@@ -18,63 +18,65 @@ class AppColors {
   static const Color secondaryContainer = Color(0xFFE8DEF8);
   static const Color onSecondaryContainer = Color(0xFF1D192B);
 
-   // Tertiary (optional accent)
-   static const Color tertiary = Color(0xFF7D5260);
-   static const Color onTertiary = Colors.white;
-   static const Color tertiaryContainer = Color(0xFFFFD8E4);
-   static const Color onTertiaryContainer = Color(0xFF31111D);
+  // Tertiary (optional accent)
+  static const Color tertiary = Color(0xFF7D5260);
+  static const Color onTertiary = Colors.white;
+  static const Color tertiaryContainer = Color(0xFFFFD8E4);
+  static const Color onTertiaryContainer = Color(0xFF31111D);
 
-   // Error
-   static const Color error = Color(0xFFB3261E);
-   static const Color onError = Colors.white;
-   static const Color errorContainer = Color(0xFFF9DEDC);
-   static const Color onErrorContainer = Color(0xFF410E0B);
+  // Error
+  static const Color error = Color(0xFFB3261E);
+  static const Color onError = Colors.white;
+  static const Color errorContainer = Color(0xFFF9DEDC);
+  static const Color onErrorContainer = Color(0xFF410E0B);
 
-   // Neutrals / Surfaces
-   static const Color background = Color(0xFFFFFBFE);
-   static const Color onBackground = Color(0xFF1C1B1F);
-   static const Color surface = Color(0xFFFFFBFE);
-   static const Color onSurface = Color(0xFF1C1B1F);
-   static const Color surfaceVariant = Color(0xFFE7E0EC);
-   static const Color onSurfaceVariant = Color(0xFF49454F);
-   static const Color outline = Color(0xFF79747E);
-   static const Color outlineVariant = Color(0xFFCAC4D0);
-   static const Color shadow = Colors.black54;
-   static const Color scrim = Colors.black54;
-   static const Color inverseSurface = Color(0xFF313033);
-   static const Color onInverseSurface = Color(0xFFF4EFF4);
-   static const Color inversePrimary = Color(0xFFD0BCFF);
+  // Neutrals / Surfaces
+  static const Color background = Color(0xFFFFFBFE);
+  static const Color onBackground = Color(0xFF1C1B1F);
+  static const Color surface = Color(0xFFFFFBFE);
+  static const Color onSurface = Color(0xFF1C1B1F);
+  static const Color surfaceVariant = Color(0xFFE7E0EC);
+  static const Color onSurfaceVariant = Color(0xFF49454F);
+  static const Color outline = Color(0xFF79747E);
+  static const Color outlineVariant = Color(0xFFCAC4D0);
+  static const Color shadow = Colors.black54;
+  static const Color scrim = Colors.black54;
+  static const Color inverseSurface = Color(0xFF313033);
+  static const Color onInverseSurface = Color(0xFFF4EFF4);
+  static const Color inversePrimary = Color(0xFFD0BCFF);
 
-   // Utility / Status
-   static const Color success = Color(0xFF2E7D32);
-   static const Color warning = Color(0xFFF57C00);
-   static const Color info = Color(0xFF0288D1);
+  // Utility / Status
+  static const Color success = Color(0xFF2E7D32);
+  static const Color warning = Color(0xFFF57C00);
+  static const Color info = Color(0xFF0288D1);
   static const Color green = Color(0xFF28A745); // Brand green
   static const Color onGreen = Colors.white;
   static const Color greenContainer = Color(0xFFDFF5E1);
   static const Color onGreenContainer = Color(0xFF1E4620);
 
-   // Text helpers
-   static const Color textPrimary = onSurface;
-   static const Color textSecondary = Color(0xFF5E5A65);
-   static const Color textDisabled = Color(0xFF9E9AA4);
+  // Text helpers
+  static const Color textPrimary = onSurface;
+  static const Color textSecondary = Color(0xFF5E5A65);
+  static const Color textDisabled = Color(0xFF9E9AA4);
 
-   // UI helpers
-   static const Color divider = outlineVariant;
-   static const Color border = outline;
-   static const Color disabled = Color(0xFFE0E0E0);
-   static const Color scaffoldBackground = background;
-   static const Color cardBackground = surface;
- }
+  // UI helpers
+  static const Color divider = outlineVariant;
+  static const Color border = outline;
+  static const Color disabled = Color(0xFFE0E0E0);
+  static const Color scaffoldBackground = background;
+  static const Color cardBackground = surface;
+  // Utility
+  static const Color transparent = Colors.transparent;
+}
 
- /// Dark mode colors. Keep brand hues consistent while adjusting luminance.
- class AppColorsDark {
-   AppColorsDark._();
+/// Dark mode colors. Keep brand hues consistent while adjusting luminance.
+class AppColorsDark {
+  AppColorsDark._();
 
-   static const Color primary = Color(0xFFD0BCFF);
-   static const Color onPrimary = Color(0xFF381E72);
-   static const Color primaryContainer = Color(0xFF4F378B);
-   static const Color onPrimaryContainer = Color(0xFFEADDFF);
+  static const Color primary = Color(0xFFD0BCFF);
+  static const Color onPrimary = Color(0xFF381E72);
+  static const Color primaryContainer = Color(0xFF4F378B);
+  static const Color onPrimaryContainer = Color(0xFFEADDFF);
 
    static const Color secondary = Color(0xFFCCC2DC);
    static const Color onSecondary = Color(0xFF332D41);

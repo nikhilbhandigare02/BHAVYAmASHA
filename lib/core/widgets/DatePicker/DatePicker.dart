@@ -7,6 +7,7 @@ class CustomDatePicker extends StatefulWidget {
   final Function(DateTime?)? onDateChanged;
   final String labelText;
   final String? hintText;
+  final String? Function(DateTime?)? validator; // 🔹 External validator
 
   const CustomDatePicker({
     super.key,
@@ -15,6 +16,7 @@ class CustomDatePicker extends StatefulWidget {
     this.onDateChanged,
     this.labelText = 'Select Date',
     this.hintText,
+    this.validator,
   });
 
   @override
@@ -42,6 +44,18 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
       initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF2E73B8),
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -49,28 +63,50 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         selectedDate = picked;
         _controller.text = DateFormat('dd/MM/yy').format(picked);
       });
-      if (widget.onDateChanged != null) widget.onDateChanged!(picked);
+      widget.onDateChanged?.call(picked);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = selectedDate != null ? DateFormat('dd/MM/yy').format(selectedDate!) : '';
-    return AbsorbPointer(
-      absorbing: !widget.isEditable,
-      child: TextFormField(
-        readOnly: true,
-        decoration: InputDecoration(
-          labelText: widget.labelText,
-          hintText: widget.hintText ?? 'dd/MM/yy',
-          suffixIcon: widget.isEditable
-              ? const Icon(Icons.calendar_today_outlined)
-              : null,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
+    return GestureDetector(
+      onTap: widget.isEditable ? () => _pickDate(context) : null,
+      child: AbsorbPointer(
+        absorbing: true,
+        child: TextFormField(
+          controller: _controller,
+          readOnly: true,
+          // validator: (_) {
+          //   if (widget.validator != null) {
+          //     final error = widget.validator!(selectedDate);
+          //     if (error != null && error.isNotEmpty) {
+          //       // 🔹 Show validation message as a Snackbar
+          //       WidgetsBinding.instance.addPostFrameCallback((_) {
+          //         ScaffoldMessenger.of(context).showSnackBar(
+          //           SnackBar(
+          //             content: Text(error),
+          //             backgroundColor: Colors.redAccent,
+          //             behavior: SnackBarBehavior.floating,
+          //           ),
+          //         );
+          //       });
+          //     }
+          //     return null;
+          //   }
+          //   return null;
+          // },
+          decoration: InputDecoration(
+            labelText: widget.labelText,
+            hintText: widget.hintText ?? 'dd/MM/yy',
+            suffixIcon: widget.isEditable
+                ? const Icon(Icons.calendar_today_outlined, color: Colors.grey)
+                : null,
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          ),
         ),
-        controller: TextEditingController(text: formattedDate),
       ),
     );
   }

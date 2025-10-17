@@ -10,4 +10,10 @@ class Route_Names{
   static const String incentivePortal = 'incentivePortal';
   static const String GuestBeneficiarySearch = 'GuestBeneficiarySearch';
   static const String RegisterNewHousehold = 'RegisterNewHousehold';
+  static const String addFamilyHead = 'addFamilyHead';
+  static const String addFamilyMember = 'addFamilyMember';
+  static const String AllHousehold = 'AllHousehold';
+  static const String houseHoldBeneficiaryScreen = 'houseHoldBeneficiaryScreen';
+  static const String AllBeneficiaryScreen = 'AllBeneficiaryScreen';
+  static const String Mybeneficiaries = 'Mybeneficiaries';
 }

@@ -663,4 +663,523 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get advanceFilter => 'उन्नत फ़िल्टर';
+
+  @override
+  String get newMemberDetailsTitle => 'नए सदस्य का विवरण';
+
+  @override
+  String get memberTypeLabel => 'सदस्य प्रकार';
+
+  @override
+  String get memberTypeAdult => 'वयस्क';
+
+  @override
+  String get memberTypeChild => 'बालक';
+
+  @override
+  String get memberTypeInfant => 'शिशु';
+
+  @override
+  String get relationWithHeadLabel => 'परिवार प्रमुख से संबंध';
+
+  @override
+  String get relationSpouse => 'पति/पत्नी';
+
+  @override
+  String get relationSon => 'पुत्र';
+
+  @override
+  String get relationDaughter => 'पुत्री';
+
+  @override
+  String get relationFather => 'पिता';
+
+  @override
+  String get relationMother => 'माता';
+
+  @override
+  String get relationBrother => 'भाई';
+
+  @override
+  String get relationSister => 'बहन';
+
+  @override
+  String get relationOther => 'अन्य';
+
+  @override
+  String get nameOfMemberLabel => 'सदस्य का नाम';
+
+  @override
+  String get nameOfMemberHint => 'सदस्य का नाम';
+
+  @override
+  String get fatherGuardianNameLabel => 'पिता/अभिभावक का नाम';
+
+  @override
+  String get motherNameLabel => 'माता का नाम';
+
+  @override
+  String get dobShort => 'जन्म तिथि';
+
+  @override
+  String get ageApproximate => 'आयु/अनुमानित आयु';
+
+  @override
+  String get birthOrderLabel => 'जन्म क्रम';
+
+  @override
+  String get birthOrder1 => '1';
+
+  @override
+  String get birthOrder2 => '2';
+
+  @override
+  String get birthOrder3 => '3';
+
+  @override
+  String get birthOrder4 => '4';
+
+  @override
+  String get birthOrder5Plus => '5+';
+
+  @override
+  String get genderMale => 'पुरुष';
+
+  @override
+  String get genderFemale => 'महिला';
+
+  @override
+  String get genderOther => 'अन्य';
+
+  @override
+  String get occupationLabel => 'पेशा';
+
+  @override
+  String get occupationEmployed => 'नौकरी';
+
+  @override
+  String get occupationSelfEmployed => 'स्वरोजगार';
+
+  @override
+  String get occupationStudent => 'विद्यार्थी';
+
+  @override
+  String get occupationUnemployed => 'बेरोजगार';
+
+  @override
+  String get educationLabel => 'शिक्षा';
+
+  @override
+  String get educationPrimary => 'प्राथमिक';
+
+  @override
+  String get educationSecondary => 'माध्यमिक';
+
+  @override
+  String get educationGraduate => 'स्नातक';
+
+  @override
+  String get educationPostgraduate => 'स्नातकोत्तर';
+
+  @override
+  String get religionLabel => 'धर्म';
+
+  @override
+  String get religionHindu => 'हिन्दू';
+
+  @override
+  String get religionMuslim => 'मुस्लिम';
+
+  @override
+  String get religionChristian => 'ईसाई';
+
+  @override
+  String get religionSikh => 'सिख';
+
+  @override
+  String get religionOther => 'अन्य';
+
+  @override
+  String get abhaAddressLabel => 'आभा पता';
+
+  @override
+  String get whoseMobileLabel => 'मोबाइल नंबर किसका?';
+
+  @override
+  String get self => 'स्वयं';
+
+  @override
+  String get spouse => 'पति/पत्नी';
+
+  @override
+  String get father => 'पिता';
+
+  @override
+  String get mother => 'माता';
+
+  @override
+  String get other => 'अन्य';
+
+  @override
+  String get voterIdLabel => 'वोटर आईडी';
+
+  @override
+  String get rationCardIdLabel => 'राशन कार्ड आईडी';
+
+  @override
+  String get personalHealthIdLabel => 'व्यक्तिगत स्वास्थ्य आईडी';
+
+  @override
+  String get beneficiaryTypeLabel => 'लाभार्थी का प्रकार';
+
+  @override
+  String get beneficiaryTypeAPL => 'एपीएल';
+
+  @override
+  String get beneficiaryTypeBPL => 'बीपीएल';
+
+  @override
+  String get beneficiaryTypeAntyodaya => 'अंत्योदय';
+
+  @override
+  String get maritalStatusLabel => 'वैवाहिक स्थिति';
+
+  @override
+  String get married => 'विवाहित';
+
+  @override
+  String get unmarried => 'अविवाहित';
+
+  @override
+  String get widowed => 'विधवा/विधुर';
+
+  @override
+  String get separated => 'अलग रह रहे';
+
+  @override
+  String get divorced => 'तलाकशुदा';
+
+  @override
+  String get ageAtMarriageLabel => 'विवाह के समय आयु';
+
+  @override
+  String get ageAtMarriageHint => 'विवाह के समय आयु';
+
+  @override
+  String get spouseNameLabel => 'पति/पत्नी का नाम';
+
+  @override
+  String get spouseNameHint => 'पति/पत्नी का नाम';
+
+  @override
+  String get haveChildrenQuestion => 'क्या आपके बच्चे हैं?';
+
+  @override
+  String get isWomanPregnantQuestion => 'क्या महिला गर्भवती है?';
+
+  @override
+  String get yes => 'हाँ';
+
+  @override
+  String get no => 'नहीं';
+
+  @override
+  String get requiredField => 'आवश्यक';
+
+  @override
+  String get enterValidMobile => 'मान्य मोबाइल दर्ज करें';
+
+  @override
+  String get addButton => 'जोड़ें';
+
+  @override
+  String get addingButton => 'जोड़ रहे हैं...';
+
+  @override
+  String get familyHeadDetailsTitle => 'परिवार प्रमुख का विवरण';
+
+  @override
+  String get houseNoLabel => 'मकान संख्या';
+
+  @override
+  String get houseNoHint => 'मकान संख्या';
+
+  @override
+  String get nameOfFamilyHeadLabel => 'परिवार प्रमुख का नाम';
+
+  @override
+  String get nameOfFamilyHeadHint => 'परिवार प्रमुख का नाम';
+
+  @override
+  String get fatherNameLabel => 'पिता का नाम';
+
+  @override
+  String get villageNameLabel => 'गांव का नाम';
+
+  @override
+  String get wardNoLabel => 'वार्ड संख्या';
+
+  @override
+  String get mohallaTolaNameLabel => 'मोहल्ला/टोला का नाम';
+
+  @override
+  String get rnhTabMemberDetails => 'सदस्य विवरण';
+
+  @override
+  String get rnhTabHouseholdDetails => 'परिवार विवरण';
+
+  @override
+  String get rnhTabHouseholdAmenities => 'परिवार सुविधाएँ';
+
+  @override
+  String get rnhAddHeadFirstTabs => 'अन्य अनुभागों तक पहुँचने से पहले कृपया परिवार प्रमुख जोड़ें।';
+
+  @override
+  String get rnhAddHeadProceed => 'कृपया आगे बढ़ने से पहले परिवार प्रमुख जोड़ें।';
+
+  @override
+  String get nextButton => 'अगला';
+
+  @override
+  String get finishButton => 'समाप्त';
+
+  @override
+  String get addNewMemberButton => 'नया सदस्य जोड़ें';
+
+  @override
+  String get addFamilyHeadButton => 'परिवार प्रमुख जोड़ें';
+
+  @override
+  String get rnhTotalMembers => 'कुल सदस्यों की संख्या';
+
+  @override
+  String get thNumber => '#';
+
+  @override
+  String get thType => 'प्रकार';
+
+  @override
+  String get thName => 'नाम';
+
+  @override
+  String get thAge => 'आयु';
+
+  @override
+  String get thGender => 'लिंग';
+
+  @override
+  String get thRelation => 'संबंध';
+
+  @override
+  String get thFather => 'पिता';
+
+  @override
+  String get thSpouse => 'पति/पत्नी';
+
+  @override
+  String get thTotalChildren => 'कुल बच्चे';
+
+  @override
+  String get addressDetailsTitle => 'पता विवरण';
+
+  @override
+  String get socioEconomicDetailsTitle => 'सामाजिक-आर्थिक विवरण';
+
+  @override
+  String get waterSanitationTitle => 'जल और स्वच्छता';
+
+  @override
+  String get cookingFuelTitle => 'खाना पकाने का ईंधन';
+
+  @override
+  String get electricityTitle => 'बिजली';
+
+  @override
+  String get streetLocalityLabel => 'सड़क/स्थानीयता';
+
+  @override
+  String get pincodeLabel => 'पिनकोड';
+
+  @override
+  String get economicStatusLabel => 'आर्थिक स्थिति';
+
+  @override
+  String get casteLabel => 'जाति';
+
+  @override
+  String get availableLabel => 'उपलब्ध';
+
+  @override
+  String get remarksLabel => 'टिप्पणी';
+
+  @override
+  String get previousButton => 'पिछला';
+
+  @override
+  String get saveButton => 'सहेजें';
+
+  @override
+  String get residentialAreaTypeLabel => 'आवासीय क्षेत्र का प्रकार';
+
+  @override
+  String get areaRural => 'ग्रामीण';
+
+  @override
+  String get areaUrban => 'शहरी';
+
+  @override
+  String get areaTribal => 'जनजातीय';
+
+  @override
+  String get houseTypeLabel => 'घर का प्रकार';
+
+  @override
+  String get houseNone => 'कोई नहीं';
+
+  @override
+  String get houseKachcha => 'कच्चा घर';
+
+  @override
+  String get houseSemiPucca => 'अर्ध-पक्का घर';
+
+  @override
+  String get housePucca => 'पक्का घर';
+
+  @override
+  String get houseThatch => 'खपरैल/फूस का घर';
+
+  @override
+  String get ownershipTypeLabel => 'स्वामित्व का प्रकार';
+
+  @override
+  String get rental => 'किराये पर';
+
+  @override
+  String get sharing => 'साझा';
+
+  @override
+  String get kitchenInsideLabel => 'क्या रसोई घर के अंदर है';
+
+  @override
+  String get cookingFuelTypeLabel => 'खाना बनाने के लिए प्रयुक्त ईंधन का प्रकार';
+
+  @override
+  String get fuelLpg => 'एलपीजी';
+
+  @override
+  String get fuelFirewood => 'लकड़ी';
+
+  @override
+  String get fuelCoal => 'कोयला';
+
+  @override
+  String get fuelKerosene => 'मिट्टी का तेल';
+
+  @override
+  String get fuelCropResidue => 'फसल अवशेष';
+
+  @override
+  String get fuelDungCake => 'उपला/गोबर के कंडे';
+
+  @override
+  String get fuelOther => 'अन्य';
+
+  @override
+  String get primaryWaterSourceLabel => 'पानी का मुख्य स्रोत';
+
+  @override
+  String get waterSupply => 'नल का पानी';
+
+  @override
+  String get waterRO => 'आर.ओ.';
+
+  @override
+  String get waterHandpumpInside => 'घर के भीतर हैंडपंप';
+
+  @override
+  String get waterHandpumpOutside => 'घर के बाहर हैंडपंप';
+
+  @override
+  String get waterTanker => 'टैंकर';
+
+  @override
+  String get waterRiver => 'नदी';
+
+  @override
+  String get waterPond => 'तालाब';
+
+  @override
+  String get waterLake => 'झील';
+
+  @override
+  String get waterWell => 'कुआँ';
+
+  @override
+  String get waterOther => 'अन्य';
+
+  @override
+  String get electricityAvailabilityLabel => 'बिजली की उपलब्धता';
+
+  @override
+  String get elecSupply => 'बिजली आपूर्ति';
+
+  @override
+  String get elecGenerator => 'जनरेटर';
+
+  @override
+  String get elecSolar => 'सौर ऊर्जा';
+
+  @override
+  String get elecKeroseneLamp => 'मिट्टी के तेल का दीया';
+
+  @override
+  String get elecOther => 'अन्य';
+
+  @override
+  String get toiletAccessLabel => 'क्या आपके घर में शौचालय की सुविधा है';
+
+  @override
+  String get eligibleCouples => 'योग्य दंपत्ति';
+
+  @override
+  String get pregnantWomen => 'गर्भवती महिलाएँ';
+
+  @override
+  String get elderlyAbove65 => 'वृद्ध (>65 वर्ष)';
+
+  @override
+  String get children0to1 => '0-1 वर्ष के बच्चे';
+
+  @override
+  String get children1to2 => '1-2 वर्ष के बच्चे';
+
+  @override
+  String get children2to5 => '2-5 वर्ष के बच्चे';
+
+  @override
+  String get householdBeneficiaryTitle => 'परिवार लाभार्थी';
+
+  @override
+  String get householdBeneficiarySearch => 'परिवार लाभार्थी खोज';
+
+  @override
+  String get notAvailable => 'उपलब्ध नहीं';
+
+  @override
+  String get addNewBeneficiaryButton => 'नया लाभार्थी जोड़ें';
+
+  @override
+  String get registrationDateLabel => 'पंजीकरण तिथि';
+
+  @override
+  String get registrationTypeLabel => 'पंजीकरण प्रकार';
+
+  @override
+  String get beneficiaryIdLabel => 'लाभार्थी आईडी';
+
+  @override
+  String get ageGenderLabel => 'आयु | लिंग';
+
+  @override
+  String get edit => 'संपादित करें';
 }

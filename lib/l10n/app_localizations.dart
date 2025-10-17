@@ -1402,6 +1402,1044 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Advance Filter'**
   String get advanceFilter;
+
+  /// No description provided for @newMemberDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Member Details'**
+  String get newMemberDetailsTitle;
+
+  /// No description provided for @memberTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Member type'**
+  String get memberTypeLabel;
+
+  /// No description provided for @memberTypeAdult.
+  ///
+  /// In en, this message translates to:
+  /// **'Adult'**
+  String get memberTypeAdult;
+
+  /// No description provided for @memberTypeChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Child'**
+  String get memberTypeChild;
+
+  /// No description provided for @memberTypeInfant.
+  ///
+  /// In en, this message translates to:
+  /// **'Infant'**
+  String get memberTypeInfant;
+
+  /// No description provided for @relationWithHeadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Relation with the family head'**
+  String get relationWithHeadLabel;
+
+  /// No description provided for @relationSpouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse'**
+  String get relationSpouse;
+
+  /// No description provided for @relationSon.
+  ///
+  /// In en, this message translates to:
+  /// **'Son'**
+  String get relationSon;
+
+  /// No description provided for @relationDaughter.
+  ///
+  /// In en, this message translates to:
+  /// **'Daughter'**
+  String get relationDaughter;
+
+  /// No description provided for @relationFather.
+  ///
+  /// In en, this message translates to:
+  /// **'Father'**
+  String get relationFather;
+
+  /// No description provided for @relationMother.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother'**
+  String get relationMother;
+
+  /// No description provided for @relationBrother.
+  ///
+  /// In en, this message translates to:
+  /// **'Brother'**
+  String get relationBrother;
+
+  /// No description provided for @relationSister.
+  ///
+  /// In en, this message translates to:
+  /// **'Sister'**
+  String get relationSister;
+
+  /// No description provided for @relationOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get relationOther;
+
+  /// No description provided for @nameOfMemberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of member'**
+  String get nameOfMemberLabel;
+
+  /// No description provided for @nameOfMemberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of member'**
+  String get nameOfMemberHint;
+
+  /// No description provided for @fatherGuardianNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Father/Guardian Name'**
+  String get fatherGuardianNameLabel;
+
+  /// No description provided for @motherNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother Name'**
+  String get motherNameLabel;
+
+  /// No description provided for @dobShort.
+  ///
+  /// In en, this message translates to:
+  /// **'DOB'**
+  String get dobShort;
+
+  /// No description provided for @ageApproximate.
+  ///
+  /// In en, this message translates to:
+  /// **'Age/Approximate Age'**
+  String get ageApproximate;
+
+  /// No description provided for @birthOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth Order'**
+  String get birthOrderLabel;
+
+  /// No description provided for @birthOrder1.
+  ///
+  /// In en, this message translates to:
+  /// **'1'**
+  String get birthOrder1;
+
+  /// No description provided for @birthOrder2.
+  ///
+  /// In en, this message translates to:
+  /// **'2'**
+  String get birthOrder2;
+
+  /// No description provided for @birthOrder3.
+  ///
+  /// In en, this message translates to:
+  /// **'3'**
+  String get birthOrder3;
+
+  /// No description provided for @birthOrder4.
+  ///
+  /// In en, this message translates to:
+  /// **'4'**
+  String get birthOrder4;
+
+  /// No description provided for @birthOrder5Plus.
+  ///
+  /// In en, this message translates to:
+  /// **'5+'**
+  String get birthOrder5Plus;
+
+  /// No description provided for @genderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get genderMale;
+
+  /// No description provided for @genderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get genderFemale;
+
+  /// No description provided for @genderOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get genderOther;
+
+  /// No description provided for @occupationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupation'**
+  String get occupationLabel;
+
+  /// No description provided for @occupationEmployed.
+  ///
+  /// In en, this message translates to:
+  /// **'Employed'**
+  String get occupationEmployed;
+
+  /// No description provided for @occupationSelfEmployed.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-employed'**
+  String get occupationSelfEmployed;
+
+  /// No description provided for @occupationStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get occupationStudent;
+
+  /// No description provided for @occupationUnemployed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unemployed'**
+  String get occupationUnemployed;
+
+  /// No description provided for @educationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get educationLabel;
+
+  /// No description provided for @educationPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get educationPrimary;
+
+  /// No description provided for @educationSecondary.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary'**
+  String get educationSecondary;
+
+  /// No description provided for @educationGraduate.
+  ///
+  /// In en, this message translates to:
+  /// **'Graduate'**
+  String get educationGraduate;
+
+  /// No description provided for @educationPostgraduate.
+  ///
+  /// In en, this message translates to:
+  /// **'Postgraduate'**
+  String get educationPostgraduate;
+
+  /// No description provided for @religionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Religion'**
+  String get religionLabel;
+
+  /// No description provided for @religionHindu.
+  ///
+  /// In en, this message translates to:
+  /// **'Hindu'**
+  String get religionHindu;
+
+  /// No description provided for @religionMuslim.
+  ///
+  /// In en, this message translates to:
+  /// **'Muslim'**
+  String get religionMuslim;
+
+  /// No description provided for @religionChristian.
+  ///
+  /// In en, this message translates to:
+  /// **'Christian'**
+  String get religionChristian;
+
+  /// No description provided for @religionSikh.
+  ///
+  /// In en, this message translates to:
+  /// **'Sikh'**
+  String get religionSikh;
+
+  /// No description provided for @religionOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get religionOther;
+
+  /// No description provided for @abhaAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ABHA address'**
+  String get abhaAddressLabel;
+
+  /// No description provided for @whoseMobileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Whose mobile no.?'**
+  String get whoseMobileLabel;
+
+  /// No description provided for @self.
+  ///
+  /// In en, this message translates to:
+  /// **'Self'**
+  String get self;
+
+  /// No description provided for @spouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse'**
+  String get spouse;
+
+  /// No description provided for @father.
+  ///
+  /// In en, this message translates to:
+  /// **'Father'**
+  String get father;
+
+  /// No description provided for @mother.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother'**
+  String get mother;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @voterIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voter Id'**
+  String get voterIdLabel;
+
+  /// No description provided for @rationCardIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ration Card Id'**
+  String get rationCardIdLabel;
+
+  /// No description provided for @personalHealthIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Health Id'**
+  String get personalHealthIdLabel;
+
+  /// No description provided for @beneficiaryTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of beneficiary'**
+  String get beneficiaryTypeLabel;
+
+  /// No description provided for @beneficiaryTypeAPL.
+  ///
+  /// In en, this message translates to:
+  /// **'APL'**
+  String get beneficiaryTypeAPL;
+
+  /// No description provided for @beneficiaryTypeBPL.
+  ///
+  /// In en, this message translates to:
+  /// **'BPL'**
+  String get beneficiaryTypeBPL;
+
+  /// No description provided for @beneficiaryTypeAntyodaya.
+  ///
+  /// In en, this message translates to:
+  /// **'Antyodaya'**
+  String get beneficiaryTypeAntyodaya;
+
+  /// No description provided for @maritalStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Marital status'**
+  String get maritalStatusLabel;
+
+  /// No description provided for @married.
+  ///
+  /// In en, this message translates to:
+  /// **'Married'**
+  String get married;
+
+  /// No description provided for @unmarried.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmarried'**
+  String get unmarried;
+
+  /// No description provided for @widowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Widowed'**
+  String get widowed;
+
+  /// No description provided for @separated.
+  ///
+  /// In en, this message translates to:
+  /// **'Separated'**
+  String get separated;
+
+  /// No description provided for @divorced.
+  ///
+  /// In en, this message translates to:
+  /// **'Divorced'**
+  String get divorced;
+
+  /// No description provided for @ageAtMarriageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Age at the time of marriage'**
+  String get ageAtMarriageLabel;
+
+  /// No description provided for @ageAtMarriageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Age at the time of marriage'**
+  String get ageAtMarriageHint;
+
+  /// No description provided for @spouseNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Name'**
+  String get spouseNameLabel;
+
+  /// No description provided for @spouseNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Name'**
+  String get spouseNameHint;
+
+  /// No description provided for @haveChildrenQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you have children?'**
+  String get haveChildrenQuestion;
+
+  /// No description provided for @isWomanPregnantQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the Woman Pregnant?'**
+  String get isWomanPregnantQuestion;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get requiredField;
+
+  /// No description provided for @enterValidMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid mobile'**
+  String get enterValidMobile;
+
+  /// No description provided for @addButton.
+  ///
+  /// In en, this message translates to:
+  /// **'ADD'**
+  String get addButton;
+
+  /// No description provided for @addingButton.
+  ///
+  /// In en, this message translates to:
+  /// **'ADDING...'**
+  String get addingButton;
+
+  /// No description provided for @familyHeadDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Head Details'**
+  String get familyHeadDetailsTitle;
+
+  /// No description provided for @houseNoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'House no'**
+  String get houseNoLabel;
+
+  /// No description provided for @houseNoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'House no'**
+  String get houseNoHint;
+
+  /// No description provided for @nameOfFamilyHeadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of family head'**
+  String get nameOfFamilyHeadLabel;
+
+  /// No description provided for @nameOfFamilyHeadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of family head'**
+  String get nameOfFamilyHeadHint;
+
+  /// No description provided for @fatherNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Father name'**
+  String get fatherNameLabel;
+
+  /// No description provided for @villageNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Village name'**
+  String get villageNameLabel;
+
+  /// No description provided for @wardNoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ward no.'**
+  String get wardNoLabel;
+
+  /// No description provided for @mohallaTolaNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mohalla/Tola name'**
+  String get mohallaTolaNameLabel;
+
+  /// No description provided for @rnhTabMemberDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'MEMBER DETAILS'**
+  String get rnhTabMemberDetails;
+
+  /// No description provided for @rnhTabHouseholdDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'HOUSEHOLD DETAILS'**
+  String get rnhTabHouseholdDetails;
+
+  /// No description provided for @rnhTabHouseholdAmenities.
+  ///
+  /// In en, this message translates to:
+  /// **'HOUSEHOLD AMENITIES'**
+  String get rnhTabHouseholdAmenities;
+
+  /// No description provided for @rnhAddHeadFirstTabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add a family head before accessing other sections.'**
+  String get rnhAddHeadFirstTabs;
+
+  /// No description provided for @rnhAddHeadProceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add a family head before proceeding.'**
+  String get rnhAddHeadProceed;
+
+  /// No description provided for @nextButton.
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT'**
+  String get nextButton;
+
+  /// No description provided for @finishButton.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE'**
+  String get finishButton;
+
+  /// No description provided for @addNewMemberButton.
+  ///
+  /// In en, this message translates to:
+  /// **'ADD NEW MEMBER'**
+  String get addNewMemberButton;
+
+  /// No description provided for @addFamilyHeadButton.
+  ///
+  /// In en, this message translates to:
+  /// **'ADD FAMILY HEAD'**
+  String get addFamilyHeadButton;
+
+  /// No description provided for @rnhTotalMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'No. of total members'**
+  String get rnhTotalMembers;
+
+  /// No description provided for @thNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'#'**
+  String get thNumber;
+
+  /// No description provided for @thType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get thType;
+
+  /// No description provided for @thName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get thName;
+
+  /// No description provided for @thAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get thAge;
+
+  /// No description provided for @thGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get thGender;
+
+  /// No description provided for @thRelation.
+  ///
+  /// In en, this message translates to:
+  /// **'Relation'**
+  String get thRelation;
+
+  /// No description provided for @thFather.
+  ///
+  /// In en, this message translates to:
+  /// **'Father'**
+  String get thFather;
+
+  /// No description provided for @thSpouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse'**
+  String get thSpouse;
+
+  /// No description provided for @thTotalChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Children'**
+  String get thTotalChildren;
+
+  /// No description provided for @addressDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Address Details'**
+  String get addressDetailsTitle;
+
+  /// No description provided for @socioEconomicDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Socio-economic Details'**
+  String get socioEconomicDetailsTitle;
+
+  /// No description provided for @waterSanitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Water & Sanitation'**
+  String get waterSanitationTitle;
+
+  /// No description provided for @cookingFuelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking Fuel'**
+  String get cookingFuelTitle;
+
+  /// No description provided for @electricityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity'**
+  String get electricityTitle;
+
+  /// No description provided for @streetLocalityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Street/Locality'**
+  String get streetLocalityLabel;
+
+  /// No description provided for @pincodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pincode'**
+  String get pincodeLabel;
+
+  /// No description provided for @economicStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Economic Status'**
+  String get economicStatusLabel;
+
+  /// No description provided for @casteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Caste'**
+  String get casteLabel;
+
+  /// No description provided for @availableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get availableLabel;
+
+  /// No description provided for @remarksLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remarks'**
+  String get remarksLabel;
+
+  /// No description provided for @previousButton.
+  ///
+  /// In en, this message translates to:
+  /// **'PREVIOUS'**
+  String get previousButton;
+
+  /// No description provided for @saveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE'**
+  String get saveButton;
+
+  /// No description provided for @residentialAreaTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of residential area'**
+  String get residentialAreaTypeLabel;
+
+  /// No description provided for @areaRural.
+  ///
+  /// In en, this message translates to:
+  /// **'Rural'**
+  String get areaRural;
+
+  /// No description provided for @areaUrban.
+  ///
+  /// In en, this message translates to:
+  /// **'Urban'**
+  String get areaUrban;
+
+  /// No description provided for @areaTribal.
+  ///
+  /// In en, this message translates to:
+  /// **'Tribal'**
+  String get areaTribal;
+
+  /// No description provided for @houseTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of house'**
+  String get houseTypeLabel;
+
+  /// No description provided for @houseNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get houseNone;
+
+  /// No description provided for @houseKachcha.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuchcha house'**
+  String get houseKachcha;
+
+  /// No description provided for @houseSemiPucca.
+  ///
+  /// In en, this message translates to:
+  /// **'Semi Pucca house'**
+  String get houseSemiPucca;
+
+  /// No description provided for @housePucca.
+  ///
+  /// In en, this message translates to:
+  /// **'Pucca house'**
+  String get housePucca;
+
+  /// No description provided for @houseThatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Thatch house'**
+  String get houseThatch;
+
+  /// No description provided for @ownershipTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of ownership'**
+  String get ownershipTypeLabel;
+
+  /// No description provided for @rental.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental'**
+  String get rental;
+
+  /// No description provided for @sharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing'**
+  String get sharing;
+
+  /// No description provided for @kitchenInsideLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the kitchen inside the house'**
+  String get kitchenInsideLabel;
+
+  /// No description provided for @cookingFuelTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of Fuel used for cooking'**
+  String get cookingFuelTypeLabel;
+
+  /// No description provided for @fuelLpg.
+  ///
+  /// In en, this message translates to:
+  /// **'LPG'**
+  String get fuelLpg;
+
+  /// No description provided for @fuelFirewood.
+  ///
+  /// In en, this message translates to:
+  /// **'Firewood'**
+  String get fuelFirewood;
+
+  /// No description provided for @fuelCoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Coal'**
+  String get fuelCoal;
+
+  /// No description provided for @fuelKerosene.
+  ///
+  /// In en, this message translates to:
+  /// **'Kerosene'**
+  String get fuelKerosene;
+
+  /// No description provided for @fuelCropResidue.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop Residue'**
+  String get fuelCropResidue;
+
+  /// No description provided for @fuelDungCake.
+  ///
+  /// In en, this message translates to:
+  /// **'Dung Cake'**
+  String get fuelDungCake;
+
+  /// No description provided for @fuelOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get fuelOther;
+
+  /// No description provided for @primaryWaterSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary source of water'**
+  String get primaryWaterSourceLabel;
+
+  /// No description provided for @waterSupply.
+  ///
+  /// In en, this message translates to:
+  /// **'Supply Water'**
+  String get waterSupply;
+
+  /// No description provided for @waterRO.
+  ///
+  /// In en, this message translates to:
+  /// **'R.O'**
+  String get waterRO;
+
+  /// No description provided for @waterHandpumpInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand pump within house'**
+  String get waterHandpumpInside;
+
+  /// No description provided for @waterHandpumpOutside.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand pump outside of house'**
+  String get waterHandpumpOutside;
+
+  /// No description provided for @waterTanker.
+  ///
+  /// In en, this message translates to:
+  /// **'Tanker'**
+  String get waterTanker;
+
+  /// No description provided for @waterRiver.
+  ///
+  /// In en, this message translates to:
+  /// **'River'**
+  String get waterRiver;
+
+  /// No description provided for @waterPond.
+  ///
+  /// In en, this message translates to:
+  /// **'Pond'**
+  String get waterPond;
+
+  /// No description provided for @waterLake.
+  ///
+  /// In en, this message translates to:
+  /// **'Lake'**
+  String get waterLake;
+
+  /// No description provided for @waterWell.
+  ///
+  /// In en, this message translates to:
+  /// **'Well'**
+  String get waterWell;
+
+  /// No description provided for @waterOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get waterOther;
+
+  /// No description provided for @electricityAvailabilityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability of electricity'**
+  String get electricityAvailabilityLabel;
+
+  /// No description provided for @elecSupply.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity Supply'**
+  String get elecSupply;
+
+  /// No description provided for @elecGenerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Generator'**
+  String get elecGenerator;
+
+  /// No description provided for @elecSolar.
+  ///
+  /// In en, this message translates to:
+  /// **'Solar Power'**
+  String get elecSolar;
+
+  /// No description provided for @elecKeroseneLamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Kerosene Lamp'**
+  String get elecKeroseneLamp;
+
+  /// No description provided for @elecOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get elecOther;
+
+  /// No description provided for @toiletAccessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you have access to toilet at your home'**
+  String get toiletAccessLabel;
+
+  /// No description provided for @eligibleCouples.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible couples'**
+  String get eligibleCouples;
+
+  /// No description provided for @pregnantWomen.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant women'**
+  String get pregnantWomen;
+
+  /// No description provided for @elderlyAbove65.
+  ///
+  /// In en, this message translates to:
+  /// **'Elderly (>65 Y)'**
+  String get elderlyAbove65;
+
+  /// No description provided for @children0to1.
+  ///
+  /// In en, this message translates to:
+  /// **'0-1 year old children'**
+  String get children0to1;
+
+  /// No description provided for @children1to2.
+  ///
+  /// In en, this message translates to:
+  /// **'1-2 year old children'**
+  String get children1to2;
+
+  /// No description provided for @children2to5.
+  ///
+  /// In en, this message translates to:
+  /// **'2-5 year old children'**
+  String get children2to5;
+
+  /// No description provided for @householdBeneficiaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Household Beneficiary'**
+  String get householdBeneficiaryTitle;
+
+  /// No description provided for @householdBeneficiarySearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Household Beneficiary Search'**
+  String get householdBeneficiarySearch;
+
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Available'**
+  String get notAvailable;
+
+  /// No description provided for @addNewBeneficiaryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Beneficiary'**
+  String get addNewBeneficiaryButton;
+
+  /// No description provided for @registrationDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Date'**
+  String get registrationDateLabel;
+
+  /// No description provided for @registrationTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Type'**
+  String get registrationTypeLabel;
+
+  /// No description provided for @beneficiaryIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary ID'**
+  String get beneficiaryIdLabel;
+
+  /// No description provided for @ageGenderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Age | Gender'**
+  String get ageGenderLabel;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

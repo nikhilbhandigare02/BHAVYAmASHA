@@ -663,4 +663,523 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get advanceFilter => 'Advance Filter';
+
+  @override
+  String get newMemberDetailsTitle => 'New Member Details';
+
+  @override
+  String get memberTypeLabel => 'Member type';
+
+  @override
+  String get memberTypeAdult => 'Adult';
+
+  @override
+  String get memberTypeChild => 'Child';
+
+  @override
+  String get memberTypeInfant => 'Infant';
+
+  @override
+  String get relationWithHeadLabel => 'Relation with the family head';
+
+  @override
+  String get relationSpouse => 'Spouse';
+
+  @override
+  String get relationSon => 'Son';
+
+  @override
+  String get relationDaughter => 'Daughter';
+
+  @override
+  String get relationFather => 'Father';
+
+  @override
+  String get relationMother => 'Mother';
+
+  @override
+  String get relationBrother => 'Brother';
+
+  @override
+  String get relationSister => 'Sister';
+
+  @override
+  String get relationOther => 'Other';
+
+  @override
+  String get nameOfMemberLabel => 'Name of member';
+
+  @override
+  String get nameOfMemberHint => 'Name of member';
+
+  @override
+  String get fatherGuardianNameLabel => 'Father/Guardian Name';
+
+  @override
+  String get motherNameLabel => 'Mother Name';
+
+  @override
+  String get dobShort => 'DOB';
+
+  @override
+  String get ageApproximate => 'Age/Approximate Age';
+
+  @override
+  String get birthOrderLabel => 'Birth Order';
+
+  @override
+  String get birthOrder1 => '1';
+
+  @override
+  String get birthOrder2 => '2';
+
+  @override
+  String get birthOrder3 => '3';
+
+  @override
+  String get birthOrder4 => '4';
+
+  @override
+  String get birthOrder5Plus => '5+';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get genderFemale => 'Female';
+
+  @override
+  String get genderOther => 'Other';
+
+  @override
+  String get occupationLabel => 'Occupation';
+
+  @override
+  String get occupationEmployed => 'Employed';
+
+  @override
+  String get occupationSelfEmployed => 'Self-employed';
+
+  @override
+  String get occupationStudent => 'Student';
+
+  @override
+  String get occupationUnemployed => 'Unemployed';
+
+  @override
+  String get educationLabel => 'Education';
+
+  @override
+  String get educationPrimary => 'Primary';
+
+  @override
+  String get educationSecondary => 'Secondary';
+
+  @override
+  String get educationGraduate => 'Graduate';
+
+  @override
+  String get educationPostgraduate => 'Postgraduate';
+
+  @override
+  String get religionLabel => 'Religion';
+
+  @override
+  String get religionHindu => 'Hindu';
+
+  @override
+  String get religionMuslim => 'Muslim';
+
+  @override
+  String get religionChristian => 'Christian';
+
+  @override
+  String get religionSikh => 'Sikh';
+
+  @override
+  String get religionOther => 'Other';
+
+  @override
+  String get abhaAddressLabel => 'ABHA address';
+
+  @override
+  String get whoseMobileLabel => 'Whose mobile no.?';
+
+  @override
+  String get self => 'Self';
+
+  @override
+  String get spouse => 'Spouse';
+
+  @override
+  String get father => 'Father';
+
+  @override
+  String get mother => 'Mother';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String get voterIdLabel => 'Voter Id';
+
+  @override
+  String get rationCardIdLabel => 'Ration Card Id';
+
+  @override
+  String get personalHealthIdLabel => 'Personal Health Id';
+
+  @override
+  String get beneficiaryTypeLabel => 'Type of beneficiary';
+
+  @override
+  String get beneficiaryTypeAPL => 'APL';
+
+  @override
+  String get beneficiaryTypeBPL => 'BPL';
+
+  @override
+  String get beneficiaryTypeAntyodaya => 'Antyodaya';
+
+  @override
+  String get maritalStatusLabel => 'Marital status';
+
+  @override
+  String get married => 'Married';
+
+  @override
+  String get unmarried => 'Unmarried';
+
+  @override
+  String get widowed => 'Widowed';
+
+  @override
+  String get separated => 'Separated';
+
+  @override
+  String get divorced => 'Divorced';
+
+  @override
+  String get ageAtMarriageLabel => 'Age at the time of marriage';
+
+  @override
+  String get ageAtMarriageHint => 'Age at the time of marriage';
+
+  @override
+  String get spouseNameLabel => 'Spouse Name';
+
+  @override
+  String get spouseNameHint => 'Spouse Name';
+
+  @override
+  String get haveChildrenQuestion => 'Do you have children?';
+
+  @override
+  String get isWomanPregnantQuestion => 'Is the Woman Pregnant?';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get requiredField => 'Required';
+
+  @override
+  String get enterValidMobile => 'Enter valid mobile';
+
+  @override
+  String get addButton => 'ADD';
+
+  @override
+  String get addingButton => 'ADDING...';
+
+  @override
+  String get familyHeadDetailsTitle => 'Family Head Details';
+
+  @override
+  String get houseNoLabel => 'House no';
+
+  @override
+  String get houseNoHint => 'House no';
+
+  @override
+  String get nameOfFamilyHeadLabel => 'Name of family head';
+
+  @override
+  String get nameOfFamilyHeadHint => 'Name of family head';
+
+  @override
+  String get fatherNameLabel => 'Father name';
+
+  @override
+  String get villageNameLabel => 'Village name';
+
+  @override
+  String get wardNoLabel => 'Ward no.';
+
+  @override
+  String get mohallaTolaNameLabel => 'Mohalla/Tola name';
+
+  @override
+  String get rnhTabMemberDetails => 'MEMBER DETAILS';
+
+  @override
+  String get rnhTabHouseholdDetails => 'HOUSEHOLD DETAILS';
+
+  @override
+  String get rnhTabHouseholdAmenities => 'HOUSEHOLD AMENITIES';
+
+  @override
+  String get rnhAddHeadFirstTabs => 'Please add a family head before accessing other sections.';
+
+  @override
+  String get rnhAddHeadProceed => 'Please add a family head before proceeding.';
+
+  @override
+  String get nextButton => 'NEXT';
+
+  @override
+  String get finishButton => 'SAVE';
+
+  @override
+  String get addNewMemberButton => 'ADD NEW MEMBER';
+
+  @override
+  String get addFamilyHeadButton => 'ADD FAMILY HEAD';
+
+  @override
+  String get rnhTotalMembers => 'No. of total members';
+
+  @override
+  String get thNumber => '#';
+
+  @override
+  String get thType => 'Type';
+
+  @override
+  String get thName => 'Name';
+
+  @override
+  String get thAge => 'Age';
+
+  @override
+  String get thGender => 'Gender';
+
+  @override
+  String get thRelation => 'Relation';
+
+  @override
+  String get thFather => 'Father';
+
+  @override
+  String get thSpouse => 'Spouse';
+
+  @override
+  String get thTotalChildren => 'Total Children';
+
+  @override
+  String get addressDetailsTitle => 'Address Details';
+
+  @override
+  String get socioEconomicDetailsTitle => 'Socio-economic Details';
+
+  @override
+  String get waterSanitationTitle => 'Water & Sanitation';
+
+  @override
+  String get cookingFuelTitle => 'Cooking Fuel';
+
+  @override
+  String get electricityTitle => 'Electricity';
+
+  @override
+  String get streetLocalityLabel => 'Street/Locality';
+
+  @override
+  String get pincodeLabel => 'Pincode';
+
+  @override
+  String get economicStatusLabel => 'Economic Status';
+
+  @override
+  String get casteLabel => 'Caste';
+
+  @override
+  String get availableLabel => 'Available';
+
+  @override
+  String get remarksLabel => 'Remarks';
+
+  @override
+  String get previousButton => 'PREVIOUS';
+
+  @override
+  String get saveButton => 'SAVE';
+
+  @override
+  String get residentialAreaTypeLabel => 'Type of residential area';
+
+  @override
+  String get areaRural => 'Rural';
+
+  @override
+  String get areaUrban => 'Urban';
+
+  @override
+  String get areaTribal => 'Tribal';
+
+  @override
+  String get houseTypeLabel => 'Type of house';
+
+  @override
+  String get houseNone => 'None';
+
+  @override
+  String get houseKachcha => 'Kuchcha house';
+
+  @override
+  String get houseSemiPucca => 'Semi Pucca house';
+
+  @override
+  String get housePucca => 'Pucca house';
+
+  @override
+  String get houseThatch => 'Thatch house';
+
+  @override
+  String get ownershipTypeLabel => 'Type of ownership';
+
+  @override
+  String get rental => 'Rental';
+
+  @override
+  String get sharing => 'Sharing';
+
+  @override
+  String get kitchenInsideLabel => 'Is the kitchen inside the house';
+
+  @override
+  String get cookingFuelTypeLabel => 'Type of Fuel used for cooking';
+
+  @override
+  String get fuelLpg => 'LPG';
+
+  @override
+  String get fuelFirewood => 'Firewood';
+
+  @override
+  String get fuelCoal => 'Coal';
+
+  @override
+  String get fuelKerosene => 'Kerosene';
+
+  @override
+  String get fuelCropResidue => 'Crop Residue';
+
+  @override
+  String get fuelDungCake => 'Dung Cake';
+
+  @override
+  String get fuelOther => 'Other';
+
+  @override
+  String get primaryWaterSourceLabel => 'Primary source of water';
+
+  @override
+  String get waterSupply => 'Supply Water';
+
+  @override
+  String get waterRO => 'R.O';
+
+  @override
+  String get waterHandpumpInside => 'Hand pump within house';
+
+  @override
+  String get waterHandpumpOutside => 'Hand pump outside of house';
+
+  @override
+  String get waterTanker => 'Tanker';
+
+  @override
+  String get waterRiver => 'River';
+
+  @override
+  String get waterPond => 'Pond';
+
+  @override
+  String get waterLake => 'Lake';
+
+  @override
+  String get waterWell => 'Well';
+
+  @override
+  String get waterOther => 'Other';
+
+  @override
+  String get electricityAvailabilityLabel => 'Availability of electricity';
+
+  @override
+  String get elecSupply => 'Electricity Supply';
+
+  @override
+  String get elecGenerator => 'Generator';
+
+  @override
+  String get elecSolar => 'Solar Power';
+
+  @override
+  String get elecKeroseneLamp => 'Kerosene Lamp';
+
+  @override
+  String get elecOther => 'Other';
+
+  @override
+  String get toiletAccessLabel => 'Do you have access to toilet at your home';
+
+  @override
+  String get eligibleCouples => 'Eligible couples';
+
+  @override
+  String get pregnantWomen => 'Pregnant women';
+
+  @override
+  String get elderlyAbove65 => 'Elderly (>65 Y)';
+
+  @override
+  String get children0to1 => '0-1 year old children';
+
+  @override
+  String get children1to2 => '1-2 year old children';
+
+  @override
+  String get children2to5 => '2-5 year old children';
+
+  @override
+  String get householdBeneficiaryTitle => 'Household Beneficiary';
+
+  @override
+  String get householdBeneficiarySearch => 'Household Beneficiary Search';
+
+  @override
+  String get notAvailable => 'Not Available';
+
+  @override
+  String get addNewBeneficiaryButton => 'Add New Beneficiary';
+
+  @override
+  String get registrationDateLabel => 'Registration Date';
+
+  @override
+  String get registrationTypeLabel => 'Registration Type';
+
+  @override
+  String get beneficiaryIdLabel => 'Beneficiary ID';
+
+  @override
+  String get ageGenderLabel => 'Age | Gender';
+
+  @override
+  String get edit => 'Edit';
 }

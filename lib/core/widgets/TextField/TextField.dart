@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 
 class CustomTextField extends StatefulWidget {
@@ -12,6 +13,8 @@ class CustomTextField extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final int maxLines;
   final bool readOnly;
+  final List<TextInputFormatter>? inputFormatters;
+  final int? maxLength;
 
   const CustomTextField({
     super.key,
@@ -25,6 +28,8 @@ class CustomTextField extends StatefulWidget {
     this.validator,
     this.maxLines = 1,
     this.readOnly = false,
+    this.inputFormatters,
+    this.maxLength,
   });
 
   @override
@@ -47,12 +52,36 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return TextFormField(
       initialValue: widget.initialValue,
       onChanged: widget.onChanged,
-      validator: widget.validator,
       obscureText: widget.obscureText ? _isObscure : false,
       keyboardType: widget.keyboardType,
       maxLines: widget.maxLines,
       readOnly: widget.readOnly,
+      maxLength: widget.maxLength,
+      inputFormatters: widget.inputFormatters,
       cursorColor: AppColors.primary,
+
+      // 🔹 Custom validator to show SnackBar instead of inline red text
+      // validator: (value) {
+      //   if (widget.validator != null) {
+      //     final error = widget.validator!(value);
+      //     if (error != null && error.isNotEmpty) {
+      //       // Show validation error via ScaffoldMessenger
+      //       WidgetsBinding.instance.addPostFrameCallback((_) {
+      //         ScaffoldMessenger.of(context).showSnackBar(
+      //           SnackBar(
+      //             content: Text(error),
+      //             backgroundColor: Colors.redAccent,
+      //             behavior: SnackBarBehavior.floating,
+      //           ),
+      //         );
+      //       });
+      //     }
+      //     // Return null to suppress inline error
+      //     return null;
+      //   }
+      //   return null;
+      // },
+
       decoration: InputDecoration(
         labelText: widget.labelText,
         hintText: widget.hintText,

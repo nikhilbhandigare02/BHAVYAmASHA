@@ -17,7 +17,6 @@ class Validations {
       return l10n.passwordTooShort;
     }
 
-    // Regex for at least one letter, one number, and one special character
     final passwordRegex = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]).{6,}$');
     if (!passwordRegex.hasMatch(password)) {
       return l10n.passwordComplexity;
@@ -34,6 +33,13 @@ class Validations {
     if (password.length < 6) {
       return l10n.passwordTooShort;
     }
+    return null;
+  }
+  static String? validateHouseNo(AppLocalizations l10n, String? houseNo) {
+    if (houseNo == null || houseNo.isEmpty) {
+      return 'House number is required';
+    }
+
     return null;
   }
 
@@ -63,5 +69,85 @@ class Validations {
     }
 
     return null; // ✅ Valid
+  }
+
+  static String? validateDOB(AppLocalizations l10n, DateTime? dob) {
+    if (dob == null) {
+      return 'Date of birth is required'; // or l10n.dobRequired
+    }
+
+    final today = DateTime.now();
+
+    final dobDate = DateTime(dob.year, dob.month, dob.day);
+    final todayDate = DateTime(today.year, today.month, today.day);
+
+    if (dobDate.isAfter(todayDate)) {
+      return 'Date of birth cannot be in the future';
+    }
+
+    return null; // ✅ valid
+  }
+  static String? validateGender(AppLocalizations l10n, String? gender) {
+    if (gender == null || gender.isEmpty) {
+      return 'Gender is required';
+    }
+
+    return null;
+  }
+  static String? validateWhoMobileNo(AppLocalizations l10n, String? mobileNo) {
+    if (mobileNo == null || mobileNo.isEmpty) {
+      return 'Whose mobile is required';
+    }
+
+    return null;
+  }
+  static String? validateMobileNo(AppLocalizations l10n, String? mobileNo) {
+    if (mobileNo == null || mobileNo.isEmpty) {
+      return 'Mobile no. is required';
+    }
+
+    return null;
+  }
+  static String? validateMaritalStatus(AppLocalizations l10n, String? maritalStatus) {
+    if (maritalStatus == null || maritalStatus.isEmpty) {
+      return 'Marital Status is required';
+    }
+
+    return null;
+  }
+  static String? validateFamilyHead(AppLocalizations l10n, String? familyHead) {
+    if (familyHead == null || familyHead.isEmpty) {
+      return 'Family Head is required';
+    }
+
+    return null;
+  }
+  static String? validateSpousName(AppLocalizations l10n, String? spousName) {
+    if (spousName == null || spousName.isEmpty) {
+      return 'FSpous Name is required';
+    }
+
+    return null;
+  }
+  static String? validateIsPregnant(AppLocalizations l10n, String? isPregnant) {
+    if (isPregnant == null || isPregnant.isEmpty) {
+      return 'Is Woman Pregnant is required';
+    }
+
+    return null;
+  }
+  static String? validateRelationWithHead(AppLocalizations l10n, String? relation) {
+    if (relation == null || relation.isEmpty) {
+      return 'Relation head is required';
+    }
+
+    return null;
+  }
+  static String? validateNameofMember(AppLocalizations l10n, String? name) {
+    if (name == null || name.isEmpty) {
+      return 'Name of Member is required';
+    }
+
+    return null;
   }
 }

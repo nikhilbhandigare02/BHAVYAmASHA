@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import '../../l10n/app_localizations.dart' show AppLocalizations;
-import '../RegisterNewHouseHold/RegisterNewHouseHold.dart';
+import '../RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 
 class AshaDashboardSection extends StatelessWidget {
   final int? selectedGridIndex;
@@ -250,6 +250,15 @@ class AshaDashboardSection extends StatelessWidget {
     }
     if (index == 0) {
       Navigator.pushNamed(context, Route_Names.RegisterNewHousehold);
+      return;
+    }else if (index == 1) {
+      Navigator.pushNamed(context, Route_Names.AllHousehold);
+      return;
+    }else if (index == 2) {
+      Navigator.pushNamed(context, Route_Names.AllBeneficiaryScreen);
+      return;
+    }else if (index == 3) {
+      Navigator.pushNamed(context, Route_Names.Mybeneficiaries);
       return;
     }
 
