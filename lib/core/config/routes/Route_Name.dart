@@ -16,4 +16,16 @@ class Route_Names{
   static const String houseHoldBeneficiaryScreen = 'houseHoldBeneficiaryScreen';
   static const String AllBeneficiaryScreen = 'AllBeneficiaryScreen';
   static const String Mybeneficiaries = 'Mybeneficiaries';
+  static const String ABHAGeneration = 'ABHAGeneration';
+  static const String WorkProgress = 'WorkProgress';
+  static const String Annoucement = 'Annoucement';
+  static const String EligibleCoupleIdentified = 'EligibleCoupleIdentified';
+  static const String UpdatedEligibleCoupleList = 'UpdatedEligibleCoupleList';
+  static const String EligibleCoupleHomeScreen = 'EligibleCoupleHomeScreen';
+  static const String UpdatedEligibleCoupleScreen = 'UpdatedEligibleCoupleScreen';
+  static const String Mothercarehomescreen = 'Mothercarehomescreen';
+  static const String Ancvisitlistscreen = 'Ancvisitlistscreen';
+  static const String Ancvisitform = 'Ancvisitform';
+  static const String Previousvisit = 'Previousvisit';
+  static const String ChildCareHomeScreen = 'ChildCareHomeScreen';
 }

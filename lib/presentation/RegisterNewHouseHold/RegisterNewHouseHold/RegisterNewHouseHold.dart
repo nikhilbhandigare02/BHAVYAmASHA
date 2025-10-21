@@ -7,7 +7,7 @@ import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_
 
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
-import '../AddFamilyHead/AddNewFamilyHead.dart';
+import '../AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 import '../AddNewFamilyMember/AddNewFamilyMember.dart';
 
 class RegisterNewHouseHoldScreen extends StatefulWidget {

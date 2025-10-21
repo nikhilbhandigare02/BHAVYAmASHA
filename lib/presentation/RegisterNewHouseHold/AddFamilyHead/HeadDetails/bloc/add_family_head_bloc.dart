@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import '../../../../core/utils/enums.dart';
+import '../../../../../core/utils/enums.dart';
 
 part 'add_family_head_event.dart';
 part 'add_family_head_state.dart';
@@ -108,6 +108,8 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         errors.add('Gender required');
       if (state.maritalStatus == null || state.maritalStatus!.isEmpty) {
         errors.add('Marital status required');
+      } if (state.isPregnant == null || state.isPregnant!.isEmpty) {
+        errors.add('Is women pregnant is required');
       } else if (state.maritalStatus == 'Married') {
         if (state.spouseName == null || state.spouseName!.trim().isEmpty) {
           errors.add('Spouse Name is required for married status');

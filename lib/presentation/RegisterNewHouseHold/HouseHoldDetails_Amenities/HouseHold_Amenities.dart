@@ -5,7 +5,6 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
 import '../../../l10n/app_localizations.dart';
-import '../AddFamilyHead/bloc/add_family_head_bloc.dart';
 
 class HouseHoldAmenities extends StatefulWidget {
   const HouseHoldAmenities({super.key});

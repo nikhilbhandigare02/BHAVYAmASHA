@@ -1,28 +1,32 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+
+import '../../config/themes/CustomColors.dart';
 
 class RoundButton extends StatelessWidget {
   final String title;
   final VoidCallback onPress;
   final bool isLoading;
+  final bool disabled; // 👈 add this
   final Color? color;
   final double height;
   final double width;
-  final double borderRadius; // Configurable border radius
+  final double borderRadius;
   final IconData? icon;
-  final double iconSize; // Configurable icon size
-  final double fontSize; // Configurable text size
-  final double spacing; // Space between icon and text
+  final double iconSize;
+  final double fontSize;
+  final double spacing;
 
   const RoundButton({
     super.key,
     required this.title,
     required this.onPress,
     this.isLoading = false,
+    this.disabled = false, // 👈 default false
     this.color,
     this.height = 44,
     this.width = double.infinity,
-    this.borderRadius = 4, // default radius
+    this.borderRadius = 4,
     this.icon,
     this.iconSize = 20,
     this.fontSize = 16,
@@ -31,15 +35,19 @@ class RoundButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDisabled = isLoading || disabled; // combine loading + disabled
+
     return GestureDetector(
-      onTap: isLoading ? null : onPress,
+      onTap: isDisabled ? null : onPress,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         height: height,
         width: width,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(borderRadius), // uses the parameter
-          color: color ?? AppColors.primary,
+          borderRadius: BorderRadius.circular(borderRadius),
+          color: isDisabled
+              ? (color ?? AppColors.primary).withOpacity(0.5) // faded color
+              : color ?? AppColors.primary,
           boxShadow: [
             BoxShadow(
               color: (color ?? AppColors.primary).withOpacity(0.4),
@@ -50,7 +58,7 @@ class RoundButton extends StatelessWidget {
         ),
         child: Center(
           child: isLoading
-              ? const SizedBox(
+              ?  SizedBox(
             height: 24,
             width: 24,
             child: CircularProgressIndicator(

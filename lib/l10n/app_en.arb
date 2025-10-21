@@ -219,6 +219,11 @@
   "reenterPasswordTooShort": "Password must be at least 6 characters",
   "passwordsDoNotMatch": "Passwords do not match"
   ,
+  "aadhaarNumberLabel": "Aadhaar Number",
+  "declarationIntro": "I hereby declare that:",
+  "otpGeneratedSuccess": "OTP generated successfully",
+  "generateOtp": "GENERATE OTP"
+  ,
   "guestSearchTitle": "Guest Beneficiary Search",
   "beneficiaryNumberLabel": "Beneficiary no.",
   "or": "OR",
@@ -405,7 +410,6 @@
   "registrationDateLabel": "Registration Date",
   "registrationTypeLabel": "Registration Type",
   "beneficiaryIdLabel": "Beneficiary ID",
-  "ageGenderLabel": "Age | Gender"
-  ,
+  "ageGenderLabel": "Age | Gender",
   "edit": "Edit"
 }

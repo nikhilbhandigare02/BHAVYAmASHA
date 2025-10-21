@@ -100,8 +100,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
         )
             : null,
         labelStyle: TextStyle(
-          fontWeight: FontWeight.w500,
-          color: AppColors.onSurface,
+
+          // color: AppColors.onSurface,
         ),
         hintStyle: TextStyle(color: AppColors.onSurfaceVariant),
         filled: false,

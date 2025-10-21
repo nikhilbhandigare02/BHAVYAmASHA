@@ -198,7 +198,7 @@ class AshaDashboardSection extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final item = bottomGridItems[index];
                     return InkWell(
-                      onTap: () => _onBottomGridTap(index),
+                      onTap: () => _onBottomGridTap(context, index),
                       child: Card(
                         elevation: 3,
                         color: AppColors.surface,
@@ -260,12 +260,27 @@ class AshaDashboardSection extends StatelessWidget {
     }else if (index == 3) {
       Navigator.pushNamed(context, Route_Names.Mybeneficiaries);
       return;
+    }else if (index == 4) {
+      Navigator.pushNamed(context, Route_Names.ABHAGeneration);
+      return;
+    }else if (index == 5) {
+      Navigator.pushNamed(context, Route_Names.WorkProgress);
+      return;
+    }else if (index == 6) {
+      Navigator.pushNamed(context, Route_Names.EligibleCoupleHomeScreen);
+      return;
+    }else if (index == 7) {
+      Navigator.pushNamed(context, Route_Names.Mothercarehomescreen);
+      return;
+    }else if (index == 8) {
+      Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
+      return;
     }
 
     onGridTap(index);
   }
 
-  void _onBottomGridTap(int index) {
+  void _onBottomGridTap(BuildContext context, int index) {
     if (bottomGridActions != null && index < bottomGridActions!.length) {
       final action = bottomGridActions![index];
       if (action != null) {
@@ -273,8 +288,23 @@ class AshaDashboardSection extends StatelessWidget {
         return;
       }
     }
-    if (onBottomGridTap != null) {
-      onBottomGridTap!(index);
+
+    // handle navigation for each bottom grid item
+    switch (index) {
+      case 0:
+      // Announcement
+        Navigator.pushNamed(context, Route_Names.Annoucement);
+        break;
+      // case 1:
+      // // Help
+      //   Navigator.pushNamed(context, Route_Names.h);
+      //   break;
+      // case 2:
+      // // NCD
+      //   Navigator.pushNamed(context, Route_Names.NCDScreen);
+      //   break;
+      default:
+        if (onBottomGridTap != null) onBottomGridTap!(index);
     }
   }
 }

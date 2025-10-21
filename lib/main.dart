@@ -11,7 +11,7 @@ import 'core/locale/bloc/locale_event.dart';
 import 'l10n/app_localizations.dart';
 
 void main() {
-  GoogleFonts.config.allowRuntimeFetching = false;
+  GoogleFonts.config.allowRuntimeFetching = true;
 
   runApp(
     BlocProvider(
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
 
           theme: ThemeData(
             colorScheme: AppColorSchemes.light,
-            textTheme: GoogleFonts.poppinsTextTheme(
+            textTheme: GoogleFonts.latoTextTheme(
               Theme.of(context).textTheme,
             ),
             scaffoldBackgroundColor: AppColors.scaffoldBackground,
