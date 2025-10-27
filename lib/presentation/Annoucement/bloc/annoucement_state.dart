@@ -1,12 +1,12 @@
 part of 'annoucement_bloc.dart';
 
 class AnnouncementItem extends Equatable {
-  final String title;
+  final String titleKey;
   final String date;
-  final String body;
-  const AnnouncementItem({required this.title, required this.date, required this.body});
+  final String bodyKey;
+  const AnnouncementItem({required this.titleKey, required this.date, required this.bodyKey});
   @override
-  List<Object?> get props => [title, date, body];
+  List<Object?> get props => [titleKey, date, bodyKey];
 }
 
 class AnnoucementState extends Equatable {

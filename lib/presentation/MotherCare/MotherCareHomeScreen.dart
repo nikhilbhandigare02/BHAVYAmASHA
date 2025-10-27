@@ -32,7 +32,7 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
             children: [
               Expanded(
                 child: _FeatureCard(
-                  title: 'ANC Visit',
+                  title: l10n?.motherAncVisitTitle ?? 'ANC Visit',
                   count: 6,
                   image: 'assets/images/pregnant-woman.png',
                   onClick: () {
@@ -43,27 +43,24 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: _FeatureCard(
-                  title: 'Delivery\nOutcome',
+                  title: l10n?.deliveryOutcomeTitle ?? 'Delivery\nOutcome',
                   count: 0,
                   image: 'assets/images/mother.png',
                   onClick: () {
-                    // handle click
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Delivery Outcome clicked')),
-                    );
+                    Navigator.pushNamed(context, Route_Names.DeliveryOutcomeScreen);
+
                   },
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _FeatureCard(
-                  title: 'HBNC Mother',
+                  title: l10n?.hbncMotherTitle ?? 'HBNC Mother',
                   count: 0,
                   image: 'assets/images/pnc-mother.png',
                   onClick: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('HBNC Mother clicked')),
-                    );
+                    Navigator.pushNamed(context, Route_Names.HBNCScreen);
+
                   },
                 ),
               ),

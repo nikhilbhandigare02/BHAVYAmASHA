@@ -12,6 +12,30 @@ final class AnmUpdateMemberType extends AddnewfamilymemberEvent {
   @override
   List<Object> get props => [value];
 }
+final class RichIDChanged extends AddnewfamilymemberEvent {
+  final String value;
+  const RichIDChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+final class WeightChange extends AddnewfamilymemberEvent {
+  final String value;
+  const WeightChange(this.value);
+  @override
+  List<Object> get props => [value];
+}
+final class BirthCertificateChange extends AddnewfamilymemberEvent {
+  final String value;
+  const BirthCertificateChange(this.value);
+  @override
+  List<Object> get props => [value];
+}
+final class ChildSchoolChange extends AddnewfamilymemberEvent {
+  final String value;
+  const ChildSchoolChange(this.value);
+  @override
+  List<Object> get props => [value];
+}
 final class ChildrenChanged extends AddnewfamilymemberEvent {
   final String value;
   const ChildrenChanged(this.value);

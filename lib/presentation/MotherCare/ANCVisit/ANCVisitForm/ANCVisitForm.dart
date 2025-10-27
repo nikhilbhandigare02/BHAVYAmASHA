@@ -7,6 +7,7 @@ import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'bloc/anvvisitform_bloc.dart';
 
 class Ancvisitform extends StatefulWidget {
@@ -19,21 +20,23 @@ class Ancvisitform extends StatefulWidget {
 class _AncvisitformState extends State<Ancvisitform> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BlocProvider(
       create: (_) => AnvvisitformBloc(),
       child: Scaffold(
-        appBar: const AppHeader(
-          screenTitle: 'ANC Visit Form',
+        appBar: AppHeader(
+          screenTitle: l10n?.ancVisitFormTitle ?? 'ANC Visit Form',
           showBack: true,
         ),
         body: SafeArea(
           child: BlocConsumer<AnvvisitformBloc, AnvvisitformState>(
             listener: (context, state) {
               if (state.error != null) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!)));
+                final msg = state.error!.isNotEmpty ? state.error! : (l10n?.somethingWentWrong ?? 'Something went wrong');
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
               }
               if (state.isSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved successfully')));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n?.saveSuccess ?? 'Saved successfully')));
               }
             },
             builder: (context, state) {
@@ -49,7 +52,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(left: 12.0),
-                            child: Text('ANC visit', style: Theme.of(context).textTheme.titleSmall),
+                            child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: Theme.of(context).textTheme.titleSmall),
                           ),
                           const SizedBox(height: 6),
                           Padding(
@@ -61,28 +64,38 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                           const SizedBox(height: 12),
                           ApiDropdown<String>(
-                            labelText: 'Visit type *',
-                            items: const ['Home', 'Subcenter', 'PHC', 'Hospital'],
+                            labelText: l10n?.visitTypeLabel ?? 'Visit type *',
+                            items: [
+                              l10n?.visitTypeHome ?? 'Home',
+                              l10n?.visitTypeSubcenter ?? 'Subcenter',
+                              l10n?.visitTypePhc ?? 'PHC',
+                              l10n?.visitTypeHospital ?? 'Hospital',
+                            ],
                             value: state.visitType.isEmpty ? null : state.visitType,
                             getLabel: (s) => s,
                             onChanged: (v) => bloc.add(VisitTypeChanged(v ?? '')),
-                            hintText: 'Select',
+                            hintText: l10n?.select ?? 'Select',
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           ApiDropdown<String>(
-                            labelText: 'Place of ANC',
-                            items: const ['Home', 'Subcenter', 'PHC', 'Hospital'],
+                            labelText: l10n?.placeOfAncLabel ?? 'Place of ANC',
+                            items: [
+                              l10n?.visitTypeHome ?? 'Home',
+                              l10n?.visitTypeSubcenter ?? 'Subcenter',
+                              l10n?.visitTypePhc ?? 'PHC',
+                              l10n?.visitTypeHospital ?? 'Hospital',
+                            ],
                             value: state.placeOfAnc.isEmpty ? null : state.placeOfAnc,
                             getLabel: (s) => s,
                             onChanged: (v) => bloc.add(PlaceOfAncChanged(v ?? '')),
-                            hintText: 'Select',
+                            hintText: l10n?.select ?? 'Select',
                           ),
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           CustomDatePicker(
-                            labelText: 'Date of inspection *',
+                            labelText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
                             initialDate: state.dateOfInspection,
                             onDateChanged: (d) => bloc.add(DateOfInspectionChanged(d)),
                           ),
@@ -90,25 +103,25 @@ class _AncvisitformState extends State<Ancvisitform> {
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           CustomTextField(
-                            labelText: 'House number',
+                            labelText: l10n?.houseNumberLabel ?? 'House number',
                             initialValue: state.houseNumber,
                             onChanged: (v) => bloc.add(HouseNumberChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText: 'Name of Pregnant Woman',
+                            labelText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
                             initialValue: state.womanName,
                             onChanged: (v) => bloc.add(WomanNameChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText: "Husband's name",
+                            labelText: l10n?.husbandNameLabel ?? "Husband's name",
                             initialValue: state.husbandName,
                             onChanged: (v) => bloc.add(HusbandNameChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText: 'RCH number',
+                            labelText: l10n?.rchNumberLabel ?? 'RCH number',
                             initialValue: state.rchNumber,
                             onChanged: (v) => bloc.add(RchNumberChanged(v)),
                           ),
@@ -118,21 +131,21 @@ class _AncvisitformState extends State<Ancvisitform> {
                             decoration: const BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.all(Radius.circular(4))),
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                             child: CustomDatePicker(
-                              labelText: 'Date of last menstrual period (LMP) *',
+                              labelText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
                               initialDate: state.lmpDate,
                               onDateChanged: (d) => bloc.add(LmpDateChanged(d)),
                             ),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomDatePicker(
-                            labelText: 'Expected date of delivery (EDD)',
+                            labelText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
                             initialDate: state.eddDate,
                             onDateChanged: (d) => bloc.add(EddDateChanged(d)),
                           ),
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText: 'No. of weeks of pregnancy',
+                            labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                             initialValue: state.weeksOfPregnancy,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
@@ -144,7 +157,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Order of Pregnancy(Gravida)'),
+                                Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)'),
                                 const SizedBox(height: 6),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -171,36 +184,36 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 16),
                           ApiDropdown<String>(
-                            labelText: 'Is woman breastfeeding?',
-                            items: const ['Yes', 'No'],
+                            labelText: l10n?.isWomanBreastfeedingLabel ?? 'Is woman breastfeeding?',
+                            items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                             value: state.isBreastFeeding.isEmpty ? null : state.isBreastFeeding,
                             getLabel: (s) => s,
                             onChanged: (v) => bloc.add(IsBreastFeedingChanged(v ?? '')),
-                            hintText: 'Select',
+                            hintText: l10n?.select ?? 'Select',
                           ),
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomDatePicker(
-                            labelText: 'Date of T.D(Tetanus and adult diphtheria) 1',
+                            labelText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
                             initialDate: state.td1Date,
                             onDateChanged: (d) => bloc.add(Td1DateChanged(d)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomDatePicker(
-                            labelText: 'Date of T.D(Tetanus and adult diphtheria) 2',
+                            labelText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
                             initialDate: state.td2Date,
                             onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomDatePicker(
-                            labelText: 'Date of T.D(Tetanus and adult diphtheria) booster',
+                            labelText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
                             initialDate: state.tdBoosterDate,
                             onDateChanged: (d) => bloc.add(TdBoosterDateChanged(d)),
                           ),
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText: 'Number of Folic Acid tablets given',
+                            labelText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
                             initialValue: state.folicAcidTablets,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
@@ -208,38 +221,44 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           ApiDropdown<String>(
-                            labelText: 'Pre - Existing disease',
-                            items: const ['None', 'Diabetes', 'Hypertension', 'Anemia', 'Other'],
+                            labelText: l10n?.preExistingDiseaseLabel ?? 'Pre - Existing disease',
+                            items: [
+                              l10n?.diseaseNone ?? 'None',
+                              l10n?.diseaseDiabetes ?? 'Diabetes',
+                              l10n?.diseaseHypertension ?? 'Hypertension',
+                              l10n?.diseaseAnemia ?? 'Anemia',
+                              l10n?.diseaseOther ?? 'Other',
+                            ],
                             value: state.preExistingDisease.isEmpty ? null : state.preExistingDisease,
                             getLabel: (s) => s,
                             onChanged: (v) => bloc.add(PreExistingDiseaseChanged(v ?? '')),
-                            hintText: 'Select',
+                            hintText: l10n?.select ?? 'Select',
                           ),
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText: 'Weight (Kg)',
+                            labelText: l10n?.weightKgLabel ?? 'Weight (Kg)',
                             initialValue: state.weight,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(WeightChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText: 'Systolic',
+                            labelText: l10n?.systolicLabel ?? 'Systolic',
                             initialValue: state.systolic,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(SystolicChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText: 'Diastolic',
+                            labelText: l10n?.diastolicLabel ?? 'Diastolic',
                             initialValue: state.diastolic,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(DiastolicChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText: 'Hemoglobin (HB)',
+                            labelText: l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
                             initialValue: state.hemoglobin,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(HemoglobinChanged(v)),
@@ -247,21 +266,21 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           ApiDropdown<String>(
-                            labelText: 'Is there any high risk problem?',
-                            items: const ['Yes', 'No'],
+                            labelText: l10n?.anyHighRiskProblemLabel ?? 'Is there any high risk problem?',
+                            items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                             value: state.highRisk.isEmpty ? null : state.highRisk,
                             getLabel: (s) => s,
                             onChanged: (v) => bloc.add(HighRiskChanged(v ?? '')),
-                            hintText: 'Select',
+                            hintText: l10n?.select ?? 'Select',
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           ApiDropdown<String>(
-                            labelText: 'Is Beneficiary Absent?',
-                            items: const ['Yes', 'No'],
+                            labelText: l10n?.beneficiaryAbsentLabel ?? 'Is Beneficiary Absent?',
+                            items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                             value: state.beneficiaryAbsent.isEmpty ? null : state.beneficiaryAbsent,
                             getLabel: (s) => s,
                             onChanged: (v) => bloc.add(BeneficiaryAbsentChanged(v ?? '')),
-                            hintText: 'Select',
+                            hintText: l10n?.select ?? 'Select',
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -278,7 +297,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             child: SizedBox(
                               height: 44,
                               child: RoundButton(
-                                title: 'PREVIOUS VISITS',
+                                title: l10n?.previousVisitsButton ?? 'PREVIOUS VISITS',
                                 color: AppColors.primary,
                                 borderRadius: 8,
                                 onPress: () {
@@ -292,7 +311,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             child: SizedBox(
                               height: 44,
                               child: RoundButton(
-                                title: state.isSubmitting ? 'SAVING...' : 'SAVE',
+                                title: state.isSubmitting ? (l10n?.savingButton ?? 'SAVING...') : (l10n?.saveButton ?? 'SAVE'),
                                 color: AppColors.primary,
                                 borderRadius: 8,
                                 onPress: () => bloc.add(const SubmitPressed()),

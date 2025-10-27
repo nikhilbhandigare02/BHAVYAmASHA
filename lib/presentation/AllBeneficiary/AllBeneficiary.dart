@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
-
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -12,35 +11,42 @@ class AllBeneficiaryScreen extends StatefulWidget {
   const AllBeneficiaryScreen({super.key});
 
   @override
-  State<AllBeneficiaryScreen> createState() =>
-      _AllBeneficiaryScreenState();
+  State<AllBeneficiaryScreen> createState() => _AllBeneficiaryScreenState();
 }
 
-class _AllBeneficiaryScreenState
-    extends State<AllBeneficiaryScreen> {
+class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
+
   final List<Map<String, dynamic>> _staticHouseholds = [
     {
       'hhId': '51016121847',
-
       'RegitrationDate': '16-10-2025',
       'RegitrationType': 'General',
       'BeneficiaryID': '8347683437',
-      'Name': 0,
-      'Age|Gender': '19 Y | Male',
-      'Mobileno.': '1365124512',
-      'FatherName': 'flagyht ujy',
+      'Tola/Mohalla': 'Shivpuri',
+      'village': 'Rampur',
+      'RichID': 'RCH123456',
+      'Name': 'Rohit Sharma',
+      'Age|Gender': '27 Y | Male',
+      'Mobileno.': '9876543210',
+      'FatherName': 'Rajesh Sharma',
+      'HusbandName': '',
+      'WifeName': 'Anjali Sharma',
     },
     {
-      'hhId': '510161265767',
-
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '83476834477',
-      'Name': 0,
-      'Age|Gender': '19 Y | Male',
-      'Mobileno.': '1365124512',
-      'FatherName': 'flagyht ujy',
+      'hhId': '51016121848',
+      'RegitrationDate': '18-10-2025',
+      'RegitrationType': 'Special',
+      'BeneficiaryID': '8347683438',
+      'Tola/Mohalla': 'Gandhi Nagar',
+      'village': 'Mohanpur',
+      'RichID': 'RCH987654',
+      'Name': 'Priya Verma',
+      'Age|Gender': '25 Y | Female',
+      'Mobileno.': '9998887776',
+      'FatherName': 'Vinod Verma',
+      'HusbandName': 'Ravi Verma',
+      'WifeName': '',
     },
   ];
 
@@ -68,9 +74,11 @@ class _AllBeneficiaryScreenState
       } else {
         _filtered = _staticHouseholds.where((e) {
           return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['houseNo'] as String).toLowerCase().contains(q) ||
-              (e['name'] as String).toLowerCase().contains(q) ||
-              (e['mobile'] as String).toLowerCase().contains(q);
+              (e['Name'] as String).toLowerCase().contains(q) ||
+              (e['Mobileno.'] as String).toLowerCase().contains(q) ||
+              (e['village'] as String).toLowerCase().contains(q) ||
+              (e['Tola/Mohalla'] as String).toLowerCase().contains(q) ||
+              (e['BeneficiaryID'] as String).toLowerCase().contains(q);
         }).toList();
       }
     });
@@ -83,27 +91,23 @@ class _AllBeneficiaryScreenState
       appBar: AppHeader(
         screenTitle: l10n?.householdBeneficiaryTitle ?? 'Household Beneficiary',
         showBack: false,
-
         icon2: Icons.home,
         onIcon2Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
       ),
-      drawer: CustomDrawer(),
+      drawer: const CustomDrawer(),
       body: Column(
         children: [
-          // Search
+          // 🔍 Search Field
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: l10n?.householdBeneficiarySearch ?? 'Household Beneficiary Search',
+                hintText:  'Search All Beneficiary',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 12,
-                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -118,30 +122,10 @@ class _AllBeneficiaryScreenState
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(4),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _infoColumn(l10n?.villageLabel ?? 'Village', l10n?.notAvailable ?? 'Not Available'),
-                  _infoColumn(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla', l10n?.notAvailable ?? 'Not Available'),
-                ],
-              ),
-            ),
-          ),
+
+
+
+          // 📋 List of Households
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
@@ -153,23 +137,20 @@ class _AllBeneficiaryScreenState
             ),
           ),
 
+          // ➕ Add New Button
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12.0,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
               child: SizedBox(
                 width: double.infinity,
-                height: 35,
+                height: 40,
                 child: RoundButton(
-                  title: (l10n?.gridRegisterNewHousehold ?? 'Add New HouseHold').toUpperCase(),
+                  title: (l10n?.gridRegisterNewHousehold ?? 'Add New Household').toUpperCase(),
                   color: AppColors.primary,
                   borderRadius: 8,
-                  height: 50,
+                  height: 45,
                   onPress: () {
-                    Navigator.pushNamed(context, Route_Names.addFamilyMember);
-
+                    Navigator.pushNamed(context, Route_Names.addFamilyHead);
                   },
                 ),
               ),
@@ -180,149 +161,142 @@ class _AllBeneficiaryScreenState
     );
   }
 
+  // 🧱 Household Card UI
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
-
     final Color primary = Theme.of(context).primaryColor;
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          Route_Names.addFamilyMember,
-          arguments: {
-            'isBeneficiary': true,
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        InkWell(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              Route_Names.addFamilyMember,
+              arguments: {'isBeneficiary': true},
+            );
           },
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          boxShadow: [
-            // Bottom shadow
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 2,
-              spreadRadius: 1,
-              offset: const Offset(0, 2), // down
-            ),
-            // Top shadow
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 2,
-              spreadRadius: 1,
-              offset: const Offset(0, -2), // up
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
-              ),
-              padding: const EdgeInsets.all(4),
-              child: Row(
-                children: [
-                  const Icon(Icons.home, color: Colors.black54, size: 18),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      data['hhId'] ?? '',
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.asset(
-                      'assets/images/sync.png',
-                      width: 25,
-                      height: 25,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: primary.withOpacity(0.95),
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(4),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 2,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _rowText(
-                          l10n?.registrationDateLabel ?? 'Registration Date',
-                          data['RegitrationDate'],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _rowText(
-                          l10n?.registrationTypeLabel ?? 'Registration Type',
-                          data['RegitrationType'],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _rowText(
-                          l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
-                          data['BeneficiaryID'].toString(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(child: _rowText(l10n?.thName ?? 'Name', data['Name'].toString())),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _rowText(
-                          l10n?.ageGenderLabel ?? 'Age | Gender',
-                          data['Age|Gender'].toString(),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _rowText(
-                          l10n?.mobileLabelSimple ?? 'Mobile no.',
-                          data['Mobileno'].toString(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _rowText(
-                          l10n?.fatherNameLabel ?? 'Father Name',
-                          data['FatherName'].toString(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              ],
             ),
-          ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header Row
+                Container(
+                  decoration: const BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
+                  ),
+                  padding: const EdgeInsets.all(6),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.home, color: Colors.black54, size: 18),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          data['hhId'] ?? '',
+                          style: TextStyle(
+                            color: primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.asset(
+                          'assets/images/sync.png',
+                          width: 25,
+                          height: 25,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Card Body
+                Container(
+                  decoration: BoxDecoration(
+                    color: primary.withOpacity(0.95),
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(6)),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildRow([
+                        _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate']),
+                        _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType']),
+                        _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID']),
+                      ]),
+                      const SizedBox(height: 8),
+                      _buildRow([
+                        _rowText(l10n?.villageLabel ?? 'Village', data['village']),
+                        _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla', data['Tola/Mohalla']),
+                        _rowText('RCH ID', data['RichID']),
+                      ]),
+                      const SizedBox(height: 8),
+                      _buildRow([
+                        _rowText(l10n?.thName ?? 'Name', data['Name']),
+                        _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender']),
+                        _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.']),
+                      ]),
+                      const SizedBox(height: 8),
+                      _buildRow([
+                        _rowText(l10n?.fatherNameLabel ?? 'Father Name', data['FatherName']),
+                        _rowText( 'Husband Name', data['HusbandName']),
+                        _rowText( 'Wife Name', data['WifeName']),
+                      ]),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
+
+        // CBAC Button
+        Padding(
+          padding: const EdgeInsets.only(right: 8, top: 6, bottom: 8),
+          child: SizedBox(
+            height: 32,
+            child: RoundButton(
+              title: 'CBAC',
+              color: AppColors.primary,
+              borderRadius: 6,
+              width: 100,
+              onPress: () {
+                Navigator.pushNamed(context, Route_Names.cbacScreen);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRow(List<Widget> children) {
+    return Row(
+      children: [
+        for (int i = 0; i < children.length; i++) ...[
+          Expanded(child: children[i]),
+          if (i < children.length - 1) const SizedBox(width: 10),
+        ]
+      ],
     );
   }
 
@@ -336,22 +310,24 @@ class _AllBeneficiaryScreenState
         ),
         const SizedBox(height: 2),
         Text(
-          value,
+          value.isEmpty ? 'N/A' : value,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
+            fontSize: 13,
           ),
         ),
       ],
     );
   }
+
   Widget _infoColumn(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style:  TextStyle(
+          style: TextStyle(
             fontSize: 13,
             color: AppColors.background,
             fontWeight: FontWeight.w500,
@@ -366,8 +342,6 @@ class _AllBeneficiaryScreenState
             color: AppColors.background,
           ),
         ),
-        const SizedBox(height: 0),
-
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:medixcel_new/data/repositories/GuestBeneficiaryRepository.dart';
+import '../../../core/utils/enums.dart' show GbsStatus;
 import 'guest_beneficiary_search_event.dart';
 import 'guest_beneficiary_search_state.dart';
 

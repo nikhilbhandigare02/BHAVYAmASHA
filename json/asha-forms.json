@@ -1,0 +1,3142 @@
+{
+    "forms":{
+        "safe_motherhood": {
+            "title": {
+                "en": "Safe Motherhood",
+                "hi": "सुरक्षित मातृत्व"
+            },
+            "sub_center": {
+                "en": "Select sub center",
+                "hi": "उप केंद्र का चयन करें",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Lakhnoti",
+                        "hi": "लखनौती",
+                        "value": "lakhnoti"
+                    }
+                ]
+            },
+            "village": {
+                "en": "Select village",
+                "hi": "गांव का चयन करें",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Jhabiran (1583)",
+                        "hi": "झबीरन (1583)",
+                        "value": "jhabiran"
+                    },
+                    {
+                        "en": "Lakhnauti (1582)",
+                        "hi": "लखनौती (1582)",
+                        "value": "lakhnauti"
+                    }
+                ]
+            },
+            "asha_area": {
+                "en": "Select ASHA area",
+                "hi": "आशा क्षेत्र का चयन करें",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "ASHA area 1",
+                        "hi": "आशा क्षेत्र एक",
+                        "value": "asha_area_1"
+                    },
+                    {
+                        "en": "ASHA area 2",
+                        "hi": "आशा क्षेत्र दो",
+                        "value": "asha_area_2"
+                    },
+                    {
+                        "en": "ASHA area 3",
+                        "hi": "आशा क्षेत्र तीन",
+                        "value": "asha_area_3"
+                    },
+                    {
+                        "en": "ASHA area 4",
+                        "hi": "आशा क्षेत्र चार",
+                        "value": "asha_area_4"
+                    }
+                ]
+            },
+            "do_you_have_abha_number": {
+                "en": "Do you have a ABHA number?",
+                "hi": "क्या आपके पास आभा संख्या है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                     {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]         
+            },
+            "link_abha":{
+                "en":"Link ABHA",
+                "hi":"आभा लिंक"
+            },
+            "create_abha":{
+                "en":"Generate ABHA Number",
+                "hi":"आभा लिंक बनाएं"
+            },
+            "is_woman_or_beneficiary": {
+                "en": "Is a woman/beneficiary",
+                "hi": "महिला/लाभार्थी है",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                     {
+                        "en": "Pregnant",
+                        "hi": "गर्भवती",
+                        "value": "pregnant"
+                    },
+                    {
+                        "en": "Already Delivered",
+                        "hi": "पहले से ही वितरित है",
+                        "value": "already_delivered"
+                    }
+                ] 
+            },
+            "lmp": {
+                "en": "LMP",
+                "hi": "एलएमपी"
+            },
+            "iron_folic_tablet_given": {
+                "en": "How many iron and folic acid tablets were given?",
+                "hi": "कितने आयरन और फोलिक एसिड टेबल दिए गए?",
+                "placeholder": {
+                    "en": "Please enter number of tablets",
+                    "hi": "कृपया गोलियों की संख्या दर्ज करें "
+                }
+            },
+            "calcium_tablet_given": {
+                "en": "How many calcium tablets were given?",
+                "hi": "कितनी कैल्शियम की गोलियां दी गईं?",
+                "placeholder": {
+                    "en": "Please enter number of tablets",
+                    "hi": "कृपया गोलियों की संख्या दर्ज करें "
+                }
+            },
+            "was_albendozole_given": {
+                "en": "Was albendazole given?",
+                "hi": "एल्बेंडोजोल दिया गया?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ] 
+            },
+            "received_anc_under_pmshm": {
+                "en": "Received ANC under PMSHM",
+                "hi": "PMSHM के तहत ANC प्राप्त किया",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ] 
+            },
+            "hrp_idendify": {
+                "en": "HRP idendify",
+                "hi": "एचआरपी की पहचान",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ] 
+            },
+            "submit_review_data": {
+                "en": "Do you want to submit or review the data?",
+                "hi": "क्या आप डेटा सबमिट या समीक्षा करना चाहते हैं?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                        "en": "I want to submit the data",
+                    "hi": "मैं डेटा सबमिट करना चाहता हूं",
+                    "value": "i want to submit the data"
+                   },
+                   {
+                    "en": "I want to verify the data",
+                    "hi": "मैं डेटा सत्यापित करना चाहता हूं",
+                    "value": "i want to verify the data"
+                   }
+                ]
+            },
+            "save":{
+                "en":"Save",
+                "hi":"संरक्षित करें"
+            }
+        },
+
+
+
+        "sam_management": {
+            "title": {
+                "en": "SAM Management",
+                "hi": "सैम मैनेजमेनेट"
+            },
+            "type_of_service": {
+                "en": "Select the type of service",
+                "hi": "सेवा के प्रकार का चयन करें",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Children Enrollment",
+                        "hi": "बच्चों का नामांकन",
+                        "value": "children_enrollment"
+                    },
+                    {
+                        "en": "Session Report",
+                        "hi": "सत्र रिपोर्ट",
+                        "value": "session_report"
+                    },
+                    {
+                        "en": "Follow Up",
+                        "hi": "फॉलो अप",
+                        "value": "follow_up"
+                    }
+                ]
+            },
+            "detect_child_suffering_from_malnutrition": {
+                "en": "Please enter the information below to detect whether the child is suffering from malnutrition",
+                "hi": "बच्चा कुपोषण से पीड़ित है या नहीं, इसका पता लगाने के लिए कृपया नीचे दी गई जानकारी दर्ज करें",
+                "child_gender": {
+                    "en": "Child gender",
+                    "hi": "बाल लिंग",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options":[
+                        {
+                           "en": "Male",
+                           "hi": "नर",
+                           "value": "male"
+                       },
+                       {
+                           "en": "Female",
+                           "hi": "महिला",
+                           "value": "female"
+                       }
+                   ] 
+                },
+                "child_height": {
+                    "en": "Child's Height (in cms)",
+                    "hi": "बच्चे की ऊंचाई (सेमी में)"
+                },
+                "equi_availabe_for_height": {
+                    "en": "Is equipment available",
+                    "hi": "उपकरण उपलब्ध नहीं"
+                },
+                "child_weight": {
+                    "en": "Child's Weight (in kgs)",
+                    "hi": "बच्चे का वजन (किलो में)"
+                },
+                "equi_availabe_for_weight": {
+                    "en": "Is weighing scale available",
+                    "hi": "वजन का पैमाना उपलब्ध नहीं है"
+                },
+                "does_child_have_bilateral_edema": {
+                    "en": "Does the child have bilateral pedal edema?",
+                    "hi": "क्या बच्चे को द्विपक्षीय पेडल एडिमा है?",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options":[
+                        {
+                           "en": "Yes",
+                           "hi": "हाँ",
+                           "value": "yes"
+                       },
+                       {
+                           "en": "No",
+                           "hi": "नहीं",
+                           "value": "no"
+                       }
+                   ] 
+                },
+                "date_screening": {
+                    "en": "Date of Screening",
+                    "hi": "स्क्रीनिंग की तिथि"
+                }
+            },
+            "location": {
+                "en": "Select location",
+                "hi": "स्थान चुनें",
+                "sub_center": {
+                    "en": "Select sub center",
+                    "hi": "उप केंद्र का चयन करें",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options": [
+                        {
+                            "en": "Lakhnoti",
+                            "hi": "लखनौती",
+                            "value": "lakhnoti"
+                        }
+                    ]
+                },
+                "village": {
+                    "en": "Select village",
+                    "hi": "गांव का चयन करें",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options": [
+                        {
+                            "en": "Jhabiran (1583)",
+                            "hi": "झबीरन (1583)",
+                            "value": "jhabiran"
+                        },
+                        {
+                            "en": "Lakhnauti (1582)",
+                            "hi": "लखनौती (1582)",
+                            "value": "lakhnaut_"
+                        }
+                    ]
+                },
+                "asha_area": {
+                    "en": "Select ASHA area",
+                    "hi": "आशा क्षेत्र का चयन करें",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options": [
+                        {
+                            "en": "ASHA area 1",
+                            "hi": "आशा क्षेत्र एक",
+                            "value": "asha_area_1"
+                        },
+                        {
+                            "en": "ASHA area 2",
+                            "hi": "आशा क्षेत्र दो",
+                            "value": "asha_area_2"
+                        },
+                        {
+                            "en": "ASHA area 3",
+                            "hi": "आशा क्षेत्र तीन",
+                            "value": "asha_area_3"
+                        },
+                        {
+                            "en": "ASHA area 4",
+                            "hi": "आशा क्षेत्र चार",
+                            "value": "asha_area_4"
+                        }
+                    ]
+                },
+                "child_name": {
+                    "en": "Child name",
+                    "hi": "बच्चे का नाम"
+                },
+                "mother_name": {
+                    "en": "Mother name",
+                    "hi": "माँ का नाम"
+                },
+                "father_name": {
+                    "en": "Father name",
+                    "hi": "पिता का नाम"
+                },
+                "last_name": {
+                    "en": "Last name",
+                    "hi": "उपनाम"
+                },
+                "family_mobile_number": {
+                    "en": "Family Mobile no.",
+                    "hi": "परिवार का मोबाइल नंबर"
+                },
+                "date_of_birth": {
+                    "en": "Date of birth",
+                    "hi": "जन्म की तिथि"
+                },
+                "age_as_per_birth_date": {
+                    "en": "Age as per date selected",
+                    "hi": "चयनित तिथि के अनुसार आयु"
+                },
+                "medical_complication": {
+                    "en": "Medical complication",
+                    "hi": "चिकित्सा जटिलता",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options":[
+                        {
+                        "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                       },
+                       {
+                        "en": "None",
+                        "hi": "कोई नहीं",
+                        "value": "none"
+                       }
+                   ] 
+                },
+                "medical_managemnet_provided": {
+                    "en": "Medical managemnet provided at site by ANM/CHO?",
+                    "hi": "एएनएम/सीएचओ द्वारा साइट पर चिकित्सा प्रबंधन प्रदान किया गया?",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options":[
+                        {
+                           "en": "Yes",
+                           "hi": "हाँ",
+                           "value": "yes"
+                       },
+                       {
+                           "en": "No",
+                           "hi": "नहीं",
+                           "value": "no"
+                       }
+                   ] 
+                },
+                "medicine_dose_age_per_weight": {
+                    "en": "Medicine dose as per age/weight",
+                    "hi": "उम्र/वजन के अनुसार दवा की खुराक",
+                    "list":[
+                        {
+                            "en":"Amoxicillin [Tablet (125 mg/tab) / syrup (125mg/ 5ml)]",
+                            "hi":"एमोक्सिसिलिन [टैबलेट (125 मिलीग्राम/टैब) / सिरप (125 मिलीग्राम/ 5 मिली)]"
+                        },
+                        {
+                            "en":"Vitamin A Syrup",
+                            "hi":"विटामिन ए सिरप"
+                        },
+                        {
+                            "en":"Folic Acid [5mg tablet]",
+                            "hi":"फोलिक एसिड [5mg टैबलेट]"
+                        },
+                        {
+                            "en":"IFA Syrup",
+                            "hi":"आईएफए सिरप"
+                        },
+                        {
+                            "en":"Albendazole (400 mg tablet)",
+                            "hi":"एल्बेंडाजोल (400 मिलीग्राम टैबलेट)"
+                        }
+                    ]
+                },
+                "medications": {
+                    "en": "Select Medication",
+                    "hi": "दवा का चयन करें",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options": [
+                        {
+                            "en": "Amoxycillin",
+                            "hi": "अमोक्सिसिलिन",
+                            "value": "amoxycillin"
+                        },
+                        {
+                            "en": "Vitamin A Syrup",
+                            "hi": "विटामिन ए सिरप",
+                            "value": "vitamin_a_syrup"
+                        },
+                        {
+                            "en": "Folic Acid",
+                            "hi": "फोलिक एसिड",
+                            "value": "folic_acid"
+                        },
+                        {
+                            "en": "IFA Syrup",
+                            "hi": "आईएफए सिरप",
+                            "value": "ifa_syrup"
+                        },
+                        {
+                            "en": "Albendazole",
+                            "hi": "एल्बेंडाजोल",
+                            "value": "albendazole"
+                        }
+                    ]
+                }
+            },
+            "aabha_number":{
+                "label":{
+                    "en":"ABHA number",
+                    "hi":"आभा संख्या"
+                },
+                "en":"You are about to create or link ABHA number for the beneficiary. ABHA number will uniquely identify a beneficiary and help you search for them easily in the system. The ABHA number will also help the beneficiary to easily manage and share their health records.",
+                "hi":"आप लाभार्थी के लिए ABHA नंबर बनाने या लिंक करने वाले हैं। ABHA नंबर विशिष्ट रूप से एक लाभार्थी की पहचान करेगा और सिस्टम में उन्हें आसानी से खोजने में आपकी मदद करेगा। आभा संख्या लाभार्थी को अपने स्वास्थ्य रिकॉर्ड को आसानी से प्रबंधित करने और साझा करने में भी मदद करेगी।"
+            },
+            "form_entry_completed": {
+                "en": "Form entry completed You have successfully completed entering the information in the form. Do you want to submit or review the data?",
+                "hi": "फॉर्म प्रविष्टि पूर्ण आपने प्रपत्र में जानकारी दर्ज करना सफलतापूर्वक पूरा कर लिया है। क्या आप डेटा सबमिट या समीक्षा करना चाहते हैं?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "I want to submit the data",
+                        "hi": "मैं डेटा सबमिट करना चाहता हूं",
+                        "value": "i_want_to_submit_the_data"
+                    },
+                    {
+                        "en": "I want to verify the data",
+                        "hi": "मैं डेटा सत्यापित करना चाहता हूं",
+                        "value": "i_want_to_verify_the_data"
+                    }
+                ]
+            },
+            "form_is_completed": {
+                "en": "Form is completed",
+                "hi": "फॉर्म पूरा हो गया है",
+                "value": "form is completed"
+            },
+            "save":{
+                "en":"Save",
+                "hi":"संरक्षित करें"
+            }
+        },
+
+        "vitamin_regular_immunization": {
+            "title": {
+                "en": "Vitamin A & Regular Immunization",
+                "hi": "विटामिन ए और नियमित टीकाकरण"
+            },
+
+            "slides":[
+                {
+                    "en": "Details",
+                    "hi": "विवरण"
+                }
+            ],
+
+            "area": {
+                "en": "Please select an area",
+                "hi": "कृपया एक क्षेत्र का चयन करें",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Area name listing 1",
+                        "hi": "क्षेत्र का नाम सूची 1",
+                        "value": "area_name_listing_1"
+                    },
+                    {
+                        "en": "Area name listing 2",
+                        "hi": "क्षेत्र का नाम सूची 2",
+                        "value": "area_name_listing_2"
+                    }
+                ]
+            },
+
+
+            "next1": {
+                "en": "next",
+                "hi": "अगला"
+            },
+
+            "beneficiary_type": {
+                "en": "Please select an option",
+                "hi": "कृपया एक विकल्प चुनें",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+
+                "options": [
+                    {
+                        "en": "Child",
+                        "hi": "बच्चा",
+                        "value": "child"
+                    },
+                    {
+                        "en": "Pregnant Woman",
+                        "hi": "गर्भवती महिला",
+                        "value": "pregnant_woman"
+                    }
+                ]
+            },
+            
+            "info_of_household_head":{
+                "en":"Head of household information",
+                "hi":"परिवार के मुखिया की जानकरी",
+                "first_name":{
+                    "en":"First name (As per Aadhaar Card)",
+                    "hi":"पहला नाम (आधार कार्ड के अनुसार)"
+                },
+                "middle_name":{
+                    "en":"Middle name (As per Aadhaar Card)",
+                    "hi":"मध्य नाम (आधार कार्ड के अनुसार)"
+                },
+                "last_name":{
+                    "en":"Last name (As per Aadhaar Card)",
+                    "hi":"अंतिम नाम (आधार कार्ड के अनुसार)"
+                },
+                "father_name":{
+                    "en":"Father's name",
+                    "hi":"पिता का नाम"
+                },
+                "_mobile_number":{
+                    "en":"Mobile no.",
+                    "hi":"मोबाइल नंबर"
+                },
+                "gender_as_adhar":{
+                    "en":"Gender (As per Aadhaar Card)",
+                    "hi":"लिंग (आधार कार्ड के अनुसार)",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options": [
+                        {
+                            "en": "Male",
+                            "hi": "नर",
+                            "value": "male"
+                        },
+                         {
+                            "en": "Woman",
+                            "hi": "महिला",
+                            "value": "woman"
+                        },
+                         {
+                            "en": "Other",
+                            "hi": "अन्य",
+                            "value": "other"
+                        }
+                    ]             
+                },
+                "date_of_birth":{
+                    "en":"Select an option to enter date of birth",
+                    "hi":"जन्म तिथि दर्ज करने के लिए एक विकल्प का चयन करें",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options": [
+                        {
+                            "en": "Select date",
+                            "hi": "तिथि चूने",
+                            "value": "select date"
+                        },
+                      {
+                            "en": "Enter age in years or months",
+                            "hi": "वर्षों या महीनों में आयु दर्ज करें",
+                            "value": "enter age in years or months"
+                        }
+                    ]
+                }
+            },
+            "date_of_birth":{
+                "en":"Date of Birth (As per Aadhaar Card)",
+                "hi":"जन्म तिथि (आधार कार्ड के अनुसार)",
+                "date":{
+                    "en":"Select date",
+                    "hi":"खजूर चूना"
+                }
+            },
+            "age_as_selected_date":{
+                "en":"Age as on selected date",
+                "hi":"चयनित तिथि के अनुसार आयु"
+            },
+            "please_date_not_selected":{
+                "en":"Date not yet selected",
+                "hi":"तिथि अभी तक चयनित नहीं है"
+            },
+            "enter_age":{
+                "en":"Enter age",
+                "hi":"आयु दर्ज करें",
+                "year_months":{
+                    "en":"Year months",
+                    "hi":"वर्ष महीने"
+                }
+            },
+            "date_birth_calculation":{
+                "en":"Date of birth calculation",
+                "hi":"जन्म की गणना की तिथि"
+            },
+            "please_year/month_not_entered":{
+                "en":"Year/Month not entered",
+                "hi":"वर्ष/माह दर्ज नहीं किया गया"
+            },
+            "next2":{
+                "en":"Next",
+                "hi":"अगला"
+            },
+            "you_are_going_to_do_Abha_Sujit/Sambandh":{
+                "en":"You are going to do Abha Sujit/Sambandh of the beneficiary. Aura number is the unique identification number of the beneficiary, which can be easily identified by the medium, the beneficiary can collect or share his health information using this.",
+                "hi":"आप लाभार्थी का आभा सुजीत/संबंध करने जा रहे हैं। आभा संख्या लाभार्थी की विशिष्ट पहचान संख्या है, जिसे माध्यम से आसानी से पहचाना जा सकता है, लाभार्थी इसका उपयोग कर अपने स्वास्थ्य की जानकारी एकत्र या साझा कर सकता है।"
+            },
+            "duly_informed_beneficiary_about_Abha_Health_ID":{
+                "en":"I have duly informed the beneficiary about Abha Health ID and the details of consent/permission required for the same",
+                "hi":"मैंने लाभार्थी को आभा हेल्थ आईडी और उसके लिए आवश्यक सहमति/अनुमति के विवरण के बारे में विधिवत सूचित कर दिया है"
+            },
+            "skip_for_now":{
+                "en":"Skip for now",
+                "hi":"अभी के लिए छोड़ दे"
+            },
+            "run_process_for_beneficiary":{
+                "en":"Run the process for the beneficiary",
+                "hi":"लाभार्थी के लिए प्रक्रिया का चलन करे",
+                "surjeet-aabha_number":{
+                    "en":"Surjeet Aabha number (through OTP of mobile number linked with Aadhaar)",
+                    "hi":"सुरजीत आभा नंबर (आधार से जुड़े मोबाइल नंबर के ओटीपी के जरिए)"
+                },
+                "link_ABHA_number":{
+                    "en":"Link ABHA number",
+                    "hi":"एबीएचए नंबर लिंक करें"
+                },
+                "create_ABHA":{
+                    "en":"Create ABHA",
+                    "hi":"आभा बनाएँ"
+                },
+                "next3": {
+                    "en": "next",
+                    "hi": "अगला"
+                },
+                "create_ABHA_number":{
+                    "en":"Create ABHA number",
+                    "hi":"आभा संख्या बनाएँ"
+                },
+                "mobile_linked_with_adhaar_number": {
+                    "en": "(Aadhaar OTP Authentication) OTP will be sent to the mobile number linked with this Aadhaar number.",
+                    "hi": "(आधार ओटीपी प्रमाणीकरण) इस आधार नंबर से जुड़े मोबाइल नंबर पर ओटीपी भेजा जाएगा।"
+                },
+                "adhar_number":{
+                    "en":"Aadhar number",
+                    "hi":"आधार संख्या"
+                },
+                "mobile_number":{
+                    "en":"Mobile no.",
+                    "hi":"मोबाइल नंबर"
+                },
+                "proceeded":{
+                    "en":"Proceeded",
+                    "hi":"रवाना"
+                },
+                "mother_details":{
+                    "en":"Mother's details",
+                    "hi":"माँ का विवरण"
+                },
+                "first_name_as_adhar":{
+                    "en":"First Name (As per Aadhaar Card)",
+                    "hi":"पहला नाम (आधार कार्ड के अनुसार)"
+                },
+                "middle_name_as_adhar":{
+                    "en":"Middle Name (As per Aadhaar Card)",
+                    "hi":"मध्य नाम (आधार कार्ड के अनुसार)"
+                },
+                "last_name_as_adhar":{
+                    "en":"Last Name (As per Aadhaar Card)",
+                    "hi":"अंतिम नाम (आधार कार्ड के अनुसार)"
+                },
+                "rch_id":{
+                    "en":"RCH Id",
+                    "hi":"आरसीएच आईडी"
+                },
+                "date_of_birth":{
+                    "en":"Select an option to enter date of birth",
+                    "hi":"जन्म तिथि दर्ज करने के लिए एक विकल्प का चयन करें",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options": [
+                        {
+                            "en": "Select date",
+                            "hi": "तिथि चूने",
+                            "value": "select date"
+                        },
+                      {
+                            "en": "Enter age in years or months",
+                            "hi": "वर्षों या महीनों में आयु दर्ज करें",
+                            "value": "enter age in years or months"
+                        }
+                    ]
+                }
+            },
+            "date_of_birth_as_adhar":{
+                "en":"Date of Birth (As per Aadhaar Card)",
+                "hi":"जन्म तिथि (आधार कार्ड के अनुसार)",
+                "select_date":{
+                    "en":"Select date",
+                    "hi":"तिथि़ चुनें"
+                }
+            },
+            "age_as_selected_date_":{
+                "en":"Age as on selected date",
+                "hi":"चयनित तिथि के अनुसार आयु"
+            },
+            "__please_date_not_selected":{
+                "en":"Date not yet selected",
+                "hi":"तिथि अभी तक चयनित नहीं है"
+            },
+            "enter_age_":{
+                "en":"Enter age",
+                "hi":"आयु दर्ज करें",
+                "year_months_":{
+                    "en":"Year months",
+                    "hi":"वर्ष महीने"
+                }
+            },
+
+            "date_birth_calculation_":{
+                "en":"Date of birth calculation",
+                "hi":"जन्म की गणना की तिथि"
+            },
+            "please_year/month_not_entered_":{
+                "en":"Year/Month not entered",
+                "hi":"वर्ष/माह दर्ज नहीं किया गया"
+            },
+            "child_details":{
+                "en":"Child details",
+                "hi":"बच्चे का विवरण",
+                "first_name_as_adhar":{
+                    "en":"First Name (As per Aadhaar Card)",
+                    "hi":"पहला नाम (आधार कार्ड के अनुसार)"
+                },
+                "middle_name_as_adhar":{
+                    "en":"Middle Name (As per Aadhaar Card)",
+                    "hi":"मध्य नाम (आधार कार्ड के अनुसार)"
+                },
+                "last_name_as_adhar":{
+                    "en":"Last Name (As per Aadhaar Card)",
+                    "hi":"अंतिम नाम (आधार कार्ड के अनुसार)"
+                },
+                "rch_id":{
+                    "en":"RCH Id",
+                    "hi":"आरसीएच आईडी"
+                },
+                "gender_as_adhar":{
+                    "en":"Gender (As per Aadhaar Card)",
+                    "hi":"लिंग (आधार कार्ड के अनुसार)",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options": [
+                        {
+                            "en": "Male",
+                            "hi": "नर",
+                            "value": "male"
+                        },
+                       {
+                        "en": "Woman",
+                        "hi": "महिला",
+                        "value": "woman"
+                        },
+                        {
+                            "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                            }
+                    ]
+                },
+                "next4":{
+                    "en":"Next",
+                    "hi":"अगला"
+                },
+                "select_date_of_birth":{
+                    "en":"Select an option to enter date of birth",
+                    "hi":"जन्म तिथि दर्ज करने के लिए एक विकल्प का चयन करें",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    "options": [
+                        {
+                            "en": "Select date",
+                            "hi": "तिथि चूने",
+                            "value": "select date"
+                        },
+                      {
+                            "en": "Enter age in years or months",
+                            "hi": "वर्षों या महीनों में आयु दर्ज करें",
+                            "value": "enter age in years or months"
+                        }
+                    ]
+                }
+            },
+            "date_of_birth_as_per_adhar":{
+                "en":"Date of Birth (As per Aadhaar Card)",
+                "hi":"जन्म तिथि (आधार कार्ड के अनुसार)",
+                "date":{
+                    "en":"Select date",
+                    "hi":"तिथि चुनें"
+                }
+            },
+            "_age_as_selected_date":{
+                "en":"Age as on selected date",
+                "hi":"चयनित तिथि के अनुसार आयु"
+            },
+            "_please_date_not_selected":{
+                "en":"Date not yet selected",
+                "hi":"तिथि अभी तक चयनित नहीं है"
+            },
+            "_enter_age":{
+                "en":"Enter age",
+                "hi":"आयु दर्ज करें",
+                "year_months":{
+                    "en":"Year months",
+                    "hi":"वर्ष महीने"
+                }
+            },
+            "_date_birth_calculation":{
+                "en":"Date of birth calculation",
+                "hi":"जन्म की गणना की तिथि"
+            },
+            "_please_year/month_not_entered":{
+                "en":"Year/Month not entered",
+                "hi":"वर्ष/माह दर्ज नहीं किया गया"
+            },
+            "_add_more_child_of_same_mother":{
+                "en":"Do you want to add more child of same mother?",
+                "hi":"क्या आप एक ही माँ के और बच्चे जोड़ना चाहते हैं?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            "next5": {
+                "en": "next",
+                "hi": "अगला"
+            },
+            "next6": {
+                "en": "next",
+                "hi": "अगला"
+            },
+            "form_enrollment_completed": {
+                "en": "Form Enrollment Completed All the details of your form have been entered successfully.",
+                "hi": "फॉर्म नामांकन पूर्ण आपके फॉर्म के सभी विवरण सफलतापूर्वक दर्ज किए गए हैं।",
+                "submit_or_review_data":{
+                    "en":"Would you like to submit or review data?",
+                    "hi":"क्या आप डेटा सबमिट या समीक्षा करना चाहेंगे?",
+                    "enter_data":{
+                        "en":"I want to enter data",
+                        "hi":"मैं डेटा दर्ज करना चाहता हूं",
+                        "value":"i want to enter data"
+                    },
+                    "verify_data":{
+                        "en":"I want to verify the data",
+                        "hi":"मैं डेटा सत्यापित करना चाहता हूं",
+                        "value":"i want to verify the data"      
+                    }
+                },
+                "next7": {
+                    "en": "next",
+                    "hi": "अगला"
+                },
+                "The form is complete":{
+                    "en":"The form is complete",
+                    "hi":"फॉर्म पूरा हो गया है"
+                },
+                "deposit":{
+                    "en":"Deposit",
+                    "hi":"जमा"
+                },
+                "synced":{
+                    "en":"Synced",
+                    "hi":"सिंक"
+                }
+            }
+        },
+
+        "vitamin_regular_immunization_new": {
+            "title": {
+                "en": "Vitamin A & Regular Immunization",
+                "hi": "विटामिन ए और नियमित टीकाकरण"
+            },
+            "slide": {
+                "en": "Details",
+                "hi": "विवरण"
+            },
+          
+            "pw_vaccination": {
+                "en": "PW Vaccination",
+                "hi": "पीडब्लू टीकाकरण",
+                "date_of_tt_first": {
+                    "en": "Date of TT/TD (1st Dose)",
+                    "hi": "टीटी/टीडी की तिथि (पहली खुराक)"
+                },
+                "date_of_tt_second": {
+                    "en": "Date of TT/TD (2nd Dose)",
+                    "hi": "टीटी/टीडी (दूसरी खुराक) की तिथि"
+                },
+                "dose":{
+                   "en":"Dose",
+                   "hi":"खुराक"                },
+                "date": {
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "dose_given":{
+                    "en":"Dose given",
+                    "hi":"खुराक दी गई"
+                },
+                "tetanus_diphtheria": {
+                    "en": "Tetanus & adult Diphtheria (Td booster)",
+                    "hi": "टेटनस और वयस्क डिप्थीरिया (टीडी बूस्टर)"
+                },
+                "iron_folic_acid_tab": {
+                    "en": "IRON AND FOLIC ACID (IFA) TABLETS",
+                    "hi": "आयरन और फोलिक एसिड (IFA) टैबलेट"
+                },
+                "albendazole_tablet": {
+                    "en": "Albendazole 400mg Tablet",
+                    "hi": "एल्बेंडाजोल 400mg टैबलेट"
+                }
+            },
+            "child_vaccination": {
+                "en": "Child Vaccination",
+                "hi": "बाल टीकाकरण",
+                "birth_doses": {
+                    "en": "Birth Doses",
+                    "hi": "जन्म की खुराक",
+                    "date": {
+                        "en": "Date",
+                        "hi": "तिथि"
+                    },
+                    "dose_given":{
+                        "en":"Dose given",
+                        "hi":"खुराक दी गई"
+                    },
+                    "hep_b_0": {
+                        "en": "HEP B-0 ",
+                        "hi": "एचईपी बी-0"
+                    },
+                    "popv_0": {
+                        "en": "OPV-0",
+                        "hi": "ओपीवी-0"
+                    },
+                    "vit_k": {
+                        "en": "VIT K",
+                        "hi": "वीआईटी के"
+                    },
+                    "bcg": {
+                        "en": "BCG",
+                        "hi": "बीसीजी"
+                    }
+                },
+                "six_weeks_dose": {
+                    "en": "6 Weeks Dose",
+                    "hi": "6 सप्ताह की खुराक",
+                    "date": {
+                        "en": "Date",
+                        "hi": "तिथि"
+                    },
+                    "dose_given":{
+                        "en":"Dose given",
+                        "hi":"खुराक दी गई"
+                    },
+                    "opv_1": {
+                        "en": "OPV-1",
+                        "hi": "ओपीवी-1"
+                    },
+                    "dpt_1": {
+                        "en": "DPT-1",
+                        "hi": "डीपीटी-1"
+                    },
+                    "hep_b_1": {
+                        "en": "HEP B-1",
+                        "hi": "एचईपी बी-1"
+                    },
+                    "pentavlent_1": {
+                        "en": "Pentavalent 1",
+                        "hi": "पेंटावेलेंट 1"
+                    },
+                    "rota_1": {
+                        "en": "Rota 1",
+                        "hi": "रोटा 1"
+                    },
+                    "ipv_1": {
+                        "en": "IPV 1",
+                        "hi": "आईपीवी 1"
+                    },
+                    "pcv_1": {
+                        "en": "PCV 1",
+                        "hi": "पीसीवी 1"
+                    }
+                },
+                "ten_weeeks_dose": {
+                    "en": "10 Weeks Dose",
+                    "hi": "10 सप्ताह की खुराक",
+                    "date": {
+                        "en": "Date",
+                        "hi": "तिथि"
+                    },
+                    "dose_given":{
+                        "en":"Dose given",
+                        "hi":"खुराक दी गई"
+                    },
+                    "opv_2": {
+                        "en": "OPV-2",
+                        "hi": "ओपीवी-2"
+                    },
+                    "dpt_2": {
+                        "en": "DPT-2",
+                        "hi": "डीपीटी-2"
+                    },
+                    "hep_b_2": {
+                        "en": "HEP B-2",
+                        "hi": "एचईपी बी-2"
+                    },
+                    "pentavlent_2": {
+                        "en": "Pentavalent 2",
+                        "hi": "पेंटावेलेंट 2"
+                    },
+                    "rota_2": {
+                        "en": "Rota 2",
+                        "hi": "रोटा 2"
+                    }
+                },
+                "forteen_weeks_dose": {
+                    "en": "14 Weeks Dose",
+                    "hi": "14 सप्ताह की खुराक",
+                    "date": {
+                        "en": "Date",
+                        "hi": "तिथि"
+                    },
+                    "dose_given":{
+                        "en":"Dose given",
+                        "hi":"खुराक दी गई"
+                    },
+                    "opv_3": {
+                        "en": "OPV 3",
+                        "hi": "ओपीवी 3"
+                    },
+                    "dpt_3": {
+                        "en": "DPT 3",
+                        "hi": "डीपीटी 3"
+                    },
+                    "hep_b_3": {
+                        "en": "HEP B-3",
+                        "hi": "एचईपी बी-3"
+                    },
+                    "pentavlent_3": {
+                        "en": "Pentavalent 3",
+                        "hi": "पेंटावेलेंट 3"
+                    },
+                    "rota_3": {
+                        "en": "Rota 3",
+                        "hi": "रोटा 3"
+                    },
+                    "ipv_2": {
+                        "en": "IPV 2",
+                        "hi": "आईपीवी 2"
+                    },
+                    "pcv_2": {
+                        "en": "PCV 2",
+                        "hi": "पीसीवी 2"
+                    }
+                },
+                "nine_month_dose": {
+                    "en": "9 Months Dose",
+                    "hi": "9 महीने की खुराक",
+                    "date": {
+                        "en": "Date",
+                        "hi": "तिथि"
+                    },
+                    "dose_given":{
+                        "en":"Dose given",
+                        "hi":"खुराक दी गई"
+                    },
+                    "measles_1": {
+                        "en": "Measles 1",
+                        "hi": "खसरा 1"
+                    },
+                    "mr_1": {
+                        "en": "MR - 1",
+                        "hi": "एमआर 1"
+                    },
+                    "vitamin_a_1": {
+                        "en": "Vitamin A 1",
+                        "hi": "विटामिन ए 1"
+                    },
+                    "je_vaccine_1": {
+                        "en": "JE-Vaccine 1",
+                        "hi": "जेई-वैक्सीन 1"
+                    },
+                    "pcv_b": {
+                        "en": "PCV B",
+                        "hi": "पीसीवी बी"
+                    }
+                },
+                "sixteen_to_forteen_months_dose": {
+                    "en": "16-24 Months Dose",
+                    "hi": "16-24 महीने की खुराक",
+                    "date": {
+                        "en": "Date",
+                        "hi": "तिथि"
+                    },
+                    "dose_given":{
+                        "en":"Dose given",
+                        "hi":"खुराक दी गई"
+                    },
+                    "opv_booster": {
+                        "en": "OPV booster",
+                        "hi": "ओपीवी बूस्टर"
+                    },
+                    "dpt_booster_1": {
+                        "en": "DPT Booster 1",
+                        "hi": "डीपीटी बूस्टर 1"
+                    },
+                    "measles_2": {
+                        "en": "Measles 2",
+                        "hi": "खसरा 2"
+                    },
+                    "je_vaccine_2": {
+                        "en": "JE Vaccine 2",
+                        "hi": "जेई वैक्सीन 2"
+                    },
+                    "mr_2": {
+                        "en": "MR - 2",
+                        "hi": "एमआर 2"
+                    }
+                }
+            },
+            "five_to_six_year_dose": {
+                "en": "5-6 Years Dose",
+                "hi": "5-6 साल की खुराक",
+                "date": {
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "dose_given":{
+                    "en":"Dose given",
+                    "hi":"खुराक दी गई"
+                },
+                "dpt_booster_2": {
+                    "en": "DPT Booster-2",
+                    "hi": "डीपीटी बूस्टर"
+                }
+            },
+            "ten_year_dose": {
+                "en": "10 Years Dose",
+                "hi": "10 साल की खुराक",
+                "date": {
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "dose_given":{
+                    "en":"Dose given",
+                    "hi":"खुराक दी गई"
+                },
+                "tetanus_diphtheria_10": {
+                    "en": "Tetanus Diphtheria",
+                    "hi": "टेटनस डिप्थीरिया (टीडी)"
+                }
+            },
+            "sixteen_year_dose": {
+                "en": "16 Years Dose",
+                "hi": "16 साल की खुराक",
+                "date": {
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "dose_given":{
+                    "en":"Dose given",
+                    "hi":"खुराक दी गई"
+                },
+                "tetanus_diphtheria_16": {
+                    "en": "Tetanus Diphtheria",
+                    "hi": "टेटनस डिप्थीरिया (टीडी)"
+                }
+            },
+            "vitamin_a_dose": {
+                "en": "Vitamin A Dose",
+                "hi": "विटामिन ए की खुराक",
+                "date": {
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "dose_given":{
+                    "en":"Dose given",
+                    "hi":"खुराक दी गई"
+                },
+                "vitamin_a_2": {
+                    "en": "Vitamin A 2",
+                    "hi": "विटामिन ए 2"
+                },
+                "vitamin_a_3": {
+                    "en": "Vitamin A 3",
+                    "hi": "विटामिन ए 3"
+                },
+                "vitamin_a_4": {
+                    "en": "Vitamin A 4",
+                    "hi": "विटामिन ए 4"
+                },
+                "vitamin_a_5": {
+                    "en": "Vitamin A 5",
+                    "hi": "विटामिन ए 5"
+                },
+                "vitamin_a_6": {
+                    "en": "Vitamin A 6",
+                    "hi": "विटामिन ए 6"
+                },
+                "vitamin_a_7": {
+                    "en": "Vitamin A 7",
+                    "hi": "विटामिन ए 7"
+                },
+                "vitamin_a_8": {
+                    "en": "Vitamin A 8",
+                    "hi": "विटामिन ए 8"
+                },
+                "vitamin_a_9": {
+                    "en": "Vitamin A 9",
+                    "hi": "विटामिन ए 9"
+                }
+            },
+            "albendazole_sryup":{
+                "en":"Albendazole sryup/Tablet",
+                "hi":"एल्बेंडाजोल सिरप/टैबलेट",
+                "date": {
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "dose_given":{
+                    "en":"Dose given",
+                    "hi":"खुराक दी गई"
+                }
+            },
+            "save":{
+                "en":"Save",
+                "hi":"संरक्षित करें"
+            }
+        },
+
+
+        "idcf":{
+            "title": {
+                "en": "IDCF Registration",
+                "hi": "आईडीसीएफ पंजीकरण"
+            },
+
+            "slides":[
+                {
+                    "en": "Details",
+                    "hi": "विवरण"
+                }
+            ],
+            "villages":{
+                "en":"Select village",
+                "hi":"गांव का चयन करें",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Jhabiran (1583)",
+                        "hi": "झबीरन (1583)",
+                        "value": "jhabiran (1583)"
+                    },
+                    {
+                        "en": "Lakhnauti (1582)",
+                        "hi": "लखनौती (1582)",
+                        "value": "Lakhnauti (1582)"
+                    }
+                ]
+            },
+            "asha_areas":{
+                "en":"Select ASHA area",
+                "hi":"आशा क्षेत्र का चयन करें",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "ASHA area 1",
+                        "hi": "आशा क्षेत्र एक",
+                        "value": "asha_area_1"
+                    },
+                    {
+                        "en": "ASHA area 2",
+                        "hi": "आशा क्षेत्र दो",
+                        "value": "asha_area_2"
+                    },
+                    {
+                        "en": "ASHA area 3",
+                        "hi": "आशा क्षेत्र तीन",
+                        "value": "asha_area_3"
+                    },
+                    {
+                        "en": "ASHA area 4",
+                        "hi": "आशा क्षेत्र चार",
+                        "value": "asha_area_4"
+                    }
+                ]
+            },
+            "fill_IDCF_form":{
+                "en":"Fill up IDCF form",
+                "hi":"आईडीसीएफ फॉर्म भरें"
+            },
+            "visit_date":{
+                "en":"Visit date",
+                "hi":"भेंट की तिथि"
+            },
+            "name_of_family_head":{
+                "en":"Head of family member name",
+                "hi":"परिवार के मुखिया के सदस्य का नाम"
+            }, 
+            "mob_no_of_family_head":{
+                "en":"Head of family member contact number",
+                "hi":"परिवार के मुखिया का संपर्क नंबर"
+            },
+            "number_of_family_members":{
+                "en":"Number of family menbers",
+                "hi":"परिवार के सदस्यों की संख्या"
+            },
+            "any_child_have_diarrhoea":{
+                "en":"Does any child in the family have diarrhoea?",
+                "hi":"क्या परिवार में किसी बच्चे को डायरिया है?",
+                
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                
+                "options":[
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "details_of_child":{
+                "en":"Details of child",
+                "hi":"बच्चे का विवरण",
+
+                "first_name_of_child":{
+                    "en":"First name",
+                    "hi":"पहला नाम"
+                },
+                "father_or_mother_name":{
+                    "en":"Father/Mother name",
+                    "hi":"पिता/माता का नाम"
+                },
+                "last_name_of_child":{
+                    "en":"Last name",
+                    "hi":"उपनाम"
+                },
+                "age_of_child":{
+                    "en":"Age of child",
+                    "hi":"बच्चे की उम्र"
+                },
+                "rch_id_of_child":{
+                    "en":"RCH ID",
+                    "hi":"आरसीएच आईडी"
+                },
+                "date_child_started_diarrhea":{
+                    "en":"Date when the child started diarrhoea",
+                    "hi":"तिथि जब बच्चे को दस्त शुरू हुए"
+                },
+                "has_child_given_dose_of_ORS":{
+                    "en":"Has the child been given a dose of ORS supplements?",
+                    "hi":"क्या बच्चे को ओआरएस की खुराक दी गई है?",
+
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+
+                    "options":[
+                        {
+                            "en": "Yes",
+                            "hi": "हाँ",
+                            "value": "yes"
+                        },
+                        {
+                            "en": "No",
+                            "hi": "नहीं",
+                            "value": "no"
+                        }
+                    ]
+                },
+                "has_child_given_zinc_tablets":{
+                    "en":"Has the child been given zinc tablets?",
+                    "hi":"क्या बच्चे को जिंक की गोलियां दी गई हैं?",
+
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+
+                    "options":[
+                        {
+                            "en": "Yes",
+                            "hi": "हाँ",
+                            "value": "yes"
+                        },
+                        {
+                            "en": "No",
+                            "hi": "नहीं",
+                            "value": "no"
+                        }
+                    ]
+                },
+                "does_child_referred_hospital":{
+                    "en":"Does the child need to be referred to hospital?",
+                    "hi":"क्या बच्चे को अस्पताल रेफर करने की जरूरत है?",
+
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+                    
+                    "options":[
+                        {
+                            "en": "Yes",
+                            "hi": "हाँ",
+                            "value": "yes"
+                        },
+                        {
+                            "en": "No",
+                            "hi": "नहीं",
+                            "value": "no"
+                        }
+                    ]
+                },
+                "referral_facility_name":{
+                    "en":"Enter referral facility name",
+                    "hi":"रेफरल सुविधा का नाम दर्ज करें"
+                },
+                "any_other_child_have_diarrhea":{
+                    "en":"Does any other child in the family have diarrhoea?",
+                    "hi":"क्या परिवार में किसी और बच्चे को दस्त है?",
+
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+
+                    "options":[
+                        {
+                            "en": "Yes",
+                            "hi": "हाँ",
+                            "value": "yes"
+                        },
+                        {
+                            "en": "No",
+                            "hi": "नहीं",
+                            "value": "no"
+                        }
+                    ]
+                }
+            },
+            
+            "is_pending_second_dose_of_covid":{
+                "en":"Is there any member in the family between the age of 12 to 18 years pending covid vaccination or pending second dose of covid vaccination?",
+                "hi":"क्या परिवार में 12 से 18 वर्ष की आयु के बीच का कोई सदस्य है जिसका कोविड टीकाकरण अपूर्ण है या कोविड टीकाकरण की दूसरी खुराक अपूर्ण है?",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+
+                "options":[
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ],
+
+                "member_details":{
+                    "en":"Member details",
+                    "hi":"सदस्य विवरण",
+    
+                    "name_of_member":{
+                        "en":"Name",
+                        "hi":"नाम"
+                    }, 
+                    "age_of_member":{
+                        "en":"Age",
+                        "hi":"आयु"
+                    }
+                }
+            },
+
+            "any_member_have_symptoms_of_tb":{
+                "en":"Does any family member have symptoms of TB?",
+                "hi":"क्या परिवार के किसी सदस्य में टीबी के लक्षण हैं?",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+
+                "options":[
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ],
+
+                "member_details":{
+                    "en":"Member details",
+                    "hi":"सदस्य विवरण",
+    
+                    "name_of_member":{
+                        "en":"Name",
+                        "hi":"नाम"
+                    }, 
+                    "age_of_member":{
+                        "en":"Age",
+                        "hi":"आयु"
+                    }
+                },
+
+                "symptoms_of_tb":{
+                    "en":"Select the symptoms",
+                    "hi":"लक्षणों का चयन करें",
+
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+
+                    "options": [
+                        {
+                            "en": "Cough more than two weeks",
+                            "hi": "दो हफ्ते से ज्यादा खांसी होना",
+                            "value": "cough more than two weeks"
+                        },
+                        {
+                            "en": "Fever",
+                            "hi": "बुखार",
+                            "value": "fever"
+                        },
+                        {
+                            "en": "Chest pain/shortness of breath",
+                            "hi": "सीने में दर्द/सांस लेने में तकलीफ",
+                            "value": "chest pain/shortness of breath"
+                        },
+                        {
+                            "en": "Unexplained weight loss",
+                            "hi": "अस्पष्टीकृत वजन घटाने",
+                            "value": "unexplained weight loss"
+                        },
+                        {
+                            "en": "Blood in sputum",
+                            "hi": "थूक में खून",
+                            "value": "blood in sputum"
+                        }
+                    ]
+                },
+
+            
+
+                "is_family_member_taking_drug":{
+                    "en":"Any family member been taking the drug for 6 months or more than 6 months?",
+                    "hi":"परिवार का कोई भी सदस्य 6 महीने या 6 महीने से अधिक समय से दवा ले रहा हो?",
+    
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+    
+                    "options":[
+                        {
+                            "en": "Yes",
+                            "hi": "हाँ",
+                            "value": "yes"
+                        },
+                        {
+                            "en": "No",
+                            "hi": "नहीं",
+                            "value": "no"
+                        }
+                    ]
+                },
+
+                "other_member_have_tb_stymp":{
+                    "en":"Does any family member have symptoms of TB?",
+                    "hi":"क्या परिवार के किसी सदस्य में टीबी के लक्षण हैं?",
+    
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें "
+                    },
+    
+                    "options":[
+                        {
+                            "en": "Yes",
+                            "hi": "हाँ",
+                            "value": "yes"
+                        },
+                        {
+                            "en": "No",
+                            "hi": "नहीं",
+                            "value": "no"
+                        }
+                    ]
+                }
+            },
+
+            "form_entry_completed":{
+                "en":"Form entry completed You have successfully completed entering the information in the form. Do you want to submit or review the data?",
+                "hi":"फॉर्म प्रविष्टि पूर्ण आपने प्रपत्र में जानकारी दर्ज करना सफलतापूर्वक पूरा कर लिया है। क्या आप डेटा सबमिट या समीक्षा करना चाहते हैं?",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+
+                "options":[
+                    {
+                        "en": "I want to submit the data",
+                        "hi": "मैं डेटा सबमिट करना चाहता हूं",
+                        "value": "i_want_to_submit_the_data"
+                    },
+                    {
+                        "en": "I want to verify the data",
+                        "hi": "मैं डेटा सत्यापित करना चाहता हूं",
+                        "value": "i_want_to_verify_data"
+                    }
+                ]
+            },
+
+            "save":{
+                "en":"Save",
+                "hi":"संरक्षित करें"
+            }
+        },
+
+        "search_beneficiary":{
+            "title":{
+                "en": "Guest Beneficiary Search",
+                "hi": "अतिथि लाभार्थी खोज"
+            },
+            "beneficiary_no":{
+                "en": "Beneficiary no.",
+                "hi": "लाभार्थी संख्या"
+            },
+            "or":{
+                "en": "OR",
+                "hi": "या"
+            },
+            "districts":{
+                "en":"District",
+                "hi":"ज़िला",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                        "en":"Muzaffarpur",
+                        "hi":"मुजफ्फरपुर",
+                        "value":"muzaffarpur"
+                    },  
+                    {
+                        "en":"Begusarai",
+                        "hi":"बेगूसराय",
+                        "value":"begusarai"
+                    },
+
+                    {
+                        "en":"Darbhanga",
+                        "hi":"नहीं",
+                        "value":"Darbhanga"
+                    },
+                    {
+                        "en":"degusarai",
+                        "hi":"दरभंगा",
+                        "value":"begusarai"
+                    }
+                ]
+            },
+            "blocks":{
+                "en":"Block",
+                "hi":"खंड",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                        "en":"Aurai",
+                        "hi":"औरई",
+                        "value":"aurai"
+                    },  
+                    {
+                        "en":"Sahebganj",
+                        "hi":"साहेबगंज",
+                        "value":"sahebganj"
+                    },
+                    {
+                        "en":"Musahri",
+                        "hi":"मुसहरी",
+                        "value":"musahri"
+                    },
+                    {
+                        "en":"Minapur",
+                        "hi":"मीनापुर",
+                        "value":"minapur"
+                    }
+                ]
+            },
+            "hsc":{
+                "en":"HSC",
+                "hi":"एचएससी",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                        "en":"Shahpur",
+                        "hi":"शाहपुर",
+                        "value":"shahpur"
+                    },  
+                    {
+                        "en":"Tengarahi",
+                        "hi":"तेंगाराही",
+                        "value":"tengarahi"
+                    },
+                    {
+                        "en":"Shiavipatti",
+                        "hi":"शियावीपट्टी",
+                        "value":"shiavipatti"
+                    },
+                    {
+                        "en":"Harka",
+                        "hi":"हरका",
+                        "value":"harka"
+                    }
+                ]
+            },
+            "asha_names":{
+                "en":"ASHA",
+                "hi":"आशा",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                        "en":"Pramila Devi",
+                        "hi":"प्रमिला देवी",
+                        "value":"pramila_devi"
+                    },  
+                    {
+                        "en":"Sunila Kumari",
+                        "hi":"सुनीला कुमारी",
+                        "value":"sunila_kumari"
+                    },  
+                    {
+                        "en":"Manju Lata",
+                        "hi":"मंजू लता",
+                        "value":"manju_lata"
+                    },
+                    {
+                        "en":"Lalita Kumari",
+                        "hi":"ललिता कुमारी",
+                        "value":"lalita_kumari"
+                    }
+                ]
+            },
+            "please_ben_no_or_distict":{
+                "en":"Please enter Beneficiary no. or select District",
+                "hi":"कृपया लाभार्थी संख्या दर्ज करें या जिला का चयन करें"
+            },
+            "please_mobile_number_invaild": {
+                "en": "Please enter valid 10 digit mobile no.",
+                "hi": "कृपया मान्य 10 अंकों का मोबाइल नंबर दर्ज करें"
+            },
+            "please_select_block":{
+                "en":"Please select block",
+                "hi":"कृपया ब्लॉक चुनें"
+            },
+            "please_select_hsc":{
+                "en":"Please select hsc",
+                "hi":"कृपया एचएससी चुनें"
+            },
+            "please_select_asha":{
+                "en":"Please select ASHA",
+                "hi":"कृपया आशा का चयन करें"
+            },
+            "gender":{
+                "en":"Gender",
+                "hi":"लिंग",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Male",
+                        "hi": "पुरुष",
+                        "value": "male"
+                    },
+                    {
+                        "en": "Female",
+                        "hi": "महिला",
+                        "value": "female"
+                    },
+                    {
+                        "en": "Transgender",
+                        "hi": "ट्रांसजेंडर",
+                        "value": "transgender"
+                    }
+                ]
+            },
+            "category":{
+                "en":"Category",
+                "hi":"वर्ग",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "ANC",
+                        "hi": "प्रसवपूर्व देखभाल",
+                        "value": "anc"
+                    },
+                    {
+                        "en": "PNC",
+                        "hi": "प्रसवोत्तर देखभाल",
+                        "value": "pnc"
+                    },
+                    {
+                        "en": "RI",
+                        "hi": "आरआई",
+                        "value": "ri"
+                    }
+                ]
+            },
+            "advance_filters":{
+                "en":"Advance Filters",
+                "hi":"एडवांस/उच्च फिल्टर"
+            },
+            "mobile_no":{
+                "en": "Mobile no.",
+                "hi": "मोबाइल नंबर"
+            },
+            "age":{
+                "en": "Age",
+                "hi": "आयु"
+            },
+            "mcp_id":{
+                "en": "MCP card number",
+                "hi": "एमसीपी कार्ड नंबर"
+            },
+            "adhar_no": {
+                "en": "Aadhaar no.",
+                "hi": "आधार संख्या"
+            },
+            "search":{
+                "en":"Search",
+                "hi":"खोज"
+            }
+        },
+
+        "hbyc_form":{
+            "title":{
+                "en":"Home Based Care for Young Child",
+                "hi":"छोटे बच्चे की गृह आधारित देखभाल"
+            },
+            "sub_title":{
+                "en":"Strengthening of Health and Nutrition through Home visits",
+                "hi":"घर-घर जाकर स्वास्थ्य और पोषण को मजबूत करना"
+            },
+            "asha_visit":{
+                "en":"Do you know? ASHA will also visit children of age 3 to 15 months to support family, strengthen health, nutrition and development of children",
+                "hi":"क्या आप जानते हैं? आशा 3 से 15 महीने की उम्र के बच्चों का भी दौरा करेगी ताकि परिवार को सहारा दिया जा सके, बच्चों के स्वास्थ्य, पोषण और विकास को मजबूत किया जा सके।",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "First Visit - at 3 months",
+                        "hi": "पहली मुलाकात - 3 महीने में",
+                        "value": "first_visit_at_3_months"
+                    },
+                    {
+                        "en": "Second Visit - at 6 months",
+                        "hi": "दूसरी मुलाकात - 6 महीने पर",
+                        "value": "second_visit_at_6_months"
+                    },
+                    {
+                        "en": "Third Visit - at 9 months",
+                        "hi": "तीसरी मुलाकात - 9 महीने पर",
+                        "value": "third_visit_at_9_months"
+                    },
+                    {
+                        "en": "Fourth Visit - at 12 months",
+                        "hi": "चौथी मुलाकात - 12 महीने पर",
+                        "value": "fourth_vsit_at _2_months"
+                    },
+                    {
+                        "en": "Fifth Visit - at 15 months",
+                        "hi": "पांचवीं मुलाक़ात - 15 महीने पर",
+                        "value": "fifth_vsit_at_5_months"
+                    }
+                ]
+            },
+            "note_1":{
+                "en":"ASHA TO CHECK AND COUNSEL THE FAMILY TO ENSURE:",
+                "hi":"आशा यह सुनिश्चित करने के लिए परिवार की जांच और परामर्श करेगी:",
+                "options":[
+                 {
+                    "en": "* Mother to exclusively breastfeed till 6 months",
+                    "hi": "* मां को 6 माह तक केवल स्तनपान कराना चाहिए"
+                 },
+                 {
+                    "en": "* Complementary feeding begins at 6 months and continues breastfeeding",
+                    "hi": "* पूरक आहार 6 महीने की उम्र से शुरू होता है और स्तनपान जारी रखता है"
+                 },
+                 {
+                    "en": "* Use of MCP card for regular monitoring of child’s growth & development",
+                    "hi": "* बच्चे की वृद्धि और विकास की नियमित निगरानी के लिए एमसीपी कार्ड का उपयोग"
+                 },
+                 {
+                    "en": "* Child receives timely vaccination",
+                    "hi": "* बच्चे को समय पर टीका लगवाएं"
+                 },
+                 {
+                    "en": "* Age appropriate play and communication",
+                    "hi": "* आयु उपयुक्त खेल और संचार"
+                 },
+                 {
+                    "en": "* Availability of ORS and IFA syrup at home and its correct use",
+                    "hi": "*घर पर ओआरएस और आईएफए सिरप की उपलब्धता और उसका सही उपयोग"
+                 },
+                 {
+                    "en": "* Handwashing using soap by all care givers",
+                    "hi": "* सभी देखभाल करने वालों द्वारा साबुन से हाथ धोना"
+                 }
+                ]
+            },
+            "breastfeeding_for_six_months":{
+                "en":"Do you know? Exclusive breastfeeding for first six months satisfies all the nutrition needs of your baby",
+                "hi":"क्या आप जानते हैं? पहले छह महीनों के लिए केवल स्तनपान आपके बच्चे की सभी पोषण संबंधी जरूरतों को पूरा करता है।",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "First Visit - at 3 months",
+                        "hi": "पहली मुलाकात - 3 महीने में",
+                        "value": "first_visit_at_3_months"
+                    }
+                ]
+            },
+            "note_2":{
+                "en":"ASHA TO CHECK AND COUNSEL THE FAMILY TO ENSURE:",
+                "hi":"आशा यह सुनिश्चित करने के लिए परिवार की जांच और परामर्श करेगी:",
+                "options":[
+                 {
+                    "en": "* Mother to exclusively breastfeed till 6 months",
+                    "hi": "* मां को 6 माह तक केवल स्तनपान कराना चाहिए"
+                 },
+                 {
+                    "en": "* Mother receives adequate diet",
+                    "hi": "* माता को पर्याप्त आहार मिलता है"
+                 },
+                 {
+                    "en": "* Use of MCP card for regular monitoring of child’s growth & development",
+                    "hi": "* बच्चे की वृद्धि और विकास की नियमित निगरानी के लिए एमसीपी कार्ड का उपयोग"
+                 },
+                 {
+                    "en": "* Child receives timely vaccination",
+                    "hi": "* बच्चे को समय पर टीका लगवाएं"
+                 },
+                 {
+                    "en": "* Age appropriate play and communication",
+                    "hi": "* आयु उपयुक्त खेल और संचार"
+                 },
+                 {
+                    "en": "* Handwashing using soap by all care givers",
+                    "hi": "* सभी देखभाल करने वालों द्वारा साबुन से हाथ धोना"
+                 }
+                ]
+            },
+            "complementary_feeding":{
+                "en":"Do you know? Adequate complementary feeding, after 6 months ensures a well and healthy child",
+                "hi":"क्या आप जानते हैं? पर्याप्त पूरक 6 महीने के बाद खिलाना सुनिश्चित करता है एक अच्छा और स्वस्थ बच्चा",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Second Visit - at 6 months",
+                        "hi": "दूसरी मुलाकात - 6 महीने पर",
+                        "value": "second_visit_at_6_months"
+                    },
+                    {
+                        "en": "Third Visit - at 9 months",
+                        "hi": "तीसरी मुलाकात - 9 महीने पर",
+                        "value": "third_visit_at_9_months"
+                    },
+                    {
+                        "en": "Fourth Visit - at 12 months",
+                        "hi": "चौथी मुलाकात - 12 महीने पर",
+                        "value": "fourth_vsit_at _2_months"
+                    },
+                    {
+                        "en": "Fifth Visit - at 15 months",
+                        "hi": "पांचवीं मुलाक़ात - 15 महीने पर",
+                        "value": "fifth_vsit_at_5_months"
+                    }
+                ]
+            },
+            "note_3":{
+                "en":"ASHA TO CHECK AND COUNSEL THE FAMILY TO ENSURE:",
+                "hi":"आशा यह सुनिश्चित करने के लिए परिवार की जांच और परामर्श करेगी:",
+                "options":[
+                {
+                    "en": "* Complementary feeding begins at 6 months and continues breastfeeding",
+                    "hi": "* पूरक आहार 6 महीने की उम्र से शुरू होता है और स्तनपान जारी रखता है"
+                    },
+                 {
+                    "en": "* Use of MCP card for regular monitoring of child’s growth & development",
+                    "hi": "* बच्चे की वृद्धि और विकास की नियमित निगरानी के लिए एमसीपी कार्ड का उपयोग"
+                 },
+                 {
+                    "en": "* Child receives timely vaccination",
+                    "hi": "* बच्चे को समय पर टीका लगवाएं"
+                 },
+                 {
+                    "en": "* Age appropriate play and communication",
+                    "hi": "* आयु उपयुक्त खेल और संचार"
+                 },
+                 {
+                    "en": "* Recommended dose of IFA syrup",
+                    "hi": "* आईएफए सिरप की अनुशंसित खुराक"
+                 },
+
+                 {
+                    "en": "* Use of ORS during diarrhoea",
+                    "hi": "* दस्त होने पर ओआरएस का प्रयोग करें"
+                 },
+                 {
+                    "en": "* Handwashing using soap by all care givers",
+                    "hi": "* सभी देखभाल करने वालों द्वारा साबुन से हाथ धोना"
+                 }
+                ]
+            },
+
+
+            "home_visit":{
+                "en":"HBYC home visit",
+                "hi":"एचबीवाईसी भ्रमण",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "3 Months",
+                        "hi": "3 महीने पर",
+                        "value": "3_months"
+                    },
+                    {
+                        "en": "6 Months",
+                        "hi": "6 महीने पर",
+                        "value": "6_months"
+                    },
+                    {
+                        "en": "9 Months",
+                        "hi": "9 महीने पर",
+                        "value": "9_months"
+                    },
+                    {
+                        "en": "12 Months",
+                        "hi": "12 महीने पर",
+                        "value": "12_months"
+                    },
+                    {
+                        "en": "15 Months",
+                        "hi": "15 महीने पर",
+                        "value": "15_months"
+                    }
+                ]
+            },
+            "please_hbyc_home_visit":{
+                "en": "Please select HBYC home visit",
+                "hi": "कृपया एचबीवाईसी होम विजिट का चयन करें"
+            },
+
+            "is_child_sick":{
+                "en":"Whether child is sick?",
+                "hi":"क्या बच्चा बीमार है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_referred_to_health_facility":{
+                "en":"Child referred to health facility?",
+                "hi":"क्या नजदिकी स्वस्थ्य संस्थान पर रेफर किया गया?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_breastfeeding_continued":{
+                "en":"Breastfeeding continued?",
+                "hi":"क्या स्तनपान जारी है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_complementary_food_given":{
+                "en":"Complementary food given?",
+                "hi":"क्या संपूर्ण आहार दिया गया?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "two_three_tablespoon_meal_given":{
+                "en":"2-3 tablespoons of food at a time, 2-3 times each day.",
+                "hi":"बच्चे को प्रत्यक दिन 2-3 बार भोजन दिया गया है? (एक बार में 2-3 छोटे छम्मच भोजन)",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "half_cup_one_two_times_meal_given":{
+                "en":"1/2 cup / katori serving at a time, 2-3 times each day with 1-2 snacks between meals.",
+                "hi":"बच्चों को प्रत्यक दिन 2-3 बार भोजन (एक बार में आधी कटोरी - 250 मिली भोजन) और इसके अतिरिक्त बीच-बीच में 1-2 बार नाश्ता दिया गया है",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "half_cup_three_four_times_meal_given":{
+                "en":"1/2 cup / katori serving at a time, 3-4 times each day with 1-2 snacks between meals.",
+                "hi":"बच्चों को प्रत्यक दिन 3-4 बार भोजन (एक बार में आधी कटोरी - 250 मिली भोजन) और इसके अतिरिक्त बीच-बीच में 1-2 बार नाश्ता दिया गया है",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "one_cup_three_four_times_meal_given":{
+                "en":"3/4 to 1 cup / katori serving at a time, 3-4 times each day with 1-2 snacks between meals.",
+                "hi":"बच्चों को प्रत्यक दिन 3-4 बार भोजन (एक बार में एक कटोरी - 250 मिली भोजन) और इसके अतिरिक्त बीच-बीच में 1-2 बार नाश्ता दिया गया है",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_weight_recorded":{
+                "en":"Recording of weight-for-age by Anganwadi Worker",
+                "hi":"बच्‍चे का आंगनवाड़ी कार्यकर्ता द्वारा वजन किया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "recorded_weight":{
+                "en":"Mention the recorded weight-for-age as per MCP card (in kg)",
+                "hi":"एमसीपी कार्ड में अंकित वजन का उल्लेख करें (किलोग्राम में)",
+                "placeholder": {
+                    "en": "Please enter weight (in kg)",
+                    "hi": "कृपया वज़न दर्ज करें (किलोग्राम में)"
+                }
+            },
+            
+            "is_height_recorded":{
+                "en":"Recording of weight-for-length/height by Anganwadi Worker",
+                "hi":"आंगनवाड़ी कार्यकर्ता द्वारा लम्‍बाई/ऊंचाई रिकॉर्ड किया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "recorded_height":{
+                "en":"Mention the recorded weight-for-length/height as per MCP card (in cm)",
+                "hi":"एमसीपी कार्ड में अंकित लम्बाई / उचाई का उल्लेख करें (सेंटीमीटर में)",
+                "placeholder": {
+                    "en": "Please enter height (in cm)",
+                    "hi": "कृपया ऊंचाई दर्ज करें (सेंटीमीटर में)"
+                }
+            },
+
+            "is_child_referred":{
+                "en":"Child with <3SD weight-for-length/height referred?",
+                "hi":"क्‍या एमसीपी कार्ड में अंकित लम्‍बाई/ऊंचाई के अनुसार -3एसडी से कम वजन वाले बच्‍चे को रेफर किया गया?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "child_referred_place":{
+                "en":"Referred place",
+                "hi":"कहां रेफर किया गया?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "VHSND",
+                       "hi": "वीएचएसएनडी",
+                       "value": "vhsnd"
+                   },
+                   {
+                       "en": "PHC",
+                       "hi": "पीएचसी",
+                       "value": "phc"
+                   },
+                   {
+                    "en": "NRC",
+                    "hi": "एनआरसी",
+                    "value": "nrc"
+                }
+               ]
+            },
+
+            "is_developmental_delay_checked":{
+                "en":"Developmental delay checked?",
+                "hi":"उम्र के अनुसार बच्‍चे के शारीरिक एवं मानसिक विकास में कोई विलम्‍भ/बाधाये पाई गई?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_child_referred_due_to_developmental_day":{
+                "en":"Is the child referred?",
+                "hi":"बच्‍चे को रेफर किया गया?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "child_referred_place_due_to_developmental_delay":{
+                "en":"Referred place",
+                "hi":"कहां रेफर किया गया?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "ANM",
+                       "hi": "एएनएम",
+                       "value": "anm"
+                   },
+                   {
+                       "en": "Health Facility",
+                       "hi": "स्वास्थ्य सुविधा",
+                       "value": "health_facility"
+                   }
+               ]
+            },
+
+             "is_immunization_status_checked":{
+                "en":"Immunization status checked as per MCP card?",
+                "hi":"बच्‍चे के उम्र के अनुसार एमसीपी कार्ड में उल्‍लेखित पूर्ण टिकाकरण हुआ है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_measles_vaccine_given":{
+                "en":"Measles vaccine given?",
+                "hi":"एमसीपी कार्ड में उल्लेखित खसरा (खसरा) का टीका बच्चे को दिया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_vitamin_A_given":{
+                "en":"Vitamin A given?",
+                "hi":"एमसीपी कार्ड में उल्लेखित विटामिन-ए की खुराख बच्चे को दिया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_ors_available_at_home":{
+                "en":"ORS available at home?",
+                "hi":"ओआरएस पैकेट घर में उपलब्ध है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_ors_given":{
+                "en":"ORS given?",
+                "hi":"ओआरएस पैकेट दिया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "ors_quantity": {
+                "en": "Number of ORS given",
+                "hi": "कितनी संख्या में ओआरएस पैकेट दिया गया"
+            },
+
+            "is_folic_acid_syrup_available":{
+                "en":"Iron Folic Acid syrup available at home?",
+                "hi":"आयरन फोलिक एसिड सिरप घर में उपलब्ध है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_folic_acid_syrup_given":{
+                "en":"Iron Folic Acid syrup given?",
+                "hi":"आयरन फोलिक एसिड सिरप दिया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "folic_acid_syrup_quantity": {
+                "en": "Number of Iron Folic Acid Syrup given",
+                "hi": "कितनी संख्या में आयरन फोलिक एसिड सिरप दिया गया"
+            },
+            
+            "is_counsel_for_breast_feeding":{
+                "en":"Counsel for exclusive breast feeding?",
+                "hi":"छह माह तक केवल स्तनपान के बारे में परामर्श",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            
+            "is_counsel_for_complementary_feeding":{
+                "en":"Counsel for complementary feeding?",
+                "hi":"पूरक आहार देने के बारे में परामर्श",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_counsel_for_hand_washing":{
+                "en":"Counsel for hand washing?",
+                "hi":"हाथ धोने एवं स्वच्छ व्यवहार के बारे में परामर्श",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_counsel_for_parenting":{
+                "en":"Counsel for parenting?",
+                "hi":"लालन-पालन (पालन-पोषण का समर्थन) के बारे में सलाह",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_counsel_for_family_planning":{
+                "en":"Family Planning counselling?",
+                "hi":"परिवार नियोजन के बारे में परामर्श",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_assisted_to_prepare_ors":{
+                "en":"Assisted mother on Steps to prepare ORS at home and serve to child",
+                "hi":"ओआरएस घोल बनाने के बारे में परामर्श",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_counsel_for_measuring_correct_syrup_ml":{
+                "en":"Counsel mother on how to measure the correct millilitres dose of IFA syrup",
+                "hi":"आयरन फोलिक एसिड सिरप पिलाने के बारे में परामर्श",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "completion_date_of_hbyc_visit":{
+                "en":"Date of completion of HBYC visit activities",
+                "hi":"गतिविधियों के पूर्ण होने की तिथि",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+
+            "is_breastfeeding_started":{
+                "en":"Breastfeeding has been started?",
+                "hi":"क्या स्तनपान शुरू कर दिया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            "is_mother_receive_food":{
+                "en":"Is mother receive adequate food?",
+                "hi":"क्या माँ को पर्याप्त भोजन मिलता है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            "is_mcp_card_available":{
+                "en":"Is MCP card available?",
+                "hi":"क्या एमसीपी कार्ड उपलब्ध है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            "is_vaccine_received":{
+                "en":"Is child received vaccine?",
+                "hi":"क्या बच्चे को टीका लगाया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            "is_ors_ifa_available":{
+                "en":"Is ORS and IFA syrup available at home?",
+                "hi":"क्या घर में ओआरएस और आईएफए सिरप उपलब्ध है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            "is_handwash_given":{
+                "en":"Has mother been taught to wash hands with soap?",
+                "hi":"क्या साबुन से हाथ धोना मां को सिखाया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            "counselling_for_complementory_feeding":{
+                "en":"Has counselling for complementary feeding given?",
+                "hi":"क्या पूरक आहार के लिए परामर्श दिया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            "has_complementory_feeding_started":{
+                "en":"Has complementary feeding started?",
+                "hi":"क्या पूरक आहार शुरू हो गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options":[
+                    {
+                       "en": "Yes",
+                       "hi": "हाँ",
+                       "value": "yes"
+                   },
+                   {
+                       "en": "No",
+                       "hi": "नहीं",
+                       "value": "no"
+                   }
+               ]
+            },
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            },
+            "is_beneficiary_absent":{
+                "en": "Is Beneficiary Absent?",
+                "hi": "क्‍या लाभार्थी घर में नहीं है ?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "reason_for_absent":{
+                "en": "Reason for Absent",
+                "hi": "अनुपस्थित रहने का कारण"
+            }
+        },
+
+        "arogya_day":{
+            "title":{
+                "en":"Health Day List",
+                "hi":"आरोग्य दिवस"
+            },
+            "sub_title":{
+                "en":"Health Day List, June 2023",
+                "hi":"आरोग्य दिवस सूची, जून 2023"
+            },
+            "rch_number":{
+                "en":"RCH ID",
+                    "hi":"आरसीएच आईडी"
+            },
+            "beneficiary_name":{
+                "en":"Beneficiary Name",
+                "hi":"लाभार्थी का नाम"
+            },
+            "beneficiary_type":{
+                "en":"Beneficiary Type",
+                "hi":"लाभार्थी का प्रकार"
+            },
+            "age":{
+                "en":"Age",
+                "hi":"आयु"
+            },
+            "father_husband_name":{
+                "en":"Father/Husband name",
+                "hi":"पिता/पति का नाम"
+            }
+        }
+    }
+}

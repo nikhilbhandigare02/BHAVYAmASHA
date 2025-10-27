@@ -7,11 +7,15 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/utils/Validations.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import 'bloc/spous_bloc.dart';
 
 class Spousdetails extends StatefulWidget {
-  const Spousdetails({super.key});
+  final SpousState? initial;
+  final String? headMobileOwner;
+  final String? headMobileNo;
+  const Spousdetails({super.key, this.initial, this.headMobileOwner, this.headMobileNo});
 
   @override
   State<Spousdetails> createState() => _SpousdetailsState();
@@ -26,7 +30,7 @@ class _SpousdetailsState extends State<Spousdetails> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     return BlocProvider(
-      create: (_) => SpousBloc(),
+      create: (_) => SpousBloc(initial: widget.initial),
       child: Form(
         key: _formKey,
         child: BlocBuilder<SpousBloc, SpousState>(
@@ -49,6 +53,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                   CustomTextField(
                     labelText: 'Name of member *',
                     hintText: 'Name of member',
+                    initialValue: state.memberName,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMemberName(v.trim())),
                     validator: (value) => Validations.validateNameofMember(l, value),
                   ),
@@ -60,6 +65,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                     labelText: 'Age at the time of marriage',
                     hintText: 'Age at the time of marriage',
                     keyboardType: TextInputType.number,
+                    initialValue: state.ageAtMarriage,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateAgeAtMarriage(v.trim())),
                   ),
                 ),
@@ -69,6 +75,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                   CustomTextField(
                     labelText: 'Spouse Name *',
                     hintText: 'Spouse Name',
+                    initialValue: state.spouseName,
                     validator: (value) => Validations.validateSpousName(l, value),
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
                   ),
@@ -78,6 +85,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                 _section(
                   CustomTextField(
                     labelText: 'Father name',
+                    initialValue: state.fatherName,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateFatherName(v.trim())),
                   ),
                 ),
@@ -108,6 +116,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                     CustomDatePicker(
                       labelText: '${l.dobLabel} *',
                       hintText: l.dateHint,
+                      initialDate: state.dob,
                       onDateChanged: (d) => context.read<SpousBloc>().add(SpUpdateDob(d)),
                       validator: (date) => Validations.validateDOB(l, date),
                     ),
@@ -117,6 +126,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                     CustomTextField(
                       labelText: '${l.ageLabel} *',
                       keyboardType: TextInputType.number,
+                      initialValue: state.approxAge,
                       onChanged: (v) => context.read<SpousBloc>().add(SpUpdateApproxAge(v.trim())),
                     ),
                   ),
@@ -139,11 +149,13 @@ class _SpousdetailsState extends State<Spousdetails> {
                       }
                     },
                     value: state.gender,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateGender(v)),
+                    onChanged: null,
                     validator: (value) => Validations.validateGender(l, value),
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
 
                 _section(
                   ApiDropdown<String>(
@@ -236,19 +248,22 @@ class _SpousdetailsState extends State<Spousdetails> {
                       Expanded(
                         child: CustomTextField(
                           labelText: 'ABHA address',
+                          initialValue: state.abhaAddress,
                           onChanged: (v) =>
                               context.read<SpousBloc>().add(SpUpdateAbhaAddress(v.trim())),
                         ),
                       ),
                       const SizedBox(width: 8),
                       SizedBox(
-                        height: 44,
+                        height: 25,
                         child: RoundButton(
-                          title: 'LINK FROM ABHA',
+                          title: l.linkAbha,
                           width: 160,
                           borderRadius: 8,
-                          fontSize: 14,
+                          fontSize: 12,
                           onPress: () {
+                            Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+
                           },
                         ),
                       ),
@@ -257,21 +272,78 @@ class _SpousdetailsState extends State<Spousdetails> {
                 )
 ,
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                if (state.gender == 'Female') ...[
+                  _section(
+                   Row(
+                      children: [
+                        Expanded(
+                          child: CustomTextField(
+                            labelText: l.richIdLabel,
+                            initialValue: state.RichIDChanged,
+                            onChanged: (v) =>
+                                context.read<SpousBloc>().add(RichIDChanged(v.trim())
+                                ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          height: 25,
+                          width: 120,
+                          child: RoundButton(
+                            title: 'VERIFY',
+                            width: 160,
+                            borderRadius: 8,
+                            fontSize: 12,
+                            onPress: () {
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                ],
+                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                 _section(
                   ApiDropdown<String>(
                     labelText: '${l.whoseMobileLabel} *',
-                    items: const ['Self', 'Spouse', 'Father', 'Mother', 'Other'],
+                    items: const [
+                      'Self',
+                      'Family Head',
+                      'Wife',
+                      'Father',
+                      'Mother',
+                      'Son',
+                      'Daughter',
+                      'Father in Law',
+                      'Mother in Law',
+                      'Neighbour',
+                      'Relative',
+                      'Other',
+                    ],
                     getLabel: (s) {
                       switch (s) {
                         case 'Self':
                           return l.self;
-                        case 'Spouse':
-                          return l.spouse;
+                        case 'Wife':
+                          return l.wife;
                         case 'Father':
                           return l.father;
                         case 'Mother':
                           return l.mother;
+                        case 'Son':
+                          return l.son;
+                        case 'Daughter':
+                          return l.daughter;
+                        case 'Father in Law':
+                          return l.fatherInLaw;
+                        case 'Mother in Law':
+                          return l.motherInLaw;
+                        case 'Neighbour':
+                          return l.neighbour;
+                        case 'Relative':
+                          return l.relative;
                         case 'Other':
                           return l.other;
                         default:
@@ -279,7 +351,29 @@ class _SpousdetailsState extends State<Spousdetails> {
                       }
                     },
                     value: state.mobileOwner,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMobileOwner(v)),
+                    onChanged: (v) {
+                      final bloc = context.read<SpousBloc>();
+                      bloc.add(SpUpdateMobileOwner(v));
+                      final headOwner = widget.headMobileOwner;
+                      final headNo = widget.headMobileNo?.trim();
+
+                      bool matchesHeadOwner = false;
+                      if (v != null) {
+                        // 'Family Head' in spouse corresponds to 'Self' in head form
+                        if (v == 'Family Head' && headOwner == 'Self') {
+                          matchesHeadOwner = true;
+                        } else if (headOwner != null && v == headOwner) {
+                          matchesHeadOwner = true;
+                        }
+                      }
+
+                      if (matchesHeadOwner && headNo != null && headNo.isNotEmpty) {
+                        bloc.add(SpUpdateMobileNo(headNo));
+                      } else {
+                        // Clear to allow manual entry when not matched or head has no number
+                        bloc.add(const SpUpdateMobileNo(''));
+                      }
+                    },
                     validator: (value) => Validations.validateWhoMobileNo(l, value),
                   ),
                 ),
@@ -287,11 +381,31 @@ class _SpousdetailsState extends State<Spousdetails> {
 
                 _section(
                   CustomTextField(
+                    key: ValueKey('spouse_mobile_${state.mobileNo ?? ''}'),
                     labelText: '${l.mobileLabel} *',
                     keyboardType: TextInputType.number,
                     maxLength: 10,
+                    initialValue: state.mobileNo,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMobileNo(v.trim())),
-                    validator: (value) => Validations.validateMobileNo(l, value),
+                    validator: (value) {
+                      final owner = state.mobileOwner;
+                      final headOwner = widget.headMobileOwner;
+                      final headNo = widget.headMobileNo?.trim();
+
+                      // If owner not chosen, leave this to the owner dropdown validator.
+                      if (owner == null || owner.isEmpty) {
+                        return Validations.validateMobileNo(l, value);
+                      }
+
+                      final spouseSelectedFamilyHead = owner == 'Family Head';
+                      final matchesHeadOwner = (spouseSelectedFamilyHead && headOwner == 'Self') || (headOwner != null && owner == headOwner);
+
+                      if (matchesHeadOwner && (headNo == null || headNo.isEmpty)) {
+                        return 'Enter mobile number';
+                      }
+
+                      return Validations.validateMobileNo(l, value);
+                    },
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                     ],
@@ -303,6 +417,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                   CustomTextField(
                     labelText: 'Bank account number',
                     keyboardType: TextInputType.number,
+                    initialValue: state.bankAcc,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateBankAcc(v.trim())),
                   ),
                 ),
@@ -311,6 +426,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                 _section(
                   CustomTextField(
                     labelText: 'IFSC code',
+                    initialValue: state.ifsc,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateIfsc(v.trim())),
                   ),
                 ),
@@ -319,6 +435,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                 _section(
                   CustomTextField(
                     labelText: 'Voter Id',
+                    initialValue: state.voterId,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateVoterId(v.trim())),
                   ),
                 ),
@@ -327,6 +444,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                 _section(
                   CustomTextField(
                     labelText: 'Ration Card Id',
+                    initialValue: state.rationId,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRationId(v.trim())),
                   ),
                 ),
@@ -335,6 +453,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                 _section(
                   CustomTextField(
                     labelText: 'Personal Health Id',
+                    initialValue: state.phId,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdatePhId(v.trim())),
                   ),
                 ),
@@ -361,6 +480,56 @@ class _SpousdetailsState extends State<Spousdetails> {
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                if (state.gender == 'Female') ...[
+                  _section(
+                    ApiDropdown<String>(
+                      key: ValueKey('spouse_isPreg_${state.gender}_${state.isPregnant ?? ''}'),
+                      labelText: '${l.isWomanPregnantQuestion} *',
+                      items: const ['Yes', 'No'],
+                      getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                      value: state.isPregnant,
+                      onChanged: (v) {
+                        final bloc = context.read<SpousBloc>();
+                        bloc.add(SpUpdateIsPregnant(v));
+                        if (v == 'No') {
+                          bloc.add(const SpLMPChange(null));
+                          bloc.add(const SpEDDChange(null));
+                        }
+                      },
+                      validator: (value) {
+                        if (state.gender == 'Female') {
+                          return Validations.validateIsPregnant(l, value);
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                  if (state.isPregnant == 'Yes') ...[
+                    _section(
+                      CustomDatePicker(
+                        labelText: '${l.lmpDateLabel} *',
+                        hintText: l.dateHint,
+                        initialDate: state.lmp,
+                        onDateChanged: (d) => context.read<SpousBloc>().add(SpLMPChange(d)),
+                        validator: (date) => Validations.validateLMP(l, date),
+                      ),
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                    _section(
+                      CustomDatePicker(
+                        labelText: '${l.eddDateLabel} *',
+                        hintText: l.dateHint,
+                        initialDate: state.edd,
+                        onDateChanged: (d) => context.read<SpousBloc>().add(SpEDDChange(d)),
+                        validator: (date) => Validations.validateEDD(l, date),
+                      ),
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                  ],
+                ],
               ],
             );
           },

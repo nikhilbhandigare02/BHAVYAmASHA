@@ -1,0 +1,1490 @@
+{
+    "forms":{
+        "asha_profile":{
+
+            "asha_id":{
+                "en": "ASHA ID",
+                "hi": "आशा आई.डी."
+            },
+            
+            "asha_name":{
+                "en": "Name of ASHA",
+                "hi": "आशा का नाम"
+            },
+
+            "dob": {
+                "en": "Date of birth",
+                "hi": "जन्म की तिथि"
+            },
+
+            "please_dob": {
+                "en": "Please enter date of birth",
+                "hi": "कृपया जन्म की तिथि दर्ज करें"
+            },
+
+            "age": {
+                "en": "Age",
+                "hi": "आयु"
+            },
+
+            "mob_no": {
+                "en": "Mobile no.",
+                "hi": "मोबाइल नंबर"
+            },
+
+            "village_mukiya_mob_no": {
+                "en": "Mobile no. of mukhiya",
+                "hi": "मुखिया का मोबाइल नंबर"
+            },
+
+            "aww_mob_no": {
+                "en": "Mobile no. of AWW",
+                "hi": "आँगनवाड़ी कार्यकर्ता का मोबाइल नंबर"
+            },
+
+            "anm_one_mob_no": {
+                "en": "Mobile no. of ANM1",
+                "hi": "ए.एन.एम 1 का मोबाइल नंबर"
+            },
+
+            "anm_two_mob_no": {
+                "en": "Mobile no. of ANM2",
+                "hi": "ए.एन.एम 2 का मोबाइल नंबर"
+            },
+
+            "block_comminity_mobilzer_mob_no": {
+                "en": "Mobile no. of Block Community Mobilizer",
+                "hi": "ब्लॉक कम्युनिटी मोबिलाइज़र का मोबाइल नंबर"
+            },
+
+            "dist_comminity_mobilzer_mob_no": {
+                "en": "Mobile no. of District Community Mobilizer",
+                "hi": "जिला कम्युनिटी मोबिलाइज़र का मोबाइल नंबर"
+            },
+
+            "asha_facilitator_mob_no": {
+                "en": "Mobile no. of ASHA Facilitator",
+                "hi": "आशा फैसिलिटेटर का मोबाइल नंबर"
+            },
+
+            "cho_mob_no": {
+                "en": "Mobile no. of CHO",
+                "hi": "सी.एच.ओ. का मोबाइल नंबर"
+            },
+
+            "ward_counsellor_mob_no": {
+                "en": "Mobile no. of Ward Counsellor",
+                "hi": "वार्ड काउंसलर का मोबाइल नंबर"
+            },
+
+            "dist_urban_health_consultant_mob_no": {
+                "en": "Mobile no. of District Urban Health Consultant",
+                "hi": "जिला शहरी स्वास्थ्य सलाहकार का मोबाइल नंबर"
+            },
+
+            "alt_mob_no": {
+                "en": "Alternate mobile no.",
+                "hi": "वैकल्पिक मोबाइल नंबर"
+            },
+
+            "adhar_no":{
+                "en":"Adhar number",
+                "hi":"आधार संख्या"
+            },
+
+            "father_or_spouse_name":{
+                "en": "Father/Spouse Name",
+                "hi": "पिता/जीवनसाथी का नाम"
+            },
+
+            "date_of_joining":{
+                "en":"Date of joining",
+                "hi":"नियुक्ति होने की तिथि"
+            },
+
+            "year_of_joining":{
+                "en":"Year of joining",
+                "hi":"नियुक्ति होने की वर्ष"
+            },
+
+            "bank_details": {
+                "en": "Bank details",
+                "hi": "बैंक का विवरण"
+            },
+
+            "bank_name": {
+                "en": "Bank name",
+                "hi": "बैंक का नाम"
+            },
+
+            "branch_name": {
+                "en": "Branch name",
+                "hi": "शाखा का नाम"
+            },
+
+            "account_number": {
+                "en": "Account number",
+                "hi": "खाता संख्या"
+            },
+
+            "ifsc_code": {
+                "en": "IFSC code",
+                "hi": "आईएफएससी कोड"
+            },
+            
+            "area_of_working": {
+                "en": "Area of working",
+                "hi": "कार्य क्षेत्र",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+
+                "options":[
+                    {
+                        "en": "Rural",
+                        "hi": "ग्रामीण",
+                        "value": "rural"
+                    },
+                    {
+                        "en": "Urban",
+                        "hi": "शहरी",
+                        "value": "urban"
+                    }
+                ]
+            },
+
+            "state": {
+                "en": "State",
+                "hi": "राज्य"
+            },
+
+            "district": {
+                "en": "District",
+                "hi": "ज़िला"
+            },
+
+            "town": {
+                "en": "Town",
+                "hi": "कस्बा"
+            },
+
+            "ward_no": {
+                "en": "Ward no.",
+                "hi": "वार्ड क्रमांक"
+            },
+
+            "ward_name": {
+                "en": "Ward name",
+                "hi": "वार्ड का नाम"
+            },
+            
+            "coverage_area": {
+                "en": "Coverage Area",
+                "hi": "कवरेज क्षेत्र"
+            },
+            
+            "ward_counsellor_name": {
+                "en": "Name of the Ward Counsellor",
+                "hi": "वार्ड काउंसलर का नाम"
+            },
+            
+            "uphc_name": {
+                "en": "UPHC Name",
+                "hi": "यू.पी.एच.सी नाम"
+            },
+            
+            "fru_name": {
+                "en": "FRU name",
+                "hi": "एफ.आर.यू नाम"
+            },
+            
+            "sub_dist_hosp_or_reff_hosp": {
+                "en": "Sub - District Hospital or referral Hospital",
+                "hi": "उप-जिला अस्पताल या रेफरल अस्पताल"
+            },
+            
+            "dist_hospital": {
+                "en": "District Hospital",
+                "hi": "जिला अस्पताल"
+            },
+            
+            "population_covered_by_asha": {
+                "en": "Population covered under ASHA",
+                "hi": "आशा के क्षेत्र की जनसंख्या"
+            },
+            
+            "catchment_area": {
+                "en": "Catchment Area",
+                "hi": "जलग्रह क्षेत्र"
+            },
+            
+            "asha_facilitator_name": {
+                "en": "Name of ASHA Facilitator",
+                "hi": "आशा फैसिलिटेटर का नाम"
+            },
+            
+            "cho_name": {
+                "en": "CHO Name",
+                "hi": "सी.एच.ओ. का नाम"
+            },
+
+            "aww_name": {
+                "en": "Name of AWW",
+                "hi": "आँगनवाड़ी सेविका का नाम"
+            },
+            
+            "aaganwadi_center_no": {
+                "en": "Anganwadi Center no.",
+                "hi": "आँगनवाड़ी केंद्र संख्या"
+            },
+            
+            "anm_one_name": {
+                "en": "Name of ANM1",
+                "hi": "ए.एन.एम. 1 का नाम"
+            },
+            
+            "anm_two_name": {
+                "en": "Name of ANM2",
+                "hi": "ए.एन.एम. 2 का नाम"
+            },
+            
+            "block_comminity_mobilzer_name": {
+                "en": "Block Community Mobilizer name",
+                "hi": "ब्लॉक कम्युनिटी मोबिलाइज़र का नाम"
+            },
+            
+            "dist_comminity_mobilzer_name": {
+                "en": "District Community Mobilizer name",
+                "hi": "जिला कम्युनिटी मोबिलाइज़र का नाम"
+            },
+            
+            "dist_urban_health_consultant": {
+                "en": "District Urban Health Consultant name",
+                "hi": "जिला शहरी स्वास्थ्य सलाहकार का नाम"
+            },
+            
+            "division": {
+                "en": "Division",
+                "hi": "डिवीजन"
+            },
+            
+            "block": {
+                "en": "Block",
+                "hi": "ब्लॉक"
+            },
+            
+            "panchayat": {
+                "en": "Panchayat",
+                "hi": "पंचायत"
+            },
+            
+            "village": {
+                "en": "Village",
+                "hi": "गाँव"
+            },
+            
+            "tolla": {
+                "en": "Tola",
+                "hi": "टोला"
+            },
+            
+            "village_mukiya_name": {
+                "en": "Village mukhiya name",
+                "hi": "गाँव के मुखिया का नाम"
+            },
+            
+            "is_hwc": {
+                "en": "HWC",
+                "hi": "एच.डब्ल्यू.सी",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            
+            "hwc_name": {
+                "en": "HWC Name",
+                "hi": "एच.डब्ल्यू.सी का नाम",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                }
+            },
+            
+            "is_hsc": {
+                "en": "HSC",
+                "hi": "एच.एस.सी.",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            
+            "hsc_name": {
+                "en": "HSC Name",
+                "hi": "एच.एस.सी. का नाम"
+            },
+            
+            "first_refferal_unit": {
+                "en": "First referral unit",
+                "hi": "पहली रेफरल यूनिट"
+            },
+            
+            "phc": {
+                "en": "PHC/CHC",
+                "hi": "पी.एच.सी/सी.एच.सी"
+            },
+            
+            "rh": {
+                "en": "RH/SDH/DH/SADAR Hospital",
+                "hi": "आर.एच/अनुमण्डलीय अस्पताल/जिला अस्पताल/सदर अस्पताल"
+            },
+            
+            "training_details": {
+                "en": "Training Details",
+                "hi": "प्रशिक्षण विवरण"
+            },
+            
+            "name_of_training": {
+                "en": "Name of training",
+                "hi": "प्रशिक्षण का नाम",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "ASHA module 1",
+                        "hi": "आशा मॉड्यूल 1",
+                        "value": "asha_module_1"
+                    },
+                    {
+                        "en": "ASHA module 2",
+                        "hi": "आशा मॉड्यूल 2",
+                        "value": "asha_module_2"
+                    },
+                    {
+                        "en": "ASHA module 3",
+                        "hi": "आशा मॉड्यूल 3",
+                        "value": "asha_module_3"
+                    },
+                    {
+                        "en": "ASHA module 4",
+                        "hi": "आशा मॉड्यूल 4",
+                        "value": "Asha_module_4"
+                    },
+                    {
+                        "en": "ASHA module 5,6 & 7",
+                        "hi": "आशा मॉड्यूल 5,6 & 7",
+                        "value": "asha_module_5_6_7"
+                    },
+                    {
+                        "en": "NCD",
+                        "hi": "एन.सी.डी",
+                        "value": "ncd"
+                    },
+                    {
+                        "en": "HBNC",
+                        "hi": "एच.बी.एन.सी",
+                        "value": "hbnc"
+                    },
+                    {
+                        "en": "HBYC",
+                        "hi": "एच.बी.वाई.सी",
+                        "value": "hbyc"
+                    },
+                    {
+                        "en": "ASHA Facilitator Training",
+                        "hi": "आशा फैसिलिटेटर प्रशिक्षण",
+                        "value": "asha_facilitator_training"
+                    },
+                    {
+                        "en": "Induction Training",
+                        "hi": "शुरुआती प्रशिक्षण",
+                        "value": "induction_training"
+                    },
+                    {
+                        "en": "MAA (Mothers' Absolute Affection)",
+                        "hi": "एमएए (माँ का पूर्ण स्नेह)",
+                        "value": "maa"
+                    },
+                    {
+                        "en": "IDCF (Integrated Diarrhoea Control Fortnight)",
+                        "hi": "आईडीसीएफ (एकीकृत दस्त नियंत्रण पखवाड़ा)",
+                        "value": "idcf"
+                    },
+                    {
+                        "en": "Other Trainings",
+                        "hi": "अन्य प्रशिक्षण",
+                        "value": "other_trainings"
+                    }
+                ]
+            },
+            
+            "phases": {
+                "en": "Phase",
+                "hi": "चरण",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "First Training",
+                        "hi": "प्रथम प्रशिक्षण",
+                        "value": "first_training"
+                    },
+                    {
+                        "en": "Refresher Training 1",
+                        "hi": "पुनरावलोकन प्रशिक्षण 1",
+                        "value": "refresher_trainer_1"
+                    },
+                    {
+                        "en": "Refresher Training 2",
+                        "hi": "पुनरावलोकन प्रशिक्षण 2",
+                        "value": "refresher_trainer_2"
+                    },
+                    {
+                        "en": "Refresher Training 3",
+                        "hi": "पुनरावलोकन प्रशिक्षण 3",
+                        "value": "refresher_trainer_3"
+                    },
+                    {
+                        "en": "Refresher Training 4",
+                        "hi": "पुनरावलोकन प्रशिक्षण 4",
+                        "value": "refresher_trainer_4"
+                    }
+                ]
+            },
+            
+            "date_of_training": {
+                "en": "Date of Training",
+                "hi": "प्रशिक्षण की तिथि"
+            },
+            
+            "place_of_training": {
+                "en": "Place of Training",
+                "hi": "प्रशिक्षण का स्थान"
+            },
+            
+            "no_of_days": {
+                "en": "No. of days",
+                "hi": "दिनों की संख्या"
+            },
+            
+            "certificate": {
+                "en": "Certificate if any",
+                "hi": "प्रमाणपत्र यदि कोई हो"
+            }
+
+        },
+        "asha_facilitator":{
+            "asha_id":{
+                "en": "ASHA Facilitator ID",
+                "hi": "आशा फैसिलिटेटर आई.डी."
+            },
+            
+            "asha_facilitator_name": {
+                "en": "Name of ASHA Facilitator",
+                "hi": "आशा फैसिलिटेटर का नाम"
+            },
+          
+            "dob": {
+                "en": "Date of birth",
+                "hi": "जन्म की तिथि"
+            },
+          
+            "please_dob": {
+                "en": "Please enter date of birth",
+                "hi": "कृपया जन्म की तिथि दर्ज करें"
+            },
+          
+            "age": {
+                "en": "Age",
+                "hi": "आयु"
+            },
+            
+            "asha_facilitator_mob_no": {
+                "en": "Mobile no. of ASHA Facilitator",
+                "hi": "आशा फैसिलिटेटर का मोबाइल नंबर"
+            },
+          
+            "alt_mob_no": {
+                "en": "Alternate mobile no.",
+                "hi": "वैकल्पिक मोबाइल नंबर"
+            },
+          
+            "adhar_no":{
+                "en":"Adhar number",
+                "hi":"आधार संख्या"
+            },
+          
+            "father_or_spouse_name":{
+                "en": "Father/Spouse Name",
+                "hi": "पिता/जीवनसाथी का नाम"
+            },
+          
+            "date_of_joining":{
+                "en":"Date of joining",
+                "hi":"नियुक्ति होने की तिथि"
+            },
+          
+            "year_of_joining":{
+                "en":"Year of joining",
+                "hi":"नियुक्ति होने की वर्ष"
+            },
+          
+            "bank_details": {
+                "en": "Bank details",
+                "hi": "बैंक का विवरण"
+            },
+          
+            "bank_name": {
+                "en": "Bank name",
+                "hi": "बैंक का नाम"
+            },
+          
+            "branch_name": {
+                "en": "Branch name",
+                "hi": "शाखा का नाम"
+            },
+          
+            "account_number": {
+                "en": "Account number",
+                "hi": "खाता संख्या"
+            },
+          
+            "ifsc_code": {
+                "en": "IFSC code",
+                "hi": "आईएफएससी कोड"
+            },
+          
+            "mob_no": {
+                "en": "Mobile no.",
+                "hi": "मोबाइल नंबर"
+            },
+          
+            "village_mukiya_mob_no": {
+                "en": "Mobile no. of mukhiya",
+                "hi": "मुखिया का मोबाइल नंबर"
+            },
+          
+            "aww_mob_no": {
+                "en": "Mobile no. of AWW",
+                "hi": "आँगनवाड़ी कार्यकर्ता का मोबाइल नंबर"
+            },
+          
+            "anm_one_mob_no": {
+                "en": "Mobile no. of ANM1",
+                "hi": "ए.एन.एम 1 का मोबाइल नंबर"
+            },
+          
+            "anm_two_mob_no": {
+                "en": "Mobile no. of ANM2",
+                "hi": "ए.एन.एम 2 का मोबाइल नंबर"
+            },
+          
+            "block_comminity_mobilzer_mob_no": {
+                "en": "Mobile no. of Block Community Mobilizer",
+                "hi": "ब्लॉक कम्युनिटी मोबिलाइज़र का मोबाइल नंबर"
+            },
+          
+            "dist_comminity_mobilzer_mob_no": {
+                "en": "Mobile no. of District Community Mobilizer",
+                "hi": "जिला कम्युनिटी मोबिलाइज़र का मोबाइल नंबर"
+            },
+          
+            "cho_mob_no": {
+                "en": "Mobile no. of CHO",
+                "hi": "सी.एच.ओ. का मोबाइल नंबर"
+            },
+          
+            "ward_counsellor_mob_no": {
+                "en": "Mobile no. of Ward Counsellor",
+                "hi": "वार्ड काउंसलर का मोबाइल नंबर"
+            },
+          
+            "dist_urban_health_consultant_mob_no": {
+                "en": "Mobile no. of District Urban Health Consultant",
+                "hi": "जिला शहरी स्वास्थ्य सलाहकार का मोबाइल नंबर"
+            },
+            
+            "area_of_working": {
+                "en": "Area of working",
+                "hi": "कार्य क्षेत्र",
+          
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+          
+                "options":[
+                    {
+                        "en": "Rural",
+                        "hi": "ग्रामीण",
+                        "value": "rural"
+                    },
+                    {
+                        "en": "Urban",
+                        "hi": "शहरी",
+                        "value": "urban"
+                    }
+                ]
+            },
+          
+            "state": {
+                "en": "State",
+                "hi": "राज्य"
+            },
+          
+            "district": {
+                "en": "District",
+                "hi": "ज़िला"
+            },
+          
+            "town": {
+                "en": "Town",
+                "hi": "कस्बा"
+            },
+          
+            "ward_no": {
+                "en": "Ward no.",
+                "hi": "वार्ड क्रमांक"
+            },
+          
+            "ward_name": {
+                "en": "Ward name",
+                "hi": "वार्ड का नाम"
+            },
+            
+            "coverage_area": {
+                "en": "Coverage Area",
+                "hi": "कवरेज क्षेत्र"
+            },
+            
+            "ward_counsellor_name": {
+                "en": "Name of the Ward Counsellor",
+                "hi": "वार्ड काउंसलर का नाम"
+            },
+            
+            "uphc_name": {
+                "en": "UPHC Name",
+                "hi": "यू.पी.एच.सी नाम"
+            },
+            
+            "fru_name": {
+                "en": "FRU name",
+                "hi": "एफ.आर.यू नाम"
+            },
+            
+            "sub_dist_hosp_or_reff_hosp": {
+                "en": "Sub - District Hospital or referral Hospital",
+                "hi": "उप-जिला अस्पताल या रेफरल अस्पताल"
+            },
+            
+            "dist_hospital": {
+                "en": "District Hospital",
+                "hi": "जिला अस्पताल"
+            },
+            
+            "population_covered_by_asha_facilitator": {
+                "en": "Population covered under ASHA facilitator",
+                "hi": "आशा फैसिलिटेटर के क्षेत्र की जनसंख्या"
+            },
+            
+            "catchment_area": {
+                "en": "Catchment Area",
+                "hi": "जलग्रह क्षेत्र"
+            },
+            
+            "cho_name": {
+                "en": "CHO Name",
+                "hi": "सी.एच.ओ. का नाम"
+            },
+          
+            "aww_name": {
+                "en": "Name of AWW",
+                "hi": "आँगनवाड़ी सेविका का नाम"
+            },
+            
+            "aaganwadi_center_no": {
+                "en": "Anganwadi Center no.",
+                "hi": "आँगनवाड़ी केंद्र संख्या"
+            },
+            
+            "anm_one_name": {
+                "en": "Name of ANM1",
+                "hi": "ए.एन.एम. 1 का नाम"
+            },
+            
+            "anm_two_name": {
+                "en": "Name of ANM2",
+                "hi": "ए.एन.एम. 2 का नाम"
+            },
+            
+            "block_comminity_mobilzer_name": {
+                "en": "Block Community Mobilizer name",
+                "hi": "ब्लॉक कम्युनिटी मोबिलाइज़र का नाम"
+            },
+            
+            "dist_comminity_mobilzer_name": {
+                "en": "District Community Mobilizer name",
+                "hi": "जिला कम्युनिटी मोबिलाइज़र का नाम"
+            },
+            
+            "dist_urban_health_consultant": {
+                "en": "District Urban Health Consultant name",
+                "hi": "जिला शहरी स्वास्थ्य सलाहकार का नाम"
+            },
+            
+            "division": {
+                "en": "Division",
+                "hi": "डिवीजन"
+            },
+            
+            "block": {
+                "en": "Block",
+                "hi": "ब्लॉक"
+            },
+            
+            "panchayat": {
+                "en": "Panchayat",
+                "hi": "पंचायत"
+            },
+            
+            "village": {
+                "en": "Village",
+                "hi": "गाँव"
+            },
+            
+            "tolla": {
+                "en": "Tola",
+                "hi": "टोला"
+            },
+            
+            "village_mukiya_name": {
+                "en": "Village mukhiya name",
+                "hi": "गाँव के मुखिया का नाम"
+            },
+            
+            "is_hwc": {
+                "en": "HWC",
+                "hi": "एच.डब्ल्यू.सी",
+          
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            
+            "hwc_name": {
+                "en": "HWC Name",
+                "hi": "एच.डब्ल्यू.सी का नाम",
+          
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                }
+            },
+            
+            "is_hsc": {
+                "en": "HSC",
+                "hi": "एच.एस.सी.",
+          
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            
+            "hsc_name": {
+                "en": "HSC Name",
+                "hi": "एच.एस.सी. का नाम"
+            },
+            
+            "first_refferal_unit": {
+                "en": "First referral unit",
+                "hi": "पहली रेफरल यूनिट"
+            },
+            
+            "phc": {
+                "en": "PHC/CHC",
+                "hi": "पी.एच.सी/सी.एच.सी"
+            },
+            
+            "rh": {
+                "en": "RH/SDH/DH/SADAR Hospital",
+                "hi": "आर.एच/अनुमण्डलीय अस्पताल/जिला अस्पताल/सदर अस्पताल"
+            },
+            
+            "training_details": {
+                "en": "Training Details",
+                "hi": "प्रशिक्षण विवरण"
+            },
+            
+            "name_of_training": {
+                "en": "Name of training",
+                "hi": "प्रशिक्षण का नाम",
+          
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "ASHA module 1",
+                        "hi": "आशा मॉड्यूल 1",
+                        "value": "asha_module_1"
+                    },
+                    {
+                        "en": "ASHA module 2",
+                        "hi": "आशा मॉड्यूल 2",
+                        "value": "asha_module_2"
+                    },
+                    {
+                        "en": "ASHA module 3",
+                        "hi": "आशा मॉड्यूल 3",
+                        "value": "asha_module_3"
+                    },
+                    {
+                        "en": "ASHA module 4",
+                        "hi": "आशा मॉड्यूल 4",
+                        "value": "Asha_module_4"
+                    },
+                    {
+                        "en": "ASHA module 5,6 & 7",
+                        "hi": "आशा मॉड्यूल 5,6 & 7",
+                        "value": "asha_module_5_6_7"
+                    },
+                    {
+                        "en": "NCD",
+                        "hi": "एन.सी.डी",
+                        "value": "ncd"
+                    },
+                    {
+                        "en": "HBNC",
+                        "hi": "एच.बी.एन.सी",
+                        "value": "hbnc"
+                    },
+                    {
+                        "en": "HBYC",
+                        "hi": "एच.बी.वाई.सी",
+                        "value": "hbyc"
+                    },
+                    {
+                        "en": "ASHA Facilitator Training",
+                        "hi": "आशा फैसिलिटेटर प्रशिक्षण",
+                        "value": "asha_facilitator_training"
+                    },
+                    {
+                        "en": "Induction Training",
+                        "hi": "शुरुआती प्रशिक्षण",
+                        "value": "induction_training"
+                    },
+                    {
+                        "en": "MAA (Mothers' Absolute Affection)",
+                        "hi": "एमएए (माँ का पूर्ण स्नेह)",
+                        "value": "maa"
+                    },
+                    {
+                        "en": "IDCF (Integrated Diarrhoea Control Fortnight)",
+                        "hi": "आईडीसीएफ (एकीकृत दस्त नियंत्रण पखवाड़ा)",
+                        "value": "idcf"
+                    },
+                    {
+                        "en": "Other Trainings",
+                        "hi": "अन्य प्रशिक्षण",
+                        "value": "other_trainings"
+                    }
+                ]
+            },
+            
+            "phases": {
+                "en": "Phase",
+                "hi": "चरण",
+          
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "First Training",
+                        "hi": "प्रथम प्रशिक्षण",
+                        "value": "first_training"
+                    },
+                    {
+                        "en": "Refresher Training 1",
+                        "hi": "पुनरावलोकन प्रशिक्षण 1",
+                        "value": "refresher_trainer_1"
+                    },
+                    {
+                        "en": "Refresher Training 2",
+                        "hi": "पुनरावलोकन प्रशिक्षण 2",
+                        "value": "refresher_trainer_2"
+                    },
+                    {
+                        "en": "Refresher Training 3",
+                        "hi": "पुनरावलोकन प्रशिक्षण 3",
+                        "value": "refresher_trainer_3"
+                    },
+                    {
+                        "en": "Refresher Training 4",
+                        "hi": "पुनरावलोकन प्रशिक्षण 4",
+                        "value": "refresher_trainer_4"
+                    }
+                ]
+            },
+            
+            "date_of_training": {
+                "en": "Date of Training",
+                "hi": "प्रशिक्षण की तिथि"
+            },
+            
+            "place_of_training": {
+                "en": "Place of Training",
+                "hi": "प्रशिक्षण का स्थान"
+            },
+            
+            "no_of_days": {
+                "en": "No. of days",
+                "hi": "दिनों की संख्या"
+            },
+            
+            "certificate": {
+                "en": "Certificate if any",
+                "hi": "प्रमाणपत्र यदि कोई हो"
+            },
+          
+            "no_of_asha_under_facilitator": {
+                "en": "No. of ASHA under the facilitator",
+                "hi": "फैसिलिटेटर के अंतर्गत आशा की संख्या"
+            },
+            
+            "asha_name":{
+                "en": "Name of ASHA",
+                "hi": "आशा का नाम"
+            },
+            
+            "area": {
+                "en": "Area",
+                "hi": "क्षेत्र"
+            },
+            
+            "population_covered": {
+                "en": "Population covered",
+                "hi": "क्षेत्र की जनसंख्या"
+            }
+        },
+        "cluster_meeting":{
+            "asha_facilitator_name":{
+                "en": "ASHA Facilitator Name",
+                "hi": "आशा फैसिलिटेटर का नाम"
+            },
+            "asha_incharge_name":{
+                "en": "ASHA Incharge Name",
+                "hi": "आशा प्रभारी का नाम"
+            },
+            "aww_name":{
+                "en":"AWW Name",
+                "hi":"आँगनवाड़ी कार्यकर्ता का नाम"
+            },
+            "awc_no":{
+                "en":"AWC Number",
+                "hi":"आँगनवाड़ी केंद्र संख्या"
+            },
+            "village_name":{
+                "en":"Village Name",
+                "hi":"गाँव का नाम"
+            },
+            "ward_name":{
+                "en":"Ward Name",
+                "hi":"वार्ड का नाम"
+            },
+            "ward_number":{
+                "en":"Ward Number",
+                "hi":"वार्ड क्रमांक"
+            },
+            "block_name":{
+                "en":"Block Name",
+                "hi":"ब्लॉक का नाम"
+            },
+            "subcenter_name":{
+                "en":"Subcenter Name",
+                "hi":"उपकेंद्र का नाम"
+            },
+            "phc_name":{
+                "en":"PHC Name",
+                "hi":"पी.एच.सी का नाम"
+            },
+            "meeting_date":{
+                "en":"Date of the meeting",
+                "hi":"बैठक की तिथि",
+                "messages" : {
+                    "en":"Please enter Date of the meeting",
+                    "hi":"कृपया बैठक की तिथि दर्ज करें"
+                }
+            },
+            "day":{
+                "en":"Day",
+                "hi":"दिन"
+            },
+            "from_time":{
+                "en":"From(HH:MM)",
+                "hi":"बजे से(HH:MM)"
+            },
+            "to_time":{
+                "en":"To(HH:MM)",
+                "hi":"बजे तक(HH:MM)"
+            },
+            "no_of_hrs":{
+                "en":"No. of hours",
+                "hi":"घंटों की संख्या"
+            },
+            "total_asha_under_facilitator":{
+                "en":"Total Number of ASHA's under the Facilitator",
+                "hi":"प्रबंधक के अंतर्गत आशा की कुल संख्या"
+            },
+            "present_asha_no":{
+                "en":"No. of ASHA present in this meeting",
+                "hi":"इस बैठक में उपस्थित आशा की संख्या"
+            },
+            "absent_asha_no":{
+                "en":"No. of ASHA absent in this meeting",
+                "hi":"इस बैठक में अनुपस्थित आशाओं की संख्या"
+            },
+            "no_of_conducted_meeting":{
+                "en":"No. of Cluster meetings conducted in this month",
+                "hi":"इस माह में आयोजित क्लस्टर बैठकों की संख्या"
+            },
+            "conducted_in_month":{
+                "en":"Month",
+                "hi":"महीना"
+            },
+            "topic_of_meetings":{
+                "en":"Discussion Topic/Program",
+                "hi":"चर्चा का विषय/कार्यक्रम",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+
+                "options":[
+                    {
+                        "en": "Immunization",
+                        "hi": "टीकाकरण",
+                        "value": "immunization"
+                    },
+                    {
+                        "en": "Pregnant Women",
+                        "hi": "गर्भवती महिलाएं",
+                        "value": "pregnant_women"
+                    },
+                    {
+                        "en": "Deliveries",
+                        "hi": "प्रसव",
+                        "value": "deliveries"
+                    },
+                    {
+                        "en": "PNC",
+                        "hi": "पी.एन.सी",
+                        "value": "pnc"
+                    },
+                    {
+                        "en": "Maternal & Child Health",
+                        "hi": "मातृ एवं शिशु स्वास्थ्य",
+                        "value": "maternal_and_child_health"
+                    },
+                    {
+                        "en":"Home Visits",
+                        "hi":"घर का दौरे",
+                        "value":"home_visits"
+                    },
+                    {
+                        "en": "New Born Care",
+                        "hi": "नवजात शिशु की देखभाल",
+                        "value": "new_born_care"
+                    },
+                    {
+                        "en": "Deaths",
+                        "hi": "मौतें",
+                        "value": "deaths"
+                    },
+                    {
+                        "en": "Adolecent Health",
+                        "hi": "किशोर स्वास्थ्य",
+                        "value": "adolecent_health"
+                    },
+                    {
+                        "en": "Family Planning",
+                        "hi": "परिवार नियोजन",
+                        "value": "family_planning"
+                    },
+                    {
+                        "en": "Other Public Health Program",
+                        "hi": "अन्य सार्वजनिक स्वास्थ्य कार्यक्रम",
+                        "value": "other_public_health_program"
+                    },
+                    {
+                        "en": "Administrative",
+                        "hi": "प्रशासनिक",
+                        "value": "administrative"
+                    },
+                    {
+                        "en": "Training and Support",
+                        "hi": "प्रशिक्षण एवं सहायता",
+                        "value": "training_support"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                    }
+                ],
+
+                "immunization_options":[
+                    {
+                        "en": "Due list preparation",
+                        "hi": "देय सूची तैयार करना",
+                        "value": "due_list_preparation"
+                    },
+                    {
+                        "en": "VHSND",
+                        "hi": "वी.एच.एस.एन.डी",
+                        "value": "vhsnd"
+                    },
+                    {
+                        "en": "VHSC",
+                        "hi": "वी.एच.एस.ई",
+                        "value": "vhsc"
+                    },
+                    {
+                        "en": "Dropout Children",
+                        "hi": "ड्रॉपआउट बच्चे",
+                        "value": "dropout_children"
+                    },
+                    {
+                        "en": "Leftout Children",
+                        "hi": "छूटे हुए बच्चे",
+                        "value": "leftout_children"
+                    },
+                    {
+                        "en": "Zerodose Children",
+                        "hi": "शून्य खुराक वाले बच्चे",
+                        "value": "zerodose_children"
+                    },
+                    {
+                        "en": "Immunization in private",
+                        "hi": "निजी तौर पर टीकाकरण",
+                        "value": "immunization_in_private"
+                    },
+                    {
+                        "en": "Documentation",
+                        "hi": "दस्तावेज़ीकरण",
+                        "value": "documentation"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                    }
+                ],
+
+                "pw_options":[
+                    {
+                        "en":"ANC",
+                        "hi":"ए.एन.सी",
+                        "value":"anc"
+                    },
+                    {
+                        "en":"Registration for ANC",
+                        "hi":"एएनसी के लिए पंजीकरण",
+                        "value":"registration_for_anc"
+                    },
+                    {
+                        "en":"Danger Signs",
+                        "hi":"खतरे के संकेत",
+                        "value":"danger_sign"
+                    },
+                    {
+                        "en":"Other",
+                        "hi":"अन्य",
+                        "value":"other"
+                    }
+                ],
+
+                "home_visit_options":[
+                    {
+                        "en":"HBNC",
+                        "hi":"एच.बी.एन.सी",
+                        "value":"hbnc"
+                    },
+                    {
+                        "en":"HBYC",
+                        "hi":"एच.बी.वाई.सी",
+                        "value":"hbyc"
+                    }
+                ],
+
+                "death_options":[
+                    {
+                        "en":"Maternal Death",
+                        "hi":"मातृ मृत्यु",
+                        "value":"maternal_death"
+                    },
+                    {
+                        "en":"Child Death",
+                        "hi":"बच्चे की मौत",
+                        "value":"child_death"
+                    },
+                    {
+                        "en":"Now Born Death",
+                        "hi":"जन्मे बच्चे की मृत्यु",
+                        "value":"new_born_death"
+                    },
+                    {
+                        "en":"Infant Death",
+                        "hi":"शिशु मृत्यु",
+                        "value":"infant_death"
+                    },
+                    {
+                        "en":"Documentation",
+                        "hi":"दस्तावेज़ीकरण",
+                        "value":"documentation"
+                    },
+                    {
+                        "en":"Notification",
+                        "hi":"अधिसूचना",
+                        "value":"notification"
+                    },
+                    {
+                        "en":"Other",
+                        "hi":"अन्य",
+                        "value":"other"
+                    }
+                ],
+
+                "family_planning_options":[
+                    {
+                        "en":"Eligible couple",
+                        "hi":"योग्य दम्पत्ति",
+                        "value":"eligible_couple"
+                    }
+                ],
+
+                "other_public_health_program_options":[
+                    {
+                        "en":"Tuberculosis",
+                        "hi":"तपेदिक",
+                        "value":"tuberculosis"
+                    },
+                    {
+                        "en":"Leprosy",
+                        "hi":"कुष्ठ रोग",
+                        "value":"leprosy"
+                    },
+                    {
+                        "en":"Malnutrition",
+                        "hi":"कुपोषण",
+                        "value":"malnutrition"
+                    },
+                    {
+                        "en":"Anemia",
+                        "hi":"रक्ताल्पता",
+                        "value":"anemia"
+                    },
+                    {
+                        "en":"Diarrhaea",
+                        "hi":"दस्त",
+                        "value":"diarrhaea"
+                    },
+                    {
+                        "en":"NCD",
+                        "hi":"एन.सी.डी",
+                        "value":"ncd"
+                    },
+                    {
+                        "en":"Polio",
+                        "hi":"पोलियो",
+                        "value":"polio"
+                    },
+                    {
+                        "en":"Kala Azar",
+                        "hi":"काला अजर",
+                        "value":"kala_azar"
+                    },
+                    {
+                        "en":"AES",
+                        "hi":"ए.ई.एस",
+                        "value":"aes"
+                    },
+                    {
+                        "en":"Covid - 19",
+                        "hi":"कोविड - 19",
+                        "value":"covid_19"
+                    },
+                    {
+                        "en":"Cholera",
+                        "hi":"हैज़ा",
+                        "value":"cholera"
+                    },
+                    {
+                        "en":"Dengue",
+                        "hi":"डेंगू",
+                        "value":"dengue"
+                    },
+                    {
+                        "en":"Dog Bite",
+                        "hi":"कुत्ते का काटना",
+                        "value":"dog_bite"
+                    },
+                    {
+                        "en":"Kilkari",
+                        "hi":"किलकारी",
+                        "value":"kilkari"
+                    }
+                ],
+
+                "administrative_options":[
+                    {
+                        "en":"Registers",
+                        "hi":"रजिस्टर",
+                        "value":"registers"
+                    },
+                    {
+                        "en":"Drugs",
+                        "hi":"ड्रग्स",
+                        "value":"drugs"
+                    },
+                    {
+                        "en":"Equipment",
+                        "hi":"उपकरण",
+                        "value":"equipment"
+                    },
+                    {
+                        "en":"Planning",
+                        "hi":"योजना",
+                        "value":"planning"
+                    },
+                    {
+                        "en":"Counseling material(Flipbooks/cards)",
+                        "hi":"परामर्श सामग्री (फ्लिपबुक/कार्ड)",
+                        "value":"counseling_material"
+                    },
+                    {
+                        "en":"Immunization cards(MCP Cards)",
+                        "hi":"टीकाकरण कार्ड (एमसीपी कार्ड)",
+                        "value":"immunization_cards"
+                    },
+                    {
+                        "en":"Health Promotional Material",
+                        "hi":"स्वास्थ्य प्रचार सामग्री",
+                        "value":"health_promotional_material"
+                    }
+                ],
+
+                "traning_and_support_options":[
+                    {
+                        "en":"Training Support",
+                        "hi":"प्रशिक्षण सहायता",
+                        "value":"tranning_support"
+                    },
+                    {
+                        "en":"Mentoring Support",
+                        "hi":"मार्गदर्शन सहायता",
+                        "value":"mentoring_support"
+                    },
+                    {
+                        "en":"Field support",
+                        "hi":"मैदान में सहायता",
+                        "value":"field_support"
+                    },
+                    {
+                        "en":"ASHA work planning",
+                        "hi":"आशा कार्य योजना",
+                        "value":"asha_work_planning"
+                    },
+                    {
+                        "en":"Home Visits",
+                        "hi":"घर का दौरे",
+                        "value":"home_visits"
+                    },
+                    {
+                        "en":"Mobile Academy",
+                        "hi":"मोबाइल एकेडमी",
+                        "value":"mobile_academy"
+                    }
+                ]
+            },
+            "sub_topic_of_meetings":{
+                "en":"Discussion Sub Topic/Program",
+                "hi":"चर्चा का उप विषय/कार्यक्रम",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                }
+            },
+            "dicision_taken":{
+                "en":"Dicision taken during the meeting",
+                "hi":"बैठक के दौरान लिया गया फैसला"
+            }
+        }
+    }
+}

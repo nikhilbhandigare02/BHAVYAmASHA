@@ -7,6 +7,7 @@ import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'bloc/eligible_coule_update_bloc.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 
 class EligibleCoupleUpdateScreen extends StatelessWidget {
   const EligibleCoupleUpdateScreen({super.key});
@@ -43,9 +44,10 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Scaffold(
-      appBar: const AppHeader(
-        screenTitle: 'Eligible Couple',
+      appBar: AppHeader(
+        screenTitle: t?.eligibleCoupleUpdateTitle ?? 'Eligible Couple',
         showBack: true,
       ),
       body: SafeArea(
@@ -53,12 +55,11 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
           listener: (context, state) {
             if (state.error != null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.error!)),
-              );
+                SnackBar(content: Text(state.error!)),);
             }
             if (state.isSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Updated successfully')),
+                SnackBar(content: Text(t?.profileUpdated ?? 'Updated successfully')),
               );
             }
           },
@@ -93,59 +94,59 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text('Registration through', style: Theme.of(context).textTheme.titleMedium),
+                        Text(t?.registrationThroughTitle ?? 'Registration through', style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 8),
                         CustomTextField(
-                          labelText: 'RCH ID',
+                          labelText: t?.rchIdLabel ?? 'RCH ID',
                           initialValue: state.rchId,
                           onChanged: (v) => bloc.add(RchIdChanged(v)),
                           keyboardType: TextInputType.number,
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5, height: 0,),
                         CustomDatePicker(
-                          labelText: 'Registration Date',
+                          labelText: t?.registrationDateLabel ?? 'Registration Date',
                           initialDate: state.registrationDate,
                           onDateChanged: (d) => bloc.add(RegistrationDateChanged(d)),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         CustomTextField(
-                          labelText: 'Name of woman *',
+                          labelText: (t?.nameOfWomanLabel ?? 'Name of woman') + ' *',
                           initialValue: state.womanName,
                           onChanged: (v) => bloc.add(WomanNameChanged(v)),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         CustomTextField(
-                          labelText: 'Current age(in years) *',
+                          labelText: (t?.currentAgeLabel ?? 'Current age (in years)') + ' *',
                           initialValue: state.currentAge,
                           keyboardType: TextInputType.number,
                           onChanged: (v) => bloc.add(CurrentAgeChanged(v)),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         CustomTextField(
-                          labelText: 'Age at marriage(in years)',
+                          labelText: t?.ageAtMarriageInYearsLabel ?? 'Age at marriage (in years)',
                           initialValue: state.ageAtMarriage,
                           keyboardType: TextInputType.number,
                           onChanged: (v) => bloc.add(AgeAtMarriageChanged(v)),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         CustomTextField(
-                          labelText: 'Address',
+                          labelText: t?.addressLabel ?? 'Address',
                           initialValue: state.address,
                           maxLines: 2,
                           onChanged: (v) => bloc.add(AddressChanged(v)),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         ApiDropdown<String>(
-                          labelText: 'Whose mobile no.',
+                          labelText: t?.whoseMobileLabel ?? 'Whose mobile no.',
                           items: const ['Husband', 'Wife', 'Other'],
                           value: state.whoseMobile.isEmpty ? null : state.whoseMobile,
                           getLabel: (s) => s,
                           onChanged: (v) => bloc.add(WhoseMobileChanged(v ?? '')),
-                          hintText: 'Select',
+                          hintText: t?.select ?? 'Select',
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         CustomTextField(
-                          labelText: 'Mobile no. *',
+                          labelText: (t?.mobileLabelSimple ?? 'Mobile no.') + ' *',
                           initialValue: state.mobileNo,
                           keyboardType: TextInputType.phone,
                           maxLength: 10,
@@ -153,26 +154,26 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         ApiDropdown<String>(
-                          labelText: 'Religion',
+                          labelText: t?.religionLabel ?? 'Religion',
                           items: const ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Other'],
                           value: state.religion.isEmpty ? null : state.religion,
                           getLabel: (s) => s,
                           onChanged: (v) => bloc.add(ReligionChanged(v ?? '')),
-                          hintText: 'Select',
+                          hintText: t?.select ?? 'Select',
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         ApiDropdown<String>(
-                          labelText: 'Category',
+                          labelText: t?.categoryLabel ?? 'Category',
                           items: const ['General', 'OBC', 'SC', 'ST', 'Other'],
                           value: state.category.isEmpty ? null : state.category,
                           getLabel: (s) => s,
                           onChanged: (v) => bloc.add(CategoryChanged(v ?? '')),
-                          hintText: 'Select',
+                          hintText: t?.select ?? 'Select',
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         const SizedBox(height: 12),
 
-                        Text('Children Details', style: Theme.of(context).textTheme.titleMedium),
+                        Text(t?.childrenDetailsTitle ?? 'Children Details', style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 12),
 
 
@@ -182,7 +183,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Expanded(child: Text('Total number of children born')),
+                                  Expanded(child: Text(t?.totalChildrenBornLabel ?? 'Total number of children born')),
                                   _buildCountBoxField(state.totalChildrenBorn, (v) => bloc.add(TotalChildrenBornChanged(v))),
                                 ],
                               ),
@@ -197,7 +198,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Expanded(child: Text('Total number of live children')),
+                                  Expanded(child: Text(t?.totalLiveChildrenLabel ?? 'Total number of live children')),
                                   _buildCountBoxField(state.totalLiveChildren, (v) => bloc.add(TotalLiveChildrenChanged(v))),
                                 ],
                               ),
@@ -212,7 +213,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Expanded(child: Text('Total number of male children')),
+                                  Expanded(child: Text(t?.totalMaleChildrenLabel ?? 'Total number of male children')),
                                   _buildCountBoxField(state.totalMaleChildren, (v) => bloc.add(TotalMaleChildrenChanged(v))),
                                 ],
                               ),
@@ -227,7 +228,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Expanded(child: Text('Total number of female children')),
+                                  Expanded(child: Text(t?.totalFemaleChildrenLabel ?? 'Total number of female children')),
                                   _buildCountBoxField(state.totalFemaleChildren, (v) => bloc.add(TotalFemaleChildrenChanged(v))),
                                 ],
                               ),
@@ -242,7 +243,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Expanded(child: Text('Age of youngest child')),
+                                  Expanded(child: Text(t?.youngestChildAgeLabel ?? 'Age of youngest child')),
                                   _buildCountBoxField(state.youngestChildAge, (v) => bloc.add(YoungestChildAgeChanged(v))),
                                 ],
                               ),
@@ -252,21 +253,21 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                             Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
 
                         ApiDropdown<String>(
-                          labelText: 'Age of youngest child unit',
+                          labelText: t?.youngestChildAgeUnitLabel ?? 'Age of youngest child unit',
                           items: const ['Years', 'Months'],
                           value: state.youngestChildAgeUnit.isEmpty ? null : state.youngestChildAgeUnit,
                           getLabel: (s) => s,
                           onChanged: (v) => bloc.add(YoungestChildAgeUnitChanged(v ?? '')),
-                          hintText: 'Select',
+                          hintText: t?.select ?? 'Select',
                         ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         ApiDropdown<String>(
-                          labelText: 'Gender of youngest child',
+                          labelText: t?.youngestChildGenderLabel ?? 'Gender of youngest child',
                           items: const ['Male', 'Female'],
                           value: state.youngestChildGender.isEmpty ? null : state.youngestChildGender,
                           getLabel: (s) => s,
                           onChanged: (v) => bloc.add(YoungestChildGenderChanged(v ?? '')),
-                          hintText: 'Select',
+                          hintText: t?.select ?? 'Select',
                         ),
                       ],
                     ),
@@ -278,7 +279,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                     width: double.infinity,
                     height: 50,
                     child: RoundButton(
-                      title: state.isSubmitting ? 'UPDATING...' : 'UPDATE',
+                      title: state.isSubmitting ? 'UPDATING...' : (t?.updateButton ?? 'UPDATE'),
                       onPress: () => context.read<EligibleCouleUpdateBloc>().add(const SubmitPressed()),
                       disabled: state.isSubmitting,
                     ),

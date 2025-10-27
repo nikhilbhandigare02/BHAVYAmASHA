@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 
 class CustomDatePicker extends StatefulWidget {
   final DateTime? initialDate;
@@ -7,7 +8,8 @@ class CustomDatePicker extends StatefulWidget {
   final Function(DateTime?)? onDateChanged;
   final String labelText;
   final String? hintText;
-  final String? Function(DateTime?)? validator; // 🔹 External validator
+  final String? Function(DateTime?)? validator;
+  final int? labelMaxLines;
 
   const CustomDatePicker({
     super.key,
@@ -17,6 +19,7 @@ class CustomDatePicker extends StatefulWidget {
     this.labelText = 'Select Date',
     this.hintText,
     this.validator,
+    this.labelMaxLines,
   });
 
   @override
@@ -32,30 +35,19 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     super.initState();
     selectedDate = widget.initialDate;
     _controller = TextEditingController(
-      text: selectedDate != null ? DateFormat('dd/MM/yy').format(selectedDate!) : '',
+      text: selectedDate != null
+          ? DateFormat('dd/MM/yy').format(selectedDate!)
+          : '',
     );
   }
 
   Future<void> _pickDate(BuildContext context) async {
     if (!widget.isEditable) return;
-
     final picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF2E73B8),
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {
@@ -69,51 +61,39 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+    final TextStyle inputStyle = TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: AppColors.onSurface,
+    );
+
     return GestureDetector(
       onTap: widget.isEditable ? () => _pickDate(context) : null,
       child: AbsorbPointer(
-        absorbing: true,
         child: TextFormField(
           controller: _controller,
           readOnly: true,
-          // validator: (_) {
-          //   if (widget.validator != null) {
-          //     final error = widget.validator!(selectedDate);
-          //     if (error != null && error.isNotEmpty) {
-          //       // 🔹 Show validation message as a Snackbar
-          //       WidgetsBinding.instance.addPostFrameCallback((_) {
-          //         ScaffoldMessenger.of(context).showSnackBar(
-          //           SnackBar(
-          //             content: Text(error),
-          //             backgroundColor: Colors.redAccent,
-          //             behavior: SnackBarBehavior.floating,
-          //           ),
-          //         );
-          //       });
-          //     }
-          //     return null;
-          //   }
-          //   return null;
-          // },
+          style: inputStyle,
           decoration: InputDecoration(
-            labelText: widget.labelText,
+            label: Text(
+              widget.labelText,
+              softWrap: true,
+              maxLines: widget.labelMaxLines,
+              overflow: TextOverflow.visible,
+            ),
             hintText: widget.hintText ?? 'dd/MM/yy',
+            hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
             suffixIcon: widget.isEditable
                 ? const Icon(Icons.calendar_today_outlined, color: Colors.grey)
                 : null,
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }

@@ -15,6 +15,7 @@ class CustomTextField extends StatefulWidget {
   final bool readOnly;
   final List<TextInputFormatter>? inputFormatters;
   final int? maxLength;
+  final int? labelMaxLines;
 
   const CustomTextField({
     super.key,
@@ -30,6 +31,7 @@ class CustomTextField extends StatefulWidget {
     this.readOnly = false,
     this.inputFormatters,
     this.maxLength,
+    this.labelMaxLines,
   });
 
   @override
@@ -47,7 +49,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final TextStyle inputStyle = TextStyle(
+      fontSize: 16,
+      color: AppColors.onSurfaceVariant
+    );
 
     return TextFormField(
       initialValue: widget.initialValue,
@@ -59,32 +64,18 @@ class _CustomTextFieldState extends State<CustomTextField> {
       maxLength: widget.maxLength,
       inputFormatters: widget.inputFormatters,
       cursorColor: AppColors.primary,
-
-      // 🔹 Custom validator to show SnackBar instead of inline red text
-      // validator: (value) {
-      //   if (widget.validator != null) {
-      //     final error = widget.validator!(value);
-      //     if (error != null && error.isNotEmpty) {
-      //       // Show validation error via ScaffoldMessenger
-      //       WidgetsBinding.instance.addPostFrameCallback((_) {
-      //         ScaffoldMessenger.of(context).showSnackBar(
-      //           SnackBar(
-      //             content: Text(error),
-      //             backgroundColor: Colors.redAccent,
-      //             behavior: SnackBarBehavior.floating,
-      //           ),
-      //         );
-      //       });
-      //     }
-      //     // Return null to suppress inline error
-      //     return null;
-      //   }
-      //   return null;
-      // },
-
       decoration: InputDecoration(
-        labelText: widget.labelText,
+        label: (widget.labelText != null && widget.labelText!.isNotEmpty)
+            ? Text(
+                widget.labelText!,
+                softWrap: true,
+                maxLines: widget.labelMaxLines,
+                overflow: TextOverflow.visible,
+                style: inputStyle,
+              )
+            : null,
         hintText: widget.hintText,
+        hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
         prefixIcon: widget.prefixIcon != null
             ? Icon(widget.prefixIcon, color: AppColors.onSurfaceVariant)
             : null,
@@ -99,22 +90,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
           }),
         )
             : null,
-        labelStyle: TextStyle(
-
-          // color: AppColors.onSurface,
-        ),
-        hintStyle: TextStyle(color: AppColors.onSurfaceVariant),
-        filled: false,
         contentPadding:
         const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
       ),
-      style: theme.textTheme.bodyMedium?.copyWith(
-        fontSize: 16,
-        color: AppColors.onSurface,
-      ),
+      style: inputStyle,
     );
   }
 }

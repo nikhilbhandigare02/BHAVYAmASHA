@@ -150,9 +150,12 @@ class AshaDashboardSection extends StatelessWidget {
 
                 const SizedBox(height: 8),
 
-                // Middle Box
                 InkWell(
-                  onTap: onRoutineTap,
+                  onTap: () {
+
+                      Navigator.pushNamed(context, Route_Names.Routinescreen);
+
+                  },
                   child: Card(
                     color: AppColors.surface,
                     elevation: 2,
@@ -181,6 +184,7 @@ class AshaDashboardSection extends StatelessWidget {
                     ),
                   ),
                 ),
+
 
                 const SizedBox(height: 8),
 
@@ -275,6 +279,15 @@ class AshaDashboardSection extends StatelessWidget {
     }else if (index == 8) {
       Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
       return;
+    // }else if (index == 9) {
+    //   Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
+    //   return;
+    }else if (index == 10) {
+      Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
+      return;
+    }else if (index == 11) {
+      Navigator.pushNamed(context, Route_Names.TrainingHomeScreen);
+      return;
     }
 
     onGridTap(index);
@@ -295,14 +308,14 @@ class AshaDashboardSection extends StatelessWidget {
       // Announcement
         Navigator.pushNamed(context, Route_Names.Annoucement);
         break;
-      // case 1:
-      // // Help
-      //   Navigator.pushNamed(context, Route_Names.h);
-      //   break;
-      // case 2:
-      // // NCD
-      //   Navigator.pushNamed(context, Route_Names.NCDScreen);
-      //   break;
+      case 1:
+      // Help
+        Navigator.pushNamed(context, Route_Names.HelpScreen);
+        break;
+      case 2:
+      // NCD
+        Navigator.pushNamed(context, Route_Names.NCDHome);
+        break;
       default:
         if (onBottomGridTap != null) onBottomGridTap!(index);
     }

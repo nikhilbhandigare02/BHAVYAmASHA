@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/utils/Validations.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
@@ -9,6 +10,7 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/Dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/SpousDetails.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/bloc/spous_bloc.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/ChildrenDetaills.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/utils/enums.dart';
@@ -129,7 +131,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               }
             },
             value: state.gender,
-            onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateGender(v)),
+            onChanged: (v) {
+              final bloc = context.read<AddFamilyHeadBloc>();
+              bloc.add(AfhUpdateGender(v));
+              if (v != 'Female') {
+                // Clear pregnancy-related fields if not applicable
+                bloc.add( AfhUpdateIsPregnant(null));
+                bloc.add( LMPChange(null));
+                bloc.add( EDDChange(null));
+              }
+            },
             validator: (value) => Validations.validateGender(l, value),
           ),
         ),
@@ -219,31 +230,116 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           ),
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        _Section(
+          child: Row(
+            children: [
+              Expanded(
+                child: CustomTextField(
+                  labelText: l.abhaAddressLabel,
+                  onChanged: (v) =>
+                      context.read<AddFamilyHeadBloc>().add(AfhABHAChange(v.trim())),
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 25,
+                width: 120,
+                child: RoundButton(
+                  title: l.linkAbha,
+                  width: 160,
+                  borderRadius: 8,
+                  fontSize: 12,
+                  onPress: () {
+                    Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        if (state.gender == 'Female') ...[
+          _Section(
+            child: Row(
+              children: [
+                Expanded(
+                  child: CustomTextField(
+                    labelText: l.richIdLabel,
+                    onChanged: (v) =>
+                        context.read<AddFamilyHeadBloc>().add(AfhABHAChange(v.trim())),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  height: 25,
+                  width: 120,
+                  child: RoundButton(
+                    title: 'VERIFY',
+                    width: 160,
+                    borderRadius: 8,
+                    fontSize: 12,
+                    onPress: () {
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        ],
 
         _Section(
-          child: ApiDropdown<String>(
-            labelText: '${l.whoseMobileLabel} *',
-            items: const ['Self', 'Spouse', 'Father', 'Mother', 'Other'],
-            getLabel: (s) {
-              switch (s) {
-                case 'Self':
-                  return l.self;
-                case 'Spouse':
-                  return l.spouse;
-                case 'Father':
-                  return l.father;
-                case 'Mother':
-                  return l.mother;
-                case 'Other':
-                  return l.other;
-                default:
-                  return s;
-              }
-            },
-            value: state.mobileOwner,
-            onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileOwner(v)),
-            validator: (value) => Validations.validateWhoMobileNo(l, value),
+          child: _Section(
+            child: ApiDropdown<String>(
+              labelText: '${l.whoseMobileLabel} *',
+              items: const [
+                'Self',
+                'Wife',
+                'Father',
+                'Mother',
+                'Son',
+                'Daughter',
+                'Father in Law',
+                'Mother in Law',
+                'Neighbour',
+                'Relative',
+                'Other',
+              ],
+              getLabel: (s) {
+                switch (s) {
+                  case 'Self':
+                    return l.self;
+                  case 'Wife':
+                    return l.wife;
+                  case 'Father':
+                    return l.father;
+                  case 'Mother':
+                    return l.mother;
+                  case 'Son':
+                    return l.son;
+                  case 'Daughter':
+                    return l.daughter;
+                  case 'Father in Law':
+                    return l.fatherInLaw;
+                  case 'Mother in Law':
+                    return l.motherInLaw;
+                  case 'Neighbour':
+                    return l.neighbour;
+                  case 'Relative':
+                    return l.relative;
+                  case 'Other':
+                    return l.other;
+                  default:
+                    return s;
+                }
+              },
+              value: state.mobileOwner,
+              onChanged: (v) =>
+                  context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileOwner(v)),
+              validator: (value) => Validations.validateWhoMobileNo(l, value),
+            ),
           ),
+
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -375,9 +471,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               }
             },
             value: state.maritalStatus,
-            onChanged: (v) => context
-                .read<AddFamilyHeadBloc>()
-                .add(AfhUpdateMaritalStatus(v)),
+            onChanged: (v) {
+              final bloc = context.read<AddFamilyHeadBloc>();
+              bloc.add(AfhUpdateMaritalStatus(v));
+              if (v != 'Married') {
+                // Clear pregnancy-related state when section becomes inapplicable
+                bloc.add(AfhUpdateIsPregnant(null));
+                bloc.add(LMPChange(null));
+                bloc.add(EDDChange(null));
+              }
+            },
             validator: (value) => Validations.validateMaritalStatus(l, value),
           ),
         ),
@@ -422,19 +525,69 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           ),
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-          _Section(
-            child: ApiDropdown<String>(
-              labelText: '${l.isWomanPregnantQuestion} *',
-              items: const ['Yes', 'No'],
-              getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-              value: state.isPregnant,
-              onChanged: (v) => context
-                  .read<AddFamilyHeadBloc>()
-                  .add(AfhUpdateIsPregnant(v)),
-              validator: (value) => Validations.validateIsPregnant(l, value),
+          if (state.gender == 'Female') ...[
+            _Section(
+              child: ApiDropdown<String>(
+                labelText: '${l.isWomanPregnantQuestion} *',
+                items: const ['Yes', 'No'],
+                getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                value: state.isPregnant,
+                onChanged: (v) {
+                  final bloc = context.read<AddFamilyHeadBloc>();
+                  bloc.add(AfhUpdateIsPregnant(v));
+                  if (v == 'No') {
+                    bloc.add( LMPChange(null));
+                    bloc.add( EDDChange(null));
+                  }
+                },
+                validator: (value) {
+                  if (state.gender == 'Female' && state.maritalStatus == 'Married') {
+                    return Validations.validateIsPregnant(l, value);
+                  }
+                  return null;
+                },
+              ),
             ),
-          ),
-          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+            if (state.isPregnant == 'Yes') ...[
+              _Section(
+                child: CustomDatePicker(
+                  labelText: '${l.lmpDateLabel} *',
+                  hintText: l.dateHint,
+                  initialDate: state.lmp,
+                  onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(LMPChange(d)),
+                  validator: (date) => Validations.validateLMP(l, date),
+                ),
+              ),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+              _Section(
+                child: CustomDatePicker(
+                  labelText: '${l.eddDateLabel} *',
+                  hintText: l.dateHint,
+                  initialDate: state.edd,
+                  onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(EDDChange(d)),
+                  validator: (date) => Validations.validateEDD(l, date),
+                ),
+              ),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+            ] else if (state.isPregnant == 'No') ...[
+              _Section(
+                child: CustomTextField(
+                  labelText: '${l.fpAdoptingLabel} *',
+                  hintText: l.select,
+                  onChanged: (v) => context
+                      .read<AddFamilyHeadBloc>()
+                      .add(AfhUpdateSpouseName(v.trim())),
+                  validator: (value) => Validations.validateAdoptingPlan(l, value),
+                ),
+
+              ),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+            ],
+          ],
         ] else if (state.maritalStatus != null &&
             ['Unmarried', 'Widowed', 'Separated', 'Divorced']
                 .contains(state.maritalStatus)) ...[
@@ -457,20 +610,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
   }
 
 
-  Widget _buildChildrenForm(BuildContext context, AddFamilyHeadState state, AppLocalizations l) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-      children: [
-        _Section(
-          child: CustomTextField(
-            labelText: 'Child Name',
-            onChanged: (v) => context.read<AddFamilyHeadBloc>().add(ChildrenChanged(v.trim())),
-          ),
-        ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -573,7 +712,32 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
 
                         if (showSpouse) {
                           tabs.add(const Tab(text: 'SPOUSE DETAILS'));
-                          views.add(const Spousdetails());
+                          views.add(Spousdetails(
+                            key: ValueKey(state.gender ?? 'none'),
+                            initial: SpousState(
+                              relation: 'Spouse',
+                              memberName: state.spouseName,
+                              ageAtMarriage: state.ageAtMarriage,
+                              spouseName: state.headName,
+                              gender: (state.gender == 'Male')
+                                  ? 'Female'
+                                  : (state.gender == 'Female')
+                                      ? 'Male'
+                                      : null,
+                              religion: state.religion,
+                              category: state.category,
+                              abhaAddress: state.AfhABHAChange,
+                              bankAcc: state.bankAcc,
+                              ifsc: state.ifsc,
+                              voterId: state.voterId,
+                              rationId: state.rationId,
+                              phId: state.phId,
+                              beneficiaryType: state.beneficiaryType,
+                              RichIDChanged: state.AfhRichIdChange,
+                            ),
+                            headMobileOwner: state.mobileOwner,
+                            headMobileNo: state.mobileNo,
+                          ));
                         }
                         if (showChildren) {
                           tabs.add(const Tab(text: 'CHILDREN DETAILS'));

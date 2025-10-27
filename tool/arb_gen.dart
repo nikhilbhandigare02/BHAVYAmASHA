@@ -133,6 +133,8 @@ void _walk({
           final valueId = item['value'];
           final seg = valueId is String ? valueId : 'option_${i + 1}';
           _walk(node: item, path: [...path, 'options', seg], onLocalizedNode: onLocalizedNode);
+        } else {
+          _walk(node: item, path: [...path, 'options', 'option_${i + 1}'], onLocalizedNode: onLocalizedNode);
         }
       }
     }

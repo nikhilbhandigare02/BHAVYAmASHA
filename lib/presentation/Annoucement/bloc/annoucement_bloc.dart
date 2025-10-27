@@ -8,23 +8,21 @@ part 'annoucement_state.dart';
 class AnnoucementBloc extends Bloc<AnnoucementEvent, AnnoucementState> {
   AnnoucementBloc() : super(const AnnoucementState()) {
     on<AnLoad>((event, emit) async {
-      // Mock data list
       const items = [
         AnnouncementItem(
-          title: 'Distribution: Smart phones given to ASHA workers',
+          titleKey: 'announcementItem1Title',
           date: '02-01-2023',
-          body:
-              'In the local primary health center, smart phones were given to the ASHA workers of the block area for health related work... The mobile is specially designed for health related programs.',
+          bodyKey: 'announcementItem1Body',
         ),
         AnnouncementItem(
-          title: 'Bihar ASHA Worker Vacancy 2023: Great opportunity',
+          titleKey: 'announcementItem2Title',
           date: '19-02-2023',
-          body: 'If you are a resident of Bihar and you are a woman, then...',
+          bodyKey: 'announcementItem2Body',
         ),
         AnnouncementItem(
-          title: 'ASHA Workers of Bihar Demand Better Wages, Work Environment',
+          titleKey: 'announcementItem3Title',
           date: '07-03-2023',
-          body: 'ASHA Workers have been at the forefront of the fight against...',
+          bodyKey: 'announcementItem3Body',
         ),
       ];
       await Future<void>.delayed(const Duration(milliseconds: 100));

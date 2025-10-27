@@ -14,6 +14,14 @@ final class AfhUpdateHeadName extends AddFamilyHeadEvent {
   final String value;
   AfhUpdateHeadName(this.value);
 }
+final class AfhABHAChange extends AddFamilyHeadEvent {
+  final String value;
+  AfhABHAChange(this.value);
+}
+final class AfhRichIdChange extends AddFamilyHeadEvent {
+  final String value;
+  AfhRichIdChange(this.value);
+}
 
 final class AfhUpdateFatherName extends AddFamilyHeadEvent {
   final String value;
@@ -23,6 +31,13 @@ final class AfhUpdateFatherName extends AddFamilyHeadEvent {
 final class AfhUpdateDob extends AddFamilyHeadEvent {
   final DateTime? value;
   AfhUpdateDob(this.value);
+}
+final class EDDChange extends AddFamilyHeadEvent {
+  final DateTime? value;
+  EDDChange(this.value);
+}final class LMPChange extends AddFamilyHeadEvent {
+  final DateTime? value;
+  LMPChange(this.value);
 }
 
 final class AfhUpdateApproxAge extends AddFamilyHeadEvent {

@@ -1,0 +1,363 @@
+{
+    "national_program":{
+           "title":{
+            "en":"National Programs",
+            "hi":"राष्ट्रीय कार्यक्रम"
+           },
+
+           "program_list": {
+            "options":[
+                {
+                    "en": "Tuberculosis(TB) Eradication Program",
+                    "hi": "यक्ष्मा(टी.बी.) उन्मूलन कार्यक्रम",
+                    "router_link": "/national-program-of-tb",
+                    "imgUrl":"./assets/img/capsule2.png"
+                },
+                {
+                    "en": "Leprosy Eradication Program",
+                    "hi": "कुष्ठ उन्मूलन कार्यक्रम",
+                    "router_link": "/national-program-of-laprosy",
+                    "imgUrl":"./assets/img/capsule2.png"
+                },
+                {
+                    "en": "Kala-azar Eradication Program",
+                    "hi": "कालाजार उन्मूलन कार्यक्रम",
+                    "router_link": "/national-program-of-kalajar",
+                    "imgUrl":"./assets/img/capsule2.png"
+                },
+                {
+                    "en": "Malaria Eradication Program",
+                    "hi": "मलेरिया उन्मूलन कार्यक्रम",
+                    "router_link": "/national-program-of-malaria",
+                    "imgUrl":"./assets/img/capsule2.png"
+                },
+                {
+                    "en": "Filaria Eradication Program",
+                    "hi": "फाइलेरिया उन्मूलन कार्यक्रम",
+                    "router_link": "/national-program-of-filaria",
+                    "imgUrl":"./assets/img/capsule2.png"
+                },
+                {
+                    "en": "AES/JE Eradication Program",
+                    "hi": "AES/JE उन्मूलन कार्यक्रम",
+                    "router_link": "/national-program-of-aes",
+                    "imgUrl":"./assets/img/capsule2.png"
+                },
+                {
+                    "en": "AMB Eradication Program",
+                    "hi": "AMB उन्मूलन कार्यक्रम",
+                    "router_link": "/national-program-of-amb",
+                    "imgUrl":"./assets/img/capsule2.png"
+                },
+                {
+                    "en": "NIDDCP Program",
+                    "hi": "NIDDCP कार्यक्रम",
+                    "router_link": "/national-program-of-niddcp",
+                    "imgUrl":"./assets/img/capsule2.png"
+                },
+                {
+                    "en": "AB-PMJAY Program",
+                    "hi": "AB-PMJAY कार्यक्रम",
+                    "router_link": "/national-program-of-ab-pmjay",
+                    "imgUrl":"./assets/img/capsule2.png"
+                }
+            ]
+        },
+
+        "tb_eradiction_program":{
+            "title":{
+                "en": "Tuberculosis(TB) Eradication Program",
+                "hi": "यक्ष्मा(टी.बी.) उन्मूलन कार्यक्रम"
+            },
+            "date":{
+                "en": "Date",
+                "hi": "तिथि"
+            },
+            "first_acitivity":{
+                "indicative_work":{
+                    "en": "First Indicative Work/Intensive Search Campaign (on the lane for notifying new Tuberculosis patients)",
+                    "hi": "प्रथम सूचक कार्य/सघन खोज अभियान (नये यक्ष्मा मरीज को नोटीफाइड करने हेतु लेन पर)",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },
+                "treatment_provider":{
+                    "en": "Treatment provider work",
+                    "hi": "ट्रीटमेंट प्रोभाइडर कार्य",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                }
+            },
+            "second_acitivity":{
+                "feeding_medicine":{
+                    "en": "On feeding medicine to Drug Sensitive Tuberculosis patient or Drug Resistant Tuberculosis patient per Shorter regimen",
+                    "hi": "प्रति Drug Sensitive यक्ष्मा मरीज अथवा प्रति Shorter regimen के Drug Resistant यक्ष्मा मरीज को दवा खिलाने पर",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                }
+            },
+            "third_acitivity":{
+                "conventional_treatment":{
+                    "en": "Conventional MDR treated Drug Resistant Tuberculosis patient (Rs. 2000) for feeding medicine (on Intensive Phase).",
+                    "hi": "Conventional MDR इलाजरत Drug Resistant यक्ष्मा मरीज को दवा खिलाने ( रू० 2000- Intensive Phase पर।",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                }
+            },
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        },
+
+        "leprosy_eradiction_program":{
+            "title":{
+                "en": "Leprosy Eradication Program",
+                "hi": "कुष्ठ उन्मूलन कार्यक्रम"
+                },
+                "date":{
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "amount_for_finding_leprosy_free_patient":{
+                    "en": "Amount payable to ASHA for finding new leprosy free patients",
+                    "hi": "विकलांगता मुक्त नये कुष्ठ रोगी खोजने हेतु आशा को देय राशि",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },
+                "amount_for_finding_leprosy_patient_with_disability":{
+                    "en": "Amount payable to ASHA for finding new leprosy patients with disabilities",
+                    "hi": "विकलांगता युक्त नये कुष्ठ रोगी खोजने हेतु आशा को देय राशि",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },
+                "amount_for_pb_cases":{
+                    "en": "Pauci-Bacillary(PB) of Leprosy Payable after complete treatment of leprosy",
+                    "hi": "कुष्ठ रोग के पाउसी-बेसीलरी(पी० बी०) मामलों में पूर्ण उपचार करने के पश्चात देय राशि",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },
+                "amount_for_mb_cases":{
+                    "en": "Amount after complete cure in multi-bacillary(MB) cases of leprosy",
+                    "hi": "कुष्ठ रोग के बहु-बैसीलरी(MB)) मामलों में पूर्ण उपचार करने के पश्चात राशि",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },
+           
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        },
+
+
+        "kalajar_eradiction_program":{
+            "title":{
+                "en": "Kala-azar Eradication Program",
+                "hi": "कालाजार उन्मूलन कार्यक्रम"
+                },
+                "date":{
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "amount_for_finding_kalajar_patient":{
+                    "en": "Amount payable to ASHA for search of Kala-azar patient, referral to PHC, investigation, complete treatment, monitoring for 6 months",
+                    "hi": "कालाजार मरीज के खोज, PHC रेफर करना, जाँच कराना, पूर्ण इलाज कराना, 6 माह तक अनुश्रवण करने हेतु आशा को देय राशि",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },
+                "amount_for_treatment_of_kalajar_patient":{
+                    "en": "ASHA on completion of treatment of kala-azar patients in the government hospital under the Chief Minister's Kala-azar Relief Scheme",
+                    "hi": "आशा को मुख्यमंत्री कालाजार राहत योजना से कालाजार मरीजो को सरकारी अस्पताल में ईलाज पूर्ण कराने पर ",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },       
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        },
+
+        "malaria_eradiction_program":{
+            "title":{
+                "en": "Malaria Eradication Program",
+                "hi": "मलेरिया उन्मूलन कार्यक्रम"
+                },
+                "date":{
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "amount_for_active_malaria_patient":{
+                    "en": "Active malaria infection test of malaria fever victims",
+                    "hi": "मलेरिया बुखार पीडितों का सक्रिय (Active) मलेरिया संक्रमण जाँच",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },
+                "amount_for_providinig_treatment_to_malaria_patient":{
+                    "en": "Providing full radical treatment to malaria positive P.V. or P.F. patients as per the latest claim system",
+                    "hi": " मलेरिया पॉजिटिव पी० वी० अथवा पी० एफ० मरीजों को अद्यतन दावा प्रणाली के अनुसार पूर्ण रेडिकल उपचार प्रदान कराने",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },       
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        },
+
+        "filaria_eradiction_program":{
+            "title":{
+                "en": "Filaria Eradication Program",
+                "hi": "फाइलेरिया उन्मूलन कार्यक्रम"
+                },
+                "date":{
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "amount_for_filaria_patient":{
+                    "en": "Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)",
+                    "hi": "फाइलेरिया चक्र के दौरान आशा द्वारा प्रति 50 घर के लिए MDA Program के अंतर्गत दवा सामने खिलाने हेतु (एक हजार आबादी को कवर करने के लिए)",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },      
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        },
+
+        "aes_eradiction_program":{
+            "title":{
+                "en": "AES/JE Eradication Program",
+                "hi": "AES/JE उन्मूलन कार्यक्रम"
+                },
+                "date":{
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "amount_for_spraying_irs":{
+                    "en": "Amount payable to ASHA as community catalyst in 1000 population during IRS spraying",
+                    "hi": "IRS छिड़काव के दौरान 1000 जनसंख्या में सामुदायिक उत्प्रेरक के रूप में आशा को देय राशि",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },  
+                "amount_for_unknown_aes_patient":{
+                    "en": "Those patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer, will be given incentive amount",
+                    "hi": " आशा द्वारा नजदीकी PHC, CHC, Referral, DH अथवा चिकित्सा महाविद्यालय अस्पताल में रेफर किए गए वैसे मरीज, जिनका अज्ञात AES ( Unknown AES) अथवा जापानी इन्केलाइटिस (Japanese Encephalitis JE) संपुष्ट, चिकित्सा पदाधिकारी द्वारा किया गया हो, उन्हें प्रोत्साहन राशि दिए जाने का प्रावधान है",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },    
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        },
+
+        "amb_eradiction_program":{
+            "title":{
+                "en": "AMB Eradication Program",
+                "hi": "AMB उन्मूलन कार्यक्रम"
+                },
+                "date":{
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "amount_for_distrubution_of_ifa_pills":{
+                    "en": "ASHA women of reproductive age (20 to 49 years) in their area who are pregnant or traveling maintenance in their Line Listing Register and the amount due for distribution of 4 IFA red pills per month to those women",
+                    "hi": "आशा अपने क्षेत्र के प्रजनन उम्र (20 से 49 वर्ष) की वैसी महिलाए जो गर्भवती या यात्री न हो उनका Line Listing रजिस्टर में संधारण करना एवं उन महिला को प्रति माह 4 IFA लाल गोली वितरण करने हेतु देय राशि",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },  
+                "amount_for_distrubution_of_syrup":{
+                    "en": "Amount payable for regularizing the line listing register of the children of Asha area from 6 months to 59 months and for distribution of syrup of IFA to those guardians/parents of the children",
+                    "hi": " आशा अपने क्षेत्र के 6 माह से 59 माह तक के बच्चों का Line Listing रजिस्टर में साधारण करने एवं बच्चों के उन अभिभावक / माता पिता को IFA  का सिरप वितरण करने हेतु देय राशि",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },    
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        },
+
+        "niddcp_program":{
+            "title":{
+                "en": "NIDDCP Program",
+                "hi": "NIDDCP कार्यक्रम"
+                },
+                "date":{
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "amount_for_niddcp":{
+                    "en": "ASHA Incentive under NIDDCP",
+                    "hi": "NIDDCP के तहत आशा प्रोत्साहन",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },   
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        },
+
+        "pmjay_program":{
+            "title":{
+                "en": "AB-PMJAY Program",
+                "hi": "AB-PMJAY कार्यक्रम"
+                },
+                "date":{
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "amount_for_distrubution_of_ifa_pills":{
+                    "en": "Under AB-PMJAY, for patients brought by Asha for treatment in government hospitals (who will get medical benefits after getting admitted in the hospital)",
+                    "hi": "AB-PMJAY अंतर्गत आशा द्वारा सरकारी अस्पतालों में इलाज हेतु लाये गये मरीजो(जो अस्पताल में भर्ती होकर चिकित्सा लाभ लेंगे) के लिए",
+                    "value":{
+                        "en": "Enter amount",
+                        "hi": "राशि डालें"
+                    }
+                },    
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        }
+
+    }
+}

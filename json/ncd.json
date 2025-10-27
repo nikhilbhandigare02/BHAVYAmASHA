@@ -1,0 +1,1666 @@
+{
+    "forms": {
+        "cbac": {
+            "general_information": {
+                "en": "General Information",
+                "hi": "समान्य जानकरी",
+                "label": {
+                    "en": "General Information",
+                    "hi": "समान्य जानकरी"
+                },
+                "inputs": {
+                    "asha_name": {
+                        "en": "ASHA Name ",
+                        "hi": "आशा का नाम"
+                    },
+                    "anm_name": {
+                        "en": "ANM Name",
+                        "hi": "ए.एन.एम. का नाम"
+                    },
+                    "name_of_primary_health_center": {
+                        "en": "Name of Primary Health Center",
+                        "hi": "प्राथमिक स्वास्थ्य केन्द्र का नाम"
+                    },
+                    "village": {
+                        "en": "Village",
+                        "hi": "ग्राम "
+                    },
+                    "name_of_health_sub_center": {
+                        "en": "Name of Health Sub Center",
+                        "hi": "उप स्वास्थ्य केन्द्र का नाम"
+                    },
+                    "date": {
+                        "en": "Date",
+                        "hi": "तिथि "
+                    }
+                }
+            },
+            "personal_information": {
+                "en": "Personal Information",
+                "hi": "व्यक्तिगत जानकरी",
+                "label": {
+                    "en": "Personal Information",
+                    "hi": "व्यक्तिगत जानकरी"
+                },
+                "inputs": {
+                    "name": {
+                        "en": "Name",
+                        "hi": "नाम "
+                    },
+                    "husband_father_name": {
+                        "en": "Husband / Father Name",
+                        "hi": "पति / पिता का नाम"
+                    },
+                    "age": {
+                        "en": "Age",
+                        "hi": "उम्र "
+                    },
+                    "gender": {
+                        "en": "Gender",
+                        "hi": "लिंग "
+                    },
+                    "address": {
+                        "en": "Address",
+                        "hi": "पता "
+                    },
+                    "identification_type": {
+                        "en": "Identification Type",
+                        "hi": "पहचान प्रकार",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "Aadhaar Card",
+                                "hi": "आधार कार्ड",
+                                "value": "aadhaar_card"
+                            },
+                            {
+                                "en": "UID",
+                                "hi": "यूआईडी",
+                                "value": "uid"
+                            },
+                            {
+                                "en": "Voter Card",
+                                "hi": "वोटर कार्ड",
+                                "value": "voter_card"
+                            }
+                        ]
+                    },
+                    "identification_number": {
+                        "en": "Identification Number",
+                        "hi": "पहचान संख्या"
+                    },
+                    "affiliated_to_state_health_insurance_scheme": {
+                        "en": "Affiliated to State Health Insurance Scheme",
+                        "hi": "राज्य स्वास्थ्य बीमा योजना से सम्बद्ध",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            },
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            }
+                        ]
+                    },
+                    "mobile_number": {
+                        "en": "Mobile/Telephone Number",
+                        "hi": "मोबाइल/टेलीफोन नं०"
+                    },
+                    "whether_the_person_has_one_of_the_following_conditions": {
+                        "en": "Whether the person has one of the following conditions",
+                        "hi": "क्या व्यक्ति की स्थिति निम्न में से एक है",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें "
+                        },
+                        "options": [
+                            {
+                                "en": "Visual impairment",
+                                "hi": "दृष्टि दोष",
+                                "value": "visual_impairment"
+                            },
+                            {
+                                "en": "Physically Handicap",
+                                "hi": "विकलांग",
+                                "value": "physically_handicap"
+                            },
+                            {
+                                "en": "Bedridden due to some illness",
+                                "hi": "किसी बीमारी के कारण बिस्तर पर पड़ा हुआ",
+                                "value": "bedridden_due_to_some_illness"
+                            },
+                            {
+                                "en": "Need for help from another person to perform daily tasks",
+                                "hi": "दैनिक कार्य करने हेतु अन्य व्यक्ति के सहयोग की आवश्यकता",
+                                "value": "need_for_help_from_another_person_to_perform_daily_tasks"
+                            }
+                        ]
+                    },
+                    "details": {
+                        "en": "Details (if any selected from above list, give details)",
+                        "hi": "यदि हाँ, तो विवरण दें ।"
+                    }
+                }
+            },
+            "part_a": {
+                "en": "Part 'A' Assessment of potential risk",
+                "hi": "भाग 'A' संभावित जोखिम का आंकलन",
+                "label": {
+                    "en": "Part A",
+                    "hi": "भाग A"
+                },
+                "inputs": {
+                    "what_is_your_age_in_years": {
+                        "en": "What is your age? (in years)",
+                        "hi": "आपकी उम्र क्या है? (वर्षों में)",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें "
+                        },
+                        "messages": {
+                            "error": {
+                                "en": "Please select What is your age?",
+                                "hi": "कृपया आपकी उम्र क्या है? का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "0 to 29 years",
+                                "hi": "0 से 29 वर्ष",
+                                "value": "0"
+                            },
+                            {
+                                "en": "30 to 39 years",
+                                "hi": "30 से 39 वर्ष",
+                                "value": "1"
+                            },
+                            {
+                                "en": "40 to 49 years",
+                                "hi": "40 से 49 वर्ष",
+                                "value": "2"
+                            },
+                            {
+                                "en": "50 to 59 years",
+                                "hi": "50 से 59 वर्ष",
+                                "value": "3"
+                            },
+                            {
+                                "en": "over 59 years",
+                                "hi": "59 वर्ष से अधिक",
+                                "value": "4"
+                            }
+                        ]
+                    },
+                    "do_you_smoke_or_consume_smokeless_tobacco_products_like_gutkakhaini": {
+                        "en": "Do you smoke or consume smokeless tobacco products like Gutka/Khaini?",
+                        "hi": "क्या आप धूम्रपान या धूम्रपान रहित तम्बाकू उत्पाद यथा गुटका / खैनी का सेवन करते हैं?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें "
+                        },
+                        "messages": {
+                            "error": {
+                                "en": "Please select Do you smoke or consume smokeless tobacco products like Gutka/Khaini?",
+                                "hi": "कृपया क्या आप धूम्रपान या धूम्रपान रहित तम्बाकू उत्पाद यथा गुटका / खैनी का सेवन करते हैं? का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "Have never done",
+                                "hi": "कभी नहीं किये है",
+                                "value": "0"
+                            },
+                            {
+                                "en": "Used to do in the past or do sometimes in the present",
+                                "hi": "पूर्व में करते थे अथवा वर्तमान में कभी-कभी करते है",
+                                "value": "1"
+                            },
+                            {
+                                "en": "Do it every day",
+                                "hi": "प्रतिदिन करते है",
+                                "value": "2"
+                            }
+                        ]
+                    },
+                    "do_you_consume_alcoholliquor_daily": {
+                        "en": "Do you consume alcohol/liquor daily?",
+                        "hi": "क्या आप शराब / मदिरा का प्रतिदिन सेवन करते हैं?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें "
+                        },
+                        "messages": {
+                            "error": {
+                                "en": "Please select Do you consume alcohol/liquor daily?",
+                                "hi": "कृपया क्या आप शराब / मदिरा का प्रतिदिन सेवन करते हैं? का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "0"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "1"
+                            }
+                        ]
+                    },
+                    "waist_measurement_in_cm": {
+                        "en": "Waist measurement (in cm)",
+                        "hi": "कमर का माप (से. मी. में)",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें "
+                        },
+                        "messages": {
+                            "error": {
+                                "en": "Please select Waist measurement",
+                                "hi": "कृपया कमर का माप का चयन करें।"
+                            }
+                        },
+                        "options": {
+                            "female": [
+                                {
+                                    "en": "80 cm or less",
+                                    "hi": "80 से.मी. या उससे कम",
+                                    "value": "0"
+                                },
+                                {
+                                    "en": "81 to 90 cm",
+                                    "hi": "81 से 90 से.मी.",
+                                    "value": "1"
+                                },
+                                {
+                                    "en": "90 cm more than",
+                                    "hi": "90 से.मी. से ज्यादा",
+                                    "value": "2"
+                                }
+                            ],
+                            "male": [
+                                {
+                                    "en": "90 cm or less",
+                                    "hi": "90 से.मी. या उससे कम",
+                                    "value": "0"
+                                },
+                                {
+                                    "en": "91 to 100 cm",
+                                    "hi": "91 से 100 से.मी.",
+                                    "value": "1"
+                                },
+                                {
+                                    "en": "100 cm. m. more than",
+                                    "hi": "100 से. मी. से ज्यादा",
+                                    "value": "2"
+                                }
+                            ]
+                        }
+                    },
+                    "do_you_do_at_least_150_minutes_of_physical_activity_a_week_at_least_30_minutes_a_day_5_days_a_week": {
+                        "en": "Do you do at least 150 minutes of physical activity a week? (At least 30 minutes a day, 5 days a week)",
+                        "hi": "क्या आप सप्ताह में कम से कम 150 मिनट शारीरिक गतिविधियां करते हैं? (प्रतिदिन कम-से-कम 30 मिनट, सप्ताह में 5 दिन)",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें "
+                        },
+                        "messages": {
+                            "error": {
+                                "en": "Please select Do you do at least 150 minutes of physical activity a week?",
+                                "hi": "कृपया क्या आप सप्ताह में कम से कम 150 मिनट शारीरिक गतिविधियां करते हैं? का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "Less than 150 minutes a week",
+                                "hi": "सप्ताह में 150 मिनट से कम",
+                                "value": "1"
+                            },
+                            {
+                                "en": "More than 150 minutes a week",
+                                "hi": "सप्ताह में 150 मिनट से अधिक",
+                                "value": "0"
+                            }
+                        ]
+                    },
+                    "does_anyone_in_your_family_parents_siblings_suffer_from_high_blood_pressure_diabetes_or_heart_disease": {
+                        "en": "Does anyone in your family (parents, siblings) suffer from high blood pressure, diabetes or heart disease?",
+                        "hi": "क्या आपके परिवार (माता-पिता, भाई-बहन) में से कोई भी उच्च रक्तचाप, मधुमेह अथवा हृदय रोग से पीड़ित है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें "
+                        },
+                        "messages": {
+                            "error": {
+                                "en": "Please select Does anyone in your family (parents, siblings) suffer from high blood pressure, diabetes or heart disease?",
+                                "hi": "कृपया क्या आपके परिवार (माता-पिता, भाई-बहन) में से कोई भी उच्च रक्तचाप, मधुमेह अथवा हृदय रोग से पीड़ित है? का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "0"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "2"
+                            }
+                        ]
+                    }
+                },
+                "total_score": {
+                    "en": "Total Score (Part A)",
+                    "hi": "कुल प्राप्तांक (Part A)"
+                },
+                "it_is_mandatory_for_every_person_aged_30_years_and_above_to_be_screened_if_a_persons_total_score_is_more_than_04_then_he_has_a_higher_risk_of_noncommunicable_diseases_ncds_this_person_is_to_be_advised_to_attend_the_weekly_noncommunicable_disease_day": {
+                    "en": "It is mandatory for every person aged 30 years and above to be screened. If a person's total score is more than 04 then he has a higher risk of non-communicable diseases (NCDs). This person is to be advised to attend the weekly non-communicable disease day.",
+                    "hi": "प्रत्येक 30 वर्ष एवं उससे अधिक के व्यक्ति का स्क्रीनिंग किया जाना अनिवार्य है। यदि किसी व्यक्ति का कुल अंक 04 से अधिक है तो उसे गैर संचारी रोग (NCD) का जोखिम अधिक है। इस व्यक्ति को साप्ताहिक गैर संचारी रोग दिवस में आने के लिए सलाह देनी है।"
+                }
+            },
+            "part_b": {
+                "en": "Part 'B' Early detection of illness: Ask the person about the following symptoms",
+                "hi": "भाग 'B' समय पर बीमारी का पता लगाना : नीचे दिए हुए लक्षणों के बारे में व्यक्ति से पूछें",
+                "label": {
+                    "en": "Part B",
+                    "hi": "भाग B"
+                },
+                "inputs": {
+                    "is_there_trouble_in_breathing_shortness_of_breath": {
+                        "en": "Is there trouble in breathing (shortness of breath)?",
+                        "hi": "क्या सांस लेने में तकलीफ (साँस फूलना) है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "does_the_cough_last_for_more_than_two_weeks": {
+                        "en": "Does the cough last for more than two weeks? *",
+                        "hi": "क्या दो सप्ताह से ज्यादा खाँसी होती है? *",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Does the cough last for more than two weeks? *",
+                                "hi": "कृपया क्या दो सप्ताह से ज्यादा खाँसी होती है? * का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_blood_in_the_mucus": {
+                        "en": "Is there blood in the mucus? *",
+                        "hi": "क्या बलगम में खून आता है? *",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Is there blood in the mucus? *",
+                                "hi": "कृपया क्या बलगम में खून आता है? * का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "has_the_fever_lasted_for_more_than_two_weeks": {
+                        "en": "Has the fever lasted for more than two weeks? *",
+                        "hi": "क्या दो सप्ताह से अधिक का बुखार है? *",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Has the fever lasted for more than two weeks? *",
+                                "hi": "कृपया क्या दो सप्ताह से अधिक का बुखार है? * का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_your_weight_continuously_decreasing": {
+                        "en": "Is your weight continuously decreasing? *",
+                        "hi": "क्या वजन लगातार कम हो रहा है? *",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Is your weight continuously decreasing? *",
+                                "hi": "कृपया क्या वजन लगातार कम हो रहा है? * का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_you_sweat_a_lot_at_night": {
+                        "en": "Do you sweat a lot at night? *",
+                        "hi": "क्या रात को बहुत पसीना आता है? *",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Do you sweat a lot at night? *",
+                                "hi": "कृपया क्या रात को बहुत पसीना आता है? * का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_seizures_occur": {
+                        "en": "Do seizures occur?",
+                        "hi": "क्या दौरे आते हैं?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_you_have_trouble_to_open_your_mouth": {
+                        "en": "Do you have trouble to open your mouth?",
+                        "hi": "क्या मुँह खोलने में परेशानी होती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "have_mouth_ulcers_that_are_not_healing_for_two_weeks": {
+                        "en": "Have mouth ulcers that are not healing for two weeks?",
+                        "hi": "क्या मुँह में छाले हैं जो दो सप्ताह से ठीक नहीं हो रहे हैं?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_any_kind_of_swelling_in_the_mouth_that_has_not_healed_for_two_weeks": {
+                        "en": "Is there any kind of swelling in the mouth that has not healed for two weeks?",
+                        "hi": "क्या  मुँह में किसी प्रकार का सूजन है जो दो सप्ताह से ठीक नहीं हुआ हो?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_a_white_or_red_ringrash_in_the_mouth_that_has_not_healed_for_two_weeks": {
+                        "en": "Is there a white or red ring/rash in the mouth that has not healed for two weeks?",
+                        "hi": "क्या मुँह में सफेद या लाल रंग का घेरा / चकत्ता है जो दो सप्ताह से ठीक नहीं हुआ हो?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_it_difficultpainful_to_chew_anything": {
+                        "en": "Is it difficult/painful to chew anything?",
+                        "hi": "क्या कुछ भी चबाने में कठिनाई/दर्द होता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "are_you_currently_taking_antitb_drugs": {
+                        "en": "Are you currently taking anti-TB drugs? **",
+                        "hi": "क्या आप वर्तमान में टी.बी. रोधक दवाइयां ले रहे हैं? **",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Are you currently taking anti-TB drugs? **",
+                                "hi": "कृपया क्या आप वर्तमान में टी.बी. रोधक दवाइयां ले रहे हैं? ** का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_anyone_in_your_family_currently_suffering_from_tuberculosis_tb": {
+                        "en": "Is anyone in your family currently suffering from Tuberculosis (TB)? **",
+                        "hi": "क्या आपके परिवार में वर्तमान में कोई क्षय रोग (टी.बी.) से पीड़ित है? **",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Is anyone in your family currently suffering from Tuberculosis (TB)? **",
+                                "hi": "कृपया क्या आपके परिवार में वर्तमान में कोई क्षय रोग (टी.बी.) से पीड़ित है? ** का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "does_any_member_of_your_family_have_a_previous_history_of_tb": {
+                        "en": "Does any member of your family have a previous history of TB? **",
+                        "hi": "क्या आपके परिवार के किसी सदस्य को टी.बी. होने का कोई पिछला इतिहास है? **",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Does any member of your family have a previous history of TB? **",
+                                "hi": "कृपया क्या आपके परिवार के किसी सदस्य को टी.बी. होने का कोई पिछला इतिहास है? ** का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_the_palms_or_soles_get_sores_frequently": {
+                        "en": "Do the palms or soles get sores frequently?",
+                        "hi": "क्या हथेली या तलवों में बार-बार घाव होता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_frequent_tingling_in_the_palms_or_soles": {
+                        "en": "Is there frequent tingling in the palms or soles?",
+                        "hi": "क्या हथेली या तलवों में बार-बार झुनझुनी होती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_your_vision_blurred": {
+                        "en": "Is your vision blurred?",
+                        "hi": "क्या धुंधला दिखाई देता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_you_have_difficulty_in_reading": {
+                        "en": "Do you have difficulty in reading?",
+                        "hi": "क्या पढ़ने में कठिनाई होती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "have_you_had_eye_pain_for_more_than_a_week": {
+                        "en": "Have you had eye pain for more than a week?",
+                        "hi": "क्या एक सप्ताह से अधिक से आँखों में दर्द है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "have_you_had_redness_in_your_eyes_for_more_than_a_week": {
+                        "en": "Have you had redness in your eyes for more than a week?",
+                        "hi": "क्या एक सप्ताह से अधिक से आँखों में लालिमा है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "are_you_having_troubledifficulty_in_hearing": {
+                        "en": "Are you having trouble/difficulty in hearing?",
+                        "hi": "क्या सुनने में परेशानी / कठिनाई होती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_a_change_in_voice": {
+                        "en": "Is there a change in voice?",
+                        "hi": "क्या आवाज में बदलाव है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_a_rash_or_discoloration_of_the_skin_that_is_not_sensitive": {
+                        "en": "Is there a rash or discoloration of the skin that is not sensitive?",
+                        "hi": "क्या त्वचा पर चकत्ता या रंग में परिवर्तन (दाग) है, जिसमें कोई संवेदना नहीं है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_the_skin_thick_somewhere": {
+                        "en": "Is the skin thick somewhere?",
+                        "hi": "कहीं पर त्वचा मोटी तो नहीं है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_a_lump_on_the_skin": {
+                        "en": "Is there a lump on the skin?",
+                        "hi": "कहीं त्वचा में गांठ तो नहीं है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_no_feeling_numbness_on_hotcold_touch_in_the_palms_or_soles_of_the_feet": {
+                        "en": "Is there no feeling (numbness) on hot/cold touch in the palms or soles of the feet?",
+                        "hi": "क्या हथेली या पैर के तलवों में गरम/ठंडा छूने पर कुछ महसूस नहीं (सुन्नापन) होता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "are_there_scratchescrackstorn_on_the_fingers_or_toes": {
+                        "en": "Are there scratches/cracks/torn on the fingers or toes?",
+                        "hi": "क्या हाथ या पैरों की उंगलियों में खरोंच / दरार/फटता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_tingling_and_numbness_in_the_hands_or_feet": {
+                        "en": "Is there tingling and numbness in the hands or feet?",
+                        "hi": "क्या हाथ या पैरों में झुनझुनी होना और सुन्न हो जाता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_difficulty_in_closing_the_eyelids": {
+                        "en": "Is there difficulty in closing the eyelids?",
+                        "hi": "क्या पलकों को बंद करने में कठिनाई होती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_you_have_difficulty_in_holding_anything_with_your_fingers": {
+                        "en": "Do you have difficulty in holding anything with your fingers?",
+                        "hi": "क्या उंगलियों से कोई चीज पकड़ने में कठिनाई होती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_weakness_in_the_legs_that_makes_it_difficult_to_walk": {
+                        "en": "Is there weakness in the legs that makes it difficult to walk?",
+                        "hi": "क्या पैरों में कमजोरी जिसके कारण चलने में कठिनाई होती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_a_lump_in_the_breast_as_well": {
+                        "en": "Is there a lump in the breast as well?",
+                        "hi": "क्या स्तन में गांठ भी है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "are_the_nipplesareolas_leaking_with_blood": {
+                        "en": "Are the nipples/areolas leaking with blood?",
+                        "hi": "क्या निप्पल/धुचकों में से खून के साथ रिसाव होता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_a_difference_in_breast_shape_and_size": {
+                        "en": "Is there a difference in breast shape and size?",
+                        "hi": "क्या स्तन के आकार व नाप में अंतर है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_excessive_bleeding_during_menstruation": {
+                        "en": "Is there excessive bleeding during menstruation? ***",
+                        "hi": "क्या माहवारी में अत्यधिक रक्तस्त्राव होता है? ***",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Is there excessive bleeding during menstruation? ***",
+                                "hi": "कृपया क्या माहवारी में अत्यधिक रक्तस्त्राव होता है? *** का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_a_condition_of_mental_depression": {
+                        "en": "Is there a condition of mental depression? ***",
+                        "hi": "क्या मानसिक अवसाद की स्थिति है? ***",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Is there a condition of mental depression? ***",
+                                "hi": "कृपया क्या मानसिक अवसाद की स्थिति है? *** का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "does_the_uterus_come_out": {
+                        "en": "Does the uterus come out? ***",
+                        "hi": "क्या बच्चेदानी बाहर आती है? ***",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "required": true,
+                        "messages": {
+                            "error": {
+                                "en": "Please select Does the uterus come out? ***",
+                                "hi": "कृपया क्या बच्चेदानी बाहर आती है? *** का चयन करें।"
+                            }
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "does_bleeding_occur_after_menopause_even_after_menstruation_stops": {
+                        "en": "Does bleeding occur after menopause (even after menstruation stops)?",
+                        "hi": "क्या Menopause (माहवारी बंद होने के बाद भी) के बाद रक्तस्राव होता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "does_bleeding_occur_after_intercourse": {
+                        "en": "Does bleeding occur after intercourse?",
+                        "hi": "क्या संभोग के उपरांत रक्तस्राव होता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_a_smelly_vaginal_discharge": {
+                        "en": "Is there a smelly vaginal discharge?",
+                        "hi": "क्या बदबूदार योनिस्त्राव होती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "are_there_irregular_periods": {
+                        "en": "Are there irregular periods?",
+                        "hi": "क्या अनियमित माहवारी होती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_you_have_joint_pains": {
+                        "en": "Do you have joint pains?",
+                        "hi": "क्या जोड़ों में दर्द होता है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_you_feel_unsteady_while_standing_or_walking": {
+                        "en": "Do you feel unsteady while standing or walking?",
+                        "hi": "क्या खड़े रहने या चलने में अस्थिर महसूस करते हैं?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "is_there_any_physical_disability_that_causes_problems_with_walking": {
+                        "en": "Is there any physical disability that causes problems with walking?",
+                        "hi": "क्या कोई शारीरिक अक्षमता है, जिसके कारण चलने संबंधी समस्या होती हो?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_you_need_help_from_someone_else_to_do_daily_activities_such_as_eating_and_dressing_bathing_walking_or_going_to_the_toilet": {
+                        "en": "Do you need help from someone else to do daily activities such as eating and dressing, bathing, walking, or going to the toilet?",
+                        "hi": "क्या दैनिक कार्यों जैसे खाना खाने तथा तैयार होने, नहाने, चलने या शौचालय जाने हेतु किसी अन्य व्यक्ति के मदद की आवश्यकता पड़ती है?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "do_you_forget_the_names_or_home_addresses_of_people_close_to_you": {
+                        "en": "Do you forget the names or home addresses of people close to you?",
+                        "hi": "क्या अपने नजदीकी व्यक्तियों का नाम या घर का पता भूल जाते हैं?",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    },
+                    "if_a_person_has_any_of_the_symptoms_given_above_then_in_that_case_immediately_take_the_person_to_the_nearest_health_center_for_treatment_by_a_medical_officer": {
+                        "en": "If a person has any of the symptoms given above, then in that case, immediately take the person to the nearest health center for treatment by a medical officer.",
+                        "hi": "यदि किसी व्यक्ति में ऊपर दिए गए लक्षणों में से कोई एक भी लक्षण है तो उस स्थिति में व्यक्ति को तुरंत निकटतम स्वास्थ्य केन्द्र पर चिकित्सा पदाधिकारी पास उपचार हेतु मैजें।",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No",
+                                "hi": "नहीं",
+                                "value": "no"
+                            },
+                            {
+                                "en": "Yes",
+                                "hi": "हाँ",
+                                "value": "yes"
+                            }
+                        ]
+                    }
+                },
+                "if_the_answer_is_yes__suggest_about_next_action_collect_sputum_sample_and_send_it_for_testing_to_the_nearest_tb_testing_centre": {
+                    "en": "\"*If the answer is yes - suggest about next action Collect sputum sample and send it for testing to the nearest TB testing centre.\"",
+                    "hi": "*यदि उत्तर हाँ है- अगली कार्यवाही का सुझाव दें बलगम का नमूना संग्रह कर निकटतम टी.बी. परीक्षण केन्द्र में जाँच के लिए भेंजे।",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें"
+                    },
+                    "options": [
+                        {
+                            "en": "No",
+                            "hi": "नहीं",
+                            "value": "no"
+                        },
+                        {
+                            "en": "Yes",
+                            "hi": "हाँ",
+                            "value": "yes"
+                        }
+                    ]
+                },
+                "if_the_answer_is_yes_then_the_anm_should_search_for_this_disease_in_all_other_family_members": {
+                    "en": "\"**If the answer is yes, then the ANM should search for this disease in all other family members.\"",
+                    "hi": "**यदि उत्तर हाँ है, तो ए.एन.एम. द्वारा परिवार के अन्य सभी सदस्यों में इस रोग की खोज करनी चाहिए।",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें"
+                    },
+                    "options": [
+                        {
+                            "en": "No",
+                            "hi": "नहीं",
+                            "value": "no"
+                        },
+                        {
+                            "en": "Yes",
+                            "hi": "हाँ",
+                            "value": "yes"
+                        }
+                    ]
+                },
+                "if_a_woman_has_these_symptoms_then_information_about_such_women_should_be_made_available_to_the_asha_facilitator": {
+                    "en": "\"***If a woman has these symptoms then information about such women should be made available to the ASHA facilitator.\"",
+                    "hi": "***यदि महिला में ये लक्षण हो तो उन महिलाओं की जानकारी आशा फैसिलिटेटर को उपलब्ध करायी जाये।",
+                    "placeholder": {
+                        "en": "Select",
+                        "hi": "चुनें"
+                    },
+                    "options": [
+                        {
+                            "en": "No",
+                            "hi": "नहीं",
+                            "value": "no"
+                        },
+                        {
+                            "en": "Yes",
+                            "hi": "हाँ",
+                            "value": "yes"
+                        }
+                    ]
+                }
+            },
+            "part_c": {
+                "en": "Part C: Risk factors for lung diseases (tick whichever is correct)",
+                "hi": "भाग 'C'  फेफड़ों संबंधी रोगों के जोखिम (जो सही हो उस पर सही का निशान लगाएं)",
+                "label": {
+                    "en": "Part C",
+                    "hi": "भाग C"
+                },
+                "inputs": {
+                    "what_type_of_fuel_is_used_for_cooking": {
+                        "en": "What type of fuel is used for cooking?",
+                        "hi": "खाना पकाने के लिये किस प्रकार के ईंधन का उपयोग किया जाता है",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "Firewood",
+                                "hi": "जलाने वाली लकड़ी",
+                                "value": "firewood"
+                            },
+                            {
+                                "en": "Crop Residues",
+                                "hi": "फसल के बचे हुए अवशेष",
+                                "value": "crop_residues"
+                            },
+                            {
+                                "en": "Cow dung cakes",
+                                "hi": "गोबर के उपले",
+                                "value": "cow_dung_cakes"
+                            },
+                            {
+                                "en": "Coal",
+                                "hi": "कोयला",
+                                "value": "coal"
+                            },
+                            {
+                                "en": "Kerosene oil (kerosene)",
+                                "hi": "मिट्टी का तेल (केरोसिन)",
+                                "value": "kerosene_oil_kerosene"
+                            },
+                            {
+                                "en": "L.P.G",
+                                "hi": "एल.पी.जी.",
+                                "value": "lpg"
+                            }
+                        ]
+                    },
+                    "business_risk": {
+                        "en": "Business Risk -",
+                        "hi": "व्यवसायिक जोखिम -",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "Burning of crop residue",
+                                "hi": "फसल के बचे हुए अवशेष का जलना",
+                                "value": "burning_of_crop_residue"
+                            },
+                            {
+                                "en": "Burning of garbage and leaves",
+                                "hi": "कूड़ा-करकट-पत्तियों का जलना",
+                                "value": "burning_of_garbage_and_leaves"
+                            },
+                            {
+                                "en": "Working in a smokey factory",
+                                "hi": "धुएँ वाले कारखाने में काम करना",
+                                "value": "working_in_a_smokey_factory"
+                            },
+                            {
+                                "en": "Working in industries with gas and smoke pollution such as brick kiln and glass industry etc.",
+                                "hi": "गैस एवं धुएं के प्रदूषण वाले उद्योगों जैसे- ईंट भट्टा और कांच वाले उद्योग में काम करना आदि",
+                                "value": "working_in_industries_with_gas_and_smoke_pollution_such_as_brick_kiln_and_glass_industry_etc"
+                            }
+                        ]
+                    }
+                }
+            },
+            "part_d": {
+                "en": "Part 'D' Patient Health Questionnaire ( Tick whichever is correct )",
+                "hi": "भाग 'D' रोगी स्वास्थ्य प्रश्नावली (जो सही हो उस पर सही का निशान लगाएं)",
+                "label": {
+                    "en": "Part D",
+                    "hi": "भाग D"
+                },
+                "inputs": {
+                    "less_interest_or_pleasure_in_performing_the_task": {
+                        "en": "Less interest or pleasure in performing the task",
+                        "hi": "कार्य को करने में कम रुचि या खुशी",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No way",
+                                "hi": "बिल्कुल नहीं",
+                                "value": "0"
+                            },
+                            {
+                                "en": "Just a few days",
+                                "hi": "मात्र कुछ दिन",
+                                "value": "1"
+                            },
+                            {
+                                "en": "More than half a day",
+                                "hi": "आधे दिनों से अधिक",
+                                "value": "2"
+                            },
+                            {
+                                "en": "Almost every day",
+                                "hi": "लगभग प्रत्येक दिन",
+                                "value": "3"
+                            }
+                        ]
+                    },
+                    "feeling_hopeless_depressed": {
+                        "en": "Feeling hopeless, depressed",
+                        "hi": "निराश महसूस करना, उदास होना",
+                        "placeholder": {
+                            "en": "Select",
+                            "hi": "चुनें"
+                        },
+                        "options": [
+                            {
+                                "en": "No way",
+                                "hi": "बिल्कुल नहीं",
+                                "value": "0"
+                            },
+                            {
+                                "en": "Just a few days",
+                                "hi": "मात्र कुछ दिन",
+                                "value": "1"
+                            },
+                            {
+                                "en": "More than half a day",
+                                "hi": "आधे दिनों से अधिक",
+                                "value": "2"
+                            },
+                            {
+                                "en": "Almost every day",
+                                "hi": "लगभग प्रत्येक दिन",
+                                "value": "3"
+                            }
+                        ]
+                    }
+                },
+                "total_score": {
+                    "en": "Total Score (Part D)",
+                    "hi": "कुल प्राप्तांक (Part D)"
+                },
+                "if_a_persons_score_is_more_than_three_refer_him_to_the_medical_officer_for_treatment": {
+                    "en": "If a person's score is more than three, refer him to the medical officer for treatment.",
+                    "hi": "यदि किसी व्यक्ति का स्कोर तीन से अधिक हो तो उसे चिकित्सा पदाधिकारी के पास उपचार हेतु रेफर करें।"
+                },
+                "my_aadhaar_number_is_registered_at_3_and_i_consent_to_the_use_of_my_aadhaar_number_i_am_informed_that_my_biometrics_will_not_be_stored": {
+                    "en": "\"My Aadhaar number is registered at 3 and I consent to the use of my Aadhaar number. I am informed that my biometrics will not be stored.",
+                    "hi": "\"मेरी आधार संख्या 3 पर दर्ज है एवं अपने आधार संख्या के उपयोग की सहमति प्रदान करता/करती हैं। मुझे सूचित किया गया है कि मेरे बायोमेट्रिक को संग्रहित नहीं किया जाएगा।"
+                },
+                "date": {
+                    "en": "Date",
+                    "hi": "तिथि"
+                },
+                "place": {
+                    "en": "Place",
+                    "hi": "स्थान"
+                },
+                "signaturethumb_impression": {
+                    "en": "Signature/Thumb Impression.",
+                    "hi": "हस्ताक्षर /अंगुठे का निशान."
+                }
+            }
+        }
+    },
+    "labels": {
+        "questions": {
+            "en": "Questions",
+            "hi": "प्रश्न"
+        },
+        "score": {
+            "en": "Score",
+            "hi": "अंक"
+        }
+    }
+}

@@ -6,8 +6,11 @@ class AddFamilyHeadState extends Equatable {
   final String? headName;
   final String? children;
   final String? fatherName;
+  final String? AfhABHAChange;
   final bool useDob;
   final DateTime? dob;
+  final DateTime? edd;
+  final DateTime? lmp;
   final String? approxAge;
   final String? gender;
   final String? occupation;
@@ -28,6 +31,7 @@ class AddFamilyHeadState extends Equatable {
   final String? maritalStatus; // e.g., Married/Unmarried/Widowed/Separated
   final String? ageAtMarriage;
   final String? spouseName;
+  final String? AfhRichIdChange;
   final String? hasChildren; // Yes/No
   final String? isPregnant; // Yes/No
   final PostApiStatus postApiStatus;
@@ -37,9 +41,12 @@ class AddFamilyHeadState extends Equatable {
     this.houseNo,
     this.headName,
     this.fatherName,
+    this.AfhABHAChange,
     this.children,
     this.useDob = true,
     this.dob,
+    this.edd,
+    this.lmp,
     this.approxAge,
     this.gender,
     this.occupation,
@@ -60,6 +67,7 @@ class AddFamilyHeadState extends Equatable {
     this.maritalStatus,
     this.ageAtMarriage,
     this.spouseName,
+    this.AfhRichIdChange,
     this.hasChildren,
     this.isPregnant,
     this.postApiStatus = PostApiStatus.initial,
@@ -70,9 +78,12 @@ class AddFamilyHeadState extends Equatable {
     String? houseNo,
     String? headName,
     String? fatherName,
+    String? AfhABHAChange,
     String? children,
     bool? useDob,
     DateTime? dob,
+    DateTime? edd,
+    DateTime? lmp,
     String? approxAge,
     String? gender,
     String? occupation,
@@ -94,6 +105,7 @@ class AddFamilyHeadState extends Equatable {
     String? ageAtMarriage,
     String? spouseName,
     String? hasChildren,
+    String? AfhRichIdChange,
     String? isPregnant,
     PostApiStatus? postApiStatus,
     String? errorMessage,
@@ -102,10 +114,13 @@ class AddFamilyHeadState extends Equatable {
     return AddFamilyHeadState(
       houseNo: houseNo ?? this.houseNo,
       headName: headName ?? this.headName,
+      AfhABHAChange: AfhABHAChange ?? this.AfhABHAChange,
       children: children ?? this.children,
       fatherName: fatherName ?? this.fatherName,
       useDob: useDob ?? this.useDob,
       dob: dob ?? this.dob,
+      edd: edd ?? this.edd,
+      lmp: lmp ?? this.lmp,
       approxAge: approxAge ?? this.approxAge,
       gender: gender ?? this.gender,
       occupation: occupation ?? this.occupation,
@@ -127,6 +142,7 @@ class AddFamilyHeadState extends Equatable {
       ageAtMarriage: ageAtMarriage ?? this.ageAtMarriage,
       spouseName: spouseName ?? this.spouseName,
       hasChildren: hasChildren ?? this.hasChildren,
+      AfhRichIdChange: AfhRichIdChange ?? this.AfhRichIdChange,
       isPregnant: isPregnant ?? this.isPregnant,
       postApiStatus: postApiStatus ?? this.postApiStatus,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
@@ -136,6 +152,10 @@ class AddFamilyHeadState extends Equatable {
   @override
   List<Object?> get props => [
     houseNo,
+    AfhABHAChange,
+    AfhRichIdChange,
+    lmp,
+    edd,
     headName,
     fatherName,
     useDob,

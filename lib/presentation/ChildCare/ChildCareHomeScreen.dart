@@ -34,39 +34,35 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                 children: [
                   Expanded(
                     child: _FeatureCard(
-                      title: 'Registered Child\nBeneficiary list',
+                      title: l10n?.childRegisteredBeneficiaryListTitle ?? 'Registered Child\nBeneficiary list',
                       count: 0,
                       image: 'assets/images/toddler.png',
                       onClick: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Registered Child Beneficiary list')),
-                        );
+                        Navigator.pushNamed(context, Route_Names.RegisterChildScreen);
                       },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _FeatureCard(
-                      title: 'Child Registered\nDue List',
+                      title: l10n?.childRegisteredDueListTitle ?? 'Child Registered\nDue List',
                       count: 0,
                       image: 'assets/images/family.png',
                       onClick: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Child Registered Due List')),
-                        );
+                        Navigator.pushNamed(context, Route_Names.RegisterChildDueList);
+
                       },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _FeatureCard(
-                      title: 'Child Tracking\nDue List',
+                      title: l10n?.childTrackingDueListTitle ?? 'Child Tracking\nDue List',
                       count: 0,
                       image: 'assets/images/notes.png',
                       onClick: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Child Tracking Due List')),
-                        );
+                        Navigator.pushNamed(context, Route_Names.CHildTrackingDueList);
+
                       },
                     ),
                   ),
@@ -77,25 +73,24 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                 children: [
                   Expanded(
                     child: _FeatureCard(
-                      title: 'HBYC List',
+                      title: l10n?.hbycListTitle ?? 'HBYC List',
                       count: 0,
                       image: 'assets/images/pnc-mother.png',
                        onClick: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('HBYC List')),
-                        );
-                      },
+                         Navigator.pushNamed(context, Route_Names.HBYCList);
+
+                       },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _FeatureCard(
-                      title: 'Deceased Child',
+                      title: l10n?.deceasedChildTitle ?? 'Deceased Child',
                       count: 0,
                       image: 'assets/images/death2.png',
                       onClick: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Deceased Child')),
+                          SnackBar(content: Text(l10n?.deceasedChildSnack ?? 'Deceased Child')),
                         );
                       },
                     ),

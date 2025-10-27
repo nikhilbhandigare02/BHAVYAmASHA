@@ -5,8 +5,12 @@ class AddnewfamilymemberState extends Equatable {
   final PostApiStatus postApiStatus;
   final String error;
   final String memberType;
+  final String? RichIDChanged;
+  final String? BirthCertificateChange;
   final String? relation;
   final String? name;
+  final String? ChildSchool;
+  final String? WeightChange;
   final String? fatherName;
   final String? motherName;
 
@@ -45,7 +49,11 @@ class AddnewfamilymemberState extends Equatable {
     this.error = '',
     this.memberType = 'Adult',
     this.relation,
+    this.WeightChange,
+    this.RichIDChanged,
+    this.ChildSchool,
     this.name,
+    this.BirthCertificateChange,
     this.fatherName,
     this.motherName,
     this.children,
@@ -80,7 +88,11 @@ class AddnewfamilymemberState extends Equatable {
     PostApiStatus? postApiStatus,
     String? error,
     String? memberType,
+    String? BirthCertificateChange,
+    String? WeightChange,
+    String? ChildSchool,
     String? children,
+    String? RichIDChanged,
     String? relation,
     String? name,
     String? fatherName,
@@ -116,9 +128,13 @@ class AddnewfamilymemberState extends Equatable {
     return AddnewfamilymemberState(
       postApiStatus: postApiStatus ?? this.postApiStatus,
       error: error ?? this.error,
+      WeightChange: WeightChange ?? this.WeightChange,
       memberType: memberType ?? this.memberType,
       children: children ?? this.children,
+      ChildSchool: ChildSchool ?? this.ChildSchool,
+      RichIDChanged: RichIDChanged ?? this.RichIDChanged,
       relation: relation ?? this.relation,
+      BirthCertificateChange: BirthCertificateChange ?? this.BirthCertificateChange,
       name: name ?? this.name,
       fatherName: fatherName ?? this.fatherName,
       motherName: motherName ?? this.motherName,
@@ -156,11 +172,15 @@ class AddnewfamilymemberState extends Equatable {
     error,
     memberType,
     relation,
+    WeightChange,
     name,
+    RichIDChanged,
     fatherName,
     motherName,
     useDob,
     dob,
+    BirthCertificateChange,
+    ChildSchool,
     children,
     approxAge,
     birthOrder,

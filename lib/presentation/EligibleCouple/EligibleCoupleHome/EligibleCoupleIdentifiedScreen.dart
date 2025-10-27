@@ -84,7 +84,7 @@ class _EligibleCoupleIdentifiedScreenState
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Eligible Couple List',
+        screenTitle: l10n?.updatedEligibleCoupleListTitle ?? 'Eligible Couple List',
         showBack: false,
         icon1: Icons.home,
         onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
@@ -159,6 +159,7 @@ class _EligibleCoupleIdentifiedScreenState
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
 
     return InkWell(
       onTap: () {
@@ -229,19 +230,19 @@ class _EligibleCoupleIdentifiedScreenState
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _rowText('Registration Date', data['RegistrationDate'] ?? '')),
+                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegistrationDate'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText('Registration Type', data['RegistrationType'] ?? '')),
+                      Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegistrationType'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryID'] ?? '')),
+                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID'] ?? '')),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText('Name', data['Name'] ?? '')),
+                      Expanded(child: _rowText(l10n?.nameOfMemberLabel ?? 'Name', data['Name'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText('Age', data['age']?.toString() ?? '')),
+                      Expanded(child: _rowText(l10n?.ageLabelSimple ?? 'Age', data['age']?.toString() ?? '')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('Rich ID', data['RichID']?.toString() ?? '')),
                     ],
@@ -250,10 +251,10 @@ class _EligibleCoupleIdentifiedScreenState
                   Row(
                     children: [
                       Expanded(
-                          child: _rowText('Mobile No.', data['mobileno']?.toString() ?? '')),
+                          child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['mobileno']?.toString() ?? '')),
                       const SizedBox(width: 12),
                       Expanded(
-                          child: _rowText('Husband Name', data['HusbandName'] ?? '')),
+                          child: _rowText(l10n?.spouseNameLabel ?? 'Husband Name', data['HusbandName'] ?? '')),
                     ],
                   ),
                 ],

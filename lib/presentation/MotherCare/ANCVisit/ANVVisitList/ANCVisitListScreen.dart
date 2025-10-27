@@ -113,7 +113,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'ANC Visit List',
+        screenTitle: l10n?.ancVisitListTitle ?? 'ANC Visit List',
         showBack: true,
         icon1: Icons.refresh,
         onIcon1Tap: () => setState(() {}),
@@ -126,7 +126,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: 'ANC Visit Search',
+                hintText: l10n?.ancVisitSearchHint ?? 'ANC Visit Search',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -163,6 +163,8 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
 
   Widget _ancCard(BuildContext context, Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context);
+
     final primary = Theme.of(context).primaryColor;
 
     return InkWell(
@@ -211,7 +213,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Visits : 0',
+                    '${l10n?.visitsLabel ?? 'Visits :'} 0',
                     style: TextStyle(color: primary, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(width: 6),
@@ -237,22 +239,22 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _rowText('Beneficiary ID', data['hhId'] ?? '')),
-                      Expanded(child: _rowText('Name', data['name'] ?? '')),
-                      Expanded(child: _rowText('Age', 'Not Available')),
-                      Expanded(child: _rowText('Husband', 'Not Available')),
-                      Expanded(child: _rowText('Registration Date', 'Not Available')),
+                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['hhId'] ?? '')),
+                      Expanded(child: _rowText(l10n?.nameLabel ?? 'Name', data['name'] ?? '')),
+                      Expanded(child: _rowText(l10n?.ageLabel ?? 'Age', l10n?.notAvailable ?? 'Not Available')),
+                      Expanded(child: _rowText(l10n?.husbandLabel ?? 'Husband', l10n?.notAvailable ?? 'Not Available')),
+                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', l10n?.notAvailable ?? 'Not Available')),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _rowText('RCH ID', 'Not Available')),
-                      Expanded(child: _rowText('First ANC', 'Not Available')),
-                      Expanded(child: _rowText('Second ANC', 'Not Available')),
-                      Expanded(child: _rowText('Third ANC', 'Not Available')),
-                      Expanded(child: _rowText('PMSMA', 'Not Available')),
+                      Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', l10n?.notAvailable ?? 'Not Available')),
+                      Expanded(child: _rowText(l10n?.firstAncLabel ?? 'First ANC', l10n?.notAvailable ?? 'Not Available')),
+                      Expanded(child: _rowText(l10n?.secondAncLabel ?? 'Second ANC', l10n?.notAvailable ?? 'Not Available')),
+                      Expanded(child: _rowText(l10n?.thirdAncLabel ?? 'Third ANC', l10n?.notAvailable ?? 'Not Available')),
+                      Expanded(child: _rowText(l10n?.pmsmaLabel ?? 'PMSMA', l10n?.notAvailable ?? 'Not Available')),
                     ],
                   ),
                 ],

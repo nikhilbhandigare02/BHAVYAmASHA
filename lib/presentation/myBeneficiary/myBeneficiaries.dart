@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 
 class Mybeneficiaries extends StatefulWidget {
@@ -13,53 +14,53 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
   final List<_BeneficiaryTileData> _items = const [
     _BeneficiaryTileData(
       title: 'Family Update',
-      asset: 'assets/Images/family.png',
+      asset: 'assets/images/family.png',
       count: 8,
     ),
     _BeneficiaryTileData(
       title: 'Eligible Couple List',
-      asset: 'assets/Images/couple.png',
+      asset: 'assets/images/couple.png',
       count: 5,
     ),
     _BeneficiaryTileData(
       title: 'Pregnant Women List',
-      asset: 'assets/Images/pregnant-woman.png',
+      asset: 'assets/images/pregnant-woman.png',
       count: 5,
     ),
     _BeneficiaryTileData(
       title: 'Pregnancy Outcome',
-      asset: 'assets/Images/safe_motherhood.png',
+      asset: 'assets/images/safe_motherhood.png',
       count: 0,
       highlighted: true,
     ),
     _BeneficiaryTileData(
       title: 'HBNC List',
-      asset: 'assets/Images/infant-pnc.png',
+      asset: 'assets/images/infant-pnc.png',
       count: 0,
     ),
     _BeneficiaryTileData(
       title: 'LBW Referred',
-      asset: 'assets/Images/lbw.png',
+      asset: 'assets/images/lbw.png',
       count: 0,
     ),
     _BeneficiaryTileData(
       title: 'Abortion List',
-      asset: 'assets/Images/forms.png',
+      asset: 'assets/images/forms.png',
       count: 0,
     ),
     _BeneficiaryTileData(
       title: 'Death Register',
-      asset: 'assets/Images/hospital-bed.png',
+      asset: 'assets/images/hospital-bed.png',
       count: 0,
     ),
     _BeneficiaryTileData(
       title: 'Migrated Out',
-      asset: 'assets/Images/id-card.png',
+      asset: 'assets/images/id-card.png',
       count: 0,
     ),
     _BeneficiaryTileData(
       title: 'Guest Beneficiary List',
-      asset: 'assets/Images/beneficiaries.png',
+      asset: 'assets/images/beneficiaries.png',
       count: 6,
     ),
   ];
@@ -69,6 +70,7 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppHeader(screenTitle: 'My Beneficiaries'),
+      drawer: CustomDrawer(),
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         itemCount: _items.length,
@@ -78,8 +80,7 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
           return _BeneficiaryTile(
             data: item,
             onTap: () {
-              // Handle each card's tap
-              _handleTileTap(context, item);
+              // Navigator.pushNamed(context, routeName)
             },
           );
         },
@@ -87,20 +88,6 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
     );
   }
 
-  void _handleTileTap(BuildContext context, _BeneficiaryTileData item) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 
 }
 

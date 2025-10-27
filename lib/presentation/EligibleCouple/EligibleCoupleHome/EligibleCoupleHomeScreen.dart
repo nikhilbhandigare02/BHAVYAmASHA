@@ -33,7 +33,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
               child: _DashboardCard(
                 image: 'assets/images/couple.png',
                 count: '6',
-                title: 'Number Of\nEligible Couple\nIdentified',
+                title: (l10n?.gridEligibleCouple ?? 'Eligible Couple'),
                 onTap: () => Navigator.pushNamed(
                   context,
                   Route_Names.EligibleCoupleIdentified,
@@ -45,7 +45,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
               child: _DashboardCard(
                 image: 'assets/images/npcb-refer.png',
                 count: '0',
-                title: 'Updated Eligible\nCouple List',
+                title: (l10n?.updatedEligibleCoupleListTitle ?? 'Updated Eligible Couple List'),
                 onTap: () => Navigator.pushNamed(
                   context,
                   Route_Names.UpdatedEligibleCoupleScreen,

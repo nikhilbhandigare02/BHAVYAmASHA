@@ -5,10 +5,13 @@ class SpousState extends Equatable {
     this.relation,
     this.memberName,
     this.ageAtMarriage,
+    this.RichIDChanged,
     this.spouseName,
     this.fatherName,
     this.useDob = true,
     this.dob,
+    this.edd,
+    this.lmp,
     this.approxAge,
     this.gender,
     this.occupation,
@@ -24,15 +27,19 @@ class SpousState extends Equatable {
     this.rationId,
     this.phId,
     this.beneficiaryType,
+    this.isPregnant,
   });
 
   final String? relation;
   final String? memberName;
   final String? ageAtMarriage;
+  final String? RichIDChanged;
   final String? spouseName;
   final String? fatherName;
   final bool useDob;
   final DateTime? dob;
+  final DateTime? edd;
+  final DateTime? lmp;
   final String? approxAge;
   final String? gender;
   final String? occupation;
@@ -48,6 +55,7 @@ class SpousState extends Equatable {
   final String? rationId;
   final String? phId;
   final String? beneficiaryType;
+  final String? isPregnant; // Yes/No
 
   SpousState copyWith({
     String? relation,
@@ -55,8 +63,11 @@ class SpousState extends Equatable {
     String? ageAtMarriage,
     String? spouseName,
     String? fatherName,
+    String? RichIDChanged,
     bool? useDob,
     DateTime? dob,
+    DateTime? edd,
+    DateTime? lmp,
     String? approxAge,
     String? gender,
     String? occupation,
@@ -72,6 +83,7 @@ class SpousState extends Equatable {
     String? rationId,
     String? phId,
     String? beneficiaryType,
+    String? isPregnant,
   }) {
     return SpousState(
       relation: relation ?? this.relation,
@@ -80,7 +92,10 @@ class SpousState extends Equatable {
       spouseName: spouseName ?? this.spouseName,
       fatherName: fatherName ?? this.fatherName,
       useDob: useDob ?? this.useDob,
+      RichIDChanged: RichIDChanged ?? this.RichIDChanged,
       dob: dob ?? this.dob,
+      edd: edd ?? this.edd,
+      lmp: lmp ?? this.lmp,
       approxAge: approxAge ?? this.approxAge,
       gender: gender ?? this.gender,
       occupation: occupation ?? this.occupation,
@@ -96,6 +111,7 @@ class SpousState extends Equatable {
       rationId: rationId ?? this.rationId,
       phId: phId ?? this.phId,
       beneficiaryType: beneficiaryType ?? this.beneficiaryType,
+      isPregnant: isPregnant ?? this.isPregnant,
     );
   }
 
@@ -108,6 +124,8 @@ class SpousState extends Equatable {
         fatherName,
         useDob,
         dob,
+        lmp,
+        edd,
         approxAge,
         gender,
         occupation,
@@ -116,6 +134,7 @@ class SpousState extends Equatable {
         category,
         abhaAddress,
         mobileOwner,
+        RichIDChanged,
         mobileNo,
         bankAcc,
         ifsc,
@@ -123,5 +142,6 @@ class SpousState extends Equatable {
         rationId,
         phId,
         beneficiaryType,
+        isPregnant,
       ];
 }

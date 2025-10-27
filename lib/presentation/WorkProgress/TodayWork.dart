@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'bloc/todays_work_bloc.dart';
 
 class Todaywork extends StatefulWidget {
@@ -20,10 +21,11 @@ class _TodayworkState extends State<Todaywork> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BlocProvider(
       create: (_) => TodaysWorkBloc()..add(const TwLoad(toDo: 1, completed: 0)),
       child: Scaffold(
-        appBar: const AppHeader(screenTitle: "Today's Work Progress", showBack: true),
+        appBar: AppHeader(screenTitle: l10n?.todayWorkTitle ?? "Today's Work Progress", showBack: true),
         body: SafeArea(
           child: BlocBuilder<TodaysWorkBloc, TodaysWorkState>(
             builder: (context, state) {
@@ -44,17 +46,17 @@ class _TodayworkState extends State<Todaywork> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _kv('To do visits :', state.toDo.toString()),
-                          _kv('Completed visits :', state.completed.toString()),
-                          _kv('Pending visits :', state.pending.toString()),
-                          _kv('Progress :', '$percent%'),
+                          _kv(l10n?.todayWorkToDo ?? 'To do visits :', state.toDo.toString()),
+                          _kv(l10n?.todayWorkCompleted ?? 'Completed visits :', state.completed.toString()),
+                          _kv(l10n?.todayWorkPending ?? 'Pending visits :', state.pending.toString()),
+                          _kv(l10n?.todayWorkProgress ?? 'Progress :', '$percent%'),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _legend(color: Colors.green, label: 'Completed'),
+                              _legend(color: Colors.green, label: l10n?.legendCompleted ?? 'Completed'),
                               const SizedBox(width: 16),
-                              _legend(color: Colors.blue, label: 'Pending'),
+                              _legend(color: Colors.blue, label: l10n?.legendPending ?? 'Pending'),
                             ],
                           ),
                           const SizedBox(height: 16),

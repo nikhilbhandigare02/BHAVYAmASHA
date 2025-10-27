@@ -1,0 +1,180 @@
+{
+    "ri_of_beneficiary":{
+        "title":{
+            "en":"RI Register of Beneficiary",
+            "hi":"लाभार्थी के लिए आरआई रजिस्टर"
+        },
+        "label":{
+            "en":"Distribution of beneficiary coming in next session",
+            "hi":"अगले सत्र में आनेवाले लाभार्थी का वितरण"
+        },
+        "rch_number":{
+            "en":"RCH number",
+            "hi":"आरसीएच संख्या"
+        },
+        "beneficiary_name":{
+            "en":"Beneficiary name",
+            "hi":"लाभार्थी का नाम"
+        },
+        "beneficiary_type":{
+            "en":"Beneficiary type",
+            "hi":"लाभार्थी का प्रकार",
+            "placeholder":{
+                "en":"Select",
+                "hi":"चुने"
+            },
+            "options":[
+                {
+                    "en":"PW",
+                    "hi":"पीडब्लू",
+                    "value":"pw"
+                },
+                {
+                    "en":"LW",
+                    "hi":"एलडब्ल्यू",
+                    "value":"lw"
+                },
+                {
+                    "en":"EC",
+                    "hi":"ईसी",
+                    "value":"ec"
+                },
+                {
+                    "en":"0-5",
+                    "hi":"0-5",
+                    "value":"0-5"
+                },
+                {
+                    "en":"A",
+                    "hi":"ए",
+                    "value":"a"
+                }
+            ]
+        },
+        "age":{
+            "en":"Age",
+            "hi":"टिककर्मी का नाम"
+        },
+        "father_husband_name":{
+            "en":"Father/Husband name",
+            "hi":"पिता/पति का नाम"
+        },
+        "services_to_be_availed":{
+            "en":"Services to be availed by the beneficiary in the next session",
+            "hi":"अगले सत्र में सेवाए जो लाभार्थी को मिलनी है",
+            "placeholder":{
+                "en":"Select",
+                "hi":"चुने"
+            },
+            "options":[
+                {
+                    "en":"ANC",
+                    "hi":"एएनसी",
+                    "value":"anc"
+                },
+                {
+                    "en":"PNC",
+                    "hi":"पीएनसी",
+                    "value":"pnc"
+                },
+                {
+                    "en":"FP",
+                    "hi":"एफपी",
+                    "value":"fp"
+                },
+                {
+                    "en":"Other",
+                    "hi":"अन्य",
+                    "value":"other"
+                }
+            ]
+        },
+        "sub_label":{
+            "en":"Fill on session day",
+            "hi":"सत्र के दिन भरे "
+        },
+        "beneficiary_present":{
+            "en":"Has that beneficiary come today?",
+            "hi":"क्या वो लाभार्थी आज आया है?",
+            "placeholder":{
+                "en":"Select",
+                "hi":"चुने"
+            },
+            "options":[
+                {
+                    "en":"Yes",
+                    "hi":"हाँ",
+                    "value":"yes"
+                },
+                {
+                    "en":"No",
+                    "hi":"नहीं",
+                    "value":"no"
+                }
+            ]
+        },
+        "services_received":{
+            "en":"Services received by the beneficiary today",
+            "hi":"आज जो सेवाए लाभार्थी को मिली "
+        },
+        "service_advice_given":{
+            "en":"Service advice given?",
+            "hi":"सेवा से सबंधित परामर्श दिया गया?",
+            "placeholder":{
+                "en":"Select",
+                "hi":"चुने"
+            },
+            "options":[
+                {
+                    "en":"Yes",
+                    "hi":"हाँ",
+                    "value":"yes"
+                },
+                {
+                    "en":"No",
+                    "hi":"नहीं",
+                    "value":"no"
+                }
+            ]
+        },
+        "beneficiary_not_present_reason":{
+            "en":"Reason due to beneficiary was not available",
+            "hi":"लाभार्थी  नहीं आने का कारण",
+            "placeholder":{
+                "en":"Select",
+                "hi":"चुने"
+            },
+            "options":[
+                {
+                    "en":"Out of town",
+                    "hi":"गाव से बाहर",
+                    "value":"out_of_town"
+                },
+                {
+                    "en":"Sick",
+                    "hi":"बीमार",
+                    "value":"sick"
+                },
+                {
+                    "en":"Refuse",
+                    "hi":"मना करना",
+                    "value":"refuse"
+                },
+                {
+                    "en":"Outsourced service",
+                    "hi":"आउटसोर्स सेवा",
+                    "value":"outsourced_service"
+                },
+                {
+                    "en":"Other",
+                    "hi":"अन्य",
+                    "value":"other"
+                }
+            ]
+        },
+        "not_available_beneficiary":{
+            "en":"Number of beneficiary not avaailable",
+            "hi":"लाभार्थी की संख्या उपलब्ध नहीं है"
+        }
+    }
+}

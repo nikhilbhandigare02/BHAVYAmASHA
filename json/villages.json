@@ -1,0 +1,3946 @@
+{
+    "Bihar":{
+        "id":1,
+       
+        "en": "Bihar",
+        "hi": "बिहार",
+
+        "districts":{
+            "Araria": {
+                "id": "398",
+               
+                "en": "Araria",
+                "hi": "अररिया",
+
+                "blocks":{
+                    "Forbesganj": {
+                        "id": "1000",
+                        "en": "Forbesganj",
+                        "hi": "फोर्बेस्गंज"
+                    },
+                    "Jokihat": {
+                        "id": "1001",
+                        "en": "Jokihat",
+                        "hi": "जोकीहाट"
+                    },
+                    "KURSAKANTA": {
+                        "id": "1002",
+                        "en": "KURSAKANTA",
+                        "hi": "कुर्साकांता"
+                    },
+                    "Narpatganj": {
+                        "id": "1003",
+                        "en": "Narpatganj",
+                        "hi": "नरपतगंज"
+                    },
+                    "Palasi": {
+                        "id": "1004",
+                        "en": "Palasi",
+                        "hi": "पलासी"
+                    },
+                    "Raniganj": {
+                        "id": "1005",
+                        "en": "Raniganj",
+                        "hi": "रानीगंज"
+                    },
+                    "Sikti": {
+                        "id": "1006",
+                        "en": "Sikti",
+                        "hi": "सिकती"
+                    },
+                    "Araria": {
+                        "id": "1007",
+                        "en": "Araria",
+                        "hi": "अररिया"
+                    },
+                    "Bhargama": {
+                        "id": "1008",
+                        "en": "Bhargama",
+                        "hi": "भार्गमा"
+                    }
+
+                }
+        
+            },
+            "Arwal": {
+                "id": "399",
+               
+                "en": "Arwal",
+                "hi": "अरवल",
+
+
+                "blocks":{
+                    "Arwal": {
+                        "id": "1009",
+                        "en": "Arwal",
+                        "hi": "अरवल"
+                    },
+                    "Kaler": {
+                        "id": "1010",
+                        "en": "Kaler",
+                        "hi": "कलेर"
+                    },
+                    "Karpi": {
+                        "id": "1011",
+                        "en": "Karpi",
+                        "hi": "करपी"
+                    },
+                    "Kurtha": {
+                        "id": "1012",
+                        "en": "Kurtha",
+                        "hi": "कुर्ता"
+                    },
+                    "Sonbhadra Banshi Suryapur": {
+                        "id": "1013",
+                        "en": "Sonbhadra Banshi Suryapur",
+                        "hi": "सोनभद्र बंशी सूर्यपुर"
+                    }
+
+                }
+            },
+            "Aurangabad": {
+                "id": "400",
+               
+                "en": "Aurangabad",
+                "hi": "औरंगाबाद",
+
+
+                "blocks":{
+                    "Aurangabad": {
+                        "id": "1014",
+                        "en": "Aurangabad",
+                        "hi": "औरंगाबाद"
+                    },
+                    "Barun": {
+                        "id": "1015",
+                        "en": "Barun",
+                        "hi": "बरुण"
+                    },
+                    "Daudnagar": {
+                        "id": "1016",
+                        "en": "Daudnagar",
+                        "hi": "दौडनगर"
+                    },
+                    "Deo": {
+                        "id": "1017",
+                        "en": "Deo",
+                        "hi": "डियो"
+                    },
+                    "Goh": {
+                        "id": "1018",
+                        "en": "Goh",
+                        "hi": "गोह"
+                    },
+                    "Haspura": {
+                        "id": "1019",
+                        "en": "Haspura",
+                        "hi": "हसपुरा"
+                    },
+                    "Kutumba": {
+                        "id": "1020",
+                        "en": "Kutumba",
+                        "hi": "कुटुम्बा"
+                    },
+                    "Madanpur": {
+                        "id": "1021",
+                        "en": "Madanpur",
+                        "hi": "मदनपुर"
+                    },
+                    "Nabinagar": {
+                        "id": "1022",
+                        "en": "Nabinagar",
+                        "hi": "नबीनगर"
+                    },
+                    "Obra": {
+                        "id": "1023",
+                        "en": "Obra",
+                        "hi": "ओबरा"
+                    },
+                    "Rafiganj": {
+                        "id": "1024",
+                        "en": "Rafiganj",
+                        "hi": "रफीगंज"
+                    }
+                    
+                }
+            },
+            "Banka": {
+                "id": "401",
+                "en": "Banka",
+                "hi": "बांका",
+
+
+                "blocks":{
+                    "Amarpur": {
+                        "id": "1025",
+                        "en": "Amarpur",
+                        "hi": "अमरपुर"
+                    },
+                    "Banka": {
+                        "id": "1026",
+                        "en": "Banka",
+                        "hi": "बांका"
+                    },
+                    "Barahat": {
+                        "id": "1027",
+                        "en": "Barahat",
+                        "hi": "बाराहाट"
+                    },
+                    "Bausi": {
+                        "id": "1028",
+                        "en": "Bausi",
+                        "hi": "बौसी"
+                    },
+                    "Belhar": {
+                        "id": "1029",
+                        "en": "Belhar",
+                        "hi": "बेलहर"
+                    },
+                    "Chanan": {
+                        "id": "1030",
+                        "en": "Chanan",
+                        "hi": "चानन"
+                    },
+                    "Dhuraiya": {
+                        "id": "1031",
+                        "en": "Dhuraiya",
+                        "hi": "धुरैया"
+                    },
+                    "Phulidumar": {
+                        "id": "1032",
+                        "en": "Phulidumar",
+                        "hi": "फुलीडुमर"
+                    },
+                    "Katoria": {
+                        "id": "1033",
+                        "en": "Katoria",
+                        "hi": "कटोरिया"
+                    },
+                    "Rajaun": {
+                        "id": "1034",
+                        "en": "Rajaun",
+                        "hi": "रजौन"
+                    },
+                    "Shambhuganj": {
+                        "id": "1035",
+                        "en": "Shambhuganj",
+                        "hi": "शंभुगंज"
+                    }
+                    
+                }
+            },
+            "Begusarai": {
+                "id": "402",
+                "en": "Begusarai",
+                "hi": "बेगूसराय",
+
+
+                "blocks":{
+                    "Bachhwara": {
+                        "id": "1036",
+                        "en": "Bachhwara",
+                        "hi": "बछवारा"
+                    },
+                    "Bakhri": {
+                        "id": "1037",
+                        "en": "Bakhri",
+                        "hi": "बखरी"
+                    },
+                    "Balia": {
+                        "id": "1038",
+                        "en": "Balia",
+                        "hi": "बलिया"
+                    },
+                    "Barauni": {
+                        "id": "1039",
+                        "en": "Barauni",
+                        "hi": "बरौनी"
+                    },
+                    "Begusarai": {
+                        "id": "1040",
+                        "en": "Begusarai",
+                        "hi": "बेगूसराय"
+                    },
+                    "Bhagwanpur": {
+                        "id": "1041",
+                        "en": "Bhagwanpur",
+                        "hi": "भगवानपुर"
+                    },
+                    "Birpur": {
+                        "id": "1042",
+                        "en": "Birpur",
+                        "hi": "बीरपुर"
+                    },
+                    "Cheria Bariarpur": {
+                        "id": "1043",
+                        "en": "Cheria Bariarpur",
+                        "hi": "चेरिया बरियारपुर"
+                    },
+                    "Chhorahi": {
+                        "id": "1044",
+                        "en": "Chhorahi",
+                        "hi": "छोराही"
+                    },
+                    "Dandari": {
+                        "id": "1045",
+                        "en": "Dandari",
+                        "hi": "डंडारी"
+                    },
+                    "Garhpura": {
+                        "id": "1046",
+                        "en": "Garhpura",
+                        "hi": "गढ़पुरा"
+                    },
+                    "Khudabandpur": {
+                        "id": "1047",
+                        "en": "Khudabandpur",
+                        "hi": "खुदाबन्दपुर"
+                    },
+                    "Mansurchak": {
+                        "id": "1048",
+                        "en": "Mansurchak",
+                        "hi": "मंसूरचक"
+                    },
+                    "Matihani": {
+                        "id": "1049",
+                        "en": "Matihani",
+                        "hi": "मटिहानी"
+                    },
+                    "Naokothi": {
+                        "id": "1050",
+                        "en": "Naokothi",
+                        "hi": "नाओकोठी"
+                    },
+                    "Sahebpur Kamal": {
+                        "id": "1051",
+                        "en": "Sahebpur Kamal",
+                        "hi": "साहेबपुर कमाल"
+                    },
+                    "Shamho Akha Kurha": {
+                        "id": "1052",
+                        "en": "Shamho Akha Kurha",
+                        "hi": "शम्हो आखा कुरहा"
+                    },
+                    "Teghra": {
+                        "id": "1053",
+                        "en": "Teghra",
+                        "hi": "तेघरा"
+                    }
+
+                }
+            },
+            "Bhagalpur": {
+                "id": "403",
+                "en": "Bhagalpur",
+                "hi": "भागलपुर",
+
+
+                "blocks":{
+                    "Colgong": {
+                        "id": "1054",
+                        "en": "Colgong",
+                        "hi": "कोलगोंग"
+                    },
+                    "Gopalpur": {
+                        "id": "1055",
+                        "en": "Gopalpur",
+                        "hi": "गोपालपुर"
+                    },
+                    "Goradih": {
+                        "id": "1056",
+                        "en": "Goradih",
+                        "hi": "गोराडीह"
+                    },
+                    "Bihpur": {
+                        "id": "1057",
+                        "en": "Bihpur",
+                        "hi": "बिहपुर"
+                    },
+                    "Ismailpur": {
+                        "id": "1058",
+                        "en": "Ismailpur",
+                        "hi": "इस्माइलपुर"
+                    },
+                    "Jagdishpur": {
+                        "id": "1059",
+                        "en": "Jagdishpur",
+                        "hi": "जगदीशपुर"
+                    },
+                    "Kharik": {
+                        "id": "1060",
+                        "en": "Kharik",
+                        "hi": "खारिक"
+                    },
+                    "Narayanpur": {
+                        "id": "1061",
+                        "en": "Narayanpur",
+                        "hi": "नारायणपुर"
+                    },
+                    "Nathnagar": {
+                        "id": "1062",
+                        "en": "Nathnagar",
+                        "hi": "नाथनगर"
+                    },
+                    "Naugachhia": {
+                        "id": "1063",
+                        "en": "Naugachhia",
+                        "hi": "नौगछिया"
+                    },
+                    "Pirpainti": {
+                        "id": "1064",
+                        "en": "Pirpainti",
+                        "hi": "पीरपैंती"
+                    },
+                    "Rangra Chowk": {
+                        "id": "1065",
+                        "en": "Rangra Chowk",
+                        "hi": "रंगरा चौक"
+                    },
+                    "Sabour": {
+                        "id": "1066",
+                        "en": "Sabour",
+                        "hi": "सबौर"
+                    },
+                    "Shahkund": {
+                        "id": "1067",
+                        "en": "Shahkund",
+                        "hi": "शाहकुंड"
+                    },
+                    "Sonhaula": {
+                        "id": "1068",
+                        "en": "Sonhaula",
+                        "hi": "सोनहौला"
+                    },
+                    "Sultanganj": {
+                        "id": "1069",
+                        "en": "Sultanganj",
+                        "hi": "सुल्तानगंज"
+                    }
+
+
+                }
+            },
+            "Bhojpur": {
+                "id": "404",
+                "en": "Bhojpur",
+                "hi": "भोजपुर",
+
+
+                "blocks":{
+                    "Agiaon": {
+                        "id": "1070",
+                        "en": "Agiaon",
+                        "hi": "अगिआओं"
+                    },
+                    "Arrah": {
+                        "id": "1071",
+                        "en": "Arrah",
+                        "hi": "आरा"
+                    },
+                    "Barhara": {
+                        "id": "1072",
+                        "en": "Barhara",
+                        "hi": "बरहारा"
+                    },
+                    "Bihiya": {
+                        "id": "1073",
+                        "en": "Bihiya",
+                        "hi": "बिहिया"
+                    },
+                    "Charpokhari": {
+                        "id": "1074",
+                        "en": "Charpokhari",
+                        "hi": "चरपोखरी"
+                    },
+                    "Garhani": {
+                        "id": "1075",
+                        "en": "Garhani",
+                        "hi": "गढ़ानी"
+                    },
+                    "Jagdishpur": {
+                        "id": "1076",
+                        "en": "Jagdishpur",
+                        "hi": "जगदीशपुर"
+                    },
+                    "Koilwar": {
+                        "id": "1077",
+                        "en": "Koilwar",
+                        "hi": "कोईलवर"
+                    },
+                    "Piro": {
+                        "id": "1078",
+                        "en": "Piro",
+                        "hi": "पिरो"
+                    },
+                    "Sahar": {
+                        "id": "1079",
+                        "en": "Sahar",
+                        "hi": "सहार"
+                    },
+                    "Sandesh": {
+                        "id": "1080",
+                        "en": "Sandesh",
+                        "hi": "संदेश"
+                    },
+                    "Shahpur": {
+                        "id": "1081",
+                        "en": "Shahpur",
+                        "hi": "शाहपुर"
+                    },
+                    "Tarari": {
+                        "id": "1082",
+                        "en": "Tarari",
+                        "hi": "तरारी"
+                    },
+                    "Udwant Nagar": {
+                        "id": "1083",
+                        "en": "Udwant Nagar",
+                        "hi": "उदवंत नगर"
+                    }
+
+                }
+            },
+            "Buxar": {
+                "id": "405",
+                "en": "Buxar",
+                "hi": "बक्सर",
+
+
+                "blocks":{
+                    "Barhampur": {
+                        "id": "1084",
+                        "en": "Barhampur",
+                        "hi": "बरहामपुर"
+                    },
+                    "Buxar": {
+                        "id": "1085",
+                        "en": "Buxar",
+                        "hi": "बक्सर"
+                    },
+                    "Chakki": {
+                        "id": "1086",
+                        "en": "Chakki",
+                        "hi": "चक्की"
+                    },
+                    "Chausa": {
+                        "id": "1087",
+                        "en": "Chausa",
+                        "hi": "चौसा"
+                    },
+                    "Chaugain": {
+                        "id": "1088",
+                        "en": "Chaugain",
+                        "hi": "चौगैन"
+                    },
+                    "Dumraon": {
+                        "id": "1089",
+                        "en": "Dumraon",
+                        "hi": "दुमरांव"
+                    },
+                    "Itarhi": {
+                        "id": "1090",
+                        "en": "Itarhi",
+                        "hi": "इतरही"
+                    },
+                    "Kesath ": {
+                        "id": "1091",
+                        "en": "Kesath",
+                        "hi": "केशथ"
+                    },
+                    "Nawanagar": {
+                        "id": "1092",
+                        "en": "Nawanagar",
+                        "hi": "नवानगर"
+                    },
+                    "Rajpur": {
+                        "id": "1093",
+                        "en": "Rajpur",
+                        "hi": "राजपुर"
+                    },
+                    "Simri": {
+                        "id": "1094",
+                        "en": "Simri",
+                        "hi": "सिमरी"
+                    }
+
+                }
+            },
+            "Darbhanga": {
+                "id": "406",
+                "en": "Darbhanga",
+                "hi": "दरभंगा",
+
+
+                "blocks":{
+                    "Alinagar": {
+                        "id": "1095",
+                        "en": "Alinagar",
+                        "hi": "अलीनगर"
+                    },
+                    "Bahadurpur": {
+                        "id": "1096",
+                        "en": "Bahadurpur",
+                        "hi": "बहादुरपुर"
+                    },
+                    "Baheri": {
+                        "id": "1097",
+                        "en": "Baheri",
+                        "hi": "बहेरी"
+                    },
+                    "Benipur": {
+                        "id": "1098",
+                        "en": "Benipur",
+                        "hi": "बेनीपुर"
+                    },
+                    "Biraul": {
+                        "id": "1099",
+                        "en": "Biraul",
+                        "hi": "बिरौल"
+                    },
+                    "Darbhanga Sadar": {
+                        "id": "1100",
+                        "en": "Darbhanga Sadar",
+                        "hi": "दरभंगा सदर"
+                    },
+                    "Gora Bauram": {
+                        "id": "1101",
+                        "en": "Gora Bauram",
+                        "hi": "गोरा बौराम"
+                    },
+                    "Ghanshyampur": {
+                        "id": "1102",
+                        "en": "Ghanshyampur",
+                        "hi": "घनश्यामपुर"
+                    },
+                    "Hanumannagar": {
+                        "id": "1103",
+                        "en": "Hanumannagar",
+                        "hi": "हनुमाननगर"
+                    },
+                    "Hayaghat": {
+                        "id": "1104",
+                        "en": "Hayaghat",
+                        "hi": "हायाघाट"
+                    },
+                    "Jale": {
+                        "id": "1105",
+                        "en": "Jale",
+                        "hi": "जले"
+                    },
+                    "Keotiranway": {
+                        "id": "1106",
+                        "en": "Keotiranway",
+                        "hi": "केओतिरनवे"
+                    },
+                    "Kiratpur": {
+                        "id": "1107",
+                        "en": "Kiratpur",
+                        "hi": "कीरतपुर"
+                    },
+                    "Kusheshwar Asthan": {
+                        "id": "1108",
+                        "en": "Kusheshwar Asthan",
+                        "hi": "कुशेश्वर स्थान"
+                    },
+                    "Kusheshwar Asthan Purbi": {
+                        "id": "1109",
+                        "en": "Kusheshwar Asthan Purbi",
+                        "hi": "कुशेश्वर स्थान पूरबी"
+                    },
+                    "Manigachhi": {
+                        "id": "1110",
+                        "en": "Manigachhi",
+                        "hi": "मनीगाछी"
+                    },
+                    "Singhwara": {
+                        "id": "1111",
+                        "en": "Singhwara",
+                        "hi": "सिंघवारा"
+                    },
+                    "Tardih": {
+                        "id": "1112",
+                        "en": "Tardih",
+                        "hi": "तारडीह"
+                    }
+
+                }
+            },
+            "Gaya": {
+                "id": "407",
+                "en": "Gaya",
+                "hi": "गया",
+
+
+                "blocks":{
+                    "Amas": {
+                        "id": "1113",
+                        "en": "Amas",
+                        "hi": "अमास"
+                    },
+                    "Atri": {
+                        "id": "1114",
+                        "en": "Atri",
+                        "hi": "अत्री"
+                    },
+                    "Banke Bazar": {
+                        "id": "1115",
+                        "en": "Banke Bazar",
+                        "hi": "बांके बाजार"
+                    },
+                    "Barachatti": {
+                        "id": "1116",
+                        "en": "Barachatti",
+                        "hi": "बाराचट्टी"
+                    },
+                    "Belaganj": {
+                        "id": "1117",
+                        "en": "Belaganj",
+                        "hi": "बेलागंज"
+                    },
+                    "Bodh Gaya": {
+                        "id": "1118",
+                        "en": "Bodh Gaya",
+                        "hi": "बोधगया"
+                    },
+                    "Dobhi": {
+                        "id": "1119",
+                        "en": "Dobhi",
+                        "hi": "दोभी"
+                    },
+                    "Dumaria": {
+                        "id": "1120",
+                        "en": "Dumaria",
+                        "hi": "डुमरिया"
+                    },
+                    "Fatehpur": {
+                        "id": "1121",
+                        "en": "Fatehpur",
+                        "hi": "फतेहपुर"
+                    },
+                    "Gaya Town C.D.Block": {
+                        "id": "1122",
+                        "en": "Gaya Town C.D.Block",
+                        "hi": "गया टाउन सीडी ब्लॉक"
+                    },
+                    "Guraru": {
+                        "id": "1123",
+                        "en": "Guraru",
+                        "hi": "गुरारू"
+                    },
+                    "Gurua": {
+                        "id": "1124",
+                        "en": "Gurua",
+                        "hi": "गुरुआ"
+                    },
+                    "Imamganj": {
+                        "id": "1125",
+                        "en": "Imamganj",
+                        "hi": "इमामगंज"
+                    },
+                    "Khizirsarai": {
+                        "id": "1126",
+                        "en": "Khizirsarai",
+                        "hi": "खिजिरसराय"
+                    },
+                    "Konch": {
+                        "id": "1127",
+                        "en": "Konch",
+                        "hi": "कोंच"
+                    },
+                    "Manpur": {
+                        "id": "1128",
+                        "en": "Manpur",
+                        "hi": "मानपुर"
+                    },
+                    "Mohanpur": {
+                        "id": "1129",
+                        "en": "Mohanpur",
+                        "hi": "मोहनपुर"
+                    },
+                    "Muhra": {
+                        "id": "1130",
+                        "en": "Muhra",
+                        "hi": "मुहरा"
+                    },
+                    "Neem Chak Bathani": {
+                        "id": "1131",
+                        "en": "Neem Chak Bathani",
+                        "hi": "नीम चक बथानी"
+                    },
+                    "Paraiya": {
+                        "id": "1132",
+                        "en": "Paraiya",
+                        "hi": "परैया"
+                    },
+                    "Sherghati": {
+                        "id": "1133",
+                        "en": "Sherghati",
+                        "hi": "शेरघाटी"
+                    },
+                    "Tan Kuppa": {
+                        "id": "1134",
+                        "en": "Tan Kuppa",
+                        "hi": "तन कुप्पा"
+                    },
+                    "Tikari ": {
+                        "id": "1135",
+                        "en": "Tikari ",
+                        "hi": "टिकारी"
+                    },
+                    "Wazirganj": {
+                        "id": "1136",
+                        "en": "Wazirganj",
+                        "hi": "वजीरगंज"
+                    }
+
+                }
+            },
+            "Gopalganj": {
+                "id": "408",
+                "en": "Gopalganj",
+                "hi": "गोपालगंज",
+
+
+                "blocks":{
+                    
+                    "Baikunthpur": {
+                        "id": "1137",
+                        "en": "Baikunthpur",
+                        "hi": "बैकुंठपुर"
+                    },
+                    "Barauli": {
+                        "id": "1138",
+                        "en": "Barauli",
+                        "hi": "बरौली"
+                    },
+                    "Bhorey": {
+                        "id": "1139",
+                        "en": "Bhorey",
+                        "hi": "भोरे"
+                    },
+                    "Bijaipur": {
+                        "id": "1140",
+                        "en": "Bijaipur",
+                        "hi": "बिजयपुर"
+                    },
+                    "Gopalganj": {
+                        "id": "1141",
+                        "en": "Gopalganj",
+                        "hi": "गोपालगंज"
+                    },
+                    "Hathua": {
+                        "id": "1142",
+                        "en": "Hathua",
+                        "hi": "हथुआ"
+                    },
+                    "Katiya": {
+                        "id": "1143",
+                        "en": "Katiya",
+                        "hi": "कटिया"
+                    },
+                    "Kuchaikote": {
+                        "id": "1144",
+                        "en": "Kuchaikote",
+                        "hi": "कुचायकोटे"
+                    },
+                    "Manjha": {
+                        "id": "1145",
+                        "en": "Manjha",
+                        "hi": "मांझा"
+                    },
+                    "Pach Deuri": {
+                        "id": "1146",
+                        "en": "Pach Deuri",
+                        "hi": "पच देउरी"
+                    },
+                    "Phulwaria": {
+                        "id": "1147",
+                        "en": "Phulwaria",
+                        "hi": "फुलवरिया"
+                    },
+                    "Sidhwalia": {
+                        "id": "1148",
+                        "en": "Sidhwalia",
+                        "hi": "सिधवलिया"
+                    },
+                    "Thawe": {
+                        "id": "1149",
+                        "en": "Thawe",
+                        "hi": "थावे"
+                    },
+                    "Uchkagaon": {
+                        "id": "1150",
+                        "en": "Uchkagaon",
+                        "hi": "उचकागांव"
+                    }
+
+                }
+            },
+            "Jamui": {
+                "id": "409",
+                "en": "Jamui",
+                "hi": "जमुई",
+
+
+                "blocks":{
+                    
+                    "Sikandra": {
+                        "id": "1151",
+                        "en": "Sikandra",
+                        "hi": "सिकंदरा"
+                    },
+                    "Sono": {
+                        "id": "1152",
+                        "en": "Sono",
+                        "hi": "सोनो"
+                    },
+                    "Barhat": {
+                        "id": "1153",
+                        "en": "Barhat",
+                        "hi": "बरहाट"
+                    },
+                    "Chakai": {
+                        "id": "1154",
+                        "en": "Chakai",
+                        "hi": "चकाई"
+                    },
+                    "Gidhaur": {
+                        "id": "1155",
+                        "en": "Gidhaur",
+                        "hi": "गिद्धौर"
+                    },
+                    "Islamnagar Aliganj": {
+                        "id": "1156",
+                        "en": "Islamnagar Aliganj",
+                        "hi": "इस्लामनगर अलीगंज"
+                    },
+                    "Jamui": {
+                        "id": "1157",
+                        "en": "Jamui",
+                        "hi": "जमुई"
+                    },
+                    "Jhajha": {
+                        "id": "1158",
+                        "en": "Jhajha",
+                        "hi": "झाझा"
+                    },
+                    "Khaira": {
+                        "id": "1159",
+                        "en": "Khaira",
+                        "hi": "खैरा"
+                    },
+                    "Lakshmipur": {
+                        "id": "1160",
+                        "en": "Lakshmipur",
+                        "hi": "लक्ष्मीपुर"
+                    }
+
+                }
+            },
+            "Jehanabad": {
+                "id": "410",
+                "en": "Jehanabad",
+                "hi": "जहानाबाद",
+
+
+                "blocks":{
+                    
+                    "Ghoshi": {
+                        "id": "1161",
+                        "en": "Ghoshi",
+                        "hi": "घोषी"
+                    },
+                    
+                    "Ratni Faridpur": {
+                        "id": "1162",
+                        "en": "Ratni Faridpur",
+                        "hi": "रतनी फरीदपुर"
+                    },
+                    
+                    "Hulasganj": {
+                        "id": "1163",
+                        "en": "Hulasganj",
+                        "hi": "हुलासगंज"
+                    },
+                    
+                    "Jehanabad": {
+                        "id": "1164",
+                        "en": "Jehanabad",
+                        "hi": "जहानाबाद"
+                    },
+                    
+                    "Kako": {
+                        "id": "1165",
+                        "en": "Kako",
+                        "hi": "काको"
+                    },
+                    
+                    "Makhdumpur": {
+                        "id": "1166",
+                        "en": "Makhdumpur",
+                        "hi": "मखदुमपुर"
+                    },
+                    
+                    "Modanganj": {
+                        "id": "1167",
+                        "en": "Modanganj",
+                        "hi": "मोदनगंज"
+                    }
+
+
+                }
+            },
+            "Kaimur (Bhabua)": {
+                "id": "411",
+                "en": "Kaimur (Bhabua)",
+                "hi": "कैमूर (भभुआ)",
+
+
+                "blocks":{
+                    
+                    "Adhaura": {
+                        "id": "1168",
+                        "en": "Adhaura",
+                        "hi": "अधौरा"
+                    },
+                    "Bhabua": {
+                        "id": "1169",
+                        "en": "Bhabua",
+                        "hi": "भभुआ"
+                    },
+                    "Bhagwanpur": {
+                        "id": "1170",
+                        "en": "Bhagwanpur",
+                        "hi": "भगवानपुर"
+                    },
+                    "Chainpur": {
+                        "id": "1171",
+                        "en": "Chainpur",
+                        "hi": "चैनपुर"
+                    },
+                    "Chand": {
+                        "id": "1172",
+                        "en": "Chand",
+                        "hi": "चाँद"
+                    },
+                    "Durgawati": {
+                        "id": "1173",
+                        "en": "Durgawati",
+                        "hi": "दुर्गावती"
+                    },
+                    "Kudra": {
+                        "id": "1174",
+                        "en": "Kudra",
+                        "hi": "कुदरा"
+                    },
+                    "Mohania": {
+                        "id": "1175",
+                        "en": "Mohania",
+                        "hi": "मोहनिया"
+                    },
+                    "Nuaon": {
+                        "id": "1176",
+                        "en": "Nuaon",
+                        "hi": "नुआँव"
+                    },
+                    "Ramgarh": {
+                        "id": "1177",
+                        "en": "Ramgarh",
+                        "hi": "रामगढ़"
+                    },
+                    "Rampur": {
+                        "id": "1178",
+                        "en": "Rampur",
+                        "hi": "रामपुर"
+                    }
+
+                }
+            },
+            "Katihar": {
+                "id": "412",
+                "en": "Katihar",
+                "hi": "कटिहार",
+
+
+                "blocks":{
+                    
+                    "Falka": {
+                        "id": "1179",
+                        "en": "Falka",
+                        "hi": "फालका"
+                    },
+                    "Hasanganj": {
+                        "id": "1180",
+                        "en": "Hasanganj",
+                        "hi": "हसनगंज"
+                    },
+                    "Kadwa": {
+                        "id": "1181",
+                        "en": "Kadwa",
+                        "hi": "कड़वा"
+                    },
+                    "Katihar": {
+                        "id": "1182",
+                        "en": "Katihar",
+                        "hi": "कटिहार"
+                    },
+                    "Korha": {
+                        "id": "1183",
+                        "en": "Korha",
+                        "hi": "कोहरा"
+                    },
+                    "Azamnagar": {
+                        "id": "1184",
+                        "en": "Azamnagar",
+                        "hi": "आजमनगर"
+                    },
+                    "Balrampur": {
+                        "id": "1185",
+                        "en": "Balrampur",
+                        "hi": "बलरामपुर"
+                    },
+                    "Barari": {
+                        "id": "1186",
+                        "en": "Barari",
+                        "hi": "बरारी"
+                    },
+                    "Barsoi": {
+                        "id": "1187",
+                        "en": "Barsoi",
+                        "hi": "बरसोई"
+                    },
+                    "Dandkhora": {
+                        "id": "1188",
+                        "en": "Dandkhora",
+                        "hi": "दंडखोरा"
+                    },
+                    "Amdabad": {
+                        "id": "1189",
+                        "en": "Amdabad",
+                        "hi": "अहमदाबाद"
+                    },
+                    "Kursela": {
+                        "id": "1190",
+                        "en": "Kursela",
+                        "hi": "कुर्सेला"
+                    },
+                    "Manihari": {
+                        "id": "1191",
+                        "en": "Manihari",
+                        "hi": "मनिहारी"
+                    },
+                    "Mansahi": {
+                        "id": "1192",
+                        "en": "Mansahi",
+                        "hi": "मनसाही"
+                    },
+                    "Pranpur": {
+                        "id": "1193",
+                        "en": "Pranpur",
+                        "hi": "प्राणपुर"
+                    },
+                    "Sameli": {
+                        "id": "1194",
+                        "en": "Sameli",
+                        "hi": "समेली"
+                    }
+
+                }
+            },
+            "Khagaria": {
+                "id": "413",
+                "en": "Khagaria",
+                "hi": "खगरिया",
+
+
+                "blocks":{
+                    
+                    "Gogri": {
+                        "id": "1195",
+                        "en": "Gogri",
+                        "hi": "गोगरी"
+                    },
+                    "Khagaria": {
+                        "id": "1196",
+                        "en": "Khagaria",
+                        "hi": "खगरिया"
+                    },
+                    "Mansi": {
+                        "id": "1197",
+                        "en": "Mansi",
+                        "hi": "मानसी"
+                    },
+                    "Parbatta": {
+                        "id": "1198",
+                        "en": "Parbatta",
+                        "hi": "परबत्ता"
+                    },
+                    "Alauli": {
+                        "id": "1199",
+                        "en": "Alauli",
+                        "hi": "अलौली"
+                    },
+                    "Beldaur": {
+                        "id": "1200",
+                        "en": "Beldaur",
+                        "hi": "बेलदौर"
+                    },
+                    "Chautham": {
+                        "id": "1201",
+                        "en": "Chautham",
+                        "hi": "चौथम"
+                    }
+
+                }
+            },
+            "Kishanganj": {
+                "id": "414",
+                "en": "Kishanganj",
+                "hi": "किशनगंज",
+
+
+                "blocks":{
+                    
+                    "Bahadurganj": {
+                        "id": "1202",
+                        "en": "Bahadurganj",
+                        "hi": "बहादुरगंज"
+                    },
+                    
+                    "Dighalbank": {
+                        "id": "1203",
+                        "en": "Dighalbank",
+                        "hi": "दिघलबैंक"
+                    },
+                    
+                    "Kishanganj": {
+                        "id": "1204",
+                        "en": "Kishanganj",
+                        "hi": "किशनगंज"
+                    },
+                    
+                    "Kochadhamin": {
+                        "id": "1205",
+                        "en": "Kochadhamin",
+                        "hi": "कोचादमिन"
+                    },
+                    
+                    "Pothia": {
+                        "id": "1206",
+                        "en": "Pothia",
+                        "hi": "पोथिया"
+                    },
+                    
+                    "Terhagachh": {
+                        "id": "1207",
+                        "en": "Terhagachh",
+                        "hi": "तेरहगछ"
+                    },
+                    
+                    "Thakurganj": {
+                        "id": "1208",
+                        "en": "Thakurganj",
+                        "hi": "ठाकुरगंज"
+                    }
+
+                }
+            },
+            "Lakhisarai": {
+                "id": "415",
+                "en": "Lakhisarai",
+                "hi": "लखीसराय",
+
+
+                "blocks":{
+                    
+                    "Barahiya": {
+                        "id": "1209",
+                        "en": "Barahiya",
+                        "hi": "बड़हिया"
+                    },
+                    "Chanan": {
+                        "id": "1210",
+                        "en": "Chanan",
+                        "hi": "चानन"
+                    },
+                    "Halsi": {
+                        "id": "1211",
+                        "en": "Halsi",
+                        "hi": "हलसी"
+                    },
+                    "Lakhisarai": {
+                        "id": "1212",
+                        "en": "Lakhisarai",
+                        "hi": "लखीसराय"
+                    },
+                    "Pipariya": {
+                        "id": "1213",
+                        "en": "Pipariya",
+                        "hi": "पिपरिया"
+                    },
+                    "Ramgarh Chowk": {
+                        "id": "1214",
+                        "en": "Ramgarh Chowk",
+                        "hi": "रामगढ़ चौक"
+                    },
+                    "Surajgarha": {
+                        "id": "1215",
+                        "en": "Surajgarha",
+                        "hi": "सूरजगढ़ा"
+                    }
+
+                }
+            },
+            "Madhepura": {
+                "id": "416",
+                "en": "Madhepura",
+                "hi": "मधेपुरा",
+
+
+                "blocks":{
+                    
+                    "Alamnagar": {
+                        "id": "1216",
+                        "en": "Alamnagar",
+                        "hi": "आलमनगर"
+                    },
+                    
+                    "Bihariganj": {
+                        "id": "1217",
+                        "en": "Bihariganj",
+                        "hi": "बिहारीगंज"
+                    },
+                    
+                    "Chausa": {
+                        "id": "1218",
+                        "en": "Chausa",
+                        "hi": "चौसा"
+                    },
+                    
+                    "Gamharia": {
+                        "id": "1219",
+                        "en": "Gamharia",
+                        "hi": "गम्हरिया"
+                    },
+                    
+                    "Ghailarh": {
+                        "id": "1220",
+                        "en": "Ghailarh",
+                        "hi": "गिलार"
+                    },
+                    
+                    "Gwalpara": {
+                        "id": "1221",
+                        "en": "Gwalpara",
+                        "hi": "ग्वालपाड़ा"
+                    },
+                    
+                    "Kumarkhand": {
+                        "id": "1222",
+                        "en": "Kumarkhand",
+                        "hi": "कुमारखंड"
+                    },
+                    
+                    "Madhepura": {
+                        "id": "1223",
+                        "en": "Madhepura",
+                        "hi": "मधेपुरा"
+                    },
+                    
+                    "Murliganj": {
+                        "id": "1224",
+                        "en": "Murliganj",
+                        "hi": "मुरलीगंज"
+                    },
+                    
+                    "Puraini": {
+                        "id": "1225",
+                        "en": "Puraini",
+                        "hi": "पुरैनी"
+                    },
+                    
+                    "Shankarpur": {
+                        "id": "1226",
+                        "en": "Shankarpur",
+                        "hi": "शंकरपुर"
+                    },
+                    
+                    "Singheshwar": {
+                        "id": "1227",
+                        "en": "Singheshwar",
+                        "hi": "सिंहेश्वर"
+                    },
+                    
+                    "Ud Kishanganj": {
+                        "id": "1228",
+                        "en": "Ud Kishanganj",
+                        "hi": "उद किशनगंज"
+                    }
+
+
+                }
+            },
+            "Madhubani": {
+                "id": "417",
+                "en": "Madhubani",
+                "hi": "मधुबनी",
+
+
+                "blocks":{
+                    
+                    "Rajnagar": {
+                        "id": "1229",
+                        "en": "Rajnagar",
+                        "hi": "राजनगर"
+                    },
+                    
+                    "Andhratharhi": {
+                        "id": "1230",
+                        "en": "Andhratharhi",
+                        "hi": "आंध्रधरही"
+                    },
+                    
+                    "Babubarhi": {
+                        "id": "1230",
+                        "en": "Babubarhi",
+                        "hi": "बाबूबरही"
+                    },
+                    
+                    "Basopatti": {
+                        "id": "1231",
+                        "en": "Basopatti",
+                        "hi": "बासोपट्टी"
+                    },
+                    
+                    "Benipatti": {
+                        "id": "1232",
+                        "en": "Benipatti",
+                        "hi": "बेनीपट्टी"
+                    },
+                    
+                    "Bisfi": {
+                        "id": "1233",
+                        "en": "Bisfi",
+                        "hi": "बिस्फी"
+                    },
+                    
+                    "Ghoghardiha": {
+                        "id": "1234",
+                        "en": "Ghoghardiha",
+                        "hi": "घोघरडीहा"
+                    },
+                    
+                    "Harlakhi": {
+                        "id": "1235",
+                        "en": "Harlakhi",
+                        "hi": "हरलाखी"
+                    },
+                    
+                    "Madhwapur": {
+                        "id": "1236",
+                        "en": "Madhwapur",
+                        "hi": "मधवापुर प्रखण्ड"
+                    },
+                    
+                    "Pandaul": {
+                        "id": "1237",
+                        "en": "Pandaul",
+                        "hi": "पंडौल"
+                    },
+                    
+                    "Phulparas": {
+                        "id": "1238",
+                        "en": "Phulparas",
+                        "hi": "फुलपरास"
+                    },
+                    
+                    "Jainagar": {
+                        "id": "1239",
+                        "en": "Jainagar",
+                        "hi": "जयनगर"
+                    },
+                    
+                    "Jhanjharpur": {
+                        "id": "1240",
+                        "en": "Jhanjharpur",
+                        "hi": "झंझारपुर"
+                    },
+                    
+                    "Kaluahi": {
+                        "id": "1241",
+                        "en": "Kaluahi",
+                        "hi": "कलुआही"
+                    },
+                    
+                    "Khajauli": {
+                        "id": "1242",
+                        "en": "Khajauli",
+                        "hi": "खजौली"
+                    },
+                    
+                    "Ladania": {
+                        "id": "1243",
+                        "en": "Ladania",
+                        "hi": "लदानिया"
+                    },
+                    
+                    "Lakhnaur": {
+                        "id": "1244",
+                        "en": "Lakhnaur",
+                        "hi": "लखनौर"
+                    },
+                    
+                    "Laukaha khutauna": {
+                        "id": "1245",
+                        "en": "Laukaha khutauna",
+                        "hi": "लौकहा खुटौना"
+                    },
+                    
+                    "Laukahi": {
+                        "id": "1246",
+                        "en": "Laukahi",
+                        "hi": "लौकही"
+                    },
+                    
+                    "Madhepur": {
+                        "id": "1247",
+                        "en": "Madhepur",
+                        "hi": "मधेपुर"
+                    },
+                    
+                    "Madhubani": {
+                        "id": "1248",
+                        "en": "Madhubani",
+                        "hi": "मधुबनी"
+                    }
+
+
+                }
+            },
+            "Munger": {
+                "id": "418",
+                "en": "Munger",
+                "hi": "मुंगेर",
+
+
+                "blocks":{
+                    
+                    "Asarganj": {
+                        "id": "1249",
+                        "en": "Asarganj",
+                        "hi": "असरगंज"
+                    },
+                    "Bariarpur": {
+                        "id": "1250",
+                        "en": "Bariarpur",
+                        "hi": "बरियारपुर"
+                    },
+                    "Dharhara": {
+                        "id": "1251",
+                        "en": "Dharhara",
+                        "hi": "धरहरा"
+                    },
+                    "Jamalpur": {
+                        "id": "1252",
+                        "en": "Jamalpur",
+                        "hi": "जमालपुर"
+                    },
+                    "Haweli Kharagpur": {
+                        "id": "1253",
+                        "en": "Haweli Kharagpur",
+                        "hi": "हवेली खड़गपुर"
+                    },
+                    "Munger Sadar": {
+                        "id": "1254",
+                        "en": "Munger Sadar",
+                        "hi": "मुंगेर सदर"
+                    },
+                    "Sangrampur": {
+                        "id": "1255",
+                        "en": "Sangrampur",
+                        "hi": "संग्रामपुर"
+                    },
+                    "Tarapur": {
+                        "id": "1256",
+                        "en": "Tarapur",
+                        "hi": "तारापुर"
+                    },
+                    "Tetiha Bambar": {
+                        "id": "1257",
+                        "en": "Tetiha Bambar",
+                        "hi": "तेतीहा बम्बर"
+                    }
+
+
+                }
+
+            },
+            "Muzaffarpur": {
+                "id": "419",
+                 "en": "Muzaffarpur",
+                "hi": "मुजफ्फरपुर",
+
+                "blocks":{
+                    "Aurai": {
+                        "id": "1655",
+                        "en": "Aurai",
+                        "hi": "औराई"
+                    },
+                    "Bandra": {
+                        "id": "1658",
+                        "en": "Bandra",
+                        "hi": "बांद्रा"
+                    },
+                    "Baruraj (Motipur)": {
+                        "id": "1648",
+                        "en": "Baruraj (Motipur)",
+                        "hi": "बरुराज (मोतीपुर)"
+                    },
+                    "Bochaha": {
+                        "id": "1654",
+                        "en": "Bochaha",
+                        "hi": "बोचहा"
+                    },
+                    "Dholi (Moraul)": {
+                        "id": "1659",
+                        "en": "Dholi (Moraul)",
+                        "hi": "ढोली (मोरौल)"
+                    },
+                    "Gaighat": {
+                        "id": "1657",
+                        "en": "Gaighat",
+                        "hi": "गायघाट"
+                    },
+                    "Kanti": {
+                        "id": "1652",
+                        "en": "Kanti",
+                        "hi": "कांटी"
+                    },
+                    "Katra": {
+                        "id": "1656",
+                        "en": "Katra",
+                        "hi": "कटरा"
+                    },
+                    "Kurhani": {
+                        "id": "1661",
+                        "en": "Kurhani",
+                        "hi": "कुरहानी",
+
+                        "villages":{
+                        
+                            "Agha Nagar": {
+                                "id": "2473",
+                                "en": "Agha Nagar",
+                                "hi": "आगा नगर"
+                            },
+                            "Akhtiarpur Mohan": {
+                                "id": "4217",
+                                "en": "Akhtiarpur Mohan",
+                                "hi": "अख्तरपुर मोहन"
+                            },
+                            "Amrakh": {
+                                "id": "9468",
+                                "en": "Amrakh",
+                                "hi": "अमरख"
+                            },
+                            "Arizrpur Ragho": {
+                                "id": "14089",
+                                "en": "Arizrpur Ragho",
+                                "hi": "अरिजरपुर राघो"
+                            },
+                            "Asapur Bhawani": {
+                                "id": "15059",
+                                "en": "Asapur Bhawani",
+                                "hi": "आसपुर भवानी"
+                            },
+                            "Bachhuman": {
+                                "id": "18403",
+                                "en": "Bachhuman",
+                                "hi": "बछुमन"
+                            },
+                            "Baghi Gopalpur Gopinath": {
+                                "id": "21901",
+                                "en": "Baghi Gopalpur Gopinath",
+                                "hi": "बागी गोपालपुर गोपीनाथ"
+                            },
+                            "Baghi Harnarayan": {
+                                "id": "21902",
+                                "en": "Baghi Harnarayan",
+                                "hi": "बाघी हरनारायण"
+                            },
+                            "Baghi Maniar": {
+                                "id": "21904",
+                                "en": "Baghi Maniar",
+                                "hi": "बाघी मनियार"
+                            },
+                            "Baghi urf Bishunpur Madho": {
+                                "id": "21906",
+                                "en": "Baghi urf Bishunpur Madho",
+                                "hi": "बागी उर्फ बिशुनपुर माधो"
+                            },
+                            "Bakarpur": {
+                                "id": "25041",
+                                "en": "Bakarpur",
+                                "hi": "बकरपुर"
+                            },
+                            "Balia": {
+                                "id": "26760",
+                                "en": "Balia",
+                                "hi": "बलिया"
+                            },
+                            "Balra Ismail": {
+                                "id": "27833",
+                                "en": "Balra Ismail",
+                                "hi": "बलरा इस्माइल"
+                            },
+                            "Balra Kishun": {
+                                "id": "27836",
+                                "en": "Balra Kishun",
+                                "hi": "बलरा किशुन"
+                            },
+                            "Bangra Bansidhar": {
+                                "id": "31030",
+                                "en": "Bangra Bansidhar",
+                                "hi": "बंगरा बंसीधर"
+                            },
+                            "Bangra Bazid": {
+                                "id": "31032",
+                                "en": "Bangra Bazid",
+                                "hi": "बंगरा बाजिद"
+                            },
+                            "Bangra Hardas": {
+                                "id": "31036",
+                                "en": "Bangra Hardas",
+                                "hi": "बंगरा हरदास"
+                            },
+                            "Bara Kapur": {
+                                "id": "33168",
+                                "en": "Bara Kapur",
+                                "hi": "बारा कपूर"
+                            },
+                            "Basauli": {
+                                "id": "38599",
+                                "en": "Basauli",
+                                "hi": "बसौली"
+                            },
+                            "Bazidpur": {
+                                "id": "40798",
+                                "en": "Bazidpur",
+                                "hi": "बाजिदपुर"
+                            },
+                            "Bazidpur Kodaria": {
+                                "id": "40855",
+                                "en": "Bazidpur Kodaria",
+                                "hi": "बाजिदपुर कोदरिया"
+                            },
+                            "Belahia": {
+                                "id": "42269",
+                                "en": "Belahia",
+                                "hi": "बेलाहिया"
+                            },
+                            "Bhagwanpur": {
+                                "id": "46197",
+                                "en": "Bhagwanpur",
+                                "hi": "भगवानपुर"
+                            },
+                            "Bhawanipur": {
+                                "id": "51023",
+                                "en": "Bhawanipur",
+                                "hi": "भवानीपुर"
+                            },
+                            "Bhikhanpur Saif": {
+                                "id": "52083",
+                                "en": "Bhikhanpur Saif",
+                                "hi": "भीखनपुर सैफ"
+                            },
+                            "Bilwar urf Belwar Dih": {
+                                "id": "57495",
+                                "en": "Bilwar urf Belwar Dih",
+                                "hi": "बिलवर उर्फ बेलवर डीह"
+                            },
+                            "Bishunpur Dhanraj": {
+                                "id": "59346",
+                                "en": "Bishunpur Dhanraj",
+                                "hi": "बिशुनपुर धनराज"
+                            },
+                            "Bishunpur Gidha": {
+                                "id": "59364",
+                                "en": "Bishunpur Gidha",
+                                "hi": "बिशुनपुर गिधा"
+                            },
+                            "Bishunpur Jaynarayan": {
+                                "id": "59378",
+                                "en": "Bishunpur Jaynarayan",
+                                "hi": "बिशुनपुर जयनारायण"
+                            },
+                            "Bishunpur Mangar": {
+                                "id": "59406",
+                                "en": "Bishunpur Mangar",
+                                "hi": "बिशुनपुर मंगर"
+                            },
+                            "Chainpur": {
+                                "id": "67642",
+                                "en": "Chainpur",
+                                "hi": "चैनपुर"
+                            },
+                            "Chak Bhati": {
+                                "id": "67959",
+                                "en": "Chak Bhati",
+                                "hi": "चक भाटी"
+                            },
+                            "Chak Bhikhi": {
+                                "id": "67965",
+                                "en": "Chak Bhikhi",
+                                "hi": "चक भीखी"
+                            },
+                            "Chak Bir urf Madapur Ghaus": {
+                                "id": "67981",
+                                "en": "Chak Bir urf Madapur Ghaus",
+                                "hi": "चक बीर उर्फ़ मादापुर गौस"
+                            },
+                            "Chak Dharha urf Dunda Chak": {
+                                "id": "68068",
+                                "en": "Chak Dharha urf Dunda Chak",
+                                "hi": "चक धर उर्फ डूंडा चक"
+                            },
+                            "Chak Makhan": {
+                                "id": "68386",
+                                "en": "Chak Makhan",
+                                "hi": "चक माखन"
+                            },
+                            "Chak Mehsi": {
+                                "id": "68428",
+                                "en": "Chak Mehsi",
+                                "hi": "चक मेहसी"
+                            },
+                            "Chakia": {
+                                "id": "69137",
+                                "en": "Chakia",
+                                "hi": "चकिया"
+                            },
+                            "Chamrahra urf Lalpur": {
+                                "id": "70457",
+                                "en": "Chamrahra urf Lalpur",
+                                "hi": "चमरहरा उर्फ लालपुर"
+                            },
+                            "Chandrahati": {
+                                "id": "72043",
+                                "en": "Chandrahati",
+                                "hi": "चंद्रहाटी"
+                            },
+                            "Chandrahia": {
+                                "id": "72045",
+                                "en": "Chandrahia",
+                                "hi": "चंद्रहिया"
+                            },
+                            "Chapki": {
+                                "id": "73183",
+                                "en": "Chapki",
+                                "hi": "छपकी"
+                            },
+                            "Chhajan Harshankar": {
+                                "id": "76527",
+                                "en": "Chhajan Harshankar",
+                                "hi": "छजन हरशंकर"
+                            },
+                            "Chhitrauli": {
+                                "id": "77969",
+                                "en": "Chhitrauli",
+                                "hi": "छितरौली"
+                            },
+                            "Daha Chak": {
+                                "id": "87013",
+                                "en": "Daha Chak",
+                                "hi": "दाहा चक"
+                            },
+                            "Damodarpur Dumri": {
+                                "id": "89147",
+                                "en": "Damodarpur Dumri",
+                                "hi": "दामोदरपुर डुमरी"
+                            },
+                            "Deogan": {
+                                "id": "93787",
+                                "en": "Deogan",
+                                "hi": "देवगण"
+                            },
+                            "Dharmohan": {
+                                "id": "100122",
+                                "en": "Dharmohan",
+                                "hi": "धर्ममोहन"
+                            },
+                            "Dhonrhi Anandkari": {
+                                "id": "102144",
+                                "en": "Dhonrhi Anandkari",
+                                "hi": "धोंरही आनंदकारी"
+                            },
+                            "Dhonrhi Lala": {
+                                "id": "102145",
+                                "en": "Dhonrhi Lala",
+                                "hi": "धोनरी लाला"
+                            },
+                            "Dhonrhi Parsuram": {
+                                "id": "102146",
+                                "en": "Dhonrhi Parsuram",
+                                "hi": "धोंरही परशुराम"
+                            },
+                            "Dhonrhi Ratan": {
+                                "id": "102147",
+                                "en": "Dhonrhi Ratan",
+                                "hi": "धोनरी रतन"
+                            },
+                            "Dubahi": {
+                                "id": "107865",
+                                "en": "Dubahi",
+                                "hi": "दुबई"
+                            },
+                            "Enayitpoor": {
+                                "id": "112100",
+                                "en": "Enayitpoor",
+                                "hi": "इनायतपुर"
+                            },
+                            "Fatehpur Atwal": {
+                                "id": "113433",
+                                "en": "Fatehpur Atwal",
+                                "hi": "फतेहपुर अटवाल"
+                            },
+                            "Fatehpur Bhagwan": {
+                                "id": "113436",
+                                "en": "Fatehpur Bhagwan",
+                                "hi": "फतेहपुर भगवान"
+                            },
+                            "Fatehpur Kasturi": {
+                                "id": "113461",
+                                "en": "Fatehpur Kasturi",
+                                "hi": "फतेहपुर कस्तूरी"
+                            },
+                            "Gajpati": {
+                                "id": "116207",
+                                "en": "Gajpati",
+                                "hi": "गजपति"
+                            },
+                            "Gauraia": {
+                                "id": "120786",
+                                "en": "Gauraia",
+                                "hi": "गौरैया"
+                            },
+                            "Gausara": {
+                                "id": "120914",
+                                "en": "Gausara",
+                                "hi": "गौसरा"
+                            },
+                            "Ghausi": {
+                                "id": "123181",
+                                "en": "Ghausi",
+                                "hi": "गौसी"
+                            },
+                            "Ghausikhan": {
+                                "id": "123183",
+                                "en": "Ghausikhan",
+                                "hi": "गौसीखान"
+                            },
+                            "Godni": {
+                                "id": "126727",
+                                "en": "Godni",
+                                "hi": "गोदनी"
+                            },
+                            "Goriari": {
+                                "id": "129948",
+                                "en": "Goriari",
+                                "hi": "गोरीरी"
+                            },
+                            "Habibpatti": {
+                                "id": "135273",
+                                "en": "Habibpatti",
+                                "hi": "हबीबपट्टी"
+                            },
+                            "Harnarayanpur": {
+                                "id": "139789",
+                                "en": "Harnarayanpur",
+                                "hi": "हरनारायणपुर"
+                            },
+                            "Harpur Balra": {
+                                "id": "140020",
+                                "en": "Harpur Balra",
+                                "hi": "हरपुर बलरा"
+                            },
+                            "Harshankarpur Maniari": {
+                                "id": "140228",
+                                "en": "Harshankarpur Maniari",
+                                "hi": "हरशंकरपुर मनियारी"
+                            },
+                            "Jagarnathpur": {
+                                "id": "150200",
+                                "en": "Jagarnathpur",
+                                "hi": "जगरनाथपुर"
+                            },
+                            "Jagdishpur": {
+                                "id": "150393",
+                                "en": "Jagdishpur",
+                                "hi": "जगदीशपुर"
+                            },
+                            "Jarhua": {
+                                "id": "156262",
+                                "en": "Jarhua",
+                                "hi": "जरहुआ"
+                            },
+                            "Jhiki urf Salimpur Husain": {
+                                "id": "159564",
+                                "en": "Jhiki urf Salimpur Husain",
+                                "hi": "झिकी उर्फ सलीमपुर हुसैन"
+                            },
+                            "Kafain Daria Chhapra": {
+                                "id": "165973",
+                                "en": "Kafain Daria Chhapra",
+                                "hi": "कफैन दरिया छपरा"
+                            },
+                            "Kakra": {
+                                "id": "167577",
+                                "en": "Kakra",
+                                "hi": "काकरा"
+                            },
+                            "Kamtaul Anant": {
+                                "id": "172382",
+                                "en": "Kamtaul Anant",
+                                "hi": "कमतौल अनंत"
+                            },
+                            "Kamtaul Ghazi": {
+                                "id": "172383",
+                                "en": "Kamtaul Ghazi",
+                                "hi": "कमतौल गाजी"
+                            },
+                            "Kamtaul Jagdish": {
+                                "id": "172384",
+                                "en": "Kamtaul Jagdish",
+                                "hi": "कमतौल जगदीश"
+                            },
+                            "Kamtaul Muzaffarpur": {
+                                "id": "172385",
+                                "en": "Kamtaul Muzaffarpur",
+                                "hi": "कमतौल मुजफ्फरपुर"
+                            },
+                            "Karam Chand Balra": {
+                                "id": "177613",
+                                "en": "Karam Chand Balra",
+                                "hi": "करम चंद बलरा"
+                            },
+                            "Kasimpur": {
+                                "id": "181721",
+                                "en": "Kasimpur",
+                                "hi": "कासिमपुर"
+                            },
+                            "Kerwan Dih": {
+                                "id": "187154",
+                                "en": "Kerwan Dih",
+                                "hi": "केरवान डीह"
+                            },
+                            "Kerwan Raghoram": {
+                                "id": "187155",
+                                "en": "Kerwan Raghoram",
+                                "hi": "केरवन राघोराम"
+                            },
+                            "Keshopur": {
+                                "id": "187563",
+                                "en": "Keshopur",
+                                "hi": "केशोपुर"
+                            },
+                            "Kesrawan Dih": {
+                                "id": "187698",
+                                "en": "Kesrawan Dih",
+                                "hi": "केसरावां डीह"
+                            },
+                            "Khakhra": {
+                                "id": "190027",
+                                "en": "Khakhra",
+                                "hi": "खाखरा"
+                            },
+                            "Kharauna Dih": {
+                                "id": "192951",
+                                "en": "Kharauna Dih",
+                                "hi": "खरौना डीह"
+                            },
+                            "Kinari": {
+                                "id": "199397",
+                                "en": "Kinari",
+                                "hi": "किनारी"
+                            },
+                            "Kishunpur Belaur": {
+                                "id": "200299",
+                                "en": "Kishunpur Belaur",
+                                "hi": "किशुनपुर बेलौर"
+                            },
+                            "Kishunpur Madhuban": {
+                                "id": "200302",
+                                "en": "Kishunpur Madhuban",
+                                "hi": "किशुनपुर मधुबन"
+                            },
+                            "Kishunpur Mohan": {
+                                "id": "200304",
+                                "en": "Kishunpur Mohan",
+                                "hi": "किशुनपुर मोहन"
+                            },
+                            "Kobian": {
+                                "id": "200748",
+                                "en": "Kobian",
+                                "hi": "कोबियन"
+                            },
+                            "Kurhani": {
+                                "id": "214248",
+                                "en": "Kurhani",
+                                "hi": "कुरहानी"
+                            },
+                            "Ladauar": {
+                                "id": "217422",
+                                "en": "Ladauar",
+                                "hi": "लदाउर"
+                            },
+                            "Ladaura": {
+                                "id": "217426",
+                                "en": "Ladaura",
+                                "hi": "लदौरा"
+                            },
+                            "Lakhmi Nandlalpur": {
+                                "id": "218876",
+                                "en": "Lakhmi Nandlalpur",
+                                "hi": "लखमी नंदलालपुर"
+                            },
+                            "Madapur Rayati": {
+                                "id": "227485",
+                                "en": "Madapur Rayati",
+                                "hi": "मादापुर रायती"
+                            },
+                            "Madhaul": {
+                                "id": "228031",
+                                "en": "Madhaul",
+                                "hi": "माधौल"
+                            },
+                            "Madhaul Asli": {
+                                "id": "228033",
+                                "en": "Madhaul Asli",
+                                "hi": "माधौल असली"
+                            },
+                            "Madhopur Chikni": {
+                                "id": "228341",
+                                "en": "Madhopur Chikni",
+                                "hi": "माधोपुर चिकनी"
+                            },
+                            "Madhopur Kapur": {
+                                "id": "228349",
+                                "en": "Madhopur Kapur",
+                                "hi": "माधोपुर कपूर"
+                            },
+                            "Madhopur Susta": {
+                                "id": "228372",
+                                "en": "Madhopur Susta",
+                                "hi": "माधोपुर सुस्ता"
+                            },
+                            "Mahammadpur Mobarak": {
+                                "id": "230291",
+                                "en": "Mahammadpur Mobarak",
+                                "hi": "महम्मदपुर मुबारक"
+                            },
+                            "Mahanth Maniari": {
+                                "id": "230371",
+                                "en": "Mahanth Maniari",
+                                "hi": "महंत मनियारी"
+                            },
+                            "Majhanpatti": {
+                                "id": "232972",
+                                "en": "Majhanpatti",
+                                "hi": "मझनपट्टी"
+                            },
+                            "Maksudpur": {
+                                "id": "234364",
+                                "en": "Maksudpur",
+                                "hi": "मकसूदपुर"
+                            },
+                            "Mankauli": {
+                                "id": "240875",
+                                "en": "Mankauli",
+                                "hi": "मनकौली"
+                            },
+                            "Mathurapur": {
+                                "id": "244998",
+                                "en": "Mathurapur",
+                                "hi": "मथुरापुर"
+                            },
+                            "Misir Maniari": {
+                                "id": "250278",
+                                "en": "Misir Maniari",
+                                "hi": "मिसिर मनियारी"
+                            },
+                            "Mohammadpur Alam": {
+                                "id": "251372",
+                                "en": "Mohammadpur Alam",
+                                "hi": "मोहम्मदपुर आलम"
+                            },
+                            "Mohanpur": {
+                                "id": "251585",
+                                "en": "Mohanpur",
+                                "hi": "मोहनपुर"
+                            },
+                            "Mohanpur Bara": {
+                                "id": "251681",
+                                "en": "Mohanpur Bara",
+                                "hi": "मोहनपुर बाड़ा"
+                            },
+                            "Moraul": {
+                                "id": "253480",
+                                "en": "Moraul",
+                                "hi": "मोरौल"
+                            },
+                            "Moraul urf Mor Nisf": {
+                                "id": "253483",
+                                "en": "Moraul urf Mor Nisf",
+                                "hi": "मोरौल उर्फ मोर निस्फ"
+                            },
+                            "Motha urf Chak Harun": {
+                                "id": "254198",
+                                "en": "Motha urf Chak Harun",
+                                "hi": "मोथा उर्फ़ चक हारून"
+                            },
+                            "Murarpur": {
+                                "id": "257909",
+                                "en": "Murarpur",
+                                "hi": "मुरारपुर"
+                            },
+                            "Nirpur": {
+                                "id": "273811",
+                                "en": "Nirpur",
+                                "hi": "निरपुर"
+                            },
+                            "Padmaul": {
+                                "id": "280968",
+                                "en": "Padmaul",
+                                "hi": "पद्मौल"
+                            },
+                            "Paharpur": {
+                                "id": "281707",
+                                "en": "Paharpur",
+                                "hi": "पहाड़पुर"
+                            },
+                            "Pakahi urf Asadpur Pakauli": {
+                                "id": "282410",
+                                "en": "Pakahi urf Asadpur Pakauli",
+                                "hi": "पकही उर्फ़ असदपुर पकौली"
+                            },
+                            "Pakauli": {
+                                "id": "282540",
+                                "en": "Pakauli",
+                                "hi": "पकौली"
+                            },
+                            "Parian Bathna Pachhiari": {
+                                "id": "289347",
+                                "en": "Parian Bathna Pachhiari",
+                                "hi": "परियां बथना पछियारी"
+                            },
+                            "Parian Bathna Purwari": {
+                                "id": "289348",
+                                "en": "Parian Bathna Purwari",
+                                "hi": "परियां बथना पुरवारी"
+                            },
+                            "Parian urf Akhtiarpur": {
+                                "id": "289349",
+                                "en": "Parian urf Akhtiarpur",
+                                "hi": "परियां उर्फ अख्तरपुर"
+                            },
+                            "Parkhotimpur": {
+                                "id": "289533",
+                                "en": "Parkhotimpur",
+                                "hi": "परखोटीमपुर"
+                            },
+                            "Parsotimpur": {
+                                "id": "290339",
+                                "en": "Parsotimpur",
+                                "hi": "परसोटीमपुर"
+                            },
+                            "Phulwaria": {
+                                "id": "297356",
+                                "en": "Phulwaria",
+                                "hi": "फुलवरिया"
+                            },
+                            "Pokhraira Kasim": {
+                                "id": "301872",
+                                "en": "Pokhraira Kasim",
+                                "hi": "पोखरैरा कासिम"
+                            },
+                            "Pupri urf Nuripur": {
+                                "id": "305032",
+                                "en": "Pupri urf Nuripur",
+                                "hi": "पुपरी उर्फ नूरीपुर"
+                            },
+                            "Raghunathpur Basant": {
+                                "id": "307615",
+                                "en": "Raghunathpur Basant",
+                                "hi": "रघुनाथपुर बसंत"
+                            },
+                            "Raghunathpur Madhuban urf Kaman Chhapra": {
+                                "id": "307623",
+                                "en": "Raghunathpur Madhuban urf Kaman Chhapra",
+                                "hi": "रघुनाथपुर मधुबन उर्फ कमान छपरा"
+                            },
+                            "Rajla": {
+                                "id": "310006",
+                                "en": "Rajla",
+                                "hi": "राजला"
+                            },
+                            "Rampur Balra": {
+                                "id": "313279",
+                                "en": "Rampur Balra",
+                                "hi": "रामपुर बलरा"
+                            },
+                            "Rampur Kashi": {
+                                "id": "313376",
+                                "en": "Rampur Kashi",
+                                "hi": "रामपुर काशी"
+                            },
+                            "Ratnauli": {
+                                "id": "317074",
+                                "en": "Ratnauli",
+                                "hi": "रत्नौली"
+                            },
+                            "Sadhwara": {
+                                "id": "323322",
+                                "en": "Sadhwara",
+                                "hi": "सधवारा"
+                            },
+                            "Shahpur Dokhili": {
+                                "id": "340323",
+                                "en": "Shahpur Dokhili",
+                                "hi": "शाहपुर दोखिली"
+                            },
+                            "Shahpur Mircha": {
+                                "id": "340349",
+                                "en": "Shahpur Mircha",
+                                "hi": "शाहपुर मिर्चा"
+                            },
+                            "Shakrisaraiya": {
+                                "id": "340570",
+                                "en": "Shakrisaraiya",
+                                "hi": "शकीसराय"
+                            },
+                            "Sherpurchak Makhan": {
+                                "id": "342255",
+                                "en": "Sherpurchak Makhan",
+                                "hi": "शेरपुरचक माखन"
+                            },
+                            "Silaut Baijnath": {
+                                "id": "345915",
+                                "en": "Silaut Baijnath",
+                                "hi": "सिलौत बैजनाथ"
+                            },
+                            "Silaut Basdeo": {
+                                "id": "345916",
+                                "en": "Silaut Basdeo",
+                                "hi": "सिलौत बसदेव"
+                            },
+                            "Silaut Bhimal": {
+                                "id": "345917",
+                                "en": "Silaut Bhimal",
+                                "hi": "सिलौत भीमल"
+                            },
+                            "Silaut Harbans": {
+                                "id": "345918",
+                                "en": "Silaut Harbans",
+                                "hi": "सिलौत हरबंस"
+                            },
+                            "Siripur": {
+                                "id": "349013",
+                                "en": "Siripur",
+                                "hi": "सिरीपुर"
+                            },
+                            "Siwanpatti": {
+                                "id": "350436",
+                                "en": "Siwanpatti",
+                                "hi": "सीवानपट्टी"
+                            },
+                            "Sonbarsa Ahmad": {
+                                "id": "352301",
+                                "en": "Sonbarsa Ahmad",
+                                "hi": "सोनबरसा अहमद"
+                            },
+                            "Sonbarsa Dih": {
+                                "id": "352305",
+                                "en": "Sonbarsa Dih",
+                                "hi": "सोनबरसा डीह"
+                            },
+                            "Sonbarsa Shah": {
+                                "id": "352309",
+                                "en": "Sonbarsa Shah",
+                                "hi": "सोनबरसा शाह"
+                            },
+                            "Subudhia Bishunpur": {
+                                "id": "354341",
+                                "en": "Subudhia Bishunpur",
+                                "hi": "सुबुधिया बिशुनपुर"
+                            },
+                            "Subudho Nathan": {
+                                "id": "354345",
+                                "en": "Subudho Nathan",
+                                "hi": "सुबुधो नाथन"
+                            },
+                            "Sumera": {
+                                "id": "356057",
+                                "en": "Sumera",
+                                "hi": "सुमेरा"
+                            },
+                            "Sumera urf Afzalpur Madho": {
+                                "id": "356059",
+                                "en": "Sumera urf Afzalpur Madho",
+                                "hi": "सुमेरा उर्फ अफजलपुर माधो"
+                            },
+                            "Tal Garhwa": {
+                                "id": "359841",
+                                "en": "Tal Garhwa",
+                                "hi": "ताल गढ़वा"
+                            },
+                            "Tarsan Kishuni": {
+                                "id": "363456",
+                                "en": "Tarsan Kishuni",
+                                "hi": "तर्सन किशुनी"
+                            },
+                            "Telia urf Baikunthpur": {
+                                "id": "364787",
+                                "en": "Telia urf Baikunthpur",
+                                "hi": "तेलिया उर्फ़ बैकुंठपुर"
+                            },
+                            "Thatia Garh Goriari": {
+                                "id": "367819",
+                                "en": "Thatia Garh Goriari",
+                                "hi": "ठटिया गढ़ गोरियारी"
+                            },
+                            "Thuhawan": {
+                                "id": "370000",
+                                "en": "Thuhawan",
+                                "hi": "थूहावन"
+                            },
+                            "Turki": {
+                                "id": "377036",
+                                "en": "Turki",
+                                "hi": "तुर्की"
+                            },
+                            "Zamin Kamtaul": {
+                                "id": "393261",
+                                "en": "Zamin Kamtaul",
+                                "hi": "जमीं कमतौल"
+                            }
+                        }
+                    },
+                    "Marwan": {
+                        "id": "1651",
+                        "en": "Marwan",
+                        "hi": "मरवन"
+                    },
+                    "Minapur": {
+                        "id": "1653",
+                        "en": "Minapur",
+                        "hi": "मीनापुर"
+                    },
+                    "Musahari": {
+                        "id": "1660",
+                        "en": "Musahari",
+                        "hi": "मुसहरी"
+                    },
+                    "Paroo": {
+                        "id": "1649",
+                        "en": "Paroo",
+                        "hi": "पारू"
+                    },
+                    "Sahebganj": {
+                        "id": "1647",
+                        "en": "Sahebganj",
+                        "hi": "साहेबगंज"
+                    },
+                    "Sakra": {
+                        "id": "1662",
+                        "en": "Sakra",
+                        "hi": "सकारा"
+                    },
+                    "Saraiya": {
+                        "id": "1650",
+                        "en": "Saraiya",
+                        "hi": "सरैया"
+                    }
+                }
+            },
+            "Nalanda": {
+                "id": "420",
+                "en": "Nalanda",
+                "hi": "नालंदा",
+
+
+                "blocks":{
+                    
+                    "Asthawan": {
+                        "id": "1258",
+                        "en": "Asthawan",
+                        "hi": "अस्थावान"
+                    },
+                    "Ben": {
+                        "id": "1259",
+                        "en": "Ben",
+                        "hi": "बेन"
+                    },
+                    "Bihar Sharif": {
+                        "id": "1260",
+                        "en": "Bihar Sharif",
+                        "hi": "बिहारशरीफ"
+                    },
+                    "Bind": {
+                        "id": "1261",
+                        "en": "Bind",
+                        "hi": "बिंद"
+                    },
+                    "Chandi": {
+                        "id": "1262",
+                        "en": "Chandi",
+                        "hi": "चंडी"
+                    },
+                    "Ekangarsarai": {
+                        "id": "1263",
+                        "en": "Ekangarsarai",
+                        "hi": "एकंगरसराय"
+                    },
+                    "Giriak": {
+                        "id": "1264",
+                        "en": "Giriak",
+                        "hi": "गिरियक"
+                    },
+                    "Harnaut": {
+                        "id": "1265",
+                        "en": "Harnaut",
+                        "hi": "हरनौत"
+                    },
+                    "Hilsa": {
+                        "id": "1266",
+                        "en": "Hilsa",
+                        "hi": "हिलसा"
+                    },
+                    "Islampur": {
+                        "id": "1267",
+                        "en": "Islampur",
+                        "hi": "इस्लामपुर"
+                    },
+                    "Karai Parsurai": {
+                        "id": "1268",
+                        "en": "Karai Parsurai",
+                        "hi": "करै परसुराय"
+                    },
+                    "Katrisarai": {
+                        "id": "1269",
+                        "en": "Katrisarai",
+                        "hi": "कतरीसराय"
+                    },
+                    "Nagar Nausa": {
+                        "id": "1270",
+                        "en": "Nagar Nausa",
+                        "hi": "नगर नौसा"
+                    },
+                    "Noorsarai": {
+                        "id": "1271",
+                        "en": "Noorsarai",
+                        "hi": "नूरसराय"
+                    },
+                    "Parbalpur": {
+                        "id": "1272",
+                        "en": "Parbalpur",
+                        "hi": "परबलपुर"
+                    },
+                    "Rahui": {
+                        "id": "1273",
+                        "en": "Rahui",
+                        "hi": "राहुई"
+                    },
+                    "Rajgir": {
+                        "id": "1274",
+                        "en": "Rajgir",
+                        "hi": "राजगीर"
+                    },
+                    "Sarmera": {
+                        "id": "1275",
+                        "en": "Sarmera",
+                        "hi": "सरमेरा"
+                    },
+                    "Silao": {
+                        "id": "1276",
+                        "en": "Silao",
+                        "hi": "सिलाओ"
+                    },
+                    "Tharthari": {
+                        "id": "1277",
+                        "en": "Tharthari",
+                        "hi": "थरथारी"
+                    }
+
+
+
+                }
+            },
+            "Nawada": {
+                "id": "421",
+                "en": "Nawada",
+                "hi": "नवादा",
+
+
+                "blocks":{
+                    
+                    "Akbarpur": {
+                        "id": "1278",
+                        "en": "Akbarpur",
+                        "hi": "अकबरपुर"
+                    },
+                    "Gobindpur": {
+                        "id": "1279",
+                        "en": "Gobindpur",
+                        "hi": "गोबिंदपुर"
+                    },
+                    "Hisua": {
+                        "id": "1280",
+                        "en": "Hisua",
+                        "hi": "हिसुआ"
+                    },
+                    "Kashi Chak": {
+                        "id": "1281",
+                        "en": "Kashi Chak",
+                        "hi": "काशी चक"
+                    },
+                    "Kawakol": {
+                        "id": "1282",
+                        "en": "Kawakol",
+                        "hi": "कवाकोल"
+                    },
+                    "Meskaur": {
+                        "id": "1283",
+                        "en": "Meskaur",
+                        "hi": "मेसकौर"
+                    },
+                    "Nardiganj": {
+                        "id": "1284",
+                        "en": "Nardiganj",
+                        "hi": "नारदीगंज"
+                    },
+                    "Narhat": {
+                        "id": "1285",
+                        "en": "Narhat",
+                        "hi": "नरहट"
+                    },
+                    "Nawada": {
+                        "id": "1286",
+                        "en": "Nawada",
+                        "hi": "नवादा"
+                    },
+                    "Pakribarawan": {
+                        "id": "1287",
+                        "en": "Pakribarawan",
+                        "hi": "पकड़ीबरावां"
+                    },
+                    "Rajauli": {
+                        "id": "1288",
+                        "en": "Rajauli",
+                        "hi": "रजौली"
+                    },
+                    "Roh": {
+                        "id": "1289",
+                        "en": "Roh",
+                        "hi": "रूह"
+                    },
+                    "Sirdala": {
+                        "id": "1290",
+                        "en": "Sirdala",
+                        "hi": "सिरदला"
+                    },
+                    "Warisaliganj": {
+                        "id": "1291",
+                        "en": "Warisaliganj",
+                        "hi": "वारिसलीगंज"
+                    }
+
+
+                }
+            },
+            "Pashchim Champaran": {
+                "id": "422",
+                "en": "Pashchim Champaran",
+                "hi": "पश्चिम चंपारण",
+
+
+                "blocks":{
+                    
+                    "Nautan": {
+                        "id": "1292",
+                        "en": "Nautan",
+                        "hi": "नौतन"
+                    },
+                    "Narkatiaganj": {
+                        "id": "1293",
+                        "en": "Narkatiaganj",
+                        "hi": "नरकटियागंज"
+                    },
+                    "Thakrahan": {
+                        "id": "1294",
+                        "en": "Thakrahan",
+                        "hi": "ठकराहन"
+                    },
+                    "Piprasi": {
+                        "id": "1295",
+                        "en": "Piprasi",
+                        "hi": "पिपरासी"
+                    },
+                    "Ramnagar": {
+                        "id": "1296",
+                        "en": "Ramnagar",
+                        "hi": "रामनगर"
+                    },
+                    "Sikta": {
+                        "id": "1297",
+                        "en": "Sikta",
+                        "hi": "सिक्त"
+                    },
+                    "Bagaha - 1": {
+                        "id": "1298",
+                        "en": "Bagaha - 1",
+                        "hi": "बगहा -1"
+                    },
+                    "Sidhaw(Bagah-II)": {
+                        "id": "1299",
+                        "en": "Sidhaw(Bagah-II)",
+                        "hi": "सिधौ (बगह-II)"
+                    },
+                    "Bairia": {
+                        "id": "1300",
+                        "en": "Bairia",
+                        "hi": "बैरिया"
+                    },
+                    "Bettiah": {
+                        "id": "1301",
+                        "en": "Bettiah",
+                        "hi": "बेतिया"
+                    },
+                    "Bhitaha": {
+                        "id": "1302",
+                        "en": "Bhitaha",
+                        "hi": "भितहा"
+                    },
+                    "Chanpatia": {
+                        "id": "1303",
+                        "en": "Chanpatia",
+                        "hi": "चनपटिया"
+                    },
+                    "Gaunaha": {
+                        "id": "1304",
+                        "en": "Gaunaha",
+                        "hi": "गौनाहा"
+                    },
+                    "Jogapatti": {
+                        "id": "1305",
+                        "en": "Jogapatti",
+                        "hi": "जोगापट्टी"
+                    },
+                    "Lauriya": {
+                        "id": "1306",
+                        "en": "Lauriya",
+                        "hi": "लौरिया"
+                    },
+                    "Madhubani": {
+                        "id": "1307",
+                        "en": "Madhubani",
+                        "hi": "मधुबनी"
+                    },
+                    "Mainatanr": {
+                        "id": "1308",
+                        "en": "Mainatanr",
+                        "hi": "मैनटानर"
+                    },
+                    "Majhaulia": {
+                        "id": "1309",
+                        "en": "Majhaulia",
+                        "hi": "मझौलिया"
+                    }
+
+
+                }
+            },
+            "Patna": {
+                "id": "423",
+                "en": "Patna",
+                "hi": "पटना",
+
+
+                "blocks":{
+                    
+                    "PATNA SADAR": {
+                        "id": "1310",
+                        "en": "PATNA SADAR",
+                        "hi": "पटना सदर"
+                    },
+                    "Danapur-Cum-Khagaul": {
+                        "id": "1311",
+                        "en": "Danapur-Cum-Khagaul",
+                        "hi": "दानापुर-सह-खगौल"
+                    },
+                    "Dulhin Bazar": {
+                        "id": "1312",
+                        "en": "Dulhin Bazar",
+                        "hi": "दुल्हिन बाजार"
+                    },
+                    "Fatwah": {
+                        "id": "1313",
+                        "en": "Fatwah",
+                        "hi": "फतवा"
+                    },
+                    "Ghoswari": {
+                        "id": "1314",
+                        "en": "Ghoswari",
+                        "hi": "घोसवारी"
+                    },
+                    "Khusrupur": {
+                        "id": "1315",
+                        "en": "Khusrupur",
+                        "hi": "खुसरूपुर"
+                    },
+                    "Maner": {
+                        "id": "1316",
+                        "en": "Maner",
+                        "hi": "मानेर"
+                    },
+                    "Masaurhi": {
+                        "id": "1317",
+                        "en": "Masaurhi",
+                        "hi": "मसौर्ही"
+                    },
+                    "MOKAMA": {
+                        "id": "1318",
+                        "en": "MOKAMA",
+                        "hi": "मोकामा"
+                    },
+                    "Naubatpur": {
+                        "id": "1319",
+                        "en": "Naubatpur",
+                        "hi": "नौबतपुर"
+                    },
+                    "Paliganj": {
+                        "id": "1320",
+                        "en": "Paliganj",
+                        "hi": "पालीगंज"
+                    },
+                    "Pandarak": {
+                        "id": "1321",
+                        "en": "Pandarak",
+                        "hi": "पंडारक"
+                    },
+                    "PHULWARISARIF": {
+                        "id": "1322",
+                        "en": "PHULWARISARIF",
+                        "hi": "फुलवारी शरीफ"
+                    },
+                    "Punpun": {
+                        "id": "1323",
+                        "en": "Punpun",
+                        "hi": "पुनपुन"
+                    },
+                    "Sampatchak": {
+                        "id": "1324",
+                        "en": "Sampatchak",
+                        "hi": "संपतचक"
+                    },
+                    "Athmalgola": {
+                        "id": "1325",
+                        "en": "Athmalgola",
+                        "hi": "अथमलगोला"
+                    },
+                    "Bakhtiarpur": {
+                        "id": "1326",
+                        "en": "Bakhtiarpur",
+                        "hi": "बख्तियारपुर"
+                    },
+                    "Barh": {
+                        "id": "1327",
+                        "en": "Barh",
+                        "hi": "बाढ़"
+                    },
+                    "BELCHCHI": {
+                        "id": "1328",
+                        "en": "BELCHCHI",
+                        "hi": "बेल्चची"
+                    },
+                    "Bihta": {
+                        "id": "1329",
+                        "en": "Bihta",
+                        "hi": "बिहटा"
+                    },
+                    "Bikram": {
+                        "id": "1330",
+                        "en": "Bikram",
+                        "hi": "बिक्रम"
+                    },
+                    "Daniawan": {
+                        "id": "1331",
+                        "en": "Daniawan",
+                        "hi": "दनियावान"
+                    },
+                    "Dhanarua": {
+                        "id": "1332",
+                        "en": "Dhanarua",
+                        "hi": "धनरुआ"
+                    }
+
+                }
+            },
+            "Purba Champaran": {
+                "id": "424",
+                "en": "Purba Champaran",
+                "hi": "पूरब चंपारण",
+
+
+                "blocks":{
+                    
+                    "Kotwa": {
+                        "id": "1332",
+                        "en": "Kotwa",
+                        "hi": "कोटवा"
+                    },
+                    "Madhuban": {
+                        "id": "1333",
+                        "en": "Madhuban",
+                        "hi": "मधुबन"
+                    },
+                    "Mehsi": {
+                        "id": "1334",
+                        "en": "Mehsi",
+                        "hi": "मेहसी"
+                    },
+                    "Motihari": {
+                        "id": "1335",
+                        "en": "Motihari",
+                        "hi": "मोतिहारी"
+                    },
+                    "Pakri Dayal": {
+                        "id": "1336",
+                        "en": "Pakri Dayal",
+                        "hi": "पकरी दयाल"
+                    },
+                    "Patahi": {
+                        "id": "1337",
+                        "en": "Patahi",
+                        "hi": "पताही"
+                    },
+                    "Phenhara": {
+                        "id": "1338",
+                        "en": "Phenhara",
+                        "hi": "फेनहारा"
+                    },
+                    "Piprakothi": {
+                        "id": "1339",
+                        "en": "Piprakothi",
+                        "hi": "पिपराकोठी"
+                    },
+                    "Ramgarhwa": {
+                        "id": "1340",
+                        "en": "Ramgarhwa",
+                        "hi": "रामगढ़वा"
+                    },
+                    "Raxaul": {
+                        "id": "1341",
+                        "en": "Raxaul",
+                        "hi": "रक्सौल"
+                    },
+                    "Sangrampur": {
+                        "id": "1342",
+                        "en": "Sangrampur",
+                        "hi": "संग्रामपुर"
+                    },
+                    "Sugauli": {
+                        "id": "1343",
+                        "en": "Danapur",
+                        "hi": "सुगौली"
+                    },
+                    "Tetaria": {
+                        "id": "1344",
+                        "en": "Tetaria",
+                        "hi": "तेतरिया"
+                    },
+                    "Turkaulia": {
+                        "id": "1345",
+                        "en": "Turkaulia",
+                        "hi": "तुरकौलिया"
+                    },
+                    "Areraj": {
+                        "id": "1346",
+                        "en": "Areraj",
+                        "hi": "अरेराज"
+                    },
+                    "Banjaria": {
+                        "id": "1347",
+                        "en": "Banjaria",
+                        "hi": "बंजारिया"
+                    },
+                    "Bankatwa": {
+                        "id": "1348",
+                        "en": "Bankatwa",
+                        "hi": "बनकटवा"
+                    },
+                    "Chakia(Pipra)": {
+                        "id": "1349",
+                        "en": "Chakia(Pipra)",
+                        "hi": "चकिया(पिपरा)"
+                    },
+                    "Chawradano": {
+                        "id": "1350",
+                        "en": "Chawradano",
+                        "hi": "चौराडानो"
+                    },
+                    "Chiraia": {
+                        "id": "1351",
+                        "en": "Chiraia",
+                        "hi": "चिरैया"
+                    },
+                    "Dhaka": {
+                        "id": "1352",
+                        "en": "Dhaka",
+                        "hi": "ढाका"
+                    },
+                    "Ghorasahan": {
+                        "id": "1353",
+                        "en": "Ghorasahan",
+                        "hi": "घोड़ासहन"
+                    },
+                    "Harsidhi": {
+                        "id": "1354",
+                        "en": "Harsidhi",
+                        "hi": "हरसिद्धि"
+                    },
+                    "Kalyanpur": {
+                        "id": "1355",
+                        "en": "Kalyanpur",
+                        "hi": "कल्याणपुर"
+                    },
+                    "Adapur": {
+                        "id": "1356",
+                        "en": "Adapur",
+                        "hi": "आदापुर"
+                    },
+                    "Kesaria": {
+                        "id": "1357",
+                        "en": "Kesaria",
+                        "hi": "केसरिया"
+                    },
+                    "Paharpur": {
+                        "id": "1358",
+                        "en": "Paharpur",
+                        "hi": "पहाड़पुर"
+                    }
+
+                }
+            },
+            "Purnia": {
+                "id": "425",
+                "en": "Purnia",
+                "hi": "पूर्णिया",
+
+
+                "blocks":{
+                    
+                    "Amour": {
+                        "id": "1359",
+                        "en": "Amour",
+                        "hi": "अमोर"
+                    },
+                    "Banmankhi": {
+                        "id": "1360",
+                        "en": "Banmankhi",
+                        "hi": "बनमनखी"
+                    },
+                    "Barhara kothi": {
+                        "id": "1361",
+                        "en": "Barhara kothi",
+                        "hi": "बरहरा कोठी"
+                    },
+                    "Bhawanipur": {
+                        "id": "1362",
+                        "en": "Bhawanipur",
+                        "hi": "भवानीपुर"
+                    },
+                    "Dagarua": {
+                        "id": "1363",
+                        "en": "Dagarua",
+                        "hi": "डगरुआ"
+                    },
+                    "Dhamdaha": {
+                        "id": "1364",
+                        "en": "Dhamdaha",
+                        "hi": "धमदाहा"
+                    },
+                    "Jalalgarh": {
+                        "id": "1365",
+                        "en": "Jalalgarh",
+                        "hi": "जलालगढ़"
+                    },
+                    "Kasba": {
+                        "id": "1366",
+                        "en": "Kasba",
+                        "hi": "कस्बा"
+                    },
+                    "Krityanand Nagar": {
+                        "id": "1367",
+                        "en": "Krityanand Nagar",
+                        "hi": "कृत्यानंद नगर"
+                    },
+                    "Purnia East": {
+                        "id": "1368",
+                        "en": "Purnia East",
+                        "hi": "पूर्णिया पूर्व"
+                    },
+                    "Rupauli": {
+                        "id": "1369",
+                        "en": "Rupauli",
+                        "hi": "रूपौली"
+                    },
+                    "Srinagar": {
+                        "id": "1370",
+                        "en": "Srinagar",
+                        "hi": "श्रीनगर"
+                    },
+                    "Baisa": {
+                        "id": "1371",
+                        "en": "Baisa",
+                        "hi": "बाईसा"
+                    },
+                    "Baisi": {
+                        "id": "1372",
+                        "en": "Baisi",
+                        "hi": "बैसी"
+                    }
+
+                }
+            },
+            "Rohtas": {
+                "id": "426",
+                "en": "Rohtas",
+                "hi": "रोहतास",
+
+
+                "blocks":{
+                    
+                    "Akorhi Gola": {
+                        "id": "1373",
+                        "en": "Akorhi Gola",
+                        "hi": "अकोढ़ी गोला"
+                    },
+                    "Bikramganj": {
+                        "id": "1374",
+                        "en": "Bikramganj",
+                        "hi": "बिक्रमगंज"
+                    },
+                    "Chenari": {
+                        "id": "1375",
+                        "en": "Chenari",
+                        "hi": "चेनारी"
+                    },
+                    "Dawath": {
+                        "id": "1376",
+                        "en": "Dawath",
+                        "hi": "दावत"
+                    },
+                    "Dehri": {
+                        "id": "1377",
+                        "en": "Dehri",
+                        "hi": "डेहरी"
+                    },
+                    "Dinara": {
+                        "id": "1378",
+                        "en": "Dinara",
+                        "hi": "दिनारा"
+                    },
+                    "Karakat": {
+                        "id": "1379",
+                        "en": "Karakat",
+                        "hi": "काराकाट"
+                    },
+                    "Kargahar": {
+                        "id": "1380",
+                        "en": "Kargahar",
+                        "hi": "कारगहर"
+                    },
+                    "Kochas": {
+                        "id": "1381",
+                        "en": "Kochas",
+                        "hi": "कोचस"
+                    },
+                    "Nasriganj": {
+                        "id": "1382",
+                        "en": "Nasriganj",
+                        "hi": "नसरीगंज"
+                    },
+                    "Nauhatta": {
+                        "id": "1383",
+                        "en": "Nauhatta",
+                        "hi": "नौहट्टा"
+                    },
+                    "Nokha": {
+                        "id": "1384",
+                        "en": "Nokha",
+                        "hi": "नोखा"
+                    },
+                    "Rajpur": {
+                        "id": "1385",
+                        "en": "Rajpur",
+                        "hi": "राजपुर"
+                    },
+                    "Rohtas": {
+                        "id": "1386",
+                        "en": "Rohtas",
+                        "hi": "रोहतास"
+                    },
+                    "Sanjhauli": {
+                        "id": "1387",
+                        "en": "Sanjhauli",
+                        "hi": "संझौली"
+                    },
+                    "Sasaram": {
+                        "id": "1388",
+                        "en": "Sasaram",
+                        "hi": "सासाराम"
+                    },
+                    "Sheosagar": {
+                        "id": "1389",
+                        "en": "Sheosagar",
+                        "hi": "शिवसागर"
+                    },
+                    "Suryapura": {
+                        "id": "1390",
+                        "en": "Suryapura",
+                        "hi": "सूर्यपुरा"
+                    },
+                    "Tilouthu": {
+                        "id": "1391",
+                        "en": "Tilouthu",
+                        "hi": "तिलौथु"
+                    }
+
+
+                }
+            },
+            "Saharsa": {
+                "id": "427",
+                "en": "Saharsa",
+                "hi": "सहरसा",
+
+
+                "blocks":{
+                    
+                    "Banma Itahri": {
+                        "id": "1392",
+                        "en": "Banma Itahri",
+                        "hi": "बनमा इटहरी"
+                    },
+                    "Kahara": {
+                        "id": "1393",
+                        "en": "Kahara",
+                        "hi": "कहारा"
+                    },
+                    "Mahishi": {
+                        "id": "1394",
+                        "en": "Mahishi",
+                        "hi": "महिषी"
+                    },
+                    "Nauhatta": {
+                        "id": "1395",
+                        "en": "Nauhatta",
+                        "hi": "नौहट्टा"
+                    },
+                    "Patarghat": {
+                        "id": "1396",
+                        "en": "Patarghat",
+                        "hi": "पत्थरघाट"
+                    },
+                    "Salkhua": {
+                        "id": "1397",
+                        "en": "Salkhua",
+                        "hi": "सलखुआ"
+                    },
+                    "Satar Kataiya": {
+                        "id": "1398",
+                        "en": "Satar Kataiya",
+                        "hi": "सतार कटैया"
+                    },
+                    "Simri Bakhtiarpur": {
+                        "id": "1399",
+                        "en": "Simri Bakhtiarpur",
+                        "hi": "सिमरी बख्तियारपुर"
+                    },
+                    "Sonbarsa": {
+                        "id": "1400",
+                        "en": "Sonbarsa",
+                        "hi": "सोनबरसा"
+                    },
+                    "Saur Bazar": {
+                        "id": "1401",
+                        "en": "Saur Bazar",
+                        "hi": "सौर बाजार"
+                    }
+
+                }
+            },
+            "Samastipur": {
+                "id": "428",
+                "en": "Samastipur",
+                "hi": "समस्तीपुर",
+
+
+                "blocks":{
+                    
+                    "Bibhutpur": {
+                        "id": "1402",
+                        "en": "Bibhutpur",
+                        "hi": "विभूतपुर"
+                    },
+                    "Bithan": {
+                        "id": "1403",
+                        "en": "Bithan",
+                        "hi": "बिथन"
+                    },
+                    "Dalsinghsarai": {
+                        "id": "1404",
+                        "en": "Dalsinghsarai",
+                        "hi": "दलसिंहसराय"
+                    },
+                    "Hasanpur": {
+                        "id": "1405",
+                        "en": "Hasanpur",
+                        "hi": "हसनपुर"
+                    },
+                    "Ujiarpur": {
+                        "id": "1406",
+                        "en": "Ujiarpur",
+                        "hi": "उजियारपुर"
+                    },
+                    "Mohiuddinagar": {
+                        "id": "1407",
+                        "en": "Mohiuddinagar",
+                        "hi": "मोहिउद्दीननगर"
+                    },
+                    "Warisnagar": {
+                        "id": "1408",
+                        "en": "Warisnagar",
+                        "hi": "वारिसनगर"
+                    },
+                    "Rosera": {
+                        "id": "1409",
+                        "en": "Rosera",
+                        "hi": "रोसेरा"
+                    },
+                    "Samastipur": {
+                        "id": "1410",
+                        "en": "Samastipur",
+                        "hi": "समस्तीपुर"
+                    },
+                    "Kalyanpur": {
+                        "id": "1411",
+                        "en": "Kalyanpur",
+                        "hi": "कल्याणपुर"
+                    },
+                    "Khanpur": {
+                        "id": "1412",
+                        "en": "Khanpur",
+                        "hi": "खानपुर"
+                    },
+                    "Mohanpur": {
+                        "id": "1413",
+                        "en": "Mohanpur",
+                        "hi": "मोहनपुर"
+                    },
+                    "Morwa": {
+                        "id": "1414",
+                        "en": "Morwa",
+                        "hi": "मोरवा"
+                    },
+                    "Patori": {
+                        "id": "1415",
+                        "en": "Patori",
+                        "hi": "पटोरी"
+                    },
+                    "Pusa": {
+                        "id": "1416",
+                        "en": "Pusa",
+                        "hi": "पूसा"
+                    },
+                    "Sarairanjan": {
+                        "id": "1417",
+                        "en": "Sarairanjan",
+                        "hi": "सरायरंजन"
+                    },
+                    "Shivaji Nagar": {
+                        "id": "1418",
+                        "en": "Shivaji Nagar",
+                        "hi": "शिवाजी नगर"
+                    },
+                    "Singhia": {
+                        "id": "1419",
+                        "en": "Singhia",
+                        "hi": "सिंघिया"
+                    },
+                    "Tajpur": {
+                        "id": "1420",
+                        "en": "Tajpur",
+                        "hi": "ताजपुर"
+                    },
+                    "Vidyapati Nagar": {
+                        "id": "1421",
+                        "en": "Vidyapati Nagar",
+                        "hi": "विद्यापति नगर"
+                    }
+
+                }
+            },
+            "Saran": {
+                "id": "429",
+                "en": "Saran",
+                "hi": "सरन",
+
+
+                "blocks":{
+                    
+                    "Parsa": {
+                        "id": "1422",
+                        "en": "Parsa",
+                        "hi": "परसा"
+                    },
+                    "Revelganj": {
+                        "id": "1423",
+                        "en": "Revelganj",
+                        "hi": "रेवेलगंज"
+                    },
+                    "Sonepur": {
+                        "id": "1424",
+                        "en": "Sonepur",
+                        "hi": "सोनेपुर"
+                    },
+                    "Taraiya": {
+                        "id": "1425",
+                        "en": "Taraiya",
+                        "hi": "तरैया"
+                    },
+                    "Ishupur": {
+                        "id": "1426",
+                        "en": "Ishupur",
+                        "hi": "ईशुपुर"
+                    },
+                    "Jalalpur": {
+                        "id": "1427",
+                        "en": "Jalalpur",
+                        "hi": "जलालपुर"
+                    },
+                    "Lahladpur": {
+                        "id": "1428",
+                        "en": "Lahladpur",
+                        "hi": "लहलादपुर"
+                    },
+                    "Maker": {
+                        "id": "1429",
+                        "en": "Maker",
+                        "hi": "मेकर"
+                    },
+                    "Manjhi": {
+                        "id": "1430",
+                        "en": "Manjhi",
+                        "hi": "मांझी"
+                    },
+                    "Marhaura": {
+                        "id": "1431",
+                        "en": "Marhaura",
+                        "hi": "मढ़ौरा"
+                    },
+                    "Mashrakh": {
+                        "id": "1432",
+                        "en": "Mashrakh",
+                        "hi": "मशरख"
+                    },
+                    "Nagra": {
+                        "id": "1433",
+                        "en": "Nagra",
+                        "hi": "नागरा"
+                    },
+                    "Panapur": {
+                        "id": "1434",
+                        "en": "Panapur",
+                        "hi": "पानापुर"
+                    },
+                    "Baniapur": {
+                        "id": "1435",
+                        "en": "Baniapur",
+                        "hi": "बनियापुर"
+                    },
+                    "Chapra": {
+                        "id": "1436",
+                        "en": "Chapra",
+                        "hi": "छपरा"
+                    },
+                    "Dariapur": {
+                        "id": "1437",
+                        "en": "Dariapur",
+                        "hi": "दरियापुर"
+                    },
+                    "Dighwara": {
+                        "id": "1438",
+                        "en": "Dighwara",
+                        "hi": "दिघवारा"
+                    },
+                    "Ekma": {
+                        "id": "1439",
+                        "en": "Ekma",
+                        "hi": "एकमा"
+                    },
+                    "Garkha": {
+                        "id": "1440",
+                        "en": "Garkha",
+                        "hi": "गरखा"
+                    },
+                    "Amnour": {
+                        "id": "1441",
+                        "en": "Amnour",
+                        "hi": "अमनौर"
+                    }
+
+
+                }
+            },
+            "Sheikhpura": {
+                "id": "430",
+                "en": "Sheikhpura",
+                "hi": "शेखपुरा",
+
+
+                "blocks":{
+                    
+                    "Ariari": {
+                        "id": "1442",
+                        "en": "Ariari",
+                        "hi": "अरियारी"
+                    },
+                    "Barbigha": {
+                        "id": "1443",
+                        "en": "Barbigha",
+                        "hi": "बरबीघा"
+                    },
+                    "Chewara": {
+                        "id": "1444",
+                        "en": "Chewara",
+                        "hi": "चेवारा"
+                    },
+                    "Ghat Kusumbha": {
+                        "id": "1445",
+                        "en": "Ghat Kusumbha",
+                        "hi": "घाट कुसुंभ"
+                    },
+                    "Shekhopur Sarai": {
+                        "id": "1446",
+                        "en": "Shekhopur Sarai",
+                        "hi": "शेखोपुर सराय"
+                    },
+                    "Sheikhpura": {
+                        "id": "1447",
+                        "en": "Sheikhpura",
+                        "hi": "शेखपुरा"
+                    }
+
+                }
+            },
+            "Sheohar": {
+                "id": "431",
+                "en": "Sheohar",
+                "hi": "शिवहर",
+
+
+                "blocks":{
+                    
+                    "Dumri Katsari": {
+                        "id": "1448",
+                        "en": "Dumri Katsari",
+                        "hi": "डुमरी कटसरी"
+                    },
+                    "Piprarhi": {
+                        "id": "1449",
+                        "en": "Piprarhi",
+                        "hi": "पिपराही"
+                    },
+                    "Purnahiya": {
+                        "id": "1450",
+                        "en": "Purnahiya",
+                        "hi": "पुरनहिया"
+                    },
+                    "Sheohar": {
+                        "id": "1451",
+                        "en": "Sheohar",
+                        "hi": "शिवहर"
+                    },
+                    "Tariani Chowk": {
+                        "id": "1452",
+                        "en": "Tariani Chowk",
+                        "hi": "तरियानी चौक"
+                    }
+
+
+                }
+            },
+            "Sitamarhi": {
+                "id": "432",
+                "en": "Sitamarhi",
+                "hi": "सीतामढ़ी",
+
+
+                "blocks":{
+                    
+                    "Parihar": {
+                        "id": "1453",
+                        "en": "Parihar",
+                        "hi": "परिहार"
+                    },
+                    "Parsauni": {
+                        "id": "1454",
+                        "en": "Parsauni",
+                        "hi": "परसौनी"
+                    },
+                    "Pupri": {
+                        "id": "1455",
+                        "en": "Pupri",
+                        "hi": "पुपरी"
+                    },
+                    "Riga": {
+                        "id": "1456",
+                        "en": "Riga",
+                        "hi": "रीगा"
+                    },
+                    "Runisaidpur": {
+                        "id": "1457",
+                        "en": "Runisaidpur",
+                        "hi": "रुनीसैदपुर"
+                    },
+                    "Sonbarsa": {
+                        "id": "1458",
+                        "en": "Sonbarsa",
+                        "hi": "सोनबरसा"
+                    },
+                    "Suppi": {
+                        "id": "1459",
+                        "en": "Suppi",
+                        "hi": "सुप्पी"
+                    },
+                    "Sursand": {
+                        "id": "1460",
+                        "en": "Sursand",
+                        "hi": "सुरसंड"
+                    },
+                    "Dumra": {
+                        "id": "1461",
+                        "en": "Dumra",
+                        "hi": "डुमरा"
+                    },
+                    "Bairgania": {
+                        "id": "1462",
+                        "en": "Bairgania",
+                        "hi": "बैरगनिया"
+                    },
+                    "Belsand": {
+                        "id": "1463",
+                        "en": "Belsand",
+                        "hi": "बेलसंद"
+                    },
+                    "Bajpatti": {
+                        "id": "1464",
+                        "en": "Bajpatti",
+                        "hi": "बाजपट्टी"
+                    },
+                    "Bathnaha": {
+                        "id": "1465",
+                        "en": "Bathnaha",
+                        "hi": "बथनाहा"
+                    },
+                    "Bokhara": {
+                        "id": "1466",
+                        "en": "Bokhara",
+                        "hi": "बोखरा"
+                    },
+                    "Charaut": {
+                        "id": "1467",
+                        "en": "Charaut",
+                        "hi": "चरौत"
+                    },
+                    "Majorganj": {
+                        "id": "1468",
+                        "en": "Majorganj",
+                        "hi": "मेजरगंज"
+                    },
+                    "Nanpur": {
+                        "id": "1469",
+                        "en": "Nanpur",
+                        "hi": "नानपुर"
+                    }
+
+                }
+            },
+            "Siwan": {
+                "id": "433",
+                "en": "Siwan",
+                "hi": "सिवान",
+
+
+                "blocks":{
+                    
+                    "Hasanpura": {
+                        "id": "1470",
+                        "en": "Hasanpura",
+                        "hi": "हसनपोरा"
+                    },
+                    "Hussainganj": {
+                        "id": "1471",
+                        "en": "Hussainganj",
+                        "hi": "हुसैनगंज"
+                    },
+                    "Andar": {
+                        "id": "1472",
+                        "en": "Andar",
+                        "hi": "अंदर"
+                    },
+                    "Barharia": {
+                        "id": "1473",
+                        "en": "Barharia",
+                        "hi": "बरहरिया"
+                    },
+                    "Basantpur": {
+                        "id": "1474",
+                        "en": "Basantpur",
+                        "hi": "बसंतपुर"
+                    },
+                    "Bhagwanpur Hat": {
+                        "id": "1475",
+                        "en": "Bhagwanpur Hat",
+                        "hi": "भगवानपुर हाट"
+                    },
+                    "Darauli": {
+                        "id": "1476",
+                        "en": "Darauli",
+                        "hi": " दरौली"
+                    },
+                    "Daraundha": {
+                        "id": "1477",
+                        "en": "Daraundha",
+                        "hi": "दारौंदा"
+                    },
+                    "Goriakothi": {
+                        "id": "1478",
+                        "en": "Goriakothi",
+                        "hi": "गोरियाकोठी"
+                    },
+                    "Guthani": {
+                        "id": "1479",
+                        "en": "Guthani",
+                        "hi": "गुथानी"
+                    },
+                    "Lakri Nabiganj": {
+                        "id": "1480",
+                        "en": "Lakri Nabiganj",
+                        "hi": "लकरी नबीगंज"
+                    },
+                    "Maharajganj": {
+                        "id": "1481",
+                        "en": "Maharajganj",
+                        "hi": "महाराजगंज"
+                    },
+                    "Mairwa": {
+                        "id": "1482",
+                        "en": "Mairwa",
+                        "hi": "मैरवा"
+                    },
+                    "Nautan": {
+                        "id": "1483",
+                        "en": "Nautan",
+                        "hi": "नौतन"
+                    },
+                    "Pachrukhi": {
+                        "id": "1484",
+                        "en": "Pachrukhi",
+                        "hi": "पचरुखी"
+                    },
+                    "Raghunathpur": {
+                        "id": "1485",
+                        "en": "Raghunathpur",
+                        "hi": "रघुनाथपुर"
+                    },
+                    "Siswan": {
+                        "id": "1486",
+                        "en": "Siswan",
+                        "hi": "सिसवन"
+                    },
+                    "Siwan Sadar": {
+                        "id": "1487",
+                        "en": "Siwan Sadar",
+                        "hi": "सीवान सदर"
+                    },
+                    "Ziradei": {
+                        "id": "1488",
+                        "en": "Ziradei",
+                        "hi": "जीरादेई"
+                    }
+
+
+                }
+            },
+            "Supaul": {
+                "id": "434",
+                "en": "Supaul",
+                "hi": "सुपौल",
+
+
+                "blocks":{
+                    
+                    "Supaul": {
+                        "id": "1489",
+                        "en": "Supaul",
+                        "hi": "सुपौल"
+                    },
+                    "Tribeniganj": {
+                        "id": "1490",
+                        "en": "Tribeniganj",
+                        "hi": "त्रिवेणीगंज"
+                    },
+                    "Kishanpur": {
+                        "id": "1491",
+                        "en": "Kishanpur",
+                        "hi": "किशनपुर"
+                    },
+                    "Basantpur": {
+                        "id": "1492",
+                        "en": "Basantpur",
+                        "hi": "बसंतपुर"
+                    },
+                    "Chhatapur": {
+                        "id": "1493",
+                        "en": "Chhatapur",
+                        "hi": "छातापुर"
+                    },
+                    "Marauna": {
+                        "id": "1494",
+                        "en": "Marauna",
+                        "hi": "मरौना"
+                    },
+                    "Nirmali": {
+                        "id": "1495",
+                        "en": "Nirmali",
+                        "hi": "निर्मली"
+                    },
+                    "Pipra": {
+                        "id": "1496",
+                        "en": "Pipra",
+                        "hi": "पिपरा"
+                    },
+                    "Pratapganj": {
+                        "id": "1497",
+                        "en": "Pratapganj",
+                        "hi": "प्रतापगंज"
+                    },
+                    "Raghopur": {
+                        "id": "1498",
+                        "en": "Raghopur",
+                        "hi": "राघोपुर"
+                    },
+                    "Saraigarh Bhaptiyahi": {
+                        "id": "1499",
+                        "en": "Saraigarh Bhaptiyahi",
+                        "hi": "Saraigarh Bhaptiyahi"
+                    }
+
+                }
+            },
+            "Vaishali": {
+                "id": "435",
+                "en": "Vaishali",
+                "hi": "वैशाली",
+
+
+                "blocks":{
+                    
+                    "Mahua": {
+                        "id": "1500",
+                        "en": "Mahua",
+                        "hi": "महुआ"
+                    },
+                    "Patepur": {
+                        "id": "1501",
+                        "en": "Patepur",
+                        "hi": "पातेपुर"
+                    },
+                    "Raghopur": {
+                        "id": "1502",
+                        "en": "Raghopur",
+                        "hi": "राघोपुर"
+                    },
+                    "Raja Pakar": {
+                        "id": "1503",
+                        "en": "Raja Pakar",
+                        "hi": "राजा पाकर"
+                    },
+                    "Sahdai Buzurg": {
+                        "id": "1504",
+                        "en": "Sahdai Buzurg",
+                        "hi": "सहदई बुजुर्ग"
+                    },
+                    "Vaishali": {
+                        "id": "1505",
+                        "en": "Vaishali",
+                        "hi": "वैशाली"
+                    },
+                    "Bhagwanpur": {
+                        "id": "1506",
+                        "en": "Bhagwanpur",
+                        "hi": "भगवानपुर"
+                    },
+                    "Bidupur": {
+                        "id": "1507",
+                        "en": "Bidupur",
+                        "hi": "बिदुपुर"
+                    },
+                    "Chehra Kalan": {
+                        "id": "1508",
+                        "en": "Chehra Kalan",
+                        "hi": "चेहरा कलां"
+                    },
+                    "Desri": {
+                        "id": "1509",
+                        "en": "Desri",
+                        "hi": "देसरी"
+                    },
+                    "Goraul": {
+                        "id": "1510",
+                        "en": "Goraul",
+                        "hi": "गोरौल"
+                    },
+                    "Hajipur": {
+                        "id": "1511",
+                        "en": "Hajipur",
+                        "hi": "हाजीपुर"
+                    },
+                    "Jandaha": {
+                        "id": "1512",
+                        "en": "Jandaha",
+                        "hi": "जनदाहा"
+                    },
+                    "Lalganj": {
+                        "id": "1513",
+                        "en": "Lalganj",
+                        "hi": "लालगंज"
+                    },
+                    "Mahnar": {
+                        "id": "1514",
+                        "en": "Mahnar",
+                        "hi": "महनार"
+                    },
+                    "Paterhi Belsar": {
+                        "id": "15015",
+                        "en": "Paterhi Belsar",
+                        "hi": "पथरी बेलसर"
+                    }
+
+                }
+            }
+        }
+    }
+}

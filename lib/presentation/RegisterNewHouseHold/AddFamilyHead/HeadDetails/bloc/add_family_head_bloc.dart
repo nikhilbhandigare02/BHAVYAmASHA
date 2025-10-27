@@ -28,8 +28,14 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
     on<AfhUpdateGender>(
       (event, emit) => emit(state.copyWith(gender: event.value)),
     );
+    on<AfhABHAChange>(
+      (event, emit) => emit(state.copyWith(AfhABHAChange: event.value)),
+    );
     on<AfhUpdateOccupation>(
       (event, emit) => emit(state.copyWith(occupation: event.value)),
+    );
+    on<AfhRichIdChange>(
+      (event, emit) => emit(state.copyWith(AfhRichIdChange: event.value)),
     );
     on<AfhUpdateEducation>(
       (event, emit) => emit(state.copyWith(education: event.value)),
@@ -86,6 +92,16 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       (event, emit) => emit(state.copyWith(isPregnant: event.value)),
     );
 
+    on<LMPChange>((event, emit) {
+      final lmp = event.value;
+      final edd = lmp != null ? lmp.add(const Duration(days: 5)) : null;
+      emit(state.copyWith(lmp: lmp, edd: edd));
+    });
+
+    on<EDDChange>((event, emit) {
+      emit(state.copyWith(edd: event.value));
+    });
+
     on<AfhSubmit>((event, emit) async {
       emit(
         state.copyWith(postApiStatus: PostApiStatus.loading, clearError: true),
@@ -107,10 +123,22 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       if (state.gender == null || state.gender!.isEmpty)
         errors.add('Gender required');
       if (state.maritalStatus == null || state.maritalStatus!.isEmpty) {
-        errors.add('Marital status required');
-      } if (state.isPregnant == null || state.isPregnant!.isEmpty) {
-        errors.add('Is women pregnant is required');
-      } else if (state.maritalStatus == 'Married') {
+        errors.add('Marital status required') ;
+      }
+
+      // Pregnancy validations: only when Female + Married
+      final isFemale = state.gender == 'Female';
+      final isMarried = state.maritalStatus == 'Married';
+      if (isFemale && isMarried) {
+        if (state.isPregnant == null || state.isPregnant!.isEmpty) {
+          errors.add('Is women pregnant is required');
+        } else if (state.isPregnant == 'Yes') {
+          if (state.lmp == null) errors.add('LMP is required');
+          if (state.edd == null) errors.add('EDD is required');
+        }
+      }
+
+      if (state.maritalStatus == 'Married') {
         if (state.spouseName == null || state.spouseName!.trim().isEmpty) {
           errors.add('Spouse Name is required for married status');
         }

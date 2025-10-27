@@ -22,6 +22,13 @@ class SpUpdateMemberName extends SpousEvent {
   List<Object?> get props => [value];
 }
 
+class RichIDChanged extends SpousEvent {
+  final String value;
+  const RichIDChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
 class SpUpdateAgeAtMarriage extends SpousEvent {
   final String value;
   const SpUpdateAgeAtMarriage(this.value);
@@ -151,6 +158,27 @@ class SpUpdatePhId extends SpousEvent {
 class SpUpdateBeneficiaryType extends SpousEvent {
   final String? value;
   const SpUpdateBeneficiaryType(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class SpUpdateIsPregnant extends SpousEvent {
+  final String? value;
+  const SpUpdateIsPregnant(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class SpLMPChange extends SpousEvent {
+  final DateTime? value;
+  const SpLMPChange(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class SpEDDChange extends SpousEvent {
+  final DateTime? value;
+  const SpEDDChange(this.value);
   @override
   List<Object?> get props => [value];
 }

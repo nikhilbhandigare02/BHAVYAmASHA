@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-enum GbsStatus { initial, submitting, success, failure }
+import '../../../core/utils/enums.dart';
+
 
 class GuestBeneficiarySearchState extends Equatable {
   final bool showAdvanced;

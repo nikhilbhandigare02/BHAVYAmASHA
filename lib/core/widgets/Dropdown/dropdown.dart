@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 
 class ApiDropdown<T> extends StatelessWidget {
-  final String labelText;
+  final String? labelText;
   final List<T> items;
   final String Function(T) getLabel;
   final T? value;
@@ -9,10 +10,11 @@ class ApiDropdown<T> extends StatelessWidget {
   final bool isExpanded;
   final String? hintText;
   final FormFieldValidator<T>? validator;
+  final int? labelMaxLines;
 
   const ApiDropdown({
     super.key,
-    required this.labelText,
+    this.labelText,
     required this.items,
     required this.getLabel,
     this.value,
@@ -20,45 +22,42 @@ class ApiDropdown<T> extends StatelessWidget {
     this.isExpanded = true,
     this.hintText,
     this.validator,
+    this.labelMaxLines,
   });
 
   @override
   Widget build(BuildContext context) {
+    final TextStyle inputStyle = TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: AppColors.onSurface,
+    );
+
     return DropdownButtonFormField<T>(
       value: value,
       isExpanded: isExpanded,
+      style: inputStyle,
       decoration: InputDecoration(
-        labelText: labelText,
+        label: (labelText != null && labelText!.isNotEmpty)
+            ? Text(
+                labelText!,
+                softWrap: true,
+                maxLines: labelMaxLines,
+                overflow: TextOverflow.visible,
+              )
+            : null,
         hintText: hintText,
+        hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding:
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
-      hint: hintText != null ? Text(hintText!) : null,
-      // validator: (val) {
-      //   if (validator != null) {
-      //     final error = validator!(val);
-      //     if (error != null && error.isNotEmpty) {
-      //       // 🔹 Show validation error as SnackBar
-      //       WidgetsBinding.instance.addPostFrameCallback((_) {
-      //         ScaffoldMessenger.of(context).showSnackBar(
-      //           SnackBar(
-      //             content: Text(error),
-      //             backgroundColor: Colors.redAccent,
-      //             behavior: SnackBarBehavior.floating,
-      //           ),
-      //         );
-      //       });
-      //     }
-      //     return null;
-      //   }
-      //   return null;
-      // },
       items: items.map((item) {
         return DropdownMenuItem<T>(
           value: item,
-          child: Text(getLabel(item)),
+          child: Text(getLabel(item), style: inputStyle),
         );
       }).toList(),
       onChanged: onChanged,

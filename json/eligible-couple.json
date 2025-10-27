@@ -1,0 +1,1781 @@
+{
+    "forms": {
+        "eligible_couple": {
+            "title": {
+                "en": "Eligible Couple",
+                "hi": "योग्य दम्पत्ति"
+            },
+            "slides": {
+                "en": "Details",
+                "hi": "विवरण"
+            },
+            "registration_through": {
+                "en": "Registration through",
+                "hi": "पंजीकरण का माध्यम"
+            },
+            "link_from_aabha": {
+                "en": "Link from abha",
+                "hi": "आभा से जोड़े"
+            },
+            "create_and_link": {
+                "en": "Create and link from abha",
+                "hi": "आभा आई.डी. बनाएं एवं जोड़े"
+            },
+            "date_of_reg": {
+                "en": "Date of registration",
+                "hi": "पंजीकरण की तिथि"
+            },
+            "please_date_of_visit": {
+                "en": "Please enter date of registration",
+                "hi": "कृपया पंजीकरण की तिथि दर्ज करें"
+            },
+            "financial_year": {
+                "en": "Financial year",
+                "hi": "वित्तीय वर्ष"
+            },
+            "rch_id": {
+                "en": "RCH ID",
+                "hi": "आरसीएच आईडी"
+            },
+            "sr_no_of_EC": {
+                "en": "Sr no.of EC in RCH register",
+                "hi": "आरसीएच पंजी में योग्य दंपति का क्रम सं."
+            },
+            "please_sr_no_of_EC": {
+                "en": "Please enter sr number of EC",
+                "hi": "कृपया ईसी की क्रम संख्या दर्ज करें"
+            },
+            "name_of_women": {
+                "en": "Name of woman",
+                "hi": "महिला का नाम"
+            },
+            "please_name_of_women": {
+                "en": "Please enter name of women",
+                "hi": "कृपया महिला का नाम दर्ज करें"
+            },
+            "current_age": {
+                "en": "Current age(in years)",
+                "hi": "वर्तमान आयु (वर्ष में)"
+            },
+            "please_current_age": {
+                "en": "Please enter current age",
+                "hi": "कृपया वर्तमान आयु दर्ज करें"
+            },
+            "age_at_marrige": {
+                "en": "Age at marriage(in years)",
+                "hi": "विवाह के समय आयु (वर्ष में)"
+            },
+            "invalid_age_at_marrige": {
+                "en": "Age at marriage should not be greater than current age.",
+                "hi": "विवाह के समय की आयु वर्तमान आयु से अधिक नहीं होनी चाहिए।"
+            },
+            "bank_account_details": {
+                "en": "Bank account details",
+                "hi": "बैंक खाता का विवरण",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "bank_name": {
+                "en": "Bank name",
+                "hi": "बैंक का नाम"
+            },
+            "branch_name": {
+                "en": "Branch name",
+                "hi": "शाखा का नाम"
+            },
+            "account_number": {
+                "en": "Account number",
+                "hi": "खाता संख्या"
+            },
+            "ifsc_code": {
+                "en": "IFSC code",
+                "hi": "आईएफएससी कोड"
+            },
+            "continue": {
+                "en": "Continue",
+                "hi": "जारी रखें"
+            },
+            "husband_details": {
+                "en": "Husband details",
+                "hi": "पति का विवरण                "
+            },
+            "name_of_husband": {
+                "en": "Name of husband",
+                "hi": "पति का नाम"
+            },
+            "please_name_of_husband": {
+                "en": "Please enter name of husband",
+                "hi": "कृपया पति का नाम दर्ज करें"
+            },
+            "husband_current_age": {
+                "en": "Current age(in years)",
+                "hi": "वर्तमान आयु (वर्ष में)"
+            },
+            "please_husband_current_age": {
+                "en": "Please enter current age",
+                "hi": "कृपया पति की वर्तमान आयु दर्ज करें"
+            },
+            "husband_age_at_marrige": {
+                "en": "Age at marriage(in years)",
+                "hi": "विवाह के समय आयु (वर्ष में)"
+            },
+            "please_husband_age_at_marrige": {
+                "en": "Please enter age of husband at marriage",
+                "hi": "कृपया विवाह के समय पति की आयु दर्ज करें"
+            },
+            "husband_bank_account_details": {
+                "en": "Bank account details",
+                "hi": "बैंक खाता का विवरण",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "husband_bank_name": {
+                "en": "Bank name",
+                "hi": "बैंक का नाम"
+            },
+            "husband_branch_name": {
+                "en": "Branch name",
+                "hi": "शाखा का नाम"
+            },
+            "husband_account_number": {
+                "en": "Account number",
+                "hi": "खाता संख्या"
+            },
+            "husband_ifsc_code": {
+                "en": "IFSC code",
+                "hi": "आईएफएससी कोड"
+            },
+            "please_enter_account_number": {
+                "en": "Please enter valid 11 to 18 digit bank account number",
+                "hi": "कृपया वैध 11 से 18 अंकों का बैंक खाता संख्या दर्ज करें"
+            },
+            "please_enter_valid_ifsc_code": {
+                "en": "Please enter valid 11 characters IFSC code, with first 4 characters in uppercase letters, 5th character must be 0 and the remaining characters being digits",
+                "hi": "कृपया वैध 11 अक्षरों का आईएफएससी कोड दर्ज करें, जिसमें पहले 4 अक्षर बड़े अक्षरों में होंगे, 5वां अक्षर 0 होना चाहिए और शेष अक्षर अंक होंगे"
+            },
+            "address": {
+                "en": "Address",
+                "hi": "पता"
+            },
+            "please_address": {
+                "en": "Please enter address",
+                "hi": "कृपया पता दर्ज करें"
+            },
+            "whose_mob_no": {
+                "en": "Whose mobile no.",
+                "hi": "मोबाइल उपयोगकर्ता",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Self",
+                        "hi": "स्वयं का",
+                        "value": "self"
+                    },
+                    {
+                        "en":"Family Head",
+                        "hi": "परिवार के मुखिया का",
+                        "value": "family_head"
+                    },
+                    {
+                        "en": "Husband",
+                        "hi": "पति का",
+                        "value": "husband"
+                    },
+                    {
+                        "en":"Mother",
+                        "hi": "मां का",
+                        "value": "mother"
+                    },
+                    {
+                        "en":"Father",
+                        "hi": "पिता का",
+                        "value": "father"
+                    },
+                    {
+                        "en": "Son",
+                        "hi": "बेटे का"
+                    },
+                    {
+                        "en": "Daughter",
+                        "hi": "बेटी का"
+                    },
+                    {
+                        "en": "Father In Law",
+                        "hi": "ससुर का",
+                        "value": "father_in_law"
+                    },
+                    {
+                        "en": "Mother In Law",
+                        "hi": "सास का",
+                        "value": "mother_in_law"
+                    },
+                    {
+                        "en": "Neighbour",
+                        "hi": "पड़ोसी का",
+                        "value": "neighbour"
+                    },
+                    {
+                        "en": "Relative",
+                        "hi": "रिश्तेदार का",
+                        "value": "relative"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य का",
+                        "value": "other"
+                    }
+                ]
+            },
+            "please_enter_whose_mob_no": {
+                "en": "Please select whose mobile no.",
+                "hi": "कृपया किसका मोबाइल नंबर है चुनें"
+            },
+
+            "mobile_no": {
+                "en": "Mobile no.",
+                "hi": "मोबाइल नंबर"
+            },
+            
+            "other_mobile_no": {
+                "en": "Whose other's mobile no. is it?",
+                "hi": "अन्य किसका मोबाइल नंबर है?"
+            },
+            
+            "please_other_mobile_no": {
+                "en": "Please enter, Whose other's mobile no. is it?",
+                "hi": "कृपया दर्ज करें, अन्य किसका मोबाइल नंबर है?"
+            },
+
+            "please_mobile_number": {
+                "en": "Please enter mobile no.",
+                "hi": "कृपया मोबाइल नम्बर दर्ज करें"
+            },
+            "please_mobile_number_invaild": {
+                "en": "Please enter valid 10 digit mobile no.",
+                "hi": "कृपया मान्य 10 अंकों का मोबाइल नंबर दर्ज करें"
+            },
+            "religion": {
+                "en": "Religion",
+                "hi": "धर्म",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Do not want to disclose",
+                        "hi": "नही बताना चाहतें हैं",
+                        "value": "not_disclosed"
+                    },
+                    {
+                        "en": "Hindu",
+                        "hi": "हिंन्दू",
+                        "value": "hindu"
+                    },
+                    {
+                        "en": "Muslim",
+                        "hi": "मुस्लिम",
+                        "value": "muslim"
+                    },
+                    {
+                        "en": "Christian",
+                        "hi": "ईसाई",
+                        "value": "christian"
+                    },
+                    {
+                        "en": "Sikh",
+                        "hi": "सिंख",
+                        "value": "sikh"
+                    },
+                    {
+                        "en": "Buddism",
+                        "hi": "बौद्ध",
+                        "value": "buddism"
+                    },
+                    {
+                        "en": "Jainism",
+                        "hi": "जैन",
+                        "value": "jainism"
+                    },
+                    {
+                        "en": "Parsi",
+                        "hi": "पारसी",
+                        "value": "parasi"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                    }
+                ]
+            },
+            "other_religion": {
+                "en": "Other religion name",
+                "hi": "अन्य धर्म का नाम"
+            },
+            "caste": {
+                "en": "Category",
+                "hi": "वर्ग",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Do not want to disclose",
+                        "hi": "नही बताना चाहतें हैं",
+                        "value": "not_disclosed"
+                    },
+                    {
+                        "en": "General",
+                        "hi": "सामान्य",
+                        "value": "general"
+                    },
+                    {
+                        "en": "OBC",
+                        "hi": "ओबीसी",
+                        "value": "obc"
+                    },
+                    {
+                        "en": "SC",
+                        "hi": "अनुसूचित जाति",
+                        "value": "sc"
+                    },
+                    {
+                        "en": "ST",
+                        "hi": "अनुसूचित जनजाति",
+                        "value": "st"
+                    },
+                    {
+                        "en": "Pichda Varg 1",
+                        "hi": "पिछड़ा वर्ग 1",
+                        "value": "pichda_varg_1"
+                    },
+                    {
+                        "en": "Pichda Varg 2",
+                        "hi": "पिछड़ा वर्ग 2",
+                        "value": "pichda_varg_2"
+                    },
+                    {
+                        "en": "Atyant Pichda Varg",
+                        "hi": "अत्यंत पिछड़ा वर्ग",
+                        "value": "atyanth_pichda_varg"
+                    },
+                    {
+                        "en": "Do Not Know",
+                        "hi": "पता नहीं",
+                        "value": "do_not_know"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                    }
+                ]
+            },
+            "other_caste": {
+                "en": "Other category name",
+                "hi": "अन्य वर्ग का नाम"
+            },
+            "economic_status": {
+                "en": "Economic status",
+                "hi": "आर्थिक स्थिति",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "APL",
+                        "hi": "एपीएल",
+                        "value": "apl"
+                    },
+                    {
+                        "en": "BPL",
+                        "hi": "गरीबी रेखा से नीचे",
+                        "value": "bpl"
+                    },
+                    {
+                        "en": "Don't Know",
+                        "hi": "पता नहीं",
+                        "value": "dont_know"
+                    }
+                ]
+            },
+            "please_economic_status": {
+                "en": "Please select economic status",
+                "hi": "कृपया आर्थिक स्थिति का चयन करें"
+            },
+            "total_no_of_born_children": {
+                "en": "Total number of children born",
+                "hi": "पैदा हुए बच्चों की कुल संख्या"
+            },
+            "total_no_of_born_children_male": {
+                "en": "Total number of male children",
+                "hi": "पैदा हुए बच्चों की कुल संख्या(पुरुष)",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "0",
+                        "hi": "0",
+                        "value": "0"
+                    },
+                    {
+                        "en": "1",
+                        "hi": "1",
+                        "value": "1"
+                    },
+                    {
+                        "en": "2",
+                        "hi": "2",
+                        "value": "2"
+                    },
+                    {
+                        "en": "3",
+                        "hi": "3",
+                        "value": "3"
+                    },
+                    {
+                        "en": "4",
+                        "hi": "4",
+                        "value": "4"
+                    },
+                    {
+                        "en": "5",
+                        "hi": "5",
+                        "value": "5"
+                    },
+                    {
+                        "en": "6",
+                        "hi": "6",
+                        "value": "6"
+                    },
+                    {
+                        "en": "7",
+                        "hi": "7",
+                        "value": "7"
+                    },
+                    {
+                        "en": "8",
+                        "hi": "8",
+                        "value": "8"
+                    },
+                    {
+                        "en": "9",
+                        "hi": "9",
+                        "value": "9"
+                    },
+                    {
+                        "en": "10",
+                        "hi": "10",
+                        "value": "10"
+                    },
+                    {
+                        "en": "11",
+                        "hi": "11",
+                        "value": "11"
+                    },
+                    {
+                        "en": "12",
+                        "hi": "12",
+                        "value": "12"
+                    },
+                    {
+                        "en": "13",
+                        "hi": "13",
+                        "value": "13"
+                    },
+                    {
+                        "en": "14",
+                        "hi": "14",
+                        "value": "14"
+                    },
+                    {
+                        "en": "15",
+                        "hi": "15",
+                        "value": "15"
+                    }
+                ]
+            },
+            "total_no_of_born_children_female": {
+                "en": "Total number of female children",
+                "hi": "पैदा हुए बच्चों की कुल संख्या(महिला)",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "0",
+                        "hi": "0",
+                        "value": "0"
+                    },
+                    {
+                        "en": "1",
+                        "hi": "1",
+                        "value": "1"
+                    },
+                    {
+                        "en": "2",
+                        "hi": "2",
+                        "value": "2"
+                    },
+                    {
+                        "en": "3",
+                        "hi": "3",
+                        "value": "3"
+                    },
+                    {
+                        "en": "4",
+                        "hi": "4",
+                        "value": "4"
+                    },
+                    {
+                        "en": "5",
+                        "hi": "5",
+                        "value": "5"
+                    },
+                    {
+                        "en": "6",
+                        "hi": "6",
+                        "value": "6"
+                    },
+                    {
+                        "en": "7",
+                        "hi": "7",
+                        "value": "7"
+                    },
+                    {
+                        "en": "8",
+                        "hi": "8",
+                        "value": "8"
+                    },
+                    {
+                        "en": "9",
+                        "hi": "9",
+                        "value": "9"
+                    },
+                    {
+                        "en": "10",
+                        "hi": "10",
+                        "value": "10"
+                    },
+                    {
+                        "en": "11",
+                        "hi": "11",
+                        "value": "11"
+                    },
+                    {
+                        "en": "12",
+                        "hi": "12",
+                        "value": "12"
+                    },
+                    {
+                        "en": "13",
+                        "hi": "13",
+                        "value": "13"
+                    },
+                    {
+                        "en": "14",
+                        "hi": "14",
+                        "value": "14"
+                    },
+                    {
+                        "en": "15",
+                        "hi": "15",
+                        "value": "15"
+                    }
+                ]
+            },
+            "no_of_live_children": {
+                "en": "No. of live children",
+                "hi": "जीवित बच्चों की संख्या"
+            },
+            "children_details": {
+                "en": "Children Details",
+                "hi": "बच्चों का विवरण"
+            },
+            "total_no_of_live_children": {
+                "en": "Total number of live children",
+                "hi": "कुल जीवित बच्चों की संख्या"
+            },
+            "no_of_live_feamle": {
+                "en": "Female",
+                "hi": "महिला"
+            },
+            "details_of_live_youngest_child": {
+                "en": "Details of live youngest child",
+                "hi": "जीवित सबसे छोटे बच्चे का विवरण"
+            },
+            "age_in_year": {
+                "en": "Age(years)",
+                "hi": "उम्र (साल)"
+            },
+            "age_in_month": {
+                "en": "Age(month)",
+                "hi": "आयु (महीना)"
+            },
+            "age_of_youngest_child": {
+                "en": "Age of youngest child",
+                "hi": "सबसे छोटे बच्चे की उम्र"
+            },
+            "age_of_youngest_child_unit": {
+                "en": "Age of youngest child unit",
+                "hi": "सबसे छोटे बच्चे की उम्र का यूनिट",
+
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Year",
+                        "hi": "साल",
+                        "value": "year"
+                    },
+                    {
+                        "en": "Month",
+                        "hi": "महीना",
+                        "value": "month"
+                    },
+                    {
+                        "en": "Day",
+                        "hi": "दिन",
+                        "value": "day"
+                    }
+                ]
+            },
+            "sex": {
+                "en": "Gender of youngest child",
+                "hi": "सबसे छोटे बच्चे का लिंग",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Male",
+                        "hi": "पुरुष",
+                        "value": "male"
+                    },
+                    {
+                        "en": "Female",
+                        "hi": "महिला",
+                        "value": "female"
+                    },
+                    {
+                        "en": "Transgender",
+                        "hi": "ट्रांसजेंडर",
+                        "value": "transgender"
+                    }
+                ]
+            },
+            "gender_of_younget_child": {
+                "en": "Gender of youngest child",
+                "hi": "सबसे छोटे बच्चे का लिंग",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Male",
+                        "hi": "पुरुष",
+                        "value": "male"
+                    },
+                    {
+                        "en": "Female",
+                        "hi": "महिला",
+                        "value": "female"
+                    },
+                    {
+                        "en": "Transgender",
+                        "hi": "ट्रांसजेंडर",
+                        "value": "transgender"
+                    }
+                ]
+            },
+            "is_ec_infertile": {
+                "en": "Is the EC fertile?",
+                "hi": "क्या महिला प्रजनन योग्य है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "please_is_ec_infertile": {
+                "en": "Please select, Is EC fertile?",
+                "hi": "कृपया चुनें, क्या महिला प्रजनन योग्य है?"
+            },
+            "reffreral_facility_name": {
+                "en": "Name of referral facility",
+                "hi": "रेफरल संस्थान का नाम",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "FRU",
+                        "hi": "एफ आर यू",
+                        "value": "fru"
+                    },
+                    {
+                        "en": "District Hospitals",
+                        "hi": "जिला अस्पताल",
+                        "value": "district_hospital"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                    }
+                ]
+            },
+            "infertility_refer": {
+                "en": "Infertility refer",
+                "hi": "बांझपन स्थानांतरण"
+            },
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            },
+            "update": {
+                "en": "Update",
+                "hi": "अपडेट"
+            }
+        },
+        "tracking_due": {
+            "title": {
+                "en": "Eligible Couple Tracking Due",
+                "hi": "योग्य दम्पत्तियों की ट्रैकिंग"
+            },
+            "slides": {
+                "en": "Details",
+                "hi": "विवरण"
+            },
+            "date_of_visit": {
+                "en": "Date of visit",
+                "hi": "भ्रमण की तिथि"
+            },
+
+            "please_date_of_visit": {
+                "en": "Please enter date of visit",
+                "hi": "कृपया भ्रमण की तिथि दर्ज करें"
+            },
+            "financial_year": {
+                "en": "Finacial year",
+                "hi": "वित्तीय वर्ष"
+            },
+            "is_family_planning_kit":{
+                "en":"Does the ASHA have a family planning basket/kit?",
+                "hi":"क्या आशा के पास परिवार नियोजन टोकरी/किट है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "is_kit_available":{
+                "en":"Does ASHA have a pregnancy kit?",
+                "hi":"क्या आशा के पास गर्भावस्था किट है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "please_is_kit_available": {
+                "en": "Please select, Does ASHA have a pregnancy kit?",
+                "hi": "कृपया चुनें, क्या आशा के पास गर्भावस्था किट है?"
+            },
+            "is_women_pregenant": {
+                "en": "Woman is pregnant?",
+                "hi": "क्या महिला गर्भवती है?",
+                "label_second":{
+                    "en": "Is the woman suspected to be pregnant?",
+                    "hi": "क्या महिला के गर्भवती होने का संदेह है?"
+                },
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    },
+                    {
+                        "en": "Don't Know",
+                        "hi": "पता नहीं",
+                        "value": "dont_know"
+                    }
+                ]
+            },
+            "please_select_is_women_pregenant": {
+                "en": "Please select, Is Woman Pregnant?",
+                "hi": "कृपया चयन करें, क्या महिला गर्भवती है?"
+            },
+            "lmp_date": {
+                "en": "LMP date",
+                "hi": "एलएमपी की तिथि"
+            },
+            "please_enter_lmp_date": {
+                "en": "Please enter LMP date",
+                "hi": "कृपया एलएमपी तिथि दर्ज करें"
+            },
+            "quantity_of_condoms_should_be_number": {
+                "en": "Quantity of condoms should be number",
+                "hi": "कंडोम की मात्रा संख्या होनी चाहिए"
+            },
+            "quantity_of_mala_n_daily_should_be_number": {
+                "en": "Quantity of Mala - N(Daily contraceptive pill) should be number",
+                "hi": "माला - एन(प्रतिदिन गर्भनिरोधक गोली) की मात्रा संख्या होनी चाहिए"
+            },
+            "quantity_of_chhaya_weekly_should_be_number": {
+                "en": "Quantity of Chhaya(Weekly contraceptive pill) should be number",
+                "hi": "छाया(साप्ताहिक गर्भनिरोधक गोली) की मात्रा संख्या होनी चाहिए"
+            },
+            "quantity_of_ecp_should_be_number": {
+                "en": "Quantity of ECP(Emergency Contraceptive Pill) should be number",
+                "hi": "ई.सी.पी(आपातकालीन गर्भनिरोधक गोली) की मात्रा संख्या होनी चाहिए"
+            },
+            "edd_date": {
+                "en": "Expected date of delivery (EDD)",
+                "hi": "प्रसव होने की संभावित तिथि"
+            },
+            "pregenancy_test_done": {
+                "en": "Has a pregnancy test been done?",
+                "hi": "क्या गर्भावस्था का परीक्षण किया गया है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "please_pregenancy_test_done": {
+                "en": "Please select, Has a pregnancy test been done?",
+                "hi": "कृपया चयन करें, क्या गर्भावस्था का परीक्षण किया गया है?"
+            },
+            "is_any_method_of_constracepation_being_used": {
+                "en": "Is any method of contraception being used?",
+                "hi": "क्या गर्भनिरोधक के लिये कोई तरीका इस्तेमाल किया जा रहा है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+
+            "is_family_planning":{
+                "en": "Are you/your partner adopting family planning?",
+                "hi": "क्या आप/आपका साथी परिवार नियोजन अपना रहे हैं?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+
+            "method_of_contraception": {
+                "en": "Method of contraception",
+                "hi": "गर्भनिरोधक का तरीका",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Antra Injection",
+                        "hi": "अंतरा इंजेक्शन",
+                        "value": "antra_injection"
+                    },
+                    {
+                        "en": "Copper - T (IUCD)",
+                        "hi": "कॉपर - टी (आईयूडी)",
+                        "value": "copper_t"
+                    },
+                    {
+                        "en": "Condom",
+                        "hi": "कंडोम",
+                        "value": "condom"
+                    },
+                    {
+                        "en": "Mala - N(Daily contraceptive pill)",
+                        "hi": "माला - एन(प्रतिदिन गर्भनिरोधक गोली)",
+                        "value": "mala_n_daily"
+                    },
+                    {
+                        "en": "Chhaya(Weekly contraceptive pill)",
+                        "hi": "छाया(साप्ताहिक गर्भनिरोधक गोली)",
+                        "value": "chhaya_weekly"
+                    },
+                    {
+                        "en": "ECP(Emergency Contraceptive Pill)",
+                        "hi": "ई.सी.पी(आपातकालीन गर्भनिरोधक गोली)",
+                        "value": "ecp"
+                    },
+                    {
+                        "en": "Male Sterilization",
+                        "hi": "पुरुष नसबंदी",
+                        "value": "male_sterilization"
+                    },
+                    {
+                        "en": "Female Sterilization",
+                        "hi": "महिला बंध्याकरण",
+                        "value": "female_sterilization"
+                    },
+                    {
+                        "en": "Any Other Specify",
+                        "hi": "कोई अन्य निर्दिष्ट करें",
+                        "value": "any_other_specify"
+                    }
+                ]
+            },
+            
+            "date_of_antra":{
+                "en": "Date of Antra",
+                "hi": "अंतरा की तिथि"
+            },
+            
+            "removal_date":{
+                "en": "Removal Date",
+                "hi": "हटाने की तिथि"
+            },
+            
+            "reason":{
+                "en": "Reason",
+                "hi": "कारण"
+            },
+            
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            },
+
+            "quantity_of_condoms":{
+                "en": "Quantity of Condoms",
+                "hi": "कंडोम की संख्या"
+            },
+            
+            "quantity_of_mala_n_daily":{
+                "en": "Quantity of Mala - N(Daily contraceptive pill)",
+                "hi": "माला - एन(प्रतिदिन गर्भनिरोधक गोली) की संख्या"
+            },
+
+            "quantity_of_chhaya_weekly":{
+                "en": "Quantity of Chhaya(Weekly contraceptive pill)",
+                "hi": "छाया(साप्ताहिक गर्भनिरोधक गोली) की संख्या"
+            },
+
+            "quantity_of_ecp":{
+                "en": "Quantity of ECP(Emergency Contraceptive Pill)",
+                "hi": "ई.सी.पी(आपातकालीन गर्भनिरोधक गोली) की संख्या"
+            },
+
+            "is_beneficiary_absent":{
+                "en": "Is Beneficiary Absent?",
+                "hi": "क्या लाभार्थी अनुपस्थित है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "reason_for_absent":{
+                "en": "Reason for Absent",
+                "hi": "अनुपस्थित रहने का कारण"
+            }
+
+        },
+        "re_registration": {
+            "title": {
+                "en": "Eligible Couple Re-Registration",
+                "hi": "योग्य दम्पत्ति पुनः पंजीकरण"
+            },
+            "slides": {
+                "en": "Details",
+                "hi": "विवरण"
+            },
+            "lmp_date": {
+                "en": "LMP date",
+                "hi": "एलएमपी की तिथि"
+            },
+            "date_of_reg": {
+                "en": "Date of registration",
+                "hi": "पंजीकरण की तिथि"
+            },
+            "please_date_of_reg": {
+                "en": "Please enter date of registration",
+                "hi": "कृपया पंजीकरण की तिथि दर्ज करें"
+            },
+            "financial_year": {
+                "en": "Financial year",
+                "hi": "वित्तीय वर्ष"
+            },
+            "rch_id": {
+                "en": "RCH ID",
+                "hi": "आरसीएच आईडी"
+            },
+            "sr_no_of_EC": {
+                "en": "Sr. no. of EC in RCH register",
+                "hi": "आरसीएच पंजी में योग्य दंपति का क्रम सं."
+            },
+            "please_sr_no_of_EC": {
+                "en": "Please enter sr number of EC",
+                "hi": "कृपया ईसी की क्रम संख्या दर्ज करें"
+            },
+            "name_of_women": {
+                "en": "Name of woman",
+                "hi": "महिला का नाम"
+            },
+            "please_name_of_women": {
+                "en": "Please enter name of women",
+                "hi": "कृपया महिला का नाम दर्ज करें"
+            },
+            "current_age": {
+                "en": "Current age(in years)",
+                "hi": "वर्तमान आयु (वर्ष में)"
+            },
+            "please_current_age": {
+                "en": "Please enter current age",
+                "hi": "कृपया वर्तमान आयु दर्ज करें"
+            },
+            "age_at_marrige": {
+                "en": "Age at marriage(in years)",
+                "hi": "विवाह के समय आयु (वर्ष में)"
+            },
+            "bank_account_details": {
+                "en": "Bank account details",
+                "hi": "बैंक खाता का विवरण",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "bank_name": {
+                "en": "Bank name",
+                "hi": "बैंक का नाम"
+            },
+            "branch_name": {
+                "en": "Branch name",
+                "hi": "शाखा का नाम"
+            },
+            "account_number": {
+                "en": "Account number",
+                "hi": "खाता संख्या"
+            },
+            "ifsc_code": {
+                "en": "IFSC code",
+                "hi": "आईएफएससी कोड"
+            },
+            "continue": {
+                "en": "Continue",
+                "hi": "जारी रखें"
+            },
+            "husband_details": {
+                "en": "Husband details",
+                "hi": "पति का विवरण"
+            },
+            "name_of_husband": {
+                "en": "Name of husband",
+                "hi": "पति का नाम"
+            },
+            "husband_current_age": {
+                "en": "Current age(in years)",
+                "hi": "वर्तमान आयु (वर्ष में)"
+            },
+            "husband_age_at_marrige": {
+                "en": "Age at marriage(in years)",
+                "hi": "विवाह के समय आयु (वर्ष में)"
+            },
+            "husband_bank_account_details": {
+                "en": "Bank account details",
+                "hi": "बैंक खाता का विवरण",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "husband_bank_name": {
+                "en": "Bank name",
+                "hi": "बैंक का नाम"
+            },
+            "husband_branch_name": {
+                "en": "Branch name",
+                "hi": "शाखा का नाम"
+            },
+            "husband_account_number": {
+                "en": "Account number",
+                "hi": "खाता संख्या"
+            },
+            "husband_ifsc_code": {
+                "en": "IFSC code",
+                "hi": "आईएफएससी कोड"
+            },
+            "address": {
+                "en": "Address",
+                "hi": "पता"
+            },
+            "please_address": {
+                "en": "Please enter address",
+                "hi": "कृपया पता दर्ज करें"
+            },
+            "whose_mob_no": {
+                "en": "Whose mobile no.",
+                "hi": "मोबाइल उपयोगकर्ता",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Self",
+                        "hi": "स्वयं का",
+                        "value": "self"
+                    },
+                    {
+                        "en":"Family Head",
+                        "hi": "परिवार के मुखिया का",
+                        "value": "family_head"
+                    },
+                    {
+                        "en": "Husband",
+                        "hi": "पति का",
+                        "value": "husband"
+                    },
+                    {
+                        "en":"Mother",
+                        "hi": "मां का",
+                        "value": "mother"
+                    },
+                    {
+                        "en":"Father",
+                        "hi": "पिता का",
+                        "value": "father"
+                    },
+                    {
+                        "en": "Son",
+                        "hi": "बेटे का"
+                    },
+                    {
+                        "en": "Daughter",
+                        "hi": "बेटी का"
+                    },
+                    {
+                        "en": "Father In Law",
+                        "hi": "ससुर का",
+                        "value": "father_in_law"
+                    },
+                    {
+                        "en": "Mother In Law",
+                        "hi": "सास का",
+                        "value": "mother_in_law"
+                    },
+                    {
+                        "en": "Neighbour",
+                        "hi": "पड़ोसी का",
+                        "value": "neighbour"
+                    },
+                    {
+                        "en": "Relative",
+                        "hi": "रिश्तेदार का",
+                        "value": "relative"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य का",
+                        "value": "other"
+                    }
+                ]
+            },
+            "please_enter_whose_mob_no": {
+                "en": "Please select whose mobile no.",
+                "hi": "कृपया किसका मोबाइल नंबर है चुनें"
+            },
+            "mobile_no": {
+                "en": "Mobile no.",
+                "hi": "मोबाइल नंबर"
+            },
+            "please_mobile_number": {
+                "en": "Please enter mobile no.",
+                "hi": "कृपया मोबाइल नंबर दर्ज करें"
+            },
+            "please_mobile_number_invaild": {
+                "en": "Please enter valid 10 digit mobile no.",
+                "hi": "कृपया मान्य 10 अंकों का मोबाइल नंबर दर्ज करें"
+            },
+            "religion": {
+                "en": "Religion",
+                "hi": "धर्म",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Do not want to disclose",
+                        "hi": "नही बताना चाहतें हैं",
+                        "value": "not_disclosed"
+                    },
+                    {
+                        "en": "Hindu",
+                        "hi": "हिंन्दू",
+                        "value": "hindu"
+                    },
+                    {
+                        "en": "Muslim",
+                        "hi": "मुस्लिम",
+                        "value": "muslim"
+                    },
+                    {
+                        "en": "Christian",
+                        "hi": "ईसाई",
+                        "value": "christian"
+                    },
+                    {
+                        "en": "Sikh",
+                        "hi": "सिंख",
+                        "value": "sikh"
+                    },
+                    {
+                        "en": "Buddism",
+                        "hi": "बौद्ध",
+                        "value": "buddism"
+                    },
+                    {
+                        "en": "Jainism",
+                        "hi": "जैन",
+                        "value": "jainism"
+                    },
+                    {
+                        "en": "Parsi",
+                        "hi": "पारसी",
+                        "value": "parasi"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                    }
+                ]
+            },
+            "caste": {
+                "en": "Category",
+                "hi": "वर्ग",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Do not want to disclose",
+                        "hi": "नही बताना चाहतें हैं",
+                        "value": "not_disclosed"
+                    },
+                    {
+                        "en": "General",
+                        "hi": "सामान्य",
+                        "value": "general"
+                    },
+                    {
+                        "en": "OBC",
+                        "hi": "ओबीसी",
+                        "value": "obc"
+                    },
+                    {
+                        "en": "SC",
+                        "hi": "अनुसूचित जाति",
+                        "value": "sc"
+                    },
+                    {
+                        "en": "ST",
+                        "hi": "अनुसूचित जनजाति",
+                        "value": "st"
+                    },
+                    {
+                        "en": "Pichda Varg 1",
+                        "hi": "पिछड़ा वर्ग 1",
+                        "value": "pichda_varg_1"
+                    },
+                    {
+                        "en": "Pichda Varg 2",
+                        "hi": "पिछड़ा वर्ग 2",
+                        "value": "pichda_varg_2"
+                    },
+                    {
+                        "en": "Atyant Pichda Varg",
+                        "hi": "अत्यंत पिछड़ा वर्ग",
+                        "value": "atyanth_pichda_varg"
+                    },
+                    {
+                        "en": "Do Not Know",
+                        "hi": "पता नहीं",
+                        "value": "do_not_know"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                    }
+                ]
+            },
+            "other_caste": {
+                "en": "Other category name",
+                "hi": "अन्य वर्ग का नाम"
+            },
+            "economic_status": {
+                "en": "Economic Status",
+                "hi": "आर्थिक स्थिति",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "APL",
+                        "hi": "एपीएल",
+                        "value": "apl"
+                    },
+                    {
+                        "en": "BPL",
+                        "hi": "गरीबी रेखा से नीचे",
+                        "value": "bpl"
+                    },
+                    {
+                        "en": "Don't Know",
+                        "hi": "पता नहीं",
+                        "value": "dont_know"
+                    }
+                ]
+            },
+            "please_economic_status": {
+                "en": "Please enter economic status",
+                "hi": "कृपया आर्थिक स्थिति दर्ज करें"
+            },
+            "total_no_of_live_children": {
+                "en": "Total no. of live children",
+                "hi": "कुल जीवित बच्चों की संख्या"
+            },
+            "total_no_of_born_children_male": {
+                "en": "Total no.of children born(Male)",
+                "hi": "पैदा हुए बच्चों की कुल संख्या(पुरुष)",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "0",
+                        "hi": "0",
+                        "value": "0"
+                    },
+                    {
+                        "en": "1",
+                        "hi": "1",
+                        "value": "1"
+                    },
+                    {
+                        "en": "2",
+                        "hi": "2",
+                        "value": "2"
+                    },
+                    {
+                        "en": "3",
+                        "hi": "3",
+                        "value": "3"
+                    },
+                    {
+                        "en": "4",
+                        "hi": "4",
+                        "value": "4"
+                    },
+                    {
+                        "en": "5",
+                        "hi": "5",
+                        "value": "5"
+                    },
+                    {
+                        "en": "6",
+                        "hi": "6",
+                        "value": "6"
+                    },
+                    {
+                        "en": "7",
+                        "hi": "7",
+                        "value": "7"
+                    },
+                    {
+                        "en": "8",
+                        "hi": "8",
+                        "value": "8"
+                    },
+                    {
+                        "en": "9",
+                        "hi": "9",
+                        "value": "9"
+                    },
+                    {
+                        "en": "10",
+                        "hi": "10",
+                        "value": "10"
+                    },
+                    {
+                        "en": "11",
+                        "hi": "11",
+                        "value": "11"
+                    },
+                    {
+                        "en": "12",
+                        "hi": "12",
+                        "value": "12"
+                    },
+                    {
+                        "en": "13",
+                        "hi": "13",
+                        "value": "13"
+                    },
+                    {
+                        "en": "14",
+                        "hi": "14",
+                        "value": "14"
+                    },
+                    {
+                        "en": "15",
+                        "hi": "15",
+                        "value": "15"
+                    }
+                ]
+            },
+            "total_no_of_born_children_female": {
+                "en": "Total no.of children born(Female)",
+                "hi": "पैदा हुए बच्चों की कुल संख्या(महिला)",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "0",
+                        "hi": "0",
+                        "value": "0"
+                    },
+                    {
+                        "en": "1",
+                        "hi": "1",
+                        "value": "1"
+                    },
+                    {
+                        "en": "2",
+                        "hi": "2",
+                        "value": "2"
+                    },
+                    {
+                        "en": "3",
+                        "hi": "3",
+                        "value": "3"
+                    },
+                    {
+                        "en": "4",
+                        "hi": "4",
+                        "value": "4"
+                    },
+                    {
+                        "en": "5",
+                        "hi": "5",
+                        "value": "5"
+                    },
+                    {
+                        "en": "6",
+                        "hi": "6",
+                        "value": "6"
+                    },
+                    {
+                        "en": "7",
+                        "hi": "7",
+                        "value": "7"
+                    },
+                    {
+                        "en": "8",
+                        "hi": "8",
+                        "value": "8"
+                    },
+                    {
+                        "en": "9",
+                        "hi": "9",
+                        "value": "9"
+                    },
+                    {
+                        "en": "10",
+                        "hi": "10",
+                        "value": "10"
+                    },
+                    {
+                        "en": "11",
+                        "hi": "11",
+                        "value": "11"
+                    },
+                    {
+                        "en": "12",
+                        "hi": "12",
+                        "value": "12"
+                    },
+                    {
+                        "en": "13",
+                        "hi": "13",
+                        "value": "13"
+                    },
+                    {
+                        "en": "14",
+                        "hi": "14",
+                        "value": "14"
+                    },
+                    {
+                        "en": "15",
+                        "hi": "15",
+                        "value": "15"
+                    }
+                ]
+            },
+            "no_of_live_children": {
+                "en": "No. of live children",
+                "hi": "जीवित बच्चों की संख्या"
+            },
+            "no_of_live_feamle": {
+                "en": "Female",
+                "hi": "महिला"
+            },
+            "details_of_live_youngest_child": {
+                "en": "Details of live youngest child",
+                "hi": "जीवित सबसे छोटे बच्चे का विवरण"
+            },
+            "age_in_year": {
+                "en": "Age(years)",
+                "hi": "उम्र (साल)"
+            },
+            "age_in_month": {
+                "en": "Age(month)",
+                "hi": "आयु (महीना)"
+            },
+            "sex": {
+                "en": "Gender",
+                "hi": "लिंग",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Male",
+                        "hi": "पुरुष",
+                        "value": "male"
+                    },
+                    {
+                        "en": "Female",
+                        "hi": "महिला",
+                        "value": "female"
+                    }
+                ]
+            },
+            "is_ec_infertile": {
+                "en": "Is the EC fertile?",
+                "hi": "क्या महिला प्रजनन योग्य है?",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "Yes",
+                        "hi": "हाँ",
+                        "value": "yes"
+                    },
+                    {
+                        "en": "No",
+                        "hi": "नहीं",
+                        "value": "no"
+                    }
+                ]
+            },
+            "please_is_ec_infertile": {
+                "en": "Please select, Is EC fertile?",
+                "hi": "कृपया चुनें, क्या महिला प्रजनन योग्य है?"
+            },
+            "reffreral_facility_name": {
+                "en": "Name Of referral facility",
+                "hi": "रेफरल संस्थान का नाम",
+                "placeholder": {
+                    "en": "Select",
+                    "hi": "चुनें "
+                },
+                "options": [
+                    {
+                        "en": "FRU",
+                        "hi": "एफ आर यू",
+                        "value": "fru"
+                    },
+                    {
+                        "en": "District Hospitals",
+                        "hi": "जिला अस्पताल",
+                        "value": "district_hospital"
+                    },
+                    {
+                        "en": "Other",
+                        "hi": "अन्य",
+                        "value": "other"
+                    }
+                ]
+            },
+            "infertility_refer": {
+                "en": "Infertility refer",
+                "hi": "बांझपन स्थानांतरण"
+            },
+            "save": {
+                "en": "Save",
+                "hi": "संरक्षित करें"
+            }
+        }
+    }
+}

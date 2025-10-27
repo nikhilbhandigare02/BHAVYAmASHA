@@ -6,7 +6,7 @@ part 'spous_event.dart';
 part 'spous_state.dart';
 
 class SpousBloc extends Bloc<SpousEvent, SpousState> {
-  SpousBloc() : super(const SpousState()) {
+  SpousBloc({SpousState? initial}) : super(initial ?? const SpousState()) {
     on<SpToggleUseDob>((event, emit) => emit(state.copyWith(useDob: !state.useDob)));
 
     on<SpUpdateRelation>((event, emit) => emit(state.copyWith(relation: event.value)));
@@ -30,5 +30,15 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
     on<SpUpdateRationId>((event, emit) => emit(state.copyWith(rationId: event.value)));
     on<SpUpdatePhId>((event, emit) => emit(state.copyWith(phId: event.value)));
     on<SpUpdateBeneficiaryType>((event, emit) => emit(state.copyWith(beneficiaryType: event.value)));
+
+    on<SpUpdateIsPregnant>((event, emit) => emit(state.copyWith(isPregnant: event.value)));
+
+    on<SpLMPChange>((event, emit) {
+      final lmp = event.value;
+      final edd = lmp != null ? lmp.add(const Duration(days: 5)) : null;
+      emit(state.copyWith(lmp: lmp, edd: edd));
+    });
+
+    on<SpEDDChange>((event, emit) => emit(state.copyWith(edd: event.value)));
   }
 }

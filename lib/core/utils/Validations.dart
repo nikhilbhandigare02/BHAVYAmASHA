@@ -87,6 +87,34 @@ class Validations {
 
     return null; // ✅ valid
   }
+  static String? validateLMP(AppLocalizations l10n, DateTime? dob) {
+    if (dob == null) {
+      return 'LMP is required'; // or l10n.dobRequired
+    }
+
+
+
+    return null; // ✅ valid
+  }
+  static String? validateEDD(AppLocalizations l10n, DateTime? dob) {
+    if (dob == null) {
+      return 'Expected Delivery Date is required';
+    }
+
+
+
+    return null; // ✅ valid
+  }
+  static String? validateAdoptingPlan(AppLocalizations l10n, String? dob) {
+    if (dob == null) {
+      return 'family adopting planning is required';
+    }
+
+
+
+    return null; // ✅ valid
+  }
+
   static String? validateGender(AppLocalizations l10n, String? gender) {
     if (gender == null || gender.isEmpty) {
       return 'Gender is required';

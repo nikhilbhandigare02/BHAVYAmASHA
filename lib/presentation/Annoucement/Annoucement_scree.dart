@@ -29,6 +29,28 @@ class _AnnoucementScreeState extends State<AnnoucementScree> {
                 itemBuilder: (context, index) {
                   final item = state.items[index];
                   final expanded = state.expanded.contains(index);
+                  String resolveTitle(AppLocalizations l) {
+                    switch (item.titleKey) {
+                      case 'announcementItem1Title':
+                        return l.announcementItem1Title;
+                      case 'announcementItem2Title':
+                        return l.announcementItem2Title;
+                      case 'announcementItem3Title':
+                        return l.announcementItem3Title;
+                    }
+                    return item.titleKey;
+                  }
+                  String resolveBody(AppLocalizations l) {
+                    switch (item.bodyKey) {
+                      case 'announcementItem1Body':
+                        return l.announcementItem1Body;
+                      case 'announcementItem2Body':
+                        return l.announcementItem2Body;
+                      case 'announcementItem3Body':
+                        return l.announcementItem3Body;
+                    }
+                    return item.bodyKey;
+                  }
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
@@ -51,7 +73,7 @@ class _AnnoucementScreeState extends State<AnnoucementScree> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    item.title,
+                                    resolveTitle(l10n!),
                                     style: const TextStyle(
                                       color: Color(0xFF1976D2),
                                       fontWeight: FontWeight.w700,
@@ -67,7 +89,7 @@ class _AnnoucementScreeState extends State<AnnoucementScree> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              item.body,
+                              resolveBody(l10n!),
                               maxLines: expanded ? null : 2,
                               overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
                               style: const TextStyle(color: Colors.black87, height: 1.3),
@@ -76,7 +98,7 @@ class _AnnoucementScreeState extends State<AnnoucementScree> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: Text(
-                                expanded ? 'Read less' : 'Read more',
+                                expanded ? (l10n?.readLess ?? 'Read less') : (l10n?.readMore ?? 'Read more'),
                                 style: const TextStyle(color: Color(0xFF1976D2), fontWeight: FontWeight.w600),
                               ),
                             ),

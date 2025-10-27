@@ -1,0 +1,178 @@
+{
+    "training": {
+        "title": {
+            "en": "Training",
+            "hi": "प्रशिक्षण"
+        },
+        "training_received": {
+            "en": "Training Received",
+            "hi": "प्रशिक्षण प्राप्त हुआ"
+        },
+        "training_provided": {
+            "en": "Training Provided",
+            "hi": "प्रशिक्षण प्रदान किया गया"
+        },
+        "add_new_training": {
+            "en": "Add New Training",
+            "hi": "नया प्रशिक्षण जोड़ें"
+        }
+    },
+    "form": {
+        "training_details": {
+            "en": "Training Details",
+            "hi": "प्रशिक्षण विवरण"
+        },
+        "training_type": {
+            "en": "Training Type",
+            "hi": "प्रशिक्षण प्रकार",
+            "placeholder": {
+                "en": "Select",
+                "hi": "चुनें "
+            },
+            "options": [
+                {
+                    "en": "Receiving",
+                    "hi": "प्राप्त हो रहा है",
+                    "value": "receiving"
+                },
+                {
+                    "en": "Providing",
+                    "hi": "प्रदान हो रहा है",
+                    "value": "providing"
+                }
+            ]
+        },
+        "name_of_training": {
+            "en": "Name of training",
+            "hi": "प्रशिक्षण का नाम",
+            "placeholder": {
+                "en": "Select",
+                "hi": "चुनें "
+            },
+            "options": [
+                {
+                    "en": "ASHA module 1",
+                    "hi": "आशा मॉड्यूल 1",
+                    "value": "asha_module_1"
+                },
+                {
+                    "en": "ASHA module 2",
+                    "hi": "आशा मॉड्यूल 2",
+                    "value": "asha_module_2"
+                },
+                {
+                    "en": "ASHA module 3",
+                    "hi": "आशा मॉड्यूल 3",
+                    "value": "asha_module_3"
+                },
+                {
+                    "en": "ASHA module 4",
+                    "hi": "आशा मॉड्यूल 4",
+                    "value": "asha_module_4"
+                },
+                {
+                    "en": "ASHA module 5,6 & 7",
+                    "hi": "आशा मॉड्यूल 5,6 & 7",
+                    "value": "asha_module_5_6_7"
+                },
+                {
+                    "en": "NCD",
+                    "hi": "एन.सी.डी",
+                    "value": "ncd"
+                },
+                {
+                    "en": "HBNC",
+                    "hi": "एच.बी.एन.सी",
+                    "value": "hbnc"
+                },
+                {
+                    "en": "HBYC",
+                    "hi": "एच.बी.वाई.सी",
+                    "value": "hbyc"
+                },
+                {
+                    "en": "ASHA Facilitator Training",
+                    "hi": "आशा फैसिलिटेटर प्रशिक्षण",
+                    "value": "asha_facilitator_training"
+                },
+                {
+                    "en": "Induction Training",
+                    "hi": "शुरुआती प्रशिक्षण",
+                    "value": "induction_training"
+                },
+                {
+                    "en": "MAA (Mothers' Absolute Affection)",
+                    "hi": "एमएए (माँ का पूर्ण स्नेह)",
+                    "value": "maa"
+                },
+                {
+                    "en": "IDCF (Integrated Diarrhoea Control Fortnight)",
+                    "hi": "आईडीसीएफ (एकीकृत दस्त नियंत्रण पखवाड़ा)",
+                    "value": "idcf"
+                },
+                {
+                    "en": "Other Trainings",
+                    "hi": "अन्य प्रशिक्षण",
+                    "value": "other_trainings"
+                }
+            ]
+        },
+        "phases": {
+            "en": "Phase",
+            "hi": "चरण",
+            "placeholder": {
+                "en": "Select",
+                "hi": "चुनें "
+            },
+            "options": [
+                {
+                    "en": "First Training",
+                    "hi": "प्रथम प्रशिक्षण",
+                    "value": "first_training"
+                },
+                {
+                    "en": "Refresher Training 1",
+                    "hi": "पुनरावलोकन प्रशिक्षण 1",
+                    "value": "refresher_trainer_1"
+                },
+                {
+                    "en": "Refresher Training 2",
+                    "hi": "पुनरावलोकन प्रशिक्षण 2",
+                    "value": "refresher_trainer_2"
+                },
+                {
+                    "en": "Refresher Training 3",
+                    "hi": "पुनरावलोकन प्रशिक्षण 3",
+                    "value": "refresher_trainer_3"
+                },
+                {
+                    "en": "Refresher Training 4",
+                    "hi": "पुनरावलोकन प्रशिक्षण 4",
+                    "value": "refresher_trainer_4"
+                }
+            ]
+        },
+        "date_of_training": {
+            "en": "Date of Training",
+            "hi": "प्रशिक्षण की तिथि"
+        },
+        "place_of_training": {
+            "en": "Place of Training",
+            "hi": "प्रशिक्षण का स्थान"
+        },
+        "no_of_days": {
+            "en": "No. of days",
+            "hi": "दिनों की संख्या"
+        },
+        "save": {
+            "en": "Save",
+            "hi": "संरक्षित करें"
+        }
+    },
+    "received_training": {
+        "title": {
+            "en": "Training Received List",
+            "hi": "प्रशिक्षण प्राप्त सूची"
+        }
+    }
+}

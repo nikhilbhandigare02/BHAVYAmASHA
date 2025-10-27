@@ -17,8 +17,10 @@ class Route_Names{
   static const String AllBeneficiaryScreen = 'AllBeneficiaryScreen';
   static const String Mybeneficiaries = 'Mybeneficiaries';
   static const String ABHAGeneration = 'ABHAGeneration';
+  static const String RegisterChildScreen = 'RegisterChildScreen';
   static const String WorkProgress = 'WorkProgress';
   static const String Annoucement = 'Annoucement';
+  static const String RegisterChildDueList = 'RegisterChildDueList';
   static const String EligibleCoupleIdentified = 'EligibleCoupleIdentified';
   static const String UpdatedEligibleCoupleList = 'UpdatedEligibleCoupleList';
   static const String EligibleCoupleHomeScreen = 'EligibleCoupleHomeScreen';
@@ -28,4 +30,22 @@ class Route_Names{
   static const String Ancvisitform = 'Ancvisitform';
   static const String Previousvisit = 'Previousvisit';
   static const String ChildCareHomeScreen = 'ChildCareHomeScreen';
+  static const String TrainingHomeScreen = 'TrainingHomeScreen';
+  static const String Routinescreen = 'Routinescreen';
+  static const String Trainingform = 'Trainingform';
+  static const String HelpScreen = 'HelpScreen';
+  static const String NCDHome = 'NCDHome';
+  static const String HbncVisitFormScreen = 'HbncVisitFormScreen';
+  static const String TrackEligibleCoupleScreen = 'TrackEligibleCoupleScreen';
+  static const String TrainingReceived = 'TrainingReceived';
+  static const String TrainingProvided = 'TrainingProvided';
+  static const String DeliveryOutcomeScreen = 'DeliveryOutcomeScreen';
+  static const String OutcomeFormScreen = 'OutcomeFormScreen';
+  static const String HBNCScreen = 'HBNCScreen';
+  static const String Abhalinkscreen = 'Abhalinkscreen';
+  static const String cbacScreen = 'cbacScreen';
+  static const String CHildTrackingDueList = 'CHildTrackingDueList';
+  static const String HBYCList = 'HBYCList';
+  static const String HBYCChildCareForm = 'HBYCChildCareForm';
+  static const String RegisterChildDueListFormScreen = 'RegisterChildDueListFormScreen';
 }
