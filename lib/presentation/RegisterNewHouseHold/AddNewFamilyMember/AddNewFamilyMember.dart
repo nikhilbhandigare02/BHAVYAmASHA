@@ -53,10 +53,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
         onWillPop: () async {
           final shouldExit = await showConfirmationDialog(
             context: context,
-            title: 'Attention !',
-            message: 'Do you want to close this form?',
-            yesText: 'Yes',
-            noText: 'No',
+            title: l.confirmAttentionTitle,
+            message: l.confirmCloseFormMsg,
+            yesText: l.confirmYes,
+            noText: l.confirmNo,
           );
           return shouldExit ?? false;
         },
@@ -67,10 +67,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
             onBackTap: () async {
               final shouldExit = await showConfirmationDialog(
                 context: context,
-                title: 'Attention !',
-                message: 'Do you want to close this form?',
-                yesText: 'Yes',
-                noText: 'No',
+                title: l.confirmAttentionTitle,
+                message: l.confirmCloseFormMsg,
+                yesText: l.confirmYes,
+                noText: l.confirmNo,
               );
               if (shouldExit ?? false) {
                 Navigator.of(context).pop();

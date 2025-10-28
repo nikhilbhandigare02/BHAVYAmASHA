@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_bloc.dart';
@@ -22,7 +23,6 @@ class _HbncVisitScreenState extends State<HbncVisitScreen> with SingleTickerProv
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
 
-  // Validation is handled by the BLoC via ValidateSection event.
 
   @override
   void initState() {
@@ -38,6 +38,8 @@ class _HbncVisitScreenState extends State<HbncVisitScreen> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return BlocProvider(
       create: (context) => HbncVisitBloc(),
       child: Builder(
@@ -48,8 +50,11 @@ class _HbncVisitScreenState extends State<HbncVisitScreen> with SingleTickerProv
               final idx = _tabController.index;
               if (state.lastValidatedIndex == idx) {
                 if (state.validationErrors.isNotEmpty) {
+                  final t = AppLocalizations.of(context)!;
+                  final first = state.validationErrors.first;
+                  final localized = _mapErrorCodeToText(t, first);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.validationErrors.first)),
+                    SnackBar(content: Text(localized)),
                   );
                 } else {
                   if (state.lastValidationWasSave) {
@@ -64,14 +69,42 @@ class _HbncVisitScreenState extends State<HbncVisitScreen> with SingleTickerProv
             },
             child: Column(
               children: [
-                AppHeader(screenTitle: 'HBNC Visit Form', showBack: true),
+                AppHeader(
+                  screenTitle: t.visitHbnc,
+                  showBack: true,
+                  icon1Widget: Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              t.previousVisits,
+                              style: TextStyle(color: AppColors.onSurfaceVariant, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  ),
+                  onIcon1Tap: () {
+                    Navigator.pushNamed(context, Route_Names.previousVisit);
+                  },
+                ),
 
                 TabBar(
                   controller: _tabController,
-                  tabs: const [
-                    Tab(text: 'General Details'),
-                    Tab(text: 'Mother Details'),
-                    Tab(text: 'Newborn Details'),
+                  tabs: [
+                    Tab(text: AppLocalizations.of(context)!.tabGeneralDetails),
+                    Tab(text: AppLocalizations.of(context)!.tabMotherDetails),
+                    Tab(text: AppLocalizations.of(context)!.tabNewbornDetails),
                   ],
                   onTap: (index) => context.read<HbncVisitBloc>().add(TabChanged(index)),
                 ),
@@ -152,4 +185,58 @@ class _HbncVisitScreenState extends State<HbncVisitScreen> with SingleTickerProv
     ));
   }
 
+  String _mapErrorCodeToText(AppLocalizations t, String code) {
+    final m = <String, String>{
+      'err_visit_day_required': t.err_visit_day_required,
+      'err_visit_date_required': t.err_visit_date_required,
+      'err_mother_status_required': t.err_mother_status_required,
+      'err_mcp_mother_required': t.err_mcp_mother_required,
+      'err_post_delivery_problems_required': t.err_post_delivery_problems_required,
+      'err_breastfeeding_problems_required': t.err_breastfeeding_problems_required,
+      'err_pads_per_day_required': t.err_pads_per_day_required,
+      'err_mothers_temperature_required': t.err_mothers_temperature_required,
+      'err_foul_discharge_high_fever_required': t.err_foul_discharge_high_fever_required,
+      'err_abnormal_speech_or_seizure_required': t.err_abnormal_speech_or_seizure_required,
+      'err_counseling_advice_required': t.err_counseling_advice_required,
+      'err_milk_not_producing_or_less_required': t.err_milk_not_producing_or_less_required,
+      'err_nipple_cracks_pain_or_engorged_required': t.err_nipple_cracks_pain_or_engorged_required,
+      'err_baby_condition_required': t.err_baby_condition_required,
+      'err_baby_name_required': t.err_baby_name_required,
+      'err_baby_gender_required': t.err_baby_gender_required,
+      'err_baby_weight_required': t.err_baby_weight_required,
+      'err_newborn_temperature_required': t.err_newborn_temperature_required,
+      'err_infant_temp_unit_required': t.err_infant_temp_unit_required,
+      'err_weight_color_match_required': t.err_weight_color_match_required,
+      'err_weighing_scale_color_required': t.err_weighing_scale_color_required,
+      'err_mother_reports_temp_or_chest_indrawing_required': t.err_mother_reports_temp_or_chest_indrawing_required,
+      'err_bleeding_umbilical_cord_required': t.err_bleeding_umbilical_cord_required,
+      'err_pus_in_navel_required': t.err_pus_in_navel_required,
+      'err_routine_care_done_required': t.err_routine_care_done_required,
+      'err_breathing_rapid_required': t.err_breathing_rapid_required,
+      'err_congenital_abnormalities_required': t.err_congenital_abnormalities_required,
+      'err_eyes_normal_required': t.err_eyes_normal_required,
+      'err_eyes_swollen_or_pus_required': t.err_eyes_swollen_or_pus_required,
+      'err_skin_fold_redness_required': t.err_skin_fold_redness_required,
+      'err_newborn_jaundice_required': t.err_newborn_jaundice_required,
+      'err_pus_bumps_or_boil_required': t.err_pus_bumps_or_boil_required,
+      'err_newborn_seizures_required': t.err_newborn_seizures_required,
+      'err_crying_constant_or_less_urine_required': t.err_crying_constant_or_less_urine_required,
+      'err_crying_softly_required': t.err_crying_softly_required,
+      'err_stopped_crying_required': t.err_stopped_crying_required,
+      'err_referred_by_asha_required': t.err_referred_by_asha_required,
+      'err_birth_registered_required': t.err_birth_registered_required,
+      'err_birth_certificate_issued_required': t.err_birth_certificate_issued_required,
+      'err_birth_dose_vaccination_required': t.err_birth_dose_vaccination_required,
+      'err_mcp_child_required': t.err_mcp_child_required,
+      'err_exclusive_breastfeeding_started_required': t.err_exclusive_breastfeeding_started_required,
+      'err_first_breastfeed_timing_required': t.err_first_breastfeed_timing_required,
+      'err_how_was_breastfed_required': t.err_how_was_breastfed_required,
+      'err_first_feed_given_after_birth_required': t.err_first_feed_given_after_birth_required,
+      'err_adequately_fed_seven_eight_required': t.err_adequately_fed_seven_eight_required,
+      'err_baby_drinking_less_milk_required': t.err_baby_drinking_less_milk_required,
+      'err_breastfeeding_stopped_required': t.err_breastfeeding_stopped_required,
+      'err_bloated_or_frequent_vomit_required': t.err_bloated_or_frequent_vomit_required,
+    };
+    return m[code] ?? code;
+  }
 }

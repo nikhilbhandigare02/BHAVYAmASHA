@@ -11,177 +11,94 @@ class PreviousVisitScreen extends StatefulWidget {
 }
 
 class _PreviousVisitScreenState extends State<PreviousVisitScreen> {
-  // Sample data for previous visits
-  final List<Map<String, dynamic>> _visits = [
-    {
-      'visitDate': '16-10-2025',
-      'visitType': 'PNC',
-      'visitStatus': 'Completed',
-      'visitDetails': 'Post Natal Care visit for routine checkup',
-      'healthWorker': 'Dr. Smith',
-    },
-    {
-      'visitDate': '10-10-2025',
-      'visitType': 'HBNC',
-      'visitStatus': 'Completed',
-      'visitDetails': 'Home Based Newborn Care visit',
-      'healthWorker': 'Nurse Johnson',
-    },
-    {
-      'visitDate': '05-10-2025',
-      'visitType': 'ANC',
-      'visitStatus': 'Completed',
-      'visitDetails': 'Antenatal Care visit',
-      'healthWorker': 'Dr. Williams',
-    },
+  // Minimal PNC-style data matching the screenshot
+  final List<Map<String, dynamic>> _pncVisits = const [
+    { 'date': '12-01-2024', 'day': 1 },
+    // Add more rows if needed
   ];
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.previousVisits ?? 'Previous Visits',
+        screenTitle: t.previousVisits,
         showBack: true,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _visits.length,
-        itemBuilder: (context, index) {
-          final visit = _visits[index];
-          return _buildVisitCard(visit, context);
-        },
-      ),
-    );
-  }
-
-  Widget _buildVisitCard(Map<String, dynamic> visit, BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final Color statusColor = visit['visitStatus'] == 'Completed' 
-        ? Colors.green 
-        : Colors.orange;
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
+      body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Visit header with date and status
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${l10n?.visitDateLabel ?? 'Visit Date'}: ${visit['visitDate']}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor.withOpacity(0.5)),
-                  ),
-                  child: Text(
-                    visit['visitStatus'],
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            
-            // Visit type
-            _buildInfoRow(
-              l10n?.visitTypeLabel ?? 'Visit Type',
-              visit['visitType'],
-              Icons.medical_services_outlined,
-            ),
+            _TableHeader(t: t),
             const SizedBox(height: 8),
-            
-            // Visit details
-            _buildInfoRow(
-              l10n?.detailsLabel ?? 'Details',
-              visit['visitDetails'],
-              Icons.description_outlined,
-            ),
-            const SizedBox(height: 8),
-            
-            // Health worker
-            _buildInfoRow(
-              l10n?.healthWorkerLabel ?? 'Health Worker',
-              visit['healthWorker'],
-              Icons.person_outline,
-            ),
-            
-            const SizedBox(height: 12),
-            
-            // View details button
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  // Handle view details
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).primaryColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Theme.of(context).primaryColor),
-                  ),
-                ),
-                child: Text(l10n?.viewDetails ?? 'View Details'),
-              ),
-            ),
+            ..._pncVisits.asMap().entries.map((e) => _TableRowItem(
+                  index: e.key + 1,
+                  date: e.value['date'].toString(),
+                  day: e.value['day'].toString(),
+                )),
           ],
         ),
       ),
     );
   }
-  
-  Widget _buildInfoRow(String label, String value, IconData icon) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+}
+
+class _TableHeader extends StatelessWidget {
+  const _TableHeader({required this.t});
+  final AppLocalizations t;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0,1))],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(10),
         ),
-      ],
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            Expanded(flex: 2, child: Text(t.prevVisitSrNo, style: const TextStyle(fontWeight: FontWeight.w600))),
+            Expanded(flex: 6, child: Text(t.prevVisitPncDate, style: const TextStyle(fontWeight: FontWeight.w600))),
+            Expanded(flex: 4, child: Text(t.prevVisitPncDay, style: const TextStyle(fontWeight: FontWeight.w600))),
+          ],
+        ),
+      ),
     );
   }
 }
+
+class _TableRowItem extends StatelessWidget {
+  const _TableRowItem({required this.index, required this.date, required this.day});
+  final int index;
+  final String date;
+  final String day;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0,1))],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: Row(
+          children: [
+            Expanded(flex: 2, child: Text('$index')),
+            Expanded(flex: 6, child: Text(date)),
+            Expanded(flex: 4, child: Text(day)),
+          ],
+        ),
+      ),
+    );
+  }}

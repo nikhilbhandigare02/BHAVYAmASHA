@@ -71,10 +71,10 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           if (_members.isNotEmpty) {
             final shouldExit = await showConfirmationDialog(
               context: context,
-              title: 'Attention !',
-              message: 'If you get back, Details will be lost. So, Do you want to go back ?',
-              yesText: 'Yes, Exit',
-              noText: 'No',
+              title: l10n?.confirmAttentionTitle ?? 'Attention!',
+              message: l10n?.confirmBackLoseDetailsMsg ?? 'If you go back, details will be lost. Do you want to go back?',
+              yesText: l10n?.confirmYesExit ?? 'Yes, Exit',
+              noText: l10n?.confirmNo ?? 'No',
             );
             return shouldExit ?? false;
           }

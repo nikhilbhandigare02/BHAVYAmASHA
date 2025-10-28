@@ -126,6 +126,17 @@ class MotherDetailsTab extends StatelessWidget {
                     ),
                     const Divider(),
 
+                    ApiDropdown<String>(
+                      labelText: t.counselingAdviceLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['counselingAdvice']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(field: 'counselingAdvice', value: val),
+                      ),
+                    ),
+                    const Divider(),
+
                     // Pads changed per day
                     ApiDropdown<int>(
                       labelText: t.padsPerDayLabel,
@@ -176,6 +187,29 @@ class MotherDetailsTab extends StatelessWidget {
                       ),
                     ),
                                         const Divider(height: 0,),
+
+                    // New questions (as per request) - Yes/No
+                    ApiDropdown<String>(
+                      labelText: t.milkNotProducingOrLessLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['milkNotProducingOrLess']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(field: 'milkNotProducingOrLess', value: val),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: t.nippleCracksPainOrEngorgedLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['nippleCracksPainOrEngorged']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(field: 'nippleCracksPainOrEngorged', value: val),
+                      ),
+                    ),
+                    const Divider(height: 0,),
 
                   ],
                 ),

@@ -620,10 +620,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         onWillPop: () async {
           final shouldExit = await showConfirmationDialog(
             context: context,
-            title: 'Attention !',
-            message: 'Do you want to close this form?',
-            yesText: 'Yes',
-            noText: 'No',
+            title: l.confirmAttentionTitle,
+            message: l.confirmCloseFormMsg,
+            yesText: l.confirmYes,
+            noText: l.confirmNo,
           );
           return shouldExit ?? false;
         },
@@ -686,10 +686,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               onBackTap: () async {
                 final shouldExit = await showConfirmationDialog(
                   context: context,
-                  title: 'Attention !',
-                  message: 'Do you want to close this form?',
-                  yesText: 'Yes, Exit',
-                  noText: 'No',
+                  title: l.confirmAttentionTitle,
+                  message: l.confirmCloseFormMsg,
+                  yesText: l.confirmYesExit,
+                  noText: l.confirmNo,
                 );
                 if (shouldExit ?? false) {
                   Navigator.of(context).pop();

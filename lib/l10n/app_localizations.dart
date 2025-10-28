@@ -5092,6 +5092,444 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Is the mother speaking abnormally or having seizures?*'**
   String get abnormalSpeechOrSeizureLabel;
+
+  /// No description provided for @counselingAdviceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Counseling / Advice*'**
+  String get counselingAdviceLabel;
+
+  /// No description provided for @milkNotProducingOrLessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'After delivery, is the mother not producing milk or does she feel milk is less?*'**
+  String get milkNotProducingOrLessLabel;
+
+  /// No description provided for @nippleCracksPainOrEngorgedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Does the mother have nipple cracks/pain and/or engorged breasts?*'**
+  String get nippleCracksPainOrEngorgedLabel;
+
+  /// No description provided for @exclusiveBreastfeedingStartedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Has exclusive breastfeeding started?*'**
+  String get exclusiveBreastfeedingStartedLabel;
+
+  /// No description provided for @firstBreastfeedTimingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'When was the first breastfeed given to the baby?*'**
+  String get firstBreastfeedTimingLabel;
+
+  /// No description provided for @howWasBreastfedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'How was the baby breastfed?*'**
+  String get howWasBreastfedLabel;
+
+  /// No description provided for @firstFeedGivenAfterBirthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What was given to the baby as the first feed after birth?*'**
+  String get firstFeedGivenAfterBirthLabel;
+
+  /// No description provided for @adequatelyFedSevenToEightTimesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)?*'**
+  String get adequatelyFedSevenToEightTimesLabel;
+
+  /// No description provided for @babyDrinkingLessMilkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the baby drinking less milk?*'**
+  String get babyDrinkingLessMilkLabel;
+
+  /// No description provided for @breastfeedingStoppedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Has breastfeeding been stopped for the baby?*'**
+  String get breastfeedingStoppedLabel;
+
+  /// No description provided for @bloatedStomachOrFrequentVomitingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the baby\'s stomach bloated or does the mother report frequent vomiting?*'**
+  String get bloatedStomachOrFrequentVomitingLabel;
+
+  /// No description provided for @err_visit_day_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Visit Day is required.'**
+  String get err_visit_day_required;
+
+  /// No description provided for @err_visit_date_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of home visit is required.'**
+  String get err_visit_date_required;
+
+  /// No description provided for @err_mother_status_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother\'s status is required.'**
+  String get err_mother_status_required;
+
+  /// No description provided for @err_mcp_mother_required.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP card availability is required (Mother).'**
+  String get err_mcp_mother_required;
+
+  /// No description provided for @err_post_delivery_problems_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-delivery problems selection is required.'**
+  String get err_post_delivery_problems_required;
+
+  /// No description provided for @err_breastfeeding_problems_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Breastfeeding problems selection is required.'**
+  String get err_breastfeeding_problems_required;
+
+  /// No description provided for @err_pads_per_day_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Pads changed per day is required.'**
+  String get err_pads_per_day_required;
+
+  /// No description provided for @err_mothers_temperature_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother\'s temperature is required.'**
+  String get err_mothers_temperature_required;
+
+  /// No description provided for @err_foul_discharge_high_fever_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Foul discharge/high fever selection is required.'**
+  String get err_foul_discharge_high_fever_required;
+
+  /// No description provided for @err_abnormal_speech_or_seizure_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Abnormal speech or seizures selection is required.'**
+  String get err_abnormal_speech_or_seizure_required;
+
+  /// No description provided for @err_counseling_advice_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Counseling / Advice is required.'**
+  String get err_counseling_advice_required;
+
+  /// No description provided for @err_milk_not_producing_or_less_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk not producing/less selection is required.'**
+  String get err_milk_not_producing_or_less_required;
+
+  /// No description provided for @err_nipple_cracks_pain_or_engorged_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Nipple cracks/pain or engorged breasts selection is required.'**
+  String get err_nipple_cracks_pain_or_engorged_required;
+
+  /// No description provided for @err_baby_condition_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby\'s condition is required.'**
+  String get err_baby_condition_required;
+
+  /// No description provided for @err_baby_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby\'s name is required.'**
+  String get err_baby_name_required;
+
+  /// No description provided for @err_baby_gender_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby\'s gender is required.'**
+  String get err_baby_gender_required;
+
+  /// No description provided for @err_baby_weight_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby\'s weight is required.'**
+  String get err_baby_weight_required;
+
+  /// No description provided for @err_newborn_temperature_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature is required.'**
+  String get err_newborn_temperature_required;
+
+  /// No description provided for @err_infant_temp_unit_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Infant\'s temperature unit is required.'**
+  String get err_infant_temp_unit_required;
+
+  /// No description provided for @err_weight_color_match_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight color match is required.'**
+  String get err_weight_color_match_required;
+
+  /// No description provided for @err_weighing_scale_color_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighing scale color is required.'**
+  String get err_weighing_scale_color_required;
+
+  /// No description provided for @err_mother_reports_temp_or_chest_indrawing_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother reports temp/chest indrawing selection is required.'**
+  String get err_mother_reports_temp_or_chest_indrawing_required;
+
+  /// No description provided for @err_bleeding_umbilical_cord_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Bleeding from umbilical cord selection is required.'**
+  String get err_bleeding_umbilical_cord_required;
+
+  /// No description provided for @err_pus_in_navel_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Pus in navel selection is required.'**
+  String get err_pus_in_navel_required;
+
+  /// No description provided for @err_routine_care_done_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine newborn care selection is required.'**
+  String get err_routine_care_done_required;
+
+  /// No description provided for @err_breathing_rapid_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Rapid breathing selection is required.'**
+  String get err_breathing_rapid_required;
+
+  /// No description provided for @err_congenital_abnormalities_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Congenital abnormalities selection is required.'**
+  String get err_congenital_abnormalities_required;
+
+  /// No description provided for @err_eyes_normal_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Eyes: Normal selection is required.'**
+  String get err_eyes_normal_required;
+
+  /// No description provided for @err_eyes_swollen_or_pus_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Eyes swollen/pus selection is required.'**
+  String get err_eyes_swollen_or_pus_required;
+
+  /// No description provided for @err_skin_fold_redness_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Skin fold crack/redness selection is required.'**
+  String get err_skin_fold_redness_required;
+
+  /// No description provided for @err_newborn_jaundice_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Jaundice selection is required.'**
+  String get err_newborn_jaundice_required;
+
+  /// No description provided for @err_pus_bumps_or_boil_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Pus-filled bumps/boil selection is required.'**
+  String get err_pus_bumps_or_boil_required;
+
+  /// No description provided for @err_newborn_seizures_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Seizures selection is required.'**
+  String get err_newborn_seizures_required;
+
+  /// No description provided for @err_crying_constant_or_less_urine_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Crying constantly/less urine selection is required.'**
+  String get err_crying_constant_or_less_urine_required;
+
+  /// No description provided for @err_crying_softly_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Crying softly selection is required.'**
+  String get err_crying_softly_required;
+
+  /// No description provided for @err_stopped_crying_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped crying selection is required.'**
+  String get err_stopped_crying_required;
+
+  /// No description provided for @err_referred_by_asha_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Referred by ASHA selection is required.'**
+  String get err_referred_by_asha_required;
+
+  /// No description provided for @err_birth_registered_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth registration selection is required.'**
+  String get err_birth_registered_required;
+
+  /// No description provided for @err_birth_certificate_issued_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth certificate issued selection is required.'**
+  String get err_birth_certificate_issued_required;
+
+  /// No description provided for @err_birth_dose_vaccination_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth dose vaccination selection is required.'**
+  String get err_birth_dose_vaccination_required;
+
+  /// No description provided for @err_mcp_child_required.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP card availability is required (Child).'**
+  String get err_mcp_child_required;
+
+  /// No description provided for @err_exclusive_breastfeeding_started_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclusive breastfeeding started selection is required.'**
+  String get err_exclusive_breastfeeding_started_required;
+
+  /// No description provided for @err_first_breastfeed_timing_required.
+  ///
+  /// In en, this message translates to:
+  /// **'First breastfeed timing selection is required.'**
+  String get err_first_breastfeed_timing_required;
+
+  /// No description provided for @err_how_was_breastfed_required.
+  ///
+  /// In en, this message translates to:
+  /// **'How was breastfed selection is required.'**
+  String get err_how_was_breastfed_required;
+
+  /// No description provided for @err_first_feed_given_after_birth_required.
+  ///
+  /// In en, this message translates to:
+  /// **'First feed after birth selection is required.'**
+  String get err_first_feed_given_after_birth_required;
+
+  /// No description provided for @err_adequately_fed_seven_eight_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Adequate feeding (7–8 times) selection is required.'**
+  String get err_adequately_fed_seven_eight_required;
+
+  /// No description provided for @err_baby_drinking_less_milk_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby drinking less milk selection is required.'**
+  String get err_baby_drinking_less_milk_required;
+
+  /// No description provided for @err_breastfeeding_stopped_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Breastfeeding stopped selection is required.'**
+  String get err_breastfeeding_stopped_required;
+
+  /// No description provided for @err_bloated_or_frequent_vomit_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Bloated stomach/frequent vomiting selection is required.'**
+  String get err_bloated_or_frequent_vomit_required;
+
+  /// No description provided for @prevVisitSrNo.
+  ///
+  /// In en, this message translates to:
+  /// **'S. No.'**
+  String get prevVisitSrNo;
+
+  /// No description provided for @prevVisitPncDate.
+  ///
+  /// In en, this message translates to:
+  /// **'PNC Date'**
+  String get prevVisitPncDate;
+
+  /// No description provided for @prevVisitPncDay.
+  ///
+  /// In en, this message translates to:
+  /// **'PNC Day'**
+  String get prevVisitPncDay;
+
+  /// No description provided for @tabGeneralDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'General Details'**
+  String get tabGeneralDetails;
+
+  /// No description provided for @tabMotherDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother Details'**
+  String get tabMotherDetails;
+
+  /// No description provided for @tabNewbornDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Newborn Details'**
+  String get tabNewbornDetails;
+
+  /// No description provided for @confirmAttentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attention!'**
+  String get confirmAttentionTitle;
+
+  /// No description provided for @confirmBackLoseDetailsMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'If you go back, details will be lost. Do you want to go back?'**
+  String get confirmBackLoseDetailsMsg;
+
+  /// No description provided for @confirmYesExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Exit'**
+  String get confirmYesExit;
+
+  /// No description provided for @confirmNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get confirmNo;
+
+  /// No description provided for @confirmCloseFormMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to close this form?'**
+  String get confirmCloseFormMsg;
+
+  /// No description provided for @confirmYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get confirmYes;
+
+  /// No description provided for @visitHbnc.
+  ///
+  /// In en, this message translates to:
+  /// **'HBNC Visit Form'**
+  String get visitHbnc;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

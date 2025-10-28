@@ -2518,4 +2518,223 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get abnormalSpeechOrSeizureLabel => 'Is the mother speaking abnormally or having seizures?*';
+
+  @override
+  String get counselingAdviceLabel => 'Counseling / Advice*';
+
+  @override
+  String get milkNotProducingOrLessLabel => 'After delivery, is the mother not producing milk or does she feel milk is less?*';
+
+  @override
+  String get nippleCracksPainOrEngorgedLabel => 'Does the mother have nipple cracks/pain and/or engorged breasts?*';
+
+  @override
+  String get exclusiveBreastfeedingStartedLabel => 'Has exclusive breastfeeding started?*';
+
+  @override
+  String get firstBreastfeedTimingLabel => 'When was the first breastfeed given to the baby?*';
+
+  @override
+  String get howWasBreastfedLabel => 'How was the baby breastfed?*';
+
+  @override
+  String get firstFeedGivenAfterBirthLabel => 'What was given to the baby as the first feed after birth?*';
+
+  @override
+  String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)?*';
+
+  @override
+  String get babyDrinkingLessMilkLabel => 'Is the baby drinking less milk?*';
+
+  @override
+  String get breastfeedingStoppedLabel => 'Has breastfeeding been stopped for the baby?*';
+
+  @override
+  String get bloatedStomachOrFrequentVomitingLabel => 'Is the baby\'s stomach bloated or does the mother report frequent vomiting?*';
+
+  @override
+  String get err_visit_day_required => 'Home Visit Day is required.';
+
+  @override
+  String get err_visit_date_required => 'Date of home visit is required.';
+
+  @override
+  String get err_mother_status_required => 'Mother\'s status is required.';
+
+  @override
+  String get err_mcp_mother_required => 'MCP card availability is required (Mother).';
+
+  @override
+  String get err_post_delivery_problems_required => 'Post-delivery problems selection is required.';
+
+  @override
+  String get err_breastfeeding_problems_required => 'Breastfeeding problems selection is required.';
+
+  @override
+  String get err_pads_per_day_required => 'Pads changed per day is required.';
+
+  @override
+  String get err_mothers_temperature_required => 'Mother\'s temperature is required.';
+
+  @override
+  String get err_foul_discharge_high_fever_required => 'Foul discharge/high fever selection is required.';
+
+  @override
+  String get err_abnormal_speech_or_seizure_required => 'Abnormal speech or seizures selection is required.';
+
+  @override
+  String get err_counseling_advice_required => 'Counseling / Advice is required.';
+
+  @override
+  String get err_milk_not_producing_or_less_required => 'Milk not producing/less selection is required.';
+
+  @override
+  String get err_nipple_cracks_pain_or_engorged_required => 'Nipple cracks/pain or engorged breasts selection is required.';
+
+  @override
+  String get err_baby_condition_required => 'Baby\'s condition is required.';
+
+  @override
+  String get err_baby_name_required => 'Baby\'s name is required.';
+
+  @override
+  String get err_baby_gender_required => 'Baby\'s gender is required.';
+
+  @override
+  String get err_baby_weight_required => 'Baby\'s weight is required.';
+
+  @override
+  String get err_newborn_temperature_required => 'Temperature is required.';
+
+  @override
+  String get err_infant_temp_unit_required => 'Infant\'s temperature unit is required.';
+
+  @override
+  String get err_weight_color_match_required => 'Weight color match is required.';
+
+  @override
+  String get err_weighing_scale_color_required => 'Weighing scale color is required.';
+
+  @override
+  String get err_mother_reports_temp_or_chest_indrawing_required => 'Mother reports temp/chest indrawing selection is required.';
+
+  @override
+  String get err_bleeding_umbilical_cord_required => 'Bleeding from umbilical cord selection is required.';
+
+  @override
+  String get err_pus_in_navel_required => 'Pus in navel selection is required.';
+
+  @override
+  String get err_routine_care_done_required => 'Routine newborn care selection is required.';
+
+  @override
+  String get err_breathing_rapid_required => 'Rapid breathing selection is required.';
+
+  @override
+  String get err_congenital_abnormalities_required => 'Congenital abnormalities selection is required.';
+
+  @override
+  String get err_eyes_normal_required => 'Eyes: Normal selection is required.';
+
+  @override
+  String get err_eyes_swollen_or_pus_required => 'Eyes swollen/pus selection is required.';
+
+  @override
+  String get err_skin_fold_redness_required => 'Skin fold crack/redness selection is required.';
+
+  @override
+  String get err_newborn_jaundice_required => 'Jaundice selection is required.';
+
+  @override
+  String get err_pus_bumps_or_boil_required => 'Pus-filled bumps/boil selection is required.';
+
+  @override
+  String get err_newborn_seizures_required => 'Seizures selection is required.';
+
+  @override
+  String get err_crying_constant_or_less_urine_required => 'Crying constantly/less urine selection is required.';
+
+  @override
+  String get err_crying_softly_required => 'Crying softly selection is required.';
+
+  @override
+  String get err_stopped_crying_required => 'Stopped crying selection is required.';
+
+  @override
+  String get err_referred_by_asha_required => 'Referred by ASHA selection is required.';
+
+  @override
+  String get err_birth_registered_required => 'Birth registration selection is required.';
+
+  @override
+  String get err_birth_certificate_issued_required => 'Birth certificate issued selection is required.';
+
+  @override
+  String get err_birth_dose_vaccination_required => 'Birth dose vaccination selection is required.';
+
+  @override
+  String get err_mcp_child_required => 'MCP card availability is required (Child).';
+
+  @override
+  String get err_exclusive_breastfeeding_started_required => 'Exclusive breastfeeding started selection is required.';
+
+  @override
+  String get err_first_breastfeed_timing_required => 'First breastfeed timing selection is required.';
+
+  @override
+  String get err_how_was_breastfed_required => 'How was breastfed selection is required.';
+
+  @override
+  String get err_first_feed_given_after_birth_required => 'First feed after birth selection is required.';
+
+  @override
+  String get err_adequately_fed_seven_eight_required => 'Adequate feeding (7–8 times) selection is required.';
+
+  @override
+  String get err_baby_drinking_less_milk_required => 'Baby drinking less milk selection is required.';
+
+  @override
+  String get err_breastfeeding_stopped_required => 'Breastfeeding stopped selection is required.';
+
+  @override
+  String get err_bloated_or_frequent_vomit_required => 'Bloated stomach/frequent vomiting selection is required.';
+
+  @override
+  String get prevVisitSrNo => 'S. No.';
+
+  @override
+  String get prevVisitPncDate => 'PNC Date';
+
+  @override
+  String get prevVisitPncDay => 'PNC Day';
+
+  @override
+  String get tabGeneralDetails => 'General Details';
+
+  @override
+  String get tabMotherDetails => 'Mother Details';
+
+  @override
+  String get tabNewbornDetails => 'Newborn Details';
+
+  @override
+  String get confirmAttentionTitle => 'Attention!';
+
+  @override
+  String get confirmBackLoseDetailsMsg => 'If you go back, details will be lost. Do you want to go back?';
+
+  @override
+  String get confirmYesExit => 'Yes, Exit';
+
+  @override
+  String get confirmNo => 'No';
+
+  @override
+  String get confirmCloseFormMsg => 'Do you want to close this form?';
+
+  @override
+  String get confirmYes => 'Yes';
+
+  @override
+  String get visitHbnc => 'HBNC Visit Form';
 }

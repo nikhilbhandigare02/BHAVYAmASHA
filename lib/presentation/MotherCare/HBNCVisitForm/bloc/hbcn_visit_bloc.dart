@@ -92,42 +92,76 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
     if (idx == 0) {
       final v = state.visitDetails;
       if (v['visitNumber'] == null || (v['visitNumber'].toString()).isEmpty) {
-        errors.add('Home Visit Day is required');
+        errors.add('err_visit_day_required');
       }
       if (v['visitDate'] == null) {
-        errors.add('Date of home visit is required');
+        errors.add('err_visit_date_required');
       }
     } else if (idx == 1) {
       final m = state.motherDetails;
-      void req(String key, String label) {
+      void req(String key, String code) {
         final val = m[key];
         if (val == null || (val is String && val.trim().isEmpty)) {
-          errors.add(label);
+          errors.add(code);
         }
       }
-      req('motherStatus', "Mother's status is required");
-      req('mcpCardAvailable', 'MCP card availability is required');
-      req('postDeliveryProblems', 'Post-delivery problems is required');
-      req('breastfeedingProblems', 'Breastfeeding problems is required');
-      req('padsPerDay', 'Pads changed per day is required');
-      req('temperature', "Mother's temperature is required");
-      req('foulDischargeHighFever', 'Foul discharge/high fever selection is required');
-      req('abnormalSpeechOrSeizure', 'Abnormal speech or seizures selection is required');
+      req('motherStatus', 'err_mother_status_required');
+      req('mcpCardAvailable', 'err_mcp_mother_required');
+      req('postDeliveryProblems', 'err_post_delivery_problems_required');
+      req('breastfeedingProblems', 'err_breastfeeding_problems_required');
+      req('padsPerDay', 'err_pads_per_day_required');
+      req('temperature', 'err_mothers_temperature_required');
+      req('foulDischargeHighFever', 'err_foul_discharge_high_fever_required');
+      req('abnormalSpeechOrSeizure', 'err_abnormal_speech_or_seizure_required');
+      // Newly added starred fields
+      req('counselingAdvice', 'err_counseling_advice_required');
+      req('milkNotProducingOrLess', 'err_milk_not_producing_or_less_required');
+      req('nippleCracksPainOrEngorged', 'err_nipple_cracks_pain_or_engorged_required');
     } else if (idx == 2) {
       final c = state.newbornDetails;
-      void req(String key, String label) {
+      void req(String key, String code) {
         final val = c[key];
         if (val == null || (val is String && val.trim().isEmpty)) {
-          errors.add(label);
+          errors.add(code);
         }
       }
-      req('babyCondition', "Baby's condition is required");
-      req('babyName', "Baby's name is required");
-      req('gender', "Baby's gender is required");
-      req('weightAtBirth', "Baby's weight (g) is required");
-      req('temperature', 'Temperature is required');
-      req('tempUnit', "Infant's temperature unit is required");
-      req('weighingScaleColor', 'Weighing Scale Color is required');
+      req('babyCondition', 'err_baby_condition_required');
+      req('babyName', 'err_baby_name_required');
+      req('gender', 'err_baby_gender_required');
+      req('weightAtBirth', 'err_baby_weight_required');
+      req('temperature', 'err_newborn_temperature_required');
+      req('tempUnit', 'err_infant_temp_unit_required');
+      req('weightColorMatch', 'err_weight_color_match_required');
+      req('weighingScaleColor', 'err_weighing_scale_color_required');
+      req('motherReportsTempOrChestIndrawing', 'err_mother_reports_temp_or_chest_indrawing_required');
+      req('bleedingUmbilicalCord', 'err_bleeding_umbilical_cord_required');
+      req('pusInNavel', 'err_pus_in_navel_required');
+      req('routineCareDone', 'err_routine_care_done_required');
+      req('breathingRapid', 'err_breathing_rapid_required');
+      req('congenitalAbnormalities', 'err_congenital_abnormalities_required');
+      req('eyesNormal', 'err_eyes_normal_required');
+      req('eyesSwollenOrPus', 'err_eyes_swollen_or_pus_required');
+      req('skinFoldRedness', 'err_skin_fold_redness_required');
+      req('jaundice', 'err_newborn_jaundice_required');
+      req('pusBumpsOrBoil', 'err_pus_bumps_or_boil_required');
+      req('seizures', 'err_newborn_seizures_required');
+      req('cryingConstantlyOrLessUrine', 'err_crying_constant_or_less_urine_required');
+      req('cryingSoftly', 'err_crying_softly_required');
+      req('stoppedCrying', 'err_stopped_crying_required');
+      req('referredByASHA', 'err_referred_by_asha_required');
+      req('birthRegistered', 'err_birth_registered_required');
+      req('birthCertificateIssued', 'err_birth_certificate_issued_required');
+      req('birthDoseVaccination', 'err_birth_dose_vaccination_required');
+      req('mcpCardAvailable', 'err_mcp_child_required');
+      // Newly added breastfeeding section
+      req('exclusiveBreastfeedingStarted', 'err_exclusive_breastfeeding_started_required');
+      req('firstBreastfeedTiming', 'err_first_breastfeed_timing_required');
+      req('howWasBreastfed', 'err_how_was_breastfed_required');
+      req('firstFeedGivenAfterBirth', 'err_first_feed_given_after_birth_required');
+      req('adequatelyFedSevenToEightTimes', 'err_adequately_fed_seven_eight_required');
+      req('babyDrinkingLessMilk', 'err_baby_drinking_less_milk_required');
+      req('breastfeedingStopped', 'err_breastfeeding_stopped_required');
+      req('bloatedStomachOrFrequentVomiting', 'err_bloated_or_frequent_vomit_required');
     }
 
     emit(state.copyWith(

@@ -44,6 +44,7 @@ import '../../../presentation/MotherCare/HBNCScreen/HBNCList.dart' show HBNCList
 import '../../../presentation/MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
 import '../../../presentation/MotherCare/MotherCareHomeScreen.dart' show Mothercarehomescreen;
 import '../../../presentation/MotherCare/OutcomeForm/OutcomeForm.dart';
+import '../../../presentation/MotherCare/PreviousVisit/PreviousVisit.dart' show PreviousVisitScreen;
 import '../../../presentation/NCD/NCDHome.dart';
 import '../../../presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
 import '../../../presentation/RegisterNewHouseHold/AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart';
@@ -153,6 +154,8 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const HBYCChildCareFormScreen(),);
       case Route_Names.RegisterChildDueListFormScreen:
         return MaterialPageRoute(builder: (context) => const RegisterChildDueListFormScreen(),);
+      case Route_Names.previousVisit:
+        return MaterialPageRoute(builder: (context) => const PreviousVisitScreen(),);
       case Route_Names.addFamilyHead:
         return MaterialPageRoute(
           settings: setting,

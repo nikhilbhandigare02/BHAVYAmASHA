@@ -141,6 +141,95 @@ class ChildDetailsTab extends StatelessWidget {
                                         const Divider(height: 0,),
 
 
+                    // Breastfeeding-related fields
+                    ApiDropdown<String>(
+                      labelText: t.exclusiveBreastfeedingStartedLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['exclusiveBreastfeedingStarted']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'exclusiveBreastfeedingStarted', value: val),
+                      ),
+                    ),
+                                        const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: t.firstBreastfeedTimingLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['firstBreastfeedTiming']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'firstBreastfeedTiming', value: val),
+                      ),
+                    ),
+                                        const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: t.howWasBreastfedLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['howWasBreastfed']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'howWasBreastfed', value: val),
+                      ),
+                    ),
+                                        const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: t.firstFeedGivenAfterBirthLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['firstFeedGivenAfterBirth']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'firstFeedGivenAfterBirth', value: val),
+                      ),
+                    ),
+                                        const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: t.adequatelyFedSevenToEightTimesLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['adequatelyFedSevenToEightTimes']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'adequatelyFedSevenToEightTimes', value: val),
+                      ),
+                    ),
+                                        const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: t.babyDrinkingLessMilkLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['babyDrinkingLessMilk']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'babyDrinkingLessMilk', value: val),
+                      ),
+                    ),
+                                        const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: t.breastfeedingStoppedLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['breastfeedingStopped']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'breastfeedingStopped', value: val),
+                      ),
+                    ),
+                                        const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: t.bloatedStomachOrFrequentVomitingLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['bloatedStomachOrFrequentVomiting']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'bloatedStomachOrFrequentVomiting', value: val),
+                      ),
+                    ),
+                                        const Divider(height: 0,),
+
                     // Additional checks (mostly Yes/No)
                     ApiDropdown<String>(
                       labelText: t.bleedingUmbilicalCordLabel,

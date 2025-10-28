@@ -782,7 +782,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get choNameLabel => 'सीएचओ का नाम';
 
   @override
-  String get completedVisits => 'पूर्ण विज़िट';
+  String get completedVisits => 'पूर्ण दौरे';
 
   @override
   String get contactLabel => 'संपर्क';
@@ -914,25 +914,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String get drawerHome => 'होम';
 
   @override
-  String get drawerIncentivePortal => 'इंसेंटिव पोर्टल';
+  String get drawerIncentivePortal => 'प्रोत्साहन पोर्टल';
 
   @override
-  String get drawerLogout => 'लॉगआउट';
+  String get drawerLogout => 'लॉग आउट';
 
   @override
-  String get drawerMisReport => 'एमआईएस रिपोर्ट';
+  String get drawerMisReport => 'MIS रिपोर्ट';
 
   @override
-  String get drawerProfile => 'प्रोफ़ाइल';
+  String get drawerProfile => 'प्रोफाइल';
 
   @override
-  String get drawerResetPassword => 'पासवर्ड रीसेट';
+  String get drawerResetPassword => 'पासवर्ड बदलें';
 
   @override
-  String get drawerSettings => 'सेटिंग्स';
+  String get drawerSettings => 'सेटिंग';
 
   @override
-  String get drawerSyncedData => 'सिंक किया गया डेटा';
+  String get drawerSyncedData => 'डेटा सिंक करें';
 
   @override
   String get economicStatusLabel => 'आर्थिक स्थिति';
@@ -1130,34 +1130,34 @@ class AppLocalizationsHi extends AppLocalizations {
   String get generateOtp => 'GENERATE OTP';
 
   @override
-  String get gridAbhaGeneration => 'आभा जनरेशन';
+  String get gridAbhaGeneration => 'आभा बनाना';
 
   @override
   String get gridAllBeneficiaries => 'सभी लाभार्थी';
 
   @override
-  String get gridAllHousehold => 'सभी परिवार';
+  String get gridAllHousehold => 'सभी घर';
 
   @override
   String get gridAshaKiDuniya => 'आशा की दुनिया';
 
   @override
-  String get gridChildCare => 'बाल देखभाल';
+  String get gridChildCare => 'शिशु देखभाल';
 
   @override
-  String get gridEligibleCouple => 'योग्य दंपत्ति';
+  String get gridEligibleCouple => 'योग्य दम्पत्ति';
 
   @override
-  String get gridHighRisk => 'उच्च-जोखिम';
+  String get gridHighRisk => 'उच्च जोखिम';
 
   @override
-  String get gridMotherCare => 'मातृ देखभाल';
+  String get gridMotherCare => 'मातृत्व देखभाल';
 
   @override
   String get gridMyBeneficiaries => 'मेरे लाभार्थी';
 
   @override
-  String get gridRegisterNewHousehold => 'नया परिवार पंजीकृत करें';
+  String get gridRegisterNewHousehold => 'नया पंजीकरण';
 
   @override
   String get gridTraining => 'प्रशिक्षण';
@@ -1256,7 +1256,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hello => 'नमस्ते';
 
   @override
-  String get help => 'सहायता';
+  String get help => 'सहायता नियम';
 
   @override
   String get helpInstructions => 'कृपया किसी भी सहायता के लिए नीचे दिए गए हेल्प नंबरों पर कॉल करें।';
@@ -1429,7 +1429,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get lmpDateLabel => 'एलएमपी की तिथि';
 
   @override
-  String get loginButton => 'लॉगिन';
+  String get loginButton => 'लॉग इन करें';
 
   @override
   String get loginFailed => 'लॉगिन विफल';
@@ -1591,7 +1591,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get nameOfWomanLabel => 'महिला का नाम';
 
   @override
-  String get ncd => 'गैर-संचारी रोग (NCD)';
+  String get ncd => 'एनसीडी';
 
   @override
   String get neighbour => 'पड़ोसी';
@@ -1711,7 +1711,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get populationCoveredLabel => 'आशा के अंतर्गत आबादी';
 
   @override
-  String get poweredBy => 'मेडिक्सेल लाइट द्वारा संचालित ';
+  String get poweredBy => 'Powered By Medixcel Lite © 2025';
 
   @override
   String get preExistingDiseaseLabel => 'Pre - Existing disease';
@@ -1723,7 +1723,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get previousButton => 'पिछला';
 
   @override
-  String get previousVisits => 'पिछले विज़िट';
+  String get previousVisits => 'पिछले दौरे';
 
   @override
   String get previousVisitsButton => 'PREVIOUS VISITS';
@@ -2367,34 +2367,34 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dead => 'मृत';
 
   @override
-  String get babyConditionLabel => 'बच्चे की स्थिति*';
+  String get babyConditionLabel => 'शिशु की स्थिति *';
 
   @override
-  String get babyNameLabel => 'बच्चे का नाम*';
+  String get babyNameLabel => 'शिशु का नाम *';
 
   @override
-  String get babyGenderLabel => 'बच्चे का लिंग*';
+  String get babyGenderLabel => 'शिशु का लिंग *';
 
   @override
-  String get newbornWeightGramLabel => 'बच्चे का वजन (ग्राम) *';
+  String get newbornWeightGramLabel => 'शिशु का वजन (ग्रा.) *';
 
   @override
   String get newbornTemperatureLabel => 'तापमान *';
 
   @override
-  String get infantTemperatureUnitLabel => 'शिशु का तापमान (बगल में मापें और दर्ज करें) *';
+  String get infantTemperatureUnitLabel => 'शिशु का तापमान (बगल में मापें और रिकॉर्ड करें) *';
 
   @override
   String get temperatureUnitCelsius => 'सेल्सियस';
 
   @override
-  String get temperatureUnitFahrenheit => 'फारेनहाइट';
+  String get temperatureUnitFahrenheit => 'फॉरेनहाइट';
 
   @override
-  String get weightColorMatchLabel => 'वजन किस रंग से मेल खाता है?';
+  String get weightColorMatchLabel => 'वजन किस रंग से मेल खाता है? *';
 
   @override
-  String get weighingScaleColorLabel => 'तौल तराजू का रंग *';
+  String get weighingScaleColorLabel => 'वजन मापने की मशीन के स्केल का रंग *';
 
   @override
   String get colorGreen => 'हरा';
@@ -2406,52 +2406,52 @@ class AppLocalizationsHi extends AppLocalizations {
   String get colorRed => 'लाल';
 
   @override
-  String get motherReportsTempOrChestIndrawingLabel => 'माता बताती हैं कि बच्चा स्पर्श करने पर गर्म या ठंडा लगता है, या बच्चे का तापमान 37.5°C या अधिक या 35.5°C से कम है, और सांस लेते समय छाती अंदर की ओर जाती है.*';
+  String get motherReportsTempOrChestIndrawingLabel => 'मां बताती हैं कि शिशु छूने पर गर्म या ठंडा लगता है या शिशु का तापमान 37.5°C या अधिक या 35.5°C से कम है और सांस लेते समय छाती अंदर की ओर जाती है.*';
 
   @override
-  String get bleedingUmbilicalCordLabel => 'क्या नाभि से खून आ रहा है?*';
+  String get bleedingUmbilicalCordLabel => 'क्या नाभि से रक्तस्राव हो रहा है? *';
 
   @override
   String get pusInNavelLabel => 'क्या नाभि में मवाद है?*';
 
   @override
-  String get routineCareDoneLabel => 'क्या नियमित नवजात देखभाल कार्य किए गए?*';
+  String get routineCareDoneLabel => 'क्या नियमित नवजात देखभाल कार्य निष्पादित किये गए हैं? *';
 
   @override
-  String get breathingRapidLabel => 'क्या आपका बच्चा तेज सांस ले रहा है (प्रति मिनट 60 या अधिक)?*';
+  String get breathingRapidLabel => 'क्या शिशु की सांस तेज (प्रति मिनट 60 या अधिक) चल रही है? *';
 
   @override
-  String get lethargicLabel => 'क्या बच्चा सुस्त है?';
+  String get lethargicLabel => 'क्या शिशु सुस्त है?';
 
   @override
-  String get congenitalAbnormalitiesLabel => 'क्या बच्चे में कोई जन्मजात शारीरिक असामान्यता है?*';
+  String get congenitalAbnormalitiesLabel => 'क्या शिशु में कोई जन्मजात शारीरिक असामान्यता है? *';
 
   @override
   String get eyesNormalLabel => 'आंखें: सामान्य*';
 
   @override
-  String get eyesSwollenOrPusLabel => 'क्या आंखें सूजी हुई हैं? क्या आंखों से मवाद आ रहा है?*';
+  String get eyesSwollenOrPusLabel => 'क्या आंखें सूजी हैं? क्या आंखों से मवाद आ रहा है? *';
 
   @override
-  String get skinFoldRednessLabel => 'क्या त्वचा की सिलवटों (जांघ/बगल/कूल्हा) में फटना/लालिमा है? *';
+  String get skinFoldRednessLabel => 'क्या त्वचा की तह पर कोई दरार/लालिमा है? (जांघ / बगल / नितंब) *';
 
   @override
   String get newbornJaundiceLabel => 'त्वचा/हथेलियों/तलवों/आंखों में पीलापन: पीलिया*';
 
   @override
-  String get pusBumpsOrBoilLabel => 'त्वचा पर 10 से अधिक मवाद भरे दाने या एक बड़ा फोड़ा?*';
+  String get pusBumpsOrBoilLabel => 'त्वचा में 10 से अधिक मवाद भरी फुंसियां या एक बड़ा फोड़ा? *';
 
   @override
   String get newbornSeizuresLabel => 'क्या बच्चे को दौरे पड़ रहे हैं?*';
 
   @override
-  String get cryingConstantlyOrLessUrineLabel => 'क्या बच्चा लगातार रो रहा है या दिन में 6 बार से कम पेशाब कर रहा है?*';
+  String get cryingConstantlyOrLessUrineLabel => 'क्या शिशु लगातार रो रहा है या वह दिन में 6 बार से कम पेशाब कर रहा/रही है? *';
 
   @override
-  String get cryingSoftlyLabel => 'क्या बच्चा धीमे स्वर में रो रहा है?*';
+  String get cryingSoftlyLabel => 'क्या शिशु धीरे-धीरे रो रहा/रही है? *';
 
   @override
-  String get stoppedCryingLabel => 'क्या बच्चे ने रोना बंद कर दिया है?*';
+  String get stoppedCryingLabel => 'क्या शिशु ने रोना बंद कर दिया है? *';
 
   @override
   String get newbornReferredByAshaLabel => 'क्या ऊपर बताए लक्षणों के लिए बच्चे को आशा द्वारा रेफर किया गया है?*';
@@ -2460,25 +2460,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String get birthRegisteredLabel => 'क्या जन्म का पंजीकरण हो गया है?*';
 
   @override
-  String get mcpCardAvailableLabel => 'क्या \'मात्र शिशु सुरक्षा (एमसीपी)\' कार्ड उपलब्ध है?*';
+  String get mcpCardAvailableLabel => 'क्या \'मात्र शिशु संरक्षण (एमसीपी)\' कार्ड की उपलब्धता है? *';
 
   @override
-  String get birthDoseVaccinationLabel => 'क्या बच्चे को जन्म खुराक टीकाकरण मिला है?*';
+  String get birthDoseVaccinationLabel => 'क्या शिशु को जन्म की खुराक टीकाकरण दिया गया है? *';
 
   @override
-  String get homeVisitDayLabel => 'घर भ्रमण का दिन *';
+  String get homeVisitDayLabel => 'गृह भ्रमण का दिन *';
 
   @override
-  String get dateOfHomeVisitLabel => 'घर भ्रमण की तिथि*';
+  String get dateOfHomeVisitLabel => 'गृह भ्रमण की तिथि*';
 
   @override
   String get motherStatusLabel => 'मां की स्थिति*';
 
   @override
-  String get mcpCardAvailableLabelMother => 'क्या \'मात्र शिशु प्रक्षयान (एमसीपी)\' कार्ड उपलब्ध है? *';
+  String get mcpCardAvailableLabelMother => 'क्या \'मात्र शिशु संरक्षण (एमसीपी)\' कार्ड की उपलब्धता है? *';
 
   @override
-  String get postDeliveryProblemsLabel => 'क्या प्रसव के बाद मां को कोई समस्या है?*';
+  String get postDeliveryProblemsLabel => 'क्या प्रसव के बाद मां को निम्नलिखित में से कोई समस्या है? *';
 
   @override
   String get postDeliveryProblemNone => 'कोई नहीं';
@@ -2502,20 +2502,239 @@ class AppLocalizationsHi extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'दौरे';
 
   @override
-  String get breastfeedingProblemsLabel => 'क्या मां को स्तनपान कराने में समस्या है?*';
+  String get breastfeedingProblemsLabel => 'क्या मां को स्तनपान कराते समय समस्या है? *';
 
   @override
-  String get mealsPerDayLabel => '24 घंटे में मां कितनी बार पूरा भोजन करती है?';
+  String get mealsPerDayLabel => '24 घंटे में मां पूर्ण भोजन कितनी बार करती है?';
 
   @override
-  String get padsPerDayLabel => 'रक्तस्राव के लिए एक दिन में कितने पैड बदले जाते हैं?*';
+  String get padsPerDayLabel => 'रक्तस्राव के लिए एक दिन में कितने पैड बदले गए हैं? *';
 
   @override
   String get mothersTemperatureLabel => 'मां का तापमान*';
 
   @override
-  String get foulDischargeHighFeverLabel => 'दुर्गंधयुक्त स्राव और बुखार 102°F (38.9°C)*';
+  String get foulDischargeHighFeverLabel => 'दुर्गंधयुक्त स्राव और बुखार 102 डिग्री फॉरेनहाइट (38.9 डिग्री सेल्सियस) *';
 
   @override
-  String get abnormalSpeechOrSeizureLabel => 'क्या मां असामान्य रूप से बोल रही है या उसे दौरे पड़ रहे हैं?*';
+  String get abnormalSpeechOrSeizureLabel => 'क्या मां असामान्य ढंग से बोल रही है या उसे दौरे पड़ रहे हैं? *';
+
+  @override
+  String get counselingAdviceLabel => 'परामर्श / सलाह *';
+
+  @override
+  String get milkNotProducingOrLessLabel => 'प्रसव के बाद माँ का दूध नहीं बन रहा है या वह समझती है कि कम दूध बन रहा है। *';
+
+  @override
+  String get nippleCracksPainOrEngorgedLabel => 'क्या माँ के निप्पल में दरार/दर्द और/या कड़े स्तन हैं? *';
+
+  @override
+  String get exclusiveBreastfeedingStartedLabel => 'क्या केवल स्तनपान की शुरुआत हो गई है? *';
+
+  @override
+  String get firstBreastfeedTimingLabel => 'शिशु को पहली बार स्तनपान किस समय कराया गया था? *';
+
+  @override
+  String get howWasBreastfedLabel => 'शिशु ने स्तनपान कैसे किया था? *';
+
+  @override
+  String get firstFeedGivenAfterBirthLabel => 'जन्म के बाद शिशु को प्रथम आहार के रूप में क्या दिया गया? *';
+
+  @override
+  String get adequatelyFedSevenToEightTimesLabel => 'क्या बच्चे को ठीक से खाना खिलाया जा रहा है (जब भी भूख लगे या 24 घंटे में कम से कम 7-8 बार) *';
+
+  @override
+  String get babyDrinkingLessMilkLabel => 'क्या शिशु कम दूध पी रहा/रही है? *';
+
+  @override
+  String get breastfeedingStoppedLabel => 'क्या बच्चे को दूध पिलाना बंद कर दिया है? *';
+
+  @override
+  String get bloatedStomachOrFrequentVomitingLabel => 'फूला हुआ पेट या मां बताती है कि बच्चा बार-बार उल्टी करता है। *';
+
+  @override
+  String get err_visit_day_required => 'गृह भ्रमण का दिन अनिवार्य है।';
+
+  @override
+  String get err_visit_date_required => 'गृह भ्रमण की तिथि अनिवार्य है।';
+
+  @override
+  String get err_mother_status_required => 'माता की स्थिति अनिवार्य है।';
+
+  @override
+  String get err_mcp_mother_required => 'एमसीपी कार्ड की उपलब्धता (माता) अनिवार्य है।';
+
+  @override
+  String get err_post_delivery_problems_required => 'प्रसव के बाद की समस्याओं का चयन अनिवार्य है।';
+
+  @override
+  String get err_breastfeeding_problems_required => 'स्तनपान संबंधी समस्या का चयन अनिवार्य है।';
+
+  @override
+  String get err_pads_per_day_required => 'प्रतिदिन बदले जाने वाले पैड की संख्या अनिवार्य है।';
+
+  @override
+  String get err_mothers_temperature_required => 'माता का तापमान अनिवार्य है।';
+
+  @override
+  String get err_foul_discharge_high_fever_required => 'दुर्गंधयुक्त स्राव/तेज बुखार का चयन अनिवार्य है।';
+
+  @override
+  String get err_abnormal_speech_or_seizure_required => 'असामान्य बोलना/दौरे का चयन अनिवार्य है।';
+
+  @override
+  String get err_counseling_advice_required => 'परामर्श/सलाह अनिवार्य है।';
+
+  @override
+  String get err_milk_not_producing_or_less_required => 'दूध नहीं बन रहा/कम बन रहा चयन अनिवार्य है।';
+
+  @override
+  String get err_nipple_cracks_pain_or_engorged_required => 'निप्पल में दरार/दर्द/कड़े स्तन का चयन अनिवार्य है।';
+
+  @override
+  String get err_baby_condition_required => 'शिशु की स्थिति अनिवार्य है।';
+
+  @override
+  String get err_baby_name_required => 'शिशु का नाम अनिवार्य है।';
+
+  @override
+  String get err_baby_gender_required => 'शिशु का लिंग अनिवार्य है।';
+
+  @override
+  String get err_baby_weight_required => 'शिशु का वजन अनिवार्य है।';
+
+  @override
+  String get err_newborn_temperature_required => 'तापमान अनिवार्य है।';
+
+  @override
+  String get err_infant_temp_unit_required => 'शिशु के तापमान की इकाई अनिवार्य है।';
+
+  @override
+  String get err_weight_color_match_required => 'वजन किस रंग से मेल खाता है? चयन अनिवार्य है।';
+
+  @override
+  String get err_weighing_scale_color_required => 'वजन मापने की मशीन के स्केल का रंग अनिवार्य है।';
+
+  @override
+  String get err_mother_reports_temp_or_chest_indrawing_required => 'मां द्वारा बताए ताप/छाती धंसने का चयन अनिवार्य है।';
+
+  @override
+  String get err_bleeding_umbilical_cord_required => 'नाभि से रक्तस्राव का चयन अनिवार्य है।';
+
+  @override
+  String get err_pus_in_navel_required => 'नाभि में मवाद का चयन अनिवार्य है।';
+
+  @override
+  String get err_routine_care_done_required => 'नियमित नवजात देखभाल का चयन अनिवार्य है।';
+
+  @override
+  String get err_breathing_rapid_required => 'तेज सांस चलने का चयन अनिवार्य है।';
+
+  @override
+  String get err_congenital_abnormalities_required => 'जन्मजात शारीरिक असामान्यता का चयन अनिवार्य है।';
+
+  @override
+  String get err_eyes_normal_required => 'आंखें: सामान्य का चयन अनिवार्य है।';
+
+  @override
+  String get err_eyes_swollen_or_pus_required => 'आंखें सूजी/मवाद का चयन अनिवार्य है।';
+
+  @override
+  String get err_skin_fold_redness_required => 'त्वचा की तह में दरार/लालिमा का चयन अनिवार्य है।';
+
+  @override
+  String get err_newborn_jaundice_required => 'पीलिया का चयन अनिवार्य है।';
+
+  @override
+  String get err_pus_bumps_or_boil_required => 'मवाद भरी फुंसियां/फोड़े का चयन अनिवार्य है।';
+
+  @override
+  String get err_newborn_seizures_required => 'दौरे का चयन अनिवार्य है।';
+
+  @override
+  String get err_crying_constant_or_less_urine_required => 'लगातार रोना/कम पेशाब का चयन अनिवार्य है।';
+
+  @override
+  String get err_crying_softly_required => 'धीमे स्वर में रोना का चयन अनिवार्य है।';
+
+  @override
+  String get err_stopped_crying_required => 'रोना बंद करने का चयन अनिवार्य है।';
+
+  @override
+  String get err_referred_by_asha_required => 'आशा द्वारा रेफर का चयन अनिवार्य है।';
+
+  @override
+  String get err_birth_registered_required => 'जन्म पंजीकरण का चयन अनिवार्य है।';
+
+  @override
+  String get err_birth_certificate_issued_required => 'जन्म प्रमाणपत्र जारी का चयन अनिवार्य है।';
+
+  @override
+  String get err_birth_dose_vaccination_required => 'जन्म खुराक टीकाकरण का चयन अनिवार्य है।';
+
+  @override
+  String get err_mcp_child_required => 'एमसीपी कार्ड की उपलब्धता (शिशु) अनिवार्य है।';
+
+  @override
+  String get err_exclusive_breastfeeding_started_required => 'केवल स्तनपान शुरू हुआ/हुई का चयन अनिवार्य है।';
+
+  @override
+  String get err_first_breastfeed_timing_required => 'पहली स्तनपान करवाने के समय का चयन अनिवार्य है।';
+
+  @override
+  String get err_how_was_breastfed_required => 'स्तनपान कैसे किया गया का चयन अनिवार्य है।';
+
+  @override
+  String get err_first_feed_given_after_birth_required => 'जन्म के बाद प्रथम आहार का चयन अनिवार्य है।';
+
+  @override
+  String get err_adequately_fed_seven_eight_required => 'समुचित भोजन (24 घंटे में कम से कम 7–8 बार) का चयन अनिवार्य है।';
+
+  @override
+  String get err_baby_drinking_less_milk_required => 'शिशु कम दूध पी रहा/रही है का चयन अनिवार्य है।';
+
+  @override
+  String get err_breastfeeding_stopped_required => 'शिशु को दूध पिलाना बंद किया गया का चयन अनिवार्य है।';
+
+  @override
+  String get err_bloated_or_frequent_vomit_required => 'फूला हुआ पेट/बार-बार उल्टी का चयन अनिवार्य है।';
+
+  @override
+  String get prevVisitSrNo => 'क्र.';
+
+  @override
+  String get prevVisitPncDate => 'पी.एन.सी. की तिथि';
+
+  @override
+  String get prevVisitPncDay => 'पी.एन.सी. की दिन';
+
+  @override
+  String get tabGeneralDetails => 'सामान्य विवरण';
+
+  @override
+  String get tabMotherDetails => 'माता का विवरण';
+
+  @override
+  String get tabNewbornDetails => 'बच्चे का विवरण';
+
+  @override
+  String get confirmAttentionTitle => 'Attention!';
+
+  @override
+  String get confirmBackLoseDetailsMsg => 'If you go back, details will be lost. Do you want to go back?';
+
+  @override
+  String get confirmYesExit => 'Yes, Exit';
+
+  @override
+  String get confirmNo => 'No';
+
+  @override
+  String get confirmCloseFormMsg => 'Do you want to close this form?';
+
+  @override
+  String get confirmYes => 'Yes';
+
+  @override
+  String get visitHbnc => 'एचबीएनसी विजिट फॉर्म';
 }

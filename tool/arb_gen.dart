@@ -1,22 +1,37 @@
 import 'dart:convert';
 import 'dart:io';
 
-/// Configure which JSON files to extract translations from.
-final List<String> sourceJsonFiles = [
-  'assets/json/multilingual.json',
-  'assets/json/asha-forms.json',
-  'assets/json/national-program.json',
-];
+Future<List<String>> _discoverJsonSources() async {
+  const jsonDir = 'json';
+  final dir = Directory(jsonDir);
+  if (!await dir.exists()) {
+    stderr.writeln('Warning: $jsonDir not found. No JSON sources discovered.');
+    return const [];
+  }
+  final files = <String>[];
+  await for (final entity in dir.list(recursive: false, followLinks: false)) {
+    if (entity is File && entity.path.toLowerCase().endsWith('.json')) {
+      files.add(entity.path);
+    }
+  }
+  if (files.isEmpty) {
+    stderr.writeln('Warning: No .json files found under $jsonDir');
+  } else {
+    stdout.writeln('Discovered ${files.length} JSON source file(s) under $jsonDir');
+  }
+  return files;
+}
 
 const String enArbPath = 'lib/l10n/app_en.arb';
 const String hiArbPath = 'lib/l10n/app_hi.arb';
 
 Future<void> main() async {
-  final enMap = await _readArb(enArbPath);
-  final hiMap = await _readArb(hiArbPath);
+  final enMap = _ensureArbMeta({}, 'en');
+  final hiMap = _ensureArbMeta({}, 'hi');
 
   final addedKeys = <String>[];
 
+  final sourceJsonFiles = await _discoverJsonSources();
   for (final path in sourceJsonFiles) {
     final file = File(path);
     if (!await file.exists()) {
