@@ -40,24 +40,38 @@ class ChildrenBloc extends Bloc<ChildrenEvent, ChildrenState> {
 
     // male
     on<ChIncrementMale>((event, emit) {
-      final maxMale = state.totalLive - state.totalFemale;
-      final male = (state.totalMale + 1).clamp(0, maxMale.clamp(0, 999));
-      emit(state.copyWith(totalMale: male));
+      // Allow male to grow up to totalBorn - totalFemale
+      final maxMaleByBorn = state.totalBorn - state.totalFemale;
+      final male = (state.totalMale + 1).clamp(0, maxMaleByBorn.clamp(0, 999));
+      // Ensure totalLive is at least male + female, but not beyond totalBorn
+      final desiredLive = (male + state.totalFemale).clamp(0, state.totalBorn);
+      final live = state.totalLive < desiredLive ? desiredLive : state.totalLive;
+      emit(state.copyWith(totalMale: male, totalLive: live));
     });
     on<ChDecrementMale>((event, emit) {
       final male = (state.totalMale - 1).clamp(0, 999);
-      emit(state.copyWith(totalMale: male));
+      // Keep totalLive not less than male + female
+      final desiredLive = (male + state.totalFemale).clamp(0, state.totalBorn);
+      final live = state.totalLive < desiredLive ? desiredLive : state.totalLive;
+      emit(state.copyWith(totalMale: male, totalLive: live));
     });
 
     // female
     on<ChIncrementFemale>((event, emit) {
-      final maxFemale = state.totalLive - state.totalMale;
-      final female = (state.totalFemale + 1).clamp(0, maxFemale.clamp(0, 999));
-      emit(state.copyWith(totalFemale: female));
+      // Allow female to grow up to totalBorn - totalMale
+      final maxFemaleByBorn = state.totalBorn - state.totalMale;
+      final female = (state.totalFemale + 1).clamp(0, maxFemaleByBorn.clamp(0, 999));
+      // Ensure totalLive is at least male + female, but not beyond totalBorn
+      final desiredLive = (state.totalMale + female).clamp(0, state.totalBorn);
+      final live = state.totalLive < desiredLive ? desiredLive : state.totalLive;
+      emit(state.copyWith(totalFemale: female, totalLive: live));
     });
     on<ChDecrementFemale>((event, emit) {
       final female = (state.totalFemale - 1).clamp(0, 999);
-      emit(state.copyWith(totalFemale: female));
+      // Keep totalLive not less than male + female
+      final desiredLive = (state.totalMale + female).clamp(0, state.totalBorn);
+      final live = state.totalLive < desiredLive ? desiredLive : state.totalLive;
+      emit(state.copyWith(totalFemale: female, totalLive: live));
     });
 
     // youngest fields

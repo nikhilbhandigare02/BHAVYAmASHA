@@ -965,6 +965,20 @@ class AppLocalizationsHi extends AppLocalizations {
   String get elecGenerator => 'जनरेटर';
 
   @override
+  String householdSavedSuccessfully(Object count) {
+    return 'एकूण लाभार्थी: $count';
+  }
+
+  @override
+  String get dataSavedSuccessfully => 'नवीन घर यशस्वीरित्या जोडले गेले आहे';
+
+  @override
+  String get closeButton => 'बंद करा';
+
+  @override
+  String get ok => 'ठीक आहे';
+
+  @override
   String get elecKeroseneLamp => 'मिट्टी के तेल का दीया';
 
   @override

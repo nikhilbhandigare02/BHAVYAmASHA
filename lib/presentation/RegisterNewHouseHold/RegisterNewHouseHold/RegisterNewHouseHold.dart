@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/HouseHoldDetails.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/HouseHold_Amenities.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'dart:io' show Platform;
+import 'dart:convert';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
@@ -32,11 +39,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   int totalMembers = 0;
   bool headAdded = false;
   final List<Map<String, String>> _members = [];
+  Map<String, dynamic>? _headForm;
+  final List<Map<String, dynamic>> _memberForms = [];
   bool _hideAddMemberButton = false;
+  late final HouseholdDetailsAmenitiesBloc _hhBloc;
+  bool _skipExitConfirm = false;
 
-  final List<bool> _memberPanelsOpen = [false, false, false];
-  final List<bool> _householdPanelsOpen = [false, false];
-  final List<bool> _amenityPanelsOpen = [false, false, false];
+
 
   @override
   void initState() {
@@ -45,6 +54,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+    _hhBloc = HouseholdDetailsAmenitiesBloc();
 
     // Initialize from incoming data if provided
     if (widget.initialMembers != null && widget.initialMembers!.isNotEmpty) {
@@ -56,9 +66,32 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     _hideAddMemberButton = widget.hideAddMemberButton;
   }
 
+  // Deep-convert all 'Yes'/'No' values to 1/0 for storage
+  dynamic _convertYesNoDynamic(dynamic value) {
+    if (value is String) {
+      if (value == 'Yes') return 1;
+      if (value == 'No') return 0;
+      return value;
+    } else if (value is Map) {
+      return _convertYesNoMap(Map<String, dynamic>.from(value as Map));
+    } else if (value is List) {
+      return value.map(_convertYesNoDynamic).toList();
+    }
+    return value;
+  }
+
+  Map<String, dynamic> _convertYesNoMap(Map<String, dynamic> input) {
+    final out = <String, dynamic>{};
+    input.forEach((k, v) {
+      out[k] = _convertYesNoDynamic(v);
+    });
+    return out;
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
+    _hhBloc.close();
     super.dispose();
   }
 
@@ -68,6 +101,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
     return WillPopScope(
         onWillPop: () async {
+          if (_skipExitConfirm) return true;
           if (_members.isNotEmpty) {
             final shouldExit = await showConfirmationDialog(
               context: context,
@@ -145,8 +179,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     : null,
                 children: [
                   _buildMemberDetails(context),
-                  HouseHoldDetails(),
-                  HouseHoldAmenities(),
+                  BlocProvider.value(value: _hhBloc, child: const HouseHoldDetails()),
+                  BlocProvider.value(value: _hhBloc, child: const HouseHoldAmenities()),
                 ],
               ),
             ),
@@ -212,8 +246,68 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             if (idx < 2) {
                               _tabController.animateTo(idx + 1);
                             } else {
-                              // TODO: Save action for amenities
-                              Navigator.of(context).maybePop();
+                              final now = DateTime.now();
+                              final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+                              final s = _hhBloc.state;
+                              final householdFormJson = {
+                                'headdetails': _headForm ?? {},
+                                'memberdetails': _memberForms,
+                                'spousedetails': _headForm?['spousedetails'] ?? {},
+                                'childrendetails': _headForm?['childrendetails'] ?? {},
+                                'amenities': {
+                                  'residentialArea': s.residentialArea,
+                                  'ownershipType': s.ownershipType,
+                                  'houseType': s.houseType,
+                                  'houseKitchen': s.houseKitchen,
+                                  'cookingFuel': s.cookingFuel,
+                                  'waterSource': s.waterSource,
+                                  'electricity': s.electricity,
+                                  'toilet': s.toilet,
+                                },
+                              };
+                              final normalizedHouseholdInfo = _convertYesNoMap(Map<String, dynamic>.from(householdFormJson));
+                              debugPrint(jsonEncode(normalizedHouseholdInfo));
+
+                              final payload = {
+                                'server_id': null,
+                                'unique_key': 'HH_${now.millisecondsSinceEpoch}',
+                                'address': {},
+                                'geo_location': {},
+                                'head_id': _headForm?['unique_key'] ?? _headForm?['id'],
+                                'household_info': normalizedHouseholdInfo,
+                                'device_details': {
+                                  'platform': Platform.operatingSystem,
+                                },
+                                'app_details': {
+                                  'app_name': 'BHAVYA mASHA UAT',
+                                },
+                                'parent_user': {},
+                                'current_user_key': 'local_user',
+                                'facility_id': 283,
+                                'created_date_time': ts,
+                                'modified_date_time': ts,
+                                'is_synced': 0,
+                                'is_deleted': 0,
+                              };
+
+                              debugPrint(jsonEncode(payload));
+
+// In the save handler:
+                              LocalStorageDao.instance.insertHousehold(payload).then((_) async {
+                                _skipExitConfirm = true;
+                                if (!mounted) return;
+
+                                if (mounted) {
+                                  final shouldNavigate = await showSuccessDialog(context);
+                                  if (shouldNavigate == true && mounted) {
+                                    Navigator.pushNamedAndRemoveUntil(
+                                      context,
+                                      Route_Names.homeScreen,
+                                      (route) => false,
+                                    );
+                                  }
+                                }
+                              });
                             }
                           },
                         ),
@@ -230,45 +324,116 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   }
 
   Future<void> _openAddHead() async {
-    final result = await Navigator.of(context).push<Map<String, String>>(
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(builder: (_) => AddNewFamilyHeadScreen()),
     );
     if (result != null) {
       setState(() {
+        _headForm = Map<String, dynamic>.from(result);
         headAdded = true;
         totalMembers = totalMembers + 1;
+        final String name = (result['headName'] ?? '').toString();
+        final bool useDob = (result['useDob'] == true);
+        final String? dobIso = result['dob'] as String?;
+        String age = '';
+        if (useDob && dobIso != null && dobIso.isNotEmpty) {
+          final dob = DateTime.tryParse(dobIso);
+          age = dob != null ? (DateTime.now().year - dob.year).toString() : (result['approxAge'] ?? '').toString();
+        } else {
+          age = (result['approxAge'] ?? '').toString();
+        }
+        final String gender = (result['gender'] ?? '').toString();
+        final String father = (result['fatherName'] ?? '').toString();
+        final String spouse = (result['spouseName'] ?? '').toString();
+        final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
+            ? (int.tryParse(result['children'].toString()) ?? 0) > 0 
+                ? result['children'].toString() 
+                : '0'
+            : '0';
+
         _members.add({
           '#': '${_members.length + 1}',
           'Type': 'Adult',
-          'Name': result['Name'] ?? '',
-          'Age': result['Age'] ?? '',
-          'Gender': result['Gender'] ?? '',
-          'Relation': result['Relation'] ?? 'Self',
-          'Father': result['Father'] ?? '',
-          'Spouse': result['Spouse'] ?? '',
-          'Total Children': result['Total Children'] ?? '',
+          'Name': name,
+          'Age': age,
+          'Gender': gender,
+          'Relation': 'Self',
+          'Father': father,
+          'Spouse': spouse,
+          'Total Children': totalChildren,
         });
+
+        // Add spouse row if married and spouse details exist
+        final String maritalStatus = (result['maritalStatus'] ?? '').toString();
+        if (maritalStatus == 'Married' && spouse.isNotEmpty) {
+          final String spouseGender = (gender == 'Male')
+              ? 'Female'
+              : (gender == 'Female')
+                  ? 'Male'
+                  : '';
+          _members.add({
+            '#': '${_members.length + 1}',
+            'Type': 'Adult',
+            'Name': spouse,
+            'Age': '',
+            'Gender': spouseGender,
+            'Relation': 'Wife',
+            'Father': '',
+            'Spouse': name,
+            'Total Children': totalChildren,
+          });
+          totalMembers = totalMembers + 1;
+        }
       });
     }
   }
 
   Future<void> _openAddMember() async {
-    final result = await Navigator.of(context).push<Map<String, String>>(
-      MaterialPageRoute(builder: (_) => const AddNewFamilyMemberScreen()),
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        builder: (_) => AddNewFamilyMemberScreen(
+          headName: _headForm?['headName']?.toString(),
+          spouseName: _headForm?['spouseName']?.toString(),
+          headGender: _headForm?['gender']?.toString(),
+          headMobileNo: _headForm?['mobileNo']?.toString(),
+        ),
+      ),
     );
     if (result != null) {
       setState(() {
+        _memberForms.add(Map<String, dynamic>.from(result));
         totalMembers = totalMembers + 1;
+        final String type = (result['memberType'] ?? 'Adult').toString();
+        final String name = (result['name'] ?? '').toString();
+        final bool useDob = (result['useDob'] == true);
+        final String? dobIso = result['dob'] as String?;
+        String age = '';
+        if (useDob && dobIso != null && dobIso.isNotEmpty) {
+          final dob = DateTime.tryParse(dobIso);
+          age = dob != null ? (DateTime.now().year - dob.year).toString() : (result['approxAge'] ?? '').toString();
+        } else {
+          age = (result['approxAge'] ?? '').toString();
+        }
+        final String gender = (result['gender'] ?? '').toString();
+        final String relation = (result['relation'] ?? '').toString();
+        final String father = (result['fatherName'] ?? '').toString();
+        final String spouse = (result['spouseName'] ?? '').toString();
+        final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
+            ? (int.tryParse(result['children'].toString()) ?? 0) > 0 
+                ? result['children'].toString() 
+                : '0'
+            : '0';
+
         _members.add({
           '#': '${_members.length + 1}',
-          'Type': result['Type'] ?? 'Adult',
-          'Name': result['Name'] ?? '',
-          'Age': result['Age'] ?? '',
-          'Gender': result['Gender'] ?? '',
-          'Relation': result['Relation'] ?? '',
-          'Father': result['Father'] ?? '',
-          'Spouse': result['Spouse'] ?? '',
-          'Total Children': result['Total Children'] ?? '',
+          'Type': type,
+          'Name': name,
+          'Age': age,
+          'Gender': gender,
+          'Relation': relation,
+          'Father': father,
+          'Spouse': spouse,
+          'Total Children': totalChildren,
         });
       });
     }
@@ -315,6 +480,32 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           ),
         ),
         const SizedBox(height: 20),
+        Builder(builder: (_) {
+          final int childrenTarget = int.tryParse((_headForm?['children'] ?? '').toString()) ?? 0;
+          final int childrenAdded = _members.where((m) {
+            final t = (m['Type'] ?? '');
+            final r = (m['Relation'] ?? '');
+            return t == 'Child' || t == 'Infant' || r == 'Son' || r == 'Daughter';
+          }).length;
+          final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
+          if (childrenTarget <= 0) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.all( 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'No. of members remains to be added: ',
+                  style:  TextStyle(fontWeight: FontWeight.w600, color: AppColors.warning, fontSize: 16),
+                ),
+                Text(
+                  '$remaining ',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          );
+        }),
         if (headAdded) _buildMembersTable(),
         if (headAdded) const SizedBox(height: 16),
         if (!_hideAddMemberButton)
@@ -486,42 +677,67 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     );
   }
 
+  Future<bool?> showSuccessDialog(BuildContext context) {
+    final memberCount = _members.length + 1;
+    final l10n = AppLocalizations.of(context);
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Green checkmark circle
 
-  Widget _buildExpansionPanelList({
-    required List<String> titles,
-    required List<bool> opens,
-    required List<Widget> contents,
-  }) {
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: AppColors.transparent),
-      child: ExpansionPanelList(
-        elevation: 2,
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (index, isOpen) {
-          setState(() {
-            opens[index] = !isOpen;
-          });
-        },
-        children: List.generate(titles.length, (index) {
-          return ExpansionPanel(
-            canTapOnHeader: true,
-            isExpanded: opens[index],
-            headerBuilder: (context, isOpen) {
-              return ListTile(
-                title: Text(
-                  titles[index],
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+
+                const SizedBox(height: 8),
+                Text(
+                  l10n?.dataSavedSuccessfully ??
+                      'New house has been added successfully',
+                  textAlign: TextAlign.center,
+                  style:  TextStyle(
+                    fontSize: 18,
+                    color: AppColors.primary,
+                  ),
                 ),
-              );
-            },
-            body: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: contents[index],
+                const SizedBox(height: 12),
+                Text(
+                  l10n?.householdSavedSuccessfully(memberCount) ??
+                      '$memberCount household(s) saved successfully',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.tertiary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pushNamed(context, Route_Names.homeScreen),
+                      child:  Text(
+                        'OK',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          );
-        }),
-      ),
+          ),
+        );
+      },
     );
-  }
-
-}
+  }}

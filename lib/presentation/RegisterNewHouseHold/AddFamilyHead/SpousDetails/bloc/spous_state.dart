@@ -144,4 +144,35 @@ class SpousState extends Equatable {
         beneficiaryType,
         isPregnant,
       ];
+
+  Map<String, dynamic> toJson() {
+    return {
+      'relation': relation,
+      'memberName': memberName,
+      'ageAtMarriage': ageAtMarriage,
+      'RichIDChanged': RichIDChanged,
+      'spouseName': spouseName,
+      'fatherName': fatherName,
+      'useDob': useDob,
+      'dob': dob?.toIso8601String(),
+      'edd': edd?.toIso8601String(),
+      'lmp': lmp?.toIso8601String(),
+      'approxAge': approxAge,
+      'gender': gender,
+      'occupation': occupation,
+      'education': education,
+      'religion': religion,
+      'category': category,
+      'abhaAddress': abhaAddress,
+      'mobileOwner': mobileOwner,
+      'mobileNo': mobileNo,
+      'bankAcc': bankAcc,
+      'ifsc': ifsc,
+      'voterId': voterId,
+      'rationId': rationId,
+      'phId': phId,
+      'beneficiaryType': beneficiaryType,
+      'isPregnant': isPregnant,
+    };
+  }
 }

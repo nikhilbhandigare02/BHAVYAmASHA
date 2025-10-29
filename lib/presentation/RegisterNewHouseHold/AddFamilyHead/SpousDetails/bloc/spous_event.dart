@@ -182,3 +182,11 @@ class SpEDDChange extends SpousEvent {
   @override
   List<Object?> get props => [value];
 }
+
+/// Hydrate the spouse state in a single event
+class SpHydrate extends SpousEvent {
+  final SpousState value;
+  const SpHydrate(this.value);
+  @override
+  List<Object?> get props => [value];
+}

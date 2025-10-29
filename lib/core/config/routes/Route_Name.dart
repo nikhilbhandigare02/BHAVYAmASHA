@@ -49,4 +49,7 @@ class Route_Names{
   static const String HBYCChildCareForm = 'HBYCChildCareForm';
   static const String RegisterChildDueListFormScreen = 'RegisterChildDueListFormScreen';
   static const String previousVisit = 'previousVisit';
+  static const String FamliyUpdate = 'FamliyUpdate';
+  static const String EligibleCoupleList = 'EligibleCoupleList';
+  static const String PregnantWomenList = 'PregnantWomenList';
 }

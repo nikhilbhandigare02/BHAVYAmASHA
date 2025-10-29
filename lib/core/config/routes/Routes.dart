@@ -55,6 +55,9 @@ import '../../../presentation/Training/ReceivedTraining/RecievedTraining.dart' s
 import '../../../presentation/Training/Training_Form/TrainingForm.dart' show Trainingform;
 import '../../../presentation/Training/Training_Provided/ProvidedTraining.dart';
 import '../../../presentation/login/Login_Screen.dart';
+import '../../../presentation/myBeneficiary/Beneficiaries/EligibleCoupleList.dart' show EligibleCoupleList;
+import '../../../presentation/myBeneficiary/Beneficiaries/FamilyUpdateList.dart' show FamliyUpdate;
+import '../../../presentation/myBeneficiary/Beneficiaries/PregnantWomanList.dart' show PregnantWomenList;
 import 'Route_Name.dart' show Route_Names;
 
 class Routes{
@@ -156,6 +159,12 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const RegisterChildDueListFormScreen(),);
       case Route_Names.previousVisit:
         return MaterialPageRoute(builder: (context) => const PreviousVisitScreen(),);
+      case Route_Names.FamliyUpdate:
+        return MaterialPageRoute(builder: (context) => const FamliyUpdate(),);
+      case Route_Names.EligibleCoupleList:
+        return MaterialPageRoute(builder: (context) => const EligibleCoupleList(),);
+      case Route_Names.PregnantWomenList:
+        return MaterialPageRoute(builder: (context) => const PregnantWomenList(),);
       case Route_Names.addFamilyHead:
         return MaterialPageRoute(
           settings: setting,

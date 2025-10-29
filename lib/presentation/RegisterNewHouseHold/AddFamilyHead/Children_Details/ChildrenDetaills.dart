@@ -7,6 +7,7 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import 'bloc/children_bloc.dart';
+import '../HeadDetails/bloc/add_family_head_bloc.dart';
 
 class Childrendetaills extends StatefulWidget {
   const Childrendetaills({super.key});
@@ -64,13 +65,18 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    return BlocProvider(
-      create: (_) => ChildrenBloc(),
+    return BlocListener<ChildrenBloc, ChildrenState>(
+      listener: (context, state) {
+        // Push live children count to parent AddFamilyHeadBloc
+        try {
+          context.read<AddFamilyHeadBloc>().add(ChildrenChanged(state.totalLive.toString()));
+        } catch (_) {}
+      },
       child: BlocBuilder<ChildrenBloc, ChildrenState>(
         builder: (context, state) {
           return ListView(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-            children: [
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+              children: [
               _section(
                 _counterRow(
                   label: 'Total number of children born',
@@ -109,6 +115,14 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                   onPlus: () => context.read<ChildrenBloc>().add(ChIncrementFemale()),
                 ),
               ),
+              if (state.totalLive > 0 && (state.totalMale + state.totalFemale) != state.totalLive)
+                Padding(
+                  padding: const EdgeInsets.only(left: 0, top: 4, bottom: 8),
+                  child: Text(
+                    'Male + Female must equal Total number of live children',
+                    style: TextStyle(color: Colors.red.shade700, fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
               _section(

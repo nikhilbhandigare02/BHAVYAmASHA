@@ -12,6 +12,7 @@ import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/SpousDetails.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/bloc/spous_bloc.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/ChildrenDetaills.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/bloc/children_bloc.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/utils/enums.dart';
 import '../../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
@@ -50,6 +51,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           child: CustomTextField(
             labelText: '${l.houseNoLabel} *',
             hintText: l.houseNoHint,
+            initialValue: state.houseNo,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateHouseNo(v.trim())),
             validator: (value) => Validations.validateHouseNo(l, value),
           ),
@@ -60,6 +62,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           child: CustomTextField(
             labelText: '${l.nameOfFamilyHeadLabel} *',
             hintText: l.nameOfFamilyHeadHint,
+            initialValue: state.headName,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateHeadName(v.trim())),
             validator: (value) => Validations.validateFamilyHead(l, value),
           ),
@@ -70,6 +73,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           child: CustomTextField(
             labelText: l.fatherNameLabel,
             hintText: l.fatherNameLabel,
+            initialValue: state.fatherName,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateFatherName(v.trim())),
           ),
         ),
@@ -109,6 +113,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             child: CustomTextField(
               labelText: '${l.ageLabel} *',
               keyboardType: TextInputType.number,
+              initialValue: state.approxAge,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateApproxAge(v.trim())),
             ),
           ),
@@ -348,6 +353,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             labelText: '${l.mobileLabel} *',
             keyboardType: TextInputType.number,
             maxLength: 10,
+            initialValue: state.mobileNo,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileNo(v.trim())),
             validator: (value) => Validations.validateMobileNo(l, value),
             inputFormatters: [
@@ -492,6 +498,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               labelText: l.ageAtMarriageLabel,
               hintText: l.ageAtMarriageHint,
               keyboardType: TextInputType.number,
+              initialValue: state.ageAtMarriage,
               onChanged: (v) => context
                   .read<AddFamilyHeadBloc>()
                   .add(AfhUpdateAgeAtMarriage(v.trim())),
@@ -503,6 +510,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             child: CustomTextField(
               labelText: '${l.spouseNameLabel} *',
               hintText: l.spouseNameHint,
+              initialValue: state.spouseName,
               onChanged: (v) => context
                   .read<AddFamilyHeadBloc>()
                   .add(AfhUpdateSpouseName(v.trim())),
@@ -589,7 +597,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             ],
           ],
         ] else if (state.maritalStatus != null &&
-            ['Unmarried', 'Widowed', 'Separated', 'Divorced']
+            [ 'Widowed', 'Separated', 'Divorced']
                 .contains(state.maritalStatus)) ...[
           _Section(
             child: CustomTextField(
@@ -614,8 +622,57 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    return BlocProvider(
-      create: (_) => AddFamilyHeadBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AddFamilyHeadBloc>(create: (_) {
+          final b = AddFamilyHeadBloc();
+          final m = widget.initial;
+          if (m != null && m.isNotEmpty) {
+            DateTime? _parseDate(String? iso) => (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
+            b.add(
+              AfhHydrate(
+                AddFamilyHeadState(
+                  houseNo: m['houseNo'],
+                  headName: m['headName'],
+                  fatherName: m['fatherName'],
+                  AfhABHAChange: m['AfhABHAChange'],
+                  children: m['children'],
+                  useDob: m['useDob'] == 'true' || m['useDob'] == true,
+                  dob: _parseDate(m['dob'] as String?),
+                  edd: _parseDate(m['edd'] as String?),
+                  lmp: _parseDate(m['lmp'] as String?),
+                  approxAge: m['approxAge'],
+                  gender: m['gender'],
+                  occupation: m['occupation'],
+                  education: m['education'],
+                  religion: m['religion'],
+                  category: m['category'],
+                  mobileOwner: m['mobileOwner'],
+                  mobileNo: m['mobileNo'],
+                  village: m['village'],
+                  ward: m['ward'],
+                  mohalla: m['mohalla'],
+                  bankAcc: m['bankAcc'],
+                  ifsc: m['ifsc'],
+                  voterId: m['voterId'],
+                  rationId: m['rationId'],
+                  phId: m['phId'],
+                  beneficiaryType: m['beneficiaryType'],
+                  maritalStatus: m['maritalStatus'],
+                  ageAtMarriage: m['ageAtMarriage'],
+                  spouseName: m['spouseName'],
+                  AfhRichIdChange: m['AfhRichIdChange'],
+                  hasChildren: m['hasChildren'],
+                  isPregnant: m['isPregnant'],
+                ),
+              ),
+            );
+          }
+          return b;
+        }),
+        BlocProvider<SpousBloc>(create: (_) => SpousBloc()),
+        BlocProvider<ChildrenBloc>(create: (_) => ChildrenBloc()),
+      ],
       child: WillPopScope(
         onWillPop: () async {
           final shouldExit = await showConfirmationDialog(
@@ -636,18 +693,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               );
             }
             if (state.postApiStatus == PostApiStatus.success) {
-              final Map<String, String> result = {
-                'Name': (state.headName ?? '').toString(),
-                'Age': ((state.useDob && state.dob != null) ? _ageFromDob(state.dob!) : (state.approxAge ?? '')).toString(),
-                'Gender': (state.gender ?? '').toString(),
-                'Relation': 'Self',
-                'Father': (state.fatherName ?? '').toString(),
-                'Spouse': (state.spouseName ?? '').toString(),
-                'Total Children': state.hasChildren == 'Yes' ? '1+' : '0',
-                'Marital Status': (state.maritalStatus ?? '').toString(),
-                'Beneficiary Type': (state.beneficiaryType ?? '').toString(),
-                'Is Pregnant': (state.isPregnant ?? '').toString(),
-              };
+              final Map<String, dynamic> result = state.toJson();
+              // Attach spouse and children details JSON if available
+              try {
+                final sp = context.read<SpousBloc>().state;
+                result['spousedetails'] = sp.toJson();
+              } catch (_) {}
+              try {
+                final ch = context.read<ChildrenBloc>().state;
+                result['childrendetails'] = ch.toJson();
+              } catch (_) {}
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
                 if (widget.isEdit) {
@@ -655,15 +710,38 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     {
                       '#': '1',
                       'Type': 'Adult',
-                      'Name': result['Name'] ?? '',
-                      'Age': result['Age'] ?? '',
-                      'Gender': result['Gender'] ?? '',
-                      'Relation': result['Relation'] ?? 'Self',
-                      'Father': result['Father'] ?? '',
-                      'Spouse': result['Spouse'] ?? '',
-                      'Total Children': result['Total Children'] ?? '',
+                      'Name': (state.headName ?? '').toString(),
+                      'Age': ((state.useDob && state.dob != null) ? _ageFromDob(state.dob!) : (state.approxAge ?? '')).toString(),
+                      'Gender': (state.gender ?? '').toString(),
+                      'Relation': 'Self',
+                      'Father': (state.fatherName ?? '').toString(),
+                      'Spouse': (state.spouseName ?? '').toString(),
+                      'Total Children': (state.children != null && state.children!.isNotEmpty)
+                          ? state.children!
+                          : (state.hasChildren == 'Yes' ? '1+' : '0'),
                     }
                   ];
+                  // Add spouse row when available
+                  if ((state.maritalStatus == 'Married') && (state.spouseName != null) && state.spouseName!.isNotEmpty) {
+                    final spouseGender = (state.gender == 'Male')
+                        ? 'Female'
+                        : (state.gender == 'Female')
+                            ? 'Male'
+                            : '';
+                    members.add({
+                      '#': '2',
+                      'Type': 'Adult',
+                      'Name': state.spouseName!,
+                      'Age': '',
+                      'Gender': spouseGender,
+                      'Relation': 'Wife',
+                      'Father': '',
+                      'Spouse': (state.headName ?? '').toString(),
+                      'Total Children': (state.children != null && state.children!.isNotEmpty)
+                          ? state.children!
+                          : (state.hasChildren == 'Yes' ? '1+' : '0'),
+                    });
+                  }
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (_) => RegisterNewHouseHoldScreen(
@@ -674,7 +752,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     ),
                   );
                 } else {
-                  Navigator.of(context).pop<Map<String, String>>(result);
+                  Navigator.of(context).pop<Map<String, dynamic>>(result);
                 }
               });
             }
@@ -711,19 +789,19 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                         final showChildren = showSpouse && state.hasChildren == 'Yes';
 
                         if (showSpouse) {
-                          tabs.add(const Tab(text: 'SPOUSE DETAILS'));
-                          views.add(Spousdetails(
-                            key: ValueKey(state.gender ?? 'none'),
-                            initial: SpousState(
+                          final spBloc = context.read<SpousBloc>();
+                          if (spBloc.state.relation == null) {
+                            final g = (state.gender == 'Male')
+                                ? 'Female'
+                                : (state.gender == 'Female')
+                                    ? 'Male'
+                                    : null;
+                            spBloc.add(SpHydrate(SpousState(
                               relation: 'Spouse',
                               memberName: state.spouseName,
                               ageAtMarriage: state.ageAtMarriage,
                               spouseName: state.headName,
-                              gender: (state.gender == 'Male')
-                                  ? 'Female'
-                                  : (state.gender == 'Female')
-                                      ? 'Male'
-                                      : null,
+                              gender: g,
                               religion: state.religion,
                               category: state.category,
                               abhaAddress: state.AfhABHAChange,
@@ -734,10 +812,40 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                               phId: state.phId,
                               beneficiaryType: state.beneficiaryType,
                               RichIDChanged: state.AfhRichIdChange,
+                            )));
+                          } else {
+                            final current = spBloc.state;
+                            final headName = state.headName?.trim();
+                            final spouseName = state.spouseName?.trim();
+                            if ((current.memberName == null || current.memberName!.isEmpty) && (spouseName != null && spouseName.isNotEmpty)) {
+                              spBloc.add(SpUpdateMemberName(spouseName));
+                            }
+                            if ((current.spouseName == null || current.spouseName!.isEmpty) && (headName != null && headName.isNotEmpty)) {
+                              spBloc.add(SpUpdateSpouseName(headName));
+                            }
+                          }
+                          tabs.add(const Tab(text: 'SPOUSE DETAILS'));
+                          views.add(
+                            BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
+                              listenWhen: (prev, curr) => prev.headName != curr.headName || prev.spouseName != curr.spouseName,
+                              listener: (ctx, st) {
+                                final spBloc = ctx.read<SpousBloc>();
+                                final memberName = st.spouseName?.trim();
+                                final spouseName = st.headName?.trim();
+                                if (memberName != null && memberName.isNotEmpty) {
+                                  spBloc.add(SpUpdateMemberName(memberName));
+                                }
+                                if (spouseName != null && spouseName.isNotEmpty) {
+                                  spBloc.add(SpUpdateSpouseName(spouseName));
+                                }
+                              },
+                              child: Spousdetails(
+                                key: ValueKey(state.gender ?? 'none'),
+                                headMobileOwner: state.mobileOwner,
+                                headMobileNo: state.mobileNo,
+                              ),
                             ),
-                            headMobileOwner: state.mobileOwner,
-                            headMobileNo: state.mobileNo,
-                          ));
+                          );
                         }
                         if (showChildren) {
                           tabs.add(const Tab(text: 'CHILDREN DETAILS'));

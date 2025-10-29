@@ -8,6 +8,7 @@ part 'add_family_head_state.dart';
 
 class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
   AddFamilyHeadBloc() : super(const AddFamilyHeadState()) {
+    on<AfhHydrate>((event, emit) => emit(event.value));
     on<AfhToggleUseDob>((event, emit) {
       emit(state.copyWith(useDob: !state.useDob));
     });

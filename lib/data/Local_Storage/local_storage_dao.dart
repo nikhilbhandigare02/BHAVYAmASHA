@@ -170,4 +170,37 @@ class LocalStorageDao {
     };
     return db.insert('followup_form_data', row);
   }
+
+  Future<List<Map<String, dynamic>>> getAllHouseholds() async {
+    final db = await _db;
+    final rows = await db.query('households', orderBy: 'created_date_time DESC');
+    return rows.map((row) {
+      final mapped = Map<String, dynamic>.from(row);
+      try {
+        final v = mapped['household_info'];
+        if (v is String && v.isNotEmpty) mapped['household_info'] = jsonDecode(v);
+      } catch (_) {}
+      try {
+        final v = mapped['address'];
+        if (v is String && v.isNotEmpty) mapped['address'] = jsonDecode(v);
+      } catch (_) {}
+      try {
+        final v = mapped['geo_location'];
+        if (v is String && v.isNotEmpty) mapped['geo_location'] = jsonDecode(v);
+      } catch (_) {}
+      try {
+        final v = mapped['device_details'];
+        if (v is String && v.isNotEmpty) mapped['device_details'] = jsonDecode(v);
+      } catch (_) {}
+      try {
+        final v = mapped['app_details'];
+        if (v is String && v.isNotEmpty) mapped['app_details'] = jsonDecode(v);
+      } catch (_) {}
+      try {
+        final v = mapped['parent_user'];
+        if (v is String && v.isNotEmpty) mapped['parent_user'] = jsonDecode(v);
+      } catch (_) {}
+      return mapped;
+    }).toList();
+  }
 }

@@ -965,6 +965,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get elecGenerator => 'Generator';
 
   @override
+  String householdSavedSuccessfully(Object count) {
+    return 'Total beneficiaries: $count';
+  }
+
+  @override
+  String get dataSavedSuccessfully => 'New house has been added successfully';
+
+  @override
+  String get closeButton => 'CLOSE';
+
+  @override
+  String get ok => 'OK';
+
+  @override
   String get elecKeroseneLamp => 'Kerosene Lamp';
 
   @override

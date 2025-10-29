@@ -3,6 +3,8 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 
+import '../../core/config/routes/Route_Name.dart';
+
 class Mybeneficiaries extends StatefulWidget {
   const Mybeneficiaries({super.key});
 
@@ -80,11 +82,45 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
           return _BeneficiaryTile(
             data: item,
             onTap: () {
-              // Navigator.pushNamed(context, routeName)
+              switch (index) {
+                case 0:
+                  Navigator.pushNamed(context, Route_Names.FamliyUpdate);
+                  break;
+                case 1:
+                  Navigator.pushNamed(context, Route_Names.EligibleCoupleList);
+                  break;
+                case 2:
+                  Navigator.pushNamed(context, Route_Names.PregnantWomenList);
+                  break;
+                // case 3:
+                //   Navigator.pushNamed(context, Route_Names.PregnancyOutcome);
+                //   break;
+                // case 4:
+                //   Navigator.pushNamed(context, Route_Names.HBNCList);
+                //   break;
+                // case 5:
+                //   Navigator.pushNamed(context, Route_Names.LBWReferred);
+                //   break;
+                // case 6:
+                //   Navigator.pushNamed(context, Route_Names.AbortionList);
+                //   break;
+                // case 7:
+                //   Navigator.pushNamed(context, Route_Names.DeathRegister);
+                //   break;
+                // case 8:
+                //   Navigator.pushNamed(context, Route_Names.MigratedOut);
+                //   break;
+                // case 9:
+                //   Navigator.pushNamed(context, Route_Names.GuestBeneficiaryList);
+                //   break;
+                default:
+                  break;
+              }
             },
           );
         },
       ),
+
     );
   }
 

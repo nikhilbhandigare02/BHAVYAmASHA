@@ -1991,6 +1991,30 @@ abstract class AppLocalizations {
   /// **'Generator'**
   String get elecGenerator;
 
+  /// No description provided for @householdSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Total beneficiaries: {count}'**
+  String householdSavedSuccessfully(Object count);
+
+  /// No description provided for @dataSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'New house has been added successfully'**
+  String get dataSavedSuccessfully;
+
+  /// No description provided for @closeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'CLOSE'**
+  String get closeButton;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
   /// No description provided for @elecKeroseneLamp.
   ///
   /// In en, this message translates to:

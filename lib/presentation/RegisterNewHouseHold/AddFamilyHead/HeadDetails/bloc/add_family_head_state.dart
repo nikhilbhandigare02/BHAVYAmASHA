@@ -186,4 +186,43 @@ class AddFamilyHeadState extends Equatable {
     postApiStatus,
     errorMessage,
   ];
+
+  Map<String, dynamic> toJson() {
+    return {
+      'houseNo': houseNo,
+      'headName': headName,
+      'children': children,
+      'fatherName': fatherName,
+      'AfhABHAChange': AfhABHAChange,
+      'useDob': useDob,
+      'dob': dob?.toIso8601String(),
+      'edd': edd?.toIso8601String(),
+      'lmp': lmp?.toIso8601String(),
+      'approxAge': approxAge,
+      'gender': gender,
+      'occupation': occupation,
+      'education': education,
+      'religion': religion,
+      'category': category,
+      'mobileOwner': mobileOwner,
+      'mobileNo': mobileNo,
+      'village': village,
+      'ward': ward,
+      'mohalla': mohalla,
+      'bankAcc': bankAcc,
+      'ifsc': ifsc,
+      'voterId': voterId,
+      'rationId': rationId,
+      'phId': phId,
+      'beneficiaryType': beneficiaryType,
+      'maritalStatus': maritalStatus,
+      'ageAtMarriage': ageAtMarriage,
+      'spouseName': spouseName,
+      'AfhRichIdChange': AfhRichIdChange,
+      'hasChildren': hasChildren,
+      'isPregnant': isPregnant,
+      'postApiStatus': postApiStatus.toString(),
+      'errorMessage': errorMessage,
+    };
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -19,67 +20,13 @@ class AllhouseholdScreen extends StatefulWidget {
 
 class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'houseNo': 'ga',
-      'name': 'va',
-      'mobile': '9923175398',
-      'totalMembers': 1,
-      'eligibleCouples': 0,
-      'pregnantWomen': 0,
-      'elderly': 0,
-      'child0to1': 0,
-      'child1to2': 0,
-      'child2to5': 0,
-    },
-    {
-      'hhId': '51016102919',
-      'houseNo': 'gaa',
-      'name': 'hs',
-      'mobile': '7620593001',
-      'totalMembers': 1,
-      'eligibleCouples': 0,
-      'pregnantWomen': 0,
-      'elderly': 0,
-      'child0to1': 0,
-      'child1to2': 0,
-      'child2to5': 0,
-    },
-    {
-      'hhId': '51014184212',
-      'houseNo': 'A006',
-      'name': 'Shrikant jadhav',
-      'mobile': '9657908015',
-      'totalMembers': 3,
-      'eligibleCouples': 1,
-      'pregnantWomen': 0,
-      'elderly': 0,
-      'child0to1': 0,
-      'child1to2': 0,
-      'child2to5': 0,
-    },
-    {
-      'hhId': '51014110459',
-      'houseNo': 'A003',
-      'name': 'Shrikant patil',
-      'mobile': '7620593002',
-      'totalMembers': 2,
-      'eligibleCouples': 1,
-      'pregnantWomen': 1,
-      'elderly': 0,
-      'child0to1': 0,
-      'child1to2': 0,
-      'child2to5': 0,
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  List<Map<String, dynamic>> _items = [];
+  List<Map<String, dynamic>> _filtered = [];
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _loadData();
     _searchCtrl.addListener(_onSearchChanged);
   }
 
@@ -94,15 +41,87 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _filtered = List<Map<String, dynamic>>.from(_items);
       } else {
-        _filtered = _staticHouseholds.where((e) {
+        _filtered = _items.where((e) {
           return (e['hhId'] as String).toLowerCase().contains(q) ||
               (e['houseNo'] as String).toLowerCase().contains(q) ||
               (e['name'] as String).toLowerCase().contains(q) ||
               (e['mobile'] as String).toLowerCase().contains(q);
         }).toList();
       }
+    });
+  }
+
+  Future<void> _loadData() async {
+    final rows = await LocalStorageDao.instance.getAllHouseholds();
+    final mapped = rows.map<Map<String, dynamic>>((r) {
+      final info = Map<String, dynamic>.from((r['household_info'] as Map?) ?? const {});
+      final head = Map<String, dynamic>.from((info['headdetails'] as Map?) ?? const {});
+      final spouse = Map<String, dynamic>.from((info['spousedetails'] as Map?) ?? const {});
+      final List<dynamic> membersRaw = (info['memberdetails'] as List?) ?? const <dynamic>[];
+      final List<Map<String, dynamic>> members = membersRaw
+          .whereType<Map>()
+          .map<Map<String, dynamic>>((m) => Map<String, dynamic>.from(m))
+          .toList();
+
+      final String hhId = (r['unique_key'] ?? r['id']?.toString() ?? '').toString();
+      final String houseNo = (head['houseNo'] ?? '').toString();
+      final String name = (head['headName'] ?? '').toString();
+      final String mobile = (head['mobileNo'] ?? '').toString();
+      final int totalMembers = 1 + members.length + (spouse.isNotEmpty ? 1 : 0);
+
+      final String headMarital = (head['maritalStatus'] ?? '').toString();
+      final int eligibleCouples = headMarital == 'Married' ? (totalMembers - 1).clamp(0, totalMembers) : 0;
+
+      int preg = 0;
+      final List<Map<String, dynamic>> all = [head, if (spouse.isNotEmpty) spouse, ...members];
+      for (final m in all) {
+        final v = m['isPregnant'];
+        if (v == 1 || v == 'Yes' || v == true) { preg = 1; break; }
+      }
+
+      int elderly = 0;
+      int child0to1 = 0;
+      int child1to2 = 0;
+      int child2to5 = 0;
+      for (final m in all) {
+        int? ageYears;
+        final String? dobIso = m['dob'] as String?;
+        if (dobIso != null && dobIso.isNotEmpty) {
+          final dob = DateTime.tryParse(dobIso);
+          if (dob != null) {
+            final now = DateTime.now();
+            ageYears = now.year - dob.year - ((now.month < dob.month || (now.month == dob.month && now.day < dob.day)) ? 1 : 0);
+            final ageMonths = (now.year - dob.year) * 12 + (now.month - dob.month) - (now.day < dob.day ? 1 : 0);
+            if (ageMonths <= 12) child0to1++;
+            else if (ageMonths <= 24) child1to2++;
+            else if (ageMonths <= 60) child2to5++;
+          }
+        }
+        ageYears ??= int.tryParse((m['approxAge'] ?? '').toString());
+        if (ageYears != null && ageYears >= 65) elderly++;
+      }
+
+      return {
+        'hhId': hhId,
+        'houseNo': houseNo,
+        'name': name,
+        'mobile': mobile,
+        'totalMembers': totalMembers,
+        'eligibleCouples': eligibleCouples,
+        'pregnantWomen': preg,
+        'elderly': elderly,
+        'child0to1': child0to1,
+        'child1to2': child1to2,
+        'child2to5': child2to5,
+        '_raw': r,
+      };
+    }).toList();
+
+    setState(() {
+      _items = mapped;
+      _filtered = List<Map<String, dynamic>>.from(_items);
     });
   }
 
@@ -146,14 +165,21 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           ),
 
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
+            child: _filtered.isEmpty
+                ? Center(
+                    child: Text(
+                      ( 'No data found'),
+                      style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    itemCount: _filtered.length,
+                    itemBuilder: (context, index) {
+                      final data = _filtered[index];
+                      return _householdCard(context, data);
+                    },
+                  ),
           ),
 
           SafeArea(

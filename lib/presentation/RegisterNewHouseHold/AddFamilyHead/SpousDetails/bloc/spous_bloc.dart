@@ -7,6 +7,7 @@ part 'spous_state.dart';
 
 class SpousBloc extends Bloc<SpousEvent, SpousState> {
   SpousBloc({SpousState? initial}) : super(initial ?? const SpousState()) {
+    on<SpHydrate>((event, emit) => emit(event.value));
     on<SpToggleUseDob>((event, emit) => emit(state.copyWith(useDob: !state.useDob)));
 
     on<SpUpdateRelation>((event, emit) => emit(state.copyWith(relation: event.value)));

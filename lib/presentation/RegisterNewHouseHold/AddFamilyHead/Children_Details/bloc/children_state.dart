@@ -49,4 +49,16 @@ class ChildrenState extends Equatable {
         ageUnit,
         youngestGender,
       ];
+
+  Map<String, dynamic> toJson() {
+    return {
+      'totalBorn': totalBorn,
+      'totalLive': totalLive,
+      'totalMale': totalMale,
+      'totalFemale': totalFemale,
+      'youngestAge': youngestAge,
+      'ageUnit': ageUnit,
+      'youngestGender': youngestGender,
+    };
+  }
 }

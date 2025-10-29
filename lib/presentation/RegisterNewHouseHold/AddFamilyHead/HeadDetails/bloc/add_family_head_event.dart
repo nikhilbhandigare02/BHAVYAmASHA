@@ -155,3 +155,8 @@ final class AfhUpdateIsPregnant extends AddFamilyHeadEvent {
 }
 
 final class AfhSubmit extends AddFamilyHeadEvent {}
+
+final class AfhHydrate extends AddFamilyHeadEvent {
+  final AddFamilyHeadState value;
+  AfhHydrate(this.value);
+}

@@ -7,6 +7,7 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/utils/Validations.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
 import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import 'bloc/spous_bloc.dart';
@@ -21,21 +22,62 @@ class Spousdetails extends StatefulWidget {
   State<Spousdetails> createState() => _SpousdetailsState();
 }
 
-class _SpousdetailsState extends State<Spousdetails> {
+class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClientMixin {
   final _formKey = GlobalKey<FormState>();
 
   Widget _section(Widget child) => child;
 
   @override
+  void initState() {
+    super.initState();
+    // Prefill once on first mount using current AddHead state to avoid first-time partial sync.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final head = context.read<AddFamilyHeadBloc>().state;
+      final spBloc = context.read<SpousBloc>();
+      final curr = spBloc.state;
+      final memberName = head.spouseName?.trim();
+      final spouseName = head.headName?.trim();
+      final currMember = curr.memberName ?? '';
+      if (memberName != null && memberName.isNotEmpty &&
+          (currMember.isEmpty || (memberName.length > currMember.length && memberName.startsWith(currMember)))) {
+        spBloc.add(SpUpdateMemberName(memberName));
+      }
+      final currSpouse = curr.spouseName ?? '';
+      if (spouseName != null && spouseName.isNotEmpty &&
+          (currSpouse.isEmpty || (spouseName.length > currSpouse.length && spouseName.startsWith(currSpouse)))) {
+        spBloc.add(SpUpdateSpouseName(spouseName));
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l = AppLocalizations.of(context)!;
-    return BlocProvider(
-      create: (_) => SpousBloc(initial: widget.initial),
+    return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
+      listenWhen: (prev, curr) => prev.headName != curr.headName || prev.spouseName != curr.spouseName,
+      listener: (ctx, st) {
+        final spBloc = ctx.read<SpousBloc>();
+        final curr = spBloc.state;
+        final memberName = st.spouseName?.trim();
+        final spouseName = st.headName?.trim();
+        final currMember = curr.memberName ?? '';
+        if (memberName != null && memberName.isNotEmpty &&
+            (currMember.isEmpty || (memberName.length > currMember.length && memberName.startsWith(currMember)))) {
+          spBloc.add(SpUpdateMemberName(memberName));
+        }
+        final currSpouse = curr.spouseName ?? '';
+        if (spouseName != null && spouseName.isNotEmpty &&
+            (currSpouse.isEmpty || (spouseName.length > currSpouse.length && spouseName.startsWith(currSpouse)))) {
+          spBloc.add(SpUpdateSpouseName(spouseName));
+        }
+      },
       child: Form(
         key: _formKey,
         child: BlocBuilder<SpousBloc, SpousState>(
-          builder: (context, state) {
-            return ListView(
+        builder: (context, state) {
+          return ListView(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
               children: [
                 _section(
@@ -54,6 +96,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                     labelText: 'Name of member *',
                     hintText: 'Name of member',
                     initialValue: state.memberName,
+                    readOnly: false,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMemberName(v.trim())),
                     validator: (value) => Validations.validateNameofMember(l, value),
                   ),
@@ -76,6 +119,7 @@ class _SpousdetailsState extends State<Spousdetails> {
                     labelText: 'Spouse Name *',
                     hintText: 'Spouse Name',
                     initialValue: state.spouseName,
+                    readOnly: false,
                     validator: (value) => Validations.validateSpousName(l, value),
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
                   ),
@@ -381,7 +425,8 @@ class _SpousdetailsState extends State<Spousdetails> {
 
                 _section(
                   CustomTextField(
-                    key: ValueKey('spouse_mobile_${state.mobileNo ?? ''}'),
+                    key: ValueKey('spouse_mobile_${state.mobileNo ?? ''}')
+,
                     labelText: '${l.mobileLabel} *',
                     keyboardType: TextInputType.number,
                     maxLength: 10,
@@ -392,7 +437,6 @@ class _SpousdetailsState extends State<Spousdetails> {
                       final headOwner = widget.headMobileOwner;
                       final headNo = widget.headMobileNo?.trim();
 
-                      // If owner not chosen, leave this to the owner dropdown validator.
                       if (owner == null || owner.isEmpty) {
                         return Validations.validateMobileNo(l, value);
                       }
@@ -532,9 +576,11 @@ class _SpousdetailsState extends State<Spousdetails> {
                 ],
               ],
             );
-          },
-        ),
+        },
       ),
-    );
+    ));
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

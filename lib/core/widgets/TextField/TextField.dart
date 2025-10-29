@@ -40,11 +40,38 @@ class CustomTextField extends StatefulWidget {
 
 class _CustomTextFieldState extends State<CustomTextField> {
   bool _isObscure = true;
+  TextEditingController? _controller;
 
   @override
   void initState() {
     super.initState();
     _isObscure = widget.obscureText;
+    _controller = TextEditingController(text: widget.initialValue ?? '');
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _controller ??= TextEditingController();
+    final newText = widget.initialValue ?? '';
+    final oldInit = oldWidget.initialValue ?? '';
+    final currText = _controller!.text;
+    final shouldUpdate =
+        // update if text is currently empty
+        currText.isEmpty ||
+        // or if it still matches the old initialValue (user hasn't edited)
+        currText == oldInit ||
+        // or if upstream is progressively providing a longer value (prefill flow)
+        (newText.length >= currText.length && newText.startsWith(currText));
+    if (shouldUpdate && currText != newText) {
+      _controller!.text = newText;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
   }
 
   @override
@@ -55,7 +82,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
     );
 
     return TextFormField(
-      initialValue: widget.initialValue,
+      controller: _controller,
+      // initialValue must be null when controller is provided
+      initialValue: null,
       onChanged: widget.onChanged,
       obscureText: widget.obscureText ? _isObscure : false,
       keyboardType: widget.keyboardType,
