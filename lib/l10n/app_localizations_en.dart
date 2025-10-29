@@ -1159,7 +1159,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gridChildCare => 'Child Care';
 
   @override
-  String get gridEligibleCouple => 'Eligible Couple';
+  String get gridEligibleCouple => 'Number Of Eligible Couple Identified';
 
   @override
   String get gridHighRisk => 'High-Risk';

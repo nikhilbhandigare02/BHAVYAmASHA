@@ -101,7 +101,7 @@ class _FeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
 
-    return InkWell( // ✅ makes the entire card clickable
+    return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(8),
       child: Container(

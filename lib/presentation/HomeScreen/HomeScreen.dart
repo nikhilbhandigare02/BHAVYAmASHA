@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppHeader(
         screenTitle: l10n.homeTitle,
         showBack: false,
@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
         icon3: Icons.home,
         onIcon3Tap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) =>   HomeScreen()),
         ),
       ),
       drawer: CustomDrawer(),
@@ -94,17 +94,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Icon(
                                 Icons.calendar_month_outlined,
-                                color: selectedIndex == 0
-                                    ? AppColors.primary
-                                    : AppColors.onSurface,
+                                color:AppColors.primary,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 l10n.tabTodaysProgram,
                                 style: TextStyle(
+
                                   color: selectedIndex == 0
                                       ? AppColors.primary
-                                      : AppColors.onSurface,
+                                      : AppColors.outline,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -135,9 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Icon(
                                 Icons.apps_sharp,
-                                color: selectedIndex == 1
-                                    ? AppColors.primary
-                                    : AppColors.onSurface,
+                                color: AppColors.primary
+
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -145,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: TextStyle(
                                   color: selectedIndex == 1
                                       ? AppColors.primary
-                                      : AppColors.onSurface,
+                                      : AppColors.outline,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -165,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 30),
 
           Expanded(
             child: selectedIndex == 0
@@ -187,6 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+
         ],
       ),
     );

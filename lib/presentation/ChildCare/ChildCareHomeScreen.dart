@@ -16,6 +16,9 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final cardWidth = (MediaQuery.of(context).size.width - 48) / 3;
+    const cardHeight = 120.0;
+
     return Scaffold(
       appBar: AppHeader(
         screenTitle: l10n?.gridChildCare ?? 'Child Care',
@@ -29,74 +32,86 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
           child: Column(
             children: [
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _FeatureCard(
-                      title: l10n?.childRegisteredBeneficiaryListTitle ?? 'Registered Child\nBeneficiary list',
-                      count: 0,
-                      image: 'assets/images/toddler.png',
-                      onClick: () {
-                        Navigator.pushNamed(context, Route_Names.RegisterChildScreen);
-                      },
-                    ),
+                  _FeatureCard(
+                    width: cardWidth,
+                    height: cardHeight,
+                    title: l10n?.childRegisteredBeneficiaryListTitle ??
+                        'Registered Child\nBeneficiary list',
+                    count: 0,
+                    image: 'assets/images/toddler.png',
+                    onClick: () {
+                      Navigator.pushNamed(context, Route_Names.RegisterChildScreen);
+                    },
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: _FeatureCard(
-                      title: l10n?.childRegisteredDueListTitle ?? 'Child Registered\nDue List',
-                      count: 0,
-                      image: 'assets/images/family.png',
-                      onClick: () {
-                        Navigator.pushNamed(context, Route_Names.RegisterChildDueList);
-
-                      },
-                    ),
+                  _FeatureCard(
+                    width: cardWidth,
+                    height: cardHeight,
+                    title: l10n?.childRegisteredDueListTitle ??
+                        'Child Registered\nDue List',
+                    count: 0,
+                    image: 'assets/images/family.png',
+                    onClick: () {
+                      Navigator.pushNamed(context, Route_Names.RegisterChildDueList);
+                    },
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: _FeatureCard(
-                      title: l10n?.childTrackingDueListTitle ?? 'Child Tracking\nDue List',
-                      count: 0,
-                      image: 'assets/images/notes.png',
-                      onClick: () {
-                        Navigator.pushNamed(context, Route_Names.CHildTrackingDueList);
-
-                      },
-                    ),
+                  _FeatureCard(
+                    width: cardWidth,
+                    height: cardHeight,
+                    title: l10n?.childTrackingDueListTitle ??
+                        'Child Tracking\nDue List',
+                    count: 0,
+                    image: 'assets/images/notes.png',
+                    onClick: () {
+                      Navigator.pushNamed(context, Route_Names.CHildTrackingDueList);
+                    },
                   ),
                 ],
               ),
-              SizedBox(height: 12,),
-              Row(
-                children: [
-                  Expanded(
-                    child: _FeatureCard(
-                      title: l10n?.hbycListTitle ?? 'HBYC List',
-                      count: 0,
-                      image: 'assets/images/pnc-mother.png',
-                       onClick: () {
-                         Navigator.pushNamed(context, Route_Names.HBYCList);
 
-                       },
-                    ),
+              const SizedBox(height: 12),
+
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _FeatureCard(
+                    width: cardWidth,
+                    height: cardHeight,
+                    title: l10n?.hbycListTitle ?? 'HBYC List',
+                    count: 0,
+                    image: 'assets/images/pnc-mother.png',
+                    onClick: () {
+                      Navigator.pushNamed(context, Route_Names.HBYCList);
+                    },
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: _FeatureCard(
-                      title: l10n?.deceasedChildTitle ?? 'Deceased Child',
-                      count: 0,
-                      image: 'assets/images/death2.png',
-                      onClick: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n?.deceasedChildSnack ?? 'Deceased Child')),
-                        );
-                      },
-                    ),
+                  _FeatureCard(
+                    width: cardWidth,
+                    height: cardHeight,
+                    title: l10n?.deceasedChildTitle ?? 'Deceased Child',
+                    count: 0,
+                    image: 'assets/images/death2.png',
+                    onClick: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            l10n?.deceasedChildSnack ?? 'Deceased Child',
+                          ),
+                        ),
+                      );
+                    },
                   ),
+                  const SizedBox(width: 12),
+                  // ✅ Empty placeholder to keep alignment of 3 cards
+                  SizedBox(width: cardWidth, height: cardHeight),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -110,23 +125,28 @@ class _FeatureCard extends StatelessWidget {
   final int count;
   final String image;
   final VoidCallback onClick;
+  final double width;
+  final double height;
 
   const _FeatureCard({
     required this.title,
     required this.count,
     required this.image,
     required this.onClick,
+    required this.width,
+    required this.height,
   });
 
   @override
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
 
-    return InkWell( // ✅ makes the entire card clickable
+    return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        height: 100,
+        width: width,
+        height: height,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
@@ -161,12 +181,12 @@ class _FeatureCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+          SizedBox(height: 10),
             Text(
               title,
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: AppColors.outline,
                 fontSize: 12,
               ),
             ),

@@ -36,15 +36,16 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(80);
+  Size get preferredSize => const Size.fromHeight(100);
 
   @override
   Widget build(BuildContext context) {
     return Container(
+
       height: preferredSize.height,
       color: Theme.of(context).colorScheme.primary,
       child: Padding(
-        padding: const EdgeInsets.only(top: 22.0),
+        padding: const EdgeInsets.only(top: 40.0),
         child: Row(
           children: [
             showBack
