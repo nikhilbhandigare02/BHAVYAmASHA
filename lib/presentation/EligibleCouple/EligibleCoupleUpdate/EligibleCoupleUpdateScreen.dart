@@ -102,12 +102,12 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                           onChanged: (v) => bloc.add(RchIdChanged(v)),
                           keyboardType: TextInputType.number,
                         ),
-                        Divider(color: AppColors.divider, thickness: 0.5, height: 0,),
-                        CustomDatePicker(
-                          labelText: t?.registrationDateLabel ?? 'Registration Date',
-                          initialDate: state.registrationDate,
-                          onDateChanged: (d) => bloc.add(RegistrationDateChanged(d)),
-                        ),
+                        // Divider(color: AppColors.divider, thickness: 0.5, height: 0,),
+                        // CustomDatePicker(
+                        //   labelText: t?.registrationDateLabel ?? 'Registration Date',
+                        //   initialDate: state.registrationDate,
+                        //   onDateChanged: (d) => bloc.add(RegistrationDateChanged(d)),
+                        // ),
                         Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                         CustomTextField(
                           labelText: (t?.nameOfWomanLabel ?? 'Name of woman') + ' *',
