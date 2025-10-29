@@ -12,6 +12,7 @@ class AppColors {
   static const Color primaryContainer = Color(0xFFEADDFF);
   static const Color onPrimaryContainer = Color(0xFF21005D);
 
+
   // Secondary / Accent
   static const Color secondary = Color(0xFF625B71);
   static const Color onSecondary = Colors.white;
@@ -49,7 +50,9 @@ class AppColors {
   static const Color success = Color(0xFF2E7D32);
   static const Color warning = Color(0xFFF57C00);
   static const Color info = Color(0xFF0288D1);
-  static const Color green = Color(0xFF28A745); // Brand green
+  static const Color green = Color(0xFF28A745);
+  static const Color blue = Color(0xFF2196F3);
+
   static const Color onGreen = Colors.white;
   static const Color greenContainer = Color(0xFFDFF5E1);
   static const Color onGreenContainer = Color(0xFF1E4620);

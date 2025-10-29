@@ -3,7 +3,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 
 import '../../l10n/app_localizations.dart';
 
-class TodayProgramSection extends StatelessWidget {
+class TodayProgramSection extends StatefulWidget {
   final int? selectedGridIndex;
   final Function(int) onGridTap;
   final Map<String, List<String>> apiData;
@@ -16,22 +16,35 @@ class TodayProgramSection extends StatelessWidget {
   });
 
   @override
+  State<TodayProgramSection> createState() => _TodayProgramSectionState();
+}
+
+class _TodayProgramSectionState extends State<TodayProgramSection> {
+  String? _expandedKey;
+
+  bool _isExpanded(String key) {
+    return _expandedKey == key;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
     return Column(
+      spacing: 5,
       children: [
         // Grid Boxes
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             children: [
-              // Grid Box 1
               Expanded(
                 child: InkWell(
-                  onTap: () => onGridTap(0),
+                  onTap: () => widget.onGridTap(0),
                   child: Card(
                     elevation: 3,
-                    color: selectedGridIndex == 0 ? AppColors.primary : AppColors.surface,
+                    color: widget.selectedGridIndex == 0 ? AppColors.primary : AppColors.surface,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -56,18 +69,12 @@ class TodayProgramSection extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: selectedGridIndex == 0 ? AppColors.surface : AppColors.surfaceVariant,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  "0", // Count value
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: selectedGridIndex == 0 ? AppColors.primary : AppColors.onSurface,
-                                  ),
+                              Text(
+                                "0",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: widget.selectedGridIndex == 0 ? AppColors.onPrimary : AppColors.onSurface,
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
@@ -77,8 +84,8 @@ class TodayProgramSection extends StatelessWidget {
                             l10n.toDoVisits,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: selectedGridIndex == 0 ? AppColors.onPrimary : AppColors.onSurface,
+                              fontSize: 15,
+                              color: widget.selectedGridIndex == 0 ? AppColors.onPrimary : AppColors.outline,
                             ),
                           ),
                         ],
@@ -91,10 +98,10 @@ class TodayProgramSection extends StatelessWidget {
               // Grid Box 2
               Expanded(
                 child: InkWell(
-                  onTap: () => onGridTap(1),
+                  onTap: () => widget.onGridTap(1),
                   child: Card(
                     elevation: 3,
-                    color: selectedGridIndex == 1 ? AppColors.primary : AppColors.surface,
+                    color: widget.selectedGridIndex == 1 ? AppColors.primary : AppColors.surface,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -120,18 +127,12 @@ class TodayProgramSection extends StatelessWidget {
                                 ),
                               ),
 
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: selectedGridIndex == 1 ? AppColors.surface : AppColors.surfaceVariant,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  "0", // Count value
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: selectedGridIndex == 1 ? AppColors.primary : AppColors.onSurface,
-                                  ),
+                              Text(
+                                "0",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: widget.selectedGridIndex == 1 ? AppColors.onPrimary : AppColors.onSurface,
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
@@ -140,9 +141,10 @@ class TodayProgramSection extends StatelessWidget {
                           Text(
                             l10n.completedVisits,
                             style: TextStyle(
+
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: selectedGridIndex == 1 ? AppColors.onPrimary : AppColors.onSurface,
+                              fontSize: 15  ,
+                              color: widget.selectedGridIndex == 1 ? AppColors.onPrimary : AppColors.outline,
                             ),
                           ),
                         ],
@@ -160,45 +162,64 @@ class TodayProgramSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Theme(
-            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            data: Theme.of(context).copyWith(
+              dividerColor: Colors.transparent,
+              // Control ExpansionTile animation speed globally
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+            ),
             child: Column(
               children: [
-                for (var entry in apiData.entries) ...[
-                  ExpansionTile(
-                    title: Text(
-                      entry.key,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                for (var entry in widget.apiData.entries) ...[
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 400), // Adjust speed here
+                    curve: Curves.easeInOut, // Smooth animation curve
+                    child: ExpansionTile(
+                      key: ValueKey('${entry.key}_$_expandedKey'),
+                      onExpansionChanged: (expanded) {
+                        setState(() {
+                          _expandedKey = expanded ? entry.key : null;
+                        });
+                      },
+                      initiallyExpanded: _expandedKey == entry.key,
+                      title: Text(
+                        entry.key,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          color: _expandedKey == entry.key ? Colors.blueAccent : null,
+                        ),
                       ),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
                             "${entry.value.length}",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: AppColors.onSurface,
+                              color: _expandedKey == entry.key
+                                  ? Colors.blueAccent
+                                  : AppColors.onSurface,
+                              fontSize: 15,
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.arrow_drop_down,
-                          color: AppColors.onSurface,
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          AnimatedRotation(
+                            turns: _expandedKey == entry.key ? 0.5 : 0,
+                            duration: const Duration(milliseconds: 400), // Match with AnimatedSize
+                            curve: Curves.easeInOut,
+                            child: Icon(
+                              Icons.keyboard_arrow_down_outlined,
+                              color: _expandedKey == entry.key
+                                  ? Colors.blueAccent
+                                  : AppColors.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                      children: entry.value
+                          .map((item) => ListTile(title: Text(item)))
+                          .toList(),
                     ),
-                    children: entry.value
-                        .map((item) => ListTile(title: Text(item)))
-                        .toList(),
                   ),
                   Divider(
                     color: AppColors.divider,
@@ -209,7 +230,7 @@ class TodayProgramSection extends StatelessWidget {
               ],
             ),
           ),
-        ),
+        )
       ],
     );
   }
