@@ -1282,6 +1282,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gridEligibleCouple => 'योग्य दम्पत्ति';
 
   @override
+  String get gridEligibleCoupleASHA => 'योग्य दम्पत्ति';
+
+  @override
   String get gridHighRisk => 'उच्च जोखिम';
 
   @override

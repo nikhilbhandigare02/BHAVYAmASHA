@@ -2621,6 +2621,12 @@ abstract class AppLocalizations {
   /// **'Number Of Eligible Couple Identified'**
   String get gridEligibleCouple;
 
+  /// No description provided for @gridEligibleCoupleASHA.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible Couple'**
+  String get gridEligibleCoupleASHA;
+
   /// No description provided for @gridHighRisk.
   ///
   /// In en, this message translates to:
