@@ -11,7 +11,9 @@ import 'TodaysProgramm.dart';
 import 'AshaDashboardSection.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int initialTabIndex;
+  
+  const HomeScreen({super.key, this.initialTabIndex = 0});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -34,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    selectedIndex = widget.initialTabIndex;
     fetchApiData();
   }
 

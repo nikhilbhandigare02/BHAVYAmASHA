@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:sizer/sizer.dart';
 import '../../l10n/app_localizations.dart' show AppLocalizations;
 import '../RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 
@@ -69,7 +70,7 @@ class AshaDashboardSection extends StatelessWidget {
           //   ),
           // ),
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
                 // Main Grid
@@ -77,10 +78,10 @@ class AshaDashboardSection extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: mainGridItems.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    mainAxisSpacing: 4,
-                    crossAxisSpacing: 4,
+                    mainAxisSpacing: 0.5.h,
+                    crossAxisSpacing: 0.5.w,
                     childAspectRatio: 1,
                   ),
                   itemBuilder: (context, index) {
@@ -93,7 +94,7 @@ class AshaDashboardSection extends StatelessWidget {
                         elevation: 3,
                         color: AppColors.surface,
                         child: Padding(
-                          padding: const EdgeInsets.all(12.0),
+                          padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.h),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -102,39 +103,33 @@ class AshaDashboardSection extends StatelessWidget {
                                 children: [
                                   Image.asset(
                                     item['image'],
-                                    width: 30,
-                                    height: 30,
+                                    width: 7.w,
+                                    height: 7.w,
                                     fit: BoxFit.contain,
                                   ),
                                   if (hasCount)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.surfaceVariant,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        "${item['count']}",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.onSurface,
-                                        ),
+                                    Text(
+                                      "${item['count']}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.onSurface,
+                                        fontSize: 16.sp
                                       ),
                                     ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
                               Expanded(
-                                child: Center(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
                                   child: Text(
                                     item['label'],
-                                    textAlign: TextAlign.center,
+                                    textAlign: TextAlign.left,
                                     softWrap: true,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,
-                                      fontSize: 14,
+                                      fontSize: 15.5.sp,
                                       color: AppColors.onSurface,
                                     ),
                                   ),
@@ -159,24 +154,24 @@ class AshaDashboardSection extends StatelessWidget {
                   child: Card(
                     color: AppColors.surface,
                     elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(1.5.h)),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      padding: EdgeInsets.symmetric(vertical: 1.5.h, horizontal: 4.w),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Image.asset(
                             middleBox['image'],
-                            width: 30,
-                            height: 30,
+                            width: 7.w,
+                            height: 7.w,
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 3.w),
                           Text(
                             middleBox['label'],
                             style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 15.5.sp,
                             ),
                           ),
                         ],
@@ -193,10 +188,10 @@ class AshaDashboardSection extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: bottomGridItems.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 0.5.h,
+                    crossAxisSpacing: 0.5.w,
                     childAspectRatio: 1,
                   ),
                   itemBuilder: (context, index) {
@@ -207,25 +202,28 @@ class AshaDashboardSection extends StatelessWidget {
                         elevation: 3,
                         color: AppColors.surface,
                         child: Padding(
-                          padding: const EdgeInsets.all(12.0),
+                          padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Image.asset(
                                 item['image'],
-                                width: 30,
-                                height: 30,
+                                width: 7.w,
+                                height: 7.w,
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 1.h),
                               Flexible(
-                                child: Text(
-                                  item['label'],
-                                  textAlign: TextAlign.center,
-                                  softWrap: true,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14,
-                                    color: AppColors.onSurface,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    item['label'],
+                                    textAlign: TextAlign.left,
+                                    softWrap: true,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 15.5.sp,
+                                      color: AppColors.onSurface,
+                                    ),
                                   ),
                                 ),
                               ),

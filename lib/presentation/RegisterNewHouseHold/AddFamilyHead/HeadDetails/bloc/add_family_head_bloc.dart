@@ -99,6 +99,38 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       emit(state.copyWith(lmp: lmp, edd: edd));
     });
 
+    on<UpdateYears>((event, emit) {
+      emit(state.copyWith(years: event.value));
+      // Update approxAge when any of the fields change
+      final years = event.value;
+      final months = state.months ?? '0';
+      final days = state.days ?? '0';
+      emit(state.copyWith(
+        years: years,
+        approxAge: '$years years $months months $days days'.trim(),
+      ));
+    });
+
+    on<UpdateMonths>((event, emit) {
+      final months = event.value;
+      final years = state.years ?? '0';
+      final days = state.days ?? '0';
+      emit(state.copyWith(
+        months: months,
+        approxAge: '$years years $months months $days days'.trim(),
+      ));
+    });
+
+    on<UpdateDays>((event, emit) {
+      final days = event.value;
+      final years = state.years ?? '0';
+      final months = state.months ?? '0';
+      emit(state.copyWith(
+        days: days,
+        approxAge: '$years years $months months $days days'.trim(),
+      ));
+    });
+
     on<EDDChange>((event, emit) {
       emit(state.copyWith(edd: event.value));
     });

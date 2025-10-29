@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:sizer/sizer.dart';
 
 class CustomDatePicker extends StatefulWidget {
   final DateTime? initialDate;
@@ -10,6 +11,8 @@ class CustomDatePicker extends StatefulWidget {
   final String? hintText;
   final String? Function(DateTime?)? validator;
   final int? labelMaxLines;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
 
   const CustomDatePicker({
     super.key,
@@ -20,6 +23,8 @@ class CustomDatePicker extends StatefulWidget {
     this.hintText,
     this.validator,
     this.labelMaxLines,
+    this.firstDate,
+    this.lastDate,
   });
 
   @override
@@ -46,8 +51,8 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     final picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
+      firstDate: widget.firstDate ?? DateTime(1900),
+      lastDate: widget.lastDate ?? DateTime(2100),
     );
 
     if (picked != null) {
@@ -62,9 +67,10 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 16,
+      fontSize: 16.sp,
       fontWeight: FontWeight.w500,
       color: AppColors.onSurface,
+      height: 1.5,
     );
 
     return GestureDetector(
@@ -84,13 +90,22 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
             hintText: widget.hintText ?? 'dd/MM/yy',
             hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
             suffixIcon: widget.isEditable
-                ? const Icon(Icons.calendar_today_outlined, color: Colors.grey)
+                ? Padding(
+                    padding: EdgeInsets.only(right: 2.w),
+                    child: Icon(
+                      Icons.calendar_today_outlined,
+                      color: Colors.grey,
+                      size: 16.sp,
+                    ),
+                  )
                 : null,
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 3.w,
+              vertical: 1.5.h,
+            ),
           ),
         ),
       ),

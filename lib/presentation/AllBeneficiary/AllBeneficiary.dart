@@ -7,6 +7,8 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
+import '../HomeScreen/HomeScreen.dart';
+
 class AllBeneficiaryScreen extends StatefulWidget {
   const AllBeneficiaryScreen({super.key});
 
@@ -92,12 +94,16 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         screenTitle: l10n?.householdBeneficiaryTitle ?? 'Household Beneficiary',
         showBack: false,
         icon2: Icons.home,
-        onIcon2Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
+        onIcon2Tap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialTabIndex: 1),
+          ),
+        ),
       ),
       drawer: const CustomDrawer(),
       body: Column(
         children: [
-          // 🔍 Search Field
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(

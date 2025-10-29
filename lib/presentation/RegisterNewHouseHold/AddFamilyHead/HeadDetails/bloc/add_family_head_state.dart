@@ -12,6 +12,9 @@ class AddFamilyHeadState extends Equatable {
   final DateTime? edd;
   final DateTime? lmp;
   final String? approxAge;
+  final String? years;
+  final String? months;
+  final String? days;
   final String? gender;
   final String? occupation;
   final String? education;
@@ -48,6 +51,9 @@ class AddFamilyHeadState extends Equatable {
     this.edd,
     this.lmp,
     this.approxAge,
+    this.years,
+    this.months,
+    this.days,
     this.gender,
     this.occupation,
     this.education,
@@ -85,6 +91,9 @@ class AddFamilyHeadState extends Equatable {
     DateTime? edd,
     DateTime? lmp,
     String? approxAge,
+    String? years,
+    String? months,
+    String? days,
     String? gender,
     String? occupation,
     String? education,
@@ -122,6 +131,9 @@ class AddFamilyHeadState extends Equatable {
       edd: edd ?? this.edd,
       lmp: lmp ?? this.lmp,
       approxAge: approxAge ?? this.approxAge,
+      years: years ?? this.years,
+      months: months ?? this.months,
+      days: days ?? this.days,
       gender: gender ?? this.gender,
       occupation: occupation ?? this.occupation,
       education: education ?? this.education,
@@ -162,6 +174,9 @@ class AddFamilyHeadState extends Equatable {
     dob,
     children,
     approxAge,
+    years,
+    months,
+    days,
     gender,
     occupation,
     education,

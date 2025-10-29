@@ -10,6 +10,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 
 import '../../../core/widgets/AppDrawer/Drawer.dart';
+import '../../HomeScreen/HomeScreen.dart';
 
 class AllhouseholdScreen extends StatefulWidget {
   const AllhouseholdScreen({super.key});
@@ -133,7 +134,12 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         screenTitle: l10n?.gridAllHousehold ?? 'All Household',
         showBack: false,
         icon1: Icons.home,
-        onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
+        onIcon1Tap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialTabIndex: 1),
+          ),
+        ),
       ),
       drawer: CustomDrawer(),
       body: Column(

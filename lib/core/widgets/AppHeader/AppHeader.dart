@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final String screenTitle;
@@ -36,7 +37,8 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(80);
+  @override
+  Size get preferredSize => Size.fromHeight(10.h);
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       height: preferredSize.height,
       color: Theme.of(context).colorScheme.primary,
       child: Padding(
-        padding: const EdgeInsets.only(top: 22.0),
+        padding: EdgeInsets.only(top: 2.5.h),
         child: Row(
           children: [
             showBack
@@ -60,13 +62,13 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: 1.w),
             // Title takes remaining space
             Expanded(
               child: Text(
                 screenTitle,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),

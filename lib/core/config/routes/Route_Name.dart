@@ -52,4 +52,5 @@ class Route_Names{
   static const String FamliyUpdate = 'FamliyUpdate';
   static const String EligibleCoupleList = 'EligibleCoupleList';
   static const String PregnantWomenList = 'PregnantWomenList';
+  static const String AshaDashboardSection = 'AshaDashboardSection';
 }

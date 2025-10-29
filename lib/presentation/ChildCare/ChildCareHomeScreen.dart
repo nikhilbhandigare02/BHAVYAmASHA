@@ -5,6 +5,8 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
+import '../HomeScreen/HomeScreen.dart';
+
 class ChildCareHomeScreen extends StatefulWidget {
   const ChildCareHomeScreen({super.key});
 
@@ -21,7 +23,12 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
         screenTitle: l10n?.gridChildCare ?? 'Child Care',
         showBack: false,
         icon1: Icons.home,
-        onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
+        onIcon1Tap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialTabIndex: 1),
+          ),
+        ),
       ),
       drawer: const CustomDrawer(),
       body: SafeArea(

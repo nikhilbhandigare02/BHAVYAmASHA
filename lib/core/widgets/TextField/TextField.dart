@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:sizer/sizer.dart';
 
 class CustomTextField extends StatefulWidget {
   final String? labelText;
@@ -77,8 +78,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 16,
-      color: AppColors.onSurfaceVariant
+      fontSize: 16.sp,
+      color: AppColors.onSurfaceVariant,
+      height: 1.5
     );
 
     return TextFormField(
@@ -119,8 +121,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
           }),
         )
             : null,
-        contentPadding:
-        const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        contentPadding: EdgeInsets.symmetric(
+          vertical: 1.5.h,
+          horizontal: 3.w,
+        ),
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,

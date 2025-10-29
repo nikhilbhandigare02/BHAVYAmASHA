@@ -8,6 +8,7 @@ import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/utils/Validations.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
+import 'package:sizer/sizer.dart';
 import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import 'bloc/spous_bloc.dart';
@@ -25,7 +26,10 @@ class Spousdetails extends StatefulWidget {
 class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClientMixin {
   final _formKey = GlobalKey<FormState>();
 
-  Widget _section(Widget child) => child;
+  Widget _section(Widget child) => Padding(
+        padding: EdgeInsets.symmetric(vertical: 0.h),
+        child: child,
+      );
 
   @override
   void initState() {
@@ -33,9 +37,17 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
     // Prefill once on first mount using current AddHead state to avoid first-time partial sync.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final head = context.read<AddFamilyHeadBloc>().state;
+      final headBloc = context.read<AddFamilyHeadBloc>();
+      final head = headBloc.state;
       final spBloc = context.read<SpousBloc>();
       final curr = spBloc.state;
+      
+      // Set relation based on head's gender
+      if (head.gender != null) {
+        final relation = head.gender == 'Male' ? 'Wife' : 'Husband';
+        spBloc.add(SpUpdateRelation(relation));
+      }
+      
       final memberName = head.spouseName?.trim();
       final spouseName = head.headName?.trim();
       final currMember = curr.memberName ?? '';
@@ -76,20 +88,24 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
       child: Form(
         key: _formKey,
         child: BlocBuilder<SpousBloc, SpousState>(
-        builder: (context, state) {
-          return ListView(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+          builder: (context, state) {
+            return ListView(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
               children: [
                 _section(
                   ApiDropdown<String>(
                     labelText: 'Relation with the family head',
-                    items: const ['Spouse'],
+                    items: const ['Husband', 'Wife'],
                     getLabel: (s) => s,
-                    value: state.relation,
+                    value: state.relation == 'Spouse' 
+                        ? (state.gender == 'Female' ? 'Husband' : 'Wife')
+                        : (state.relation ?? (state.gender == 'Female' ? 'Husband' : 'Wife')),
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRelation(v)),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -101,7 +117,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     validator: (value) => Validations.validateNameofMember(l, value),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -112,7 +130,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateAgeAtMarriage(v.trim())),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -124,7 +144,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -133,10 +155,12 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateFatherName(v.trim())),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 Padding(
-                  padding: const EdgeInsets.only(top: 4),
+                  padding: EdgeInsets.all(2.h),
                   child: Row(
                     children: [
                       Radio<bool>(
@@ -145,7 +169,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
                       ),
                       const Text('DOB'),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 4.w),
                       Radio<bool>(
                         value: false,
                         groupValue: state.useDob,
@@ -157,37 +181,101 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 ),
                 if (state.useDob)
                   _section(
+
                     CustomDatePicker(
                       labelText: '${l.dobLabel} *',
                       hintText: l.dateHint,
-                      initialDate: state.dob,
                       onDateChanged: (d) => context.read<SpousBloc>().add(SpUpdateDob(d)),
                       validator: (date) => Validations.validateDOB(l, date),
                     ),
                   )
                 else
                   _section(
-                    CustomTextField(
-                      labelText: '${l.ageLabel} *',
-                      keyboardType: TextInputType.number,
-                      initialValue: state.approxAge,
-                      onChanged: (v) => context.read<SpousBloc>().add(SpUpdateApproxAge(v.trim())),
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 1.h, left: 1.3.h),
+                          child: Text(
+                            '${l.ageApproximate} *',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CustomTextField(
+                                labelText: 'Years',
+                                hintText: 'Years',
+                                initialValue: state.UpdateYears ?? '',
+                                keyboardType: TextInputType.number,
+                                onChanged: (v) => context.read<SpousBloc>().add(UpdateYearsChanged(v.trim())),
+                              ),
+                            ),
+
+                            // --- Divider between Years & Months ---
+                            Container(
+                              width: 1,
+                              height: 4.h,
+                              color: Colors.grey.shade300,
+                              margin: EdgeInsets.symmetric(horizontal: 1.w),
+                            ),
+
+                            // --- Months ---
+                            Expanded(
+                              child: CustomTextField(
+                                labelText: 'Months',
+                                hintText: 'Months',
+                                initialValue: state.UpdateMonths ?? '',
+                                keyboardType: TextInputType.number,
+                                onChanged: (v) => context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim())),
+                              ),
+                            ),
+
+                            // --- Divider between Months & Days ---
+                            Container(
+                              width: 1,
+                              height: 4.h,
+                              color: Colors.grey.shade300,
+                              margin: EdgeInsets.symmetric(horizontal: 1.w),
+                            ),
+
+                            // --- Days ---
+                            Expanded(
+                              child: CustomTextField(
+                                labelText: 'Days',
+                                hintText: 'Days',
+                                initialValue: state.UpdateDays ?? '',
+                                keyboardType: TextInputType.number,
+                                onChanged: (v) => context.read<SpousBloc>().add(UpdateDaysChanged(v.trim())),
+                              ),
+                            ),
+                          ],
+                        )
+
+                      ],
                     ),
                   ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   ApiDropdown<String>(
                     labelText: '${l.genderLabel} *',
-                    items: const ['Male', 'Female', 'Other'],
+                    items: const ['Male', 'Female', 'Transgender'],
                     getLabel: (s) {
                       switch (s) {
                         case 'Male':
                           return l.genderMale;
                         case 'Female':
                           return l.genderFemale;
-                        case 'Other':
-                          return l.genderOther;
+                        case 'Transgender':
+                          return l.transgender;
                         default:
                           return s;
                       }
@@ -197,24 +285,32 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     validator: (value) => Validations.validateGender(l, value),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
+                SizedBox(height: 1.h),
 
                 _section(
                   ApiDropdown<String>(
                     labelText: l.occupationLabel,
-                    items: const ['Employed', 'Self-employed', 'Student', 'Unemployed'],
+                    items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
                     getLabel: (s) {
                       switch (s) {
-                        case 'Employed':
-                          return l.occupationEmployed;
-                        case 'Self-employed':
-                          return l.occupationSelfEmployed;
-                        case 'Student':
-                          return l.occupationStudent;
                         case 'Unemployed':
                           return l.occupationUnemployed;
+                        case 'Housewife':
+                          return l.occupationHousewife;
+                        case 'Daily Wage Labor':
+                          return l.occupationDailyWageLabor;
+                        case 'Agriculture':
+                          return l.occupationAgriculture;
+                        case 'Salaried':
+                          return l.occupationSalaried;
+                        case 'Business':
+                          return l.occupationBusiness;
+                        case 'Retired':
+                          return l.occupationRetired;
+                        case 'Other':
+                          return l.occupationOther;
                         default:
                           return s;
                       }
@@ -223,22 +319,30 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateOccupation(v)),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   ApiDropdown<String>(
                     labelText: l.educationLabel,
-                    items: const ['Primary', 'Secondary', 'Graduate', 'Postgraduate'],
+                    items: const ['No Schooling', 'Primary', 'Secondary', 'High School', 'Intermediate', 'Diploma', 'Graduate and above'],
                     getLabel: (s) {
                       switch (s) {
+                        case 'No Schooling':
+                          return l.educationNoSchooling;
                         case 'Primary':
                           return l.educationPrimary;
                         case 'Secondary':
                           return l.educationSecondary;
-                        case 'Graduate':
-                          return l.educationGraduate;
-                        case 'Postgraduate':
-                          return l.educationPostgraduate;
+                        case 'High School':
+                          return l.educationHighSchool;
+                        case 'Intermediate':
+                          return l.educationIntermediate;
+                        case 'Diploma':
+                          return l.educationDiploma;
+                        case 'Graduate and above':
+                          return l.educationGraduateAndAbove;
                         default:
                           return s;
                       }
@@ -247,14 +351,18 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateEducation(v)),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   ApiDropdown<String>(
                     labelText: l.religionLabel,
-                    items: const ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Other'],
+                    items: const ['Do not want to disclose', 'Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhism', 'Jainism', 'Parsi', 'Other'],
                     getLabel: (s) {
                       switch (s) {
+                        case 'Do not want to disclose':
+                          return l.religionNotDisclosed;
                         case 'Hindu':
                           return l.religionHindu;
                         case 'Muslim':
@@ -263,6 +371,12 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           return l.religionChristian;
                         case 'Sikh':
                           return l.religionSikh;
+                        case 'Buddhism':
+                          return l.religionBuddhism;
+                        case 'Jainism':
+                          return l.religionJainism;
+                        case 'Parsi':
+                          return l.religionParsi;
                         case 'Other':
                           return l.religionOther;
                         default:
@@ -273,36 +387,65 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateReligion(v)),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   ApiDropdown<String>(
                     labelText: l.categoryLabel,
-                    items: const ['General', 'OBC', 'SC', 'ST'],
-                    getLabel: (s) => s,
+                    items: const ['NotDisclosed', 'General', 'OBC', 'SC', 'ST', 'PichdaVarg1', 'PichdaVarg2', 'AtyantPichdaVarg', 'DontKnow', 'Other'],
+                    getLabel: (s) {
+                      switch (s) {
+                        case 'NotDisclosed':
+                          return l.categoryNotDisclosed;
+                        case 'General':
+                          return l.categoryGeneral;
+                        case 'OBC':
+                          return l.categoryOBC;
+                        case 'SC':
+                          return l.categorySC;
+                        case 'ST':
+                          return l.categoryST;
+                        case 'PichdaVarg1':
+                          return l.categoryPichdaVarg1;
+                        case 'PichdaVarg2':
+                          return l.categoryPichdaVarg2;
+                        case 'AtyantPichdaVarg':
+                          return l.categoryAtyantPichdaVarg;
+                        case 'DontKnow':
+                          return l.categoryDontKnow;
+                        case 'Other':
+                          return l.religionOther;
+                        default:
+                          return s;
+                      }
+                    },
                     value: state.category,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateCategory(v)),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   Row(
                     children: [
                       Expanded(
                         child: CustomTextField(
-                          labelText: 'ABHA address',
+                          labelText: l.abhaAddressLabel,
                           initialValue: state.abhaAddress,
                           onChanged: (v) =>
                               context.read<SpousBloc>().add(SpUpdateAbhaAddress(v.trim())),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(height: 1.h),
                       SizedBox(
-                        height: 25,
+                        height: 3.5.h,
                         child: RoundButton(
                           title: l.linkAbha,
-                          width: 160,
+                          width: 15.h,
                           borderRadius: 8,
                           fontSize: 12,
                           onPress: () {
@@ -313,26 +456,26 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       ),
                     ],
                   ),
-                )
-,
+                ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
                 if (state.gender == 'Female') ...[
                   _section(
-                   Row(
+                    Row(
                       children: [
                         Expanded(
                           child: CustomTextField(
                             labelText: l.richIdLabel,
                             initialValue: state.RichIDChanged,
                             onChanged: (v) =>
-                                context.read<SpousBloc>().add(RichIDChanged(v.trim())
-                                ),
+                                context.read<SpousBloc>().add(RichIDChanged(v.trim())),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(height: 1.h),
                         SizedBox(
-                          height: 25,
-                          width: 120,
+                          height: 3.5.h,
+                          width: 15.h,
                           child: RoundButton(
                             title: 'VERIFY',
                             width: 160,
@@ -345,9 +488,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       ],
                     ),
                   ),
-                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 ],
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   ApiDropdown<String>(
@@ -421,7 +565,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     validator: (value) => Validations.validateWhoMobileNo(l, value),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -455,7 +601,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ],
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -465,7 +613,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateBankAcc(v.trim())),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -474,7 +624,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateIfsc(v.trim())),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -483,7 +635,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateVoterId(v.trim())),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -492,7 +646,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRationId(v.trim())),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -501,20 +657,20 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdatePhId(v.trim())),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                 _section(
                   ApiDropdown<String>(
                     labelText: l.beneficiaryTypeLabel,
-                    items: const ['APL', 'BPL', 'Antyodaya'],
+                    items: const ['StayingInHouse', 'SeasonalMigrant'],
                     getLabel: (s) {
                       switch (s) {
-                        case 'APL':
-                          return l.beneficiaryTypeAPL;
-                        case 'BPL':
-                          return l.beneficiaryTypeBPL;
-                        case 'Antyodaya':
-                          return l.beneficiaryTypeAntyodaya;
+                        case 'StayingInHouse':
+                          return l.migrationStayingInHouse;
+                        case 'SeasonalMigrant':
+                          return l.migrationSeasonalMigrant;
                         default:
                           return s;
                       }
@@ -523,7 +679,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateBeneficiaryType(v)),
                   ),
                 ),
+                SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
                 if (state.gender == 'Female') ...[
                   _section(
                     ApiDropdown<String>(
@@ -548,30 +706,77 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       },
                     ),
                   ),
-                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                  SizedBox(height: 1.h),
+                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                SizedBox(height: 1.h),
 
                   if (state.isPregnant == 'Yes') ...[
                     _section(
-                      CustomDatePicker(
-                        labelText: '${l.lmpDateLabel} *',
-                        hintText: l.dateHint,
-                        initialDate: state.lmp,
-                        onDateChanged: (d) => context.read<SpousBloc>().add(SpLMPChange(d)),
-                        validator: (date) => Validations.validateLMP(l, date),
+                      InkWell(
+                        onTap: () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: state.lmp ?? now,
+                            firstDate: DateTime(now.year - 5),
+                            lastDate: now,
+                          );
+                          if (picked != null) {
+                            context.read<SpousBloc>().add(SpLMPChange(picked));
+                          }
+                        },
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: '${l.lmpDateLabel} *',
+                            border: const UnderlineInputBorder(),
+                          ),
+                          child: Text(
+                            state.lmp != null
+                                ? '${state.lmp!.day.toString().padLeft(2, '0')}-${state.lmp!.month.toString().padLeft(2, '0')}-${state.lmp!.year}'
+                                : 'dd-mm-yyyy',
+                            style: TextStyle(
+                              color: state.lmp != null ? Colors.black : Colors.black45,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                     _section(
-                      CustomDatePicker(
-                        labelText: '${l.eddDateLabel} *',
-                        hintText: l.dateHint,
-                        initialDate: state.edd,
-                        onDateChanged: (d) => context.read<SpousBloc>().add(SpEDDChange(d)),
-                        validator: (date) => Validations.validateEDD(l, date),
+                      InkWell(
+                        onTap: state.lmp == null 
+                            ? null 
+                            : () async {
+                                final now = DateTime.now();
+                                final firstDate = state.lmp?.add(const Duration(days: 1)) ?? now.add(const Duration(days: 1));
+                                final lastDate = state.lmp?.add(const Duration(days: 280)) ?? now.add(const Duration(days: 280));
+                                
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: state.edd ?? firstDate,
+                                  firstDate: firstDate,
+                                  lastDate: lastDate,
+                                );
+                                if (picked != null) {
+                                  context.read<SpousBloc>().add(SpEDDChange(picked));
+                                }
+                              },
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: '${l.eddDateLabel} *',
+                            border: const UnderlineInputBorder(),
+                          ),
+                          child: Text(
+                            state.edd != null
+                                ? '${state.edd!.day.toString().padLeft(2, '0')}-${state.edd!.month.toString().padLeft(2, '0')}-${state.edd!.year}'
+                                : 'dd-mm-yyyy',
+                            style: TextStyle(
+                              color: state.edd != null ? Colors.black : Colors.black45,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                   ],
                 ],
               ],

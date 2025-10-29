@@ -45,6 +45,21 @@ final class AfhUpdateApproxAge extends AddFamilyHeadEvent {
   AfhUpdateApproxAge(this.value);
 }
 
+final class UpdateYears extends AddFamilyHeadEvent {
+  final String value;
+  UpdateYears(this.value);
+}
+
+final class UpdateMonths extends AddFamilyHeadEvent {
+  final String value;
+  UpdateMonths(this.value);
+}
+
+final class UpdateDays extends AddFamilyHeadEvent {
+  final String value;
+  UpdateDays(this.value);
+}
+
 final class AfhUpdateGender extends AddFamilyHeadEvent {
   final String? value;
   AfhUpdateGender(this.value);

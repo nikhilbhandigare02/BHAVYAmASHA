@@ -72,6 +72,138 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addFamilyHeadButton => 'ADD FAMILY HEAD';
 
   @override
+  String get transgender => 'Transgender';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get genderFemale => 'Female';
+
+  @override
+  String get occupationUnemployed => 'Unemployed';
+
+  @override
+  String get occupationHousewife => 'Housewife';
+
+  @override
+  String get occupationDailyWageLabor => 'Daily Wage Labor';
+
+  @override
+  String get occupationAgriculture => 'Agriculture';
+
+  @override
+  String get occupationSalaried => 'Salaried';
+
+  @override
+  String get occupationBusiness => 'Business';
+
+  @override
+  String get occupationRetired => 'Retired';
+
+  @override
+  String get occupationOther => 'Other';
+
+  @override
+  String get educationNoSchooling => 'No Schooling';
+
+  @override
+  String get educationPrimary => 'Primary';
+
+  @override
+  String get educationSecondary => 'Secondary';
+
+  @override
+  String get educationHighSchool => 'High School';
+
+  @override
+  String get educationIntermediate => 'Intermediate';
+
+  @override
+  String get educationDiploma => 'Diploma';
+
+  @override
+  String get educationGraduateAndAbove => 'Graduate and above';
+
+  @override
+  String get religionNotDisclosed => 'Do not want to disclose';
+
+  @override
+  String get religionHindu => 'Hindu';
+
+  @override
+  String get religionMuslim => 'Muslim';
+
+  @override
+  String get religionChristian => 'Christian';
+
+  @override
+  String get religionSikh => 'Sikh';
+
+  @override
+  String get religionBuddhism => 'Buddhism';
+
+  @override
+  String get religionJainism => 'Jainism';
+
+  @override
+  String get religionParsi => 'Parsi';
+
+  @override
+  String get religionOther => 'Other';
+
+  @override
+  String get categoryNotDisclosed => 'Do not want to disclose';
+
+  @override
+  String get categoryGeneral => 'General';
+
+  @override
+  String get categoryOBC => 'OBC';
+
+  @override
+  String get categorySC => 'SC';
+
+  @override
+  String get categoryST => 'ST';
+
+  @override
+  String get categoryPichdaVarg1 => 'Pichda Varg 1';
+
+  @override
+  String get categoryPichdaVarg2 => 'Pichda Varg 2';
+
+  @override
+  String get categoryAtyantPichdaVarg => 'Atyant Pichda Varg';
+
+  @override
+  String get categoryDontKnow => 'Do not know';
+
+  @override
+  String get migrationStayingInHouse => 'Staying in House';
+
+  @override
+  String get migrationSeasonalMigrant => 'Seasonal Migrant';
+
+  @override
+  String get maritalStatusMarried => 'Married';
+
+  @override
+  String get maritalStatusUnmarried => 'Unmarried';
+
+  @override
+  String get maritalStatusWidowed => 'Widowed';
+
+  @override
+  String get maritalStatusWidower => 'Widower';
+
+  @override
+  String get maritalStatusSeparated => 'Separated';
+
+  @override
+  String get maritalStatusDivorced => 'Divorced';
+
+  @override
   String get addNewBeneficiaryButton => 'Add New Beneficiary';
 
   @override
@@ -839,7 +971,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get declarationIntro => 'I hereby declare that:';
 
   @override
-  String get deliveryOutcomeTitle => 'Delivery\nOutcome';
+  String get deliveryOutcomeTitle => 'Delivery Outcome';
 
   @override
   String get detailsLabel => 'Details';
@@ -917,7 +1049,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drawerIncentivePortal => 'Incentive Portal';
 
   @override
-  String get drawerLogout => 'Logout';
+  String get drawerLogout => 'LOGOUT';
 
   @override
   String get drawerMisReport => 'MIS Report';
@@ -951,12 +1083,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get educationPostgraduate => 'Postgraduate';
-
-  @override
-  String get educationPrimary => 'Primary';
-
-  @override
-  String get educationSecondary => 'Secondary';
 
   @override
   String get elderlyAbove65 => 'Elderly (>65 Y)';
@@ -1129,13 +1255,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fuelOther => 'Other';
 
   @override
-  String get genderFemale => 'Female';
-
-  @override
   String get genderLabel => 'Gender';
-
-  @override
-  String get genderMale => 'Male';
 
   @override
   String get genderOther => 'Other';
@@ -1333,7 +1453,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get husbandLabel => 'Husband';
 
   @override
-  String get husbandNameLabel => 'Husband\'s name';
+  String get husbandNameLabel => 'Husband\'s Name';
 
   @override
   String get hwcNameHint => 'HWC Name';
@@ -1443,7 +1563,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lmpDateLabel => 'Date of last menstrual period (LMP) *';
 
   @override
-  String get loginButton => 'LogIn';
+  String get loginButton => 'Login';
 
   @override
   String get loginFailed => 'Login Failed';
@@ -1494,7 +1614,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mobileLabel => 'Mobile no.';
 
   @override
-  String get mobileLabelSimple => 'Mobile no.';
+  String get mobileLabelSimple => 'Mobile No.';
 
   @override
   String get mobileTelephoneLabel => 'Mobile/Telephone Number';
@@ -1656,9 +1776,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get occupationStudent => 'Student';
 
   @override
-  String get occupationUnemployed => 'Unemployed';
-
-  @override
   String get or => 'OR';
 
   @override
@@ -1818,22 +1935,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get relative => 'Relative';
 
   @override
-  String get religionChristian => 'Christian';
-
-  @override
-  String get religionHindu => 'Hindu';
-
-  @override
   String get religionLabel => 'Religion';
-
-  @override
-  String get religionMuslim => 'Muslim';
-
-  @override
-  String get religionOther => 'Other';
-
-  @override
-  String get religionSikh => 'Sikh';
 
   @override
   String get remarksLabel => 'Remarks';
@@ -2276,6 +2378,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get youngestChildGenderLabel => 'Gender of youngest child';
 
   @override
+  String get deliveryOutcomeList => 'Delivery Outcome List';
+
+  @override
+  String get searchDeliveryOutcome => 'Search delivery outcome...';
+
+  @override
+  String get previousPncDateLabel => 'Previous PNC Date';
+
+  @override
+  String get nextPncDateLabel => 'Next PNC Date';
+
+  @override
   String get registrationDueTitle => 'registration due';
 
   @override
@@ -2541,6 +2655,171 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nippleCracksPainOrEngorgedLabel => 'Does the mother have nipple cracks/pain and/or engorged breasts?*';
+
+  @override
+  String get outcomeFormTitle => 'Delivery Outcome';
+
+  @override
+  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
+
+  @override
+  String get deliveryDateLabel => 'Date of Delivery *';
+
+  @override
+  String get pregnancyWeeksLabel => 'Number of weeks of pregnancy during delivery.';
+
+  @override
+  String get outcomeTypeLabel => 'Type of Outcome *';
+
+  @override
+  String get outcomeTypeLiveBirth => 'Live Birth';
+
+  @override
+  String get outcomeTypeStillBirth => 'Still Birth';
+
+  @override
+  String get outcomeTypeAbortion => 'Abortion';
+
+  @override
+  String get birthWeightLabel => 'Birth Weight (in kg)';
+
+  @override
+  String get genderOfChildLabel => 'Gender of Child';
+
+  @override
+  String get placeOfDeliveryLabel => 'Place of Delivery *';
+
+  @override
+  String get placeOfDeliveryHome => 'Home';
+
+  @override
+  String get placeOfDeliveryGovt => 'Government Facility';
+
+  @override
+  String get placeOfDeliveryPrivate => 'Private Facility';
+
+  @override
+  String get placeOfDeliveryOther => 'Other';
+
+  @override
+  String get deliveryConductedByLabel => 'Delivery Conducted By *';
+
+  @override
+  String get deliveryConductedByDoctor => 'Doctor';
+
+  @override
+  String get deliveryConductedByANM => 'ANM';
+
+  @override
+  String get deliveryConductedByNurse => 'Nurse';
+
+  @override
+  String get deliveryConductedByDai => 'Dai';
+
+  @override
+  String get deliveryConductedByOther => 'Other';
+
+  @override
+  String get complicationsLabel => 'Complications (if any)';
+
+  @override
+  String get complicationBleeding => 'Excessive Bleeding';
+
+  @override
+  String get complicationInfection => 'Infection';
+
+  @override
+  String get complicationEclampsia => 'Eclampsia';
+
+  @override
+  String get complicationOther => 'Other';
+
+  @override
+  String get referralFacilityLabel => 'Referred to Facility';
+
+  @override
+  String get referralFacilityYes => 'Yes';
+
+  @override
+  String get referralFacilityNo => 'No';
+
+  @override
+  String get referralFacilityNameLabel => 'Name of Facility';
+
+  @override
+  String get referralFacilityNameHint => 'Enter facility name';
+
+  @override
+  String get referralReasonLabel => 'Reason for Referral';
+
+  @override
+  String get referralReasonHint => 'Enter reason for referral';
+
+  @override
+  String get dataSavedSuccessMessage => 'Data saved successfully';
+
+  @override
+  String get deliveryDate => 'Date of Delivery *';
+
+  @override
+  String get gestationWeeks => 'Number of weeks of pregnancy during delivery';
+
+  @override
+  String get deliveryTime => 'Delivery Time (hh:mm)';
+
+  @override
+  String get deliveryTimeHint => 'hh:mm';
+
+  @override
+  String get placeOfDelivery => 'Place of Delivery';
+
+  @override
+  String get selectPlaceOfDelivery => 'Select Place of Delivery *';
+
+  @override
+  String get selectOption => 'Select';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get subCenter => 'Sub-Center';
+
+  @override
+  String get phc => 'PHC';
+
+  @override
+  String get chc => 'CHC';
+
+  @override
+  String get districtHospital => 'District Hospital';
+
+  @override
+  String get privateHospital => 'Private Hospital';
+
+  @override
+  String get deliveryType => 'Type of Delivery';
+
+  @override
+  String get normalDelivery => 'Normal';
+
+  @override
+  String get cesareanDelivery => 'Cesarean';
+
+  @override
+  String get assistedDelivery => 'Assisted (Vacuum/Forceps)';
+
+  @override
+  String get complications => 'Complications during delivery? *';
+
+  @override
+  String get outcomeCount => 'Number of Outcomes *';
+
+  @override
+  String get familyPlanningCounseling => 'Family Planning Counseling Provided?';
+
+  @override
+  String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
   String get exclusiveBreastfeedingStartedLabel => 'Has exclusive breastfeeding started?*';

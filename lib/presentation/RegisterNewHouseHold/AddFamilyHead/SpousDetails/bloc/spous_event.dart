@@ -168,6 +168,24 @@ class SpUpdateIsPregnant extends SpousEvent {
   @override
   List<Object?> get props => [value];
 }
+class UpdateYearsChanged extends SpousEvent {
+  final String? value;
+  const UpdateYearsChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+class UpdateMonthsChanged extends SpousEvent {
+  final String? value;
+  const UpdateMonthsChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+class UpdateDaysChanged extends SpousEvent {
+  final String? value;
+  const UpdateDaysChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
 
 class SpLMPChange extends SpousEvent {
   final DateTime? value;

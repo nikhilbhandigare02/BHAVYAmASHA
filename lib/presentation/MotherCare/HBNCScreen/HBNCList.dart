@@ -72,10 +72,8 @@ class _HBNCListScreenState
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle:  'प्रसव परिणाम सूची',
+        screenTitle: l10n!.deliveryOutcomeList,
         showBack: true,
-
-
       ),
       body: Column(
         children: [
@@ -85,7 +83,7 @@ class _HBNCListScreenState
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  'प्रसव परिणाम खोज',
+                hintText: l10n.searchDeliveryOutcome,
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -127,7 +125,7 @@ class _HBNCListScreenState
     final Color primary = Theme.of(context).primaryColor;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end, // align CBAC button to right
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         InkWell(
           onTap: () {
@@ -215,22 +213,22 @@ class _HBNCListScreenState
                         children: [
                           Expanded(
                             child: _rowText(
-                              l10n?.registrationDateLabel ?? 'Registration Date',
+                              l10n!.registrationDateLabel,
                               data['RegitrationDate'],
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _rowText(
-                              l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                              l10n.beneficiaryIdLabel,
                               (data['BeneficiaryID'] ?? '').toString(),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _rowText(
-                              'RCH ID',
-                              l10n?.notAvailable ?? 'Not Available',
+                              l10n.rchIdLabel,
+                              l10n.notAvailable,
                             ),
                           ),
                         ],
@@ -239,18 +237,18 @@ class _HBNCListScreenState
                       Row(
                         children: [
                           Expanded(
-                              child: _rowText(l10n?.thName ?? 'Name', (data['Name'] ?? '').toString())),
+                              child: _rowText(l10n.nameLabel, (data['Name'] ?? '').toString())),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _rowText(
-                              l10n?.ageGenderLabel ?? 'Age | Gender',
+                              l10n.ageGenderLabel,
                               (data['Age|Gender'] ?? '').toString(),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _rowText(
-                              l10n?.mobileLabelSimple ?? 'Mobile no.',
+                              l10n.mobileLabelSimple,
                               (data['Mobileno'] ?? data['Mobileno.'] ?? '').toString(),
                             ),
                           ),
@@ -261,18 +259,18 @@ class _HBNCListScreenState
                         children: [
                           Expanded(
                             child: _rowText(
-                              'Husband Name',
+                              l10n.husbandNameLabel,
                               (data['HusbandName'] ?? data['HusbandName'] ?? '').toString(),
                             ),
                           ),
                           Expanded(
                             child: _rowText(
-                              'Previous PNC Date',
+                              l10n.previousPncDateLabel,
                               data['PreviousPNCDate'] ?? '' ,
                             ),
                           ),Expanded(
                             child: _rowText(
-                              'Next PNC Date',
+                              l10n.nextPncDateLabel,
                               data['NextPNCDate'] ?? '' ,
                             ),
                           ),

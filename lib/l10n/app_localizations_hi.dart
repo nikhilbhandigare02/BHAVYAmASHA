@@ -72,6 +72,138 @@ class AppLocalizationsHi extends AppLocalizations {
   String get addFamilyHeadButton => 'परिवार प्रमुख जोड़ें';
 
   @override
+  String get transgender => 'ट्रांसजेंडर';
+
+  @override
+  String get genderMale => 'पुरुष';
+
+  @override
+  String get genderFemale => 'महिला';
+
+  @override
+  String get occupationUnemployed => 'बेरोजगार';
+
+  @override
+  String get occupationHousewife => 'गृहिणी';
+
+  @override
+  String get occupationDailyWageLabor => 'दैनिक मजदूरी';
+
+  @override
+  String get occupationAgriculture => 'कृषि';
+
+  @override
+  String get occupationSalaried => 'वेतनभोगी';
+
+  @override
+  String get occupationBusiness => 'व्यवसाय';
+
+  @override
+  String get occupationRetired => 'सेवानिवृत्त';
+
+  @override
+  String get occupationOther => 'अन्य';
+
+  @override
+  String get educationNoSchooling => 'स्कूल नहीं गए';
+
+  @override
+  String get educationPrimary => 'प्राथमिक';
+
+  @override
+  String get educationSecondary => 'माध्यमिक';
+
+  @override
+  String get educationHighSchool => 'हाई स्कूल';
+
+  @override
+  String get educationIntermediate => 'इंटरमीडिएट';
+
+  @override
+  String get educationDiploma => 'डिप्लोमा';
+
+  @override
+  String get educationGraduateAndAbove => 'स्नातक और उससे ऊपर';
+
+  @override
+  String get religionNotDisclosed => 'बताना नहीं चाहते';
+
+  @override
+  String get religionHindu => 'हिन्दू';
+
+  @override
+  String get religionMuslim => 'मुस्लिम';
+
+  @override
+  String get religionChristian => 'ईसाई';
+
+  @override
+  String get religionSikh => 'सिख';
+
+  @override
+  String get religionBuddhism => 'बौद्ध';
+
+  @override
+  String get religionJainism => 'जैन';
+
+  @override
+  String get religionParsi => 'पारसी';
+
+  @override
+  String get religionOther => 'अन्य';
+
+  @override
+  String get categoryNotDisclosed => 'बताना नहीं चाहते';
+
+  @override
+  String get categoryGeneral => 'सामान्य';
+
+  @override
+  String get categoryOBC => 'ओबीसी';
+
+  @override
+  String get categorySC => 'एससी';
+
+  @override
+  String get categoryST => 'एसटी';
+
+  @override
+  String get categoryPichdaVarg1 => 'पिछड़ा वर्ग 1';
+
+  @override
+  String get categoryPichdaVarg2 => 'पिछड़ा वर्ग 2';
+
+  @override
+  String get categoryAtyantPichdaVarg => 'अत्यंत पिछड़ा वर्ग';
+
+  @override
+  String get categoryDontKnow => 'पता नहीं';
+
+  @override
+  String get migrationStayingInHouse => 'घर में रहने वाले';
+
+  @override
+  String get migrationSeasonalMigrant => 'मौसमी प्रवासी';
+
+  @override
+  String get maritalStatusMarried => 'विवाहित';
+
+  @override
+  String get maritalStatusUnmarried => 'अविवाहित';
+
+  @override
+  String get maritalStatusWidowed => 'विधवा';
+
+  @override
+  String get maritalStatusWidower => 'विधुर';
+
+  @override
+  String get maritalStatusSeparated => 'अलग हुए';
+
+  @override
+  String get maritalStatusDivorced => 'तलाकशुदा';
+
+  @override
   String get addNewBeneficiaryButton => 'नया लाभार्थी जोड़ें';
 
   @override
@@ -269,7 +401,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get beneficiaryAbsentLabel => 'Is Beneficiary Absent?';
 
   @override
-  String get beneficiaryIdLabel => 'लाभार्थी ID';
+  String get beneficiaryIdLabel => 'लाभार्थी आईडी';
 
   @override
   String get beneficiaryNumberLabel => 'लाभार्थी संख्या';
@@ -953,12 +1085,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get educationPostgraduate => 'स्नातकोत्तर';
 
   @override
-  String get educationPrimary => 'प्राथमिक';
-
-  @override
-  String get educationSecondary => 'माध्यमिक';
-
-  @override
   String get elderlyAbove65 => 'वृद्ध (>65 वर्ष)';
 
   @override
@@ -1129,13 +1255,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get fuelOther => 'अन्य';
 
   @override
-  String get genderFemale => 'महिला';
-
-  @override
   String get genderLabel => 'लिंग';
-
-  @override
-  String get genderMale => 'पुरुष';
 
   @override
   String get genderOther => 'अन्य';
@@ -1333,7 +1453,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get husbandLabel => 'पति';
 
   @override
-  String get husbandNameLabel => 'Husband\'s name';
+  String get husbandNameLabel => 'पति का नाम';
 
   @override
   String get hwcNameHint => 'एचडब्ल्यूसी का नाम';
@@ -1494,7 +1614,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mobileLabel => 'मोबाइल नंबर';
 
   @override
-  String get mobileLabelSimple => 'मोबाइल नंबर';
+  String get mobileLabelSimple => 'मोबाइल नं.';
 
   @override
   String get mobileTelephoneLabel => 'मोबाइल/टेलीफोन नंबर';
@@ -1656,9 +1776,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get occupationStudent => 'विद्यार्थी';
 
   @override
-  String get occupationUnemployed => 'बेरोजगार';
-
-  @override
   String get or => 'या';
 
   @override
@@ -1755,7 +1872,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get rationCardIdLabel => 'राशन कार्ड आईडी';
 
   @override
-  String get rchIdLabel => 'आरसीएच ID';
+  String get rchIdLabel => 'आरसीएच आईडी';
 
   @override
   String get rchNumberLabel => 'RCH number';
@@ -1818,22 +1935,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relative => 'रिश्तेदार';
 
   @override
-  String get religionChristian => 'ईसाई';
-
-  @override
-  String get religionHindu => 'हिन्दू';
-
-  @override
   String get religionLabel => 'धर्म';
-
-  @override
-  String get religionMuslim => 'मुस्लिम';
-
-  @override
-  String get religionOther => 'अन्य';
-
-  @override
-  String get religionSikh => 'सिख';
 
   @override
   String get remarksLabel => 'टिप्पणी';
@@ -2276,6 +2378,18 @@ class AppLocalizationsHi extends AppLocalizations {
   String get youngestChildGenderLabel => 'सबसे छोटे बच्चे का लिंग';
 
   @override
+  String get deliveryOutcomeList => 'प्रसव परिणाम सूची';
+
+  @override
+  String get searchDeliveryOutcome => 'प्रसव परिणाम खोजें...';
+
+  @override
+  String get previousPncDateLabel => 'पिछली पीएनसी तिथि';
+
+  @override
+  String get nextPncDateLabel => 'अगली पीएनसी तिथि';
+
+  @override
   String get registrationDueTitle => 'registration due';
 
   @override
@@ -2541,6 +2655,171 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get nippleCracksPainOrEngorgedLabel => 'क्या माँ के निप्पल में दरार/दर्द और/या कड़े स्तन हैं? *';
+
+  @override
+  String get outcomeFormTitle => 'Delivery Outcome';
+
+  @override
+  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
+
+  @override
+  String get deliveryDateLabel => 'Date of Delivery *';
+
+  @override
+  String get pregnancyWeeksLabel => 'Number of weeks of pregnancy during delivery.';
+
+  @override
+  String get outcomeTypeLabel => 'Type of Outcome *';
+
+  @override
+  String get outcomeTypeLiveBirth => 'Live Birth';
+
+  @override
+  String get outcomeTypeStillBirth => 'Still Birth';
+
+  @override
+  String get outcomeTypeAbortion => 'Abortion';
+
+  @override
+  String get birthWeightLabel => 'Birth Weight (in kg)';
+
+  @override
+  String get genderOfChildLabel => 'Gender of Child';
+
+  @override
+  String get placeOfDeliveryLabel => 'Place of Delivery *';
+
+  @override
+  String get placeOfDeliveryHome => 'Home';
+
+  @override
+  String get placeOfDeliveryGovt => 'Government Facility';
+
+  @override
+  String get placeOfDeliveryPrivate => 'Private Facility';
+
+  @override
+  String get placeOfDeliveryOther => 'Other';
+
+  @override
+  String get deliveryConductedByLabel => 'Delivery Conducted By *';
+
+  @override
+  String get deliveryConductedByDoctor => 'Doctor';
+
+  @override
+  String get deliveryConductedByANM => 'ANM';
+
+  @override
+  String get deliveryConductedByNurse => 'Nurse';
+
+  @override
+  String get deliveryConductedByDai => 'Dai';
+
+  @override
+  String get deliveryConductedByOther => 'Other';
+
+  @override
+  String get complicationsLabel => 'Complications (if any)';
+
+  @override
+  String get complicationBleeding => 'Excessive Bleeding';
+
+  @override
+  String get complicationInfection => 'Infection';
+
+  @override
+  String get complicationEclampsia => 'Eclampsia';
+
+  @override
+  String get complicationOther => 'Other';
+
+  @override
+  String get referralFacilityLabel => 'Referred to Facility';
+
+  @override
+  String get referralFacilityYes => 'Yes';
+
+  @override
+  String get referralFacilityNo => 'No';
+
+  @override
+  String get referralFacilityNameLabel => 'Name of Facility';
+
+  @override
+  String get referralFacilityNameHint => 'Enter facility name';
+
+  @override
+  String get referralReasonLabel => 'Reason for Referral';
+
+  @override
+  String get referralReasonHint => 'Enter reason for referral';
+
+  @override
+  String get dataSavedSuccessMessage => 'Data saved successfully';
+
+  @override
+  String get deliveryDate => 'Date of Delivery *';
+
+  @override
+  String get gestationWeeks => 'Number of weeks of pregnancy during delivery';
+
+  @override
+  String get deliveryTime => 'Delivery Time (hh:mm)';
+
+  @override
+  String get deliveryTimeHint => 'hh:mm';
+
+  @override
+  String get placeOfDelivery => 'Place of Delivery';
+
+  @override
+  String get selectPlaceOfDelivery => 'Select Place of Delivery *';
+
+  @override
+  String get selectOption => 'Select';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get subCenter => 'Sub-Center';
+
+  @override
+  String get phc => 'PHC';
+
+  @override
+  String get chc => 'CHC';
+
+  @override
+  String get districtHospital => 'District Hospital';
+
+  @override
+  String get privateHospital => 'Private Hospital';
+
+  @override
+  String get deliveryType => 'Type of Delivery';
+
+  @override
+  String get normalDelivery => 'Normal';
+
+  @override
+  String get cesareanDelivery => 'Cesarean';
+
+  @override
+  String get assistedDelivery => 'Assisted (Vacuum/Forceps)';
+
+  @override
+  String get complications => 'Complications during delivery? *';
+
+  @override
+  String get outcomeCount => 'Number of Outcomes *';
+
+  @override
+  String get familyPlanningCounseling => 'Family Planning Counseling Provided?';
+
+  @override
+  String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
   String get exclusiveBreastfeedingStartedLabel => 'क्या केवल स्तनपान की शुरुआत हो गई है? *';

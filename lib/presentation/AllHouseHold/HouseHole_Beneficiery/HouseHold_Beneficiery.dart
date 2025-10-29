@@ -7,6 +7,8 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
+import '../../HomeScreen/HomeScreen.dart';
+
 class HouseHold_BeneficiaryScreen extends StatefulWidget {
   const HouseHold_BeneficiaryScreen({super.key});
 
@@ -85,7 +87,12 @@ class _HouseHold_BeneficiaryScreenState
         icon1: CupertinoIcons.arrow_left_right,
         onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
         icon2: Icons.home,
-        onIcon2Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
+        onIcon2Tap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialTabIndex: 1),
+          ),
+        ),
       ),
       body: Column(
         children: [

@@ -3,6 +3,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/presentation/HomeScreen/HomeScreen.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/HouseHoldDetails.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/HouseHold_Amenities.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +12,7 @@ import 'dart:io' show Platform;
 import 'dart:convert';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
 import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
@@ -129,10 +131,12 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               color: AppColors.primary,
               child: TabBar(
                 controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start, // 👈 ensures tabs start flush left
+                labelPadding: const EdgeInsets.symmetric(horizontal: 16), // spacing between tabs
                 indicatorColor: AppColors.onPrimary,
                 labelColor: AppColors.onPrimary,
                 unselectedLabelColor: AppColors.onPrimary,
-
                 labelStyle: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
@@ -144,32 +148,27 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 ),
                 onTap: (index) {
                   if (!headAdded && index > 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          l10n?.rnhAddHeadFirstTabs ??
-                              'Please add a family head before accessing other sections.',
-                        ),
-                      ),
-                    );
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(
+                    //     content: Text(
+                    //       l10n?.rnhAddHeadFirstTabs ??
+                    //           'Please add a family head before accessing other sections.',
+                    //     ),
+                    //   ),
+                    // );
                     _tabController.animateTo(0);
                   } else {
                     _tabController.animateTo(index);
                   }
                 },
-
                 tabs: [
-                  Tab(text: l10n?.rnhTabMemberDetails ?? 'MEMBER DETAILS'),
-                  Tab(
-                    text: l10n?.rnhTabHouseholdDetails ?? 'HOUSEHOLD DETAILS',
-                  ),
-                  Tab(
-                    text:
-                        l10n?.rnhTabHouseholdAmenities ?? 'HOUSEHOLD AMENITIES',
-                  ),
+                  _buildTab(l10n?.rnhTabMemberDetails ?? 'MEMBER DETAILS', 0),
+                  _buildTab(l10n?.rnhTabHouseholdDetails ?? 'HOUSEHOLD DETAILS', 1),
+                  _buildTab(l10n?.rnhTabHouseholdAmenities ?? 'HOUSEHOLD AMENITIES', 2),
                 ],
               ),
             ),
+
 
             Expanded(
               child: TabBarView(
@@ -190,7 +189,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -213,8 +212,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 const SizedBox(width: 120, height: 44),
 
               SizedBox(
-                width: 120,
-                height: 44,
+                width: 30.w,
+                height: 5.h,
                 child: Builder(
                   builder: (context) {
                     final idx = _tabController.index;
@@ -233,14 +232,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                           height: 44,
                           onPress: () {
                             if (disableNext) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    l10n?.rnhAddHeadProceed ??
-                                        'Please add a family head before proceeding.',
-                                  ),
-                                ),
-                              );
+
                               return;
                             }
                             if (idx < 2) {
@@ -442,13 +434,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   Widget _buildMemberDetails(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return ListView(
-      padding: const EdgeInsets.all(8),
+      padding: EdgeInsets.all(2.w),
       children: [
         Card(
           elevation: 3,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
             decoration: BoxDecoration(
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(8),
@@ -465,7 +457,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
                   decoration: BoxDecoration(
                     color: AppColors.surface.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(6),
@@ -479,7 +471,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 2.h),
         Builder(builder: (_) {
           final int childrenTarget = int.tryParse((_headForm?['children'] ?? '').toString()) ?? 0;
           final int childrenAdded = _members.where((m) {
@@ -490,37 +482,39 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
           if (childrenTarget <= 0) return const SizedBox.shrink();
           return Padding(
-            padding: const EdgeInsets.all( 8),
+              padding: EdgeInsets.all(2.w),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'No. of members remains to be added: ',
-                  style:  TextStyle(fontWeight: FontWeight.w600, color: AppColors.warning, fontSize: 16),
+                  style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.warning, fontSize: 17.sp),
                 ),
                 Text(
                   '$remaining ',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 17.sp),
                 ),
               ],
             ),
           );
         }),
         if (headAdded) _buildMembersTable(),
-        if (headAdded) const SizedBox(height: 16),
+        if (headAdded) SizedBox(height: 2.h),
         if (!_hideAddMemberButton)
           Center(
             child: SizedBox(
-              height: 28,
-              width: 170,
+              height: 5.h,
+              width: 25.h,
               child: RoundButton(
                 title: headAdded
                     ? (l10n?.addNewMemberButton ?? 'ADD NEW MEMBER')
                     : (l10n?.addFamilyHeadButton ?? 'ADD FAMILY HEAD'),
                 icon: Icons.add_circle_outline,
                 color: AppColors.green,
-                borderRadius: 4,
-                height: 20,
+                borderRadius: 8,
+                height: 5.h,
+                fontSize: 15.sp,
+                iconSize: 20.sp,
                 onPress: () {
                   if (!headAdded) {
                     _openAddHead();
@@ -537,145 +531,136 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
   Widget _buildMembersTable() {
     final l10n = AppLocalizations.of(context);
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border, width: 0.1),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: DataTable(
-          headingRowHeight: 32,
-          dataRowHeight: 28,
-          columnSpacing: 8,
-          horizontalMargin: 5,
-          dividerThickness: 0.1,
-          headingRowColor: MaterialStateColor.resolveWith(
-            (states) => AppColors.background,
-          ),
-          dataRowColor: MaterialStateColor.resolveWith(
-            (states) => AppColors.background,
-          ),
-          border: TableBorder.all(color: AppColors.primary, width: 0.5),
-          columns: [
-            DataColumn(
-              label: Text(
-                l10n?.thNumber ?? '#',
-                style: const TextStyle(fontSize: 12),
+
+    return Container(
+      height: 300, // Fixed height
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.border, width: 0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: 43.h,
+          child: SingleChildScrollView(
+            child: DataTable(
+              headingRowHeight: 3.h,
+              dataRowHeight: 3.h,
+              columnSpacing: 1.5.w,
+              horizontalMargin: 0.w,
+              dividerThickness: 0.1,
+              headingRowColor: MaterialStateColor.resolveWith(
+                    (states) => AppColors.background,
               ),
-            ),
-            DataColumn(
-              label: Text(
-                l10n?.thType ?? 'Type',
-                style: const TextStyle(fontSize: 12),
+              dataRowColor: MaterialStateColor.resolveWith(
+                    (states) => AppColors.background,
               ),
-            ),
-            DataColumn(
-              label: Text(
-                l10n?.thName ?? 'Name',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                l10n?.thAge ?? 'Age',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                l10n?.thGender ?? 'Gender',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                l10n?.thRelation ?? 'Relation',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                l10n?.thFather ?? 'Father',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                l10n?.thSpouse ?? 'Spouse',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                l10n?.thTotalChildren ?? 'Total Children',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-          ],
-          rows: _members
-              .map(
-                (m) => DataRow(
-                  cells: [
-                    DataCell(
-                      Text(m['#'] ?? '', style: const TextStyle(fontSize: 12)),
+              border: TableBorder.all(color: AppColors.primary, width: 0.5),
+              columns: [
+                DataColumn(
+                  label: Center(
+                    child: Text(
+                      l10n?.thNumber ?? '#',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
                     ),
-                    DataCell(
-                      Text(
-                        m['Type'] ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        m['Name'] ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        m['Age'] ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        m['Gender'] ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        m['Relation'] ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        m['Father'] ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        m['Spouse'] ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        m['Total Children'] ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              )
-              .toList(),
+                DataColumn(
+                  label: Center(
+                    child: Text(
+                      l10n?.thType ?? 'Type',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Center(
+                    child: Text(
+                      l10n?.thName ?? 'Name',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Center(
+                    child: Text(
+                      l10n?.thAge ?? 'Age',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Center(
+                    child: Text(
+                      l10n?.thGender ?? 'Gender',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Center(
+                    child: Text(
+                      l10n?.thRelation ?? 'Relation',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Center(
+                    child: Text(
+                      l10n?.thFather ?? 'Father',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Center(
+                    child: Text(
+                      l10n?.thSpouse ?? 'Spouse',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Center(
+                    child: Text(
+                      l10n?.thTotalChildren ?? 'Total Children',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+              rows: _members.map((m) {
+                return DataRow(
+                  cells: [
+                    DataCell(Center(child: Text(m['#'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                    DataCell(Center(child: Text(m['Type'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                    DataCell(Center(child: Text(m['Name'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                    DataCell(Center(child: Text(m['Age'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                    DataCell(Center(child: Text(m['Gender'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                    DataCell(Center(child: Text(m['Relation'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                    DataCell(Center(child: Text(m['Father'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                    DataCell(Center(child: Text(m['Spouse'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                    DataCell(Center(child: Text(m['Total Children'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
     );
   }
+
 
   Future<bool?> showSuccessDialog(BuildContext context) {
     final memberCount = _members.length + 1;
@@ -693,7 +678,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Green checkmark circle
 
 
                 const SizedBox(height: 8),
@@ -722,13 +706,20 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, Route_Names.homeScreen),
-                      child:  Text(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(initialTabIndex: 1),
+                          ),
+                        );
+                      },
+                      child: Text(
                         'OK',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
@@ -740,4 +731,21 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         );
       },
     );
-  }}
+  }
+  Widget _buildTab(String title, int index) {
+    final bool isDisabled = !headAdded && index > 0;
+
+    return Tab(
+      child: Text(
+        title,
+        style: TextStyle(
+          color: isDisabled
+              ? Colors.white.withOpacity(0.4) // 👈 faded color for disabled tabs
+              : Colors.white,                 // normal tab color
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+}

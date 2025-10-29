@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
+import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
 import '../../../l10n/app_localizations.dart';
@@ -26,16 +27,18 @@ class _OutcomeFormView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppHeader(screenTitle: 'प्रसव का परिणाम', showBack: true,),
+      appBar: AppHeader(
+        screenTitle: l10n.deliveryOutcomeTitle,
+        showBack: true,
+      ),
       body: BlocListener<OutcomeFormBloc, OutcomeFormState>(
-        // Always listen to state changes
         listenWhen: (previous, current) => true,
         listener: (context, state) {
-          // Clear any existing snackbars to prevent stacking
           ScaffoldMessenger.of(context).clearSnackBars();
-          
-          // Show error message if exists
+
           if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -46,257 +49,235 @@ class _OutcomeFormView extends StatelessWidget {
               ),
             );
           }
-          
-          // Show success message when form is successfully submitted
+
           if (state.submitted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('डेटा सुरक्षित हो गया'),
+              SnackBar(
+                content: Text(l10n.dataSavedSuccessMessage),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
-                duration: Duration(seconds: 2),
+                duration: const Duration(seconds: 2),
               ),
             );
           }
         },
-        child: BlocBuilder<OutcomeFormBloc, OutcomeFormState>(
-          builder: (context, state) {
-            final bloc = context.read<OutcomeFormBloc>();
+        child: Column(
+          children: [
+            _SectionHeader(title: l10n.deliveryOutcomeDetails),
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _SectionHeader(title: 'प्रसव परिणाम विवरण'),
-                  const SizedBox(height: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomDatePicker(
-                        initialDate: state.deliveryDate,
-                        isEditable: true,
-                        labelText: 'प्रसव की तिथि *',
-                        onDateChanged: (d) => bloc.add(DeliveryDateChanged(d)),
-                      ),
-                      Divider(
-                        color: AppColors.divider,
-                        thickness: 0.5,
-                        height: 0,
-                      ),
-                      const SizedBox(height: 8),
-
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'प्रसव के दौरान गर्भावस्था के सप्ताहों की संख्या।',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 50, // box width
-                              child: TextField(
-                                keyboardType: TextInputType.number,
-                                onChanged: (v) => bloc.add(GestationWeeksChanged(v)),
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero, // 👈 square corners
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.grey),
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.blue, width: 1.5),
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      Divider(
-                        color: AppColors.divider,
-                        thickness: 0.5,
-                        height: 0,
-                      ),
-
-                      CustomTextField(
-                        labelText: 'प्रसव का समय (hh:mm)',
-                        hintText: 'hh:mm',
-                        initialValue: state.deliveryTime ?? '',
-                        keyboardType: TextInputType.datetime,
-                        onChanged: (v) => bloc.add(DeliveryTimeChanged(v)),
-                      ),
-                      Divider(
-                        color: AppColors.divider,
-                        thickness: 0.5,
-                        height: 0,
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('Place of Delivery', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-                      ),
-                      ApiDropdown<String>(
-                        items: const [
-                          'चुनें',
-                          'घर',
-                          'उप-केन्द्र',
-                          'पीएचसी',
-                          'सीएचसी',
-                          'जिला अस्पताल',
-                          'निजी अस्पताल',
-                        ],
-                        getLabel: (s) => s,
-                        value: state.placeOfDelivery.isEmpty
-                            ? 'चुनें'
-                            : state.placeOfDelivery,
-                        onChanged: (v) =>
-                            bloc.add(PlaceOfDeliveryChanged(v ?? '')),
-                        hintText: 'चुनें',
-                        labelText: 'डिलिवरी का स्थान *',
-                      ),
-                      Divider(
-                        color: AppColors.divider,
-                        thickness: 0.5,
-                        height: 0,
-                      ),
-
-                      ApiDropdown<String>(
-                        items: const [
-                          'चुनें',
-                          'सामान्य',
-                          'सीज़ेरियन',
-                          'वैक्यूम/फोर्सेप्स',
-                        ],
-                        getLabel: (s) => s,
-                        value: state.deliveryType.isEmpty
-                            ? 'चुनें'
-                            : state.deliveryType,
-                        onChanged: (v) =>
-                            bloc.add(DeliveryTypeChanged(v ?? '')),
-                        hintText: 'चुनें',
-                        labelText: 'प्रसव का प्रकार',
-                      ),
-                      Divider(
-                        color: AppColors.divider,
-                        thickness: 0.5,
-                        height: 0,
-                      ),
-
-                      ApiDropdown<String>(
-                        items: const ['चुनें', 'हाँ', 'नहीं'],
-                        getLabel: (s) => s,
-                        value: state.complications.isEmpty
-                            ? 'चुनें'
-                            : state.complications,
-                        onChanged: (v) =>
-                            bloc.add(ComplicationsChanged(v ?? '')),
-                        hintText: 'चुनें',
-                        labelText: 'प्रसव के दौरान जटिलता? *',
-                      ),
-                      Divider(
-                        color: AppColors.divider,
-                        thickness: 0.5,
-                        height: 0,
-                      ),
-                      const SizedBox(height: 8),
-
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'प्रसव का परिणाम *',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            SizedBox(
-                              width: 50,
-                              child: TextField(
-                                keyboardType: TextInputType.number,
-                                onChanged: (v) => bloc.add(OutcomeCountChanged(v)),
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero, // 👈 square corners
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.grey),
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.blue, width: 1.5),
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      Divider(
-                        color: AppColors.divider,
-                        thickness: 0.5,
-                        height: 0,
-                      ),
-
-                      ApiDropdown<String>(
-                        items: const ['चुनें', 'हाँ', 'नहीं'],
-                        getLabel: (s) => s,
-                        value: state.familyPlanningCounseling.isEmpty
-                            ? 'चुनें'
-                            : state.familyPlanningCounseling,
-                        onChanged: (v) =>
-                            bloc.add(FamilyPlanningCounselingChanged(v ?? '')),
-                        hintText: 'चुनें',
-                        labelText: 'परिवार नियोजन की परामर्श दी गई?',
-                      ),
-                    ],
-                  ),
-
-                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 32.0),
-                    child: SizedBox(
-                      height: 44,
-                      width: 140,
-                      child: RoundButton(
-                        title:'SAVE',
-                        borderRadius: 8,
-                        isLoading: state.submitting,
-                        color: AppColors.primary,
-                        onPress: () => context.read<OutcomeFormBloc>().add(
-                          const OutcomeFormSubmitted(),
-                      ),
-                    ),
-                    ),
-                  )
-                ],
+            // 🔹 Form Area
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: const _OutcomeFormFields(),
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class _OutcomeFormFields extends StatelessWidget {
+  const _OutcomeFormFields();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final bloc = context.read<OutcomeFormBloc>();
+    final state = context.watch<OutcomeFormBloc>().state;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CustomDatePicker(
+          initialDate: state.deliveryDate,
+          isEditable: true,
+          labelText: l10n.deliveryDate,
+          onDateChanged: (d) => bloc.add(DeliveryDateChanged(d)),
+        ),
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        const SizedBox(height: 8),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.gestationWeeks,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 50,
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => bloc.add(GestationWeeksChanged(v)),
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue, width: 1.5),
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+        CustomTextField(
+          labelText: l10n.deliveryTime,
+          hintText: l10n.deliveryTimeHint,
+          initialValue: state.deliveryTime ?? '',
+          keyboardType: TextInputType.datetime,
+          onChanged: (v) => bloc.add(DeliveryTimeChanged(v)),
+        ),
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            l10n.placeOfDelivery,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+        ApiDropdown<String>(
+          items: [
+            'चुनें',
+            l10n.home,
+            l10n.subCenter,
+            l10n.phc,
+            l10n.chc,
+            l10n.districtHospital,
+            l10n.privateHospital,
+          ],
+          getLabel: (s) => s,
+          value: state.placeOfDelivery.isEmpty ||
+              !['चुनें', l10n.home, l10n.subCenter, l10n.phc, l10n.chc, l10n.districtHospital, l10n.privateHospital]
+                  .contains(state.placeOfDelivery)
+              ? 'चुनें'
+              : state.placeOfDelivery,
+          onChanged: (v) => bloc.add(PlaceOfDeliveryChanged(v ?? '')),
+          hintText: l10n.selectOption,
+          labelText: l10n.selectPlaceOfDelivery,
+        ),
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+        ApiDropdown<String>(
+          items: [
+            'चुनें',
+            l10n.normalDelivery,
+            l10n.cesareanDelivery,
+            l10n.assistedDelivery,
+          ],
+          getLabel: (s) => s,
+          value: state.deliveryType.isEmpty ||
+              !['चुनें', l10n.normalDelivery, l10n.cesareanDelivery, l10n.assistedDelivery]
+                  .contains(state.deliveryType)
+              ? 'चुनें'
+              : state.deliveryType,
+          onChanged: (v) => bloc.add(DeliveryTypeChanged(v ?? '')),
+          hintText: l10n.selectOption,
+          labelText: l10n.deliveryType,
+        ),
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+        ApiDropdown<String>(
+          items: const ['चुनें', 'हाँ', 'नहीं'],
+          getLabel: (s) => s,
+          value: state.complications.isEmpty ||
+              !['चुनें', 'हाँ', 'नहीं'].contains(state.complications)
+              ? 'चुनें'
+              : state.complications,
+          onChanged: (v) => bloc.add(ComplicationsChanged(v ?? '')),
+          hintText: l10n.selectOption,
+          labelText: l10n.complications,
+        ),
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        const SizedBox(height: 8),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  '${l10n.outcomeCount}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 50,
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => bloc.add(OutcomeCountChanged(v)),
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue, width: 1.5),
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+        ApiDropdown<String>(
+          items: const ['चुनें', 'हाँ', 'नहीं'],
+          getLabel: (s) => s,
+          value: state.familyPlanningCounseling.isEmpty
+              ? 'चुनें'
+              : state.familyPlanningCounseling,
+          onChanged: (v) => bloc.add(FamilyPlanningCounselingChanged(v ?? '')),
+          hintText: l10n.selectOption,
+          labelText: l10n.familyPlanningCounseling,
+        ),
+
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Padding(
+          padding: const EdgeInsets.only(top: 32.0),
+          child: SizedBox(
+            height: 44,
+            width: 140,
+            child: RoundButton(
+              title: l10n.saveButton,
+              borderRadius: 8,
+              isLoading: state.submitting,
+              color: AppColors.primary,
+              onPress: () => context.read<OutcomeFormBloc>().add(
+                const OutcomeFormSubmitted(),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -307,24 +288,19 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          alignment: Alignment.center,
-          child: Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(color: AppColors.primary),
-          ),
+    return Container(
+      width: double.infinity,
+      color: AppColors.primary,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Text(
+        title,
+        style:  TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.bold,
+          color: AppColors.background,
         ),
-    Divider(color: AppColors.primary, thickness: 1, height: 0),
-
-      ],
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }
-
-

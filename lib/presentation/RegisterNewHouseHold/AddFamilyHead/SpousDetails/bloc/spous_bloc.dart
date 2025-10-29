@@ -11,6 +11,9 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
     on<SpToggleUseDob>((event, emit) => emit(state.copyWith(useDob: !state.useDob)));
 
     on<SpUpdateRelation>((event, emit) => emit(state.copyWith(relation: event.value)));
+    on<UpdateYearsChanged>((event, emit) => emit(state.copyWith(UpdateYears: event.value)));
+    on<UpdateMonthsChanged>((event, emit) => emit(state.copyWith(UpdateMonths: event.value)));
+    on<UpdateDaysChanged>((event, emit) => emit(state.copyWith(UpdateDays: event.value)));
     on<SpUpdateMemberName>((event, emit) => emit(state.copyWith(memberName: event.value)));
     on<SpUpdateAgeAtMarriage>((event, emit) => emit(state.copyWith(ageAtMarriage: event.value)));
     on<SpUpdateSpouseName>((event, emit) => emit(state.copyWith(spouseName: event.value)));

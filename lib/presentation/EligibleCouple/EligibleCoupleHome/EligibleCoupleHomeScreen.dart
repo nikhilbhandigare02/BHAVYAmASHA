@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
 import '../../../core/widgets/AppHeader/AppHeader.dart' show AppHeader;
+import '../../HomeScreen/HomeScreen.dart';
 
 class EligibleCoupleHomeScreen extends StatefulWidget {
   const EligibleCoupleHomeScreen({super.key});
@@ -22,7 +23,12 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         showBack: false,
         icon1: Icons.home,
         onIcon1Tap: () =>
-            Navigator.pushNamed(context, Route_Names.homeScreen),
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(initialTabIndex: 1),
+              ),
+            ),
       ),
       drawer: CustomDrawer(),
       body: Padding(

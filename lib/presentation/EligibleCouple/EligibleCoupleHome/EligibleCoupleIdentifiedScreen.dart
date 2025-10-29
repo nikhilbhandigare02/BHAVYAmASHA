@@ -6,6 +6,7 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
+import '../../HomeScreen/HomeScreen.dart';
 
 class EligibleCoupleIdentifiedScreen extends StatefulWidget {
   const EligibleCoupleIdentifiedScreen({super.key});
@@ -87,7 +88,12 @@ class _EligibleCoupleIdentifiedScreenState
         screenTitle: l10n?.updatedEligibleCoupleListTitle ?? 'Eligible Couple List',
         showBack: false,
         icon1: Icons.home,
-        onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
+        onIcon1Tap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialTabIndex: 1),
+          ),
+        ),
       ),
       drawer: const CustomDrawer(),
       body: Column(

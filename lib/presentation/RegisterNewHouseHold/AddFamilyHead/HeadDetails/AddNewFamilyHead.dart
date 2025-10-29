@@ -13,6 +13,7 @@ import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Spo
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/bloc/spous_bloc.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/ChildrenDetaills.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/bloc/children_bloc.dart';
+import 'package:sizer/sizer.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/utils/enums.dart';
 import '../../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
@@ -45,7 +46,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
 
   Widget _buildFamilyHeadForm(BuildContext context, AddFamilyHeadState state, AppLocalizations l) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.h),
       children: [
         _Section(
           child: CustomTextField(
@@ -56,7 +57,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             validator: (value) => Validations.validateHouseNo(l, value),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -67,7 +68,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             validator: (value) => Validations.validateFamilyHead(l, value),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -77,7 +78,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateFatherName(v.trim())),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         Padding(
           padding: const EdgeInsets.only(top: 4),
@@ -89,7 +90,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                 onChanged: (_) => context.read<AddFamilyHeadBloc>().add(AfhToggleUseDob()),
               ),
               Text(l.dobShort),
-              const SizedBox(width: 16),
+              SizedBox(width: 2.w),
               Radio<bool>(
                 value: false,
                 groupValue: state.useDob,
@@ -110,61 +111,123 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           )
         else
           _Section(
-            child: CustomTextField(
-              labelText: '${l.ageLabel} *',
-              keyboardType: TextInputType.number,
-              initialValue: state.approxAge,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateApproxAge(v.trim())),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(bottom: 1.h, left: 1.3.h),
+                  child: Text(
+                    '${l.ageApproximate} *',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    // --- Years ---
+                    Expanded(
+                      child: CustomTextField(
+                        labelText: 'Years',
+                        hintText: 'Years',
+                        initialValue: state.years ?? '',
+                        keyboardType: TextInputType.number,
+                        onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateYears(v.trim())),
+                      ),
+                    ),
+
+                    // --- Divider between Years & Months ---
+                    Container(
+                      width: 1,
+                      height: 4.h,
+                      color: Colors.grey.shade300,
+                      margin: EdgeInsets.symmetric(horizontal: 1.w),
+                    ),
+
+                    // --- Months ---
+                    Expanded(
+                      child: CustomTextField(
+                        labelText: 'Months',
+                        hintText: 'Months',
+                        initialValue: state.months ?? '',
+                        keyboardType: TextInputType.number,
+                        onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateMonths(v.trim())),
+                      ),
+                    ),
+
+                    // --- Divider between Months & Days ---
+                    Container(
+                      width: 1,
+                      height: 4.h,
+                      color: Colors.grey.shade300,
+                      margin: EdgeInsets.symmetric(horizontal: 1.w),
+                    ),
+
+                    // --- Days ---
+                    Expanded(
+                      child: CustomTextField(
+                        labelText: 'Days',
+                        hintText: 'Days',
+                        initialValue: state.days ?? '',
+                        keyboardType: TextInputType.number,
+                        onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateDays(v.trim())),
+                      ),
+                    ),
+                  ],
+                )
+
+              ],
             ),
           ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: ApiDropdown<String>(
             labelText: '${l.genderLabel} *',
-            items: const ['Male', 'Female', 'Other'],
+            items: const ['Male', 'Female', 'Transgender'],
             getLabel: (s) {
               switch (s) {
                 case 'Male':
                   return l.genderMale;
                 case 'Female':
                   return l.genderFemale;
-                case 'Other':
-                  return l.genderOther;
+                case 'Transgender':
+                  return l.transgender;
                 default:
                   return s;
               }
             },
             value: state.gender,
-            onChanged: (v) {
-              final bloc = context.read<AddFamilyHeadBloc>();
-              bloc.add(AfhUpdateGender(v));
-              if (v != 'Female') {
-                // Clear pregnancy-related fields if not applicable
-                bloc.add( AfhUpdateIsPregnant(null));
-                bloc.add( LMPChange(null));
-                bloc.add( EDDChange(null));
-              }
-            },
-            validator: (value) => Validations.validateGender(l, value),
+            onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateGender(v)),
+            validator: (v) => v == null ? '${l.genderLabel} ${l.requiredField}' : null,
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: ApiDropdown<String>(
             labelText: l.occupationLabel,
-            items: const ['Employed', 'Self-employed', 'Student', 'Unemployed'],
+            items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
             getLabel: (s) {
               switch (s) {
-                case 'Employed':
-                  return l.occupationEmployed;
-                case 'Self-employed':
-                  return l.occupationSelfEmployed;
-                case 'Student':
-                  return l.occupationStudent;
                 case 'Unemployed':
                   return l.occupationUnemployed;
+                case 'Housewife':
+                  return l.occupationHousewife;
+                case 'Daily Wage Labor':
+                  return l.occupationDailyWageLabor;
+                case 'Agriculture':
+                  return l.occupationAgriculture;
+                case 'Salaried':
+                  return l.occupationSalaried;
+                case 'Business':
+                  return l.occupationBusiness;
+                case 'Retired':
+                  return l.occupationRetired;
+                case 'Other':
+                  return l.occupationOther;
                 default:
                   return s;
               }
@@ -173,22 +236,28 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateOccupation(v)),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: ApiDropdown<String>(
             labelText: l.educationLabel,
-            items: const ['Primary', 'Secondary', 'Graduate', 'Postgraduate'],
+            items: const ['No Schooling', 'Primary', 'Secondary', 'High School', 'Intermediate', 'Diploma', 'Graduate and above'],
             getLabel: (s) {
               switch (s) {
+                case 'No Schooling':
+                  return l.educationNoSchooling;
                 case 'Primary':
                   return l.educationPrimary;
                 case 'Secondary':
                   return l.educationSecondary;
-                case 'Graduate':
-                  return l.educationGraduate;
-                case 'Postgraduate':
-                  return l.educationPostgraduate;
+                case 'High School':
+                  return l.educationHighSchool;
+                case 'Intermediate':
+                  return l.educationIntermediate;
+                case 'Diploma':
+                  return l.educationDiploma;
+                case 'Graduate and above':
+                  return l.educationGraduateAndAbove;
                 default:
                   return s;
               }
@@ -197,14 +266,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateEducation(v)),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: ApiDropdown<String>(
             labelText: l.religionLabel,
-            items: const ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Other'],
+            items: const ['Do not want to disclose', 'Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhism', 'Jainism', 'Parsi', 'Other'],
             getLabel: (s) {
               switch (s) {
+                case 'Do not want to disclose':
+                  return l.religionNotDisclosed;
                 case 'Hindu':
                   return l.religionHindu;
                 case 'Muslim':
@@ -213,6 +284,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   return l.religionChristian;
                 case 'Sikh':
                   return l.religionSikh;
+                case 'Buddhism':
+                  return l.religionBuddhism;
+                case 'Jainism':
+                  return l.religionJainism;
+                case 'Parsi':
+                  return l.religionParsi;
                 case 'Other':
                   return l.religionOther;
                 default:
@@ -223,18 +300,43 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateReligion(v)),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: ApiDropdown<String>(
             labelText: l.categoryLabel,
-            items: const ['General', 'OBC', 'SC', 'ST'],
-            getLabel: (s) => s,
+            items: const ['NotDisclosed', 'General', 'OBC', 'SC', 'ST', 'PichdaVarg1', 'PichdaVarg2', 'AtyantPichdaVarg', 'DontKnow', 'Other'],
+            getLabel: (s) {
+              switch (s) {
+                case 'NotDisclosed':
+                  return l.categoryNotDisclosed;
+                case 'General':
+                  return l.categoryGeneral;
+                case 'OBC':
+                  return l.categoryOBC;
+                case 'SC':
+                  return l.categorySC;
+                case 'ST':
+                  return l.categoryST;
+                case 'PichdaVarg1':
+                  return l.categoryPichdaVarg1;
+                case 'PichdaVarg2':
+                  return l.categoryPichdaVarg2;
+                case 'AtyantPichdaVarg':
+                  return l.categoryAtyantPichdaVarg;
+                case 'DontKnow':
+                  return l.categoryDontKnow;
+                case 'Other':
+                  return l.religionOther;
+                default:
+                  return s;
+              }
+            },
             value: state.category,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateCategory(v)),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
         _Section(
           child: Row(
             children: [
@@ -247,13 +349,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               ),
               const SizedBox(width: 8),
               SizedBox(
-                height: 25,
-                width: 120,
+                height: 3.h,
+                width: 15.h,
                 child: RoundButton(
                   title: l.linkAbha,
-                  width: 160,
+                  width: 40.w,
                   borderRadius: 8,
-                  fontSize: 12,
+                  fontSize: 14.sp,
                   onPress: () {
                     Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
                   },
@@ -262,7 +364,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             ],
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
         if (state.gender == 'Female') ...[
           _Section(
             child: Row(
@@ -276,13 +378,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
-                  height: 25,
-                  width: 120,
+                  height: 3.h,
+                  width: 15.h,
                   child: RoundButton(
                     title: 'VERIFY',
-                    width: 160,
-                    borderRadius: 8,
-                    fontSize: 12,
+                    width: 40.w,
+                    borderRadius: 1.h,
+                    fontSize: 14.sp,
                     onPress: () {
                     },
                   ),
@@ -290,7 +392,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               ],
             ),
           ),
-          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
         ],
 
         _Section(
@@ -346,13 +448,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           ),
 
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
             labelText: '${l.mobileLabel} *',
             keyboardType: TextInputType.number,
-            maxLength: 10,
+            maxLength: 10, // Phone number length
             initialValue: state.mobileNo,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileNo(v.trim())),
             validator: (value) => Validations.validateMobileNo(l, value),
@@ -361,7 +463,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             ],
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -369,7 +471,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVillage(v.trim())),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -377,7 +479,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateWard(v.trim())),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -385,7 +487,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMohalla(v.trim())),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -394,7 +496,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(v.trim())),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -402,7 +504,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateIfsc(v.trim())),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -410,7 +512,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVoterId(v.trim())),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -418,7 +520,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateRationId(v.trim())),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
@@ -426,20 +528,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdatePhId(v.trim())),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: ApiDropdown<String>(
             labelText: l.beneficiaryTypeLabel,
-            items: const ['APL', 'BPL', 'Antyodaya'],
+            items: const ['StayingInHouse', 'SeasonalMigrant'],
             getLabel: (s) {
               switch (s) {
-                case 'APL':
-                  return l.beneficiaryTypeAPL;
-                case 'BPL':
-                  return l.beneficiaryTypeBPL;
-                case 'Antyodaya':
-                  return l.beneficiaryTypeAntyodaya;
+                case 'StayingInHouse':
+                  return l.migrationStayingInHouse;
+                case 'SeasonalMigrant':
+                  return l.migrationSeasonalMigrant;
                 default:
                   return s;
               }
@@ -448,7 +548,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateBeneficiaryType(v)),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: ApiDropdown<String>(
@@ -457,40 +557,35 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               'Married',
               'Unmarried',
               'Widowed',
+              'Widower',
               'Separated',
               'Divorced',
             ],
             getLabel: (s) {
               switch (s) {
                 case 'Married':
-                  return l.married;
+                  return l.maritalStatusMarried;
                 case 'Unmarried':
-                  return l.unmarried;
+                  return l.maritalStatusUnmarried;
                 case 'Widowed':
-                  return l.widowed;
+                  return l.maritalStatusWidowed;
+                case 'Widower':
+                  return l.maritalStatusWidower;
                 case 'Separated':
-                  return l.separated;
+                  return l.maritalStatusSeparated;
                 case 'Divorced':
-                  return l.divorced;
+                  return l.maritalStatusDivorced;
                 default:
                   return s;
               }
             },
             value: state.maritalStatus,
-            onChanged: (v) {
-              final bloc = context.read<AddFamilyHeadBloc>();
-              bloc.add(AfhUpdateMaritalStatus(v));
-              if (v != 'Married') {
-                // Clear pregnancy-related state when section becomes inapplicable
-                bloc.add(AfhUpdateIsPregnant(null));
-                bloc.add(LMPChange(null));
-                bloc.add(EDDChange(null));
-              }
-            },
+            onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMaritalStatus(v)),
+
             validator: (value) => Validations.validateMaritalStatus(l, value),
           ),
         ),
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         if (state.maritalStatus == 'Married') ...[
           _Section(
@@ -504,7 +599,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   .add(AfhUpdateAgeAtMarriage(v.trim())),
             ),
           ),
-          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           _Section(
             child: CustomTextField(
@@ -518,7 +613,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
 
             ),
           ),
-          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           _Section(
             child: ApiDropdown<String>(
@@ -531,7 +626,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   .add(AfhUpdateHasChildren(v)),
             ),
           ),
-          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           if (state.gender == 'Female') ...[
             _Section(
@@ -556,7 +651,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                 },
               ),
             ),
-            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+            Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
             if (state.isPregnant == 'Yes') ...[
               _Section(
                 child: CustomDatePicker(
@@ -567,7 +662,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   validator: (date) => Validations.validateLMP(l, date),
                 ),
               ),
-              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
               _Section(
                 child: CustomDatePicker(
@@ -578,7 +673,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   validator: (date) => Validations.validateEDD(l, date),
                 ),
               ),
-              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
             ] else if (state.isPregnant == 'No') ...[
               _Section(
@@ -592,7 +687,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                 ),
 
               ),
-              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
             ],
           ],
@@ -610,7 +705,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             ),
 
           ),
-          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         ],
       ],
@@ -857,13 +952,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                           length: tabs.length,
                           child: Column(
                             children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
+                              Container(
+                                color: Theme.of(context).colorScheme.primary,
                                 child: TabBar(
                                   isScrollable: true,
-                                  labelColor: AppColors.primary,
-                                  unselectedLabelColor: Colors.black87,
-                                  indicatorColor: AppColors.primary,
+                                  labelColor: Theme.of(context).colorScheme.onPrimary,
+                                  unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                  indicatorColor: Theme.of(context).colorScheme.onPrimary,
+                                  indicatorWeight: 3.0,
                                   tabs: tabs,
                                 ),
                               ),
@@ -871,7 +967,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                 child: TabBarView(children: views),
                               ),
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h).copyWith(bottom: 2.h),
                                 child: Builder(
                                   builder: (ctx) {
                                     final controller = DefaultTabController.of(ctx)!;
@@ -886,15 +982,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                               return Align(
                                                 alignment: Alignment.centerRight,
                                                 child: SizedBox(
-                                                  width: 120,
-                                                  height: 44,
+                                                  width: 30.w,
+                                                  height: 10.w,
                                                   child: RoundButton(
                                                     title: isLoading
                                                         ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
                                                         : (widget.isEdit ? 'UPDATE' : l.addButton),
                                                     color: AppColors.primary,
-                                                    borderRadius: 8,
-                                                    height: 44,
+                                                    borderRadius: 1.h,
+                                                    height: 5.5.h,
                                                     isLoading: isLoading,
                                                     onPress: () {
                                                       final formState = _formKey.currentState;
@@ -925,19 +1021,19 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                               children: [
                                                 if (i > 0)
                                                   SizedBox(
-                                                    height: 44,
+                                                    height: 5.5.h,
                                                     child:SizedBox(
-                                                      height: 44,
+                                                      height: 5.5.h,
                                                       child: OutlinedButton(
                                                         style: OutlinedButton.styleFrom(
                                                           minimumSize: const Size(120, 44),
                                                           backgroundColor: AppColors.primary, // 👈 filled background
                                                           foregroundColor: Colors.white, // 👈 white text/icon
-                                                          side: BorderSide(color: AppColors.primary, width: 1.5), // 👈 matching border
+                                                          side: BorderSide(color: AppColors.primary, width: 0.2.w), // 👈 matching border
                                                           shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.circular(8), // rounded edges
+                                                            borderRadius: BorderRadius.circular(1.h), // rounded edges
                                                           ),
-                                                          elevation: 3, // subtle elevation for depth
+                                                          elevation: 0.5, // subtle elevation for depth
                                                           shadowColor: AppColors.primary.withOpacity(0.4),
                                                         ),
                                                         onPressed: () => controller.animateTo(i - 1),
@@ -957,7 +1053,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                                 SizedBox(
                                                   height: 44,
                                                   child:SizedBox(
-                                                    height: 44,
+                                                    height: 5.5.h,
                                                     child: RoundButton(
                                                       title: i < last
                                                           ? 'NEXT'
@@ -973,9 +1069,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                                         }
                                                       },
                                                       color: AppColors.primary,
-                                                      borderRadius: 8,
-                                                      height: 44,
-                                                      width: 120,
+                                                      borderRadius: 1.h,
+                                                      height: 5.5.h,
+                                                      width: 30.w,
                                                       isLoading: isLoading,
                                                     ),
                                                   )

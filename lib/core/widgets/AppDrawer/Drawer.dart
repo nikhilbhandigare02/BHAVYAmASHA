@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
+import '../../../presentation/HomeScreen/HomeScreen.dart';
 import '../RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -13,19 +15,19 @@ class CustomDrawer extends StatelessWidget {
       backgroundColor: Colors.white,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8),
+          padding: EdgeInsets.symmetric(horizontal: 2.w),
           child: Column(
             children: [
               // Top logo
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 5),
+                padding: EdgeInsets.symmetric(vertical: 0.5.h),
                 child: Column(
                   children: [
                     Image.asset(
                       'assets/images/bhabya-logo.png',
-                      width: 120,
-                      height: 120,
+                      width: 30.w,
+                      height: 13.h,
                       fit: BoxFit.contain,
                     ),
                   ],
@@ -36,8 +38,13 @@ class CustomDrawer extends StatelessWidget {
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    _buildMenuItem(context, 'assets/images/home.png', l10n.drawerHome, onTap: () {}),
-                    _buildMenuItem(context, 'assets/images/sam_mgmt.png', l10n.drawerProfile, onTap: () {Navigator.pushNamed(context, Route_Names.profileScreen);} ),
+                    _buildMenuItem(context, 'assets/images/home.png', l10n.drawerHome, onTap: () {Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HomeScreen(initialTabIndex: 1),
+                      ),
+                    );}),
+                    _buildMenuItem(context, 'assets/images/sam_mgmt.png', l10n.drawerProfile, onTap: () {Navigator.pushNamed(context, Route_Names.profileScreen);}),
                     _buildMenuItem(context, 'assets/images/notes.png', l10n.drawerMisReport, onTap: () {Navigator.pushNamed(context, Route_Names.MISScreen);}),
                     _buildMenuItem(context, 'assets/images/rupee.png', l10n.drawerIncentivePortal, onTap: () {Navigator.pushNamed(context, Route_Names.incentivePortal);}),
                     _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () {}),
@@ -47,7 +54,7 @@ class CustomDrawer extends StatelessWidget {
                     _buildMenuItem(context, 'assets/images/information.png', l10n.drawerAboutUs, onTap: () {Navigator.pushNamed(context, Route_Names.aboutUs);}),
                     Divider(color: Theme.of(context).colorScheme.primary, thickness: 0.8),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -56,21 +63,21 @@ class CustomDrawer extends StatelessWidget {
                           _UserInfoRow(label: l10n.userVillageLabel, value: "-"),
                           _UserInfoRow(label: l10n.userHscLabel, value: "HSC Baank"),
                           _UserInfoRow(label: l10n.userHfrIdLabel, value: "IN1010001604"),
-                          const SizedBox(height: 4),
-                          Text("V 7.8.10", style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
+                          SizedBox(height: 0.5.h),
+                          Text("V 7.8.10", style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14.sp)),
                         ],
                       ),
                     ),
-                    SizedBox(height: 16),
+                    SizedBox(height: 2.h),
                   ],
                 ),
               ),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 45,
+height: 6.h,
                   child: RoundButton(
                     title: l10n.drawerLogout,
                     onPress: () {},
@@ -86,18 +93,19 @@ class CustomDrawer extends StatelessWidget {
 
   Widget _buildMenuItem(BuildContext context, String imagePath, String title, {VoidCallback? onTap}) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
       dense: true,
-      visualDensity: const VisualDensity(vertical: -1),
-      minLeadingWidth: 24,
+      visualDensity: VisualDensity(vertical: -2),
+      minLeadingWidth: 6.w,
       leading: Image.asset(
         imagePath,
-        width: 24,
-        height: 24,
+        width: 8.w,
+        height: 8.w,
+        fit: BoxFit.contain,
       ),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
       ),
       onTap: onTap,
     );
@@ -112,20 +120,26 @@ class _UserInfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: EdgeInsets.symmetric(vertical: 0.3.h),
       child: Row(
         children: [
           SizedBox(
-            width: 100,
+            width: 30.w,
             child: Text(
               label,
-              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontSize: 15.sp,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 15.sp,
+              ),
             ),
           ),
         ],
