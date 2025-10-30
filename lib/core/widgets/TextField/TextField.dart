@@ -17,6 +17,7 @@ class CustomTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final int? maxLength;
   final int? labelMaxLines;
+  final TextEditingController? controller;
 
   const CustomTextField({
     super.key,
@@ -33,6 +34,7 @@ class CustomTextField extends StatefulWidget {
     this.inputFormatters,
     this.maxLength,
     this.labelMaxLines,
+    this.controller,
   });
 
   @override
@@ -47,31 +49,44 @@ class _CustomTextFieldState extends State<CustomTextField> {
   void initState() {
     super.initState();
     _isObscure = widget.obscureText;
-    _controller = TextEditingController(text: widget.initialValue ?? '');
+    _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
   }
 
   @override
   void didUpdateWidget(covariant CustomTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _controller ??= TextEditingController();
-    final newText = widget.initialValue ?? '';
-    final oldInit = oldWidget.initialValue ?? '';
-    final currText = _controller!.text;
-    final shouldUpdate =
-        // update if text is currently empty
-        currText.isEmpty ||
-        // or if it still matches the old initialValue (user hasn't edited)
-        currText == oldInit ||
-        // or if upstream is progressively providing a longer value (prefill flow)
-        (newText.length >= currText.length && newText.startsWith(currText));
-    if (shouldUpdate && currText != newText) {
-      _controller!.text = newText;
+    
+    // If controller changed, update the reference
+    if (widget.controller != oldWidget.controller) {
+      _controller?.dispose();
+      _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
+    }
+    
+    // Only update text if we're managing our own controller
+    if (widget.controller == null) {
+      _controller ??= TextEditingController();
+      final newText = widget.initialValue ?? '';
+      final oldInit = oldWidget.initialValue ?? '';
+      final currText = _controller!.text;
+      final shouldUpdate =
+          // update if text is currently empty
+          currText.isEmpty ||
+          // or if it still matches the old initialValue (user hasn't edited)
+          currText == oldInit ||
+          // or if upstream is progressively providing a longer value (prefill flow)
+          (newText.length >= currText.length && newText.startsWith(currText));
+      if (shouldUpdate && currText != newText) {
+        _controller!.text = newText;
+      }
     }
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
+    // Only dispose the controller if we created it ourselves
+    if (widget.controller == null) {
+      _controller?.dispose();
+    }
     super.dispose();
   }
 
@@ -85,7 +100,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
     return TextFormField(
       controller: _controller,
-      // initialValue must be null when controller is provided
+
       initialValue: null,
       onChanged: widget.onChanged,
       obscureText: widget.obscureText ? _isObscure : false,
@@ -104,7 +119,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 overflow: TextOverflow.visible,
                 style: inputStyle,
               )
+
             : null,
+        // Add some space between the label and the input field
+        // when the label is floating.
+        labelStyle: inputStyle,
+        floatingLabelStyle: inputStyle,
+        floatingLabelBehavior: FloatingLabelBehavior.always,
         hintText: widget.hintText,
         hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
         prefixIcon: widget.prefixIcon != null
@@ -122,7 +143,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         )
             : null,
         contentPadding: EdgeInsets.symmetric(
-          vertical: 1.5.h,
+          vertical: 0.8.h,
           horizontal: 3.w,
         ),
         border: InputBorder.none,

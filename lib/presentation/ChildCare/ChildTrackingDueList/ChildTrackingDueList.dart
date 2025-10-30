@@ -149,7 +149,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           onTap: () {
             Navigator.pushNamed(
               context,
-              Route_Names.addFamilyMember,
+              Route_Names.ChildTrackingDueListForm,
               arguments: {'isBeneficiary': true},
             );
           },
