@@ -5249,6 +5249,12 @@ abstract class AppLocalizations {
   /// **'Home Visit Day *'**
   String get homeVisitDayLabel;
 
+  /// No description provided for @highRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'High-Risk Pregnancy List'**
+  String get highRisk;
+
   /// No description provided for @dateOfHomeVisitLabel.
   ///
   /// In en, this message translates to:

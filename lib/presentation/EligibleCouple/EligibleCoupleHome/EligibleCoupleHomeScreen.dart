@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
+import 'package:sizer/sizer.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -21,7 +22,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     final cards = [
       {
         'image': 'assets/images/couple.png',
-        'count': '6',
+        'count': '12',
         'title': l10n?.gridEligibleCouple ?? 'Eligible Couple',
         'route': Route_Names.EligibleCoupleIdentified,
       },
@@ -42,26 +43,37 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
       ),
       drawer: CustomDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: GridView.builder(
-          itemCount: cards.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1, // Make square
-          ),
-          itemBuilder: (context, index) {
-            final item = cards[index];
-            return _DashboardCard(
-              image: item['image']!,
-              count: item['count']!,
-              title: item['title']!,
-              onTap: () => Navigator.pushNamed(context, item['route']!),
-            );
-          },
-        ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+
+          final screenWidth = MediaQuery.of(context).size.width;
+          final crossAxisCount = screenWidth > 600 ? 4 : 3;
+          final padding = 12.0 * 2; // Total horizontal padding
+          final spacing = 12.0 * (crossAxisCount - 1); // Total spacing between items
+          final itemWidth = (screenWidth - padding - spacing) / crossAxisCount;
+          
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: cards.map((item) {
+                  return SizedBox(
+                    width: itemWidth,
+                    height: itemWidth, // Keep it square
+                    child: _DashboardCard(
+                      image: item['image']!,
+                      count: item['count']!,
+                      title: item['title']!,
+                      onTap: () => Navigator.pushNamed(context, item['route']!),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -94,7 +106,7 @@ class _DashboardCard extends StatelessWidget {
           padding: const EdgeInsets.all(11),
           child: Column(
 
-       //  mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //  mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Row(
                 children: [
@@ -116,16 +128,16 @@ class _DashboardCard extends StatelessWidget {
                   ),
                 ],
               ),
-                  SizedBox(height: 15),
+              SizedBox(height: 15),
               Text(
                 title,
                 textAlign: TextAlign.start,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.outline
+                style:   TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.outline
                 ),
               ),
             ],

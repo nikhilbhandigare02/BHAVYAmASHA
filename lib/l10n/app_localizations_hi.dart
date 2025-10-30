@@ -2600,6 +2600,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get homeVisitDayLabel => 'गृह भ्रमण का दिन *';
 
   @override
+  String get highRisk => 'उच्च जोखिम वाली गर्भावस्था';
+
+  @override
   String get dateOfHomeVisitLabel => 'गृह भ्रमण की तिथि*';
 
   @override

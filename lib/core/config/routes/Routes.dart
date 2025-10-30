@@ -37,6 +37,7 @@ import '../../../presentation/EligibleCouple/TrackEligibleCouple/TrackEligibleCo
 import '../../../presentation/EligibleCouple/UpdtedEligibleCoupleList/UpdatedEligibleCoupleListScreen.dart' show UpdatedEligibleCoupleListScreen;
 import '../../../presentation/GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import '../../../presentation/Help/HelpScreen.dart';
+import '../../../presentation/High-Risk/High_Risk.dart';
 import '../../../presentation/HomeScreen/HomeScreen.dart';
 import '../../../presentation/MotherCare/ANCVisit/PreviousVisits/PreviousVisit.dart' show Previousvisit;
 import '../../../presentation/MotherCare/DeliveryOutcome/Deliver_outcome_screen.dart';
@@ -168,6 +169,9 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const PregnantWomenList(),);
       case Route_Names.SyncStatusScreen:
         return MaterialPageRoute(builder: (context) => const SyncStatusScreen(),);
+
+      case Route_Names.HighRisk:
+        return MaterialPageRoute(builder: (context) => const HighRisk(),);
 
       case Route_Names.addFamilyHead:
         return MaterialPageRoute(

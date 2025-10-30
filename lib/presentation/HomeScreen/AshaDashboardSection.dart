@@ -3,6 +3,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 import '../../l10n/app_localizations.dart' show AppLocalizations;
+import '../High-Risk/High_Risk.dart';
 import '../RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 
 class AshaDashboardSection extends StatelessWidget {
@@ -279,9 +280,10 @@ class AshaDashboardSection extends StatelessWidget {
     }else if (index == 8) {
       Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
       return;
-    // }else if (index == 9) {
-    //   Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
-    //   return;
+
+    }else if (index == 9) {
+      Navigator.pushNamed(context, Route_Names.HighRisk);
+      return;
     }else if (index == 10) {
       Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
       return;

@@ -880,6 +880,7 @@
   "mcpCardAvailableLabel": "Is 'Matra Child Protection (MCP)' card available?*",
   "birthDoseVaccinationLabel": "Has the baby received the birth dose vaccination?*",
   "homeVisitDayLabel": "Home Visit Day *",
+   "highRisk": "High-Risk Pregnancy List",
   "dateOfHomeVisitLabel": "Date of home visit*",
   "motherStatusLabel": "Mother's status*",
   "mcpCardAvailableLabelMother": "Is 'Matra Shishu Prakshyan (MCP)' card available? *",
