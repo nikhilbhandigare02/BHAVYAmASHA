@@ -36,7 +36,7 @@ class _RoutinescreenState extends State<Routinescreen> {
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppHeader(screenTitle: l10n.routine, showBack: true,),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         children: [
           _sectionTile(l10n.routinePwList, _pwList),
           const SizedBox(height: 12),
@@ -68,7 +68,7 @@ class _RoutinescreenState extends State<Routinescreen> {
             });
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Row(
               children: [
                 Expanded(
@@ -136,7 +136,7 @@ class _RoutinescreenState extends State<Routinescreen> {
               itemBuilder: (context, index) {
                 final item = items[index];
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                   child: _routineCard(item),
                 );
               },
@@ -150,6 +150,7 @@ class _RoutinescreenState extends State<Routinescreen> {
   Widget _routineCard(Map<String, dynamic> item) {
     final primary = Theme.of(context).primaryColor;
     return Container(
+
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -166,7 +167,7 @@ class _RoutinescreenState extends State<Routinescreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Row(
               children: [
                 Icon(Icons.home, color: primary, size: 18),
