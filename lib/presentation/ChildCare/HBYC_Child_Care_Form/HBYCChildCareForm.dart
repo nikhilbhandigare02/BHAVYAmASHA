@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../l10n/app_localizations.dart';
@@ -31,34 +33,11 @@ class _HbycFormView extends StatefulWidget {
 class _HbycFormViewState extends State<_HbycFormView> {
   final _formKey = GlobalKey<FormState>();
 
-  final _mobileOwnerOptions = const [
-    'परिवार के मुखिया का',
-    'माता',
-    'अन्य',
-  ];
-  final _yesNoOptions = const [
+ final _yesNoOptions = const [
     'हाँ',
     'नहीं',
   ];
-  final _religionOptions = const [
-    'हिन्दू',
-    'मुस्लिम',
-    'ईसाई',
-    'सिख',
-    'अन्य',
-  ];
-  final _casteOptions = const [
-    'सामान्य',
-    'ओबीसी',
-    'एससी',
-    'एसटी',
-    'अन्य',
-  ];
-  final _genderOptions = const [
-    'पुरुष',
-    'महिला',
-    'अन्य',
-  ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +61,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
         },
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(4),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Form(
@@ -95,7 +74,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     Divider(color: AppColors.primary, thickness: 1, height: 0),
 
                     const SizedBox(height: 12),
-                    Text(AppLocalizations.of(context)!.hbycBhramanLabel),
+                    Text(AppLocalizations.of(context)!.hbycBhramanLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -105,7 +84,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycIsChildSickLabel),
+                    Text(AppLocalizations.of(context)!.hbycIsChildSickLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -114,7 +93,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycBreastfeedingContinuingLabel),
+                    Text(AppLocalizations.of(context)!.hbycBreastfeedingContinuingLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -123,7 +102,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycCompleteDietProvidedLabel),
+                    Text(AppLocalizations.of(context)!.hbycCompleteDietProvidedLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -132,7 +111,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycWeighedByAwwLabel),
+                    Text(AppLocalizations.of(context)!.hbycWeighedByAwwLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -141,7 +120,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycLengthHeightRecordedLabel),
+                    Text(AppLocalizations.of(context)!.hbycLengthHeightRecordedLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -150,7 +129,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycWeightLessThan3sdLabel),
+                    Text(AppLocalizations.of(context)!.hbycWeightLessThan3sdLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -159,7 +138,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycDevelopmentDelaysObservedLabel),
+                    Text(AppLocalizations.of(context)!.hbycDevelopmentDelaysObservedLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -168,7 +147,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycFullyVaccinatedLabel),
+                    Text(AppLocalizations.of(context)!.hbycFullyVaccinatedLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -177,7 +156,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycMeaslesVaccineGivenLabel),
+                    Text(AppLocalizations.of(context)!.hbycMeaslesVaccineGivenLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -186,7 +165,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycVitaminADosageGivenLabel),
+                    Text(AppLocalizations.of(context)!.hbycVitaminADosageGivenLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -195,7 +174,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycOrsPacketAvailableLabel),
+                    Text(AppLocalizations.of(context)!.hbycOrsPacketAvailableLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -204,7 +183,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycIronFolicSyrupAvailableLabel),
+                    Text(AppLocalizations.of(context)!.hbycIronFolicSyrupAvailableLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -213,7 +192,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycCounselingExclusiveBf6mLabel),
+                    Text(AppLocalizations.of(context)!.hbycCounselingExclusiveBf6mLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -222,7 +201,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdviceComplementaryFoodsLabel),
+                    Text(AppLocalizations.of(context)!.hbycAdviceComplementaryFoodsLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -231,7 +210,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdviceHandWashingHygieneLabel),
+                    Text(AppLocalizations.of(context)!.hbycAdviceHandWashingHygieneLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -240,7 +219,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdviceParentingSupportLabel),
+                    Text(AppLocalizations.of(context)!.hbycAdviceParentingSupportLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -249,7 +228,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycCounselingFamilyPlanningLabel),
+                    Text(AppLocalizations.of(context)!.hbycCounselingFamilyPlanningLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -258,7 +237,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdvicePreparingAdministeringOrsLabel),
+                    Text(AppLocalizations.of(context)!.hbycAdvicePreparingAdministeringOrsLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -267,7 +246,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdviceAdministeringIfaSyrupLabel),
+                    Text(AppLocalizations.of(context)!.hbycAdviceAdministeringIfaSyrupLabel, style: TextStyle(fontSize: 14.sp),),
                     ApiDropdown<String>(
                       items: _yesNoOptions,
                       getLabel: (s) => s,
@@ -275,7 +254,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                       onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceAdministeringIfaSyrupChanged(v ?? '')),
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                    Text(AppLocalizations.of(context)!.hbycCompletionDateLabel),
+                    Text(AppLocalizations.of(context)!.hbycCompletionDateLabel, style: TextStyle(fontSize: 14.sp),),
                     CustomDatePicker(
                       labelText: '',
                       hintText: AppLocalizations.of(context)!.dateHint,
@@ -291,22 +270,17 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                       builder: (context, state) {
                         final busy = state.status == HbycFormStatus.submitting;
-                        return ElevatedButton(
-                          onPressed: busy
-                              ? null
-                              : () {
-                                  if (_formKey.currentState?.validate() ?? false) {
-                                    context.read<HbycChildCareBloc>().add(const SubmitForm());
-                                  }
-                                },
-                          child: busy
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('संरक्षित करें'),
+                        return RoundButton(
+                          title: 'संरक्षित करें',
+                          isLoading: busy, // show loader if busy
+                          disabled: busy,  // disable when busy
+                          onPress: () {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              context.read<HbycChildCareBloc>().add(const SubmitForm());
+                            }
+                          },
                         );
+
                       },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),

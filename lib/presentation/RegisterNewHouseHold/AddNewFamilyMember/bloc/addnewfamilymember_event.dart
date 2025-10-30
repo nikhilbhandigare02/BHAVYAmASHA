@@ -230,6 +230,24 @@ final class AnmUpdateIsPregnant extends AddnewfamilymemberEvent {
   @override
   List<Object> get props => [value];
 }
+final class UpdateYearChanged extends AddnewfamilymemberEvent {
+  final String value; // 'Yes' | 'No'
+  const UpdateYearChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+final class UpdateMonthChanged extends AddnewfamilymemberEvent {
+  final String value; // 'Yes' | 'No'
+  const UpdateMonthChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+final class UpdateDayChanged extends AddnewfamilymemberEvent {
+  final String value; // 'Yes' | 'No'
+  const UpdateDayChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
 
 // Separate submit for update flow
 final class AnmUpdateSubmit extends AddnewfamilymemberEvent {

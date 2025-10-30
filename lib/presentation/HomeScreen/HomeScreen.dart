@@ -7,6 +7,7 @@ import 'package:sizer/sizer.dart';
 import '../../core/widgets/AppDrawer/Drawer.dart';
 import '../../core/widgets/AppHeader/AppHeader.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
+import '../../data/Local_Storage/local_storage_dao.dart';
 import '../../l10n/app_localizations.dart';
 import '../GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import 'TodaysProgramm.dart';
@@ -34,12 +35,27 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 
   bool isLoading = true;
+  int householdCount = 0;
 
   @override
   void initState() {
     super.initState();
     selectedIndex = widget.initialTabIndex;
     fetchApiData();
+    _loadHouseholdCount();
+  }
+
+  Future<void> _loadHouseholdCount() async {
+    try {
+      final count = await LocalStorageDao.instance.getHouseholdCount();
+      if (mounted) {
+        setState(() {
+          householdCount = count;
+        });
+      }
+    } catch (e) {
+      print('Error loading household count: $e');
+    }
   }
 
   Future<void> fetchApiData() async {
@@ -196,6 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
             )
                 : SingleChildScrollView(
               child: AshaDashboardSection(
+                householdCount: householdCount,
                 selectedGridIndex: selectedGridIndex,
                 onGridTap: (index) =>
                     setState(() => selectedGridIndex = index),

@@ -23,9 +23,11 @@ import 'package:medixcel_new/presentation/EligibleCouple/EligibleCoupleHome/Elig
 
 import '../../../Splash_screen/Splash_screen.dart';
 import '../../../presentation/ABHALink/AbhaLinkScreen.dart' show Abhalinkscreen;
+import '../../../presentation/AshakiDuniya/AshaKiDuniyaScreen.dart';
 import '../../../presentation/CBACForm/CBACForm.dart';
 import '../../../presentation/ChildCare/ChildCareHomeScreen.dart';
 import '../../../presentation/ChildCare/ChildTrackingDueList/ChildTrackingDueList.dart' show CHildTrackingDueList;
+import '../../../presentation/ChildCare/DeseasedList/DeseasedList.dart';
 import '../../../presentation/ChildCare/HBYCList/HBYCList.dart' show HBYCList;
 import '../../../presentation/ChildCare/HBYC_Child_Care_Form/HBYCChildCareForm.dart';
 import '../../../presentation/ChildCare/RegisterChildBeneficieryList/RegisterChildListScreen.dart' show RegisterChildScreen;
@@ -37,6 +39,7 @@ import '../../../presentation/EligibleCouple/TrackEligibleCouple/TrackEligibleCo
 import '../../../presentation/EligibleCouple/UpdtedEligibleCoupleList/UpdatedEligibleCoupleListScreen.dart' show UpdatedEligibleCoupleListScreen;
 import '../../../presentation/GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import '../../../presentation/Help/HelpScreen.dart';
+import '../../../presentation/High-Risk/High_Risk.dart';
 import '../../../presentation/HomeScreen/HomeScreen.dart';
 import '../../../presentation/MotherCare/ANCVisit/PreviousVisits/PreviousVisit.dart' show Previousvisit;
 import '../../../presentation/MotherCare/DeliveryOutcome/Deliver_outcome_screen.dart';
@@ -174,6 +177,13 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const DeathRegister(),);
       case Route_Names.HBNCListBeneficiaries:
         return MaterialPageRoute(builder: (context) => const HBNCListBeneficiaries(),);
+
+      case Route_Names.HighRisk:
+        return MaterialPageRoute(builder: (context) => const HighRisk(),);
+      case Route_Names.AshaKiDuniyaScreen:
+        return MaterialPageRoute(builder: (context) => const AshaKiDuniyaScreen(),);
+      case Route_Names.DeseasedList:
+        return MaterialPageRoute(builder: (context) => const DeseasedList(),);
 
       case Route_Names.addFamilyHead:
         return MaterialPageRoute(

@@ -29,7 +29,7 @@ class ApiDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 12.sp,
+      fontSize: 15.sp,
       fontWeight: FontWeight.w500,
       color: AppColors.onSurface,
       height: 1.5,
@@ -49,7 +49,7 @@ class ApiDropdown<T> extends StatelessWidget {
               softWrap: true,
               maxLines: labelMaxLines,
               overflow: TextOverflow.visible,
-              style: TextStyle(fontSize: 14.sp),
+              style: TextStyle(fontSize: 15.sp),
             )
                 : null,
             hintText: hintText,

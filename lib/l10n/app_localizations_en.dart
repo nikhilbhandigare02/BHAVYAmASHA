@@ -228,7 +228,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ageApproximate => 'Age/Approximate Age';
 
   @override
-  String get ageAtMarriageHint => 'Age at the time of marriage';
+  String get ageAtMarriageHint => 'Enter age at marriage';
 
   @override
   String get ageAtMarriageInYearsLabel => 'Age at marriage (in years)';
@@ -1174,7 +1174,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyHeadDetailsTitle => 'Family Head Details';
 
   @override
-  String get familySurvey => 'Edit';
+  String get familySurvey => 'Family Survey';
 
   @override
   String get father => 'Father';
@@ -1716,7 +1716,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nameOfFamilyHeadLabel => 'Name of family head';
 
   @override
-  String get nameOfMemberHint => 'Name of member';
+  String get nameOfMemberHint => 'Enter member name';
 
   @override
   String get nameOfMemberLabel => 'Name of member';
@@ -2061,7 +2061,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spouse => 'Spouse';
 
   @override
-  String get spouseNameHint => 'Spouse Name';
+  String get spouseNameHint => 'Enter spouse name';
 
   @override
   String get spouseNameLabel => 'Spouse Name';
@@ -2375,6 +2375,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get youngestChildAgeLabel => 'Age of youngest child';
 
   @override
+  String get suchivani => 'Suchivani';
+
+  @override
+  String get ashaDiary => 'ASHA Diary';
+
+  @override
+  String get householdSurvey => 'Household Survey';
+
+  @override
+  String get vhsncMeeting => 'VHSNC Meeting';
+
+  @override
+  String get training => 'Training';
+
+  @override
   String get youngestChildAgeUnitLabel => 'Age of youngest child unit';
 
   @override
@@ -2598,6 +2613,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeVisitDayLabel => 'Home Visit Day *';
+
+  @override
+  String get highRisk => 'High-Risk Pregnancy List';
 
   @override
   String get dateOfHomeVisitLabel => 'Date of home visit*';
@@ -3014,7 +3032,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabNewbornDetails => 'Newborn Details';
 
   @override
-  String get confirmAttentionTitle => 'Attention!';
+  String get confirmAttentionTitle => 'Confirm Action';
 
   @override
   String get confirmBackLoseDetailsMsg => 'If you go back, details will be lost. Do you want to go back?';
@@ -3023,10 +3041,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmYesExit => 'Yes, Exit';
 
   @override
-  String get confirmNo => 'No';
+  String get confirmNo => 'No, Stay';
 
   @override
-  String get confirmCloseFormMsg => 'Do you want to close this form?';
+  String get confirmCloseFormMsg => 'Are you sure you want to close this form? Any unsaved changes will be lost.';
 
   @override
   String get confirmYes => 'Yes';
@@ -3045,4 +3063,157 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutMessage => 'Are you sure you want to logout?';
+
+  @override
+  String get spousDetails => 'Spous Details';
+
+  @override
+  String get relationWithFamilyHead => 'Relation with the family head';
+
+  @override
+  String get nameOfMember => 'Name of member';
+
+  @override
+  String get ageAtMarriage => 'Age at the time of marriage';
+
+  @override
+  String get spouseName => 'Spouse Name';
+
+  @override
+  String get fatherName => 'Father name';
+
+  @override
+  String get fatherNameHint => 'Enter father\'s name';
+
+  @override
+  String get years => 'Years';
+
+  @override
+  String get yearsHint => 'Years';
+
+  @override
+  String get months => 'Months';
+
+  @override
+  String get monthsHint => 'Months';
+
+  @override
+  String get days => 'Days';
+
+  @override
+  String get daysHint => 'Days';
+
+  @override
+  String get totalChildrenBorn => 'Total number of children born';
+
+  @override
+  String get totalLiveChildren => 'Total number of live children';
+
+  @override
+  String get totalMaleChildren => 'Total number of male children';
+
+  @override
+  String get totalFemaleChildren => 'Total number of female children';
+
+  @override
+  String get malePlusFemaleError => 'Male + Female must equal Total number of live children';
+
+  @override
+  String get youngestChildAge => 'Age of youngest child';
+
+  @override
+  String get ageUnitOfYoungest => 'Age unit of youngest child';
+
+  @override
+  String get genderOfYoungest => 'Gender of youngest child';
+
+  @override
+  String get bankAccountNumber => 'Bank Account Number';
+
+  @override
+  String get bankAccountNumberHint => 'Enter bank account number';
+
+  @override
+  String get ifscCode => 'IFSC Code';
+
+  @override
+  String get ifscCodeHint => 'Enter 11-digit IFSC code';
+
+  @override
+  String get voterId => 'Voter ID';
+
+  @override
+  String get voterIdHint => 'Enter Voter ID';
+
+  @override
+  String get rationCardId => 'Ration Card ID';
+
+  @override
+  String get rationCardIdHint => 'Enter Ration Card ID';
+
+  @override
+  String get personalHealthId => 'Personal Health ID (ABHA ID)';
+
+  @override
+  String get personalHealthIdHint => 'Enter 14-digit Personal Health ID';
+
+  @override
+  String get memberRemainsToAdd => 'No. of members remains to be added';
+
+  @override
+  String get cbac => 'CBAC';
+
+  @override
+  String get videoTutorialList => 'Video Tutorial List';
+
+  @override
+  String get completeTutorial => 'Complete Tutorial';
+
+  @override
+  String get ashwinPortalFilm => 'Ashwin Portal Film';
+
+  @override
+  String get pneumoniaAwareness => 'Pneumonia Awareness (Child Health)';
+
+  @override
+  String get healthMinisterMessage => 'Message from the Honorable Health Minister Bihar';
+
+  @override
+  String get errorLoadingVideo => 'Error loading video';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get myBeneficiariesTitle => 'My Beneficiaries';
+
+  @override
+  String get familyUpdate => 'Family Update';
+
+  @override
+  String get eligibleCoupleList => 'Eligible Couple List';
+
+  @override
+  String get pregnantWomenList => 'Pregnant Women List';
+
+  @override
+  String get pregnancyOutcome => 'Pregnancy Outcome';
+
+  @override
+  String get hbcnList => 'HBNC List';
+
+  @override
+  String get lbwReferred => 'LBW Referred';
+
+  @override
+  String get abortionList => 'Abortion List';
+
+  @override
+  String get deathRegister => 'Death Register';
+
+  @override
+  String get migratedOut => 'Migrated Out';
+
+  @override
+  String get guestBeneficiaryList => 'Guest Beneficiary List';
 }

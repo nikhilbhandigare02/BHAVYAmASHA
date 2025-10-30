@@ -171,9 +171,20 @@ class LocalStorageDao {
     return db.insert('followup_form_data', row);
   }
 
+  Future<int> getHouseholdCount() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM households WHERE is_deleted = 0')
+    );
+    return count ?? 0;
+  }
+
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {
     final db = await _db;
-    final rows = await db.query('households', orderBy: 'created_date_time DESC');
+    final rows = await db.query('households', 
+      where: 'is_deleted = ?',
+      whereArgs: [0],
+      orderBy: 'created_date_time DESC');
     return rows.map((row) {
       final mapped = Map<String, dynamic>.from(row);
       try {

@@ -228,7 +228,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ageApproximate => 'आयु/अनुमानित आयु';
 
   @override
-  String get ageAtMarriageHint => 'विवाह के समय आयु';
+  String get ageAtMarriageHint => 'विवाह के समय आयु दर्ज करें';
 
   @override
   String get ageAtMarriageInYearsLabel => 'विवाह के समय आयु (वर्ष में)';
@@ -305,22 +305,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get announcement => 'घोषणा';
 
   @override
-  String get announcementItem1Body => 'स्थानीय प्राथमिक स्वास्थ्य केंद्र में ब्लॉक क्षेत्र की आशा कार्यकर्ताओं को स्वास्थ्य संबंधित कार्य हेतु स्मार्ट फोन दिए गए। पीएचसी प्रभारी डॉ. पुरुषोत्तम प्रियदर्शी ने बताया कि ब्लॉक क्षेत्र की कुल 126 आशा कार्यकर्ताओं को हाई-टेक बनाने के लिए स्मार्ट फोन दिए गए हैं...';
+  String get announcementItem1Body => 'स्थानीय प्राथमिक स्वास्थ्य केंद्र में ब्लॉक क्षेत्र की आशा कार्यकर्ताओं को स्वास्थ्य संबंधी कार्यों के लिए स्मार्ट फोन दिए गए। पीएचसी प्रभारी डॉ. पुरुषोत्तम प्रियदर्शी ने बताया कि ब्लॉक क्षेत्र की कुल 126 आशा कार्यकर्ताओं को हाई-टेक बनाने के लिए स्मार्ट फोन दिए गए हैं। उन्होंने कहा कि अब रजिस्टर में लिखने की आज़ादी मिलेगी। यह मोबाइल विशेष रूप से स्वास्थ्य संबंधी कार्यक्रमों के लिए तैयार किया गया है और इसे किसी अन्य कार्य के लिए उपयोग नहीं किया जा सकता। सभी आशा कार्यकर्ता अपने स्मार्ट फोन से ही मानदेय के लिए क्लेम फॉर्म भेज सकती हैं। इसके आधार पर मानदेय की राशि उनके बैंक खाते में भेजी जाएगी। बीसीएम संजीत कुमार ने बताया कि ब्लॉक क्षेत्र में कुल 120 आशा कार्यकर्ता और 6 फेसिलिटेटर हैं, जिनमें से 122 को स्मार्ट फोन उपलब्ध करा दिए गए हैं।';
 
   @override
-  String get announcementItem1Title => 'वितरण: आशा कार्यकर्ताओं को स्मार्ट फोन दिए गए';
+  String get announcementItem1Title => 'वितरण: आशा कार्यकर्ताओं को दिए गए स्मार्ट फोन';
 
   @override
-  String get announcementItem2Body => 'यदि आप बिहार के निवासी हैं और महिला हैं तो आपको बता दें कि बिहार में आशा के लिए लगभग 1.12 लाख पदों पर भारी भर्ती निकली है...';
+  String get announcementItem2Body => 'यदि आप बिहार की निवासी हैं और एक महिला हैं, तो हम आपको बता दें कि बिहार में महिलाओं के लिए लगभग 1.12 लाख पदों पर आशा कार्यकर्ता की जबरदस्त भर्ती की गई है। जिसमें बिहार की सभी महिलाएं आवेदन कर सकती हैं। बिहार आशा भर्ती 2023 के आवेदन प्रक्रिया में बड़ा बदलाव किया गया है। पहले आशा बहाली के लिए केवल 8वीं पास होना आवश्यक था, लेकिन अब इसे बदलकर 10वीं पास कर दिया गया है। इसलिए यदि आप बिहार आशा कार्यकर्ता के रूप में नौकरी पाना चाहती हैं, तो आपके पास कम से कम 10वीं पास होना अनिवार्य होगा। आप आशा कार्यकर्ता के पद के लिए आवेदन कर सकती हैं।';
 
   @override
-  String get announcementItem2Title => 'बिहार आशा वर्कर वैकेंसी 2023: (महिलाओं के लिए बड़ा अवसर, 1.12 लाख से अधिक पदों पर भर्ती)';
+  String get announcementItem2Title => 'बिहार आशा कार्यकर्ता भर्ती 2023: (महिलाओं के लिए शानदार अवसर, इस विभाग में होंगी 1.12 लाख से अधिक पदों पर भर्ती)';
 
   @override
-  String get announcementItem3Body => 'आशा कार्यकर्ता कोविड-19 से लड़ाई की अग्रिम पंक्ति में रही हैं...';
+  String get announcementItem3Body => 'आशा कार्यकर्ता कोविड-19 से लड़ाई की अग्रिम पंक्ति में रही हैं। नवजात शिशु और उनकी माताओं की देखभाल, नियमित टीकाकरण और सर्वेक्षण जैसी नियमित जिम्मेदारियों के अलावा, देशभर की आशा कार्यकर्ता कोविड-19 से संबंधित अतिरिक्त कार्य बिना किसी अतिरिक्त वेतन के कर रही हैं।';
 
   @override
-  String get announcementItem3Title => 'बिहार की आशा कार्यकर्ताओं की बेहतर वेतन और कार्य वातावरण की मांग';
+  String get announcementItem3Title => 'बिहार की आशा कार्यकर्ताओं ने बेहतर वेतन और कार्य वातावरण की मांग की';
 
   @override
   String get anyHighRiskProblemLabel => 'Is there any high risk problem?';
@@ -1174,7 +1174,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get familyHeadDetailsTitle => 'परिवार प्रमुख का विवरण';
 
   @override
-  String get familySurvey => 'Edit';
+  String get familySurvey => 'Family Survey';
 
   @override
   String get father => 'पिता';
@@ -1716,7 +1716,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get nameOfFamilyHeadLabel => 'परिवार प्रमुख का नाम';
 
   @override
-  String get nameOfMemberHint => 'सदस्य का नाम';
+  String get nameOfMemberHint => 'सदस्य का नाम दर्ज करें';
 
   @override
   String get nameOfMemberLabel => 'सदस्य का नाम';
@@ -2061,7 +2061,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get spouse => 'पति/पत्नी';
 
   @override
-  String get spouseNameHint => 'पति/पत्नी का नाम';
+  String get spouseNameHint => 'पति/पत्नी का नाम दर्ज करें';
 
   @override
   String get spouseNameLabel => 'पति/पत्नी का नाम';
@@ -2375,6 +2375,21 @@ class AppLocalizationsHi extends AppLocalizations {
   String get youngestChildAgeLabel => 'सबसे छोटे बच्चे की आयु';
 
   @override
+  String get suchivani => 'Suchivani';
+
+  @override
+  String get ashaDiary => 'ASHA Diary';
+
+  @override
+  String get householdSurvey => 'Household Survey';
+
+  @override
+  String get vhsncMeeting => 'VHSNC Meeting';
+
+  @override
+  String get training => 'Training';
+
+  @override
   String get youngestChildAgeUnitLabel => 'सबसे छोटे बच्चे की आयु की इकाई';
 
   @override
@@ -2598,6 +2613,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get homeVisitDayLabel => 'गृह भ्रमण का दिन *';
+
+  @override
+  String get highRisk => 'उच्च जोखिम वाली गर्भावस्था';
 
   @override
   String get dateOfHomeVisitLabel => 'गृह भ्रमण की तिथि*';
@@ -3014,19 +3032,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tabNewbornDetails => 'बच्चे का विवरण';
 
   @override
-  String get confirmAttentionTitle => 'Attention!';
+  String get confirmAttentionTitle => 'कार्रवाई की पुष्टि करें';
 
   @override
   String get confirmBackLoseDetailsMsg => 'If you go back, details will be lost. Do you want to go back?';
 
   @override
-  String get confirmYesExit => 'Yes, Exit';
+  String get confirmYesExit => 'हां, बाहर निकलें';
 
   @override
-  String get confirmNo => 'No';
+  String get confirmNo => 'नहीं, यहीं रहें';
 
   @override
-  String get confirmCloseFormMsg => 'Do you want to close this form?';
+  String get confirmCloseFormMsg => 'क्या आप वाकई इस फॉर्म को बंद करना चाहते हैं? कोई भी न सहेजे गए परिवर्तन हटा दिए जाएंगे।';
 
   @override
   String get confirmYes => 'Yes';
@@ -3045,4 +3063,157 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get logoutMessage => 'क्या आप वाकई लॉगआउट करना चाहते हैं?';
+
+  @override
+  String get spousDetails => 'पति/पत्नी का विवरण';
+
+  @override
+  String get relationWithFamilyHead => 'परिवार के मुखिया से संबंध';
+
+  @override
+  String get nameOfMember => 'सदस्य का नाम';
+
+  @override
+  String get ageAtMarriage => 'विवाह के समय आयु';
+
+  @override
+  String get spouseName => 'पति/पत्नी का नाम';
+
+  @override
+  String get fatherName => 'पिता का नाम';
+
+  @override
+  String get fatherNameHint => 'पिता का नाम दर्ज करें';
+
+  @override
+  String get years => 'वर्ष';
+
+  @override
+  String get yearsHint => 'वर्ष';
+
+  @override
+  String get months => 'महीने';
+
+  @override
+  String get monthsHint => 'महीने';
+
+  @override
+  String get days => 'दिन';
+
+  @override
+  String get daysHint => 'दिन';
+
+  @override
+  String get totalChildrenBorn => 'जन्मे बच्चों की कुल संख्या';
+
+  @override
+  String get totalLiveChildren => 'जीवित बच्चों की कुल संख्या';
+
+  @override
+  String get totalMaleChildren => 'पुरुष बच्चों की कुल संख्या';
+
+  @override
+  String get totalFemaleChildren => 'महिला बच्चों की कुल संख्या';
+
+  @override
+  String get malePlusFemaleError => 'पुरुष + महिला बच्चों की कुल संख्या जीवित बच्चों की कुल संख्या के बराबर होनी चाहिए';
+
+  @override
+  String get youngestChildAge => 'सबसे छोटे बच्चे की आयु';
+
+  @override
+  String get ageUnitOfYoungest => 'सबसे छोटे बच्चे की आयु की इकाई';
+
+  @override
+  String get genderOfYoungest => 'सबसे छोटे बच्चे का लिंग';
+
+  @override
+  String get bankAccountNumber => 'बैंक खाता संख्या';
+
+  @override
+  String get bankAccountNumberHint => 'बैंक खाता संख्या दर्ज करें';
+
+  @override
+  String get ifscCode => 'आईएफएससी कोड';
+
+  @override
+  String get ifscCodeHint => '11 अंकों का आईएफएससी कोड दर्ज करें';
+
+  @override
+  String get voterId => 'मतदाता पहचान पत्र';
+
+  @override
+  String get voterIdHint => 'मतदाता पहचान पत्र संख्या दर्ज करें';
+
+  @override
+  String get rationCardId => 'राशन कार्ड आईडी';
+
+  @override
+  String get rationCardIdHint => 'राशन कार्ड आईडी दर्ज करें';
+
+  @override
+  String get personalHealthId => 'व्यक्तिगत स्वास्थ्य आईडी (आभा आईडी)';
+
+  @override
+  String get personalHealthIdHint => '14 अंकों की व्यक्तिगत स्वास्थ्य आईडी दर्ज करें';
+
+  @override
+  String get memberRemainsToAdd => 'जोड़ने के लिए बचे हुए सदस्यों की संख्या';
+
+  @override
+  String get cbac => 'सीबीएसी';
+
+  @override
+  String get videoTutorialList => 'वीडियो ट्यूटोरियल सूची';
+
+  @override
+  String get completeTutorial => 'पूरा ट्यूटोरियल';
+
+  @override
+  String get ashwinPortalFilm => 'आश्विन पोर्टल फिल्म';
+
+  @override
+  String get pneumoniaAwareness => 'निमोनिया जागरूकता (बाल स्वास्थ्य)';
+
+  @override
+  String get healthMinisterMessage => 'माननीय स्वास्थ्य मंत्री बिहार का संदेश';
+
+  @override
+  String get errorLoadingVideo => 'वीडियो लोड करने में त्रुटि';
+
+  @override
+  String get retry => 'पुनः प्रयास करें';
+
+  @override
+  String get myBeneficiariesTitle => 'मेरे लाभार्थी';
+
+  @override
+  String get familyUpdate => 'परिवार अद्यतन';
+
+  @override
+  String get eligibleCoupleList => 'पात्र दंपति सूची';
+
+  @override
+  String get pregnantWomenList => 'गर्भवती महिलाओं की सूची';
+
+  @override
+  String get pregnancyOutcome => 'गर्भावस्था परिणाम';
+
+  @override
+  String get hbcnList => 'एचबीसीएन सूची';
+
+  @override
+  String get lbwReferred => 'कम वजन वाले शिशु (एलबीडब्ल्यू) रेफर किए गए';
+
+  @override
+  String get abortionList => 'गर्भपात सूची';
+
+  @override
+  String get deathRegister => 'मृत्यु रजिस्टर';
+
+  @override
+  String get migratedOut => 'बाहर स्थानांतरित';
+
+  @override
+  String get guestBeneficiaryList => 'अतिथि लाभार्थी सूची';
 }

@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
@@ -207,14 +208,14 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       child: Text(
                         data['hhId'] ?? '',
-                        style: TextStyle(color: primary, fontWeight: FontWeight.w600),
+                        style: TextStyle(color: primary, fontWeight: FontWeight.w500, fontSize: 14.sp),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${l10n?.visitsLabel ?? 'Visits :'} 0',
-                    style: TextStyle(color: primary, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: primary, fontWeight: FontWeight.w500, fontSize: 14.sp),
                   ),
                   const SizedBox(width: 6),
                   SizedBox(

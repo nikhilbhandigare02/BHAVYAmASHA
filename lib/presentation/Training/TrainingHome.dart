@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../core/widgets/RoundButton/RoundButton.dart';
 
@@ -135,7 +136,7 @@ class _FeatureCard extends StatelessWidget {
                   style: TextStyle(
                     color: primary,
                     fontWeight: FontWeight.w700,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                 ),
               ],
@@ -143,10 +144,10 @@ class _FeatureCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
-                fontSize: 12,
+                color: AppColors.outline,
+                fontSize: 14.sp,
               ),
             ),
           ],

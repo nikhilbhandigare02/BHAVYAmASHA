@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 class Routinescreen extends StatefulWidget {
   const Routinescreen({super.key});
@@ -75,17 +76,17 @@ class _RoutinescreenState extends State<Routinescreen> {
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
                   ),
                 ),
                 Text(
                   '${items.length}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  style:  TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
                     color:AppColors.textPrimary,
                   ),
                 ),
@@ -227,22 +228,25 @@ class _RoutinescreenState extends State<Routinescreen> {
                     ],
                   ),
                 ),
-                Column(
+                Row(
                   children: [
                     CircleAvatar(
-                      radius: 16,
+                      radius: 22,
                       backgroundColor: Colors.white,
-                      child: Icon(Icons.phone, color: primary, size: 18),
+                      child: Icon(Icons.phone, color: primary, size: 24),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(width: 12),
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 50,
+                      height: 50,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Icon(Icons.pregnant_woman, color: primary),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Image.asset('assets/images/hrp.png'),
+                      ),
                     ),
                   ],
                 )
@@ -254,20 +258,4 @@ class _RoutinescreenState extends State<Routinescreen> {
     );
   }
 
-  Widget _rowText(String title, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(color: Colors.white70, fontSize: 10),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(color: Colors.white, fontSize: 10),
-        ),
-      ],
-    );
-  }
 }

@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 import '../HomeScreen/HomeScreen.dart';
 
@@ -105,13 +106,7 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                     count: 0,
                     image: 'assets/images/death2.png',
                     onClick: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n?.deceasedChildSnack ?? 'Deceased Child',
-                          ),
-                        ),
-                      );
+                      Navigator.pushNamed(context, Route_Names.DeseasedList);
                     },
                   ),
                   const SizedBox(width: 12),
@@ -182,19 +177,19 @@ class _FeatureCard extends StatelessWidget {
                   '$count',
                   style: TextStyle(
                     color: primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14.sp,
                   ),
                 ),
               ],
             ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
             Text(
               title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
                 color: AppColors.outline,
-                fontSize: 12,
+                fontSize: 14.sp,
               ),
             ),
           ],

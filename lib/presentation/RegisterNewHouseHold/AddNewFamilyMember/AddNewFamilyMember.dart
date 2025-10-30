@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/Dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
+import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart' show Route_Names;
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/utils/Validations.dart' show Validations;
@@ -90,7 +91,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
             context: context,
             title: l.confirmAttentionTitle,
             message: l.confirmCloseFormMsg,
-            yesText: l.confirmYes,
+            yesText: l.yes,
             noText: l.confirmNo,
           );
           return shouldExit ?? false;
@@ -437,11 +438,72 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                             )
                           else
                             _section(
-                              CustomTextField(
-                                labelText: '${l.ageLabel} *',
-                                keyboardType: TextInputType.number,
-                                onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateApproxAge(v.trim())),
-                                validator: (v) => (state.useDob || (v != null && v.trim().isNotEmpty)) ? null : l.requiredField,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 1.h, left: 1.3.h),
+                                    child: Text(
+                                      '${l.ageApproximate} *',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: CustomTextField(
+                                          labelText: 'Years',
+                                          hintText: 'Years',
+                                          initialValue: state.updateYear ?? '',
+                                          keyboardType: TextInputType.number,
+                                          onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateYearChanged(v.trim())),
+                                        ),
+                                      ),
+
+                                      // --- Divider between Years & Months ---
+                                      Container(
+                                        width: 1,
+                                        height: 4.h,
+                                        color: Colors.grey.shade300,
+                                        margin: EdgeInsets.symmetric(horizontal: 1.w),
+                                      ),
+
+                                      // --- Months ---
+                                      Expanded(
+                                        child: CustomTextField(
+                                          labelText: 'Months',
+                                          hintText: 'Months',
+                                          initialValue: state.updateMonth ?? '',
+                                          keyboardType: TextInputType.number,
+                                          onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateMonthChanged(v.trim())),
+                                        ),
+                                      ),
+
+                                      // --- Divider between Months & Days ---
+                                      Container(
+                                        width: 1,
+                                        height: 4.h,
+                                        color: Colors.grey.shade300,
+                                        margin: EdgeInsets.symmetric(horizontal: 1.w),
+                                      ),
+
+                                      Expanded(
+                                        child: CustomTextField(
+                                          labelText: 'Days',
+                                          hintText: 'Days',
+                                          initialValue: state.updateDay ?? '',
+                                          keyboardType: TextInputType.number,
+                                          onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateDayChanged(v.trim())),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+
+                                ],
                               ),
                             ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),

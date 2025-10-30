@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -178,18 +179,18 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow('Name', data['name']),
+                  _infoRow('', data['name']),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: _infoRow('Mobile', data['mobile']),
+                        child: _infoRow('Mobile :', data['mobile']),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _infoRow(
-                          'Mohalla',
+                          'Mohalla :',
                           data['mohalla'] ?? '',
                           isWrappable: true, // ✅ Optional flag to handle wrapping
                         ),
@@ -207,26 +208,26 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     );
   }
 
-  Widget _infoRow(String title, String value,{bool isWrappable = false}) {
+  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
           Text(
-            '$title: ',
-            style: const TextStyle(
+            '$title ',
+            style:  TextStyle(
               color: Colors.white70,
-              fontSize: 13,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
           Expanded(
             child: Text(
               value.isEmpty ? 'N/A' : value,
-              style: const TextStyle(
+              style:  TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+                fontSize: 14.sp,
               ),
               overflow: TextOverflow.ellipsis,
             ),

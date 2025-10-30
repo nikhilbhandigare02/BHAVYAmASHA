@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:sizer/sizer.dart';
 
 class Previousvisit extends StatefulWidget {
   const Previousvisit({super.key});
@@ -40,11 +41,11 @@ class _PreviousvisitState extends State<Previousvisit> {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Row(
-                    children: const [
-                      Expanded(child: Text('Sr No.', style: TextStyle(fontWeight: FontWeight.w600))),
-                      Expanded(child: Text('Visit Date', style: TextStyle(fontWeight: FontWeight.w600))),
-                      Expanded(child: Text('Pregnancy Week', style: TextStyle(fontWeight: FontWeight.w600))),
-                      Expanded(child: Text('High Risk', style: TextStyle(fontWeight: FontWeight.w600))),
+                    children:  [
+                      Expanded(child: Text('Sr No.', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp))),
+                      Expanded(child: Text('Visit Date', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp))),
+                      Expanded(child: Text('Pregnancy Week', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp))),
+                      Expanded(child: Text('High Risk', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp))),
                     ],
                   ),
                 ),
@@ -67,10 +68,10 @@ class _PreviousvisitState extends State<Previousvisit> {
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       child: Row(
                         children: [
-                          Expanded(child: Text('${index + 1}')),
-                          Expanded(child: Text(row['date'] ?? '-')),
-                          Expanded(child: Text(row['week'] ?? '-')),
-                          Expanded(child: Text(row['risk'] ?? '-')),
+                          Expanded(child: Text('${index + 1}', style: TextStyle(fontSize: 14.sp),)),
+                          Expanded(child: Text(row['date'] ?? '-',style: TextStyle(fontSize: 14.sp))),
+                          Expanded(child: Text(row['week'] ?? '-',style: TextStyle(fontSize: 14.sp))),
+                          Expanded(child: Text(row['risk'] ?? '-',style: TextStyle(fontSize: 14.sp))),
                         ],
                       ),
                     ),

@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 import '../HomeScreen/HomeScreen.dart';
 
@@ -100,7 +101,7 @@ class _FeatureCard extends StatelessWidget {
       onTap: onClick,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        height: 100,
+        height: 110,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
@@ -129,19 +130,19 @@ class _FeatureCard extends StatelessWidget {
                   '$count',
                   style: TextStyle(
                     color: primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14.sp,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-                fontSize: 12,
+              style:  TextStyle(
+                fontWeight: FontWeight.w500,
+                color: AppColors.outline,
+                fontSize: 14.sp,
               ),
             ),
           ],

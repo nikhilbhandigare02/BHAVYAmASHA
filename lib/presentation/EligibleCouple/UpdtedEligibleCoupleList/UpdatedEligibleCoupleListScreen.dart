@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../core/config/routes/Route_Name.dart';
 
@@ -204,39 +205,36 @@ class _UpdatedEligibleCoupleListScreenState
 
             // 📋 List Section
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: _filtered.isNotEmpty
-                    ? ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  itemCount: _filtered.length,
-                  itemBuilder: (context, index) {
-                    final data = _filtered[index];
-                    return _householdCard(context, data);
-                  },
-                )
-                    : Center(
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 40, horizontal: 16),
-                    child: Text(
-                      t?.noRecordFound ?? 'No Record Found.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(color: Colors.black54),
-                    ),
+              child: _filtered.isNotEmpty
+                  ? ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                itemCount: _filtered.length,
+                itemBuilder: (context, index) {
+                  final data = _filtered[index];
+                  return _householdCard(context, data);
+                },
+              )
+                  : Center(
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 40, horizontal: 16),
+                  child: Text(
+                    t?.noRecordFound ?? 'No Record Found.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(color: Colors.black54),
                   ),
                 ),
               ),
@@ -360,7 +358,7 @@ class _UpdatedEligibleCoupleListScreenState
           title,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.85),
-            fontSize: 12,
+            fontSize: 14.sp,
           ),
         ),
         const SizedBox(height: 2),
@@ -368,7 +366,8 @@ class _UpdatedEligibleCoupleListScreenState
           value,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onPrimary,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
+            fontSize: 14.sp
           ),
         ),
       ],
@@ -406,8 +405,8 @@ class _TabChip extends StatelessWidget {
           label,
           style: TextStyle(
             color: selected ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
           ),
         ),
       ),

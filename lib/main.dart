@@ -32,24 +32,59 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LocaleBloc, LocaleState>(
-      builder: (context, localeState) {
+      builder: (context, state) {
+        // Create a base text theme with Lato as the default font
+        final baseTextTheme = Theme.of(context).textTheme.apply(
+              fontFamily: 'Lato',
+              displayColor: Colors.black87,
+              bodyColor: Colors.black87,
+            );
+
         return MaterialApp(
-          locale: localeState.locale,
-          onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+          title: 'Flutter Demo',
           debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppColors.primary,
+              primary: AppColors.primary,
+              secondary: AppColors.primary,
+            ),
+            useMaterial3: true,
+            // Set Lato as the default font
+            // fontFamily: 'Lato',
+            // Apply Lato to all text themes
+            textTheme: baseTextTheme,
+            // Apply to other text themes
+            primaryTextTheme: baseTextTheme.copyWith(
+              bodyLarge: baseTextTheme.bodyLarge?.copyWith(color: Colors.white),
+              bodyMedium: baseTextTheme.bodyMedium?.copyWith(color: Colors.white),
+            ),
+            // Style form fields
+            inputDecorationTheme: InputDecorationTheme(
+              labelStyle: const TextStyle(fontFamily: 'Lato'),
+              hintStyle: const TextStyle(fontFamily: 'Lato'),
+              helperStyle: const TextStyle(fontFamily: 'Lato'),
+              errorStyle: const TextStyle(fontFamily: 'Lato'),
+              prefixStyle: const TextStyle(fontFamily: 'Lato'),
+              suffixStyle: const TextStyle(fontFamily: 'Lato'),
+              counterStyle: const TextStyle(fontFamily: 'Lato'),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+            // Style buttons
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                textStyle: const TextStyle(fontFamily: 'Lato', fontWeight: FontWeight.w600),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            ),
+          ),
+          locale: state.locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-
-          theme: ThemeData(
-            colorScheme: AppColorSchemes.light,
-            textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
-            scaffoldBackgroundColor: AppColors.scaffoldBackground,
-          ),
-          darkTheme: ThemeData(
-            colorScheme: AppColorSchemes.light,
-            textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
-            scaffoldBackgroundColor: AppColors.scaffoldBackground,
-          ),
           themeMode: ThemeMode.light,
           initialRoute: Route_Names.splashScreen,
           onGenerateRoute: Routes.generateRoute,

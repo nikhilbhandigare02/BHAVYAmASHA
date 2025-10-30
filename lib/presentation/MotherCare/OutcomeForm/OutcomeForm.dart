@@ -107,9 +107,10 @@ class _OutcomeFormFields extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.gestationWeeks,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style:  TextStyle(
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
+
                   ),
                 ),
               ),
@@ -156,7 +157,7 @@ class _OutcomeFormFields extends StatelessWidget {
         ),
         ApiDropdown<String>(
           items: [
-            'चुनें',
+            l10n.select,
             l10n.home,
             l10n.subCenter,
             l10n.phc,
@@ -166,28 +167,27 @@ class _OutcomeFormFields extends StatelessWidget {
           ],
           getLabel: (s) => s,
           value: state.placeOfDelivery.isEmpty ||
-              !['चुनें', l10n.home, l10n.subCenter, l10n.phc, l10n.chc, l10n.districtHospital, l10n.privateHospital]
+              ![l10n.select, l10n.home, l10n.subCenter, l10n.phc, l10n.chc, l10n.districtHospital, l10n.privateHospital]
                   .contains(state.placeOfDelivery)
-              ? 'चुनें'
+              ? l10n.select
               : state.placeOfDelivery,
           onChanged: (v) => bloc.add(PlaceOfDeliveryChanged(v ?? '')),
-          hintText: l10n.selectOption,
           labelText: l10n.selectPlaceOfDelivery,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
           items: [
-            'चुनें',
+            l10n.select,
             l10n.normalDelivery,
             l10n.cesareanDelivery,
             l10n.assistedDelivery,
           ],
           getLabel: (s) => s,
           value: state.deliveryType.isEmpty ||
-              !['चुनें', l10n.normalDelivery, l10n.cesareanDelivery, l10n.assistedDelivery]
+              ![l10n.select, l10n.normalDelivery, l10n.cesareanDelivery, l10n.assistedDelivery]
                   .contains(state.deliveryType)
-              ? 'चुनें'
+              ? l10n.select
               : state.deliveryType,
           onChanged: (v) => bloc.add(DeliveryTypeChanged(v ?? '')),
           hintText: l10n.selectOption,
@@ -196,11 +196,11 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items: const ['चुनें', 'हाँ', 'नहीं'],
+          items:  [l10n.select, l10n.yes, l10n.no],
           getLabel: (s) => s,
           value: state.complications.isEmpty ||
-              !['चुनें', 'हाँ', 'नहीं'].contains(state.complications)
-              ? 'चुनें'
+              ![l10n.select, l10n.yes, l10n.no].contains(state.complications)
+              ? l10n.select
               : state.complications,
           onChanged: (v) => bloc.add(ComplicationsChanged(v ?? '')),
           hintText: l10n.selectOption,
@@ -210,15 +210,15 @@ class _OutcomeFormFields extends StatelessWidget {
         const SizedBox(height: 8),
 
         Padding(
-          padding: const EdgeInsets.only(left: 8.0),
+          padding: const EdgeInsets.only(left: 10.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Text(
                   '${l10n.outcomeCount}',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style:  TextStyle(
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -250,10 +250,10 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items: const ['चुनें', 'हाँ', 'नहीं'],
+          items:  [l10n.select, l10n.yes, l10n.no],
           getLabel: (s) => s,
           value: state.familyPlanningCounseling.isEmpty
-              ? 'चुनें'
+              ? l10n.select
               : state.familyPlanningCounseling,
           onChanged: (v) => bloc.add(FamilyPlanningCounselingChanged(v ?? '')),
           hintText: l10n.selectOption,

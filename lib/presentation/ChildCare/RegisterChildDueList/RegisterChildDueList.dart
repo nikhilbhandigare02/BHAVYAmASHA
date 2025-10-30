@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -262,15 +263,15 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       children: [
         Text(
           title,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          style:  TextStyle(color: Colors.white70, fontSize: 14.sp),
         ),
         const SizedBox(height: 2),
         Text(
           value.isEmpty ? (AppLocalizations.of(context)?.notAvailable ?? 'N/A') : value,
-          style: const TextStyle(
+          style:  TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
           ),
         ),
       ],

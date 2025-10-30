@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -167,10 +168,10 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow('Name', data['name']),
+                  _infoRow('', data['name']),
                   const SizedBox(height: 8),
                   _infoRow(
-                    'Age/Gender',
+                    '',
                     data['age/gender'] ?? '',
                     isWrappable: true,
                   ),
@@ -191,20 +192,20 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
         isWrappable ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           Text(
-            '$title: ',
-            style: const TextStyle(
+            '$title',
+            style:  TextStyle(
               color: Colors.white70,
-              fontSize: 13,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
           Expanded(
             child: Text(
               value.isEmpty ? 'N/A' : value,
-              style: const TextStyle(
+              style:  TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+                fontSize: 14.sp,
               ),
               softWrap: isWrappable,
               overflow:

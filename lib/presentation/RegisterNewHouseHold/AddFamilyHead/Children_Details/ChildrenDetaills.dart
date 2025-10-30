@@ -5,6 +5,7 @@ import 'package:medixcel_new/core/widgets/Dropdown/Dropdown.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import 'bloc/children_bloc.dart';
 import '../HeadDetails/bloc/add_family_head_bloc.dart';
@@ -30,7 +31,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: Text(label)),
+          Expanded(child: Text(label, style: TextStyle(fontSize: 14.sp),)),
           Row(
             children: [
               SizedBox(
@@ -47,7 +48,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                   border: Border.all(color: AppColors.divider),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Text('$value'),
+                child: Text('$value', style: TextStyle(fontSize: 14.sp),),
               ),
               const SizedBox(width: 8),
               SizedBox(
@@ -67,7 +68,6 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
     final l = AppLocalizations.of(context)!;
     return BlocListener<ChildrenBloc, ChildrenState>(
       listener: (context, state) {
-        // Push live children count to parent AddFamilyHeadBloc
         try {
           context.read<AddFamilyHeadBloc>().add(ChildrenChanged(state.totalLive.toString()));
         } catch (_) {}
@@ -79,7 +79,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
               children: [
               _section(
                 _counterRow(
-                  label: 'Total number of children born',
+                  label: l.totalChildrenBorn,
                   value: state.totalBorn,
                   onMinus: () => context.read<ChildrenBloc>().add(ChDecrementBorn()),
                   onPlus: () => context.read<ChildrenBloc>().add(ChIncrementBorn()),
@@ -89,7 +89,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
 
               _section(
                 _counterRow(
-                  label: 'Total number of live children',
+                  label: l.totalLiveChildren,
                   value: state.totalLive,
                   onMinus: () => context.read<ChildrenBloc>().add(ChDecrementLive()),
                   onPlus: () => context.read<ChildrenBloc>().add(ChIncrementLive()),
@@ -99,7 +99,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
 
               _section(
                 _counterRow(
-                  label: 'Total number of male children',
+                  label: l.totalMaleChildren,
                   value: state.totalMale,
                   onMinus: () => context.read<ChildrenBloc>().add(ChDecrementMale()),
                   onPlus: () => context.read<ChildrenBloc>().add(ChIncrementMale()),
@@ -109,7 +109,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
 
               _section(
                 _counterRow(
-                  label: 'Total number of female children',
+                  label: l.totalFemaleChildren,
                   value: state.totalFemale,
                   onMinus: () => context.read<ChildrenBloc>().add(ChDecrementFemale()),
                   onPlus: () => context.read<ChildrenBloc>().add(ChIncrementFemale()),
@@ -119,8 +119,8 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                 Padding(
                   padding: const EdgeInsets.only(left: 0, top: 4, bottom: 8),
                   child: Text(
-                    'Male + Female must equal Total number of live children',
-                    style: TextStyle(color: Colors.red.shade700, fontSize: 12, fontWeight: FontWeight.w600),
+                    l.malePlusFemaleError,
+                    style: TextStyle(color: Colors.red.shade700, fontSize: 14.sp, fontWeight: FontWeight.w600),
                   ),
                 ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -130,7 +130,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                   children: [
                     Expanded(
                       child: CustomTextField(
-                        labelText: 'Age of youngest child',
+                        labelText: l.youngestChildAge,
                         readOnly: true,
                         onChanged: (v) => context.read<ChildrenBloc>().add(ChUpdateYoungestAge(v.trim())),
                         initialValue: state.youngestAge,
@@ -175,8 +175,8 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
 
               _section(
                 ApiDropdown<String>(
-                  labelText: 'Age unit of youngest child',
-                  items: const ['Days', 'Months', 'Years'],
+                  labelText: l.ageUnitOfYoungest,
+                  items: [l.days, l.months, l.years],
                   getLabel: (s) => s,
                   value: state.ageUnit,
                   onChanged: (v) => context.read<ChildrenBloc>().add(ChUpdateAgeUnit(v)),
@@ -186,7 +186,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
 
               _section(
                 ApiDropdown<String>(
-                  labelText: 'Gender of youngest child',
+                  labelText: l.genderOfYoungest,
                   items: const ['Male', 'Female'],
                   getLabel: (s) {
                     switch (s) {

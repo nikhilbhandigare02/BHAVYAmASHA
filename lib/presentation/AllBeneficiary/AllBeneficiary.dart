@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/Loader/Loader.dart';
+import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -231,6 +232,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                           style: TextStyle(
                             color: primary,
                             fontWeight: FontWeight.w600,
+                            fontSize: 14.sp
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -296,7 +298,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           child: SizedBox(
             height: 32,
             child: RoundButton(
-              title: 'CBAC',
+              title: l10n!.cbac,
               color: AppColors.primary,
               borderRadius: 6,
               width: 100,
@@ -327,43 +329,19 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          style:  TextStyle(color: Colors.white70, fontSize: 14.sp, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 2),
         Text(
           value.isEmpty ? 'N/A' : value,
-          style: const TextStyle(
+          style:  TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
+            fontWeight: FontWeight.w500, fontSize: 14.sp,
+
           ),
         ),
       ],
     );
   }
 
-  Widget _infoColumn(String title, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 13,
-            color: AppColors.background,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.background,
-          ),
-        ),
-      ],
-    );
-  }
 }

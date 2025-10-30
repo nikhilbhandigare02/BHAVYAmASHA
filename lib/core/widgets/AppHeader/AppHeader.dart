@@ -68,7 +68,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               child: Text(
                 screenTitle,
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w500,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),

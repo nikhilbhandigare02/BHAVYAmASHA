@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -137,6 +138,7 @@ class _TrainingProvidedState
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
+                          fontSize: 14.sp
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -182,14 +184,14 @@ class _TrainingProvidedState
       children: [
         Text(
           "${title} :",
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          style:  TextStyle(color: Colors.white70, fontSize: 14.sp),
         ),
         const SizedBox(width: 4),
         Text(
           "${value}",
-          style: const TextStyle(
+          style:  TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,fontSize: 14.sp
           ),
         ),
       ],

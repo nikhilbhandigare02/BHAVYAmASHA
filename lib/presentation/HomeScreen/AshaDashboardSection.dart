@@ -3,6 +3,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 import '../../l10n/app_localizations.dart' show AppLocalizations;
+import '../High-Risk/High_Risk.dart';
 import '../RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 
 class AshaDashboardSection extends StatelessWidget {
@@ -115,7 +116,7 @@ class AshaDashboardSection extends StatelessWidget {
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.onSurface,
-                                        fontSize: 14.sp
+                                        fontSize: 15.sp
                                       ),
                                     ),
                                 ],
@@ -131,7 +132,7 @@ class AshaDashboardSection extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,
-                                      fontSize: 14.sp,
+                                      fontSize: 15.sp,
                                       color: AppColors.onSurface,
                                     ),
                                   ),
@@ -173,7 +174,7 @@ class AshaDashboardSection extends StatelessWidget {
                             style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
-                              fontSize: 14.sp,
+                              fontSize: 15.sp,
                             ),
                           ),
                         ],
@@ -223,7 +224,7 @@ class AshaDashboardSection extends StatelessWidget {
                                     softWrap: true,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 14.sp,
+                                      fontSize: 15.sp,
                                       color: AppColors.onSurface,
                                     ),
                                   ),
@@ -279,11 +280,12 @@ class AshaDashboardSection extends StatelessWidget {
     }else if (index == 8) {
       Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
       return;
-    // }else if (index == 9) {
-    //   Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
-    //   return;
+
+    }else if (index == 9) {
+      Navigator.pushNamed(context, Route_Names.HighRisk);
+      return;
     }else if (index == 10) {
-      Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
+      Navigator.pushNamed(context, Route_Names.AshaKiDuniyaScreen);
       return;
     }else if (index == 11) {
       Navigator.pushNamed(context, Route_Names.TrainingHomeScreen);

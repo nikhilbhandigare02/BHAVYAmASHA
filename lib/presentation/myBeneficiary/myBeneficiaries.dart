@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:sizer/sizer.dart';
+import '../../l10n/app_localizations.dart';
 
 import '../../core/config/routes/Route_Name.dart';
 
@@ -13,65 +15,69 @@ class Mybeneficiaries extends StatefulWidget {
 }
 
 class _MybeneficiariesState extends State<Mybeneficiaries> {
-  final List<_BeneficiaryTileData> _items = const [
-    _BeneficiaryTileData(
-      title: 'Family Update',
-      asset: 'assets/images/family.png',
-      count: 8,
-    ),
-    _BeneficiaryTileData(
-      title: 'Eligible Couple List',
-      asset: 'assets/images/couple.png',
-      count: 5,
-    ),
-    _BeneficiaryTileData(
-      title: 'Pregnant Women List',
-      asset: 'assets/images/pregnant-woman.png',
-      count: 5,
-    ),
-    _BeneficiaryTileData(
-      title: 'Pregnancy Outcome',
-      asset: 'assets/images/safe_motherhood.png',
-      count: 0,
-      highlighted: true,
-    ),
-    _BeneficiaryTileData(
-      title: 'HBNC List',
-      asset: 'assets/images/infant-pnc.png',
-      count: 0,
-    ),
-    _BeneficiaryTileData(
-      title: 'LBW Referred',
-      asset: 'assets/images/lbw.png',
-      count: 0,
-    ),
-    _BeneficiaryTileData(
-      title: 'Abortion List',
-      asset: 'assets/images/forms.png',
-      count: 0,
-    ),
-    _BeneficiaryTileData(
-      title: 'Death Register',
-      asset: 'assets/images/hospital-bed.png',
-      count: 0,
-    ),
-    _BeneficiaryTileData(
-      title: 'Migrated Out',
-      asset: 'assets/images/id-card.png',
-      count: 0,
-    ),
-    _BeneficiaryTileData(
-      title: 'Guest Beneficiary List',
-      asset: 'assets/images/beneficiaries.png',
-      count: 6,
-    ),
-  ];
+  // Moved _items list to build method to access localization
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
+    final List<_BeneficiaryTileData> _items = [
+      _BeneficiaryTileData(
+        title: l10n!.familyUpdate,
+        asset: 'assets/images/family.png',
+        count: 8,
+      ),
+      _BeneficiaryTileData(
+        title: l10n.eligibleCoupleList,
+        asset: 'assets/images/couple.png',
+        count: 5,
+      ),
+      _BeneficiaryTileData(
+        title: l10n.pregnantWomenList,
+        asset: 'assets/images/pregnant-woman.png',
+        count: 5,
+      ),
+      _BeneficiaryTileData(
+        title: l10n.pregnancyOutcome,
+        asset: 'assets/images/safe_motherhood.png',
+        count: 0,
+        highlighted: true,
+      ),
+      _BeneficiaryTileData(
+        title: l10n.hbcnList,
+        asset: 'assets/images/infant-pnc.png',
+        count: 0,
+      ),
+      _BeneficiaryTileData(
+        title: l10n.lbwReferred,
+        asset: 'assets/images/lbw.png',
+        count: 0,
+      ),
+      _BeneficiaryTileData(
+        title: l10n.abortionList,
+        asset: 'assets/images/forms.png',
+        count: 0,
+      ),
+      _BeneficiaryTileData(
+        title: l10n.deathRegister,
+        asset: 'assets/images/hospital-bed.png',
+        count: 0,
+      ),
+      _BeneficiaryTileData(
+        title: l10n.migratedOut,
+        asset: 'assets/images/id-card.png',
+        count: 0,
+      ),
+      _BeneficiaryTileData(
+        title: l10n.guestBeneficiaryList,
+        asset: 'assets/images/beneficiaries.png',
+        count: 6,
+      ),
+    ];
+    
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppHeader(screenTitle: 'My Beneficiaries'),
+      appBar: AppHeader(screenTitle: l10n.myBeneficiariesTitle),
       drawer: CustomDrawer(),
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -185,34 +191,19 @@ class _BeneficiaryTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   data.title,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style:  TextStyle(
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF2D3A4A),
                   ),
                 ),
               ),
-              Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  data.count.toString(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF3A86CF),
-                  ),
+              Text(
+                data.count.toString(),
+                style:  TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF3A86CF),
                 ),
               ),
             ],

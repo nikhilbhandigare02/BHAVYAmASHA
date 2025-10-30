@@ -42,10 +42,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
       final spBloc = context.read<SpousBloc>();
       final curr = spBloc.state;
       
-      // Set relation based on head's gender
+      // Set relation and opposite gender based on head's gender
       if (head.gender != null) {
-        final relation = head.gender == 'Male' ? 'Wife' : 'Husband';
+        final isMale = head.gender == 'Male';
+        final relation = isMale ? 'Wife' : 'Husband';
+        final oppositeGender = isMale ? 'Female' : 'Male';
+        
         spBloc.add(SpUpdateRelation(relation));
+        spBloc.add(SpUpdateGender(oppositeGender));
       }
       
       final memberName = head.spouseName?.trim();
@@ -68,10 +72,29 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
     super.build(context);
     final l = AppLocalizations.of(context)!;
     return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
-      listenWhen: (prev, curr) => prev.headName != curr.headName || prev.spouseName != curr.spouseName,
+      listenWhen: (prev, curr) => prev.headName != curr.headName || 
+                                 prev.spouseName != curr.spouseName ||
+                                 prev.gender != curr.gender,
       listener: (ctx, st) {
         final spBloc = ctx.read<SpousBloc>();
         final curr = spBloc.state;
+        
+        // Update gender and relation when head's gender changes
+        if (st.gender != null) {
+          final isMale = st.gender == 'Male';
+          final relation = isMale ? 'Wife' : 'Husband';
+          final oppositeGender = isMale ? 'Female' : 'Male';
+          
+          // Only update if the gender is actually changing
+          if (curr.relation != relation) {
+            spBloc.add(SpUpdateRelation(relation));
+          }
+          if (curr.gender != oppositeGender) {
+            spBloc.add(SpUpdateGender(oppositeGender));
+          }
+        }
+        
+        // Update names
         final memberName = st.spouseName?.trim();
         final spouseName = st.headName?.trim();
         final currMember = curr.memberName ?? '';
@@ -94,9 +117,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
               children: [
                 _section(
                   ApiDropdown<String>(
-                    labelText: 'Relation with the family head',
+                    labelText: l.relationWithFamilyHead,
                     items: const ['Husband', 'Wife'],
-                    getLabel: (s) => s,
+                    getLabel: (s) => s == 'Husband' ? l.husbandLabel : l.wife,
                     value: state.relation == 'Spouse' 
                         ? (state.gender == 'Female' ? 'Husband' : 'Wife')
                         : (state.relation ?? (state.gender == 'Female' ? 'Husband' : 'Wife')),
@@ -109,8 +132,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    labelText: 'Name of member *',
-                    hintText: 'Name of member',
+                    labelText: '${l.nameOfMember} *',
+                    hintText: l.nameOfMemberHint,
                     initialValue: state.memberName,
                     readOnly: false,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMemberName(v.trim())),
@@ -123,8 +146,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    labelText: 'Age at the time of marriage',
-                    hintText: 'Age at the time of marriage',
+                    labelText: l.ageAtMarriage,
+                    hintText: l.ageAtMarriageHint,
                     keyboardType: TextInputType.number,
                     initialValue: state.ageAtMarriage,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateAgeAtMarriage(v.trim())),
@@ -136,8 +159,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    labelText: 'Spouse Name *',
-                    hintText: 'Spouse Name',
+                    labelText: '${l.spouseName} *',
+                    hintText: l.spouseNameHint,
                     initialValue: state.spouseName,
                     readOnly: false,
                     validator: (value) => Validations.validateSpousName(l, value),
@@ -150,7 +173,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    labelText: 'Father name',
+                    labelText: l.fatherName,
                     initialValue: state.fatherName,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateFatherName(v.trim())),
                   ),
@@ -209,8 +232,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           children: [
                             Expanded(
                               child: CustomTextField(
-                                labelText: 'Years',
-                                hintText: 'Years',
+                                labelText: l.years,
+                                hintText: l.yearsHint,
                                 initialValue: state.UpdateYears ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateYearsChanged(v.trim())),
@@ -228,8 +251,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                             // --- Months ---
                             Expanded(
                               child: CustomTextField(
-                                labelText: 'Months',
-                                hintText: 'Months',
+                                labelText: l.months,
+                                hintText: l.monthsHint,
                                 initialValue: state.UpdateMonths ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim())),
@@ -247,8 +270,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                             // --- Days ---
                             Expanded(
                               child: CustomTextField(
-                                labelText: 'Days',
-                                hintText: 'Days',
+                                labelText: l.days,
+                                hintText: l.daysHint,
                                 initialValue: state.UpdateDays ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateDaysChanged(v.trim())),
@@ -447,7 +470,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           title: l.linkAbha,
                           width: 15.h,
                           borderRadius: 8,
-                          fontSize: 12,
+                          fontSize: 14.sp,
                           onPress: () {
                             Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
 
@@ -457,8 +480,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ],
                   ),
                 ),
-                SizedBox(height: 1.h),
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
                 SizedBox(height: 1.h),
                 if (state.gender == 'Female') ...[
                   _section(
@@ -607,7 +629,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    labelText: 'Bank account number',
+                    labelText: l.bankAccountNumber,
+                    hintText: l.bankAccountNumberHint,
                     keyboardType: TextInputType.number,
                     initialValue: state.bankAcc,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateBankAcc(v.trim())),
@@ -619,7 +642,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    labelText: 'IFSC code',
+                    labelText: l.ifscCode,
+                    hintText: l.ifscCodeHint,
                     initialValue: state.ifsc,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateIfsc(v.trim())),
                   ),
@@ -630,7 +654,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    labelText: 'Voter Id',
+                    labelText: l.voterId,
+                    hintText: l.voterIdHint,
                     initialValue: state.voterId,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateVoterId(v.trim())),
                   ),
@@ -641,7 +666,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    labelText: 'Ration Card Id',
+                    labelText: l.rationCardId,
+                    hintText: l.rationCardIdHint,
                     initialValue: state.rationId,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRationId(v.trim())),
                   ),
@@ -652,7 +678,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    labelText: 'Personal Health Id',
+                    labelText: l.personalHealthId,
+                    hintText: l.personalHealthIdHint,
                     initialValue: state.phId,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdatePhId(v.trim())),
                   ),
@@ -660,6 +687,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 SizedBox(height: 1.h),
+
 
                 _section(
                   ApiDropdown<String>(

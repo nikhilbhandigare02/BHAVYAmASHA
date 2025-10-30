@@ -30,7 +30,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppColors.background,
       appBar: AppHeader(screenTitle: t?.trackEligibleCoupleTitle ?? 'योग्य दम्पतियों की ट्रैकिंग', showBack: true),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -184,12 +184,11 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: AppColors.primary),
-                      foregroundColor: AppColors.primary,
+                      backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       minimumSize: const Size.fromHeight(48),
                     ),
-                    child: const Text('पिछले पेज'),
+                    child:  Text('पिछले पेज', style: TextStyle(color: AppColors.background),),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -198,13 +197,13 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     onPressed: enabled ? () => context.read<TrackEligibleCoupleBloc>().add(const SubmitTrackForm()) : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       minimumSize: const Size.fromHeight(48),
                     ),
                     child: state.status == FormStatus.submitting
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Text('संरक्षित करें'),
+                        :  Text('संरक्षित करें', style: TextStyle(color: AppColors.background),),
                   ),
                 ),
               ],

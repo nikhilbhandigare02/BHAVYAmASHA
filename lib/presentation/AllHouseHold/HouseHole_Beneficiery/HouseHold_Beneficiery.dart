@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -240,6 +241,7 @@ class _HouseHold_BeneficiaryScreenState
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w600,
+                        fontSize: 14.sp
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -249,8 +251,8 @@ class _HouseHold_BeneficiaryScreenState
                     borderRadius: BorderRadius.circular(6),
                     child: Image.asset(
                       'assets/images/sync.png',
-                      width: 25,
-                      height: 25,
+                      width: 7.w,
+                      height: 7.w,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -338,14 +340,14 @@ class _HouseHold_BeneficiaryScreenState
       children: [
         Text(
           title,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          style:  TextStyle(color: Colors.white70, fontSize: 14.sp),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(
+          style:  TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,fontSize: 14.sp
           ),
         ),
       ],

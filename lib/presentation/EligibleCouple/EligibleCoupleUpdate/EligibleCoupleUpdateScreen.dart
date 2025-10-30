@@ -5,6 +5,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
+import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'bloc/eligible_coule_update_bloc.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -183,7 +184,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Expanded(child: Text(t?.totalChildrenBornLabel ?? 'Total number of children born')),
+                                  Expanded(child: Text(t?.totalChildrenBornLabel ?? 'Total number of children born', style: TextStyle(fontSize: 14.sp),)),
                                   _buildCountBoxField(state.totalChildrenBorn, (v) => bloc.add(TotalChildrenBornChanged(v))),
                                 ],
                               ),
@@ -198,7 +199,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Expanded(child: Text(t?.totalLiveChildrenLabel ?? 'Total number of live children')),
+                                  Expanded(child: Text(t?.totalLiveChildrenLabel ?? 'Total number of live children',style: TextStyle(fontSize: 14.sp))),
                                   _buildCountBoxField(state.totalLiveChildren, (v) => bloc.add(TotalLiveChildrenChanged(v))),
                                 ],
                               ),
@@ -213,7 +214,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Expanded(child: Text(t?.totalMaleChildrenLabel ?? 'Total number of male children')),
+                                  Expanded(child: Text(t?.totalMaleChildrenLabel ?? 'Total number of male children',style: TextStyle(fontSize: 14.sp))),
                                   _buildCountBoxField(state.totalMaleChildren, (v) => bloc.add(TotalMaleChildrenChanged(v))),
                                 ],
                               ),
@@ -228,7 +229,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Expanded(child: Text(t?.totalFemaleChildrenLabel ?? 'Total number of female children')),
+                                  Expanded(child: Text(t?.totalFemaleChildrenLabel ?? 'Total number of female children',style: TextStyle(fontSize: 14.sp))),
                                   _buildCountBoxField(state.totalFemaleChildren, (v) => bloc.add(TotalFemaleChildrenChanged(v))),
                                 ],
                               ),

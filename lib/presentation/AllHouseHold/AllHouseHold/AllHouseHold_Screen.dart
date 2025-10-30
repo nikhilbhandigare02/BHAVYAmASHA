@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -224,7 +225,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   title: l10n?.gridRegisterNewHousehold.toUpperCase() ?? 'NEW HOUSEHOLD REGISTRATION',
                   color: AppColors.primary,
                   borderRadius: 8,
-                  height: 50,
+                  height: 6.h,
                   onPress: () {
                     Navigator.pushNamed(context, Route_Names.RegisterNewHousehold);
                     },
@@ -288,12 +289,12 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   Expanded(
                     child: Text(
                       data['hhId'] ?? '',
-                      style: TextStyle(color: primary, fontWeight: FontWeight.w600),
+                      style: TextStyle(color: primary, fontWeight: FontWeight.w600, fontSize: 14.sp),
                     ),
                   ),
                   Text(
                     '${l10n?.houseNoLabel ?? 'House No.'} : ${data['houseNo']}',
-                    style: TextStyle(color: primary, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: primary, fontWeight: FontWeight.w700, fontSize: 14.sp),
                   ),
                   const SizedBox(width: 8),
                   SizedBox(
@@ -301,12 +302,12 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                     height: 24,
                     child: RoundButton(
                       icon: Icons.edit,
-                      iconSize: 14,
+                      iconSize: 14.sp,
                       title:  l10n?.edit ?? 'Edit',
                       color: AppColors.primary,
                       borderRadius: 4,
-                      height: 44,
-                      fontSize: 14,
+                      height: 3.h,
+                      fontSize: 14.sp,
                       onPress: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -338,9 +339,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   Row(
                     children: [
                       Expanded(child: _rowText(l10n?.thName ?? 'Name', data['name'])),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile no.', data['mobile'])),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.rnhTotalMembers ?? 'No. of total members', data['totalMembers'].toString())),
                     ],
                   ),
@@ -348,9 +349,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   Row(
                     children: [
                       Expanded(child: _rowText(l10n?.eligibleCouples ?? 'Eligible couples', data['eligibleCouples'].toString())),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.pregnantWomen ?? 'Pregnant women', data['pregnantWomen'].toString())),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.elderlyAbove65 ?? 'Elderly (>65 Y)', data['elderly'].toString())),
                     ],
                   ),
@@ -358,9 +359,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   Row(
                     children: [
                       Expanded(child: _rowText(l10n?.children0to1 ?? '0-1 year old children', data['child0to1'].toString())),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.children1to2 ?? '1-2 year old children', data['child1to2'].toString())),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.children2to5 ?? '2-5 year old children', data['child2to5'].toString())),
                     ],
                   ),
@@ -379,12 +380,12 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          style:  TextStyle(color: Colors.white70, fontSize: 14.sp),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style:  TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14.sp),
         ),
       ],
     );

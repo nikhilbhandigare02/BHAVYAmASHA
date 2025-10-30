@@ -20,6 +20,9 @@ class AddnewfamilymemberBloc
     });
     on<AnmUpdateDob>((e, emit) => emit(state.copyWith(dob: e.value)));
     on<AnmUpdateApproxAge>((e, emit) => emit(state.copyWith(approxAge: e.value)));
+    on<UpdateDayChanged>((e, emit) => emit(state.copyWith(updateDay: e.value)));
+    on<UpdateMonthChanged>((e, emit) => emit(state.copyWith(updateMonth: e.value)));
+    on<UpdateYearChanged>((e, emit) => emit(state.copyWith(updateYear: e.value)));
     on<ChildrenChanged>((e, emit) => emit(state.copyWith(children: e.value)));
     on<AnmUpdateBirthOrder>((e, emit) => emit(state.copyWith(birthOrder: e.value)));
     on<AnmUpdateGender>((e, emit) => emit(state.copyWith(gender: e.value)));

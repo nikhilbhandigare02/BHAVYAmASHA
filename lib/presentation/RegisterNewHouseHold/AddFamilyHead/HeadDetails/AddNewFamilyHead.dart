@@ -875,7 +875,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   Expanded(
                     child: BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
                       builder: (context, state) {
-                        final tabs = [const Tab(text: 'FAMILY HEAD DETAILS')];
+                        final tabs = [ Tab(text: l.familyHeadDetailsTitle)];
                         final views = <Widget>[
                           Form(key: _formKey, child: _buildFamilyHeadForm(context, state, l)),
                         ];
@@ -919,7 +919,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                               spBloc.add(SpUpdateSpouseName(headName));
                             }
                           }
-                          tabs.add(const Tab(text: 'SPOUSE DETAILS'));
+                          tabs.add( Tab(text: l.spousDetails));
                           views.add(
                             BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
                               listenWhen: (prev, curr) => prev.headName != curr.headName || prev.spouseName != curr.spouseName,
@@ -943,7 +943,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                           );
                         }
                         if (showChildren) {
-                          tabs.add(const Tab(text: 'CHILDREN DETAILS'));
+                          tabs.add( Tab(text: l.childrenDetailsTitle));
                           views.add(const Childrendetaills());
                         }
 
@@ -1037,8 +1037,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                                           shadowColor: AppColors.primary.withOpacity(0.4),
                                                         ),
                                                         onPressed: () => controller.animateTo(i - 1),
-                                                        child: const Text(
-                                                          'PREVIOUS',
+                                                        child:  Text(
+                                                          l.previousButton,
                                                           style: TextStyle(
                                                             fontWeight: FontWeight.w600,
                                                             letterSpacing: 0.5,
@@ -1056,7 +1056,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                                     height: 5.5.h,
                                                     child: RoundButton(
                                                       title: i < last
-                                                          ? 'NEXT'
+                                                          ? l.nextButton
                                                           : (isLoading
                                                           ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
                                                           : (widget.isEdit ? 'UPDATE' : l.addButton)),

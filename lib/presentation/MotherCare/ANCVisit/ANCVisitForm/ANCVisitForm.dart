@@ -8,6 +8,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 import 'bloc/anvvisitform_bloc.dart';
 
 class Ancvisitform extends StatefulWidget {
@@ -52,7 +53,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(left: 12.0),
-                            child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: Theme.of(context).textTheme.titleSmall),
+                            child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: TextStyle(fontSize: 14.sp)),
                           ),
                           const SizedBox(height: 6),
                           Padding(
@@ -157,7 +158,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)'),
+                                Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)', style: TextStyle(fontSize: 14.sp),),
                                 const SizedBox(height: 6),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,

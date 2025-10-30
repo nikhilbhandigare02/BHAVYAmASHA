@@ -56,4 +56,8 @@ class Route_Names{
   static const String SyncStatusScreen = 'SyncStatusScreen';
   static const String DeathRegister = 'DeathRegister';
   static const String HBNCListBeneficiaries = 'HBNCListBeneficiaries';
+  static const String HighRisk = 'HighRisk';
+  static const String AshaKiDuniyaScreen = 'AshaKiDuniyaScreen';
+  static const String DeseasedList = 'DeseasedList';
+
 }

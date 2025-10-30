@@ -480,7 +480,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'No. of members remains to be added: ',
+                  "${l10n!.memberRemainsToAdd} :",
                   style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.warning, fontSize: 17.sp),
                 ),
                 Text(
@@ -526,15 +526,11 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     final l10n = AppLocalizations.of(context);
 
     return Container(
-      height: 300, // Fixed height
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border, width: 0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
+
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(
-          width: 43.h,
+          width: 45.h,
           child: SingleChildScrollView(
             child: DataTable(
               headingRowHeight: 3.h,

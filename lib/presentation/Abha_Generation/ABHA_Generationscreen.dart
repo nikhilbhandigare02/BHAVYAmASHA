@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 import '../../core/utils/enums.dart' show PostApiStatus;
 import 'bloc/abha_generation_bloc.dart';
 
@@ -155,8 +156,8 @@ class _AbhaGenerationscreenState extends State<AbhaGenerationscreen> {
                                             child: Text(
                                               consentTexts[i],
                                               textAlign: TextAlign.justify,
-                                              style: const TextStyle(
-                                                fontSize: 12,
+                                              style:  TextStyle(
+                                                fontSize: 13.sp,
                                                 height: 1.3,
                                                 color: Colors.black87,
                                               ),

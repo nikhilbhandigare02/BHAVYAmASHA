@@ -7,6 +7,7 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 import 'bloc/cbac_form_bloc.dart';
 
 class Cbacform extends StatefulWidget {
@@ -45,10 +46,10 @@ class _CbacformState extends State<Cbacform> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    title: Text(l10n?.cbacConsentTitle ?? 'Consent Form'),
+                    title: Text(l10n?.cbacConsentTitle ?? 'Consent Form', style: TextStyle(fontSize: 15.sp),),
                     content: Text(
                       l10n?.cbacConsentBody ?? 'I have been explained by the ASHA, the purpose for which the information and measurement findings is being collected from me, in a language I understand and I give my consent to collect the information and measurement findings on my personal health profile.',
-                      style: const TextStyle(fontSize: 16),
+                      style:  TextStyle(fontSize: 15.sp),
                     ),
                     actions: [
                       TextButton(
@@ -364,11 +365,10 @@ class _PartATab extends StatelessWidget {
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(l10n.cbacQuestions, style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text(l10n.cbacScore, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
+                Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
               ],
             );
-
         Widget rowScore(int score) => SizedBox(
               width: 28,
               child: Align(
@@ -393,7 +393,7 @@ class _PartATab extends StatelessWidget {
                   Expanded(
                     child: Text(
                       question,
-                      style: const TextStyle(fontSize: 14),
+                      style:  TextStyle(fontSize: 14.sp),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -461,7 +461,6 @@ class _PartATab extends StatelessWidget {
             header(),
             const SizedBox(height: 8),
 
-            // Age row
             qRow(
               question: l10n.cbacA_ageQ,
               items: itemsAge,
@@ -559,7 +558,7 @@ class _PartBTab extends StatelessWidget {
               Expanded(
                 child: Text(
                   question,
-                  style: const TextStyle(fontSize: 14),
+                  style:  TextStyle(fontSize: 14.sp),
                 ),
               ),
               const SizedBox(width: 8),
@@ -666,7 +665,7 @@ class _PartCTab extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(child: Text(l10n.cbacC_fuelQ)),
+            Expanded(child: Text(l10n.cbacC_fuelQ, style: TextStyle(fontSize:  14.sp),)),
             const SizedBox(width: 8),
             SizedBox(
               width: 180,
@@ -686,7 +685,7 @@ class _PartCTab extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(child: Text(l10n.cbacC_businessRiskQ)),
+            Expanded(child: Text(l10n.cbacC_businessRiskQ, style: TextStyle(fontSize: 14.sp),)),
             const SizedBox(width: 8),
             SizedBox(
               width: 180,
@@ -736,8 +735,8 @@ class _PartDTab extends StatelessWidget {
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(l10n.cbacQuestions, style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text(l10n.cbacScore, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600,fontSize: 14.sp)),
+                Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
               ],
             );
 
@@ -755,7 +754,7 @@ class _PartDTab extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(child: Text(question, style: const TextStyle(fontSize: 14))),
+                  Expanded(child: Text(question, style:  TextStyle(fontSize: 14.sp))),
                   const SizedBox(width: 8),
                   SizedBox(
                     width: 120,

@@ -536,7 +536,7 @@ abstract class AppLocalizations {
   /// No description provided for @ageAtMarriageHint.
   ///
   /// In en, this message translates to:
-  /// **'Age at the time of marriage'**
+  /// **'Enter age at marriage'**
   String get ageAtMarriageHint;
 
   /// No description provided for @ageAtMarriageInYearsLabel.
@@ -2408,7 +2408,7 @@ abstract class AppLocalizations {
   /// No description provided for @familySurvey.
   ///
   /// In en, this message translates to:
-  /// **'Edit'**
+  /// **'Family Survey'**
   String get familySurvey;
 
   /// No description provided for @father.
@@ -3488,7 +3488,7 @@ abstract class AppLocalizations {
   /// No description provided for @nameOfMemberHint.
   ///
   /// In en, this message translates to:
-  /// **'Name of member'**
+  /// **'Enter member name'**
   String get nameOfMemberHint;
 
   /// No description provided for @nameOfMemberLabel.
@@ -4178,7 +4178,7 @@ abstract class AppLocalizations {
   /// No description provided for @spouseNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Spouse Name'**
+  /// **'Enter spouse name'**
   String get spouseNameHint;
 
   /// No description provided for @spouseNameLabel.
@@ -4799,6 +4799,36 @@ abstract class AppLocalizations {
   /// **'Age of youngest child'**
   String get youngestChildAgeLabel;
 
+  /// No description provided for @suchivani.
+  ///
+  /// In en, this message translates to:
+  /// **'Suchivani'**
+  String get suchivani;
+
+  /// No description provided for @ashaDiary.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA Diary'**
+  String get ashaDiary;
+
+  /// No description provided for @householdSurvey.
+  ///
+  /// In en, this message translates to:
+  /// **'Household Survey'**
+  String get householdSurvey;
+
+  /// No description provided for @vhsncMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'VHSNC Meeting'**
+  String get vhsncMeeting;
+
+  /// No description provided for @training.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get training;
+
   /// No description provided for @youngestChildAgeUnitLabel.
   ///
   /// In en, this message translates to:
@@ -5248,6 +5278,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home Visit Day *'**
   String get homeVisitDayLabel;
+
+  /// No description provided for @highRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'High-Risk Pregnancy List'**
+  String get highRisk;
 
   /// No description provided for @dateOfHomeVisitLabel.
   ///
@@ -6080,7 +6116,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmAttentionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Attention!'**
+  /// **'Confirm Action'**
   String get confirmAttentionTitle;
 
   /// No description provided for @confirmBackLoseDetailsMsg.
@@ -6098,13 +6134,13 @@ abstract class AppLocalizations {
   /// No description provided for @confirmNo.
   ///
   /// In en, this message translates to:
-  /// **'No'**
+  /// **'No, Stay'**
   String get confirmNo;
 
   /// No description provided for @confirmCloseFormMsg.
   ///
   /// In en, this message translates to:
-  /// **'Do you want to close this form?'**
+  /// **'Are you sure you want to close this form? Any unsaved changes will be lost.'**
   String get confirmCloseFormMsg;
 
   /// No description provided for @confirmYes.
@@ -6142,6 +6178,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to logout?'**
   String get logoutMessage;
+
+  /// No description provided for @spousDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Spous Details'**
+  String get spousDetails;
+
+  /// No description provided for @relationWithFamilyHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Relation with the family head'**
+  String get relationWithFamilyHead;
+
+  /// No description provided for @nameOfMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of member'**
+  String get nameOfMember;
+
+  /// No description provided for @ageAtMarriage.
+  ///
+  /// In en, this message translates to:
+  /// **'Age at the time of marriage'**
+  String get ageAtMarriage;
+
+  /// No description provided for @spouseName.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Name'**
+  String get spouseName;
+
+  /// No description provided for @fatherName.
+  ///
+  /// In en, this message translates to:
+  /// **'Father name'**
+  String get fatherName;
+
+  /// No description provided for @fatherNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter father\'s name'**
+  String get fatherNameHint;
+
+  /// No description provided for @years.
+  ///
+  /// In en, this message translates to:
+  /// **'Years'**
+  String get years;
+
+  /// No description provided for @yearsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Years'**
+  String get yearsHint;
+
+  /// No description provided for @months.
+  ///
+  /// In en, this message translates to:
+  /// **'Months'**
+  String get months;
+
+  /// No description provided for @monthsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Months'**
+  String get monthsHint;
+
+  /// No description provided for @days.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get days;
+
+  /// No description provided for @daysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get daysHint;
+
+  /// No description provided for @totalChildrenBorn.
+  ///
+  /// In en, this message translates to:
+  /// **'Total number of children born'**
+  String get totalChildrenBorn;
+
+  /// No description provided for @totalLiveChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Total number of live children'**
+  String get totalLiveChildren;
+
+  /// No description provided for @totalMaleChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Total number of male children'**
+  String get totalMaleChildren;
+
+  /// No description provided for @totalFemaleChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Total number of female children'**
+  String get totalFemaleChildren;
+
+  /// No description provided for @malePlusFemaleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Male + Female must equal Total number of live children'**
+  String get malePlusFemaleError;
+
+  /// No description provided for @youngestChildAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age of youngest child'**
+  String get youngestChildAge;
+
+  /// No description provided for @ageUnitOfYoungest.
+  ///
+  /// In en, this message translates to:
+  /// **'Age unit of youngest child'**
+  String get ageUnitOfYoungest;
+
+  /// No description provided for @genderOfYoungest.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender of youngest child'**
+  String get genderOfYoungest;
+
+  /// No description provided for @bankAccountNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Account Number'**
+  String get bankAccountNumber;
+
+  /// No description provided for @bankAccountNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter bank account number'**
+  String get bankAccountNumberHint;
+
+  /// No description provided for @ifscCode.
+  ///
+  /// In en, this message translates to:
+  /// **'IFSC Code'**
+  String get ifscCode;
+
+  /// No description provided for @ifscCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 11-digit IFSC code'**
+  String get ifscCodeHint;
+
+  /// No description provided for @voterId.
+  ///
+  /// In en, this message translates to:
+  /// **'Voter ID'**
+  String get voterId;
+
+  /// No description provided for @voterIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Voter ID'**
+  String get voterIdHint;
+
+  /// No description provided for @rationCardId.
+  ///
+  /// In en, this message translates to:
+  /// **'Ration Card ID'**
+  String get rationCardId;
+
+  /// No description provided for @rationCardIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Ration Card ID'**
+  String get rationCardIdHint;
+
+  /// No description provided for @personalHealthId.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Health ID (ABHA ID)'**
+  String get personalHealthId;
+
+  /// No description provided for @personalHealthIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 14-digit Personal Health ID'**
+  String get personalHealthIdHint;
+
+  /// No description provided for @memberRemainsToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'No. of members remains to be added'**
+  String get memberRemainsToAdd;
+
+  /// No description provided for @cbac.
+  ///
+  /// In en, this message translates to:
+  /// **'CBAC'**
+  String get cbac;
+
+  /// No description provided for @videoTutorialList.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Tutorial List'**
+  String get videoTutorialList;
+
+  /// No description provided for @completeTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Tutorial'**
+  String get completeTutorial;
+
+  /// No description provided for @ashwinPortalFilm.
+  ///
+  /// In en, this message translates to:
+  /// **'Ashwin Portal Film'**
+  String get ashwinPortalFilm;
+
+  /// No description provided for @pneumoniaAwareness.
+  ///
+  /// In en, this message translates to:
+  /// **'Pneumonia Awareness (Child Health)'**
+  String get pneumoniaAwareness;
+
+  /// No description provided for @healthMinisterMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message from the Honorable Health Minister Bihar'**
+  String get healthMinisterMessage;
+
+  /// No description provided for @errorLoadingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading video'**
+  String get errorLoadingVideo;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @myBeneficiariesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Beneficiaries'**
+  String get myBeneficiariesTitle;
+
+  /// No description provided for @familyUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Update'**
+  String get familyUpdate;
+
+  /// No description provided for @eligibleCoupleList.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible Couple List'**
+  String get eligibleCoupleList;
+
+  /// No description provided for @pregnantWomenList.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant Women List'**
+  String get pregnantWomenList;
+
+  /// No description provided for @pregnancyOutcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnancy Outcome'**
+  String get pregnancyOutcome;
+
+  /// No description provided for @hbcnList.
+  ///
+  /// In en, this message translates to:
+  /// **'HBNC List'**
+  String get hbcnList;
+
+  /// No description provided for @lbwReferred.
+  ///
+  /// In en, this message translates to:
+  /// **'LBW Referred'**
+  String get lbwReferred;
+
+  /// No description provided for @abortionList.
+  ///
+  /// In en, this message translates to:
+  /// **'Abortion List'**
+  String get abortionList;
+
+  /// No description provided for @deathRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Death Register'**
+  String get deathRegister;
+
+  /// No description provided for @migratedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrated Out'**
+  String get migratedOut;
+
+  /// No description provided for @guestBeneficiaryList.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest Beneficiary List'**
+  String get guestBeneficiaryList;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

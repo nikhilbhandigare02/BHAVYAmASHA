@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 import 'bloc/todays_work_bloc.dart';
 
 class Todaywork extends StatefulWidget {
@@ -93,12 +94,12 @@ class _TodayworkState extends State<Todaywork> {
           Expanded(
             child: Text(
               k,
-              style:  TextStyle(fontSize: 16, color: AppColors.primary),
+              style:  TextStyle(fontSize: 14.sp, color: AppColors.primary),
             ),
           ),
           Text(
             v,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style:  TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
           ),
         ],
       ),

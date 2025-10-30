@@ -86,7 +86,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
               softWrap: true,
               maxLines: widget.labelMaxLines,
               overflow: TextOverflow.visible,
-              style: TextStyle(fontSize: 14.sp),
+              style: TextStyle(fontSize: 15.sp),
             ),
             hintText: widget.hintText ?? 'dd/MM/yy',
             hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),

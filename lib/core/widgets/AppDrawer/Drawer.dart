@@ -117,7 +117,7 @@ class CustomDrawer extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
       ),
       onTap: onTap,
     );
@@ -141,7 +141,7 @@ class _UserInfoRow extends StatelessWidget {
               label,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
-                fontSize: 13.sp,
+                fontSize: 14.sp,
               ),
             ),
           ),
@@ -150,7 +150,7 @@ class _UserInfoRow extends StatelessWidget {
               value,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 13.sp,
+                fontSize: 14.sp,
               ),
             ),
           ),
