@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../l10n/app_localizations.dart';
 
@@ -74,7 +75,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: widget.selectedGridIndex == 0 ? AppColors.onPrimary : AppColors.onSurface,
-                                  fontSize: 16,
+                                  fontSize: 15.sp,
                                 ),
                               ),
                             ],
@@ -84,7 +85,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             l10n.toDoVisits,
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
-                              fontSize: 15,
+                              fontSize: 15.sp,
                               color: widget.selectedGridIndex == 0 ? AppColors.onPrimary : AppColors.outline,
                             ),
                           ),
@@ -132,7 +133,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: widget.selectedGridIndex == 1 ? AppColors.onPrimary : AppColors.onSurface,
-                                  fontSize: 16,
+                                  fontSize: 15.sp,
                                 ),
                               ),
                             ],
@@ -143,7 +144,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             style: TextStyle(
 
                               fontWeight: FontWeight.w500,
-                              fontSize: 15  ,
+                              fontSize: 15.sp  ,
                               color: widget.selectedGridIndex == 1 ? AppColors.onPrimary : AppColors.outline,
                             ),
                           ),
@@ -185,7 +186,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         entry.key,
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
-                          fontSize: 15,
+                          fontSize: 15.sp,
                           color: _expandedKey == entry.key ? Colors.blueAccent : null,
                         ),
                       ),
@@ -199,7 +200,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                               color: _expandedKey == entry.key
                                   ? Colors.blueAccent
                                   : AppColors.onSurface,
-                              fontSize: 15,
+                              fontSize: 15.sp,
                             ),
                           ),
                           const SizedBox(width: 8),

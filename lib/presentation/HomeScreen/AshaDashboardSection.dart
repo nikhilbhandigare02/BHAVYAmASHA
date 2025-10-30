@@ -115,7 +115,7 @@ class AshaDashboardSection extends StatelessWidget {
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.onSurface,
-                                        fontSize: 16.sp
+                                        fontSize: 14.sp
                                       ),
                                     ),
                                 ],
@@ -131,7 +131,7 @@ class AshaDashboardSection extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,
-                                      fontSize: 15.5.sp,
+                                      fontSize: 14.sp,
                                       color: AppColors.onSurface,
                                     ),
                                   ),
@@ -173,7 +173,7 @@ class AshaDashboardSection extends StatelessWidget {
                             style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
-                              fontSize: 15.5.sp,
+                              fontSize: 14.sp,
                             ),
                           ),
                         ],
@@ -223,7 +223,7 @@ class AshaDashboardSection extends StatelessWidget {
                                     softWrap: true,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 15.5.sp,
+                                      fontSize: 14.sp,
                                       color: AppColors.onSurface,
                                     ),
                                   ),

@@ -56,8 +56,10 @@ import '../../../presentation/Training/ReceivedTraining/RecievedTraining.dart' s
 import '../../../presentation/Training/Training_Form/TrainingForm.dart' show Trainingform;
 import '../../../presentation/Training/Training_Provided/ProvidedTraining.dart';
 import '../../../presentation/login/Login_Screen.dart';
+import '../../../presentation/myBeneficiary/Beneficiaries/DeathRegister.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/EligibleCoupleList.dart' show EligibleCoupleList;
 import '../../../presentation/myBeneficiary/Beneficiaries/FamilyUpdateList.dart' show FamliyUpdate;
+import '../../../presentation/myBeneficiary/Beneficiaries/HBNCList.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/PregnantWomanList.dart' show PregnantWomenList;
 import 'Route_Name.dart' show Route_Names;
 
@@ -168,6 +170,10 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const PregnantWomenList(),);
       case Route_Names.SyncStatusScreen:
         return MaterialPageRoute(builder: (context) => const SyncStatusScreen(),);
+      case Route_Names.DeathRegister:
+        return MaterialPageRoute(builder: (context) => const DeathRegister(),);
+      case Route_Names.HBNCListBeneficiaries:
+        return MaterialPageRoute(builder: (context) => const HBNCListBeneficiaries(),);
 
       case Route_Names.addFamilyHead:
         return MaterialPageRoute(

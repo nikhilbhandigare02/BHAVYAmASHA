@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      resizeToAvoidBottomInset: true, // 👈 Allows screen to move up when keyboard shows
+      resizeToAvoidBottomInset: true, 
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(30),
         child: AppBar(
@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Text(
                                 l10n.trainingTitle,
                                 style: TextStyle(
-                                  fontSize: 24.sp,
+                                  fontSize: 20.sp,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primary,
                                 ),
@@ -139,28 +139,40 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                       /// Language Selection
                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Expanded(
-                                            child: RadioListTile<bool>(
-                                              value: true,
-                                              groupValue: isEnglishSelected,
-                                              title: Text(l10n.english),
-                                              activeColor: AppColors.primary,
-                                              onChanged: (value) {
-                                                context.read<LocaleBloc>().add(const ChangeLocale('en'));
-                                              },
-                                            ),
+                                          Row(
+                                            children: [
+                                              Radio<bool>(
+                                                value: true,
+                                                groupValue: isEnglishSelected,
+                                                activeColor: AppColors.primary,
+                                                onChanged: (value) {
+                                                  context.read<LocaleBloc>().add(const ChangeLocale('en'));
+                                                },
+                                              ),
+                                              Text(
+                                                l10n.english,
+                                                style: TextStyle(fontSize: 13.5.sp),
+                                              ),
+                                            ],
                                           ),
-                                          Expanded(
-                                            child: RadioListTile<bool>(
-                                              value: false,
-                                              groupValue: isEnglishSelected,
-                                              title: Text(l10n.hindi),
-                                              activeColor: AppColors.primary,
-                                              onChanged: (value) {
-                                                context.read<LocaleBloc>().add(const ChangeLocale('hi'));
-                                              },
-                                            ),
+                                          SizedBox(width: 8.w),
+                                          Row(
+                                            children: [
+                                              Radio<bool>(
+                                                value: false,
+                                                groupValue: isEnglishSelected,
+                                                activeColor: AppColors.primary,
+                                                onChanged: (value) {
+                                                  context.read<LocaleBloc>().add(const ChangeLocale('hi'));
+                                                },
+                                              ),
+                                              Text(
+                                                l10n.hindi,
+                                                style: TextStyle(fontSize: 13.5.sp),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -264,12 +276,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               /// Footer
                               Text(
                                 l10n.poweredBy,
-                                style: TextStyle(fontSize: 12, color: AppColors.onPrimary),
+                                style: TextStyle(fontSize: 12.sp, color: AppColors.onPrimary),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 "v7.8.10",
-                                style: TextStyle(fontSize: 12, color: AppColors.onPrimary),
+                                style: TextStyle(fontSize: 12.sp, color: AppColors.onPrimary),
                               ),
                               const SizedBox(height: 40),
                             ],

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 class Misreport extends StatefulWidget {
   const Misreport({super.key});
@@ -109,12 +110,12 @@ class _MisreportState extends State<Misreport> {
         Expanded(
           child: Text(
             label,
-            style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
+            style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
           ),
         ),
         Text(
           value,
-          style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
+          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
         ),
       ],
     );

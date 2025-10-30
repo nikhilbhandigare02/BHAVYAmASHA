@@ -3,6 +3,7 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 class FinalizeIncentivePage extends StatelessWidget {
   const FinalizeIncentivePage({super.key});
@@ -99,7 +100,7 @@ class FinalizeIncentivePage extends StatelessWidget {
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(color: AppColors.onSurface, fontSize: 16),
+                      style: TextStyle(color: AppColors.onSurface, fontSize: 15.sp),
                       children: [
                         TextSpan(text: (l10n?.finalizeTotalAmountLabel ?? 'Total Amount:') + ' '),
                         TextSpan(text: '₹ 0', style: TextStyle(color: successColor, fontWeight: FontWeight.w600)),
@@ -135,9 +136,9 @@ class _AmountColumn extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(title, style: TextStyle(color: AppColors.onSurfaceVariant, fontSize: 12, fontWeight: FontWeight.w600)),
+        Text(title, style: TextStyle(color: AppColors.onSurfaceVariant, fontSize: 14.sp, fontWeight: FontWeight.w600)),
         const SizedBox(height: 6),
-        Text(amount, style: TextStyle(color: AppColors.onSurface, fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(amount, style: TextStyle(color: AppColors.onSurface, fontSize: 15.sp, fontWeight: FontWeight.w700)),
       ],
     );
   }
@@ -208,9 +209,9 @@ class _LabelValue extends StatelessWidget {
     return Column(
       crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
-        Text(title, style: TextStyle(color: AppColors.onSurfaceVariant, fontSize: 12)),
+        Text(title, style: TextStyle(color: AppColors.onSurfaceVariant, fontSize: 14.sp)),
         const SizedBox(height: 2),
-        Text(value, style: TextStyle(color: AppColors.onSurface, fontWeight: FontWeight.w700)),
+        Text(value, style: TextStyle(color: AppColors.onSurface, fontWeight: FontWeight.w700, fontSize: 14.sp)),
       ],
     );
   }

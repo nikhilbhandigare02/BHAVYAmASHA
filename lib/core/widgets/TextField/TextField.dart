@@ -78,7 +78,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 16.sp,
+      fontSize: 14.sp,
       color: AppColors.onSurfaceVariant,
       height: 1.5
     );

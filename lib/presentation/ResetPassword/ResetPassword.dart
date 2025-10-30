@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/ResetPassword/bloc/reset_password_bloc.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../core/config/routes/Route_Name.dart';
 import '../../core/utils/Validations.dart';
@@ -170,7 +171,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                     builder: (context, state) {
                       return SizedBox(
                         width: double.infinity,
-                        height: 50,
+                        height: 5.h,
                         child: RoundButton(
                           title: l10n.updateButton,
                           color: AppColors.primary,

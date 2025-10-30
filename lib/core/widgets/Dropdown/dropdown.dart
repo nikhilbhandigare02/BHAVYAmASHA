@@ -29,7 +29,7 @@ class ApiDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 16.sp,
+      fontSize: 12.sp,
       fontWeight: FontWeight.w500,
       color: AppColors.onSurface,
       height: 1.5,
@@ -49,6 +49,7 @@ class ApiDropdown<T> extends StatelessWidget {
               softWrap: true,
               maxLines: labelMaxLines,
               overflow: TextOverflow.visible,
+              style: TextStyle(fontSize: 14.sp),
             )
                 : null,
             hintText: hintText,
@@ -91,7 +92,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   Text(
                     labelText ?? 'Select Option',
                     style: TextStyle(
-                      fontSize: 20.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -108,7 +109,7 @@ class ApiDropdown<T> extends StatelessWidget {
                       return RadioListTile<T>(
                         title: Text(
                           getLabel(item),
-                          style: TextStyle(fontSize: 18.sp),
+                          style: TextStyle(fontSize: 15.sp),
                         ),
                         value: item,
                         groupValue: tempValue,
@@ -134,7 +135,7 @@ class ApiDropdown<T> extends StatelessWidget {
                       child: Text(
                         'CANCEL',
                         style: TextStyle(
-                          fontSize: 15.sp,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.grey[700],
                         ),
@@ -150,7 +151,7 @@ class ApiDropdown<T> extends StatelessWidget {
                       child: Text(
                         'OK',
                         style: TextStyle(
-                          fontSize: 15.sp,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).primaryColor,
                         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -33,22 +34,22 @@ class _AboutusState extends State<Aboutus> {
               children: [
                 Text(
                   l10n?.aboutUsP1Title ?? '',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.onSurface),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.onSurface),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   l10n?.aboutUsP2 ?? '',
-                  style: TextStyle(fontSize: 14, color: AppColors.onSurface),
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.onSurface),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   l10n?.aboutUsP3 ?? '',
-                  style: TextStyle(fontSize: 14, color: AppColors.onSurface),
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.onSurface),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   l10n?.aboutUsP4 ?? '',
-                  style: TextStyle(fontSize: 14, color: AppColors.onSurface),
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.onSurface),
                 ),
               ],
             ),

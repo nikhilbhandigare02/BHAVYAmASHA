@@ -104,9 +104,9 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
                 // case 6:
                 //   Navigator.pushNamed(context, Route_Names.AbortionList);
                 //   break;
-                // case 7:
-                //   Navigator.pushNamed(context, Route_Names.DeathRegister);
-                //   break;
+                case 7:
+                  Navigator.pushNamed(context, Route_Names.DeathRegister);
+                  break;
                 // case 8:
                 //   Navigator.pushNamed(context, Route_Names.MigratedOut);
                 //   break;

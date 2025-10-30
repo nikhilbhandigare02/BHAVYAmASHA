@@ -54,4 +54,6 @@ class Route_Names{
   static const String PregnantWomenList = 'PregnantWomenList';
   static const String AshaDashboardSection = 'AshaDashboardSection';
   static const String SyncStatusScreen = 'SyncStatusScreen';
+  static const String DeathRegister = 'DeathRegister';
+  static const String HBNCListBeneficiaries = 'HBNCListBeneficiaries';
 }

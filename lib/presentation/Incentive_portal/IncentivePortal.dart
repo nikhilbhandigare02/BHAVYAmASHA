@@ -4,6 +4,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/presentation/Incentive_portal/Finalize_Incentive.dart';
 import 'package:medixcel_new/presentation/Incentive_portal/Monthly_Task.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../core/widgets/MarqeeText/MarqeeText.dart';
 
@@ -118,9 +119,9 @@ class _IncentivePortalState extends State<IncentivePortal>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                     Text(
                       'Rohit Chavan',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 4),
                     Divider(height: 1, color: AppColors.divider),
@@ -193,7 +194,7 @@ class _IncentivePortalState extends State<IncentivePortal>
                   l10n != null
                     ? l10n!.incentiveTotalAmount(0)
                     : 'Total amount (Daily + Monthly): ₹0',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp),
                 ),
               ),
             ),
@@ -249,9 +250,9 @@ class _InfoCell extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text(title, style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: 2),
-            Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+            Text(value, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
           ],
         ),
       ),
@@ -305,7 +306,7 @@ class _SectionPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(title, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+      child: Text(title, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14.sp)),
     );
   }
 }

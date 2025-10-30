@@ -67,7 +67,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 16.sp,
+      fontSize: 12.sp,
       fontWeight: FontWeight.w500,
       color: AppColors.onSurface,
       height: 1.5,
@@ -86,6 +86,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
               softWrap: true,
               maxLines: widget.labelMaxLines,
               overflow: TextOverflow.visible,
+              style: TextStyle(fontSize: 14.sp),
             ),
             hintText: widget.hintText ?? 'dd/MM/yy',
             hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
@@ -95,7 +96,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                     child: Icon(
                       Icons.calendar_today_outlined,
                       color: Colors.grey,
-                      size: 16.sp,
+                      size: 14.sp,
                     ),
                   )
                 : null,

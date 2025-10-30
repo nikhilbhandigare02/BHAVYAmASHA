@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 class MonthlyTasks extends StatefulWidget {
   const MonthlyTasks({super.key});
@@ -126,7 +127,7 @@ class _TaskItem extends StatelessWidget {
                 title,
                 style: TextStyle(
                   color: AppColors.primary,
-                  fontSize: 12,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),

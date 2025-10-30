@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../core/widgets/AppDrawer/Drawer.dart';
 import '../../core/widgets/AppHeader/AppHeader.dart';
@@ -115,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 l10n.tabTodaysProgram,
                                 style: TextStyle(
-
+                                      fontSize: 15.sp,
                                   color: selectedIndex == 0
                                       ? AppColors.primary
                                       : AppColors.outline,
@@ -156,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 l10n.tabAshaDashboard,
                                 style: TextStyle(
+                                  fontSize: 15.sp,
                                   color: selectedIndex == 1
                                       ? AppColors.primary
                                       : AppColors.outline,

@@ -65,7 +65,7 @@ class CustomDrawer extends StatelessWidget {
                           _UserInfoRow(label: l10n.userHscLabel, value: "HSC Baank"),
                           _UserInfoRow(label: l10n.userHfrIdLabel, value: "IN1010001604"),
                           SizedBox(height: 0.5.h),
-                          Text("V 7.8.10", style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14.sp)),
+                          Text("V 7.8.10", style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13.sp)),
                         ],
                       ),
                     ),
@@ -117,7 +117,7 @@ class CustomDrawer extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
+        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
       ),
       onTap: onTap,
     );
@@ -141,7 +141,7 @@ class _UserInfoRow extends StatelessWidget {
               label,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
-                fontSize: 15.sp,
+                fontSize: 13.sp,
               ),
             ),
           ),
@@ -150,7 +150,7 @@ class _UserInfoRow extends StatelessWidget {
               value,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 15.sp,
+                fontSize: 13.sp,
               ),
             ),
           ),

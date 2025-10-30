@@ -168,14 +168,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         groupValue: state.useDob,
                         onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
                       ),
-                      const Text('DOB'),
+                      Text(l.dobShort, style: TextStyle(fontSize: 14.sp),),
                       SizedBox(width: 4.w),
                       Radio<bool>(
                         value: false,
                         groupValue: state.useDob,
                         onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
                       ),
-                      const Text('Age/Approximate Age'),
+                      Text(l.ageApproximate, style: TextStyle(fontSize:14.sp),),
                     ],
                   ),
                 ),
@@ -199,7 +199,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           child: Text(
                             '${l.ageApproximate} *',
                             style: TextStyle(
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               color: Colors.black87,
                               fontWeight: FontWeight.w500,
                             ),

@@ -29,7 +29,7 @@ class RoundButton extends StatelessWidget {
     this.borderRadius = 4,
     this.icon,
     this.iconSize = 25,
-    this.fontSize = 16,
+    this.fontSize = 14,
     this.spacing = 8,
   });
 
