@@ -12,6 +12,7 @@ class AshaDashboardSection extends StatelessWidget {
   final VoidCallback? onRoutineTap;
   final List<VoidCallback?>? mainGridActions;
   final List<VoidCallback?>? bottomGridActions;
+  final int? householdCount;
 
   const AshaDashboardSection({
     super.key,
@@ -21,6 +22,7 @@ class AshaDashboardSection extends StatelessWidget {
     this.onRoutineTap,
     this.mainGridActions,
     this.bottomGridActions,
+    this.householdCount,
   });
 
   @override
@@ -29,7 +31,7 @@ class AshaDashboardSection extends StatelessWidget {
 
     final List<Map<String, dynamic>> mainGridItems = [
       {"image": 'assets/images/plus.png', "label": l10n.gridRegisterNewHousehold},
-      {"image": 'assets/images/home.png', "label": l10n.gridAllHousehold, "count": 3},
+      {"image": 'assets/images/home.png', "label": l10n.gridAllHousehold, "count": householdCount ?? 0},
       {"image": 'assets/images/dashboard.png', "label": l10n.gridAllBeneficiaries, "count": 5},
       {"image": 'assets/images/beneficiaries.png', "label": l10n.gridMyBeneficiaries},
       {"image": 'assets/images/id-card.png', "label": l10n.gridAbhaGeneration},

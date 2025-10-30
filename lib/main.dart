@@ -42,12 +42,12 @@ class MyApp extends StatelessWidget {
 
           theme: ThemeData(
             colorScheme: AppColorSchemes.light,
-            textTheme: Theme.of(context).textTheme,
+            textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
             scaffoldBackgroundColor: AppColors.scaffoldBackground,
           ),
           darkTheme: ThemeData(
             colorScheme: AppColorSchemes.light,
-            textTheme: Theme.of(context).textTheme,
+            textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
             scaffoldBackgroundColor: AppColors.scaffoldBackground,
           ),
           themeMode: ThemeMode.light,

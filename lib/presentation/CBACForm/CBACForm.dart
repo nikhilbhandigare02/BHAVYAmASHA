@@ -150,17 +150,20 @@ class _CbacformState extends State<Cbacform> {
                 length: tabs.length,
                 child: Column(
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TabBar(
-                        isScrollable: true,
-                        labelColor: Colors.blue,
-                        unselectedLabelColor: Colors.black87,
-                        indicatorColor: Colors.blue,
-                        tabs: tabs,
-                        onTap: (_) {}, // navigation is controlled by buttons
+                    Container(
+                      color: Theme.of(context).colorScheme.primary,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: TabBar(
+                          isScrollable: true,
+                          indicatorColor: Theme.of(context).colorScheme.onPrimary,
+                          labelColor: Theme.of(context).colorScheme.onPrimary,
+                          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                          indicatorWeight: 3.0,
+                          tabs: tabs,
+                          onTap: (_) {}, // navigation is controlled by buttons
                       ),
-                    ),
+                    ),),
                     Expanded(
                       child: TabBarView(
                         physics: const NeverScrollableScrollPhysics(),

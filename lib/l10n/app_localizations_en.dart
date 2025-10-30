@@ -3033,4 +3033,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get visitHbnc => 'HBNC Visit Form';
+
+  @override
+  String get exitAppTitle => 'Exit Application';
+
+  @override
+  String get exitAppMessage => 'Are you sure you want to exit?';
+
+  @override
+  String get logoutTitle => 'Logout';
+
+  @override
+  String get logoutMessage => 'Are you sure you want to logout?';
 }

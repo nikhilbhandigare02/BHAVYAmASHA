@@ -456,16 +456,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     ),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    '$totalMembers',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
+                Text(
+                  '$totalMembers',
+                  style:  TextStyle(fontWeight: FontWeight.w600, color: AppColors.background, fontSize: 15.sp),
                 ),
               ],
             ),

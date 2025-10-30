@@ -7,6 +7,8 @@ Future<bool?> showConfirmationDialog({
   required String message,
   required String yesText,
   required String noText,
+  VoidCallback? onYes, // ✅ Optional callback
+  VoidCallback? onNo,  // ✅ Optional callback
 }) {
   return showDialog<bool>(
     context: context,
@@ -24,14 +26,13 @@ Future<bool?> showConfirmationDialog({
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppColors.warning, // red background
-            borderRadius:  BorderRadius.circular(4
-            ),
+            color: AppColors.warning,
+            borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
             title,
-            style:  TextStyle(
-              color: AppColors.background, // title text white
+            style: const TextStyle(
+              color: AppColors.background,
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
@@ -41,16 +42,19 @@ Future<bool?> showConfirmationDialog({
           padding: const EdgeInsets.only(top: 16.0),
           child: Text(
             message,
-            style:  TextStyle(
+            style: const TextStyle(
               color: AppColors.warning,
               fontSize: 16,
-              fontWeight: FontWeight.w500
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              Navigator.of(context).pop(true);
+              if (onYes != null) onYes(); // ✅ Optional callback
+            },
             child: Text(
               yesText,
               style: const TextStyle(
@@ -60,7 +64,10 @@ Future<bool?> showConfirmationDialog({
             ),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () {
+              Navigator.of(context).pop(false);
+              if (onNo != null) onNo(); // ✅ Optional callback
+            },
             child: Text(
               noText,
               style: const TextStyle(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:medixcel_new/core/widgets/Loader/Loader.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -18,6 +19,7 @@ class AllBeneficiaryScreen extends StatefulWidget {
 
 class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
+  bool _isLoading = true;
 
   final List<Map<String, dynamic>> _staticHouseholds = [
     {
@@ -57,8 +59,19 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _loadData();
     _searchCtrl.addListener(_onSearchChanged);
+  }
+  
+  Future<void> _loadData() async {
+    // Simulate network/database delay
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (mounted) {
+      setState(() {
+        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -102,9 +115,11 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         ),
       ),
       drawer: const CustomDrawer(),
-      body: Column(
-        children: [
-          Padding(
+      body: _isLoading
+          ? const CenterBoxLoader()
+          : Column(
+              children: [
+                Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               controller: _searchCtrl,
@@ -161,9 +176,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 ),
               ),
             ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 

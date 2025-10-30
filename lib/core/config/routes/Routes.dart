@@ -51,6 +51,7 @@ import '../../../presentation/RegisterNewHouseHold/AddNewFamilyMember/bloc/addne
 import '../../../presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 import '../../../presentation/ResetPassword/ResetPassword.dart';
 import '../../../presentation/Routine/RoutineScreen.dart' show Routinescreen;
+import '../../../presentation/SyncStatus/SyncStatusScreen.dart';
 import '../../../presentation/Training/ReceivedTraining/RecievedTraining.dart' show TrainingReceived;
 import '../../../presentation/Training/Training_Form/TrainingForm.dart' show Trainingform;
 import '../../../presentation/Training/Training_Provided/ProvidedTraining.dart';
@@ -165,6 +166,8 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const EligibleCoupleList(),);
       case Route_Names.PregnantWomenList:
         return MaterialPageRoute(builder: (context) => const PregnantWomenList(),);
+      case Route_Names.SyncStatusScreen:
+        return MaterialPageRoute(builder: (context) => const SyncStatusScreen(),);
 
       case Route_Names.addFamilyHead:
         return MaterialPageRoute(

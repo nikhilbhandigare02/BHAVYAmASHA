@@ -9,7 +9,8 @@ import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 
-import '../../../core/widgets/AppDrawer/Drawer.dart';
+import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
+import 'package:medixcel_new/core/widgets/Loader/Loader.dart';
 import '../../HomeScreen/HomeScreen.dart';
 
 class AllhouseholdScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   List<Map<String, dynamic>> _items = [];
   List<Map<String, dynamic>> _filtered = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -55,7 +57,14 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
   }
 
   Future<void> _loadData() async {
-    final rows = await LocalStorageDao.instance.getAllHouseholds();
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+    
+    try {
+      final rows = await LocalStorageDao.instance.getAllHouseholds();
     final mapped = rows.map<Map<String, dynamic>>((r) {
       final info = Map<String, dynamic>.from((r['household_info'] as Map?) ?? const {});
       final head = Map<String, dynamic>.from((info['headdetails'] as Map?) ?? const {});
@@ -120,15 +129,30 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       };
     }).toList();
 
-    setState(() {
-      _items = mapped;
-      _filtered = List<Map<String, dynamic>>.from(_items);
-    });
+      if (mounted) {
+        setState(() {
+          _items = mapped;
+          _filtered = List<Map<String, dynamic>>.from(_items);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      // Optionally show error message
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Failed to load household data')),
+      // );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppHeader(
         screenTitle: l10n?.gridAllHousehold ?? 'All Household',
@@ -142,51 +166,53 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         ),
       ),
       drawer: CustomDrawer(),
-      body: Column(
-        children: [
-          // Search
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText: l10n?.gridAllHousehold ?? 'All Household',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-          ),
-
-          Expanded(
-            child: _filtered.isEmpty
-                ? Center(
-                    child: Text(
-                      ( 'No data found'),
-                      style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+      body: _isLoading
+          ? const CenterBoxLoader()
+          : Column(
+              children: [
+                // Search
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    decoration: InputDecoration(
+                      hintText: l10n?.gridAllHousehold ?? 'All Household',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppColors.outlineVariant),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                      ),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                    itemCount: _filtered.length,
-                    itemBuilder: (context, index) {
-                      final data = _filtered[index];
-                      return _householdCard(context, data);
-                    },
                   ),
-          ),
+                ),
+
+                Expanded(
+                  child: _filtered.isEmpty
+                      ? Center(
+                          child: Text(
+                            ('No data found'),
+                            style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                          itemCount: _filtered.length,
+                          itemBuilder: (context, index) {
+                            final data = _filtered[index];
+                            return _householdCard(context, data);
+                          },
+                        ),
+                ),
 
           SafeArea(
             child: Padding(

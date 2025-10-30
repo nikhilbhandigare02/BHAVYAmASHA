@@ -87,11 +87,11 @@ class ApiDropdown<T> extends StatelessWidget {
                 borderRadius: BorderRadius.circular(0.5.h),
               ),
               title: Column(
-                children: [
+                children: <Widget>[
                   Text(
                     labelText ?? 'Select Option',
                     style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -108,7 +108,7 @@ class ApiDropdown<T> extends StatelessWidget {
                       return RadioListTile<T>(
                         title: Text(
                           getLabel(item),
-                          style: TextStyle(fontSize: 16.sp),
+                          style: TextStyle(fontSize: 18.sp),
                         ),
                         value: item,
                         groupValue: tempValue,

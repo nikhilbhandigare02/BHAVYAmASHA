@@ -1037,5 +1037,9 @@
   "confirmCloseFormMsg": "Do you want to close this form?",
   "confirmYes": "Yes"
   ,
-  "visitHbnc": "HBNC Visit Form"
+  "visitHbnc": "HBNC Visit Form",
+  "exitAppTitle": "Exit Application",
+  "exitAppMessage": "Are you sure you want to exit?",
+  "logoutTitle": "Logout",
+  "logoutMessage": "Are you sure you want to logout?"
 }

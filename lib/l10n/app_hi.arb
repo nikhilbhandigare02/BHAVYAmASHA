@@ -905,5 +905,11 @@
   ,
   "tabGeneralDetails": "सामान्य विवरण",
   "tabMotherDetails": "माता का विवरण",
-  "tabNewbornDetails": "बच्चे का विवरण"
+  "tabNewbornDetails": "बच्चे का विवरण",
+  "exitAppTitle": "एप्लिकेशन से बाहर निकलें",
+  "exitAppMessage": "क्या आप वाकई एप्लिकेशन से बाहर निकलना चाहते हैं?",
+  "logoutTitle": "लॉगआउट",
+  "logoutMessage": "क्या आप वाकई लॉगआउट करना चाहते हैं?"
+
+
 }

@@ -3033,4 +3033,16 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get visitHbnc => 'एचबीएनसी विजिट फॉर्म';
+
+  @override
+  String get exitAppTitle => 'एप्लिकेशन से बाहर निकलें';
+
+  @override
+  String get exitAppMessage => 'क्या आप वाकई एप्लिकेशन से बाहर निकलना चाहते हैं?';
+
+  @override
+  String get logoutTitle => 'लॉगआउट';
+
+  @override
+  String get logoutMessage => 'क्या आप वाकई लॉगआउट करना चाहते हैं?';
 }

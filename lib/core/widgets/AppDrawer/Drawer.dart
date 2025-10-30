@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import '../../../presentation/HomeScreen/HomeScreen.dart';
+import '../ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
@@ -48,7 +49,7 @@ class CustomDrawer extends StatelessWidget {
                     _buildMenuItem(context, 'assets/images/notes.png', l10n.drawerMisReport, onTap: () {Navigator.pushNamed(context, Route_Names.MISScreen);}),
                     _buildMenuItem(context, 'assets/images/rupee.png', l10n.drawerIncentivePortal, onTap: () {Navigator.pushNamed(context, Route_Names.incentivePortal);}),
                     _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () {}),
-                    _buildMenuItem(context, 'assets/images/refresh-button.png', l10n.drawerSyncedData, onTap: () {}),
+                    _buildMenuItem(context, 'assets/images/refresh-button.png', l10n.drawerSyncedData, onTap: () {Navigator.pushNamed(context, Route_Names.SyncStatusScreen);}),
                     _buildMenuItem(context, 'assets/images/reset_password.png', l10n.drawerResetPassword, onTap: () {Navigator.pushNamed(context, Route_Names.Resetpassword);}),
                     _buildMenuItem(context, 'assets/images/setting.png', l10n.drawerSettings, onTap: () {Navigator.pushNamed(context, Route_Names.setting);}),
                     _buildMenuItem(context, 'assets/images/information.png', l10n.drawerAboutUs, onTap: () {Navigator.pushNamed(context, Route_Names.aboutUs);}),
@@ -77,10 +78,21 @@ class CustomDrawer extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
                 child: SizedBox(
                   width: double.infinity,
-height: 6.h,
+                  height: 4.5.h,
                   child: RoundButton(
                     title: l10n.drawerLogout,
-                    onPress: () {},
+                    onPress: () {
+                      showConfirmationDialog(
+                        context: context,
+                        title: l10n.logoutTitle,
+                        message: l10n.logoutMessage,
+                        yesText: l10n.yes,
+                        noText: l10n.no,
+                        onYes: () {
+                          Navigator.pushNamedAndRemoveUntil(context, Route_Names.loginScreen, (Route<dynamic> route) => false,);
+                        },
+                      );
+                    },
                   ),
                 ),
               ),
