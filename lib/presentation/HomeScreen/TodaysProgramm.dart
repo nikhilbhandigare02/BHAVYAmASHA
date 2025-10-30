@@ -83,7 +83,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           Text(
                             l10n.toDoVisits,
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                               fontSize: 15,
                               color: widget.selectedGridIndex == 0 ? AppColors.onPrimary : AppColors.outline,
                             ),
@@ -142,7 +142,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             l10n.completedVisits,
                             style: TextStyle(
 
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                               fontSize: 15  ,
                               color: widget.selectedGridIndex == 1 ? AppColors.onPrimary : AppColors.outline,
                             ),
@@ -171,8 +171,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               children: [
                 for (var entry in widget.apiData.entries) ...[
                   AnimatedSize(
-                    duration: const Duration(milliseconds: 400), // Adjust speed here
-                    curve: Curves.easeInOut, // Smooth animation curve
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
                     child: ExpansionTile(
                       key: ValueKey('${entry.key}_$_expandedKey'),
                       onExpansionChanged: (expanded) {
@@ -184,7 +184,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       title: Text(
                         entry.key,
                         style: TextStyle(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           fontSize: 15,
                           color: _expandedKey == entry.key ? Colors.blueAccent : null,
                         ),
@@ -205,7 +205,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           const SizedBox(width: 8),
                           AnimatedRotation(
                             turns: _expandedKey == entry.key ? 0.5 : 0,
-                            duration: const Duration(milliseconds: 400), // Match with AnimatedSize
+                            duration: const Duration(milliseconds: 400),
                             curve: Curves.easeInOut,
                             child: Icon(
                               Icons.keyboard_arrow_down_outlined,

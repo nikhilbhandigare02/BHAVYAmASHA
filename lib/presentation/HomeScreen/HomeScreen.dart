@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: selectedIndex == 0
                                       ? AppColors.primary
                                       : AppColors.outline,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -147,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: selectedIndex == 1
                                       ? AppColors.primary
                                       : AppColors.outline,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -166,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 20),
 
           Expanded(
             child: selectedIndex == 0

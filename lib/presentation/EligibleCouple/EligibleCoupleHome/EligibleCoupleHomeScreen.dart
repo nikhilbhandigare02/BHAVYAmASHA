@@ -36,7 +36,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.gridEligibleCouple ?? 'Eligible Couple',
+        screenTitle: l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple',
         showBack: false,
         icon1: Icons.home,
         onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
@@ -47,7 +47,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         child: GridView.builder(
           itemCount: cards.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, // Fits up to 3 small square cards per row
+            crossAxisCount: 3,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
             childAspectRatio: 1, // Make square

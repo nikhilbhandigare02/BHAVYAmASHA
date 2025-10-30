@@ -46,7 +46,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       height: preferredSize.height,
       color: Theme.of(context).colorScheme.primary,
       child: Padding(
-        padding: EdgeInsets.only(top: 2.5.h),
+        padding: EdgeInsets.only(top: 3.5.h),
         child: Row(
           children: [
             showBack
@@ -63,13 +63,13 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               constraints: const BoxConstraints(),
             ),
             SizedBox(width: 1.w),
-            // Title takes remaining space
+
             Expanded(
               child: Text(
                 screenTitle,
                 style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w500,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 overflow: TextOverflow.ellipsis,
