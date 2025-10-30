@@ -185,13 +185,12 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
 
   Widget _buildSixWeekDoseTable() {
     final data = [
-      {'name': 'OPV-1', 'due': '14-10-2022'},
-      {'name': 'DPT-1', 'due': '14-10-2022'},
-      {'name': 'Hep B-1', 'due': '14-10-2022'},
-      {'name': 'Hib-1', 'due': '14-10-2022'},
+      {'name': 'O.P.V. -1', 'due': '14-10-2022'},
+      {'name': 'D.P.T. -1', 'due': '14-10-2022'},
+      {'name': 'Pentavelent 1', 'due': '14-10-2022'},
       {'name': 'Rota-1', 'due': '14-10-2022'},
-      {'name': 'IPV-1', 'due': '14-10-2022'},
-      {'name': 'PCV-1', 'due': '14-10-2022'},
+      {'name': 'I.P.V.-1', 'due': '14-10-2022'},
+      {'name': 'P.C.V.-1', 'due': '14-10-2022'},
     ];
 
     return Table(
@@ -280,6 +279,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                   return _buildFiveToSixYearTab();
                 } else if (tabName == '10 YEAR') {
                   return _buildTenYearTab();
+                } else if (tabName == '16 YEAR') {
+                  return _buildSixteenYearTab();
                 }
                 return Center(
                   child: Text(
@@ -297,11 +298,9 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
 
   Widget _buildTenWeekDoseTable() {
     final data = [
-      {'name': 'OPV-2', 'due': '14-11-2022'},
-      {'name': 'DPT-2', 'due': '14-11-2022'},
-      {'name': 'Hep B-2', 'due': '14-11-2022'},
-      {'name': 'Hib-2', 'due': '14-11-2022'},
-      {'name': 'Rota-2', 'due': '14-11-2022'},
+      {'name': 'O.P.V.-2', 'due': '23-12-2022'},
+      {'name': 'Pentavelent -2', 'due': '23-12-2022'},
+      {'name': 'Rota-2', 'due': '23-12-2022'},
     ];
 
     return Table(
@@ -352,11 +351,11 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
 
   Widget _buildFourteenWeekDoseTable() {
     final data = [
-      {'name': 'OPV-3', 'due': '14-12-2022'},
-      {'name': 'DPT-3', 'due': '14-12-2022'},
-      {'name': 'Hep B-3', 'due': '14-12-2022'},
-      {'name': 'Hib-3', 'due': '14-12-2022'},
-      {'name': 'IPV-2', 'due': '14-12-2022'},
+      {'name': 'O.P.V.-3', 'due': '20-1-2023'},
+      {'name': 'Pentavalent-3', 'due': '20-1-2023'},
+      {'name': 'Rota 3', 'due': '20-1-2023'},
+      {'name': 'IPV 2', 'due': '20-1-2023'},
+      {'name': 'P.V.C. -2', 'due': '20-1-2023'},
     ];
 
     return Table(
@@ -836,12 +835,12 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
 
   Widget _buildNineMonthDoseTable() {
     final data = [
-      {'name': 'MMR-1', 'due': '14-07-2023'},
-      {'name': 'JE-1', 'due': '14-07-2023'},
-      {'name': 'OPV-4', 'due': '14-07-2023'},
-      {'name': 'DPT-4', 'due': '14-07-2023'},
-      {'name': 'Hep B-4', 'due': '14-07-2023'},
-      {'name': 'Hib-4', 'due': '14-07-2023'},
+      {'name': 'Measles -1', 'due': '14-07-2023'},
+      {'name': 'M.R Dose -1', 'due': '14-07-2023'},
+      {'name': 'Vitamin A Dose -1', 'due': '14-07-2023'},
+      {'name': 'J.E Vaccine -1', 'due': '14-07-2023'},
+      {'name': 'P.V.C Booster', 'due': '14-07-2023'},
+      {'name': 'F.I.P.V. -3', 'due': '14-07-2023'},
     ];
 
     return Table(
@@ -1022,11 +1021,12 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
 
   Widget _buildSixteenToTwentyFourMonthDoseTable() {
     final data = [
-      {'name': 'DPT Booster-1', 'due': '14-01-2024'},
-      {'name': 'OPV Booster-1', 'due': '14-01-2024'},
-      {'name': 'MMR-2', 'due': '14-01-2024'},
-      {'name': 'JE-2', 'due': '14-01-2024'},
-      {'name': 'Vitamin A (1st dose)', 'due': '14-01-2024'},
+      {'name': 'O.P.V. Booster-1', 'due': '14-01-2024'},
+      {'name': 'D.P.T. Booster-1', 'due': '14-01-2024'},
+
+      {'name': 'J.E Vaccine 2', 'due': '14-01-2024'},
+      {'name': 'M.R dose -2', 'due': '14-01-2024'},
+
     ];
 
     return Table(
@@ -1460,6 +1460,185 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                   ),
                   const SizedBox(height: 16),
                   _buildTenYearDoseTable(),
+                  const SizedBox(height: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CaseClosureWidget(
+                        isCaseClosureChecked: _isCaseClosureChecked,
+                        selectedClosureReason: _selectedClosureReason,
+                        migrationType: _migrationType,
+                        dateOfDeath: _dateOfDeath,
+                        probableCauseOfDeath: _probableCauseOfDeath,
+                        deathPlace: _deathPlace,
+                        reasonOfDeath: _reasonOfDeath,
+                        showOtherCauseField: _showOtherCauseField,
+                        otherCauseController: _otherCauseController,
+                        otherReasonController: _otherReasonController,
+                        onCaseClosureChanged: (value) {
+                          setState(() {
+                            _isCaseClosureChecked = value;
+                            if (!value) {
+                              _selectedClosureReason = null;
+                              _migrationType = null;
+                              _dateOfDeath = null;
+                              _probableCauseOfDeath = null;
+                              _deathPlace = null;
+                              _reasonOfDeath = null;
+                              _showOtherCauseField = false;
+                              _otherCauseController.clear();
+                              _otherReasonController.clear();
+                            }
+                          });
+                        },
+                        onClosureReasonChanged: (value) {
+                          setState(() {
+                            _selectedClosureReason = value;
+                            if (value != 'Death') {
+                              _dateOfDeath = null;
+                              _probableCauseOfDeath = null;
+                              _deathPlace = null;
+                              _reasonOfDeath = null;
+                              _showOtherCauseField = false;
+                              _otherCauseController.clear();
+                            }
+                          });
+                        },
+                        onMigrationTypeChanged: (value) {
+                          setState(() {
+                            _migrationType = value;
+                          });
+                        },
+                        onDateOfDeathChanged: (value) {
+                          setState(() {
+                            _dateOfDeath = value;
+                          });
+                        },
+                        onProbableCauseChanged: (value) {
+                          setState(() {
+                            _probableCauseOfDeath = value;
+                            _showOtherCauseField = (value == 'Any other (specify)');
+                            if (!_showOtherCauseField) {
+                              _otherCauseController.clear();
+                            }
+                          });
+                        },
+                        onDeathPlaceChanged: (value) {
+                          setState(() {
+                            _deathPlace = value;
+                          });
+                        },
+                        onReasonOfDeathChanged: (value) {
+                          setState(() {
+                            _reasonOfDeath = value;
+                          });
+                        },
+                        onShowOtherCauseFieldChanged: (value) {
+                          setState(() {
+                            _showOtherCauseField = value ?? false;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: RoundButton(
+              title: 'SAVE',
+              onPress: () {},
+              height: 50,
+              borderRadius: 8,
+              fontSize: 16,
+              spacing: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSixteenYearDoseTable() {
+    final data = [
+      {'name': 'Tetanus Diphtheria (Td)', 'due': '10-10-2038'},
+    ];
+
+    return Table(
+      columnWidths: const {
+        0: FlexColumnWidth(2.5),
+        1: FlexColumnWidth(1.5),
+        2: FlexColumnWidth(2),
+      },
+      border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
+      children: [
+        const TableRow(
+          decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
+          children: [
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Text('16 Year Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+        for (var item in data)
+          TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(item['name']!),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(item['due']!),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+                child: Text('dd-mm-yyyy', style: TextStyle(color: Colors.grey)),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSixteenYearTab() {
+    return SafeArea(
+      child: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+              child: ListView(
+                children: [
+                  const SizedBox(height: 8),
+                  _infoRow('Date of visit', '30-10-2025'),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Weight (1.2–90)kg',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      hintText: 'Enter weight',
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildSixteenYearDoseTable(),
                   const SizedBox(height: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
