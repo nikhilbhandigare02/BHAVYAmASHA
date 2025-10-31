@@ -68,7 +68,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               child: Text(
                 screenTitle,
                 style: TextStyle(
-                  fontSize: 18.sp,
+                  fontSize: 17.sp,
                   fontWeight: FontWeight.w500,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -83,7 +83,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               )
             else if (icon1 != null)
               IconButton(
-                icon: Icon(icon1, color: Theme.of(context).colorScheme.onPrimary),
+                icon: Icon(icon1, color: Theme.of(context).colorScheme.onPrimary, size: 17.sp,),
                 onPressed: onIcon1Tap,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -96,7 +96,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               )
             else if (icon2 != null)
               IconButton(
-                icon: Icon(icon2, color: Theme.of(context).colorScheme.onPrimary),
+                icon: Icon(icon2, color: Theme.of(context).colorScheme.onPrimary,size: 17.sp,),
                 onPressed: onIcon2Tap,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -109,7 +109,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               )
             else if (icon3 != null)
               IconButton(
-                icon: Icon(icon3, color: Theme.of(context).colorScheme.onPrimary),
+                icon: Icon(icon3, color: Theme.of(context).colorScheme.onPrimary,size: 17.sp,),
                 onPressed: onIcon3Tap,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),

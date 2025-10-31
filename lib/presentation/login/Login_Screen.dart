@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     final isEnglishSelected = localeCode == 'en';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(30),
@@ -147,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 children: [
                                   SizedBox(height: 10.h),
                                   Text(
-                                    l10n.trainingTitle,
+                                    'BHAVYA mASHA Training',
                                     style: TextStyle(
                                       fontSize: 20.sp,
                                       fontWeight: FontWeight.bold,
@@ -226,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                               },
                                             ),
                                             Text(
-                                              l10n.english,
+                                              'English',
                                               style: TextStyle(fontSize: 13.5.sp),
                                             ),
                                           ],
@@ -243,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                               },
                                             ),
                                             Text(
-                                              l10n.hindi,
+                                              'हिंदी',
                                               style: TextStyle(fontSize: 13.5.sp),
                                             ),
                                           ],
@@ -253,16 +253,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                                     /// Username Field
                                     BlocBuilder<LoginBloc, LoginState>(
-                                      buildWhen: (current, previous) => current.username != previous.username,
+                                      buildWhen: (current, previous) => 
+                                          current.username != previous.username || 
+                                          current.showValidationErrors != previous.showValidationErrors,
                                       builder: (context, state) {
                                         return CustomTextField(
                                           focusNode: _usernameFocusNode,
                                           textInputAction: TextInputAction.next,
-                                          labelText: l10n.usernameLabel,
+                                          // labelText: l10n.usernameLabel,
                                           hintText: l10n.usernameHint,
-                                          prefixIcon: Icons.person_outline,
+                                          prefixIcon: Icons.person,
                                           keyboardType: TextInputType.text,
-                                          validator: (value) => Validations.validateUsername(l10n, value),
+                                          validator: (value) => state.showValidationErrors 
+                                              ? Validations.validateUsername(l10n, value)
+                                              : null,
                                           onChanged: (value) {
                                             context.read<LoginBloc>().add(UsernameChanged(username: value));
                                           },
@@ -273,17 +277,21 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                                     /// Password Field
                                     BlocBuilder<LoginBloc, LoginState>(
-                                      buildWhen: (current, previous) => current.password != previous.password,
+                                      buildWhen: (current, previous) => 
+                                          current.password != previous.password || 
+                                          current.showValidationErrors != previous.showValidationErrors,
                                       builder: (context, state) {
                                         return CustomTextField(
                                           focusNode: _passwordFocusNode,
-                                          labelText: l10n.passwordLabel,
+                                          // labelText: l10n.passwordLabel,
                                           hintText: l10n.passwordHint,
-                                          prefixIcon: Icons.lock_outline,
+                                          prefixIcon: Icons.key,
                                           obscureText: true,
                                           keyboardType: TextInputType.visiblePassword,
                                           textInputAction: TextInputAction.done,
-                                          validator: (value) => Validations.validatePassword(l10n, value),
+                                          validator: (value) => state.showValidationErrors 
+                                              ? Validations.validatePassword(l10n, value) 
+                                              : null,
                                           onChanged: (value) {
                                             context.read<LoginBloc>().add(PasswordChange(password: value));
                                           },
@@ -335,8 +343,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                               color: AppColors.primary,
                                               isLoading: state.postApiStatus == PostApiStatus.loading,
                                               onPress: () {
+                                                // Show validation errors when login button is pressed
+                                                context.read<LoginBloc>().add(ShowValidationErrors());
+                                                
+                                                // Validate the form
                                                 if (_formKey.currentState!.validate()) {
+                                                  // Only proceed with login if form is valid
                                                   context.read<LoginBloc>().add(LoginButton());
+                                                } else {
+                                                  // Just show validation errors without proceeding
+                                                  context.read<LoginBloc>().add(ShowValidationErrors());
                                                 }
                                               },
                                             ),

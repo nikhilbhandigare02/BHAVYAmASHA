@@ -7,7 +7,7 @@ class AppColors {
   AppColors._();
 
   // Brand / Primary
-  static const Color primary = Color(0xFF2E73B8); // Brand Blue
+  static const Color primary = Color(0xFF428BCA);
   static const Color onPrimary = Colors.white;
   static const Color primaryContainer = Color(0xFFEADDFF);
   static const Color onPrimaryContainer = Color(0xFF21005D);
@@ -32,7 +32,7 @@ class AppColors {
   static const Color onErrorContainer = Color(0xFF410E0B);
 
   // Neutrals / Surfaces
-  static const Color background = Color(0xFFFFFBFE);
+  static const Color background = Colors.white;
   static const Color onBackground = Color(0xFF1C1B1F);
   static const Color surface = Color(0xFFFFFBFE);
   static const Color onSurface = Color(0xFF1C1B1F);

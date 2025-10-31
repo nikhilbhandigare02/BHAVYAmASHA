@@ -109,7 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // Tabs
           Material(
-            elevation: 3,
+            color: AppColors.background,
+            elevation: 2,
             borderRadius: BorderRadius.circular(8),
             child: Row(
               children: [
@@ -125,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.calendar_month_outlined,
+                                Icons.today,
                                 color:AppColors.primary,
                               ),
                               const SizedBox(width: 8),

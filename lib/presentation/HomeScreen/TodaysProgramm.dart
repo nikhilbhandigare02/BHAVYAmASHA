@@ -121,8 +121,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 child: Center(
                                   child: Image.asset(
                                     'assets/images/comment.png',
-                                    width: 24,
-                                    height: 24,
+                                    width: 6.w,
+                                    height: 6.w,
                                     fit: BoxFit.contain,
                                   ),
                                 ),
@@ -185,7 +185,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       title: Text(
                         entry.key,
                         style: TextStyle(
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w700,
                           fontSize: 15.sp,
                           color: _expandedKey == entry.key ? Colors.blueAccent : null,
                         ),

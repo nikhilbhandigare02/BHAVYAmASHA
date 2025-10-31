@@ -45,7 +45,7 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
       ),
       _BeneficiaryTileData(
         title: l10n.hbcnList,
-        asset: 'assets/images/infant-pnc.png',
+        asset: 'assets/images/toddler.png',
         count: 0,
       ),
       _BeneficiaryTileData(

@@ -22,3 +22,5 @@ class PasswordChange extends LoginEvent{
 
 class LoginButton extends LoginEvent{}
 
+class ShowValidationErrors extends LoginEvent{}
+
