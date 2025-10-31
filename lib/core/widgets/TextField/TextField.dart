@@ -18,6 +18,8 @@ class CustomTextField extends StatefulWidget {
   final int? maxLength;
   final int? labelMaxLines;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
 
   const CustomTextField({
     super.key,
@@ -35,6 +37,8 @@ class CustomTextField extends StatefulWidget {
     this.maxLength,
     this.labelMaxLines,
     this.controller,
+    this.focusNode,
+    this.textInputAction,
   });
 
   @override
@@ -55,13 +59,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   void didUpdateWidget(covariant CustomTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
-    // If controller changed, update the reference
+
+
     if (widget.controller != oldWidget.controller) {
       _controller?.dispose();
       _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
     }
-    
+
     // Only update text if we're managing our own controller
     if (widget.controller == null) {
       _controller ??= TextEditingController();
@@ -69,8 +73,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
       final oldInit = oldWidget.initialValue ?? '';
       final currText = _controller!.text;
       final shouldUpdate =
-          // update if text is currently empty
-          currText.isEmpty ||
+      // update if text is currently empty
+      currText.isEmpty ||
           // or if it still matches the old initialValue (user hasn't edited)
           currText == oldInit ||
           // or if upstream is progressively providing a longer value (prefill flow)
@@ -93,9 +97,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 15.sp,
-      color: AppColors.onSurfaceVariant,
-      height: 1.5
+        fontSize: 15.sp,
+        color: AppColors.onSurfaceVariant,
+        height: 1.5
     );
 
     return TextFormField(
@@ -110,15 +114,17 @@ class _CustomTextFieldState extends State<CustomTextField> {
       maxLength: widget.maxLength,
       inputFormatters: widget.inputFormatters,
       cursorColor: AppColors.primary,
+      focusNode: widget.focusNode,
+      textInputAction: widget.textInputAction,
       decoration: InputDecoration(
         label: (widget.labelText != null && widget.labelText!.isNotEmpty)
             ? Text(
-                widget.labelText!,
-                softWrap: true,
-                maxLines: widget.labelMaxLines,
-                overflow: TextOverflow.visible,
-                style: inputStyle,
-              )
+          widget.labelText!,
+          softWrap: true,
+          maxLines: widget.labelMaxLines,
+          overflow: TextOverflow.visible,
+          style: inputStyle,
+        )
 
             : null,
         // Add some space between the label and the input field

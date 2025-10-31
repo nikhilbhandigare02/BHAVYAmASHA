@@ -4,7 +4,8 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 
-import '../../core/widgets/Dropdown/dropdown.dart';
+import '../../core/widgets/Dropdown/Dropdown.dart';
+import '../../core/widgets/Dropdown/dropdown.dart' hide ApiDropdown;
 import '../../l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/profile_bloc.dart';

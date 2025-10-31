@@ -9,6 +9,7 @@ import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
 import '../../HomeScreen/HomeScreen.dart';
+import '../MigrtionSplitScreen/MigrationSplitScreen.dart';
 
 class HouseHold_BeneficiaryScreen extends StatefulWidget {
   const HouseHold_BeneficiaryScreen({super.key});
@@ -86,7 +87,7 @@ class _HouseHold_BeneficiaryScreenState
         screenTitle: l10n?.householdBeneficiaryTitle ?? 'Household Beneficiary',
         showBack: true,
         icon1: CupertinoIcons.arrow_left_right,
-        onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
+        onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.MigrationSplitOption),
         icon2: Icons.home,
         onIcon2Tap: () => Navigator.pushReplacement(
           context,

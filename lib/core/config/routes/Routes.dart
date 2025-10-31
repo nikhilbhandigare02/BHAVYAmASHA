@@ -23,6 +23,7 @@ import 'package:medixcel_new/presentation/EligibleCouple/EligibleCoupleHome/Elig
 
 import '../../../Splash_screen/Splash_screen.dart';
 import '../../../presentation/ABHALink/AbhaLinkScreen.dart' show Abhalinkscreen;
+import '../../../presentation/AllHouseHold/MigrtionSplitScreen/MigrationSplitScreen.dart';
 import '../../../presentation/AshakiDuniya/AshaKiDuniyaScreen.dart';
 import '../../../presentation/CBACForm/CBACForm.dart';
 import '../../../presentation/ChildCare/ChildCareHomeScreen.dart';
@@ -181,6 +182,8 @@ class Routes{
 
       case Route_Names.HighRisk:
         return MaterialPageRoute(builder: (context) => const HighRisk(),);
+      case Route_Names.MigrationSplitOption:
+        return MaterialPageRoute(builder: (context) => const MigrationSplitScreen(),);
       case Route_Names.AshaKiDuniyaScreen:
         return MaterialPageRoute(builder: (context) => const AshaKiDuniyaScreen(),);
       case Route_Names.DeseasedList:

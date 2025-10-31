@@ -3,11 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
-import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
+import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart' hide ApiDropdown;
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/utils/enums.dart';
 import '../../../core/config/themes/CustomColors.dart';
+import '../../../core/widgets/Dropdown/Dropdown.dart';
 import 'bloc/training_bloc.dart';
 
 class Trainingform extends StatelessWidget {

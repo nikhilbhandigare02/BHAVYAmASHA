@@ -23,7 +23,7 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   String? _deathPlace;
   String? _reasonOfDeath;
   
-  // Migration related state
+
   String? _migrationType;
 
   final TextEditingController _otherReasonController = TextEditingController();
