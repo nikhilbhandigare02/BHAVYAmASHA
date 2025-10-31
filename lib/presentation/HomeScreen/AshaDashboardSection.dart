@@ -74,15 +74,14 @@ class AshaDashboardSection extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                // Main Grid
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: mainGridItems.length,
                   gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    mainAxisSpacing: 0.5.h,
-                    crossAxisSpacing: 0.5.w,
+                    mainAxisSpacing: 0.4.h,
+                    crossAxisSpacing: 0.4.w,
                     childAspectRatio: 1.2,
                   ),
                   itemBuilder: (context, index) {
@@ -92,15 +91,15 @@ class AshaDashboardSection extends StatelessWidget {
                     return InkWell(
                       onTap: () => _onMainGridTap(context, index),
                       child: Card(
-                        elevation: 3,
+                        elevation: 2,
                         color: AppColors.background,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(1.5.h),
+                          borderRadius: BorderRadius.circular(0.8.h),
                         ),
                         child: Stack(
                           children: [
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.h),
+                              padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.w),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -164,7 +163,7 @@ class AshaDashboardSection extends StatelessWidget {
                   child: Card(
                     color: AppColors.background,
                     elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(1.5.h)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.8.h)),
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 1.5.h, horizontal: 4.w),
                       child: Row(
@@ -200,8 +199,8 @@ class AshaDashboardSection extends StatelessWidget {
                   itemCount: bottomGridItems.length,
                   gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    mainAxisSpacing: 0.5.h,
-                    crossAxisSpacing: 0.5.w,
+                    mainAxisSpacing: 0.4.h,
+                    crossAxisSpacing: 0.4.w,
                     childAspectRatio: 1.2,
                   ),
                   itemBuilder: (context, index) {
@@ -209,10 +208,10 @@ class AshaDashboardSection extends StatelessWidget {
                     return InkWell(
                       onTap: () => _onBottomGridTap(context, index),
                       child: Card(
-                        elevation: 3,
+                        elevation: 2,
                         color: AppColors.background,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(1.5.h),
+                          borderRadius: BorderRadius.circular(0.8.h),
                         ),
                         child: Stack(
                           children: [

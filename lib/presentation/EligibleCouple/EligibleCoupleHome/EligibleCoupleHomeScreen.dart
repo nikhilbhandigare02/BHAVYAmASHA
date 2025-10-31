@@ -37,6 +37,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     ];
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppHeader(
         screenTitle: l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple',
         showBack: false,
@@ -50,36 +51,68 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = screenWidth > 600 ? 4 : 3;
-          final padding = 12.0 * 2; // Total horizontal padding
-          final spacing = 12.0 * (crossAxisCount - 1); // Total spacing between items
-          final itemWidth = (screenWidth - padding - spacing) / crossAxisCount;
-          
+          final padding = 12.0 * 2;
+          final spacing = 12.0 * (crossAxisCount - 1);
+          final itemWidth = ((screenWidth - padding - spacing) / crossAxisCount) * 1.1;
+          final scaleFactor = MediaQuery.of(context).textScaleFactor;
+
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(12.0),
-              child: Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: cards.map((item) {
-                  return SizedBox(
-                    width: itemWidth,
-                    height: itemWidth, // Keep it square
-                    child: _DashboardCard(
-                      image: item['image']!,
-                      count: item['count']!,
-                      title: item['title']!,
-                      onTap: () => Navigator.pushNamed(context, item['route']!),
-                    ),
+              child: LayoutBuilder(
+                builder: (context, _) {
+                  double maxHeight = 0;
+                  final cardHeights = <double>[];
+
+                  for (var item in cards) {
+                    final textSpan = TextSpan(
+                      text: item['title'],
+                      style: TextStyle(
+                        fontSize: 13.sp * scaleFactor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    );
+                    final tp = TextPainter(
+                      text: textSpan,
+                      maxLines: 3,
+                      textDirection: TextDirection.ltr,
+                    )..layout(maxWidth: itemWidth - 24);
+
+                    // Height = base image + text height + padding (responsive)
+                    double cardHeight = tp.size.height + (90 * scaleFactor);
+                    cardHeights.add(cardHeight);
+                  }
+
+                  maxHeight = cardHeights.reduce((a, b) => a > b ? a : b);
+
+                  return Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: cards.map((item) {
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: itemWidth,
+                          maxWidth: itemWidth,
+                        ),
+                        child: _DashboardCard(
+                          image: item['image']!,
+                          count: item['count']!,
+                          title: item['title']!,
+                          onTap: () => Navigator.pushNamed(context, item['route']!),
+                        ),
+                      );
+                    }).toList(),
                   );
-                }).toList(),
+
+                },
               ),
             ),
           );
         },
       ),
+
     );
   }
 }
@@ -99,26 +132,30 @@ class _DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scaleFactor = MediaQuery.of(context).textScaleFactor;
+
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(1),
+      borderRadius: BorderRadius.circular(8),
       child: Card(
+        color: AppColors.background,
         elevation: 3,
         shape: RoundedRectangleBorder(
-
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(11),
+          padding: EdgeInsets.all(2.h),
           child: Column(
-
-            //  mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisSize: MainAxisSize.min, // ✅ automatically adjusts height
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
                     image,
-                    width: 28,
-                    height: 28,
+                    width: 28 * scaleFactor,
+                    height: 28 * scaleFactor,
                     fit: BoxFit.contain,
                   ),
                   const Spacer(),
@@ -126,23 +163,23 @@ class _DashboardCard extends StatelessWidget {
                     count,
                     style: TextStyle(
                       color: AppColors.primary,
-                      fontSize: 14.sp,
+                      fontSize: 14.sp * scaleFactor,
                       fontWeight: FontWeight.bold,
-
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 1.h),
               Text(
                 title,
                 textAlign: TextAlign.start,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style:   TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.outline
+                softWrap: true,
+                maxLines: null, // ✅ allow multiple lines (auto grows)
+                overflow: TextOverflow.visible,
+                style: TextStyle(
+                  fontSize: 14.sp * scaleFactor,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.outline,
                 ),
               ),
             ],

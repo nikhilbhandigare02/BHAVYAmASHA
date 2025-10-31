@@ -211,104 +211,110 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               else
                 const SizedBox(width: 120, height: 44),
 
-              SizedBox(
-                width: 30.w,
-                height: 5.h,
-                child: Builder(
-                  builder: (context) {
-                    final idx = _tabController.index;
-                    final bool disableNext = idx == 0 && !headAdded;
-                    final String rightTitle = idx == 2
-                        ? (l10n?.saveButton ?? 'SAVE')
-                        : (l10n?.nextButton ?? 'NEXT');
-                    return IgnorePointer(
-                      ignoring: disableNext,
-                      child: Opacity(
-                        opacity: disableNext ? 0.5 : 1.0,
-                        child: RoundButton(
-                          title: rightTitle,
-                          color: AppColors.primary,
-                          borderRadius: 8,
-                          height: 44,
-                          onPress: () {
-                            if (disableNext) {
+          SizedBox(
+            width: 30.w,
+            height: 5.h,
+            child: Builder(
+              builder: (context) {
+                final idx = _tabController.index;
+                final bool disableNext = idx == 0 && !headAdded;
+                final String rightTitle = idx == 2
+                    ? (l10n?.saveButton ?? 'SAVE')
+                    : (l10n?.nextButton ?? 'NEXT');
 
-                              return;
-                            }
-                            if (idx < 2) {
-                              _tabController.animateTo(idx + 1);
-                            } else {
-                              final now = DateTime.now();
-                              final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-                              final s = _hhBloc.state;
-                              final householdFormJson = {
-                                'headdetails': _headForm ?? {},
-                                'memberdetails': _memberForms,
-                                'spousedetails': _headForm?['spousedetails'] ?? {},
-                                'childrendetails': _headForm?['childrendetails'] ?? {},
-                                'amenities': {
-                                  'residentialArea': s.residentialArea,
-                                  'ownershipType': s.ownershipType,
-                                  'houseType': s.houseType,
-                                  'houseKitchen': s.houseKitchen,
-                                  'cookingFuel': s.cookingFuel,
-                                  'waterSource': s.waterSource,
-                                  'electricity': s.electricity,
-                                  'toilet': s.toilet,
-                                },
-                              };
-                              final normalizedHouseholdInfo = _convertYesNoMap(Map<String, dynamic>.from(householdFormJson));
-                              debugPrint(jsonEncode(normalizedHouseholdInfo));
-
-                              final payload = {
-                                'server_id': null,
-                                'unique_key': 'HH_${now.millisecondsSinceEpoch}',
-                                'address': {},
-                                'geo_location': {},
-                                'head_id': _headForm?['unique_key'] ?? _headForm?['id'],
-                                'household_info': normalizedHouseholdInfo,
-                                'device_details': {
-                                  'platform': Platform.operatingSystem,
-                                },
-                                'app_details': {
-                                  'app_name': 'BHAVYA mASHA UAT',
-                                },
-                                'parent_user': {},
-                                'current_user_key': 'local_user',
-                                'facility_id': 283,
-                                'created_date_time': ts,
-                                'modified_date_time': ts,
-                                'is_synced': 0,
-                                'is_deleted': 0,
-                              };
-
-                              debugPrint(jsonEncode(payload));
-
-// In the save handler:
-                              LocalStorageDao.instance.insertHousehold(payload).then((_) async {
-                                _skipExitConfirm = true;
-                                if (!mounted) return;
-
-                                if (mounted) {
-                                  final shouldNavigate = await showSuccessDialog(context);
-                                  if (shouldNavigate == true && mounted) {
-                                    Navigator.pushNamedAndRemoveUntil(
-                                      context,
-                                      Route_Names.homeScreen,
-                                      (route) => false,
-                                    );
-                                  }
-                                }
-                              });
-                            }
-                          },
+                return RoundButton(
+                  title: rightTitle,
+                  color: AppColors.primary,
+                  height: 44,
+                  onPress: () {
+                    if (disableNext) {
+                      // ✅ Show snackbar instead of disabling button
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Please add family head details',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor: Colors.redAccent,
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
                         ),
-                      ),
-                    );
+                      );
+                      return;
+                    }
+
+                    if (idx < 2) {
+                      _tabController.animateTo(idx + 1);
+                    } else {
+                      final now = DateTime.now();
+                      final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+                      final s = _hhBloc.state;
+                      final householdFormJson = {
+                        'headdetails': _headForm ?? {},
+                        'memberdetails': _memberForms,
+                        'spousedetails': _headForm?['spousedetails'] ?? {},
+                        'childrendetails': _headForm?['childrendetails'] ?? {},
+                        'amenities': {
+                          'residentialArea': s.residentialArea,
+                          'ownershipType': s.ownershipType,
+                          'houseType': s.houseType,
+                          'houseKitchen': s.houseKitchen,
+                          'cookingFuel': s.cookingFuel,
+                          'waterSource': s.waterSource,
+                          'electricity': s.electricity,
+                          'toilet': s.toilet,
+                        },
+                      };
+                      final normalizedHouseholdInfo =
+                      _convertYesNoMap(Map<String, dynamic>.from(householdFormJson));
+                      debugPrint(jsonEncode(normalizedHouseholdInfo));
+
+                      final payload = {
+                        'server_id': null,
+                        'unique_key': 'HH_${now.millisecondsSinceEpoch}',
+                        'address': {},
+                        'geo_location': {},
+                        'head_id': _headForm?['unique_key'] ?? _headForm?['id'],
+                        'household_info': normalizedHouseholdInfo,
+                        'device_details': {
+                          'platform': Platform.operatingSystem,
+                        },
+                        'app_details': {
+                          'app_name': 'BHAVYA mASHA UAT',
+                        },
+                        'parent_user': {},
+                        'current_user_key': 'local_user',
+                        'facility_id': 283,
+                        'created_date_time': ts,
+                        'modified_date_time': ts,
+                        'is_synced': 0,
+                        'is_deleted': 0,
+                      };
+
+                      debugPrint(jsonEncode(payload));
+
+                      LocalStorageDao.instance.insertHousehold(payload).then((_) async {
+                        _skipExitConfirm = true;
+                        if (!mounted) return;
+
+                        if (mounted) {
+                          final shouldNavigate = await showSuccessDialog(context);
+                          if (shouldNavigate == true && mounted) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              Route_Names.homeScreen,
+                                  (route) => false,
+                            );
+                          }
+                        }
+                      });
+                    }
                   },
-                ),
-              ),
-            ],
+                );
+              },
+            ),
+          ),
+          ],
           ),
         ),
       ),

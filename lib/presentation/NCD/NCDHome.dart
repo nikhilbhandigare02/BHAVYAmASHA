@@ -6,12 +6,8 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
-
 import 'NCDList.dart';
 import 'NCDeligibleList.dart';
-
-
-
 
 class NCDHome extends StatefulWidget {
   const NCDHome({super.key});
@@ -25,99 +21,101 @@ class _NCDHomeState extends State<NCDHome> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = (screenWidth - 48) / 3;
-    const cardHeight = 120.0;
+
+    // 🔹 3 cards per row
+    final double totalHorizontalPadding = 12 * 2;
+    final double spacingBetweenCards = 8;
+    final double cardWidth = (screenWidth - totalHorizontalPadding - (2 * spacingBetweenCards)) / 3;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppHeader(
         screenTitle: l10n?.ncdTitle ?? 'NCD',
         showBack: false,
         icon1: Icons.home,
-        onIcon1Tap: () =>
-            Navigator.pushNamed(context, Route_Names.homeScreen),
+        onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
       ),
       drawer: const CustomDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: Column(
-              children: [
-
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _FeatureCard(
-                      width: cardWidth,
-                      height: cardHeight,
-                      title: l10n?.ncdListTitle ?? 'NCD List',
-                      count: 0,
-                      image: 'assets/images/home.png',
-                      onClick: () {Navigator.push(context, MaterialPageRoute(builder: (context) => Ncdlist(),));
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    _FeatureCard(
-                      width: cardWidth,
-                      height: cardHeight,
-                      title:
-                      l10n?.ncdEligibleListTitle ?? 'NCD Eligible List',
-                      count: 0,
-                      image: 'assets/images/home.png',
-                      onClick: () {Navigator.push(context, MaterialPageRoute(builder: (context) => const  Ncdeligiblelist(),));
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    _FeatureCard(
-                      width: cardWidth,
-                      height: cardHeight,
-                      title:
-                      l10n?.ncdPriorityListTitle ?? 'NCD Priority List',
-                      count: 0,
-                      image: 'assets/images/home.png',
-                      onClick: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              l10n?.ncdMsgChildTrackingDueList ??
-                                  'Child Tracking Due List',
-                            ),
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+          child: Column(
+            children: [
+              // 🔹 First Row
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _FeatureCard(
+                    width: cardWidth,
+                    title: l10n?.ncdListTitle ?? 'NCD List',
+                    count: 0,
+                    image: 'assets/images/home.png',
+                    onClick: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Ncdlist()),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _FeatureCard(
+                    width: cardWidth,
+                    title: l10n?.ncdEligibleListTitle ?? 'NCD Eligible List',
+                    count: 0,
+                    image: 'assets/images/home.png',
+                    onClick: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Ncdeligiblelist()),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _FeatureCard(
+                    width: cardWidth,
+                    title: l10n?.ncdPriorityListTitle ?? 'NCD Priority List',
+                    count: 0,
+                    image: 'assets/images/home.png',
+                    onClick: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            l10n?.ncdMsgChildTrackingDueList ?? 'Child Tracking Due List',
                           ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
 
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _FeatureCard(
-                      width: cardWidth,
-                      height: cardHeight,
-                      title: l10n?.ncdNonEligibleListTitle ??
-                          'NCD Non-Eligible List',
-                      count: 0,
-                      image: 'assets/images/home.png',
-                      onClick: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              l10n?.ncdMsgHbycList ?? 'HBYC List',
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(width: cardWidth, height: cardHeight),
-                    const SizedBox(width: 12),
-                    SizedBox(width: cardWidth, height: cardHeight),
-                  ],
-                ),
-              ],
-            ),
+              const SizedBox(height: 10),
+
+              // 🔹 Second Row
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _FeatureCard(
+                    width: cardWidth,
+                    title: l10n?.ncdNonEligibleListTitle ?? 'NCD Non-Eligible List',
+                    count: 0,
+                    image: 'assets/images/home.png',
+                    onClick: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n?.ncdMsgHbycList ?? 'HBYC List'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  // Empty placeholders for alignment
+                  SizedBox(width: cardWidth, height: 14.h),
+                  const SizedBox(width: 8),
+                  SizedBox(width: cardWidth, height: 14.h),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -131,7 +129,6 @@ class _FeatureCard extends StatelessWidget {
   final String image;
   final VoidCallback onClick;
   final double width;
-  final double height;
 
   const _FeatureCard({
     required this.title,
@@ -139,7 +136,6 @@ class _FeatureCard extends StatelessWidget {
     required this.image,
     required this.onClick,
     required this.width,
-    required this.height,
   });
 
   @override
@@ -148,54 +144,57 @@ class _FeatureCard extends StatelessWidget {
 
     return InkWell(
       onTap: onClick,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
+      borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
         width: width,
-        height: 100,
-        decoration: BoxDecoration(
+        height: 14.h,
+        child: Card(
+          elevation: 2,
           color: Colors.white,
-          //borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.asset(
-                  image,
-                  width: 25,
-                  height: 25,
-                  fit: BoxFit.contain,
+                // 🔹 Image and Count
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Image.asset(
+                      image,
+                      width: 22.sp,
+                      height: 22.sp,
+                      fit: BoxFit.contain,
+                    ),
+                    Text(
+                      '$count',
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                  ],
                 ),
-                  Spacer(),
+                SizedBox(height: 1.6.h),
+                // 🔹 Title
                 Text(
-                  '$count',
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: primary,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.outline,
                     fontSize: 14.sp,
+                    height: 1.2,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 12),
-            Text(
-              title,
-              style:   TextStyle(
-                fontWeight: FontWeight.w500,
-                color: AppColors.outline,
-                fontSize: 14.sp,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
