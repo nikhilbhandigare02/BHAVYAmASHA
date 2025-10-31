@@ -110,7 +110,7 @@ abstract class AppLocalizations {
   /// No description provided for @abhaAddressLabel.
   ///
   /// In en, this message translates to:
-  /// **'ABHA address'**
+  /// **'ABHA Address'**
   String get abhaAddressLabel;
 
   /// No description provided for @abhaConsent1.
@@ -206,7 +206,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountNumberLabel.
   ///
   /// In en, this message translates to:
-  /// **'Account number'**
+  /// **'Bank Account number'**
   String get accountNumberLabel;
 
   /// No description provided for @addButton.

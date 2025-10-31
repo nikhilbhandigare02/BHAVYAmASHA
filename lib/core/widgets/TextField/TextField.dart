@@ -49,6 +49,21 @@ class _CustomTextFieldState extends State<CustomTextField> {
   bool _isObscure = true;
   TextEditingController? _controller;
 
+  List<TextSpan> _buildLabelTextSpans(String text) {
+    if (!text.endsWith(' *')) {
+      return [TextSpan(text: text)];
+    }
+    
+    final parts = text.split(' *');
+    return [
+      TextSpan(text: parts[0]),
+      const TextSpan(
+        text: ' *',
+        style: TextStyle(color: Colors.red),
+      ),
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -118,14 +133,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
         label: (widget.labelText != null && widget.labelText!.isNotEmpty)
-            ? Text(
-          widget.labelText!,
-          softWrap: true,
-          maxLines: widget.labelMaxLines,
-          overflow: TextOverflow.visible,
-          style: inputStyle,
-        )
-
+            ? RichText(
+                text: TextSpan(
+                  children: _buildLabelTextSpans(widget.labelText!),
+                  style: inputStyle,
+                ),
+                softWrap: true,
+                maxLines: widget.labelMaxLines,
+                overflow: TextOverflow.visible,
+              )
             : null,
         // Add some space between the label and the input field
         // when the label is floating.

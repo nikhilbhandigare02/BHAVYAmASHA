@@ -7,7 +7,7 @@ class CustomDatePicker extends StatefulWidget {
   final DateTime? initialDate;
   final bool isEditable;
   final Function(DateTime?)? onDateChanged;
-  final String labelText;
+  final String labelText;               // e.g. "Birth date *"  (asterisk optional)
   final String? hintText;
   final String? Function(DateTime?)? validator;
   final int? labelMaxLines;
@@ -48,6 +48,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
   Future<void> _pickDate(BuildContext context) async {
     if (!widget.isEditable) return;
+
     final picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? DateTime.now(),
@@ -64,12 +65,46 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     }
   }
 
+
+  Widget? get _labelWidget {
+    if (widget.labelText.isEmpty) return null;
+
+    final bool required = widget.labelText.endsWith(' *');
+    final String base = required
+        ? widget.labelText.substring(0, widget.labelText.length - 2).trim()
+        : widget.labelText;
+
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(
+          fontSize: 13.sp,
+          color: AppColors.onSurfaceVariant,
+          //fontWeight: FontWeight.w500,
+        ),
+        children: [
+          TextSpan(text: base),
+          if (required)
+            const TextSpan(
+              text: '*',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+        ],
+      ),
+      maxLines: widget.labelMaxLines,
+      overflow: TextOverflow.visible,
+      softWrap: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 12.sp,
+      fontSize: 14.sp,
       fontWeight: FontWeight.w500,
-      color: AppColors.onSurface,
+      color: AppColors.onSurfaceVariant,
       height: 1.5,
     );
 
@@ -80,26 +115,32 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
           controller: _controller,
           readOnly: true,
           style: inputStyle,
+          validator: widget.validator != null
+              ? (value) => widget.validator!(selectedDate)
+              : null,
           decoration: InputDecoration(
-            label: Text(
-              widget.labelText,
-              softWrap: true,
-              maxLines: widget.labelMaxLines,
-              overflow: TextOverflow.visible,
-              style: TextStyle(fontSize: 15.sp),
-            ),
+
+            label: _labelWidget,
+
             hintText: widget.hintText ?? 'dd/MM/yy',
-            hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
+            hintStyle:
+            inputStyle.copyWith(color: AppColors.onSurfaceVariant),
+
+
             suffixIcon: widget.isEditable
                 ? Padding(
-                    padding: EdgeInsets.only(right: 2.w),
-                    child: Icon(
-                      Icons.calendar_today_outlined,
-                      color: Colors.grey,
-                      size: 14.sp,
-                    ),
-                  )
+              padding: EdgeInsets.only(right: 2.w),
+              child: Icon(
+                Icons.calendar_today_outlined,
+                color: Colors.grey,
+                size: 14.sp,
+              ),
+            )
                 : null,
+            suffixIconConstraints:
+            const BoxConstraints(minWidth: 0, minHeight: 0),
+
+
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -111,5 +152,11 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

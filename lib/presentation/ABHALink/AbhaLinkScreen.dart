@@ -60,6 +60,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
                             borderRadius: 8,
                             isLoading: state.submitting,
                             color: Colors.green,
+                            icon: Icons.inbox_outlined,
                             onPress: () => context
                                 .read<AbhalinkBloc>()
                                 .add(const AbhaSubmitPressed()),

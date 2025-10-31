@@ -11,14 +11,14 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 
 import '../HomeScreen/HomeScreen.dart';
 
-class AllBeneficiaryScreen extends StatefulWidget {
-  const AllBeneficiaryScreen({super.key});
+class Ncdeligiblelist extends StatefulWidget {
+  const Ncdeligiblelist({super.key});
 
   @override
-  State<AllBeneficiaryScreen> createState() => _AllBeneficiaryScreenState();
+  State<Ncdeligiblelist> createState() => _AllBeneficiaryScreenState();
 }
 
-class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
+class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
   final TextEditingController _searchCtrl = TextEditingController();
   bool _isLoading = true;
 
@@ -63,7 +63,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     _loadData();
     _searchCtrl.addListener(_onSearchChanged);
   }
-  
+
   Future<void> _loadData() async {
     // Simulate network/database delay
     await Future.delayed(const Duration(milliseconds: 500));
@@ -105,7 +105,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.householdBeneficiaryTitle ?? 'Household Beneficiary',
+        screenTitle: l10n?.ncdEligibleListTitle ?? 'NCD Eligible List',
         showBack: false,
         icon2: Icons.home,
         onIcon2Tap: () => Navigator.pushReplacement(
@@ -119,13 +119,13 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       body: _isLoading
           ? const CenterBoxLoader()
           : Column(
-              children: [
-                Padding(
+        children: [
+          Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  'Search All Beneficiary',
+                hintText:  'NCD Beneficiary Search',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -156,27 +156,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             ),
           ),
 
-          // ➕ Add New Button
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-              child: SizedBox(
-                width: double.infinity,
-                height: 40,
-                child: RoundButton(
-                  title: (l10n?.gridRegisterNewHousehold ?? 'Add New Household').toUpperCase(),
-                  color: AppColors.primary,
-                  borderRadius: 8,
-                  height: 45,
-                  onPress: () {
-                    Navigator.pushNamed(context, Route_Names.addFamilyHead);
-                  },
-                ),
-              ),
-            ),
-              ),
-            ],
-          ),
+
+        ],
+      ),
     );
   }
 
@@ -188,104 +170,87 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        InkWell(
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              Route_Names.addFamilyMember,
-              arguments: {'isBeneficiary': true},
-            );
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  blurRadius: 2,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 2),
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 2,
+                spreadRadius: 1,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header Row
+              Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header Row
-                Container(
-                  decoration: const BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
-                  ),
-                  padding: const EdgeInsets.all(6),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.home, color: Colors.black54, size: 18),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          data['hhId'] ?? '',
-                          style: TextStyle(
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  children: [
+                    const Icon(Icons.home, color: Colors.black54, size: 18),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        data['hhId'] ?? '',
+                        style: TextStyle(
                             color: primary,
                             fontWeight: FontWeight.w600,
                             fontSize: 14.sp
-                          ),
-                          overflow: TextOverflow.ellipsis,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.asset(
-                          'assets/images/sync.png',
-                          width: 25,
-                          height: 25,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                    const SizedBox(width: 8),
 
-                // Card Body
-                Container(
-                  decoration: BoxDecoration(
-                    color: primary.withOpacity(0.95),
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(6)),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildRow([
-                        _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate']),
-                        _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType']),
-                        _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID']),
-                      ]),
-                      const SizedBox(height: 8),
-                      _buildRow([
-                        _rowText(l10n?.villageLabel ?? 'Village', data['village']),
-                        _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla', data['Tola/Mohalla']),
-                        _rowText('RCH ID', data['RichID']),
-                      ]),
-                      const SizedBox(height: 8),
-                      _buildRow([
-                        _rowText(l10n?.thName ?? 'Name', data['Name']),
-                        _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender']),
-                        _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.']),
-                      ]),
-                      const SizedBox(height: 8),
-                      _buildRow([
-                        _rowText(l10n?.fatherNameLabel ?? 'Father Name', data['FatherName']),
-                        _rowText( 'Husband Name', data['HusbandName']),
-                        _rowText( 'Wife Name', data['WifeName']),
-                      ]),
-                    ],
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+
+              // Card Body
+              Container(
+                decoration: BoxDecoration(
+                  color: primary.withOpacity(0.95),
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(6)),
+                ),
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildRow([
+                      _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate']),
+                      _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType']),
+                      _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID']),
+                    ]),
+                    const SizedBox(height: 8),
+                    _buildRow([
+                      _rowText(l10n?.villageLabel ?? 'Village', data['village']),
+                      _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla', data['Tola/Mohalla']),
+                      _rowText('RCH ID', data['RichID']),
+                    ]),
+                    const SizedBox(height: 8),
+                    _buildRow([
+                      _rowText(l10n?.thName ?? 'Name', data['Name']),
+                      _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender']),
+                      _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.']),
+                    ]),
+                    const SizedBox(height: 8),
+                    _buildRow([
+                      _rowText(l10n?.fatherNameLabel ?? 'Father Name', data['FatherName']),
+                      _rowText( 'Husband Name', data['HusbandName']),
+                      _rowText( 'Wife Name', data['WifeName']),
+                    ]),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
 
