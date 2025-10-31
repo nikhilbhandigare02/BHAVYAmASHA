@@ -130,8 +130,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     // --- Years ---
                     Expanded(
                       child: CustomTextField(
-                        labelText: 'Years',
-                        hintText: 'Years',
+                        labelText: 'Year',
+                        hintText: 'Year',
                         initialValue: state.years ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateYears(v.trim())),
@@ -149,8 +149,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     // --- Months ---
                     Expanded(
                       child: CustomTextField(
-                        labelText: 'Months',
-                        hintText: 'Months',
+                        labelText: 'Month',
+                        hintText: 'Month',
                         initialValue: state.months ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateMonths(v.trim())),
@@ -168,8 +168,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     // --- Days ---
                     Expanded(
                       child: CustomTextField(
-                        labelText: 'Days',
-                        hintText: 'Days',
+                        labelText: 'Day',
+                        hintText: 'Day',
                         initialValue: state.days ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateDays(v.trim())),
@@ -454,7 +454,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           child: CustomTextField(
             labelText: '${l.mobileLabel} *',
             keyboardType: TextInputType.number,
-            maxLength: 10, // Phone number length
+            maxLength: 10,
             initialValue: state.mobileNo,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileNo(v.trim())),
             validator: (value) => Validations.validateMobileNo(l, value),
@@ -857,6 +857,20 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               screenTitle: l.familyHeadDetailsTitle,
               showBack: true,
               onBackTap: () async {
+                final shouldExit = await showConfirmationDialog(
+                  context: context,
+                  title: l.confirmAttentionTitle,
+                  message: l.confirmCloseFormMsg,
+                  yesText: l.confirmYesExit,
+                  noText: l.confirmNo,
+
+                );
+                if (shouldExit ?? false) {
+                  Navigator.of(context).pop();
+                }
+              },
+              icon1: Icons.close_rounded,
+              onIcon1Tap: () async {
                 final shouldExit = await showConfirmationDialog(
                   context: context,
                   title: l.confirmAttentionTitle,

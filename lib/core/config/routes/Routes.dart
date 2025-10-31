@@ -51,6 +51,8 @@ import '../../../presentation/MotherCare/MotherCareHomeScreen.dart' show Motherc
 import '../../../presentation/MotherCare/OutcomeForm/OutcomeForm.dart';
 import '../../../presentation/MotherCare/PreviousVisit/PreviousVisit.dart' show PreviousVisitScreen;
 import '../../../presentation/NCD/NCDHome.dart';
+import '../../../presentation/NCD/NCDList.dart';
+import '../../../presentation/NCD/NCDeligibleList.dart';
 import '../../../presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
 import '../../../presentation/RegisterNewHouseHold/AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart';
 import '../../../presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
@@ -77,6 +79,8 @@ class Routes{
         return MaterialPageRoute(builder: (context) => LoginScreen(),);
       case Route_Names.homeScreen:
         return MaterialPageRoute(builder: (context) => HomeScreen(),);
+        case Route_Names.Ncdlist:
+        return MaterialPageRoute(builder: (context) => Ncdlist(),);
       case Route_Names.profileScreen:
         return MaterialPageRoute(builder: (context) => ProfileScreen(),);
       case Route_Names.MISScreen:
@@ -139,6 +143,8 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const HelpScreen(),);
       case Route_Names.NCDHome:
         return MaterialPageRoute(builder: (context) => const NCDHome(),);
+      case Route_Names.Ncdeligiblelist:
+        return MaterialPageRoute(builder: (context) => const Ncdeligiblelist(),);
       case Route_Names.TrackEligibleCoupleScreen:
         return MaterialPageRoute(builder: (context) => const TrackEligibleCoupleScreen(),);
       case Route_Names.cbacScreen:

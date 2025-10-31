@@ -6,6 +6,13 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
+
+import 'NCDList.dart';
+import 'NCDeligibleList.dart';
+
+
+
+
 class NCDHome extends StatefulWidget {
   const NCDHome({super.key});
 
@@ -46,15 +53,7 @@ class _NCDHomeState extends State<NCDHome> {
                       title: l10n?.ncdListTitle ?? 'NCD List',
                       count: 0,
                       image: 'assets/images/home.png',
-                      onClick: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              l10n?.ncdMsgRegisteredChildBeneficiary ??
-                                  'Registered Child Beneficiary list',
-                            ),
-                          ),
-                        );
+                      onClick: () {Navigator.push(context, MaterialPageRoute(builder: (context) => Ncdlist(),));
                       },
                     ),
                     const SizedBox(width: 12),
@@ -65,15 +64,7 @@ class _NCDHomeState extends State<NCDHome> {
                       l10n?.ncdEligibleListTitle ?? 'NCD Eligible List',
                       count: 0,
                       image: 'assets/images/home.png',
-                      onClick: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              l10n?.ncdMsgChildRegisteredDueList ??
-                                  'Child Registered Due List',
-                            ),
-                          ),
-                        );
+                      onClick: () {Navigator.push(context, MaterialPageRoute(builder: (context) => const  Ncdeligiblelist(),));
                       },
                     ),
                     const SizedBox(width: 12),

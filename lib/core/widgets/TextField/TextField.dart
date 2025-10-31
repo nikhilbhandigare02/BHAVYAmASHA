@@ -49,6 +49,21 @@ class _CustomTextFieldState extends State<CustomTextField> {
   bool _isObscure = true;
   TextEditingController? _controller;
 
+  List<TextSpan> _buildLabelTextSpans(String text) {
+    if (!text.endsWith(' *')) {
+      return [TextSpan(text: text)];
+    }
+    
+    final parts = text.split(' *');
+    return [
+      TextSpan(text: parts[0]),
+      const TextSpan(
+        text: ' *',
+        style: TextStyle(color: Colors.red),
+      ),
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -59,13 +74,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   void didUpdateWidget(covariant CustomTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
 
     if (widget.controller != oldWidget.controller) {
       _controller?.dispose();
       _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
     }
-    
+
     // Only update text if we're managing our own controller
     if (widget.controller == null) {
       _controller ??= TextEditingController();
@@ -73,8 +88,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
       final oldInit = oldWidget.initialValue ?? '';
       final currText = _controller!.text;
       final shouldUpdate =
-          // update if text is currently empty
-          currText.isEmpty ||
+      // update if text is currently empty
+      currText.isEmpty ||
           // or if it still matches the old initialValue (user hasn't edited)
           currText == oldInit ||
           // or if upstream is progressively providing a longer value (prefill flow)
@@ -97,9 +112,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 15.sp,
-      color: AppColors.onSurfaceVariant,
-      height: 1.5
+        fontSize: 15.sp,
+        color: AppColors.onSurfaceVariant,
+        height: 1.5
     );
 
     return TextFormField(
@@ -118,14 +133,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
         label: (widget.labelText != null && widget.labelText!.isNotEmpty)
-            ? Text(
-                widget.labelText!,
+            ? RichText(
+                text: TextSpan(
+                  children: _buildLabelTextSpans(widget.labelText!),
+                  style: inputStyle,
+                ),
                 softWrap: true,
                 maxLines: widget.labelMaxLines,
                 overflow: TextOverflow.visible,
-                style: inputStyle,
               )
-
             : null,
         // Add some space between the label and the input field
         // when the label is floating.
@@ -140,7 +156,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         suffixIcon: widget.obscureText
             ? IconButton(
           icon: Icon(
-            _isObscure ? Icons.visibility : Icons.visibility_off,
+            _isObscure ? Icons.visibility_off : Icons.visibility,
             color: AppColors.onSurfaceVariant,
           ),
           onPressed: () => setState(() {

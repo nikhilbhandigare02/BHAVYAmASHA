@@ -2,6 +2,7 @@ class Route_Names{
   static const String splashScreen = 'splashScreen';
   static const String loginScreen = 'loginScreen';
   static const String homeScreen = 'homeScreen';
+  static const String Ncdlist = 'Ncdlist';
   static const String profileScreen = 'profileScreen';
   static const String MISScreen = 'MISScreen';
   static const String Resetpassword = 'Resetpassword';
@@ -35,6 +36,7 @@ class Route_Names{
   static const String Trainingform = 'Trainingform';
   static const String HelpScreen = 'HelpScreen';
   static const String NCDHome = 'NCDHome';
+  static const String Ncdeligiblelist = 'Ncdeligiblelist';
   static const String HbncVisitFormScreen = 'HbncVisitFormScreen';
   static const String TrackEligibleCoupleScreen = 'TrackEligibleCoupleScreen';
   static const String TrainingReceived = 'TrainingReceived';

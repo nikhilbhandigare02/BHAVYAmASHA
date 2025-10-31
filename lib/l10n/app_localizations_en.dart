@@ -15,7 +15,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get abhaAadhaarNumberLabel => 'Aadhaar Number';
 
   @override
-  String get abhaAddressLabel => 'ABHA address';
+  String get abhaAddressLabel => 'ABHA Address';
 
   @override
   String get abhaConsent1 => 'I am voluntarily sharing my Aadhaar Number / Virtual ID issued by the Unique Identification Authority of India (\"UIDAI\"), and my demographic information for the purpose of creating an Ayushman Bharat Health Account number (\"ABHA number\") and Ayushman Bharat Health Account address (\"ABHA Address\"). I authorize NHA to use my Aadhaar number / Virtual ID for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I understand that UIDAI will share my e-KYC details, or response of \"Yes\" with NHA upon successful authentication.';
@@ -63,7 +63,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountNumberHint => 'Account number';
 
   @override
-  String get accountNumberLabel => 'Account number';
+  String get accountNumberLabel => 'Bank Account number';
 
   @override
   String get addButton => 'ADD';
