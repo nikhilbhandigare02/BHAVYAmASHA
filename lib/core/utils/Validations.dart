@@ -178,4 +178,21 @@ class Validations {
 
     return null;
   }
+
+  static String? validateBankAccountNumber(AppLocalizations l10n, String? accountNumber) {
+    // If the field is empty, it's valid (not required)
+    if (accountNumber == null || accountNumber.trim().isEmpty) {
+      return null;
+    }
+
+    // Remove any non-digit characters
+    final digitsOnly = accountNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    
+    // If something is entered, it must be at least 10 digits
+    if (digitsOnly.length < 10) {
+      return 'Account number must be at least 10 digits';
+    }
+
+    return null;
+  }
 }

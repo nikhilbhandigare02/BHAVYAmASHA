@@ -45,8 +45,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
   }
 
   Widget _buildFamilyHeadForm(BuildContext context, AddFamilyHeadState state, AppLocalizations l) {
-    return ListView(
-      padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.h),
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping outside of text fields
+        FocusScope.of(context).unfocus();
+      },
+      behavior: HitTestBehavior.opaque,
+      child: ListView(
+        padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.h),
       children: [
         _Section(
           child: CustomTextField(
@@ -453,6 +459,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: '${l.mobileLabel} *',
+            hintText: 'Enter mobile number',
             keyboardType: TextInputType.number,
             maxLength: 10,
             initialValue: state.mobileNo,
@@ -468,6 +475,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.villageNameLabel,
+            hintText: 'Enter village name',
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVillage(v.trim())),
           ),
         ),
@@ -476,6 +484,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.wardNoLabel,
+            hintText: 'Enter ward number',
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateWard(v.trim())),
           ),
         ),
@@ -484,23 +493,43 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.mohallaTolaNameLabel,
+            hintText: 'Enter mohalla/tola name',
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMohalla(v.trim())),
           ),
         ),
         Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
-        _Section(
-          child: CustomTextField(
-            labelText: l.accountNumberLabel,
-            keyboardType: TextInputType.number,
-            onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(v.trim())),
-          ),
+        BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
+          buildWhen: (previous, current) => previous.bankAcc != current.bankAcc,
+          builder: (contxt, state) {
+            final bankAcc = state.bankAcc ?? '';
+            final isValid = bankAcc.isEmpty || bankAcc.replaceAll(RegExp(r'[^0-9]'), '').length >= 10;
+
+            return Column(
+              children: [
+                _Section(
+                  child: CustomTextField(
+                    labelText: l.accountNumberLabel,
+                    hintText: 'Enter bank account number',
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(v.trim())),
+                  ),
+                ),
+                Divider(
+                  color: !isValid ? Colors.red : AppColors.divider,
+                  thickness: !isValid ? 1.0 : 0.1.h,
+                  height: 0,
+                ),
+              ],
+            );
+          },
         ),
-        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         _Section(
           child: CustomTextField(
             labelText: l.ifscLabel,
+            hintText:'IFSC code' ,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateIfsc(v.trim())),
           ),
         ),
@@ -509,6 +538,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.voterIdLabel,
+            hintText: 'Enter voter ID',
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVoterId(v.trim())),
           ),
         ),
@@ -517,6 +547,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.rationCardIdLabel,
+            hintText: 'Enter ration card number',
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateRationId(v.trim())),
           ),
         ),
@@ -525,6 +556,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.personalHealthIdLabel,
+            hintText: 'personal health id',
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdatePhId(v.trim())),
           ),
         ),
@@ -708,7 +740,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
         ],
-      ],
+        ],
+      ),
     );
   }
 
@@ -952,6 +985,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                 key: ValueKey(state.gender ?? 'none'),
                                 headMobileOwner: state.mobileOwner,
                                 headMobileNo: state.mobileNo,
+
                               ),
                             ),
                           );
