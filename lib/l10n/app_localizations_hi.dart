@@ -646,16 +646,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacC_fuelGas => 'गैस';
 
   @override
-  String get cbacC_fuelKerosene => 'केरोसीन';
-
-  @override
   String get cbacC_fuelOther => 'अन्य';
 
   @override
   String get cbacC_fuelQ => 'खाना पकाने के लिए किस प्रकार का ईंधन उपयोग होता है?';
-
-  @override
-  String get cbacC_fuelWood => 'लकड़ी';
 
   @override
   String get cbacConsentAgree => 'सहमत';
@@ -1471,6 +1465,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get idTypeRationCard => 'राशन कार्ड';
 
   @override
+  String get uid => 'यूआईडी';
+
+  @override
   String get idTypeStateInsurance => 'राज्य स्वास्थ्य बीमा योजना से संबद्ध';
 
   @override
@@ -2016,7 +2013,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get search => 'खोजें';
 
   @override
-  String get searchHint => 'आईडी/नाम/संपर्क से खोजें';
+  String get searchHint => 'Search by ID/Name/Contact';
+
+  @override
+  String get searchPlaceholder => 'Search...';
+
+  @override
+  String get eligibleCoupleListTitle => 'योग्य दंपति सूची';
+
+  @override
+  String get eligibleCoupleStatus => 'योग्य दंपति';
+
+  @override
+  String get deathRegisterTitle => 'मृत्यु पंजीकरण';
+
+  @override
+  String get placeLabel => 'स्थान';
 
   @override
   String get secondAncLabel => 'दूसरा एएनसी';
@@ -3216,4 +3228,34 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get guestBeneficiaryList => 'अतिथि लाभार्थी सूची';
+
+  @override
+  String get firewod => 'लकड़ी';
+
+  @override
+  String get cropResidues => 'फसल अवशेष';
+
+  @override
+  String get cowdung => 'गोबर के उपले';
+
+  @override
+  String get coal => 'कोयला';
+
+  @override
+  String get lpg => 'एलपीजी';
+
+  @override
+  String get cbacC_fuelKerosene => 'केरोसिन तेल (मिट्टी का तेल)';
+
+  @override
+  String get burningCrop => 'फसल अवशेष जलाना';
+
+  @override
+  String get burningOfGrabage => 'Burning of garbage and leaves';
+
+  @override
+  String get cbacC_workingSmokeyFactory => 'धुएं वाले कारखाने में काम करना';
+
+  @override
+  String get cbacC_workingPollutedIndustries => 'ईंट भट्ठे और कांच उद्योग जैसे गैस और धुएं के प्रदूषण वाले उद्योगों में काम करना';
 }

@@ -18,6 +18,8 @@ class CustomTextField extends StatefulWidget {
   final int? maxLength;
   final int? labelMaxLines;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
 
   const CustomTextField({
     super.key,
@@ -35,6 +37,8 @@ class CustomTextField extends StatefulWidget {
     this.maxLength,
     this.labelMaxLines,
     this.controller,
+    this.focusNode,
+    this.textInputAction,
   });
 
   @override
@@ -56,7 +60,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   void didUpdateWidget(covariant CustomTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     
-    // If controller changed, update the reference
+
     if (widget.controller != oldWidget.controller) {
       _controller?.dispose();
       _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
@@ -110,6 +114,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
       maxLength: widget.maxLength,
       inputFormatters: widget.inputFormatters,
       cursorColor: AppColors.primary,
+      focusNode: widget.focusNode,
+      textInputAction: widget.textInputAction,
       decoration: InputDecoration(
         label: (widget.labelText != null && widget.labelText!.isNotEmpty)
             ? Text(

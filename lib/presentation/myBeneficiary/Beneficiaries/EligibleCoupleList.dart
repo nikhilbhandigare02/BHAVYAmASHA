@@ -22,7 +22,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
       'hhId': '51016121847',
       'name': 'Ramesh Kumar',
       'age/gender': '18 Y / Male',
-      'status': 'Eligible Couple'
+      'status':  'Eligible Couple'
     },
     {
       'hhId': '51016121848',
@@ -38,29 +38,15 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
   void initState() {
     super.initState();
     _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-    _searchCtrl.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
-    _searchCtrl.removeListener(_onSearchChanged);
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    final q = _searchCtrl.text.trim().toLowerCase();
-    setState(() {
-      if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-      } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['name'] as String).toLowerCase().contains(q);
-        }).toList();
-      }
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +54,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Eligible Couple List',
+        screenTitle: l10n?.eligibleCoupleListTitle ?? 'Eligible Couple List',
         showBack: true,
       ),
       drawer: const CustomDrawer(),
@@ -185,6 +171,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
   }
 
   Widget _infoRow(String title, String value, {bool isWrappable = false}) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -201,7 +188,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? 'N/A' : value,
+              value.isEmpty ? l10n?.notAvailable ?? 'N/A' : value,
               style:  TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,

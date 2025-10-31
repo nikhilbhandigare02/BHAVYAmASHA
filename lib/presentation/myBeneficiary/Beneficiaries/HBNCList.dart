@@ -36,29 +36,14 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
   void initState() {
     super.initState();
     _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-    _searchCtrl.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
-    _searchCtrl.removeListener(_onSearchChanged);
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    final q = _searchCtrl.text.trim().toLowerCase();
-    setState(() {
-      if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-      } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['name'] as String).toLowerCase().contains(q);
-        }).toList();
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

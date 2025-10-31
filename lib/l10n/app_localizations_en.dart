@@ -646,16 +646,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cbacC_fuelGas => 'Gas';
 
   @override
-  String get cbacC_fuelKerosene => 'Kerosene';
-
-  @override
   String get cbacC_fuelOther => 'Other';
 
   @override
   String get cbacC_fuelQ => 'What type of fuel is used for cooking?';
-
-  @override
-  String get cbacC_fuelWood => 'Wood';
 
   @override
   String get cbacConsentAgree => 'AGREE';
@@ -1471,6 +1465,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get idTypeRationCard => 'Ration Card';
 
   @override
+  String get uid => 'UID';
+
+  @override
   String get idTypeStateInsurance => 'Affiliated to State Health Insurance Scheme';
 
   @override
@@ -2017,6 +2014,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchHint => 'Search by ID/Name/Contact';
+
+  @override
+  String get searchPlaceholder => 'Search...';
+
+  @override
+  String get eligibleCoupleListTitle => 'Eligible Couple List';
+
+  @override
+  String get eligibleCoupleStatus => 'Eligible Couple';
+
+  @override
+  String get deathRegisterTitle => 'Death Register';
+
+  @override
+  String get placeLabel => 'Place';
 
   @override
   String get secondAncLabel => 'Second ANC';
@@ -3216,4 +3228,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guestBeneficiaryList => 'Guest Beneficiary List';
+
+  @override
+  String get firewod => 'Firewood';
+
+  @override
+  String get cropResidues => 'Crop Residues';
+
+  @override
+  String get cowdung => 'Cow dung cakes';
+
+  @override
+  String get coal => 'Coal';
+
+  @override
+  String get lpg => 'L.P.G';
+
+  @override
+  String get cbacC_fuelKerosene => 'Kerosene Oil (Kerosene)';
+
+  @override
+  String get burningCrop => 'Burning of crop residue';
+
+  @override
+  String get burningOfGrabage => 'Burning of garbage and leaves';
+
+  @override
+  String get cbacC_workingSmokeyFactory => 'Working in a smokey factory';
+
+  @override
+  String get cbacC_workingPollutedIndustries => 'Working in industries with gas and smoke pollution such as brick kiln and glass industry etc.';
 }

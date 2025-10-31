@@ -17,7 +17,13 @@ class Spousdetails extends StatefulWidget {
   final SpousState? initial;
   final String? headMobileOwner;
   final String? headMobileNo;
-  const Spousdetails({super.key, this.initial, this.headMobileOwner, this.headMobileNo});
+  
+  const Spousdetails({
+    super.key, 
+    this.initial, 
+    this.headMobileOwner, 
+    this.headMobileNo,
+  });
 
   @override
   State<Spousdetails> createState() => _SpousdetailsState();
@@ -64,6 +70,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
           (currSpouse.isEmpty || (spouseName.length > currSpouse.length && spouseName.startsWith(currSpouse)))) {
         spBloc.add(SpUpdateSpouseName(spouseName));
       }
+      
+      // Auto-fill mobile number if head's mobile is available and mobile owner is 'Family Head'
+      if (head.mobileNo != null && head.mobileNo!.isNotEmpty) {
+        if (widget.headMobileOwner == 'Family Head' || curr.mobileOwner == 'Family Head') {
+          spBloc.add(SpUpdateMobileNo(head.mobileNo!));
+          spBloc.add(SpUpdateMobileOwner('Family Head'));
+        }
+      }
     });
   }
 
@@ -72,9 +86,11 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
     super.build(context);
     final l = AppLocalizations.of(context)!;
     return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
-      listenWhen: (prev, curr) => prev.headName != curr.headName || 
-                                 prev.spouseName != curr.spouseName ||
-                                 prev.gender != curr.gender,
+      listenWhen: (previous, current) => previous.headName != current.headName || 
+                                      previous.spouseName != current.spouseName ||
+                                      previous.gender != current.gender ||
+                                      previous.mobileNo != current.mobileNo ||
+                                      previous.mobileOwner != current.mobileOwner,
       listener: (ctx, st) {
         final spBloc = ctx.read<SpousBloc>();
         final curr = spBloc.state;
@@ -91,6 +107,17 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
           }
           if (curr.gender != oppositeGender) {
             spBloc.add(SpUpdateGender(oppositeGender));
+          }
+        }
+        
+        final previous = context.read<AddFamilyHeadBloc>().state;
+        if ((st.mobileNo != null && st.mobileNo != previous.mobileNo) ||
+            (st.mobileOwner != null && st.mobileOwner != previous.mobileOwner)) {
+          if (st.mobileOwner == 'Family Head' && st.mobileNo != null && st.mobileNo!.isNotEmpty) {
+            spBloc.add(SpUpdateMobileNo(st.mobileNo!));
+            spBloc.add(SpUpdateMobileOwner('Family Head'));
+          } else if (st.mobileOwner != 'Family Head' && curr.mobileOwner == 'Family Head') {
+            spBloc.add(SpUpdateMobileNo(''));
           }
         }
         

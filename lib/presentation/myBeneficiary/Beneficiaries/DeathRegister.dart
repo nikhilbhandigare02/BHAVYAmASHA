@@ -73,7 +73,7 @@ class _DeathRegisterState extends State<DeathRegister> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Death Register',
+        screenTitle: l10n?.deathRegisterTitle ?? 'Death Register',
         showBack: true,
       ),
       drawer: const CustomDrawer(),
@@ -85,7 +85,7 @@ class _DeathRegisterState extends State<DeathRegister> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: l10n?.searchHint ?? 'Search Family',
+                hintText: l10n?.searchHint ?? 'Search by ID/Name/Contact',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -124,7 +124,7 @@ class _DeathRegisterState extends State<DeathRegister> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
-
+final l10n = AppLocalizations.of(context);
     return InkWell(
       onTap: () {
         Navigator.pushNamed(
@@ -188,7 +188,7 @@ class _DeathRegisterState extends State<DeathRegister> {
                     children: [
                       Expanded(child: _infoRow('', data['name'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _infoRow('Date:', data['date'] ?? '')),
+                      Expanded(child: _infoRow('${l10n?.dateLabel ?? 'Date'}:', data['date'] ?? l10n?.notAvailable ?? 'N/A')),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -198,7 +198,7 @@ class _DeathRegisterState extends State<DeathRegister> {
                           child:
                           _infoRow('', data['age/gender'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _infoRow('Place:', data['place'] ?? '')),
+                      Expanded(child: _infoRow('${l10n?.placeLabel ?? 'Place'}:', data['place'] ?? l10n?.notAvailable ?? 'N/A')),
                     ],
                   ),
                 ],
@@ -211,6 +211,7 @@ class _DeathRegisterState extends State<DeathRegister> {
   }
 
   Widget _infoRow(String title, String value) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -224,7 +225,7 @@ class _DeathRegisterState extends State<DeathRegister> {
         ),
         Expanded(
           child: Text(
-            (value.isEmpty ? 'N/A' : value),
+            (value.isEmpty ? l10n?.notAvailable ?? 'N/A' : value),
             style:  TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w500,

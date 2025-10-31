@@ -92,8 +92,8 @@ class ApiDropdown<T> extends StatelessWidget {
                   Text(
                     labelText ?? 'Select Option',
                     style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   Divider(height: 2,)
@@ -109,7 +109,7 @@ class ApiDropdown<T> extends StatelessWidget {
                       return RadioListTile<T>(
                         title: Text(
                           getLabel(item),
-                          style: TextStyle(fontSize: 15.sp),
+                          style: TextStyle(fontSize: 16.sp),
                         ),
                         value: item,
                         groupValue: tempValue,
@@ -135,7 +135,7 @@ class ApiDropdown<T> extends StatelessWidget {
                       child: Text(
                         'CANCEL',
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.grey[700],
                         ),
@@ -151,7 +151,7 @@ class ApiDropdown<T> extends StatelessWidget {
                       child: Text(
                         'OK',
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).primaryColor,
                         ),

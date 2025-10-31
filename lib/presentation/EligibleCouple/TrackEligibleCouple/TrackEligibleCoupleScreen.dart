@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -80,12 +82,15 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               _label(t?.isPregnantLabel ?? 'क्या महिला गर्भवती है?'),
               BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
                 builder: (context, state) {
-                  final value = state.isPregnant == null ? null : (state.isPregnant! ? 'हाँ' : 'नहीं');
-                  return DropdownButtonFormField<String>(
+                  final value = state.isPregnant;
+                  return DropdownButtonFormField<bool>(
                     value: value,
                     decoration: InputDecoration(hintText: t?.selectArea ?? 'चुनें', border: const UnderlineInputBorder()),
-                    items: const [DropdownMenuItem(value: 'हाँ', child: Text('हाँ')), DropdownMenuItem(value: 'नहीं', child: Text('नहीं'))],
-                    onChanged: (v) => context.read<TrackEligibleCoupleBloc>().add(IsPregnantChanged(v == 'हाँ')),
+                    items: [
+                      DropdownMenuItem(value: true, child: Text(t?.yes ?? 'हाँ')), 
+                      DropdownMenuItem(value: false, child: Text(t?.no ?? 'नहीं'))
+                    ],
+                    onChanged: (v) => context.read<TrackEligibleCoupleBloc>().add(IsPregnantChanged(v ?? false)),
                   );
                 },
               ),
@@ -140,14 +145,14 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _label(t?.fpAdoptingLabel ?? 'क्या आप/आपका साथी परिवार नियोजन अपना रहे हैं?'),
-                        DropdownButtonFormField<String>(
-                          value: state.fpAdopting == null ? null : (state.fpAdopting! ? 'हाँ' : 'नहीं'),
+                        DropdownButtonFormField<bool>(
+                          value: state.fpAdopting,
                           decoration: InputDecoration(hintText: t?.selectArea ?? 'चुनें', border: const UnderlineInputBorder()),
-                          items: const [
-                            DropdownMenuItem(value: 'हाँ', child: Text('हाँ')),
-                            DropdownMenuItem(value: 'नहीं', child: Text('नहीं')),
+                          items: [
+                            DropdownMenuItem(value: true, child: Text(t?.yes ?? 'हाँ')),
+                            DropdownMenuItem(value: false, child: Text(t?.no ?? 'नहीं')),
                           ],
-                          onChanged: (v) => context.read<TrackEligibleCoupleBloc>().add(FpAdoptingChanged(v == 'हाँ')),
+                          onChanged: (v) => context.read<TrackEligibleCoupleBloc>().add(FpAdoptingChanged(v ?? false)),
                         ),
                         const SizedBox(height: 12),
                         _label(t?.fpMethodLabel ?? 'गर्भनिरोधक का तरीका'),
@@ -188,7 +193,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       minimumSize: const Size.fromHeight(48),
                     ),
-                    child:  Text('पिछले पेज', style: TextStyle(color: AppColors.background),),
+                    child: Text(t?.previousButton ?? 'पिछला पेज', style: TextStyle(color: AppColors.background)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -203,7 +208,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     ),
                     child: state.status == FormStatus.submitting
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        :  Text('संरक्षित करें', style: TextStyle(color: AppColors.background),),
+                        : Text(t?.saveButton ?? 'संरक्षित करें', style: TextStyle(color: AppColors.background)),
                   ),
                 ),
               ],

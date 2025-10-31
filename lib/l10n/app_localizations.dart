@@ -1361,12 +1361,6 @@ abstract class AppLocalizations {
   /// **'Gas'**
   String get cbacC_fuelGas;
 
-  /// No description provided for @cbacC_fuelKerosene.
-  ///
-  /// In en, this message translates to:
-  /// **'Kerosene'**
-  String get cbacC_fuelKerosene;
-
   /// No description provided for @cbacC_fuelOther.
   ///
   /// In en, this message translates to:
@@ -1378,12 +1372,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'What type of fuel is used for cooking?'**
   String get cbacC_fuelQ;
-
-  /// No description provided for @cbacC_fuelWood.
-  ///
-  /// In en, this message translates to:
-  /// **'Wood'**
-  String get cbacC_fuelWood;
 
   /// No description provided for @cbacConsentAgree.
   ///
@@ -2999,6 +2987,12 @@ abstract class AppLocalizations {
   /// **'Ration Card'**
   String get idTypeRationCard;
 
+  /// No description provided for @uid.
+  ///
+  /// In en, this message translates to:
+  /// **'UID'**
+  String get uid;
+
   /// No description provided for @idTypeStateInsurance.
   ///
   /// In en, this message translates to:
@@ -4090,6 +4084,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search by ID/Name/Contact'**
   String get searchHint;
+
+  /// No description provided for @searchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get searchPlaceholder;
+
+  /// No description provided for @eligibleCoupleListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible Couple List'**
+  String get eligibleCoupleListTitle;
+
+  /// No description provided for @eligibleCoupleStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible Couple'**
+  String get eligibleCoupleStatus;
+
+  /// No description provided for @deathRegisterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Death Register'**
+  String get deathRegisterTitle;
+
+  /// No description provided for @placeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Place'**
+  String get placeLabel;
 
   /// No description provided for @secondAncLabel.
   ///
@@ -6484,6 +6508,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Guest Beneficiary List'**
   String get guestBeneficiaryList;
+
+  /// No description provided for @firewod.
+  ///
+  /// In en, this message translates to:
+  /// **'Firewood'**
+  String get firewod;
+
+  /// No description provided for @cropResidues.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop Residues'**
+  String get cropResidues;
+
+  /// No description provided for @cowdung.
+  ///
+  /// In en, this message translates to:
+  /// **'Cow dung cakes'**
+  String get cowdung;
+
+  /// No description provided for @coal.
+  ///
+  /// In en, this message translates to:
+  /// **'Coal'**
+  String get coal;
+
+  /// No description provided for @lpg.
+  ///
+  /// In en, this message translates to:
+  /// **'L.P.G'**
+  String get lpg;
+
+  /// No description provided for @cbacC_fuelKerosene.
+  ///
+  /// In en, this message translates to:
+  /// **'Kerosene Oil (Kerosene)'**
+  String get cbacC_fuelKerosene;
+
+  /// No description provided for @burningCrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Burning of crop residue'**
+  String get burningCrop;
+
+  /// No description provided for @burningOfGrabage.
+  ///
+  /// In en, this message translates to:
+  /// **'Burning of garbage and leaves'**
+  String get burningOfGrabage;
+
+  /// No description provided for @cbacC_workingSmokeyFactory.
+  ///
+  /// In en, this message translates to:
+  /// **'Working in a smokey factory'**
+  String get cbacC_workingSmokeyFactory;
+
+  /// No description provided for @cbacC_workingPollutedIndustries.
+  ///
+  /// In en, this message translates to:
+  /// **'Working in industries with gas and smoke pollution such as brick kiln and glass industry etc.'**
+  String get cbacC_workingPollutedIndustries;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -38,31 +38,14 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
   void initState() {
     super.initState();
     _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-    _searchCtrl.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
-    _searchCtrl.removeListener(_onSearchChanged);
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    final q = _searchCtrl.text.trim().toLowerCase();
-    setState(() {
-      if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-      } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['name'] as String).toLowerCase().contains(q) ||
-              (e['mobile'] as String).toLowerCase().contains(q) ||
-              (e['mohalla'] as String).toLowerCase().contains(q);
-        }).toList();
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,33 +59,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
       body: Column(
         children: [
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText: l10n?.searchHint ?? 'Search Family',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding:
-                const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-          ),
 
-          // 📋 Household List
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),

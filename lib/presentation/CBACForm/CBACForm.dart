@@ -232,7 +232,6 @@ class _CbacformState extends State<Cbacform> {
   }
 }
 
-// Tabs below use core widgets: CustomTextField, ApiDropdown, CustomDatePicker
 
 class _GeneralInfoTab extends StatelessWidget {
   @override
@@ -243,34 +242,44 @@ class _GeneralInfoTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       children: [
         CustomTextField(
+          hintText: l10n.ashaNameLabel,
           labelText: l10n.ashaNameLabel,
           onChanged: (v) => bloc.add(CbacFieldChanged('general.ashaName', v.trim())),
         ),
         const Divider(height: 0.5),
         CustomTextField(
+          hintText: l10n.anmNameLabel,
           labelText: l10n.anmNameLabel,
           onChanged: (v) => bloc.add(CbacFieldChanged('general.anmName', v.trim())),
         ),
         const Divider(height: 0.5),
         CustomTextField(
+          hintText: l10n.phcNameLabel,
           labelText: l10n.phcNameLabel,
           onChanged: (v) => bloc.add(CbacFieldChanged('general.phc', v.trim())),
         ),
         const Divider(height: 0.5),
         CustomTextField(
+          hintText: l10n.villageLabel,
           labelText: l10n.villageLabel,
           onChanged: (v) => bloc.add(CbacFieldChanged('general.village', v.trim())),
         ),
         const Divider(height: 0.5),
         CustomTextField(
+          hintText: l10n.hscNameLabel,
           labelText: l10n.hscNameLabel,
           onChanged: (v) => bloc.add(CbacFieldChanged('general.hsc', v.trim())),
         ),
         const Divider(height: 0.5),
         CustomDatePicker(
+          hintText: l10n.dateLabel,
           labelText: l10n.dateLabel,
-          onDateChanged: (d) => bloc.add(CbacFieldChanged('general.date', d)),
+          initialDate: DateTime.now(),
+          isEditable: false,
+          onDateChanged: null,
         ),
+        const Divider(height: 0.5),
+
       ],
     );
   }
@@ -285,62 +294,91 @@ class _PersonalInfoTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       children: [
         CustomTextField(
+          hintText: l10n.nameLabelSimple,
           labelText: l10n.nameLabelSimple,
           onChanged: (v) => bloc.add(CbacFieldChanged('personal.name', v.trim())),
         ),
         const Divider(height: 0.5),
         CustomTextField(
+          hintText: l10n.husbandFatherNameLabel,
           labelText: l10n.husbandFatherNameLabel,
           onChanged: (v) => bloc.add(CbacFieldChanged('personal.father', v.trim())),
         ),
         const Divider(height: 0.5),
         CustomTextField(
+          hintText: l10n.ageLabel,
           labelText: l10n.ageLabel,
           keyboardType: TextInputType.number,
           onChanged: (v) => bloc.add(CbacFieldChanged('personal.age', v.trim())),
         ),
         const Divider(height: 0.5),
-        ApiDropdown<String>(
-          labelText: l10n.genderLabel,
-          items: [l10n.genderMale, l10n.genderFemale, l10n.genderOther],
-          value: null,
-          getLabel: (s) => s,
-          onChanged: (v) => bloc.add(CbacFieldChanged('personal.gender', v)),
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (previous, current) => previous.data['personal.gender'] != current.data['personal.gender'],
+          builder: (context, state) {
+            return ApiDropdown<String>(
+              hintText: l10n.genderLabel,
+              labelText: l10n.genderLabel,
+              items: [l10n.genderMale, l10n.genderFemale, l10n.genderOther],
+              value: state.data['personal.gender'],
+              getLabel: (s) => s,
+              onChanged: (v) => bloc.add(CbacFieldChanged('personal.gender', v)),
+            );
+          },
         ),
         const Divider(height: 0.5),
         CustomTextField(
+          hintText: l10n.addressLabel,
           labelText: l10n.addressLabel,
           onChanged: (v) => bloc.add(CbacFieldChanged('personal.address', v.trim())),
         ),
         const Divider(height: 0.5),
-        ApiDropdown<String>(
-          labelText: l10n.identificationTypeLabel,
-          items: [l10n.idTypeAadhaar, l10n.idTypeVoterId, l10n.idTypeRationCard, l10n.idTypeStateInsurance],
-          getLabel: (s) => s,
-          value: null,
-          onChanged: (v) => bloc.add(CbacFieldChanged('personal.idType', v)),
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (previous, current) => previous.data['personal.idType'] != current.data['personal.idType'],
+          builder: (context, state) {
+            return ApiDropdown<String>(
+              hintText: l10n.identificationTypeLabel,
+              labelText: l10n.identificationTypeLabel,
+              items: [l10n.idTypeAadhaar, l10n.idTypeVoterId, l10n.uid,],
+              value: state.data['personal.idType'],
+              getLabel: (s) => s,
+              onChanged: (v) => bloc.add(CbacFieldChanged('personal.idType', v)),
+            );
+          },
         ),
         const Divider(height: 0.5),
-        ApiDropdown<String>(
-          labelText: l10n.affiliatedToStateInsuranceLabel,
-          items: [l10n.yes, l10n.no],
-          getLabel: (s) => s,
-          value: null,
-          onChanged: (v) => bloc.add(CbacFieldChanged('personal.hasConditions', v)),
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (previous, current) => previous.data['personal.hasConditions'] != current.data['personal.hasConditions'],
+          builder: (context, state) {
+            return ApiDropdown<String>(
+              hintText: l10n.affiliatedToStateInsuranceLabel,
+              labelText: l10n.affiliatedToStateInsuranceLabel,
+              items: [l10n.yes, l10n.no],
+              value: state.data['personal.hasConditions'],
+              getLabel: (s) => s,
+              onChanged: (v) => bloc.add(CbacFieldChanged('personal.hasConditions', v)),
+            );
+          },
         ),
         const Divider(height: 0.5),
         CustomTextField(
+          hintText: l10n.mobileTelephoneLabel,
           labelText: l10n.mobileTelephoneLabel,
           keyboardType: TextInputType.number,
           onChanged: (v) => bloc.add(CbacFieldChanged('personal.mobile', v.trim())),
         ),
         const Divider(height: 0.5),
-        ApiDropdown<String>(
-          labelText: l10n.disabilityQuestionLabel,
-          items: [l10n.disabilityVisualImpairment, l10n.disabilityPhysicallyHandicap, l10n.disabilityBedridden, l10n.disabilityNeedHelp],
-          getLabel: (s) => s,
-          value: null,
-          onChanged: (v) => bloc.add(CbacFieldChanged('personal.hasConditions', v)),
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (previous, current) => previous.data['personal.disability'] != current.data['personal.disability'],
+          builder: (context, state) {
+            return ApiDropdown<String>(
+              hintText: l10n.disabilityQuestionLabel,
+              labelText: l10n.disabilityQuestionLabel,
+              items: [l10n.disabilityVisualImpairment, l10n.disabilityPhysicallyHandicap, l10n.disabilityBedridden, l10n.disabilityNeedHelp],
+              value: state.data['personal.disability'],
+              getLabel: (s) => s,
+              onChanged: (v) => bloc.add(CbacFieldChanged('personal.disability', v)),
+            );
+          },
         ),
       ],
     );
@@ -400,7 +438,7 @@ class _PartATab extends StatelessWidget {
                   SizedBox(
                     width: 160,
                     child: ApiDropdown<String>(
-                      labelText: '',
+                      hintText: '',
                       items: items,
                       getLabel: (s) => s,
                       value: value,
@@ -558,18 +596,22 @@ class _PartBTab extends StatelessWidget {
               Expanded(
                 child: Text(
                   question,
-                  style:  TextStyle(fontSize: 14.sp),
+                  style:  TextStyle(fontSize: 15.sp),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               SizedBox(
-                width: 160,
-                child: ApiDropdown<String>(
-                  labelText: '',
-                  items: [l10n.yes, l10n.no],
-                  getLabel: (s) => s,
-                  value: null,
-                  onChanged: (v) => bloc.add(CbacFieldChanged(keyPath, v)),
+                width: 180,
+                child: BlocBuilder<CbacFormBloc, CbacFormState>(
+                  buildWhen: (previous, current) => previous.data[keyPath] != current.data[keyPath],
+                  builder: (context, state) {
+                    return ApiDropdown<String>(
+                      items: [l10n.yes, l10n.no],
+                      getLabel: (s) => s,
+                      value: state.data[keyPath],
+                      onChanged: (v) => bloc.add(CbacFieldChanged(keyPath, v)),
+                    );
+                  },
                 ),
               ),
             ],
@@ -662,42 +704,50 @@ class _PartCTab extends StatelessWidget {
         ),
         const SizedBox(height: 8),
 
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(child: Text(l10n.cbacC_fuelQ, style: TextStyle(fontSize:  14.sp),)),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 180,
-              child: ApiDropdown<String>(
-                labelText: '',
-                items: [l10n.cbacC_fuelWood, l10n.cbacC_fuelKerosene, l10n.cbacC_fuelGas, l10n.cbacC_fuelOther],
-                getLabel: (s) => s,
-                value: null,
-                onChanged: (v) => bloc.add(CbacFieldChanged('partC.cookingFuel', v)),
-              ),
-            ),
-          ],
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (previous, current) => previous.data['partC.cookingFuel'] != current.data['partC.cookingFuel'],
+          builder: (context, state) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(child: Text(l10n.cbacC_fuelQ, style: TextStyle(fontSize: 15.sp),)),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 180,
+                  child: ApiDropdown<String>(
+                    items: [l10n.firewod, l10n.cropResidues, l10n.cowdung, l10n.coal,l10n.lpg, l10n.cbacC_fuelKerosene],
+                    getLabel: (s) => s,
+                    value: state.data['partC.cookingFuel'],
+                    onChanged: (v) => bloc.add(CbacFieldChanged('partC.cookingFuel', v)),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         const SizedBox(height: 6),
         const Divider(height: 0.5),
 
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(child: Text(l10n.cbacC_businessRiskQ, style: TextStyle(fontSize: 14.sp),)),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 180,
-              child: ApiDropdown<String>(
-                labelText: '',
-                items: [l10n.yes, l10n.no],
-                getLabel: (s) => s,
-                value: null,
-                onChanged: (v) => bloc.add(CbacFieldChanged('partC.businessRisk', v)),
-              ),
-            ),
-          ],
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (previous, current) => previous.data['partC.businessRisk'] != current.data['partC.businessRisk'],
+          builder: (context, state) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(child: Text(l10n.cbacC_businessRiskQ, style: TextStyle(fontSize: 15.sp),)),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 180,
+                  child: ApiDropdown<String>(
+                    items: [l10n.cbacC_workingPollutedIndustries, l10n.burningOfGrabage, l10n.burningCrop, l10n.cbacC_workingSmokeyFactory],
+                    getLabel: (s) => s,
+                    value: state.data['partC.businessRisk'],
+                    onChanged: (v) => bloc.add(CbacFieldChanged('partC.businessRisk', v)),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         const SizedBox(height: 6),
         const Divider(height: 0.5),
@@ -759,7 +809,7 @@ class _PartDTab extends StatelessWidget {
                   SizedBox(
                     width: 120,
                     child: ApiDropdown<String>(
-                      labelText: '',
+                      hintText: '',
                       items: options,
                       getLabel: (s) => s,
                       value: value,

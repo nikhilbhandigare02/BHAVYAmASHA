@@ -305,15 +305,15 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                           _section(
                             ApiDropdown<String>(
                               labelText: '${l.genderLabel} *',
-                              items: const ['Male', 'Female', 'Other'],
+                              items: const ['Male', 'Female', 'Transgender'],
                               getLabel: (s) {
                                 switch (s) {
                                   case 'Male':
                                     return l.genderMale;
                                   case 'Female':
                                     return l.genderFemale;
-                                  case 'Other':
-                                    return l.genderOther;
+                                  case 'Transgender':
+                                    return l.transgender;
                                   default:
                                     return s;
                                 }
@@ -587,9 +587,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                           _section(
                             ApiDropdown<String>(
                               labelText: l.religionLabel,
-                              items: const ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Other'],
+                              items: const ['Do not want to disclose', 'Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhism', 'Jainism', 'Parsi', 'Other'],
                               getLabel: (s) {
                                 switch (s) {
+                                  case 'Do not want to disclose':
+                                    return l.religionNotDisclosed;
                                   case 'Hindu':
                                     return l.religionHindu;
                                   case 'Muslim':
@@ -598,6 +600,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     return l.religionChristian;
                                   case 'Sikh':
                                     return l.religionSikh;
+                                  case 'Buddhism':
+                                    return l.religionBuddhism;
+                                  case 'Jainism':
+                                    return l.religionJainism;
+                                  case 'Parsi':
+                                    return l.religionParsi;
                                   case 'Other':
                                     return l.religionOther;
                                   default:
@@ -612,8 +620,33 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                           _section(
                             ApiDropdown<String>(
                               labelText: l.categoryLabel,
-                              items: const ['General', 'OBC', 'SC', 'ST'],
-                              getLabel: (s) => s,
+                              items: const ['NotDisclosed', 'General', 'OBC', 'SC', 'ST', 'PichdaVarg1', 'PichdaVarg2', 'AtyantPichdaVarg', 'DontKnow', 'Other'],
+                              getLabel: (s) {
+                                switch (s) {
+                                  case 'NotDisclosed':
+                                    return l.categoryNotDisclosed;
+                                  case 'General':
+                                    return l.categoryGeneral;
+                                  case 'OBC':
+                                    return l.categoryOBC;
+                                  case 'SC':
+                                    return l.categorySC;
+                                  case 'ST':
+                                    return l.categoryST;
+                                  case 'PichdaVarg1':
+                                    return l.categoryPichdaVarg1;
+                                  case 'PichdaVarg2':
+                                    return l.categoryPichdaVarg2;
+                                  case 'AtyantPichdaVarg':
+                                    return l.categoryAtyantPichdaVarg;
+                                  case 'DontKnow':
+                                    return l.categoryDontKnow;
+                                  case 'Other':
+                                    return l.religionOther;
+                                  default:
+                                    return s;
+                                }
+                              },
                               value: state.category,
                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateCategory(v!)),
                             ),
@@ -678,17 +711,25 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                         _section(
                           ApiDropdown<String>(
                             labelText: l.occupationLabel,
-                            items: const ['Employed', 'Self-employed', 'Student', 'Unemployed'],
+                            items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
                             getLabel: (s) {
                               switch (s) {
-                                case 'Employed':
-                                  return l.occupationEmployed;
-                                case 'Self-employed':
-                                  return l.occupationSelfEmployed;
-                                case 'Student':
-                                  return l.occupationStudent;
                                 case 'Unemployed':
                                   return l.occupationUnemployed;
+                                case 'Housewife':
+                                  return l.occupationHousewife;
+                                case 'Daily Wage Labor':
+                                  return l.occupationDailyWageLabor;
+                                case 'Agriculture':
+                                  return l.occupationAgriculture;
+                                case 'Salaried':
+                                  return l.occupationSalaried;
+                                case 'Business':
+                                  return l.occupationBusiness;
+                                case 'Retired':
+                                  return l.occupationRetired;
+                                case 'Other':
+                                  return l.occupationOther;
                                 default:
                                   return s;
                               }
@@ -701,17 +742,23 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                         _section(
                           ApiDropdown<String>(
                             labelText: l.educationLabel,
-                            items: const ['Primary', 'Secondary', 'Graduate', 'Postgraduate'],
+                            items: const ['No Schooling', 'Primary', 'Secondary', 'High School', 'Intermediate', 'Diploma', 'Graduate and above'],
                             getLabel: (s) {
                               switch (s) {
+                                case 'No Schooling':
+                                  return l.educationNoSchooling;
                                 case 'Primary':
                                   return l.educationPrimary;
                                 case 'Secondary':
                                   return l.educationSecondary;
-                                case 'Graduate':
-                                  return l.educationGraduate;
-                                case 'Postgraduate':
-                                  return l.educationPostgraduate;
+                                case 'High School':
+                                  return l.educationHighSchool;
+                                case 'Intermediate':
+                                  return l.educationIntermediate;
+                                case 'Diploma':
+                                  return l.educationDiploma;
+                                case 'Graduate and above':
+                                  return l.educationGraduateAndAbove;
                                 default:
                                   return s;
                               }
@@ -731,19 +778,16 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                           _section(CustomTextField(labelText: l.personalHealthIdLabel, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdatePhId(v.trim())),)),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                          // Beneficiary Type & Marital Status
                           _section(
                             ApiDropdown<String>(
                               labelText: l.beneficiaryTypeLabel,
-                              items: const ['APL', 'BPL', 'Antyodaya'],
+                              items: const ['StayingInHouse', 'SeasonalMigrant'],
                               getLabel: (s) {
                                 switch (s) {
-                                  case 'APL':
-                                    return l.beneficiaryTypeAPL;
-                                  case 'BPL':
-                                    return l.beneficiaryTypeBPL;
-                                  case 'Antyodaya':
-                                    return l.beneficiaryTypeAntyodaya;
+                                  case 'StayingInHouse':
+                                    return l.migrationStayingInHouse;
+                                  case 'SeasonalMigrant':
+                                    return l.migrationSeasonalMigrant;
                                   default:
                                     return s;
                                 }
