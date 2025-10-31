@@ -48,6 +48,7 @@ class CustomTextField extends StatefulWidget {
 class _CustomTextFieldState extends State<CustomTextField> {
   bool _isObscure = true;
   TextEditingController? _controller;
+  bool _isDirty = false;
 
   List<TextSpan> _buildLabelTextSpans(String text) {
     if (!text.endsWith(' *')) {
@@ -69,6 +70,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     super.initState();
     _isObscure = widget.obscureText;
     _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
+    _isDirty = widget.initialValue?.isNotEmpty ?? false;
   }
 
   @override
@@ -114,14 +116,29 @@ class _CustomTextFieldState extends State<CustomTextField> {
     final TextStyle inputStyle = TextStyle(
         fontSize: 15.sp,
         color: AppColors.onSurfaceVariant,
-        height: 1.5
+        height: 1
     );
 
     return TextFormField(
       controller: _controller,
-
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       initialValue: null,
-      onChanged: widget.onChanged,
+      onChanged: (value) {
+        if (!_isDirty && value.isNotEmpty) {
+          setState(() {
+            _isDirty = true;
+          });
+        }
+        widget.onChanged?.call(value);
+      },
+      onTap: () {
+        if (!_isDirty) {
+          setState(() {
+            _isDirty = true;
+          });
+        }
+      },
+      validator: _isDirty ? widget.validator : null,
       obscureText: widget.obscureText ? _isObscure : false,
       keyboardType: widget.keyboardType,
       maxLines: widget.maxLines,
@@ -132,19 +149,20 @@ class _CustomTextFieldState extends State<CustomTextField> {
       focusNode: widget.focusNode,
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
+        // Add padding around the label to create a gap.
         label: (widget.labelText != null && widget.labelText!.isNotEmpty)
-            ? RichText(
-                text: TextSpan(
-                  children: _buildLabelTextSpans(widget.labelText!),
-                  style: inputStyle,
-                ),
-                softWrap: true,
-                maxLines: widget.labelMaxLines,
-                overflow: TextOverflow.visible,
+            ? Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: RichText(
+                  text: TextSpan(
+                    children: _buildLabelTextSpans(widget.labelText!),
+                    style: inputStyle,
+                  ),
+                  softWrap: true,
+                  maxLines: widget.labelMaxLines,
+                  overflow: TextOverflow.visible,),
               )
             : null,
-        // Add some space between the label and the input field
-        // when the label is floating.
         labelStyle: inputStyle,
         floatingLabelStyle: inputStyle,
         floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -155,19 +173,27 @@ class _CustomTextFieldState extends State<CustomTextField> {
             : null,
         suffixIcon: widget.obscureText
             ? IconButton(
-          icon: Icon(
-            _isObscure ? Icons.visibility_off : Icons.visibility,
-            color: AppColors.onSurfaceVariant,
-          ),
-          onPressed: () => setState(() {
-            _isObscure = !_isObscure;
-          }),
-        )
+                icon: Icon(
+                  _isObscure ? Icons.visibility_off : Icons.visibility,
+                  color: AppColors.onSurfaceVariant,
+                ),
+                onPressed: () => setState(() {
+                  _isObscure = !_isObscure;
+                }),
+              )
             : null,
         contentPadding: EdgeInsets.symmetric(
           vertical: 0.8.h,
           horizontal: 3.w,
         ),
+        counterText: "",
+        counterStyle: const TextStyle(height: 0, color: Colors.transparent),
+        errorStyle: TextStyle(
+          fontSize: 11.sp,
+          height: 1.2,
+          color: Colors.red[700],
+        ),
+        errorMaxLines: 2,
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
