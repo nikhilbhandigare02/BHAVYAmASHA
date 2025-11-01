@@ -52,6 +52,8 @@ import '../../../presentation/MotherCare/OutcomeForm/OutcomeForm.dart';
 import '../../../presentation/MotherCare/PreviousVisit/PreviousVisit.dart' show PreviousVisitScreen;
 import '../../../presentation/NCD/NCDHome.dart';
 import '../../../presentation/NCD/NCDList.dart';
+import '../../../presentation/NCD/NCDNonEligibleList.dart';
+import '../../../presentation/NCD/NCDPriorityList.dart';
 import '../../../presentation/NCD/NCDeligibleList.dart';
 import '../../../presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
 import '../../../presentation/RegisterNewHouseHold/AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart';
@@ -185,6 +187,10 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const DeathRegister(),);
       case Route_Names.HBNCListBeneficiaries:
         return MaterialPageRoute(builder: (context) => const HBNCListBeneficiaries(),);
+      case Route_Names.Ncdnoneligiblelist:
+        return MaterialPageRoute(builder: (context) => const Ncdnoneligiblelist(),);
+      case Route_Names.Ncdprioritylist:
+        return MaterialPageRoute(builder: (context) => const Ncdprioritylist(),);
 
       case Route_Names.HighRisk:
         return MaterialPageRoute(builder: (context) => const HighRisk(),);

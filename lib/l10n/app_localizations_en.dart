@@ -302,7 +302,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get anmNameLabel => 'ANM Name';
 
   @override
-  String get announcement => 'Announcement';
+  String get announcement => 'Announcements List';
 
   @override
   String get announcementItem1Body => 'In the local primary health center, smart phones were given to the ASHA workers of the block area for health related work. PHC in-charge Dr. Purushottam Priyadarshi said that a total of 126 ASHA workers of the block area have been given smart phones to make them hi-tech.He told that writing ASHA in the register will now give freedom. The mobile is specially designed for health related programs. Mobile cannot be used for any other purpose.All ASHA workers can send claim form for honorarium from their smart phone itself. On the basis of this, the amount of honorarium will be sent to their bank account. BCM Sanjit Kumar said that there are a total of 120 ASHA workers and 6 facilitators in the block area. Out of which smart phones have been made available to 122.';
@@ -884,6 +884,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get childTrackingDueListTitle => 'Child Tracking\nDue List';
 
   @override
+  String get searchHintchildTrackingDueListTitle => 'Search Child Tracking Due';
+
+  @override
   String get children0to1 => '0-1 year old children';
 
   @override
@@ -1064,7 +1067,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get economicStatusLabel => 'Economic Status';
 
   @override
-  String get eddDateLabel => 'Expected date of delivery (EDD)';
+  String get eddDateLabel => 'Expected Delivery Date';
 
   @override
   String get edit => 'Edit';
@@ -1219,7 +1222,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fpAdoptingLabel => 'Are you/your partner adopting family planning?';
 
   @override
-  String get fpMethodLabel => 'Contraceptive method';
+  String get fpMethodLabel => 'Family Planning Method';
 
   @override
   String get fruNameHint => 'FRU name';
@@ -1489,35 +1492,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get incentiveFinancialYear => 'Financial year';
 
   @override
-  String get incentiveHeaderAnganwadi => 'Anganwadi';
+  String get incentiveHeaderAnganwadi => 'आंगनवाड़ी';
 
   @override
-  String get incentiveHeaderBlock => 'Block';
+  String get incentiveHeaderBlock => 'प्रखंड';
 
   @override
-  String get incentiveHeaderDistrict => 'District';
+  String get incentiveHeaderDistrict => 'जिला';
 
   @override
   String get incentiveHeaderHsc => 'HSC';
 
   @override
-  String get incentiveHeaderPanchayat => 'Panchayat';
+  String get incentiveHeaderPanchayat => 'पंचायत';
 
   @override
-  String get incentiveNote => 'Submit the payment file for each month\'s claim amount between the 28th and 30th of the next month.';
+  String get incentiveNote => 'प्रत्येक महीने की दावा राशि के भुगतान फाइल अगले महीने की 28 से 30 तारीख के बीच जमा करें।';
 
   @override
-  String get incentiveTabDaily => 'Daily tasks';
+  String get incentiveTabDaily => 'दैनिक कार्य';
 
   @override
-  String get incentiveTabFinalize => 'Finalize';
+  String get incentiveTabFinalize => 'अंतिम रूप से';
 
   @override
-  String get incentiveTabMonthly => 'Monthly tasks';
+  String get incentiveTabMonthly => 'मासिक कार्य';
 
   @override
   String incentiveTotalAmount(Object amount) {
-    return 'Total amount (Daily + Monthly): ₹$amount';
+    return 'कुल राशि(दैनिक+मासिक): ₹$amount';
   }
 
   @override
@@ -1560,7 +1563,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listRoutineImmunization => 'Routine Immunization (RI)';
 
   @override
-  String get lmpDateLabel => 'Date of last menstrual period (LMP) *';
+  String get lmpDateLabel => 'LMP Date';
 
   @override
   String get loginButton => 'Login';
@@ -2001,7 +2004,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineSampoornTikakaran => 'No. of Sampoorn Tikakaran';
 
   @override
-  String get saveButton => 'SAVE';
+  String get saveButton => 'Save';
 
   @override
   String get saveSuccess => 'Saved successfully';
@@ -2013,7 +2016,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'SEARCH';
 
   @override
-  String get searchHint => 'Search by ID/Name/Contact';
+  String get searchHint => 'Search Registered Child Beneficiary';
+
+  @override
+  String get searchHintRegisterChildDueList => 'Child Registered Due Search';
+
+  @override
+  String get searchHintHbycBen => 'Search HBYC Beneficiary';
 
   @override
   String get searchPlaceholder => 'Search...';
@@ -2037,7 +2046,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get select => 'Select';
 
   @override
-  String get selectArea => 'Select area';
+  String get selectArea => 'Select';
 
   @override
   String get self => 'Self';
@@ -2190,7 +2199,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalMaleChildrenLabel => 'Total number of male children';
 
   @override
-  String get trackEligibleCoupleTitle => 'Eligible Couple Tracking';
+  String get trackEligibleCoupleTitle => 'Track Eligible Couples';
 
   @override
   String get trainingDateLabel => 'Training Date';
@@ -3177,6 +3186,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoTutorialList => 'Video Tutorial List';
+
+  @override
+  String get previousPage => 'Previous Page';
 
   @override
   String get completeTutorial => 'Complete Tutorial';

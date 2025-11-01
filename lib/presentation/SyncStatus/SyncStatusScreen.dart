@@ -108,6 +108,7 @@ class SyncCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.white,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
@@ -121,7 +122,7 @@ class SyncCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15.sp,
                 color: Colors.blue[800],
-                //fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
             SizedBox(height: 0.8.h),
@@ -131,17 +132,17 @@ class SyncCard extends StatelessWidget {
                   TextSpan(
                     text: 'Total: ',
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: 14.sp,
                       color: Colors.blue[800],
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   TextSpan(
                     text: '$total',
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: 14.sp,
                       color: Colors.black,
-                     // fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -155,7 +156,7 @@ class SyncCard extends StatelessWidget {
                   TextSpan(
                     text: 'Synced: ',
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: 14.sp,
                       color: Colors.blue[800],
                       fontWeight: FontWeight.w500,
                     ),
@@ -163,9 +164,9 @@ class SyncCard extends StatelessWidget {
                   TextSpan(
                     text: '$synced',
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: 14.sp,
                       color: Colors.black,
-                      //fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

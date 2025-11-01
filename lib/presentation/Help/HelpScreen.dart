@@ -21,7 +21,7 @@ class HelpScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppHeader(screenTitle: l10n.help, showBack: true),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -57,27 +57,28 @@ class HelpScreen extends StatelessWidget {
                     ),
                     child: ListTile(
                       dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
                       leading: Text('${index + 1}.', style: const TextStyle(fontWeight: FontWeight.w600)),
                       title: Text(number, style: const TextStyle(fontSize: 15)),
                       trailing: Container(
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          shape: BoxShape.circle,
+
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.call, color: AppColors.primary),
+                          icon: const Icon(Icons.call, color: AppColors.primary, weight: 800),
                           onPressed: () => _callNumber(context, number),
                         ),
                       ),
                       onTap: () => _callNumber(context, number),
                     ),
+
                   );
+
                 },
+
               ),
-              const SizedBox(height: 16),
-              const Divider(height: 1),
-              const SizedBox(height: 10),
+
+Divider(),
               Row(
                 children: [
                   Text(l10n.emailLabel + '  ', style: const TextStyle(fontWeight: FontWeight.w600)),

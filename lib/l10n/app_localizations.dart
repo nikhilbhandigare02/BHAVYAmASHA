@@ -680,7 +680,7 @@ abstract class AppLocalizations {
   /// No description provided for @announcement.
   ///
   /// In en, this message translates to:
-  /// **'Announcement'**
+  /// **'Announcements List'**
   String get announcement;
 
   /// No description provided for @announcementItem1Body.
@@ -1829,6 +1829,12 @@ abstract class AppLocalizations {
   /// **'Child Tracking\nDue List'**
   String get childTrackingDueListTitle;
 
+  /// No description provided for @searchHintchildTrackingDueListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Child Tracking Due'**
+  String get searchHintchildTrackingDueListTitle;
+
   /// No description provided for @children0to1.
   ///
   /// In en, this message translates to:
@@ -2192,7 +2198,7 @@ abstract class AppLocalizations {
   /// No description provided for @eddDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Expected date of delivery (EDD)'**
+  /// **'Expected Delivery Date'**
   String get eddDateLabel;
 
   /// No description provided for @edit.
@@ -2498,7 +2504,7 @@ abstract class AppLocalizations {
   /// No description provided for @fpMethodLabel.
   ///
   /// In en, this message translates to:
-  /// **'Contraceptive method'**
+  /// **'Family Planning Method'**
   String get fpMethodLabel;
 
   /// No description provided for @fruNameHint.
@@ -3038,19 +3044,19 @@ abstract class AppLocalizations {
   /// No description provided for @incentiveHeaderAnganwadi.
   ///
   /// In en, this message translates to:
-  /// **'Anganwadi'**
+  /// **'आंगनवाड़ी'**
   String get incentiveHeaderAnganwadi;
 
   /// No description provided for @incentiveHeaderBlock.
   ///
   /// In en, this message translates to:
-  /// **'Block'**
+  /// **'प्रखंड'**
   String get incentiveHeaderBlock;
 
   /// No description provided for @incentiveHeaderDistrict.
   ///
   /// In en, this message translates to:
-  /// **'District'**
+  /// **'जिला'**
   String get incentiveHeaderDistrict;
 
   /// No description provided for @incentiveHeaderHsc.
@@ -3062,37 +3068,37 @@ abstract class AppLocalizations {
   /// No description provided for @incentiveHeaderPanchayat.
   ///
   /// In en, this message translates to:
-  /// **'Panchayat'**
+  /// **'पंचायत'**
   String get incentiveHeaderPanchayat;
 
   /// No description provided for @incentiveNote.
   ///
   /// In en, this message translates to:
-  /// **'Submit the payment file for each month\'s claim amount between the 28th and 30th of the next month.'**
+  /// **'प्रत्येक महीने की दावा राशि के भुगतान फाइल अगले महीने की 28 से 30 तारीख के बीच जमा करें।'**
   String get incentiveNote;
 
   /// No description provided for @incentiveTabDaily.
   ///
   /// In en, this message translates to:
-  /// **'Daily tasks'**
+  /// **'दैनिक कार्य'**
   String get incentiveTabDaily;
 
   /// No description provided for @incentiveTabFinalize.
   ///
   /// In en, this message translates to:
-  /// **'Finalize'**
+  /// **'अंतिम रूप से'**
   String get incentiveTabFinalize;
 
   /// No description provided for @incentiveTabMonthly.
   ///
   /// In en, this message translates to:
-  /// **'Monthly tasks'**
+  /// **'मासिक कार्य'**
   String get incentiveTabMonthly;
 
   /// No description provided for @incentiveTotalAmount.
   ///
   /// In en, this message translates to:
-  /// **'Total amount (Daily + Monthly): ₹{amount}'**
+  /// **'कुल राशि(दैनिक+मासिक): ₹{amount}'**
   String incentiveTotalAmount(Object amount);
 
   /// No description provided for @isPregnantLabel.
@@ -3176,7 +3182,7 @@ abstract class AppLocalizations {
   /// No description provided for @lmpDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of last menstrual period (LMP) *'**
+  /// **'LMP Date'**
   String get lmpDateLabel;
 
   /// No description provided for @loginButton.
@@ -4058,7 +4064,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveButton.
   ///
   /// In en, this message translates to:
-  /// **'SAVE'**
+  /// **'Save'**
   String get saveButton;
 
   /// No description provided for @saveSuccess.
@@ -4082,8 +4088,20 @@ abstract class AppLocalizations {
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search by ID/Name/Contact'**
+  /// **'Search Registered Child Beneficiary'**
   String get searchHint;
+
+  /// No description provided for @searchHintRegisterChildDueList.
+  ///
+  /// In en, this message translates to:
+  /// **'Child Registered Due Search'**
+  String get searchHintRegisterChildDueList;
+
+  /// No description provided for @searchHintHbycBen.
+  ///
+  /// In en, this message translates to:
+  /// **'Search HBYC Beneficiary'**
+  String get searchHintHbycBen;
 
   /// No description provided for @searchPlaceholder.
   ///
@@ -4130,7 +4148,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectArea.
   ///
   /// In en, this message translates to:
-  /// **'Select area'**
+  /// **'Select'**
   String get selectArea;
 
   /// No description provided for @self.
@@ -4436,7 +4454,7 @@ abstract class AppLocalizations {
   /// No description provided for @trackEligibleCoupleTitle.
   ///
   /// In en, this message translates to:
-  /// **'Eligible Couple Tracking'**
+  /// **'Track Eligible Couples'**
   String get trackEligibleCoupleTitle;
 
   /// No description provided for @trainingDateLabel.
@@ -6406,6 +6424,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Video Tutorial List'**
   String get videoTutorialList;
+
+  /// No description provided for @previousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Page'**
+  String get previousPage;
 
   /// No description provided for @completeTutorial.
   ///

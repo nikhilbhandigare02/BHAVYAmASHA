@@ -7,6 +7,8 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
 import 'NCDList.dart';
+import 'NCDNonEligibleList.dart';
+import 'NCDPriorityList.dart';
 import 'NCDeligibleList.dart';
 
 class NCDHome extends StatefulWidget {
@@ -77,12 +79,9 @@ class _NCDHomeState extends State<NCDHome> {
                     count: 0,
                     image: 'assets/images/home.png',
                     onClick: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n?.ncdMsgChildTrackingDueList ?? 'Child Tracking Due List',
-                          ),
-                        ),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>  Ncdprioritylist()),
                       );
                     },
                   ),
@@ -101,10 +100,9 @@ class _NCDHomeState extends State<NCDHome> {
                     count: 0,
                     image: 'assets/images/home.png',
                     onClick: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n?.ncdMsgHbycList ?? 'HBYC List'),
-                        ),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>   Ncdnoneligiblelist()),
                       );
                     },
                   ),

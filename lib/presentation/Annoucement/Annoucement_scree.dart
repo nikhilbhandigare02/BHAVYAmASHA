@@ -100,7 +100,7 @@ class _AnnoucementScreeState extends State<AnnoucementScree> {
                               alignment: Alignment.centerRight,
                               child: Text(
                                 expanded ? (l10n?.readLess ?? 'Read less') : (l10n?.readMore ?? 'Read more'),
-                                style:  TextStyle(color: Color(0xFF1976D2), fontWeight: FontWeight.w600, fontSize: 14.sp),
+                                style:  TextStyle(color: Colors.black54, fontWeight: FontWeight.w600, fontSize: 14.sp),
                               ),
                             ),
                           ],

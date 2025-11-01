@@ -884,6 +884,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get childTrackingDueListTitle => 'बाल ट्रैकिंग\nदेय सूची';
 
   @override
+  String get searchHintchildTrackingDueListTitle => 'बाल ट्रैकिंग देय खोजें';
+
+  @override
   String get children0to1 => '0-1 वर्ष के बच्चे';
 
   @override
@@ -2001,7 +2004,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get routineSampoornTikakaran => 'सम्पूर्ण टीकाकरण की संख्या';
 
   @override
-  String get saveButton => 'सहेजें';
+  String get saveButton => 'संरक्षित करें';
 
   @override
   String get saveSuccess => 'Saved successfully';
@@ -2014,6 +2017,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get searchHint => 'Search by ID/Name/Contact';
+
+  @override
+  String get searchHintRegisterChildDueList => 'देय पंजीकरण खोजें';
+
+  @override
+  String get searchHintHbycBen => 'एचबीवाईसी लाभार्थी खोजें';
 
   @override
   String get searchPlaceholder => 'Search...';
@@ -2037,7 +2046,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get select => 'चुनें';
 
   @override
-  String get selectArea => 'क्षेत्र चुनें';
+  String get selectArea => 'चुनें';
 
   @override
   String get self => 'स्वयं';
@@ -2190,7 +2199,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get totalMaleChildrenLabel => 'कुल पुरुष बच्चों की संख्या';
 
   @override
-  String get trackEligibleCoupleTitle => 'योग्य दम्पतियों की ट्रैकिंग';
+  String get trackEligibleCoupleTitle => 'योग्य दंपतियों की ट्रैकिंग';
 
   @override
   String get trainingDateLabel => 'प्रशिक्षण की तिथि';
@@ -2279,7 +2288,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get visitDateLabel => 'विज़िट की तिथि';
+  String get visitDateLabel => 'भ्रमण की तिथि';
 
   @override
   String get visitDetailsANC => 'प्रसवपूर्व देखभाल विज़िट';
@@ -3177,6 +3186,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get videoTutorialList => 'वीडियो ट्यूटोरियल सूची';
+
+  @override
+  String get previousPage => 'पिछला पेज';
 
   @override
   String get completeTutorial => 'पूरा ट्यूटोरियल';

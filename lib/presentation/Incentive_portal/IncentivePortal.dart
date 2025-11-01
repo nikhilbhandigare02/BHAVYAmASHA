@@ -115,7 +115,7 @@ class _IncentivePortalState extends State<IncentivePortal>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
-              color: AppColors.surface,
+              color:Colors.lightBlue[50],
               elevation: 2,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               child: Padding(
@@ -132,7 +132,7 @@ class _IncentivePortalState extends State<IncentivePortal>
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _InfoCell(title: l10n?.incentiveHeaderDistrict ?? 'District', value: 'Patna'),
+                        _InfoCell(title: l10n?.incentiveHeaderDistrict ?? 'जिला', value: 'Patna'),
                         _InfoCell(title: l10n?.incentiveHeaderBlock ?? 'Block', value: 'Maner'),
                       ],
                     ),

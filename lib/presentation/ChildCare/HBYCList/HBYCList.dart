@@ -93,7 +93,7 @@ class _HBYCListState extends State<HBYCList> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  l10n?.searchHint ?? 'Search HBYC',
+                hintText:  l10n?.searchHintHbycBen ?? 'Search HBYC',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
