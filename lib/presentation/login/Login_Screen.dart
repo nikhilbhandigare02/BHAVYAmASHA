@@ -6,7 +6,8 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/config/routes/Route_Name.dart';
-import '../../core/utils/Validations.dart';
+import 'package:medixcel_new/core/utils/Validations.dart';
+import 'package:medixcel_new/core/utils/app_version.dart';
 import '../../core/utils/enums.dart';
 import '../../core/widgets/Loader/Loader.dart';
 import '../../core/widgets/RoundButton/RoundButton.dart';
@@ -29,6 +30,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   bool _isKeyboardVisible = false;
   final FocusNode _usernameFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  String _appVersion = ''; // Default version
 
   @override
   void initState() {
@@ -38,6 +40,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+    _loadAppVersion();
+  }
+
+  Future<void> _loadAppVersion() async {
+    final version = await AppVersion.getAppVersion();
+    if (mounted) {
+      setState(() {
+        _appVersion = version;
+      });
+    }
   }
 
   @override
@@ -302,32 +314,51 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                                     SizedBox(height: 1.5.h),
 
-                                    /// Login Button
                                     BlocListener<LoginBloc, LoginState>(
                                       listener: (context, state) {
                                         if (state.postApiStatus == PostApiStatus.success) {
-                                          Navigator.pushNamedAndRemoveUntil(
-                                            context,
-                                            Route_Names.homeScreen,
-                                                (route) => false,
-                                          );
+                                          final message = state.error.isNotEmpty
+                                              ? state.error 
+                                              : l10n.loginSuccess;
+                                              
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
                                               content: Text(
-                                                l10n.loginSuccess,
+                                                message,
                                                 style: const TextStyle(color: Colors.white),
                                               ),
                                               backgroundColor: Colors.green,
+                                              duration: const Duration(seconds: 3),
                                             ),
                                           );
+                                          
+                                          Future.delayed(const Duration(milliseconds: 500), () {
+                                            Navigator.pushNamedAndRemoveUntil(
+                                              context,
+                                              Route_Names.homeScreen,
+                                              (route) => false,
+                                            );
+                                          });
                                         } else if (state.postApiStatus == PostApiStatus.error) {
+                                          final errorMessage = state.error.isNotEmpty
+                                              ? state.error 
+                                              : l10n.loginFailed;
+                                              
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
                                               content: Text(
-                                                state.error.isNotEmpty ? state.error : l10n.loginFailed,
+                                                errorMessage,
                                                 style: const TextStyle(color: Colors.white),
                                               ),
                                               backgroundColor: Colors.red,
+                                              duration: const Duration(seconds: 3),
+                                              action: SnackBarAction(
+                                                label: l10n.dismiss,
+                                                textColor: Colors.white,
+                                                onPressed: () {
+                                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                                },
+                                              ),
                                             ),
                                           );
                                         }
@@ -367,7 +398,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                             const SizedBox(height: 40),
 
-                            /// Footer
+
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,
@@ -376,12 +407,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               child: Column(
                                 children: [
                                   Text(
-                                    l10n.poweredBy,
-                                    style: TextStyle(fontSize: 14.sp, color: AppColors.onPrimary),
+                                    '${l10n.poweredBy} ${DateTime.now().year}',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: AppColors.onPrimary,
+                                    ),
                                   ),
+
                                   const SizedBox(height: 4),
                                   Text(
-                                    "v7.8.10",
+                                    _appVersion,
                                     style: TextStyle(fontSize: 14.sp, color: AppColors.onPrimary),
                                   ),
                                   SizedBox(height: _isKeyboardVisible ? 20.h : 40),

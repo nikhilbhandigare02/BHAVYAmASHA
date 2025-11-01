@@ -1064,7 +1064,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get economicStatusLabel => 'Economic Status';
 
   @override
-  String get eddDateLabel => 'Expected date of delivery (EDD)';
+  String get eddDateLabel => 'Expected Delivery Date';
 
   @override
   String get edit => 'Edit';
@@ -1219,7 +1219,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fpAdoptingLabel => 'Are you/your partner adopting family planning?';
 
   @override
-  String get fpMethodLabel => 'Contraceptive method';
+  String get fpMethodLabel => 'Family Planning Method';
 
   @override
   String get fruNameHint => 'FRU name';
@@ -1560,13 +1560,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listRoutineImmunization => 'Routine Immunization (RI)';
 
   @override
-  String get lmpDateLabel => 'Date of last menstrual period (LMP) *';
+  String get lmpDateLabel => 'LMP Date';
 
   @override
   String get loginButton => 'Login';
 
   @override
-  String get loginFailed => 'Login Failed';
+  String get loginFailed => 'Login failed. Please try again.';
 
   @override
   String get loginSuccess => 'Login successful!';
@@ -1803,7 +1803,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordEmpty => 'Password cannot be empty';
 
   @override
-  String get passwordHint => 'Enter your password';
+  String get passwordHint => 'Enter password';
 
   @override
   String get passwordLabel => 'Password';
@@ -1842,7 +1842,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get populationCoveredLabel => 'Population covered under ASHA';
 
   @override
-  String get poweredBy => 'Powered By Medixcel Lite © 2025';
+  String get poweredBy => 'Powered By Medixcel Lite © ';
 
   @override
   String get preExistingDiseaseLabel => 'Pre - Existing disease';
@@ -2001,7 +2001,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineSampoornTikakaran => 'No. of Sampoorn Tikakaran';
 
   @override
-  String get saveButton => 'SAVE';
+  String get saveButton => 'Save';
 
   @override
   String get saveSuccess => 'Saved successfully';
@@ -2037,7 +2037,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get select => 'Select';
 
   @override
-  String get selectArea => 'Select area';
+  String get selectArea => 'Select';
 
   @override
   String get self => 'Self';
@@ -2190,7 +2190,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalMaleChildrenLabel => 'Total number of male children';
 
   @override
-  String get trackEligibleCoupleTitle => 'Eligible Couple Tracking';
+  String get trackEligibleCoupleTitle => 'Track Eligible Couples';
 
   @override
   String get trainingDateLabel => 'Training Date';
@@ -2256,7 +2256,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usernameEmpty => 'Username cannot be empty';
 
   @override
-  String get usernameHint => 'Enter your Username';
+  String get usernameHint => 'Enter username';
 
   @override
   String get usernameLabel => 'Username';
@@ -3098,6 +3098,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fatherNameHint => 'Enter father\'s name';
 
   @override
+  String get dismiss => 'Dismiss';
+
+  @override
   String get years => 'Years';
 
   @override
@@ -3177,6 +3180,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoTutorialList => 'Video Tutorial List';
+
+  @override
+  String get previousPage => 'Previous Page';
 
   @override
   String get completeTutorial => 'Complete Tutorial';

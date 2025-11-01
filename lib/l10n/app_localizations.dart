@@ -2192,7 +2192,7 @@ abstract class AppLocalizations {
   /// No description provided for @eddDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Expected date of delivery (EDD)'**
+  /// **'Expected Delivery Date'**
   String get eddDateLabel;
 
   /// No description provided for @edit.
@@ -2498,7 +2498,7 @@ abstract class AppLocalizations {
   /// No description provided for @fpMethodLabel.
   ///
   /// In en, this message translates to:
-  /// **'Contraceptive method'**
+  /// **'Family Planning Method'**
   String get fpMethodLabel;
 
   /// No description provided for @fruNameHint.
@@ -3176,7 +3176,7 @@ abstract class AppLocalizations {
   /// No description provided for @lmpDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of last menstrual period (LMP) *'**
+  /// **'LMP Date'**
   String get lmpDateLabel;
 
   /// No description provided for @loginButton.
@@ -3188,7 +3188,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginFailed.
   ///
   /// In en, this message translates to:
-  /// **'Login Failed'**
+  /// **'Login failed. Please try again.'**
   String get loginFailed;
 
   /// No description provided for @loginSuccess.
@@ -3662,7 +3662,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter your password'**
+  /// **'Enter password'**
   String get passwordHint;
 
   /// No description provided for @passwordLabel.
@@ -3740,7 +3740,7 @@ abstract class AppLocalizations {
   /// No description provided for @poweredBy.
   ///
   /// In en, this message translates to:
-  /// **'Powered By Medixcel Lite © 2025'**
+  /// **'Powered By Medixcel Lite © '**
   String get poweredBy;
 
   /// No description provided for @preExistingDiseaseLabel.
@@ -4058,7 +4058,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveButton.
   ///
   /// In en, this message translates to:
-  /// **'SAVE'**
+  /// **'Save'**
   String get saveButton;
 
   /// No description provided for @saveSuccess.
@@ -4130,7 +4130,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectArea.
   ///
   /// In en, this message translates to:
-  /// **'Select area'**
+  /// **'Select'**
   String get selectArea;
 
   /// No description provided for @self.
@@ -4436,7 +4436,7 @@ abstract class AppLocalizations {
   /// No description provided for @trackEligibleCoupleTitle.
   ///
   /// In en, this message translates to:
-  /// **'Eligible Couple Tracking'**
+  /// **'Track Eligible Couples'**
   String get trackEligibleCoupleTitle;
 
   /// No description provided for @trainingDateLabel.
@@ -4568,7 +4568,7 @@ abstract class AppLocalizations {
   /// No description provided for @usernameHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter your Username'**
+  /// **'Enter username'**
   String get usernameHint;
 
   /// No description provided for @usernameLabel.
@@ -6245,6 +6245,12 @@ abstract class AppLocalizations {
   /// **'Enter father\'s name'**
   String get fatherNameHint;
 
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
   /// No description provided for @years.
   ///
   /// In en, this message translates to:
@@ -6406,6 +6412,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Video Tutorial List'**
   String get videoTutorialList;
+
+  /// No description provided for @previousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Page'**
+  String get previousPage;
 
   /// No description provided for @completeTutorial.
   ///

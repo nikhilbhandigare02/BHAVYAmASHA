@@ -1563,10 +1563,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get lmpDateLabel => 'एलएमपी की तिथि';
 
   @override
-  String get loginButton => 'लॉग इन करें';
+  String get loginButton => 'लॉगिन';
 
   @override
-  String get loginFailed => 'लॉगिन विफल';
+  String get loginFailed => 'लॉगिन विफल। कृपया पुनः प्रयास करें।';
 
   @override
   String get loginSuccess => 'लॉगिन सफल!';
@@ -1803,7 +1803,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get passwordEmpty => 'पासवर्ड खाली नहीं हो सकता';
 
   @override
-  String get passwordHint => 'अपना पासवर्ड दर्ज करें';
+  String get passwordHint => 'पासवर्ड दर्ज करें';
 
   @override
   String get passwordLabel => 'पासवर्ड';
@@ -1842,7 +1842,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get populationCoveredLabel => 'आशा के अंतर्गत आबादी';
 
   @override
-  String get poweredBy => 'Powered By Medixcel Lite © 2025';
+  String get poweredBy => 'Powered By Medixcel Lite © ';
 
   @override
   String get preExistingDiseaseLabel => 'Pre - Existing disease';
@@ -2001,7 +2001,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get routineSampoornTikakaran => 'सम्पूर्ण टीकाकरण की संख्या';
 
   @override
-  String get saveButton => 'सहेजें';
+  String get saveButton => 'संरक्षित करें';
 
   @override
   String get saveSuccess => 'Saved successfully';
@@ -2037,7 +2037,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get select => 'चुनें';
 
   @override
-  String get selectArea => 'क्षेत्र चुनें';
+  String get selectArea => 'चुनें';
 
   @override
   String get self => 'स्वयं';
@@ -2190,7 +2190,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get totalMaleChildrenLabel => 'कुल पुरुष बच्चों की संख्या';
 
   @override
-  String get trackEligibleCoupleTitle => 'योग्य दम्पतियों की ट्रैकिंग';
+  String get trackEligibleCoupleTitle => 'योग्य दंपतियों की ट्रैकिंग';
 
   @override
   String get trainingDateLabel => 'प्रशिक्षण की तिथि';
@@ -2256,7 +2256,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get usernameEmpty => 'उपयोगकर्ता नाम खाली नहीं हो सकता';
 
   @override
-  String get usernameHint => 'अपना उपयोगकर्ता नाम दर्ज करें';
+  String get usernameHint => 'उपयोगकर्ता नाम दर्ज करें';
 
   @override
   String get usernameLabel => 'उपयोगकर्ता नाम';
@@ -2279,7 +2279,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get visitDateLabel => 'विज़िट की तिथि';
+  String get visitDateLabel => 'भ्रमण की तिथि';
 
   @override
   String get visitDetailsANC => 'प्रसवपूर्व देखभाल विज़िट';
@@ -3098,6 +3098,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get fatherNameHint => 'पिता का नाम दर्ज करें';
 
   @override
+  String get dismiss => 'बंद करें';
+
+  @override
   String get years => 'वर्ष';
 
   @override
@@ -3177,6 +3180,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get videoTutorialList => 'वीडियो ट्यूटोरियल सूची';
+
+  @override
+  String get previousPage => 'पिछला पेज';
 
   @override
   String get completeTutorial => 'पूरा ट्यूटोरियल';
