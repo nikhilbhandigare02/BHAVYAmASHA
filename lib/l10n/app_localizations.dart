@@ -2585,11 +2585,23 @@ abstract class AppLocalizations {
   /// **'All Beneficiaries'**
   String get gridAllBeneficiaries;
 
+  /// No description provided for @searchBeneficiaries.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiaries Search'**
+  String get searchBeneficiaries;
+
   /// No description provided for @gridAllHousehold.
   ///
   /// In en, this message translates to:
   /// **'All Household'**
   String get gridAllHousehold;
+
+  /// No description provided for @searchHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Household Search'**
+  String get searchHousehold;
 
   /// No description provided for @gridAshaKiDuniya.
   ///
@@ -4520,14 +4532,20 @@ abstract class AppLocalizations {
   /// No description provided for @updatedEligibleCoupleListTitle.
   ///
   /// In en, this message translates to:
-  /// **'Updated Eligible Couple List'**
+  /// **'Eligible Couple List'**
   String get updatedEligibleCoupleListTitle;
 
   /// No description provided for @updatedEligibleCoupleSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search Updated Eligible Couple'**
+  /// **'Updated Eligible Couple Search'**
   String get updatedEligibleCoupleSearchHint;
+
+  /// No description provided for @eligibleCoupleSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Eligible Couple'**
+  String get eligibleCoupleSearchHint;
 
   /// No description provided for @userHfrIdLabel.
   ///

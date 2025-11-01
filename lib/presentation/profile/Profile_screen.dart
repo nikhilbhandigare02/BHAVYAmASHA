@@ -125,19 +125,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     labelText: l10n.dojLabel,
                     initialDate: state.doj,
                     isEditable: true,
-                    hintText: l10n.dateHint,
+                    hintText: l10n.dojLabel,
                     onDateChanged: (d) => bloc.add(DojChanged(d)),
                   ),
                   Divider(color: AppColors.divider, thickness: 0.5),
 
                   const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      l10n.bankDetailsTitle,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
+                  Text(
+                    l10n.bankDetailsTitle,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                    const SizedBox(height: 12),
                                       Divider(color: AppColors.divider, thickness: 0.5),

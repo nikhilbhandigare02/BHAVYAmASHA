@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../../presentation/HomeScreen/HomeScreen.dart';
+import '../../utils/app_version.dart';
 import '../ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
@@ -22,8 +23,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
   void initState() {
     super.initState();
     _loadUserData();
+    _loadAppVersion();
+
   }
 
+  Future<void> _loadAppVersion() async {
+    final version = await AppVersion.getAppVersion();
+    if (mounted) {
+      setState(() {
+        _appVersion = version;
+      });
+    }
+  }
   Future<void> _loadUserData() async {
     if (mounted) {
       setState(() => isLoading = true);
@@ -82,6 +93,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   String _appVersion = ''; // Default version
+
 
   @override
   Widget build(BuildContext context) {
@@ -154,9 +166,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     thickness: 0.8,
                   ),
 
-                  // 🔹 User Info Section
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.3.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -193,10 +204,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           ),
                         SizedBox(height: 1.h),
                         Text(
-                          "V 7.8.10",
+                          _appVersion,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontSize: 11.sp,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ],

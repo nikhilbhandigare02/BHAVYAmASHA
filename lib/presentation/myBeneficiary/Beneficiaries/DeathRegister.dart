@@ -210,31 +210,32 @@ final l10n = AppLocalizations.of(context);
     );
   }
 
-  Widget _infoRow(String title, String value) {
-    final l10n = AppLocalizations.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$title',
-          style:  TextStyle(
-            color: Colors.white70,
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            (value.isEmpty ? l10n?.notAvailable ?? 'N/A' : value),
+  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Text(
+            '$title ',
             style:  TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
+              color: AppColors.background,
               fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
             ),
-            overflow: TextOverflow.ellipsis,
           ),
-        ),
-      ],
+          Expanded(
+            child: Text(
+              value.isEmpty ? 'N/A' : value,
+              style:  TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w400,
+                fontSize: 13.sp,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

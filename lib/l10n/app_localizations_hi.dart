@@ -1264,7 +1264,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gridAllBeneficiaries => 'सभी लाभार्थी';
 
   @override
+  String get searchBeneficiaries => 'लाभार्थी खोज';
+
+  @override
   String get gridAllHousehold => 'सभी घर';
+
+  @override
+  String get searchHousehold => 'घर खोज';
 
   @override
   String get gridAshaKiDuniya => 'आशा की दुनिया';
@@ -2232,10 +2238,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get updatedEligibleCoupleListSubtitle => 'List of eligible couples';
 
   @override
-  String get updatedEligibleCoupleListTitle => 'अपडेटेड पात्र दंपत्ति सूची';
+  String get updatedEligibleCoupleListTitle => 'पात्र दंपत्ति सूची';
 
   @override
   String get updatedEligibleCoupleSearchHint => 'अपडेटेड पात्र दंपत्ति खोजें';
+
+  @override
+  String get eligibleCoupleSearchHint => 'पात्र दंपत्ति खोजें';
 
   @override
   String get userHfrIdLabel => 'एचएफआर आईडी:';

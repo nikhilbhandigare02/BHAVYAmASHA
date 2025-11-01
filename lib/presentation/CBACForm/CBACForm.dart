@@ -176,30 +176,33 @@ class _CbacformState extends State<Cbacform> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(
-                            height: 44,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(8), // 👈 add corner radius
-                              ),
-                              child: TextButton(
-                                style: TextButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8), // 👈 match same radius
-                                  ),
+                          // 👇 Keep layout stable — use SizedBox(width: 120) when hidden
+                          if (state.activeTab != 0)
+                            SizedBox(
+                              height: 44,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                onPressed: state.activeTab == 0
-                                    ? null
-                                    : () => context.read<CbacFormBloc>().add(const CbacPrevTab()),
-                                child: Text(
-                                  l10n?.previousButton ?? 'PREVIOUS',
-                                  style: const TextStyle(color: Colors.white),
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  onPressed: () =>
+                                      context.read<CbacFormBloc>().add(const CbacPrevTab()),
+                                  child: Text(
+                                    l10n?.previousButton ?? 'PREVIOUS',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
                                 ),
                               ),
                             )
+                          else
+                            const SizedBox(width: 120), // ✅ placeholder to keep NEXT aligned right
 
-                          ),
                           SizedBox(
                             height: 44,
                             child: RoundButton(
@@ -221,6 +224,7 @@ class _CbacformState extends State<Cbacform> {
                         ],
                       ),
                     ),
+
                   ],
                 ),
               );
@@ -408,7 +412,7 @@ class _PartATab extends StatelessWidget {
               ],
             );
         Widget rowScore(int score) => SizedBox(
-              width: 28,
+              // width: 28,
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text('$score', style: const TextStyle(color: Colors.black54)),
@@ -428,24 +432,20 @@ class _PartATab extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: Text(
-                      question,
-                      style:  TextStyle(fontSize: 14.sp),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
                   SizedBox(
-                    width: 160,
+                    width: 320,
                     child: ApiDropdown<String>(
+                      labelText: question,
                       hintText: '',
+                      labelFontSize: 15.sp,
                       items: items,
                       getLabel: (s) => s,
                       value: value,
                       onChanged: onChanged,
+                      isExpanded: true,
                     ),
                   ),
-                  const SizedBox(width: 8),
+
                   rowScore(score),
                 ],
               ),
@@ -455,7 +455,6 @@ class _PartATab extends StatelessWidget {
           );
         }
 
-        // Localized option lists
         final itemsAge = <String>[
           l10n.cbacA_ageLT30,
           l10n.cbacA_age30to39,
@@ -593,30 +592,29 @@ class _PartBTab extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
-                child: Text(
-                  question,
-                  style:  TextStyle(fontSize: 15.sp),
-                ),
-              ),
-              const SizedBox(width: 6),
               SizedBox(
-                width: 180,
+                width: 300,
                 child: BlocBuilder<CbacFormBloc, CbacFormState>(
                   buildWhen: (previous, current) => previous.data[keyPath] != current.data[keyPath],
                   builder: (context, state) {
                     return ApiDropdown<String>(
+                      labelText: question,
+                      hintText: '',
+                      labelFontSize: 15.sp,
                       items: [l10n.yes, l10n.no],
                       getLabel: (s) => s,
                       value: state.data[keyPath],
                       onChanged: (v) => bloc.add(CbacFieldChanged(keyPath, v)),
+                      isExpanded: true,
                     );
                   },
                 ),
               ),
+              const Spacer(),
+              const SizedBox(width: 28), // Placeholder for score to maintain alignment
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           const Divider(height: 0.5),
         ];
 
@@ -710,17 +708,21 @@ class _PartCTab extends StatelessWidget {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(child: Text(l10n.cbacC_fuelQ, style: TextStyle(fontSize: 15.sp),)),
-                const SizedBox(width: 8),
                 SizedBox(
-                  width: 180,
+                  width: 300,
                   child: ApiDropdown<String>(
-                    items: [l10n.firewod, l10n.cropResidues, l10n.cowdung, l10n.coal,l10n.lpg, l10n.cbacC_fuelKerosene],
+                    labelText: l10n.cbacC_fuelQ,
+                    hintText: '',
+                    labelFontSize: 15.sp,
+                    items: [l10n.firewod, l10n.cropResidues, l10n.cowdung, l10n.coal, l10n.lpg, l10n.cbacC_fuelKerosene],
                     getLabel: (s) => s,
                     value: state.data['partC.cookingFuel'],
                     onChanged: (v) => bloc.add(CbacFieldChanged('partC.cookingFuel', v)),
+                    isExpanded: true,
                   ),
                 ),
+                const Spacer(),
+                const SizedBox(width: 28), // Placeholder for alignment
               ],
             );
           },
@@ -734,22 +736,26 @@ class _PartCTab extends StatelessWidget {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(child: Text(l10n.cbacC_businessRiskQ, style: TextStyle(fontSize: 15.sp),)),
-                const SizedBox(width: 8),
                 SizedBox(
-                  width: 180,
+                  width: 300,
                   child: ApiDropdown<String>(
+                    labelText: l10n.cbacC_businessRiskQ,
+                    hintText: '',
+                    labelFontSize: 15.sp,
                     items: [l10n.cbacC_workingPollutedIndustries, l10n.burningOfGrabage, l10n.burningCrop, l10n.cbacC_workingSmokeyFactory],
                     getLabel: (s) => s,
                     value: state.data['partC.businessRisk'],
                     onChanged: (v) => bloc.add(CbacFieldChanged('partC.businessRisk', v)),
+                    isExpanded: true,
                   ),
                 ),
+                const Spacer(),
+                const SizedBox(width: 28), // Placeholder for alignment
               ],
             );
           },
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         const Divider(height: 0.5),
       ],
     );
@@ -804,19 +810,20 @@ class _PartDTab extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(child: Text(question, style:  TextStyle(fontSize: 14.sp))),
-                  const SizedBox(width: 8),
                   SizedBox(
-                    width: 120,
+                    width: 300,
                     child: ApiDropdown<String>(
+                      labelText: question,
                       hintText: '',
+                      labelFontSize: 15.sp,
                       items: options,
                       getLabel: (s) => s,
                       value: value,
                       onChanged: onChanged,
+                      isExpanded: true,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const Spacer(),
                   scoreBox(value),
                 ],
               ),

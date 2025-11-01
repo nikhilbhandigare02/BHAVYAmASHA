@@ -155,7 +155,7 @@ class _UpdatedEligibleCoupleListScreenState
                 controller: _search,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: t?.updatedEligibleCoupleSearchHint ?? 'Search Updated Eligible Couple',
+                  hintText: t?.eligibleCoupleSearchHint ?? 'Search Updated Eligible Couple',
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
                   fillColor: AppColors.background,
@@ -177,21 +177,20 @@ class _UpdatedEligibleCoupleListScreenState
 
             // 🟦 Tabs
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 26.0),
+              padding:  EdgeInsets.only(left: 12.0, right: 12),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _TabChip(
                     label: '${t?.tabAll ?? 'ALL'} (${_households.length})',
                     selected: _tab == 0,
                     onTap: () => setState(() => _tab = 0),
                   ),
-                  const SizedBox(width: 16),
                   _TabChip(
                     label: '${t?.tabProtected ?? 'PROTECTED'} (${_protectedList.length})',
                     selected: _tab == 1,
                     onTap: () => setState(() => _tab = 1),
                   ),
-                  const SizedBox(width: 16),
                   _TabChip(
                     label: '${t?.tabUnprotected ?? 'UNPROTECTED'} (${_unprotectedList.length})',
                     selected: _tab == 2,
@@ -203,7 +202,6 @@ class _UpdatedEligibleCoupleListScreenState
 
             const SizedBox(height: 12),
 
-            // 📋 List Section
             Expanded(
               child: _filtered.isNotEmpty
                   ? ListView.builder(

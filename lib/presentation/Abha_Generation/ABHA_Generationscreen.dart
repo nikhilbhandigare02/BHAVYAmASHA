@@ -66,6 +66,7 @@ class _AbhaGenerationscreenState extends State<AbhaGenerationscreen> {
                           /// 📱 Mobile Number Field
                           CustomTextField(
                             labelText: l10n?.mobileLabelSimple ?? 'Mobile Number',
+                            hintText: l10n?.mobileLabelSimple ?? 'Mobile Number',
                             keyboardType: TextInputType.number,
                             maxLength: 10,
                             onChanged: (v) => context
@@ -105,12 +106,12 @@ class _AbhaGenerationscreenState extends State<AbhaGenerationscreen> {
                                   ),
                                 ),
 
-                                /// 🆔 Aadhaar Number inside the card
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12),
                                   child: CustomTextField(
                                     labelText: l10n?.abhaAadhaarNumberLabel ?? 'Aadhaar Number',
+                                    hintText: l10n?.abhaAadhaarNumberLabel ?? 'Aadhaar Number',
                                     keyboardType: TextInputType.number,
                                     maxLength: 12,
                                     onChanged: (v) => context

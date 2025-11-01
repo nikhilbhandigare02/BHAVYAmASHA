@@ -68,23 +68,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     }
   }
 
-  void _onFocusChange() {
-    if (!mounted) return;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final isKeyboardVisible = bottomInset > 0;
-
-    if (isKeyboardVisible != _isKeyboardVisible) {
-      setState(() {
-        _isKeyboardVisible = isKeyboardVisible;
-      });
-
-      if (_isKeyboardVisible) {
-        _animationController.forward();
-      } else {
-        _animationController.reverse();
-      }
-    }
-  }
 
   @override
   void dispose() {

@@ -201,6 +201,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 _section(
                   CustomTextField(
                     labelText: l.fatherName,
+                    hintText: l.fatherName,
                     initialValue: state.fatherName,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateFatherName(v.trim())),
                   ),
@@ -596,7 +597,6 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                       bool matchesHeadOwner = false;
                       if (v != null) {
-                        // 'Family Head' in spouse corresponds to 'Self' in head form
                         if (v == 'Family Head' && headOwner == 'Self') {
                           matchesHeadOwner = true;
                         } else if (headOwner != null && v == headOwner) {
@@ -607,7 +607,6 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       if (matchesHeadOwner && headNo != null && headNo.isNotEmpty) {
                         bloc.add(SpUpdateMobileNo(headNo));
                       } else {
-                        // Clear to allow manual entry when not matched or head has no number
                         bloc.add(const SpUpdateMobileNo(''));
                       }
                     },
@@ -623,6 +622,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     key: ValueKey('spouse_mobile_${state.mobileNo ?? ''}')
 ,
                     labelText: '${l.mobileLabel} *',
+                    hintText: '${l.mobileLabel} *',
                     keyboardType: TextInputType.number,
                     maxLength: 10,
                     initialValue: state.mobileNo,

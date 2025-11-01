@@ -279,43 +279,15 @@ class _DeliveryOutcomeScreenState
       children: [
         Text(
           title,
-          style:  TextStyle(color: Colors.white70, fontSize: 14.sp),
+          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style:  TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w500,fontSize: 14.sp
-          ),
+          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
         ),
       ],
     );
   }
-  Widget _infoColumn(String title, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style:  TextStyle(
-            fontSize: 13,
-            color: AppColors.background,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.background,
-          ),
-        ),
-        const SizedBox(height: 0),
 
-      ],
-    );
-  }
 }

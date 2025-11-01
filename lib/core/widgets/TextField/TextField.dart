@@ -196,8 +196,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
             : null,
 
         contentPadding: EdgeInsets.symmetric(
-          vertical: 1.2.h,
-          horizontal: 0.w,
+          vertical: 1.h,
+          horizontal: 1.w,
         ),
         counterText: "",
         errorStyle: TextStyle(

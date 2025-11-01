@@ -341,15 +341,12 @@ class _HouseHold_BeneficiaryScreenState
       children: [
         Text(
           title,
-          style:  TextStyle(color: Colors.white70, fontSize: 14.sp),
+          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style:  TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w500,fontSize: 14.sp
-          ),
+          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
         ),
       ],
     );
@@ -361,7 +358,7 @@ class _HouseHold_BeneficiaryScreenState
         Text(
           title,
           style:  TextStyle(
-            fontSize: 13,
+            fontSize: 13.sp,
             color: AppColors.background,
             fontWeight: FontWeight.w500,
           ),
@@ -369,8 +366,8 @@ class _HouseHold_BeneficiaryScreenState
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 14,
+          style:  TextStyle(
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.background,
           ),

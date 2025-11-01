@@ -31,8 +31,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isEdit = false;
   bool _argsHandled = false;
-  String _fatherOption = 'Other';
-  String _motherOption = 'Other';
+  String _fatherOption = 'Select';
+  String _motherOption = 'Select';
 
   int _ageFromDob(DateTime dob) => DateTime.now().year - dob.year;
 
@@ -49,8 +49,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
         ? widget.headName
         : ((widget.headGender == 'Male') ? widget.spouseName : widget.spouseName ?? widget.headName);
 
-    _fatherOption = (maleParentName != null && maleParentName.isNotEmpty) ? maleParentName : 'Other';
-    _motherOption = (femaleParentName != null && femaleParentName.isNotEmpty) ? femaleParentName : 'Other';
+    _fatherOption = 'Select';
+    _motherOption = 'Select';
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -230,17 +230,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText: "${l.motherNameLabel} *",
+                                  hintText: "${l.motherNameLabel} *",
                                   items: [
-                                    'Other',
+                                    'Select',
                                     if ((femaleParentName ?? '').isNotEmpty) femaleParentName!,
+                                    'Other',
                                   ],
                                   getLabel: (s) => s,
                                   value: _motherOption,
                                   onChanged: (v) {
+                                    if (v == null) return;
                                     setState(() {
-                                      _motherOption = v ?? 'Other';
+                                      _motherOption = v;
                                     });
-                                    if (v != null && v != 'Other') {
+                                    if (v != 'Select' && v != 'Other') {
                                       context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v));
                                     } else {
                                       context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(''));
@@ -252,6 +255,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     padding: const EdgeInsets.only(top: 8),
                                     child: CustomTextField(
                                       labelText: l.motherNameLabel,
+                                      hintText: l.motherNameLabel,
                                       onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v.trim())),
                                     ),
                                   ),
@@ -267,24 +271,26 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ApiDropdown<String>(
                                   labelText: '${l.fatherGuardianNameLabel} *',
                                   items: [
-                                    'Other',
+                                    'Select',
                                     if ((maleParentName ?? '').isNotEmpty) maleParentName!,
+                                    'Other',
                                   ],
                                   getLabel: (s) => s,
                                   value: _fatherOption,
                                   onChanged: (v) {
+                                    if (v == null) return;
                                     setState(() {
-                                      _fatherOption = v ?? 'Other';
+                                      _fatherOption = v;
                                     });
-                                    if (v != null && v != 'Other') {
+                                    if (v != 'Select' && v != 'Other') {
                                       context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v));
                                     } else {
                                       context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(''));
                                     }
                                   },
                                   validator: (_) {
-                                    // If 'Other', ensure user inputs a name below via textfield
-                                    if (_fatherOption == 'Other') return null; // textfield below has its own validator
+                                    if (_fatherOption == 'Select') return l.select;
+                                    if (_fatherOption == 'Other') return null;
                                     return null;
                                   },
                                 ),
@@ -293,6 +299,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     padding: const EdgeInsets.only(top: 8),
                                     child: CustomTextField(
                                       labelText: l.fatherGuardianNameLabel,
+                                      hintText: l.fatherGuardianNameLabel,
                                       onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v.trim())),
                                       validator: (v) => (v == null || v.trim().isEmpty) ? l.requiredField : null,
                                     ),

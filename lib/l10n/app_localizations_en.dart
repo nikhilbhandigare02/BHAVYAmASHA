@@ -1264,7 +1264,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gridAllBeneficiaries => 'All Beneficiaries';
 
   @override
+  String get searchBeneficiaries => 'Beneficiaries Search';
+
+  @override
   String get gridAllHousehold => 'All Household';
+
+  @override
+  String get searchHousehold => 'Household Search';
 
   @override
   String get gridAshaKiDuniya => 'Asha ki Duniya';
@@ -2232,10 +2238,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updatedEligibleCoupleListSubtitle => 'List of eligible couples';
 
   @override
-  String get updatedEligibleCoupleListTitle => 'Updated Eligible Couple List';
+  String get updatedEligibleCoupleListTitle => 'Eligible Couple List';
 
   @override
-  String get updatedEligibleCoupleSearchHint => 'Search Updated Eligible Couple';
+  String get updatedEligibleCoupleSearchHint => 'Updated Eligible Couple Search';
+
+  @override
+  String get eligibleCoupleSearchHint => 'Search Eligible Couple';
 
   @override
   String get userHfrIdLabel => 'HFR ID:';

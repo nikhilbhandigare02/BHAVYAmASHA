@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
@@ -167,32 +168,28 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
     );
   }
 
-  Widget _infoRow(String title, String value, {bool isWrappable = false}) {
+  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
-        crossAxisAlignment:
-        isWrappable ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           Text(
-            '$title: ',
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+            '$title ',
+            style:  TextStyle(
+              color: AppColors.background,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
             ),
           ),
           Expanded(
             child: Text(
               value.isEmpty ? 'N/A' : value,
-              style: const TextStyle(
+              style:  TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 13.5,
+                fontWeight: FontWeight.w400,
+                fontSize: 13.sp,
               ),
-              softWrap: isWrappable,
-              overflow:
-              isWrappable ? TextOverflow.visible : TextOverflow.ellipsis,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

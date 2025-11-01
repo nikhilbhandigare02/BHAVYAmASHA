@@ -16,6 +16,9 @@ class ApiDropdown<T> extends StatelessWidget {
   final List<T> selectedValues;
   final Function(List<T>)? onMultiChanged;
 
+  /// 🔹 New parameter to control label font size
+  final double? labelFontSize;
+
   const ApiDropdown({
     super.key,
     this.labelText,
@@ -30,8 +33,8 @@ class ApiDropdown<T> extends StatelessWidget {
     this.multiSelect = false,
     this.selectedValues = const [],
     this.onMultiChanged,
+    this.labelFontSize, // ✅ new param
   });
-
 
   Widget? get _labelWidget {
     if (labelText == null || labelText!.isEmpty) return null;
@@ -44,9 +47,8 @@ class ApiDropdown<T> extends StatelessWidget {
     return RichText(
       text: TextSpan(
         style: TextStyle(
-          fontSize: 15.sp,
+          fontSize: labelFontSize ?? 15.sp, // ✅ configurable
           color: AppColors.onSurfaceVariant,
-
         ),
         children: [
           TextSpan(text: base),
@@ -68,52 +70,60 @@ class ApiDropdown<T> extends StatelessWidget {
       fontSize: 15.sp,
       fontWeight: FontWeight.w500,
       color: AppColors.onSurface,
-      height: 1.5,
+      height: 1.4,
     );
 
     return GestureDetector(
       onTap: () => _showSelectDialog(context),
       child: AbsorbPointer(
-        child: DropdownButtonFormField<T>(
-          value: multiSelect ? null : (value != null && items.contains(value) ? value : null),
-          isExpanded: isExpanded,
-          style: inputStyle,
-          validator: validator,
-          decoration: InputDecoration(
-            label: _labelWidget,
-            hintText: hintText ?? (multiSelect ? 'Select options' : 'Select'),
-            hintStyle: inputStyle.copyWith(color: AppColors.outline),
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 3.w,
-              vertical: 1.h,
-            ),
-          ),
-          items: items.map((item) {
-            return DropdownMenuItem<T>(
-              value: item,
-              child: Text(
-                multiSelect ? _getMultiSelectDisplayText() : getLabel(item),
-                style: inputStyle,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // 🔹 Label and value side by side
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (labelText != null && labelText!.isNotEmpty)
+                      Text(
+                        labelText!.replaceAll(' *', ''),
+                        style: TextStyle(
+                          fontSize: labelFontSize ?? 14.sp,
+                          color: AppColors.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                          height: 1.2,
+                        ),
+                        maxLines: labelMaxLines ?? 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value != null
+                          ? getLabel(value!)
+                          : (hintText ?? 'Select option'),
+                      style: inputStyle.copyWith(
+                        color: value != null
+                            ? AppColors.onSurface
+                            : AppColors.onSurfaceVariant,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            );
-          }).toList(),
-          onChanged: onChanged,
+              // 🔹 Dropdown arrow
+              const Icon(Icons.arrow_drop_down, color: Colors.grey),
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  String _getMultiSelectDisplayText() {
-    if (selectedValues.isEmpty) {
-      return hintText ?? 'Select options';
-    } else if (selectedValues.length == 1) {
-      return getLabel(selectedValues.first);
-    } else {
-      return '${selectedValues.length} items selected';
-    }
   }
 
 
@@ -124,7 +134,6 @@ class ApiDropdown<T> extends StatelessWidget {
       await _showSingleSelectDialog(context);
     }
   }
-
 
   Future<void> _showSingleSelectDialog(BuildContext context) async {
     T? tempValue = items.contains(value) ? value : null;
@@ -146,7 +155,7 @@ class ApiDropdown<T> extends StatelessWidget {
                 Text(
                   (labelText ?? 'Select Option').replaceAll(' *', ''),
                   style: TextStyle(
-                    fontSize: 15.sp,
+                    fontSize: labelFontSize ?? 15.sp, // ✅ applied here too
                     fontWeight: FontWeight.w500,
                     color: AppColors.onSurfaceVariant,
                   ),
@@ -164,18 +173,14 @@ class ApiDropdown<T> extends StatelessWidget {
                   return RadioListTile<T>(
                     title: Text(
                       getLabel(item),
-                      style: TextStyle(fontSize: 15.sp),
+                      style: TextStyle(fontSize: labelFontSize ?? 15.sp),
                     ),
                     value: item,
                     groupValue: tempValue,
                     onChanged: (val) => setState(() => tempValue = val),
-                    contentPadding:
-                    EdgeInsets.symmetric(vertical: 0.2.h),
+                    contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
                     dense: true,
-                    visualDensity: const VisualDensity(
-                      vertical: -4,
-                      horizontal: 0,
-                    ),
+                    visualDensity: const VisualDensity(vertical: -4),
                   );
                 }).toList(),
               ),
@@ -191,7 +196,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   child: Text(
                     'CANCEL',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).primaryColor,
                     ),
@@ -207,7 +212,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   child: Text(
                     'OK',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).primaryColor,
                     ),
@@ -237,7 +242,7 @@ class ApiDropdown<T> extends StatelessWidget {
               Text(
                 (labelText ?? 'Select Options').replaceAll(' *', ''),
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: labelFontSize ?? 16.sp, // ✅ applied here too
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),
@@ -255,35 +260,28 @@ class ApiDropdown<T> extends StatelessWidget {
                   return CheckboxListTile(
                     title: Text(
                       getLabel(item),
-                      style: TextStyle(fontSize: 15.sp),
+                      style: TextStyle(fontSize: labelFontSize ?? 15.sp),
                     ),
                     value: isSelected,
                     onChanged: (bool? checked) {
                       setState(() {
                         if (checked == true) {
-                          if (!tempValues.contains(item)) {
-                            tempValues.add(item);
-                          }
+                          if (!tempValues.contains(item)) tempValues.add(item);
                         } else {
                           tempValues.remove(item);
                         }
                       });
                     },
                     controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding:
-                    EdgeInsets.symmetric(vertical: 0.2.h),
+                    contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
                     dense: true,
-                    visualDensity: const VisualDensity(
-                      vertical: -4,
-                      horizontal: 0,
-                    ),
+                    visualDensity: const VisualDensity(vertical: -4),
                   );
                 }).toList(),
               ),
             ),
           ),
           actions: [
-           // const Divider(height: 0),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -292,7 +290,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   child: Text(
                     'CANCEL',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.grey[700],
                     ),
@@ -306,7 +304,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   child: Text(
                     'OK',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w500,
                       color: Theme.of(context).primaryColor,
                     ),
