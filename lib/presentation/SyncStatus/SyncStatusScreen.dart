@@ -56,7 +56,7 @@ class SyncStatusScreen extends StatelessWidget {
                         mainAxisSpacing: 1.5.h,
                         crossAxisSpacing: 3.w,
                         childAspectRatio: 1.5,
-                        children: const [
+                        children: [
                           SyncCard(title: 'Household', total: 22, synced: 22),
                           SyncCard(title: 'Beneficiary', total: 52, synced: 52),
                           SyncCard(title: 'Follow Up', total: 18, synced: 3),
@@ -121,27 +121,57 @@ class SyncCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15.sp,
                 color: Colors.blue[800],
-                fontWeight: FontWeight.bold,
+                //fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: 0.8.h),
-            Text(
-              'Total: $total',
-              style: TextStyle(
-                fontSize: 15.sp,
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Total: ',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      color: Colors.blue[800],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '$total',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      color: Colors.black,
+                     // fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
+
             SizedBox(height: 0.5.h),
-            Text(
-              'Synced: $synced',
-              style: TextStyle(
-                fontSize: 15.sp,
-                color: Colors.blue[800],
-                fontWeight: FontWeight.w600,
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Synced: ',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      color: Colors.blue[800],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '$synced',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      color: Colors.black,
+                      //fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-            ),
+            )
+
           ],
         ),
       ),

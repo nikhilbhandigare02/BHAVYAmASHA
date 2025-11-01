@@ -75,23 +75,14 @@ class ApiDropdown<T> extends StatelessWidget {
       onTap: () => _showSelectDialog(context),
       child: AbsorbPointer(
         child: DropdownButtonFormField<T>(
-
-          value: multiSelect ? null : value,
+          value: multiSelect ? null : (value != null && items.contains(value) ? value : null),
           isExpanded: isExpanded,
           style: inputStyle,
           validator: validator,
           decoration: InputDecoration(
-
             label: _labelWidget,
-
-
-            hintText:
-            hintText ?? (multiSelect ? 'Select options' : 'Select '),
-            hintStyle:
-            inputStyle.copyWith(color: AppColors.outline),
-
-
-
+            hintText: hintText ?? (multiSelect ? 'Select options' : 'Select'),
+            hintStyle: inputStyle.copyWith(color: AppColors.outline),
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -136,17 +127,15 @@ class ApiDropdown<T> extends StatelessWidget {
 
 
   Future<void> _showSingleSelectDialog(BuildContext context) async {
-    T? tempValue = value;
+    T? tempValue = items.contains(value) ? value : null;
 
     await showDialog<T>(
-
       context: context,
       barrierDismissible: false,
       builder: (_) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-
             borderRadius: BorderRadius.circular(0.5.h),
           ),
           title: Align(
@@ -167,9 +156,7 @@ class ApiDropdown<T> extends StatelessWidget {
             ),
           ),
           content: ConstrainedBox(
-
             constraints: BoxConstraints(maxHeight: 40.h),
-
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

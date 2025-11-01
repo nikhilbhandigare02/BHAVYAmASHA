@@ -131,8 +131,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Divider(color: AppColors.divider, thickness: 0.5),
 
                   const SizedBox(height: 12),
-                  Text(l10n.bankDetailsTitle, style: Theme.of(context).textTheme.titleMedium),
-                  CustomTextField(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      l10n.bankDetailsTitle,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                  ),
+                   const SizedBox(height: 12),
+                                      Divider(color: AppColors.divider, thickness: 0.5),
+                                    CustomTextField(
                     labelText: l10n.accountNumberLabel,
                     hintText: l10n.accountNumberHint,
                     keyboardType: TextInputType.number,
