@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
@@ -10,26 +11,47 @@ class IncentiveForm extends StatefulWidget {
 }
 
 class _IncentiveFormState extends State<IncentiveForm> {
-  final TextEditingController _workCodeController = TextEditingController();
-  final TextEditingController _beneficiaryCountController = TextEditingController();
-  final TextEditingController _workAmountController = TextEditingController();
-  final TextEditingController _claimAmountController = TextEditingController();
-  final TextEditingController _remarkController = TextEditingController();
+  String? selectedCategoryType;
+  String? selectedCategory;
+  String? selectedRegisterName;
+  String? selectedVolume;
 
-  String? _selectedCategoryType;
-  String? _selectedWorkCategory;
-  String? _selectedWork;
-  String? _selectedCompletionDate;
-  String? _selectedVillageName;
-  String? _selectedVolume;
-  String? _selectedRegistryDate;
+  final TextEditingController workCodeController = TextEditingController();
+  final TextEditingController workController = TextEditingController();
+  final TextEditingController beneficiaryCountController =
+  TextEditingController();
+  final TextEditingController workAmountController = TextEditingController();
+  final TextEditingController claimedAmountController = TextEditingController();
+  final TextEditingController completionDateController =
+  TextEditingController();
+  final TextEditingController registerDateController = TextEditingController();
+  final TextEditingController remarkController = TextEditingController();
+
+  final List<String> categoryTypes = ['Type 1', 'Type 2', 'Type 3'];
+  final List<String> categories = ['Category A', 'Category B', 'Category C'];
+  final List<String> registerNames = ['Register 1', 'Register 2', 'Register 3'];
+  final List<String> volumes = ['1', '2', '3', '4'];
+
+  Future<void> _selectDate(
+      BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+      locale: const Locale('hi', 'IN'),
+    );
+    if (picked != null) {
+      controller.text = DateFormat('dd-MM-yyyy').format(picked);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Colors.white,
       appBar: AppHeader(
         screenTitle: 'Incentive Form',
         showBack: true,
@@ -37,356 +59,233 @@ class _IncentiveFormState extends State<IncentiveForm> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Financial Year and Month Row
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'वित्तीय वर्ष: 2024-2025',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
+                  child: _infoBox('वित्तीय वर्ष:', '2024-2025'),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'वित्तीय महीना: June',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
+                  child: _infoBox('वित्तीय महीना:', 'June'),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // कार्य कोड
-            _buildLabel('कार्य कोड'),
-            const SizedBox(height: 8),
-            _buildTextField(
-              controller: _workCodeController,
-              hint: 'कार्य कोड डालें',
-            ),
-            const SizedBox(height: 20),
+            _labelField('कार्य कोड :', _textField('कार्य कोड डाले', workCodeController)),
+            const SizedBox(height: 16),
 
-            // श्रेणी का प्रकार and कार्य की श्रेणी Row
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey[100],
+              ),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      _buildLabel('श्रेणी का प्रकार : [*]'),
-                      const SizedBox(height: 8),
-                      _buildDropdown(
-                        value: _selectedCategoryType,
-                        hint: '-Select-',
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCategoryType = value;
-                          });
-                        },
+                      Expanded(
+                        child: _dropdownField(
+                            'श्रेणी का प्रकार : [*]', categoryTypes, selectedCategoryType,
+                                (val) {
+                              setState(() {
+                                selectedCategoryType = val;
+                              });
+                            }),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _dropdownField(
+                            'कार्य की श्रेणी : [*]', categories, selectedCategory,
+                                (val) {
+                              setState(() {
+                                selectedCategory = val;
+                              });
+                            }),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 12),
+                  _labelField('कार्य : [*]',
+                      _textField('कार्य चुनें', workController)),
+                  const SizedBox(height: 12),
+                  _labelField('लाभार्थी की संख्या : [*]',
+                      _textField('लाभार्थियों की संख्या', beneficiaryCountController)),
+                  const SizedBox(height: 12),
+                  Row(
                     children: [
-                      _buildLabel('कार्य की श्रेणी : [*]'),
-                      const SizedBox(height: 8),
-                      _buildDropdown(
-                        value: _selectedWorkCategory,
-                        hint: '-None-',
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedWorkCategory = value;
-                          });
-                        },
+                      Expanded(
+                        child: _labelField('कार्य की राशि : [*]',
+                            _textField('कार्य की राशि', workAmountController)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _labelField('दावा की गई राशि : [*]',
+                            _textField('दावा की गई राशि', claimedAmountController)),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  _labelField(
+                    'कार्य पूर्ण की तिथि : [*]',
+                    GestureDetector(
+                      onTap: () =>
+                          _selectDate(context, completionDateController),
+                      child: AbsorbPointer(
+                        child: _textField(
+                            'तिथि चुनें', completionDateController),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // कार्य
-            _buildLabel('कार्य : [*]'),
-            const SizedBox(height: 8),
-            _buildDropdown(
-              value: _selectedWork,
-              hint: '',
-              onChanged: (value) {
-                setState(() {
-                  _selectedWork = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // लाभार्थी की संख्या
-            _buildLabel('लाभार्थी की संख्या : [*]'),
-            const SizedBox(height: 8),
-            _buildTextField(
-              controller: _beneficiaryCountController,
-              hint: 'लाभार्थियों की संख्या',
-            ),
-            const SizedBox(height: 20),
-
-            // कार्य की राशी and दावा की गई राशी Row
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey[100],
+              ),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      _buildLabel('कार्य की राशी : [*]'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _workAmountController,
-                        hint: 'कार्य की राशी',
+                      Expanded(
+                        child: _dropdownField('पंजी का नाम : [*]', registerNames,
+                            selectedRegisterName, (val) {
+                              setState(() {
+                                selectedRegisterName = val;
+                              });
+                            }),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _dropdownField('खंड/Volume : [*]', volumes,
+                            selectedVolume, (val) {
+                              setState(() {
+                                selectedVolume = val;
+                              });
+                            }),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel('दावा की गई राशी : [*]'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _claimAmountController,
-                        hint: 'दावा की गई राशी',
+                  const SizedBox(height: 12),
+                  _labelField(
+                    'पंजी की दिनांक : [*]',
+                    GestureDetector(
+                      onTap: () => _selectDate(context, registerDateController),
+                      child: AbsorbPointer(
+                        child: _textField(
+                            'दिनांक चुनें', registerDateController),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  _labelField('अभियुक्ति/Remark : [*]',
+                      _textField('अभियुक्ति/Remark', remarkController)),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // कार्य पूर्ण की तिथि
-            _buildLabel('कार्य पूर्ण की तिथि : [*]'),
-            const SizedBox(height: 8),
-            _buildDropdown(
-              value: _selectedCompletionDate,
-              hint: '',
-              onChanged: (value) {
-                setState(() {
-                  _selectedCompletionDate = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // पंजी का नाम and खंड/Volume Row
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel('पंजी का नाम : [*]'),
-                      const SizedBox(height: 8),
-                      _buildDropdown(
-                        value: _selectedVillageName,
-                        hint: '',
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedVillageName = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel('खंड/Volume : [*]'),
-                      const SizedBox(height: 8),
-                      _buildDropdown(
-                        value: _selectedVolume,
-                        hint: '',
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedVolume = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // पंजी की दिनांक
-            _buildLabel('पंजी की दिनांक : [*]'),
-            const SizedBox(height: 8),
-            _buildDropdown(
-              value: _selectedRegistryDate,
-              hint: '',
-              onChanged: (value) {
-                setState(() {
-                  _selectedRegistryDate = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // अभिधुक्ति/Remark
-            _buildLabel('अभिधुक्ति/Remark : [*]'),
-            const SizedBox(height: 8),
-            _buildTextField(
-              controller: _remarkController,
-              hint: 'अभिधुक्ति/Remark',
-              maxLines: 4,
-            ),
-            const SizedBox(height: 30),
-
-            // Submit Button
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 48,
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle form submission
-                },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2196F3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 0,
+                  backgroundColor: const Color(0xFF1976D2),
                 ),
+                onPressed: () {},
                 child: const Text(
                   'संरक्षित करे',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        color: Colors.black87,
-        fontWeight: FontWeight.w400,
+  Widget _infoBox(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(width: 6),
+          Text(value),
+        ],
       ),
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    int maxLines = 1,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(
-            color: Color(0xFFBDBDBD),
-            fontSize: 14,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-        ),
+  Widget _labelField(String label, Widget field) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style:
+            const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        const SizedBox(height: 4),
+        field,
+      ],
+    );
+  }
+
+  Widget _textField(String hintText, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hintText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+        contentPadding:
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        filled: true,
+        fillColor: Colors.white,
       ),
     );
   }
 
-  Widget _buildDropdown({
-    String? value,
-    required String hint,
-    required Function(String?) onChanged,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          hint: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              hint,
-              style: const TextStyle(
-                color: Color(0xFFBDBDBD),
-                fontSize: 14,
-              ),
-            ),
-          ),
-          icon: const Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: Icon(Icons.keyboard_arrow_down, color: Colors.black54),
-          ),
-          items: const [], // Add your dropdown items here
+  Widget _dropdownField(String label, List<String> items, String? selectedValue,
+      Function(String?) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style:
+            const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        const SizedBox(height: 4),
+        DropdownButtonFormField<String>(
+          value: selectedValue,
+          items: items
+              .map((e) => DropdownMenuItem<String>(
+            value: e,
+            child: Text(e),
+          ))
+              .toList(),
           onChanged: onChanged,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+            contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            filled: true,
+            fillColor: Colors.white,
+          ),
         ),
-      ),
+      ],
     );
-  }
-
-  @override
-  void dispose() {
-    _workCodeController.dispose();
-    _beneficiaryCountController.dispose();
-    _workAmountController.dispose();
-    _claimAmountController.dispose();
-    _remarkController.dispose();
-    super.dispose();
   }
 }
