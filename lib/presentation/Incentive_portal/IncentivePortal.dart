@@ -29,20 +29,28 @@ class _IncentivePortalState extends State<IncentivePortal>
 
   late String _selectedYear;
   late String _selectedMonth;
+  bool _isFirstBuild = true;
 
-  final List<String> _months = const [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+  List<String> _getMonthNames(AppLocalizations? l10n) => [
+    l10n?.monthJanuary ?? 'January',
+    l10n?.monthFebruary ?? 'February',
+    l10n?.monthMarch ?? 'March',
+    l10n?.monthApril ?? 'April',
+    l10n?.monthMay ?? 'May',
+    l10n?.monthJune ?? 'June',
+    l10n?.monthJuly ?? 'July',
+    l10n?.monthAugust ?? 'August',
+    l10n?.monthSeptember ?? 'September',
+    l10n?.monthOctober ?? 'October',
+    l10n?.monthNovember ?? 'November',
+    l10n?.monthDecember ?? 'December',
   ];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-
-    final now = DateTime.now();
     _selectedYear = _years[2]; // default sample like screenshot
-    _selectedMonth = _months[now.month - 1];
 
     _tabController.addListener(() async {
       if (_navigatingFinalize) return;
@@ -72,20 +80,16 @@ class _IncentivePortalState extends State<IncentivePortal>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final monthNames = [
-      l10n?.monthJanuary ?? 'January',
-      l10n?.monthFebruary ?? 'February',
-      l10n?.monthMarch ?? 'March',
-      l10n?.monthApril ?? 'April',
-      l10n?.monthMay ?? 'May',
-      l10n?.monthJune ?? 'June',
-      l10n?.monthJuly ?? 'July',
-      l10n?.monthAugust ?? 'August',
-      l10n?.monthSeptember ?? 'September',
-      l10n?.monthOctober ?? 'October',
-      l10n?.monthNovember ?? 'November',
-      l10n?.monthDecember ?? 'December',
-    ];
+    final monthNames = _getMonthNames(l10n);
+    
+    // Initialize _selectedMonth on first build
+    if (_isFirstBuild) {
+      _isFirstBuild = false;
+      _selectedMonth = monthNames[DateTime.now().month - 1];
+    } else if (_selectedMonth == null) {
+      // Fallback in case _selectedMonth is somehow null
+      _selectedMonth = monthNames[DateTime.now().month - 1];
+    }
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -169,12 +173,12 @@ class _IncentivePortalState extends State<IncentivePortal>
                   child: _LabeledDropdown<String>(
                     label: l10n?.incentiveFinancialMonth ?? 'Financial month',
                     value: _selectedMonth,
-                    items: List.generate(_months.length, (i) {
+                    items: monthNames.map((month) {
                       return DropdownMenuItem<String>(
-                        value: _months[i],
-                        child: Text(monthNames[i]),
+                        value: month,
+                        child: Text(month),
                       );
-                    }),
+                    }).toList(),
                     onChanged: (v) => setState(() => _selectedMonth = v ?? _selectedMonth),
                   ),
                 ),

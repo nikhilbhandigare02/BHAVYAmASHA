@@ -20,10 +20,10 @@ class GuestBeneficiarySearch extends StatefulWidget {
 
 class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
 
-  final List<String> districts = const ['Select', 'Patna', 'Maner', 'Baank'];
-  final List<String> categories = const ['Select', 'General', 'OBC', 'SC', 'ST'];
-  final List<String> genders = const ['Select', 'Male', 'Female', 'Other'];
-  final List<String> blocks = const ['Select', 'Block A', 'Block B', 'Block C'];
+  final List<String> districts = const [ 'Patna', 'Maner', 'Baank'];
+  final List<String> categories = const [ 'General', 'OBC', 'SC', 'ST'];
+  final List<String> genders = const ['Male', 'Female', 'Other'];
+  final List<String> blocks = const [ 'Block A', 'Block B', 'Block C'];
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +110,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Icon(
-                                        Icons.filter_list,
+                                        Icons.filter_alt_outlined,
                                         color: AppColors.onPrimary,
                                         size: 20,
                                       ),
@@ -123,7 +123,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
 
                           if (state.showAdvanced) ...[
                             ApiDropdown<String>(
-                              labelText: l10n.categoryLabel,
+                              labelText: l10n.categoryLabel,  
                               items: categories,
                               value: state.category,
                               getLabel: (s) => s,
@@ -155,8 +155,12 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
 
                             CustomTextField(
                               labelText: l10n.mobileLabelSimple,
-                              hintText: '',
+                              hintText: 'Enter 10 digit number',
                               keyboardType: TextInputType.phone,
+                              maxLength: 10,
+                              inputFormatters: [
+                               // FilteringTextInputFormatter.digitsOnly,
+                              ],
                               onChanged: (v) => context.read<GuestBeneficiarySearchBloc>().add(GbsUpdateMobile(v)),
                             ),
                             Divider(color: AppColors.divider, thickness: 0.6),
