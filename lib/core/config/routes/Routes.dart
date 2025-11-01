@@ -8,6 +8,7 @@ import 'package:medixcel_new/presentation/AllHouseHold/AllHouseHold/AllHouseHold
 import 'package:medixcel_new/presentation/AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
 import 'package:medixcel_new/presentation/Annoucement/Annoucement_scree.dart';
 import 'package:medixcel_new/presentation/Incentive_portal/IncentivePortal.dart';
+import 'package:medixcel_new/presentation/Incentive_portal/IncentiveForm.dart';
 import 'package:medixcel_new/presentation/MISReport/MISReport.dart';
 import 'package:medixcel_new/presentation/MotherCare/ANCVisit/ANCVisitForm/ANCVisitForm.dart';
 import 'package:medixcel_new/presentation/MotherCare/ANCVisit/ANVVisitList/ANCVisitListScreen.dart';
@@ -53,6 +54,8 @@ import '../../../presentation/MotherCare/OutcomeForm/OutcomeForm.dart';
 import '../../../presentation/MotherCare/PreviousVisit/PreviousVisit.dart' show PreviousVisitScreen;
 import '../../../presentation/NCD/NCDHome.dart';
 import '../../../presentation/NCD/NCDList.dart';
+import '../../../presentation/NCD/NCDNonEligibleList.dart';
+import '../../../presentation/NCD/NCDPriorityList.dart';
 import '../../../presentation/NCD/NCDeligibleList.dart';
 import '../../../presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
 import '../../../presentation/RegisterNewHouseHold/AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart';
@@ -93,7 +96,9 @@ class Routes{
       case Route_Names.aboutUs:
         return MaterialPageRoute(builder: (context) => Aboutus(),);
       case Route_Names.incentivePortal:
-        return MaterialPageRoute(builder: (context) => IncentivePortal(),);
+        return MaterialPageRoute(builder: (_) => const IncentivePortal());
+      case Route_Names.incentiveForm:
+        return MaterialPageRoute(builder: (_) => const IncentiveForm());
       case Route_Names.GuestBeneficiarySearch:
         return MaterialPageRoute(builder: (context) => GuestBeneficiarySearch(),);
       case Route_Names.RegisterNewHousehold:
@@ -186,6 +191,10 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const DeathRegister(),);
       case Route_Names.HBNCListBeneficiaries:
         return MaterialPageRoute(builder: (context) => const HBNCListBeneficiaries(),);
+      case Route_Names.Ncdnoneligiblelist:
+        return MaterialPageRoute(builder: (context) => const Ncdnoneligiblelist(),);
+      case Route_Names.Ncdprioritylist:
+        return MaterialPageRoute(builder: (context) => const Ncdprioritylist(),);
 
       case Route_Names.HighRisk:
         return MaterialPageRoute(builder: (context) => const HighRisk(),);

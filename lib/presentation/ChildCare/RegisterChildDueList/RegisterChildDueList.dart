@@ -98,7 +98,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  l10n?.searchHint ?? 'Search All Beneficiary',
+                hintText:  l10n?.searchHintRegisterChildDueList ?? ' ',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,

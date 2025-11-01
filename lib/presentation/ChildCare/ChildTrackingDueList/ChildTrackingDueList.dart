@@ -98,7 +98,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  l10n?.searchHint ?? 'Search All Beneficiary',
+                hintText:  l10n?.searchHintchildTrackingDueListTitle ?? 'Search All Beneficiary',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,

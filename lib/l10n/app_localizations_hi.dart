@@ -884,6 +884,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get childTrackingDueListTitle => 'बाल ट्रैकिंग\nदेय सूची';
 
   @override
+  String get searchHintchildTrackingDueListTitle => 'बाल ट्रैकिंग देय खोजें';
+
+  @override
   String get children0to1 => '0-1 वर्ष के बच्चे';
 
   @override
@@ -2020,6 +2023,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get searchHint => 'Search by ID/Name/Contact';
+
+  @override
+  String get searchHintRegisterChildDueList => 'देय पंजीकरण खोजें';
+
+  @override
+  String get searchHintHbycBen => 'एचबीवाईसी लाभार्थी खोजें';
 
   @override
   String get searchPlaceholder => 'Search...';

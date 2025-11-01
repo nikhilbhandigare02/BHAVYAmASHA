@@ -70,7 +70,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                                 hintText: l10n.currentPasswordHint,
                                 keyboardType: TextInputType.text,
                                 validator: (value) => Validations.validateCurrentPassword(l10n, value),
-                                obscureText: true,
+                                obscureText: false,
                                 onChanged: (value) {
                                   context
                                       .read<ResetPasswordBloc>()
@@ -92,7 +92,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                                 hintText: l10n.newPasswordHint,
                                 keyboardType: TextInputType.text,
                                 validator: (value) => Validations.validateNewPassword(l10n, value),
-                                obscureText: true,
+                                obscureText: false,
                                 onChanged: (value) {
                                   context
                                       .read<ResetPasswordBloc>()
@@ -115,7 +115,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                                 validator: (value) =>
                                     Validations.validateReEnterPassword(
                                         l10n, value, state.newPasswordPassword),
-                                obscureText: true,
+                                obscureText: false,
                                 onChanged: (value) {
                                   context
                                       .read<ResetPasswordBloc>()

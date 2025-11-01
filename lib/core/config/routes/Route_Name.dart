@@ -49,6 +49,7 @@ class Route_Names{
   static const String cbacScreen = 'cbacScreen';
   static const String CHildTrackingDueList = 'CHildTrackingDueList';
   static const String HBYCList = 'HBYCList';
+  static const String incentiveForm = 'incentiveForm';
   static const String HBYCChildCareForm = 'HBYCChildCareForm';
   static const String RegisterChildDueListFormScreen = 'RegisterChildDueListFormScreen';
   static const String previousVisit = 'previousVisit';
@@ -61,6 +62,8 @@ class Route_Names{
   static const String HBNCListBeneficiaries = 'HBNCListBeneficiaries';
   static const String MigrationSplitOption = 'MigrationSplitOption';
   static const String HighRisk = 'HighRisk';
+  static const String Ncdprioritylist = 'Ncdprioritylist';
+  static const String Ncdnoneligiblelist = 'Ncdnoneligiblelist';
   static const String AshaKiDuniyaScreen = 'AshaKiDuniyaScreen';
   static const String DeseasedList = 'DeseasedList';
   static const String ChildTrackingDueListForm = 'ChildTrackingDueListForm';
