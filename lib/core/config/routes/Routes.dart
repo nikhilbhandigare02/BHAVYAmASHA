@@ -43,6 +43,7 @@ import '../../../presentation/GuestBeneficiarySearch/GuestBeneficiarySearch.dart
 import '../../../presentation/Help/HelpScreen.dart';
 import '../../../presentation/High-Risk/High_Risk.dart';
 import '../../../presentation/HomeScreen/HomeScreen.dart';
+import '../../../presentation/Incentive_portal/NationalPrograms/NationalProgramsScreen.dart';
 import '../../../presentation/MotherCare/ANCVisit/PreviousVisits/PreviousVisit.dart' show Previousvisit;
 import '../../../presentation/MotherCare/DeliveryOutcome/Deliver_outcome_screen.dart';
 import '../../../presentation/MotherCare/HBNCScreen/HBNCList.dart' show HBNCListScreen;
@@ -196,6 +197,8 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const DeseasedList(),);
       case Route_Names.ChildTrackingDueListForm:
         return MaterialPageRoute(builder: (context) => const ChildTrackingDueListForm(),);
+      case Route_Names.NationalProgramsScreen :
+        return MaterialPageRoute(builder: (context) =>  NationalProgramsScreen (),);
       case Route_Names.addFamilyHead:
         return MaterialPageRoute(
           settings: setting,

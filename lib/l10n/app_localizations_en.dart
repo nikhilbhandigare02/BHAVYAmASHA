@@ -1498,10 +1498,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get incentiveHeaderAnganwadi => 'Anganwadi';
 
   @override
-  String get incentiveHeaderBlock => 'Block';
+  String get incentiveHeaderBlock => '';
 
   @override
-  String get incentiveHeaderDistrict => 'District';
+  String get incentiveHeaderDistrict => 'जिला';
 
   @override
   String get incentiveHeaderHsc => 'HSC';
@@ -1510,7 +1510,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get incentiveHeaderPanchayat => 'Panchayat';
 
   @override
-  String get incentiveNote => 'Submit the payment file for each month\'s claim amount between the 28th and 30th of the next month.';
+  String get incentiveNote => '';
 
   @override
   String get incentiveTabDaily => 'Daily tasks';

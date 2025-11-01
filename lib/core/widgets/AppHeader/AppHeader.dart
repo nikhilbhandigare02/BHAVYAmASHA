@@ -7,15 +7,21 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackTap;
   final VoidCallback? onMenuTap;
 
+  // Icon 1
   final IconData? icon1;
+  final String? icon1Image; // ✅ Added image support
   final VoidCallback? onIcon1Tap;
   final Widget? icon1Widget;
 
+  // Icon 2
   final IconData? icon2;
+  final String? icon2Image; // ✅ Added image support
   final VoidCallback? onIcon2Tap;
   final Widget? icon2Widget;
 
+  // Icon 3
   final IconData? icon3;
+  final String? icon3Image; // ✅ Added image support
   final VoidCallback? onIcon3Tap;
   final Widget? icon3Widget;
 
@@ -26,19 +32,54 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onBackTap,
     this.onMenuTap,
     this.icon1,
+    this.icon1Image,
     this.onIcon1Tap,
     this.icon1Widget,
     this.icon2,
+    this.icon2Image,
     this.onIcon2Tap,
     this.icon2Widget,
     this.icon3,
+    this.icon3Image,
     this.onIcon3Tap,
     this.icon3Widget,
   });
 
   @override
-  @override
   Size get preferredSize => Size.fromHeight(10.h);
+
+  Widget _buildIcon({
+    IconData? icon,
+    String? imagePath,
+    Widget? widget,
+    VoidCallback? onTap,
+    required BuildContext context,
+  }) {
+    if (widget != null) {
+      return GestureDetector(onTap: onTap, child: widget);
+    } else if (imagePath != null && imagePath.isNotEmpty) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 12.0),
+          child: Image.asset(
+            imagePath,
+            height: 2.8.h,
+            width: 2.8.h,
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
+        ),
+      );
+    } else if (icon != null) {
+      return IconButton(
+        icon: Icon(icon, color: Theme.of(context).colorScheme.onPrimary, size: 17.sp),
+        onPressed: onTap,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+      );
+    }
+    return const SizedBox.shrink();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,13 +92,15 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           children: [
             showBack
                 ? IconButton(
-              icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+              icon: Icon(Icons.arrow_back,
+                  color: Theme.of(context).colorScheme.onPrimary),
               onPressed: onBackTap ?? () => Navigator.of(context).pop(),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             )
                 : IconButton(
-              icon: Icon(Icons.menu, color: Theme.of(context).colorScheme.onPrimary),
+              icon: Icon(Icons.menu,
+                  color: Theme.of(context).colorScheme.onPrimary),
               onPressed: onMenuTap ?? () => Scaffold.of(context).openDrawer(),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
@@ -75,45 +118,26 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // Icon1
-            if (icon1Widget != null)
-              GestureDetector(
+
+            // ✅ Icon 1, 2, 3 (now with image & widget support)
+            _buildIcon(
+                icon: icon1,
+                imagePath: icon1Image,
+                widget: icon1Widget,
                 onTap: onIcon1Tap,
-                child: icon1Widget,
-              )
-            else if (icon1 != null)
-              IconButton(
-                icon: Icon(icon1, color: Theme.of(context).colorScheme.onPrimary, size: 17.sp,),
-                onPressed: onIcon1Tap,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            // Icon2
-            if (icon2Widget != null)
-              GestureDetector(
+                context: context),
+            _buildIcon(
+                icon: icon2,
+                imagePath: icon2Image,
+                widget: icon2Widget,
                 onTap: onIcon2Tap,
-                child: icon2Widget,
-              )
-            else if (icon2 != null)
-              IconButton(
-                icon: Icon(icon2, color: Theme.of(context).colorScheme.onPrimary,size: 17.sp,),
-                onPressed: onIcon2Tap,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            // Icon3
-            if (icon3Widget != null)
-              GestureDetector(
+                context: context),
+            _buildIcon(
+                icon: icon3,
+                imagePath: icon3Image,
+                widget: icon3Widget,
                 onTap: onIcon3Tap,
-                child: icon3Widget,
-              )
-            else if (icon3 != null)
-              IconButton(
-                icon: Icon(icon3, color: Theme.of(context).colorScheme.onPrimary,size: 17.sp,),
-                onPressed: onIcon3Tap,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
+                context: context),
           ],
         ),
       ),

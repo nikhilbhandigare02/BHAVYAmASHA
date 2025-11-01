@@ -4,6 +4,7 @@ class Route_Names{
   static const String homeScreen = 'homeScreen';
   static const String Ncdlist = 'Ncdlist';
   static const String profileScreen = 'profileScreen';
+  static const String NationalProgramsScreen  = 'NationalProgramsScreen ';
   static const String MISScreen = 'MISScreen';
   static const String Resetpassword = 'Resetpassword';
   static const String setting = 'setting';

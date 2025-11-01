@@ -51,7 +51,7 @@ class AppColors {
   static const Color warning = Color(0xFFF57C00);
   static const Color info = Color(0xFF0288D1);
   static const Color green = Color(0xFF28A745);
-  static const Color blue = Color(0xFF2196F3);
+  static const Color blue = Color(0xFF4CBEE5);
 
   static const Color onGreen = Colors.white;
   static const Color greenContainer = Color(0xFFDFF5E1);
@@ -108,7 +108,7 @@ class AppColorsDark {
    static const Color scrim = Colors.black;
    static const Color inverseSurface = Color(0xFFE6E1E5);
    static const Color onInverseSurface = Color(0xFF313033);
-   static const Color inversePrimary = Color(0xFF6750A4);
+   static const Color inversePrimary = Color(0xFFA190D8);
 
    static const Color success = Color(0xFF66BB6A);
    static const Color warning = Color(0xFFFFB74D);

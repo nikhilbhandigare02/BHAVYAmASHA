@@ -18,7 +18,7 @@ class FinalizeIncentivePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppHeader(
-        screenTitle: (l10n?.finalizeTitle ?? 'Final Incentive Portal'),
+        screenTitle: ( 'Final Incentive Portal'),
         showBack: true,
       ),
       body: SafeArea(
@@ -39,20 +39,20 @@ class FinalizeIncentivePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _RowTwo(
-                        leftTitle: l10n?.incentiveFinancialYear ?? 'वित्तीय वर्ष',
+                        leftTitle:  'वित्तीय वर्ष',
                         leftValue: '2024-2025',
-                        rightTitle: l10n?.incentiveFinancialMonth ?? 'वित्तीय महीना',
+                        rightTitle:  'वित्तीय महीना',
                         rightValue: 'June',
                       ),
                       const SizedBox(height: 4),
                       Divider(height: 1, color: AppColors.divider),
                       const SizedBox(height: 4),
                       _RowThree(
-                        t1: l10n?.incentiveHeaderDistrict ?? 'जिला', v1: 'Patna',
-                        t2: l10n?.incentiveHeaderBlock ?? 'प्रखंड', v2: 'Maner',
-                        t3: l10n?.incentiveHeaderHsc ?? 'स्वास्थ्य उप केंद्र', v3: 'HSC Baank',
-                        t4: l10n?.incentiveHeaderPanchayat ?? 'पंचायत', v4: 'Baank',
-                        t5: l10n?.incentiveHeaderAnganwadi ?? 'आंगनवाड़ी', v5: 'Baank',
+                        t1: 'जिला', v1: 'Patna',
+                        t2:  'प्रखंड', v2: 'Maner',
+                        t3: 'स्वास्थ्य उप केंद्र', v3: 'HSC Baank',
+                        t4:  'पंचायत', v4: 'Baank',
+                        t5:  'आंगनवाड़ी', v5: 'Baank',
                       ),
                     ],
                   ),
@@ -69,8 +69,8 @@ class FinalizeIncentivePage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _AmountColumn(title: (l10n?.finalizeClaimedAmount ?? 'Claimed Amount'), amount: '₹ 0'),
-                    _AmountColumn(title: (l10n?.finalizeStateAmount ?? 'State Amount'), amount: '₹ 0'),
+                    _AmountColumn(title: ( 'दावा की गई राशि'), amount: '₹ 0'),
+                    _AmountColumn(title: ( 'राज्य राशि'), amount: '₹ 0'),
                   ],
                 ),
               ),
@@ -102,7 +102,7 @@ class FinalizeIncentivePage extends StatelessWidget {
                     text: TextSpan(
                       style: TextStyle(color: AppColors.onSurface, fontSize: 15.sp),
                       children: [
-                        TextSpan(text: (l10n?.finalizeTotalAmountLabel ?? 'Total Amount:') + ' '),
+                        TextSpan(text: ( 'कुल राशि :') + ' '),
                         TextSpan(text: '₹ 0', style: TextStyle(color: successColor, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -112,7 +112,7 @@ class FinalizeIncentivePage extends StatelessWidget {
                   width: 100, // fixed width for the button
                   height: 30, // optional
                   child: RoundButton(
-                    title: (l10n?.finalizeSave ?? 'Save'),
+                    title: ( 'संरक्षित करें'),
                     color: AppColors.primary,
                     onPress: () {},
                   ),

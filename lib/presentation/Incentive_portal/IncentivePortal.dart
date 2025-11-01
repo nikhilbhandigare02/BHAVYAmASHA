@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
@@ -6,7 +7,9 @@ import 'package:medixcel_new/presentation/Incentive_portal/Finalize_Incentive.da
 import 'package:medixcel_new/presentation/Incentive_portal/Monthly_Task.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../core/config/routes/Route_Name.dart';
 import '../../core/widgets/MarqeeText/MarqeeText.dart';
+import '../HomeScreen/HomeScreen.dart';
 
 class IncentivePortal extends StatefulWidget {
   const IncentivePortal({super.key});
@@ -82,21 +85,29 @@ class _IncentivePortalState extends State<IncentivePortal>
     final l10n = AppLocalizations.of(context);
     final monthNames = _getMonthNames(l10n);
     
-    // Initialize _selectedMonth on first build
     if (_isFirstBuild) {
       _isFirstBuild = false;
       _selectedMonth = monthNames[DateTime.now().month - 1];
     } else if (_selectedMonth == null) {
-      // Fallback in case _selectedMonth is somehow null
-      _selectedMonth = monthNames[DateTime.now().month - 1];
+
     }
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppHeader(
-        screenTitle: l10n?.drawerIncentivePortal ?? 'Incentive Portal',
-        showBack: true,
+        screenTitle: 'प्रोत्साहन पोर्टल',
+        showBack: false,
+        icon1Image: 'assets/images/google-docs.png',
+        onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.NationalProgramsScreen ),
+        icon2Image: 'assets/images/home.png',
+        onIcon2Tap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialTabIndex: 1),
+          ),
+        ),
       ),
+      drawer: CustomDrawer(),
       floatingActionButton: RawMaterialButton(
         onPressed: () {},
         fillColor: AppColors.primary, // background color
@@ -115,7 +126,7 @@ class _IncentivePortalState extends State<IncentivePortal>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
-              color: AppColors.surface,
+              color: AppColors.primaryContainer,
               elevation: 2,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               child: Padding(
@@ -132,16 +143,16 @@ class _IncentivePortalState extends State<IncentivePortal>
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _InfoCell(title: l10n?.incentiveHeaderDistrict ?? 'District', value: 'Patna'),
-                        _InfoCell(title: l10n?.incentiveHeaderBlock ?? 'Block', value: 'Maner'),
+                        _InfoCell(title: 'जिला', value: 'Patna'),
+                        _InfoCell(title: 'प्रखंड', value: 'Maner'),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _InfoCell(title: l10n?.incentiveHeaderHsc ?? 'HSC', value: 'HSC Baank'),
-                        _InfoCell(title: l10n?.incentiveHeaderPanchayat ?? 'Panchayat', value: 'Baank'),
-                        _InfoCell(title: l10n?.incentiveHeaderAnganwadi ?? 'Anganwadi', value: 'Baank'),
+                        _InfoCell(title:  'स्वास्थ्य उप केंद्र', value: 'HSC Baank'),
+                        _InfoCell(title:  'पंचायत', value: 'Baank'),
+                        _InfoCell(title:  'आंगनवाड़ी', value: 'Baank'),
                       ],
                     ),
                   ],
@@ -151,7 +162,7 @@ class _IncentivePortalState extends State<IncentivePortal>
 
             const SizedBox(height: 12),
             MarqueeText(
-              text: l10n?.incentiveNote ?? 'This is a sample incentive note scrolling continuously...',
+              text:  'प्रत्येक महीने की दावा राशि के भुगतान फाइल अगले महीने की 28 से 30 तारीख के बीच जमा करें।',
               style: TextStyle(color: AppColors.error, fontSize: 12),
               velocity: 50, // adjust speed
             ),
@@ -162,7 +173,7 @@ class _IncentivePortalState extends State<IncentivePortal>
               children: [
                 Expanded(
                   child: _LabeledDropdown<String>(
-                    label: l10n?.incentiveFinancialYear ?? 'Financial year',
+                    label: 'वित्तीय वर्ष',
                     value: _selectedYear,
                     items: _years.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                     onChanged: (v) => setState(() => _selectedYear = v ?? _selectedYear),
@@ -171,7 +182,7 @@ class _IncentivePortalState extends State<IncentivePortal>
                 const SizedBox(width: 12),
                 Expanded(
                   child: _LabeledDropdown<String>(
-                    label: l10n?.incentiveFinancialMonth ?? 'Financial month',
+                    label:  'वित्तीय महीना',
                     value: _selectedMonth,
                     items: monthNames.map((month) {
                       return DropdownMenuItem<String>(
@@ -195,9 +206,7 @@ class _IncentivePortalState extends State<IncentivePortal>
               ),
               child: Center(
                 child: Text(
-                  l10n != null
-                    ? l10n!.incentiveTotalAmount(0)
-                    : 'Total amount (Daily + Monthly): ₹0',
+                  'कुल राशि(दैनिक+मासिक) : ₹0',
                   style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp),
                 ),
               ),
@@ -216,9 +225,9 @@ class _IncentivePortalState extends State<IncentivePortal>
                 unselectedLabelColor: AppColors.onSurfaceVariant,
                 indicatorColor: AppColors.primary,
                 tabs: [
-                  Tab(text: l10n?.incentiveTabDaily ?? 'Daily tasks'),
-                  Tab(text: l10n?.incentiveTabMonthly ?? 'Monthly tasks'),
-                  Tab(text: l10n?.incentiveTabFinalize ?? 'Finalize'),
+                  Tab(text:  'दैनिक कार्य'),
+                  Tab(text:  'मासिक कार्य'),
+                  Tab(text: 'अंतिम रूप से'),
                 ],
               ),
             ),
@@ -282,7 +291,7 @@ class _LabeledDropdown<T> extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        Text(label, style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         const SizedBox(height: 2),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -296,6 +305,7 @@ class _LabeledDropdown<T> extends StatelessWidget {
               isExpanded: true,
               items: items,
               onChanged: onChanged,
+
             ),
           ),
         ),

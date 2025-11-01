@@ -3056,13 +3056,13 @@ abstract class AppLocalizations {
   /// No description provided for @incentiveHeaderBlock.
   ///
   /// In en, this message translates to:
-  /// **'Block'**
+  /// **''**
   String get incentiveHeaderBlock;
 
   /// No description provided for @incentiveHeaderDistrict.
   ///
   /// In en, this message translates to:
-  /// **'District'**
+  /// **'जिला'**
   String get incentiveHeaderDistrict;
 
   /// No description provided for @incentiveHeaderHsc.
@@ -3080,7 +3080,7 @@ abstract class AppLocalizations {
   /// No description provided for @incentiveNote.
   ///
   /// In en, this message translates to:
-  /// **'Submit the payment file for each month\'s claim amount between the 28th and 30th of the next month.'**
+  /// **''**
   String get incentiveNote;
 
   /// No description provided for @incentiveTabDaily.
