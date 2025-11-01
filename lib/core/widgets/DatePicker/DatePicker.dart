@@ -77,7 +77,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     return RichText(
       text: TextSpan(
         style: TextStyle(
-          fontSize: 13.sp,
+          fontSize: 15.sp,
           color: AppColors.onSurfaceVariant,
           //fontWeight: FontWeight.w500,
         ),
@@ -102,7 +102,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 14.sp,
+      fontSize: 15.sp,
       fontWeight: FontWeight.w500,
       color: AppColors.onSurfaceVariant,
       height: 1.5,
@@ -145,8 +145,8 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(
-              horizontal: 3.w,
-              vertical: 1.5.h,
+              horizontal: 1.w,
+              vertical: 1.h,
             ),
           ),
         ),

@@ -173,9 +173,9 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           Text(
             '$title ',
             style:  TextStyle(
-              color: Colors.white70,
+              color: AppColors.background,
               fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
           Expanded(
@@ -183,8 +183,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               value.isEmpty ? 'N/A' : value,
               style:  TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w500,
-                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                fontSize: 13.sp,
               ),
               overflow: TextOverflow.ellipsis,
             ),

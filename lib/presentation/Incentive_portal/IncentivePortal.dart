@@ -3,6 +3,7 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/presentation/Incentive_portal/Finalize_Incentive.dart';
+import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/presentation/Incentive_portal/Monthly_Task.dart';
 import 'package:sizer/sizer.dart';
 
@@ -98,7 +99,9 @@ class _IncentivePortalState extends State<IncentivePortal>
         showBack: true,
       ),
       floatingActionButton: RawMaterialButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, Route_Names.incentiveForm);
+        },
         fillColor: AppColors.primary, // background color
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(50),

@@ -54,7 +54,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     if (!text.endsWith(' *')) {
       return [TextSpan(text: text)];
     }
-    
+
     final parts = text.split(' *');
     return [
       TextSpan(text: parts[0]),
@@ -77,25 +77,20 @@ class _CustomTextFieldState extends State<CustomTextField> {
   void didUpdateWidget(covariant CustomTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-
     if (widget.controller != oldWidget.controller) {
       _controller?.dispose();
       _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
     }
 
-    // Only update text if we're managing our own controller
     if (widget.controller == null) {
       _controller ??= TextEditingController();
       final newText = widget.initialValue ?? '';
       final oldInit = oldWidget.initialValue ?? '';
       final currText = _controller!.text;
       final shouldUpdate =
-      // update if text is currently empty
-      currText.isEmpty ||
-          // or if it still matches the old initialValue (user hasn't edited)
-          currText == oldInit ||
-          // or if upstream is progressively providing a longer value (prefill flow)
-          (newText.length >= currText.length && newText.startsWith(currText));
+          currText.isEmpty ||
+              currText == oldInit ||
+              (newText.length >= currText.length && newText.startsWith(currText));
       if (shouldUpdate && currText != newText) {
         _controller!.text = newText;
       }
@@ -104,7 +99,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   void dispose() {
-    // Only dispose the controller if we created it ourselves
     if (widget.controller == null) {
       _controller?.dispose();
     }
@@ -114,15 +108,16 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-        fontSize: 15.sp,
-        color: AppColors.onSurfaceVariant,
-        height: 1
+      fontSize: 15.sp,
+      color: AppColors.onSurfaceVariant,
+      height: 1,
     );
 
     return TextFormField(
       controller: _controller,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       initialValue: null,
+      textAlignVertical: TextAlignVertical.center, // ✅ Keeps text & icon centered
       onChanged: (value) {
         if (!_isDirty && value.isNotEmpty) {
           setState(() {
@@ -149,45 +144,62 @@ class _CustomTextFieldState extends State<CustomTextField> {
       focusNode: widget.focusNode,
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
-        // Add padding around the label to create a gap.
+        alignLabelWithHint: true,
+        isDense: true,
         label: (widget.labelText != null && widget.labelText!.isNotEmpty)
             ? Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: RichText(
-                  text: TextSpan(
-                    children: _buildLabelTextSpans(widget.labelText!),
-                    style: inputStyle,
-                  ),
-                  softWrap: true,
-                  maxLines: widget.labelMaxLines,
-                  overflow: TextOverflow.visible,),
-              )
+          padding: const EdgeInsets.only(bottom: 10),
+          child: RichText(
+            text: TextSpan(
+              children: _buildLabelTextSpans(widget.labelText!),
+              style: inputStyle,
+            ),
+            softWrap: true,
+            maxLines: widget.labelMaxLines,
+            overflow: TextOverflow.visible,
+          ),
+        )
             : null,
         labelStyle: inputStyle,
         floatingLabelStyle: inputStyle,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         hintText: widget.hintText,
         hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
+
+        // ✅ Properly aligned prefix icon
         prefixIcon: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon, color: AppColors.onSurfaceVariant)
+            ? Padding(
+          padding: EdgeInsets.only(left: 3.w, right: 2.w),
+          child: Icon(
+            widget.prefixIcon,
+            size: 18.sp,
+            color: AppColors.onSurfaceVariant,
+          ),
+        )
             : null,
+        prefixIconConstraints: BoxConstraints(
+          minWidth: 8.w,
+          minHeight: 4.h,
+        ),
+
+        // ✅ Suffix for password toggle
         suffixIcon: widget.obscureText
             ? IconButton(
-                icon: Icon(
-                  _isObscure ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.onSurfaceVariant,
-                ),
-                onPressed: () => setState(() {
-                  _isObscure = !_isObscure;
-                }),
-              )
+          icon: Icon(
+            _isObscure ? Icons.visibility_off : Icons.visibility,
+            color: AppColors.onSurfaceVariant,
+          ),
+          onPressed: () => setState(() {
+            _isObscure = !_isObscure;
+          }),
+        )
             : null,
+
         contentPadding: EdgeInsets.symmetric(
-          vertical: 0.8.h,
-          horizontal: 3.w,
+          vertical: 1.h,
+          horizontal: 1.w,
         ),
         counterText: "",
-        counterStyle: const TextStyle(height: 0, color: Colors.transparent),
         errorStyle: TextStyle(
           fontSize: 11.sp,
           height: 1.2,

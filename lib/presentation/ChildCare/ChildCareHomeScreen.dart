@@ -23,9 +23,10 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
     // 🔹 3 cards per row (with spacing)
     final double totalHorizontalPadding = 12 * 2; // outer padding
     final double spacingBetweenCards = 12 * 2; // 2 gaps of 12px between 3 cards
-    final double cardWidth = (MediaQuery.of(context).size.width -
-        totalHorizontalPadding -
-        spacingBetweenCards) /
+    final double cardWidth =
+        (MediaQuery.of(context).size.width -
+            totalHorizontalPadding -
+            spacingBetweenCards) /
         2.9;
 
     return Scaffold(
@@ -52,40 +53,49 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                 children: [
                   _FeatureCard(
                     width: cardWidth,
-                    title: (l10n?.childRegisteredBeneficiaryListTitle ??
-                        'Registered Child\nBeneficiary List')
-                        .toString(),
+                    title:
+                        (l10n?.childRegisteredBeneficiaryListTitle ??
+                                'Registered Child\nBeneficiary List')
+                            .toString(),
                     count: 0,
                     image: 'assets/images/toddler.png',
                     onClick: () {
                       Navigator.pushNamed(
-                          context, Route_Names.RegisterChildScreen);
+                        context,
+                        Route_Names.RegisterChildScreen,
+                      );
                     },
                   ),
                   const SizedBox(width: 4),
                   _FeatureCard(
                     width: cardWidth,
-                    title: (l10n?.childRegisteredDueListTitle ??
-                        'Child Registered\nDue List')
-                        .toString(),
+                    title:
+                        (l10n?.childRegisteredDueListTitle ??
+                                'Child Registered\nDue List')
+                            .toString(),
                     count: 0,
                     image: 'assets/images/family.png',
                     onClick: () {
                       Navigator.pushNamed(
-                          context, Route_Names.RegisterChildDueList);
+                        context,
+                        Route_Names.RegisterChildDueList,
+                      );
                     },
                   ),
                   const SizedBox(width: 4),
                   _FeatureCard(
                     width: cardWidth,
-                    title: (l10n?.childTrackingDueListTitle ??
-                        'Child Tracking\nDue List')
-                        .toString(),
+                    title:
+                        (l10n?.childTrackingDueListTitle ??
+                                'Child Tracking\nDue List')
+                            .toString(),
                     count: 0,
                     image: 'assets/images/notes.png',
                     onClick: () {
                       Navigator.pushNamed(
-                          context, Route_Names.CHildTrackingDueList);
+                        context,
+                        Route_Names.CHildTrackingDueList,
+                      );
                     },
                   ),
                 ],
@@ -106,8 +116,8 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                   const SizedBox(width: 4),
                   _FeatureCard(
                     width: cardWidth,
-                    title:
-                    (l10n?.deceasedChildTitle ?? 'Deceased Child').toString(),
+                    title: (l10n?.deceasedChildTitle ?? 'Deceased Child')
+                        .toString(),
                     count: 0,
                     image: 'assets/images/death2.png',
                     onClick: () {
@@ -145,12 +155,14 @@ class _FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
+    final scaleFactor = MediaQuery.of(context).textScaleFactor;
 
     return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(12),
       child: SizedBox(
         width: width,
+        height: 15.h, // ✅ Fixed responsive height
         child: Card(
           color: AppColors.background,
           elevation: 2,
@@ -160,15 +172,16 @@ class _FeatureCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // auto height
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start, // ✅ No forced spacing
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Image.asset(
                       image,
-                      width: 30.sp,
-                      height: 30.sp,
+                      width: 28 * scaleFactor,
+                      height: 28 * scaleFactor,
                       fit: BoxFit.contain,
                     ),
                     const Spacer(),
@@ -182,13 +195,20 @@ class _FeatureCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 1.h),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.outline,
-                    fontSize: 14.sp,
+                SizedBox(height: 1.h), // ✅ Reduced space between image & title
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.outline,
+                        fontSize: 14.sp, // slightly smaller for balance
+                      ),
+                    ),
                   ),
                 ),
               ],

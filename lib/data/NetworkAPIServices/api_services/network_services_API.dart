@@ -18,44 +18,61 @@ class NetworkServiceApi extends BaseApiServices{
       throw NoInternetException('No Internet Exception');
     }on TimeoutException{
       throw NoInternetException('Request Timed out');
-    }on FetchDataException{
+    } on FetchDataException {
       throw NoInternetException('Data fetch error');
     }
     return jsonResponse;
   }
 
   @override
-  Future postApi(String url,var data) async{
-    dynamic jsonResponse;
-    try{
-      final response = await http.post(Uri.parse(url), body: data).timeout(Duration(seconds: 50));
-      jsonResponse = returnResponse(response);
-      if(response.statusCode == 200){}
-    }on SocketException{
-      throw NoInternetException('No Internet Exception');
-    }on TimeoutException{
-      throw NoInternetException('Request Timed out');
-    }on FetchDataException{
-      throw NoInternetException('Data fetch error');
+  Future<dynamic> postApi(String url, dynamic data, {Map<String, String>? headers}) async {
+    try {
+      final body = data is String ? data : jsonEncode(data);
+      final response = await http.post(
+        Uri.parse(url),
+        body: body,
+        headers: {
+          ...?headers,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 50));
+
+      return returnResponse(response);
+    } on SocketException {
+      throw NoInternetException('No Internet Connection');
+    } on TimeoutException {
+      throw NoInternetException('Request Timed Out');
+    } on FetchDataException {
+      throw FetchDataException('Error fetching data');
     }
-    return jsonResponse;
   }
-  
 }
 
-dynamic returnResponse(http.Response response){
-  switch(response){
-    case 200:
-      dynamic jsonResponse = jsonDecode(response.body);
-      return jsonResponse;
-    case 400 :
-      dynamic jsonResponse = jsonDecode(response.body);
-      return jsonResponse;
-    case 401 :
-      throw UnAuthorizedException();
-    case 500 :
-      throw FetchDataException('Error communicating with server' + response.statusCode.toString());
-    default:
-      throw UnAuthorizedException();
+dynamic returnResponse(http.Response response) {
+  try {
+    final responseJson = jsonDecode(response.body);
+
+    switch (response.statusCode) {
+      case 200:
+      case 201:
+        return responseJson;
+      case 400:
+        throw BadRequestException(responseJson['message'] ?? 'Invalid request');
+      case 401:
+        throw UnAuthorizedException(responseJson['message'] ?? 'Unauthorized');
+      case 403:
+        throw UnAuthorizedException(responseJson['message'] ?? 'Forbidden');
+      case 404:
+        throw NotFoundException(responseJson['message'] ?? 'Resource not found');
+      case 500:
+      default:
+        throw FetchDataException(
+          responseJson['message'] ??
+              'Error occurred while communication with server. Status code: ${response.statusCode}',
+        );
+    }
+  } catch (e) {
+    throw FetchDataException('Invalid response from server');
   }
 }

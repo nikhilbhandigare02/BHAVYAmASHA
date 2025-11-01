@@ -273,12 +273,12 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(color: Colors.white70, fontSize: 10),
+          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(color: Colors.white, fontSize: 10),
+          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
         ),
       ],
     );

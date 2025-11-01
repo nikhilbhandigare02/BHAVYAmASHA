@@ -8,6 +8,7 @@ import 'package:medixcel_new/presentation/AllHouseHold/AllHouseHold/AllHouseHold
 import 'package:medixcel_new/presentation/AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
 import 'package:medixcel_new/presentation/Annoucement/Annoucement_scree.dart';
 import 'package:medixcel_new/presentation/Incentive_portal/IncentivePortal.dart';
+import 'package:medixcel_new/presentation/Incentive_portal/IncentiveForm.dart';
 import 'package:medixcel_new/presentation/MISReport/MISReport.dart';
 import 'package:medixcel_new/presentation/MotherCare/ANCVisit/ANCVisitForm/ANCVisitForm.dart';
 import 'package:medixcel_new/presentation/MotherCare/ANCVisit/ANVVisitList/ANCVisitListScreen.dart';
@@ -94,7 +95,9 @@ class Routes{
       case Route_Names.aboutUs:
         return MaterialPageRoute(builder: (context) => Aboutus(),);
       case Route_Names.incentivePortal:
-        return MaterialPageRoute(builder: (context) => IncentivePortal(),);
+        return MaterialPageRoute(builder: (_) => const IncentivePortal());
+      case Route_Names.incentiveForm:
+        return MaterialPageRoute(builder: (_) => const IncentiveForm());
       case Route_Names.GuestBeneficiarySearch:
         return MaterialPageRoute(builder: (context) => GuestBeneficiarySearch(),);
       case Route_Names.RegisterNewHousehold:

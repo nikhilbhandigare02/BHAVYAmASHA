@@ -39,13 +39,13 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
       ),
       _BeneficiaryTileData(
         title: l10n.pregnancyOutcome,
-        asset: 'assets/images/safe_motherhood.png',
+        asset: 'assets/images/mother.png',
         count: 0,
         highlighted: true,
       ),
       _BeneficiaryTileData(
         title: l10n.hbcnList,
-        asset: 'assets/images/toddler.png',
+        asset: 'assets/images/pnc-mother.png',
         count: 0,
       ),
       _BeneficiaryTileData(
@@ -55,17 +55,17 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
       ),
       _BeneficiaryTileData(
         title: l10n.abortionList,
-        asset: 'assets/images/forms.png',
+        asset: 'assets/images/npcb-refer.png',
         count: 0,
       ),
       _BeneficiaryTileData(
         title: l10n.deathRegister,
-        asset: 'assets/images/hospital-bed.png',
+        asset: 'assets/images/death2.png',
         count: 0,
       ),
       _BeneficiaryTileData(
         title: l10n.migratedOut,
-        asset: 'assets/images/id-card.png',
+        asset: 'assets/images/lbw.png',
         count: 0,
       ),
       _BeneficiaryTileData(
@@ -77,10 +77,9 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
     
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppHeader(screenTitle: l10n.myBeneficiariesTitle),
-      drawer: CustomDrawer(),
+      appBar: AppHeader(screenTitle: l10n.myBeneficiariesTitle, showBack: true,),
       body: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         itemCount: _items.length,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {

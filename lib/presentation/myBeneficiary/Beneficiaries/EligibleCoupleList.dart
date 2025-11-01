@@ -170,33 +170,28 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
     );
   }
 
-  Widget _infoRow(String title, String value, {bool isWrappable = false}) {
-    final l10n = AppLocalizations.of(context);
+  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
-        crossAxisAlignment:
-        isWrappable ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           Text(
-            '$title',
+            '$title ',
             style:  TextStyle(
-              color: Colors.white70,
+              color: AppColors.background,
               fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? l10n?.notAvailable ?? 'N/A' : value,
+              value.isEmpty ? 'N/A' : value,
               style:  TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w500,
-                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                fontSize: 13.sp,
               ),
-              softWrap: isWrappable,
-              overflow:
-              isWrappable ? TextOverflow.visible : TextOverflow.ellipsis,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

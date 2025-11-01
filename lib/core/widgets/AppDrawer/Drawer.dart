@@ -1,12 +1,99 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../../presentation/HomeScreen/HomeScreen.dart';
+import '../../utils/app_version.dart';
 import '../ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
+import 'dart:convert';
 
-class CustomDrawer extends StatelessWidget {
+class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
+
+  @override
+  State<CustomDrawer> createState() => _CustomDrawerState();
+}
+
+class _CustomDrawerState extends State<CustomDrawer> {
+  Map<String, dynamic>? userData;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+    _loadAppVersion();
+
+  }
+
+  Future<void> _loadAppVersion() async {
+    final version = await AppVersion.getAppVersion();
+    if (mounted) {
+      setState(() {
+        _appVersion = version;
+      });
+    }
+  }
+  Future<void> _loadUserData() async {
+    if (mounted) {
+      setState(() => isLoading = true);
+    }
+    
+    try {
+      print('Loading user data...');
+      final data = await SecureStorageService.getCurrentUserData();
+      print('Loaded user data: $data');
+      
+      if (mounted) {
+        setState(() {
+          userData = data;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error in _loadUserData: $e');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  String _getFullName() {
+    if (userData == null) return '-';
+    try {
+      // Try to get name from nested structure
+      if (userData!['name'] is Map) {
+        final name = userData!['name'] as Map;
+        return '${name['first_name'] ?? ''} ${name['middle_name'] ?? ''} ${name['last_name'] ?? ''}'.trim().replaceAll('  ', ' ');
+      }
+      // Fallback to direct fields if not in nested structure
+      return '${userData!['first_name'] ?? ''} ${userData!['middle_name'] ?? ''} ${userData!['last_name'] ?? ''}'.trim().replaceAll('  ', ' ');
+    } catch (e) {
+      print('Error getting full name: $e');
+      return '-';
+    }
+  }
+
+  String _getWorkingLocation(String key) {
+    if (userData == null) return '-';
+    try {
+      // Try to get from nested working_location
+      if (userData!['working_location'] is Map) {
+        final workingLocation = userData!['working_location'] as Map;
+        return workingLocation[key]?.toString() ?? '-';
+      }
+      return userData![key]?.toString() ?? '-';
+    } catch (e) {
+      print('Error getting working location ($key): $e');
+      return '-';
+    }
+  }
+
+  String _appVersion = ''; // Default version
+
 
   @override
   Widget build(BuildContext context) {
@@ -79,23 +166,48 @@ class CustomDrawer extends StatelessWidget {
                     thickness: 0.8,
                   ),
 
-                  // 🔹 User Info Section
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.3.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _UserInfoRow(label: l10n.userNameLabel, value: "Rohit Chavan"),
-                        _UserInfoRow(label: l10n.userRoleLabel, value: "Bhavya ASHA"),
-                        _UserInfoRow(label: l10n.userVillageLabel, value: "-"),
-                        _UserInfoRow(label: l10n.userHscLabel, value: "HSC Baank"),
-                        _UserInfoRow(label: l10n.userHfrIdLabel, value: "IN1010001604"),
-                        SizedBox(height: 0.5.h),
+                        if (isLoading)
+                          const Center(child: CircularProgressIndicator())
+                        else if (userData != null) ...[                          
+                          _UserInfoRow(
+                            label: l10n.userNameLabel, 
+                            value: _getFullName(),
+                          ),
+                          _UserInfoRow(
+                            label: l10n.userRoleLabel, 
+                            value: 'ASHA Worker', // Default role, adjust as needed
+                          ),
+                          _UserInfoRow(
+                            label: l10n.userVillageLabel, 
+                            value: _getWorkingLocation('village'),
+                          ),
+                          _UserInfoRow(
+                            label: l10n.userHscLabel, 
+                            value: _getWorkingLocation('hsc_name'),
+                          ),
+                          _UserInfoRow(
+                            label: l10n.userHfrIdLabel, 
+                            value: _getWorkingLocation('hsc_hfr_id'),
+                          ),
+                        ] else
+                          Text(
+                            'Failed to load user data',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 12.sp,
+                            ),
+                          ),
+                        SizedBox(height: 1.h),
                         Text(
-                          "V 7.8.10",
+                          _appVersion,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontSize: 13.sp,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ],
@@ -106,7 +218,6 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
 
-            // 🔹 Fixed Logout Button - attached to all edges
             SizedBox(
               width: double.infinity,
               height: 6.h, // responsive height
@@ -129,7 +240,9 @@ class CustomDrawer extends StatelessWidget {
                     message: l10n.logoutMessage,
                     yesText: l10n.yes,
                     noText: l10n.no,
-                    onYes: () {
+                    onYes: () async {
+                      await SecureStorageService.setLoginFlag(0);
+
                       Navigator.pushNamedAndRemoveUntil(
                         context,
                         Route_Names.loginScreen,

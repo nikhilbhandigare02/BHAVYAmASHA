@@ -291,16 +291,12 @@ class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
       children: [
         Text(
           title,
-          style:  TextStyle(color: Colors.white70, fontSize: 14.sp, fontWeight: FontWeight.w500),
+          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 2),
         Text(
-          value.isEmpty ? 'N/A' : value,
-          style:  TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w500, fontSize: 14.sp,
-
-          ),
+          value,
+          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
         ),
       ],
     );

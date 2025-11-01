@@ -179,21 +179,17 @@ class _TrainingReceivedState
   }
 
   Widget _rowText(String title, String value) {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "${title} :",
-          style:  TextStyle(color: Colors.white70, fontSize: 14.sp),
+          title,
+          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(height: 2),
         Text(
-          "${value}",
-          style:  TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
-            fontSize: 14.sp
-          ),
+          value,
+          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
         ),
       ],
     );

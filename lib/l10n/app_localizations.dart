@@ -2591,11 +2591,23 @@ abstract class AppLocalizations {
   /// **'All Beneficiaries'**
   String get gridAllBeneficiaries;
 
+  /// No description provided for @searchBeneficiaries.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiaries Search'**
+  String get searchBeneficiaries;
+
   /// No description provided for @gridAllHousehold.
   ///
   /// In en, this message translates to:
   /// **'All Household'**
   String get gridAllHousehold;
+
+  /// No description provided for @searchHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Household Search'**
+  String get searchHousehold;
 
   /// No description provided for @gridAshaKiDuniya.
   ///
@@ -3194,7 +3206,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginFailed.
   ///
   /// In en, this message translates to:
-  /// **'Login Failed'**
+  /// **'Login failed. Please try again.'**
   String get loginFailed;
 
   /// No description provided for @loginSuccess.
@@ -3668,7 +3680,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter your password'**
+  /// **'Enter password'**
   String get passwordHint;
 
   /// No description provided for @passwordLabel.
@@ -3746,7 +3758,7 @@ abstract class AppLocalizations {
   /// No description provided for @poweredBy.
   ///
   /// In en, this message translates to:
-  /// **'Powered By Medixcel Lite © 2025'**
+  /// **'Powered By Medixcel Lite © '**
   String get poweredBy;
 
   /// No description provided for @preExistingDiseaseLabel.
@@ -4538,14 +4550,20 @@ abstract class AppLocalizations {
   /// No description provided for @updatedEligibleCoupleListTitle.
   ///
   /// In en, this message translates to:
-  /// **'Updated Eligible Couple List'**
+  /// **'Eligible Couple List'**
   String get updatedEligibleCoupleListTitle;
 
   /// No description provided for @updatedEligibleCoupleSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search Updated Eligible Couple'**
+  /// **'Updated Eligible Couple Search'**
   String get updatedEligibleCoupleSearchHint;
+
+  /// No description provided for @eligibleCoupleSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Eligible Couple'**
+  String get eligibleCoupleSearchHint;
 
   /// No description provided for @userHfrIdLabel.
   ///
@@ -4586,7 +4604,7 @@ abstract class AppLocalizations {
   /// No description provided for @usernameHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter your Username'**
+  /// **'Enter username'**
   String get usernameHint;
 
   /// No description provided for @usernameLabel.
@@ -6262,6 +6280,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter father\'s name'**
   String get fatherNameHint;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
 
   /// No description provided for @years.
   ///

@@ -1,13 +1,15 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:medixcel_new/core/error/Exception/app_exception.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import '../../../core/utils/enums.dart';
-import '../../../data/repositories/LoginRepository.dart';
+import '../../../data/repositories/auth_repository.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginRepository loginRepository = LoginRepository();
+  final AuthRepository _authRepository = AuthRepository();
 
   LoginBloc() : super(LoginState()) {
     on<UsernameChanged>(_onEmailChange);
@@ -18,63 +20,114 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   void _onEmailChange(UsernameChanged event, Emitter<LoginState> emit) {
     emit(
-      state.copyWith(
-        username: event.username,
-        postApiStatus: PostApiStatus.initial, // reset status
-        error: '', // clear old error message
+        state.copyWith(
+          username: event.username,
+          postApiStatus: PostApiStatus.initial, // reset status
+          error: '', // clear old error message
 
-      )
+        )
     );
   }
 
   void _onPasswordChange(PasswordChange event, Emitter<LoginState> emit) {
     emit(
-      state.copyWith(
-        password: event.password,
-        postApiStatus: PostApiStatus.initial, // reset status
-        error: '',
-      )
+        state.copyWith(
+          password: event.password,
+          postApiStatus: PostApiStatus.initial, // reset status
+          error: '',
+        )
     );
   }
 
   void _showValidationErrors(ShowValidationErrors event, Emitter<LoginState> emit) {
-    // Just show validation errors without changing other states
     emit(state.copyWith(showValidationErrors: true));
   }
 
+
   Future<void> _login(LoginButton event, Emitter<LoginState> emit) async {
-    // Set loading state
+    if (state.username.isEmpty || state.password.isEmpty) {
+      emit(state.copyWith(
+        postApiStatus: PostApiStatus.error,
+        error: 'Please enter both username and password',
+        showValidationErrors: true,
+      ));
+      return;
+    }
+
     emit(state.copyWith(
       postApiStatus: PostApiStatus.loading,
-      showValidationErrors: true, // Show validation errors
+      showValidationErrors: true,
     ));
 
     try {
-      const validUsername = 'A10000555';
-      const validPassword = 'Temp@123';
+      print('Attempting login with username: ${state.username}');
+      final response = await _authRepository.login(
+        state.username.trim(),
+        state.password.trim(),
+      );
 
-      await Future.delayed(const Duration(seconds: 1));
+      print('Login response received. Success: ${response.success}');
+      print('Token: ${response.token}');
+      print('User Data: ${response.data}');
 
-      if (state.username.trim() == validUsername && state.password.trim() == validPassword) {
+      if (response.success) {
+        await SecureStorageService.setLoginFlag(1);
+        
+        // Save token to secure storage
+        if (response.token != null) {
+          await SecureStorageService.saveToken(response.token!);
+          print('Token saved successfully');
+          
+          // Save user data with unique key if available
+          if (response.data != null) {
+            try {
+              print('Saving user data: ${response.data}');
+              final userData = response.data!;
+              final uniqueKey = userData['unique_key'] ?? 
+                              userData['id']?.toString() ?? 
+                              userData['username'] ?? 
+                              'default_key';
+              
+              print('Using unique key: $uniqueKey');
+              await SecureStorageService.saveUserDataWithKey(uniqueKey, userData);
+              
+              // Verify data was saved
+              final savedData = await SecureStorageService.getCurrentUserData();
+              print('Verification - Retrieved saved data: $savedData');
+            } catch (e) {
+              print('Error saving user data: $e');
+              // Don't fail the login if we can't save user data
+            }
+          } else {
+            print('No user data in response');
+          }
+        } else {
+          print('No token in response');
+        }
+        
         emit(state.copyWith(
           postApiStatus: PostApiStatus.success,
           error: '',
-          showValidationErrors: false, // Hide validation errors on success
+          showValidationErrors: false,
         ));
       } else {
         emit(state.copyWith(
           postApiStatus: PostApiStatus.error,
-          error: 'Invalid username or password',
-          showValidationErrors: true, // Show validation errors on error
+          error: response.msg ?? 'Login failed',
+          showValidationErrors: true,
         ));
       }
+    } on AppExceptions catch (e) {
+      emit(state.copyWith(
+        postApiStatus: PostApiStatus.error,
+        error: e.toString(),
+        showValidationErrors: true,
+      ));
     } catch (e) {
       emit(state.copyWith(
         postApiStatus: PostApiStatus.error,
-        error: 'Something went wrong',
-        showValidationErrors: true, // Show validation errors on error
+        error: 'An unexpected error occurred. Please try again.',
+        showValidationErrors: true,
       ));
     }
-  }
-
-}
+  }}

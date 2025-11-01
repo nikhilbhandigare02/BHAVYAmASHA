@@ -76,7 +76,6 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                 ),
                 Divider(color: AppColors.divider, thickness: 0.5),
 
-                // Training Name Dropdown
                 BlocBuilder<TrainingBloc, TrainingState>(
                   builder: (context, state) {
                     return ApiDropdown<String>(
@@ -91,7 +90,6 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                 ),
                 Divider(color: AppColors.divider, thickness: 0.5),
 
-                // Training Date Picker
                 BlocBuilder<TrainingBloc, TrainingState>(
                   buildWhen: (p, c) => p.date != c.date,
                   builder: (context, state) {
@@ -138,7 +136,6 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                 ),
                 Divider(color: AppColors.divider, thickness: 0.5),
 
-                // Training Place
                 BlocBuilder<TrainingBloc, TrainingState>(
                   buildWhen: (p, c) => p.place != c.place,
                   builder: (context, state) {
@@ -156,7 +153,6 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                 ),
                 Divider(color: AppColors.divider, thickness: 0.5),
 
-                // Training Days
                 BlocBuilder<TrainingBloc, TrainingState>(
                   buildWhen: (p, c) => p.days != c.days,
                   builder: (context, state) {

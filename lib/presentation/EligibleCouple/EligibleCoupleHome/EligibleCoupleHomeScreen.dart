@@ -88,13 +88,15 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
                   maxHeight = cardHeights.reduce((a, b) => a > b ? a : b);
 
                   return Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
+                    spacing: 10,
+                    runSpacing: 10,
                     children: cards.map((item) {
                       return ConstrainedBox(
                         constraints: BoxConstraints(
                           minWidth: itemWidth,
                           maxWidth: itemWidth,
+                          minHeight: 120,
+                          maxHeight: 120,
                         ),
                         child: _DashboardCard(
                           image: item['image']!,
@@ -105,6 +107,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
                       );
                     }).toList(),
                   );
+
 
                 },
               ),
@@ -144,11 +147,12 @@ class _DashboardCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(
-          padding: EdgeInsets.all(2.h),
+          padding: EdgeInsets.all(1.h),
           child: Column(
-            mainAxisSize: MainAxisSize.min, // ✅ automatically adjusts height
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              // Top Row (icon + count)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -169,13 +173,15 @@ class _DashboardCard extends StatelessWidget {
                   ),
                 ],
               ),
+
               SizedBox(height: 1.h),
+
+              // Title
               Text(
                 title,
                 textAlign: TextAlign.start,
-                softWrap: true,
-                maxLines: null, // ✅ allow multiple lines (auto grows)
-                overflow: TextOverflow.visible,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 14.sp * scaleFactor,
                   fontWeight: FontWeight.w500,

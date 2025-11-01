@@ -1267,7 +1267,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gridAllBeneficiaries => 'सभी लाभार्थी';
 
   @override
+  String get searchBeneficiaries => 'लाभार्थी खोज';
+
+  @override
   String get gridAllHousehold => 'सभी घर';
+
+  @override
+  String get searchHousehold => 'घर खोज';
 
   @override
   String get gridAshaKiDuniya => 'आशा की दुनिया';
@@ -1566,10 +1572,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get lmpDateLabel => 'एलएमपी की तिथि';
 
   @override
-  String get loginButton => 'लॉग इन करें';
+  String get loginButton => 'लॉगिन';
 
   @override
-  String get loginFailed => 'लॉगिन विफल';
+  String get loginFailed => 'लॉगिन विफल। कृपया पुनः प्रयास करें।';
 
   @override
   String get loginSuccess => 'लॉगिन सफल!';
@@ -1806,7 +1812,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get passwordEmpty => 'पासवर्ड खाली नहीं हो सकता';
 
   @override
-  String get passwordHint => 'अपना पासवर्ड दर्ज करें';
+  String get passwordHint => 'पासवर्ड दर्ज करें';
 
   @override
   String get passwordLabel => 'पासवर्ड';
@@ -1845,7 +1851,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get populationCoveredLabel => 'आशा के अंतर्गत आबादी';
 
   @override
-  String get poweredBy => 'Powered By Medixcel Lite © 2025';
+  String get poweredBy => 'Powered By Medixcel Lite © ';
 
   @override
   String get preExistingDiseaseLabel => 'Pre - Existing disease';
@@ -2241,10 +2247,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get updatedEligibleCoupleListSubtitle => 'List of eligible couples';
 
   @override
-  String get updatedEligibleCoupleListTitle => 'अपडेटेड पात्र दंपत्ति सूची';
+  String get updatedEligibleCoupleListTitle => 'पात्र दंपत्ति सूची';
 
   @override
   String get updatedEligibleCoupleSearchHint => 'अपडेटेड पात्र दंपत्ति खोजें';
+
+  @override
+  String get eligibleCoupleSearchHint => 'पात्र दंपत्ति खोजें';
 
   @override
   String get userHfrIdLabel => 'एचएफआर आईडी:';
@@ -2265,7 +2274,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get usernameEmpty => 'उपयोगकर्ता नाम खाली नहीं हो सकता';
 
   @override
-  String get usernameHint => 'अपना उपयोगकर्ता नाम दर्ज करें';
+  String get usernameHint => 'उपयोगकर्ता नाम दर्ज करें';
 
   @override
   String get usernameLabel => 'उपयोगकर्ता नाम';
@@ -3105,6 +3114,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get fatherNameHint => 'पिता का नाम दर्ज करें';
+
+  @override
+  String get dismiss => 'बंद करें';
 
   @override
   String get years => 'वर्ष';
