@@ -56,7 +56,7 @@ class KalaAzarScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'काला-आजार (Kala-Azar) स्क्रीनिंग',
+              screenTitle: 'Kala-azar Eradication Program',
               showBack: true,
             ),
             body: Padding(

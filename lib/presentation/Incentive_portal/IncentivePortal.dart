@@ -10,6 +10,7 @@ import 'package:sizer/sizer.dart';
 import '../../core/config/routes/Route_Name.dart';
 import '../../core/widgets/MarqeeText/MarqeeText.dart';
 import '../HomeScreen/HomeScreen.dart';
+import 'IncentiveForm.dart';
 
 class IncentivePortal extends StatefulWidget {
   const IncentivePortal({super.key});
@@ -109,7 +110,11 @@ class _IncentivePortalState extends State<IncentivePortal>
       ),
       drawer: CustomDrawer(),
       floatingActionButton: RawMaterialButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const IncentiveForm()),
+          );
+        },
         fillColor: AppColors.primary, // background color
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(50),
@@ -126,7 +131,7 @@ class _IncentivePortalState extends State<IncentivePortal>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
-              color: AppColors.primaryContainer,
+              color: Colors.blue[50],
               elevation: 2,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               child: Padding(
@@ -201,7 +206,7 @@ class _IncentivePortalState extends State<IncentivePortal>
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
+                color: Colors.blue[50],
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Center(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
@@ -27,7 +28,7 @@ class _IncentiveFormState extends State<IncentiveForm> {
   final TextEditingController registerDateController = TextEditingController();
   final TextEditingController remarkController = TextEditingController();
 
-  final List<String> categoryTypes = ['Type 1', 'Type 2', 'Type 3'];
+  final List<String> categoryTypes = ['C - सामुदायिक', 'I - संस्थागत'];
   final List<String> categories = ['Category A', 'Category B', 'Category C'];
   final List<String> registerNames = ['Register 1', 'Register 2', 'Register 3'];
   final List<String> volumes = ['1', '2', '3', '4'];
@@ -51,162 +52,165 @@ class _IncentiveFormState extends State<IncentiveForm> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[100],
       appBar: AppHeader(
         screenTitle: 'Incentive Form',
         showBack: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: _infoBox('वित्तीय वर्ष:', '2024-2025'),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _infoBox('वित्तीय महीना:', 'June'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            _labelField('कार्य कोड :', _textField('कार्य कोड डाले', workCodeController)),
-            const SizedBox(height: 16),
-
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.grey[100],
-              ),
-              child: Column(
+      body: SafeArea(
+        bottom: true,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _dropdownField(
-                            'श्रेणी का प्रकार : [*]', categoryTypes, selectedCategoryType,
-                                (val) {
-                              setState(() {
-                                selectedCategoryType = val;
-                              });
-                            }),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _dropdownField(
-                            'कार्य की श्रेणी : [*]', categories, selectedCategory,
-                                (val) {
-                              setState(() {
-                                selectedCategory = val;
-                              });
-                            }),
-                      ),
-                    ],
+                  Expanded(
+                    child: _infoBox('वित्तीय वर्ष:', '2024-2025'),
                   ),
-                  const SizedBox(height: 12),
-                  _labelField('कार्य : [*]',
-                      _textField('कार्य चुनें', workController)),
-                  const SizedBox(height: 12),
-                  _labelField('लाभार्थी की संख्या : [*]',
-                      _textField('लाभार्थियों की संख्या', beneficiaryCountController)),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _labelField('कार्य की राशि : [*]',
-                            _textField('कार्य की राशि', workAmountController)),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _labelField('दावा की गई राशि : [*]',
-                            _textField('दावा की गई राशि', claimedAmountController)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _labelField(
-                    'कार्य पूर्ण की तिथि : [*]',
-                    GestureDetector(
-                      onTap: () =>
-                          _selectDate(context, completionDateController),
-                      child: AbsorbPointer(
-                        child: _textField(
-                            'तिथि चुनें', completionDateController),
-                      ),
-                    ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _infoBox('वित्तीय महीना:', 'June'),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.grey[100],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _dropdownField('पंजी का नाम : [*]', registerNames,
-                            selectedRegisterName, (val) {
-                              setState(() {
-                                selectedRegisterName = val;
-                              });
-                            }),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _dropdownField('खंड/Volume : [*]', volumes,
-                            selectedVolume, (val) {
-                              setState(() {
-                                selectedVolume = val;
-                              });
-                            }),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _labelField(
-                    'पंजी की दिनांक : [*]',
-                    GestureDetector(
-                      onTap: () => _selectDate(context, registerDateController),
-                      child: AbsorbPointer(
-                        child: _textField(
-                            'दिनांक चुनें', registerDateController),
+              const SizedBox(height: 16),
+        
+              _labelField('कार्य कोड :', _textField('कार्य कोड डाले', workCodeController)),
+              const SizedBox(height: 16),
+        
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _dropdownField(
+                              'श्रेणी का प्रकार : [*]', categoryTypes, selectedCategoryType,
+                                  (val) {
+                                setState(() {
+                                  selectedCategoryType = val;
+                                });
+                              }),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _dropdownField(
+                              'कार्य की श्रेणी : [*]', categories, selectedCategory,
+                                  (val) {
+                                setState(() {
+                                  selectedCategory = val;
+                                });
+                              }),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _labelField('कार्य : [*]',
+                        _textField('कार्य चुनें', workController)),
+                    const SizedBox(height: 12),
+                    _labelField('लाभार्थी की संख्या : [*]',
+                        _textField('लाभार्थियों की संख्या', beneficiaryCountController)),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _labelField('कार्य की राशि : [*]',
+                              _textField('कार्य की राशि', workAmountController)),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _labelField('दावा की गई राशि : [*]',
+                              _textField('दावा की गई राशि', claimedAmountController)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _labelField(
+                      'कार्य पूर्ण की तिथि : [*]',
+                      GestureDetector(
+                        onTap: () =>
+                            _selectDate(context, completionDateController),
+                        child: AbsorbPointer(
+                          child: _textField(
+                              'तिथि चुनें', completionDateController),
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+        
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _dropdownField('पंजी का नाम : [*]', registerNames,
+                              selectedRegisterName, (val) {
+                                setState(() {
+                                  selectedRegisterName = val;
+                                });
+                              }),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _dropdownField('खंड/Volume : [*]', volumes,
+                              selectedVolume, (val) {
+                                setState(() {
+                                  selectedVolume = val;
+                                });
+                              }),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _labelField(
+                      'पंजी की दिनांक : [*]',
+                      GestureDetector(
+                        onTap: () => _selectDate(context, registerDateController),
+                        child: AbsorbPointer(
+                          child: _textField(
+                              'दिनांक चुनें', registerDateController),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _labelField('अभियुक्ति/Remark : [*]',
+                        _textField('अभियुक्ति/Remark', remarkController)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+        
+              SizedBox(
+                width: double.infinity,
+                height: 45,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
                   ),
-                  const SizedBox(height: 12),
-                  _labelField('अभियुक्ति/Remark : [*]',
-                      _textField('अभियुक्ति/Remark', remarkController)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1976D2),
-                ),
-                onPressed: () {},
-                child: const Text(
-                  'संरक्षित करे',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  onPressed: () {},
+                  child: const Text(
+                    'संरक्षित करे',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -250,9 +254,10 @@ class _IncentiveFormState extends State<IncentiveForm> {
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
+        isDense: true,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-        contentPadding:
-        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12, vertical: 5),
         filled: true,
         fillColor: Colors.white,
       ),
@@ -279,10 +284,10 @@ class _IncentiveFormState extends State<IncentiveForm> {
           onChanged: onChanged,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             filled: true,
             fillColor: Colors.white,
+            isDense: true,
           ),
         ),
       ],

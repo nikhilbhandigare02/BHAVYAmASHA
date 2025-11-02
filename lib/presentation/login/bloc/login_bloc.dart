@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:medixcel_new/core/error/Exception/app_exception.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';

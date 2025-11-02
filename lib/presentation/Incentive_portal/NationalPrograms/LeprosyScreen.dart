@@ -37,20 +37,20 @@ class LeprosyScreen extends StatelessWidget {
           // ✅ Questions for Leprosy Screening
           final List<Map<String, dynamic>> questions = [
             {
-              'question': '1. क्या आपको शरीर के किसी भाग में सफेद या लाल रंग के धब्बे है?',
-              'hint': 'हाँ/नहीं',
+              'question': '1. Do you have any white or red patches on any part of your body?',
+              'hint': 'Yes/No',
             },
             {
-              'question': '2. क्या आपको शरीर के किसी भाग में सुन्नपन या झुनझुनी का अनुभव होता है?',
-              'hint': 'हाँ/नहीं',
+              'question': '2. Do you feel numbness or tingling in any part of your body?',
+              'hint': 'Yes/No',
             },
             {
-              'question': '3. क्या आपको किसी अंग में कमजोरी या लकवा का अनुभव हुआ है?',
-              'hint': 'हाँ/नहीं',
+              'question': '3. Have you experienced weakness or paralysis in any limb?',
+              'hint': 'Yes/No',
             },
             {
-              'question': '4. क्या आपके परिवार में किसी को कुष्ठ रोग हुआ है?',
-              'hint': 'हाँ/नहीं',
+              'question': '4. Has anyone in your family ever had leprosy?',
+              'hint': 'Yes/No',
             },
           ];
 
@@ -63,7 +63,7 @@ class LeprosyScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'कुष्ठ रोग स्क्रीनिंग',
+              screenTitle: 'Leprosy Eradication program',
               showBack: true,
             ),
             body: Padding(
@@ -111,7 +111,7 @@ class LeprosyScreen extends StatelessWidget {
                             ),
                             SizedBox(width: 2.w),
                             Text(
-                              'स्क्रीनिंग दिनांक: $formattedDate',
+                              'Screening Date: $formattedDate',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 12.sp,
@@ -124,7 +124,7 @@ class LeprosyScreen extends StatelessWidget {
                       SizedBox(height: 2.h),
                       ...List.generate(
                         questions.length,
-                        (index) => Padding(
+                            (index) => Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: 3.w,
                             vertical: 1.h,
@@ -135,14 +135,15 @@ class LeprosyScreen extends StatelessWidget {
                               Container(
                                 width: 6.w,
                                 alignment: Alignment.center,
-                                child: Text(
-                                  '${index + 1}.'
-                                ),
+                                child: Text('${index + 1}.'),
                               ),
                               SizedBox(width: 1.w),
                               Expanded(
                                 child: Text(
-                                  questions[index]['question'].toString().replaceFirst('${index + 1} ', '').trim(),
+                                  questions[index]['question']
+                                      .toString()
+                                      .replaceFirst('${index + 1} ', '')
+                                      .trim(),
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w500,
@@ -173,12 +174,12 @@ class LeprosyScreen extends StatelessWidget {
                             bloc.add(const SaveLeprosyData());
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('स्क्रीनिंग डेटा सफलतापूर्वक सहेजा गया!'),
+                                content: Text('Screening data saved successfully!'),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           },
-                          title: 'सबमिट करें',
+                          title: 'Submit',
                           isLoading: false,
                         ),
                       ),

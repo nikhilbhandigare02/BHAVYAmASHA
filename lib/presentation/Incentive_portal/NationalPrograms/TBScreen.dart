@@ -36,10 +36,10 @@ class TbProgramScreen extends StatelessWidget {
 
           // ✅ Only label text (no numbering inside)
           final List<String> labels = [
-            'प्रथम सूचक कार्य/संपर्क खोज अभियान (नये क्षयमा मरीज को नोटिफाई करने हेतु लेन पर)',
-            'ट्रीटमेंट प्रोवाइडर कार्य',
-            'प्रति Drug Sensitive क्षयमा मरीज अथवा प्रति Shorter regimen के Drug Resistant क्षयमा मरीज को दवा खिलाने पर',
-            'Conventional MDR इलाजरत Drug Resistant क्षयमा मरीज को दवा खिलाने (रु 2000 - Intensive Phase पर)।',
+            'First indicator activity/contact tracing campaign (for notifying new TB patients on lane)',
+            'Treatment provider activity',
+            'For each Drug Sensitive TB patient or each Shorter regimen Drug Resistant TB patient for administering medicine',
+            'For administering medicine to a Conventional MDR treatment Drug Resistant TB patient (₹2000 - during Intensive Phase).',
           ];
 
           // ✅ Date setup
@@ -51,7 +51,7 @@ class TbProgramScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'क्षयमा (टी.बी.) उन्मूलन कार्यक्रम',
+              screenTitle: 'Tuberculosis Eradication Program',
               showBack: true,
             ),
             body: Padding(
@@ -162,13 +162,12 @@ class TbProgramScreen extends StatelessWidget {
                               alignment: Alignment.centerRight,
                               child: RoundButton(
                                 width: 14.h,
-                                title: 'संरक्षित करें',
+                                title: 'Save',
                                 onPress: () {
                                   bloc.add(SaveTbData());
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content:
-                                      Text('डेटा सफलतापूर्वक सहेजा गया'),
+                                      content: Text('Data saved successfully'),
                                       backgroundColor: Colors.green,
                                     ),
                                   );

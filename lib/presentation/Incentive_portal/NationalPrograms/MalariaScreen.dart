@@ -55,7 +55,7 @@ class MalariaScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'Malaria Screening',
+              screenTitle: 'Malaria Eradication Program',
               showBack: true,
             ),
             body: Padding(

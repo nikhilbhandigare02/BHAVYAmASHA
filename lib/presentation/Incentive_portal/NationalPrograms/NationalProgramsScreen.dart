@@ -3,9 +3,14 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/Incentive_portal/NationalPrograms/TBScreen.dart';
 import 'package:sizer/sizer.dart';
 
+import 'AESJEScreen.dart';
+import 'AMBScreen.dart';
+import 'FilariasisScreen.dart';
 import 'KalaAzarScreen.dart';
 import 'LeprosyScreen.dart';
 import 'MalariaScreen.dart';
+import 'NIDDCPscreen.dart';
+import 'ABPMJAYscreen.dart';
 
 
 
@@ -13,49 +18,50 @@ class NationalProgramsScreen extends StatelessWidget {
   final List<Map<String, dynamic>> programs = [
     {
       'icon': 'assets/images/capsule2.png',
-      'title': 'क्षयमा(टी.बी.) उन्मूलन कार्यक्रम',
+      'title': 'Tuberculosis Eradication Program',
       'route': (context) => TbProgramScreen(),
     },
     {
       'icon': 'assets/images/capsule2.png',
-      'title': 'कुष्ठ उन्मूलन कार्यक्रम',
+      'title': 'Leprosy Eradication program',
       'route': (context) => LeprosyScreen(),
     },
     {
       'icon': 'assets/images/capsule2.png',
-      'title': 'कालाजार उन्मूलन कार्यक्रम',
+      'title': 'Kala-azar Eradication Program',
       'route': (context) => KalaAzarScreen(),
     },
     {
       'icon': 'assets/images/capsule2.png',
-      'title': 'मलेरिया उन्मूलन कार्यक्रम',
+      'title': 'Malaria Eradication Program',
       'route': (context) => MalariaScreen(),
     },
     {
       'icon': 'assets/images/capsule2.png',
-      'title': 'फाइलेरिया उन्मूलन कार्यक्रम',
-      // 'route': (context) => FilariasisScreen(),
+      'title': 'Filaria Eradication Program',
+       'route': (context) => FilariasisScreen(),
     },
     {
       'icon': 'assets/images/capsule2.png',
-      'title': 'AES/JE उन्मूलन कार्यक्रम',
-      // 'route': (context) => AESJEScreen(),
+      'title': 'AES/JE Eradication Program ',
+       'route': (context) => AESJEScreen(),
     },
     {
       'icon': 'assets/images/capsule2.png',
-      'title': 'AMB उन्मूलन कार्यक्रम',
-      // 'route': (context) => AMBScreen(),
+      'title': 'AMB Eradication Program',
+       'route': (context) => AMBScreen(),
     },
     {
       'icon': 'assets/images/capsule2.png',
-      'title': 'NIDDCP कार्यक्रम',
-      // 'route': (context) => NIDDCPscreen(),
+      'title': 'NIDDCP Program',
+      'route': (context) => NIDDCPScreen(),
     },
     {
       'icon': 'assets/images/capsule2.png',
-      'title': 'AB-PMJAY कार्यक्रम',
-      // 'route': (context) => ABPMJAYscreen(),
+      'title': 'AB-PMJAY Program',
+      'route': (context) => ABPMJAYScreen(),
     },
+
   ];
 
   NationalProgramsScreen({super.key});
@@ -67,7 +73,7 @@ class NationalProgramsScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: Colors.grey[100],
           appBar: AppHeader(
-            screenTitle: 'राष्ट्रीय कार्यक्रम',
+            screenTitle: 'National Program',
             showBack: true,
           ),
           body: Padding(
