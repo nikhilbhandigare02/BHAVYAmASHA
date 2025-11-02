@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_bloc.dart';
@@ -21,40 +22,37 @@ class GeneralDetailsTab extends StatelessWidget {
         final DateTime? visitDate = visitMap['visitDate'] as DateTime?;
 
         return ListView(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           children: [
-            Card(
-              elevation: 0,
-              margin: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ApiDropdown<int>(
-                      labelText: t.homeVisitDayLabel,
-                      items: const [1, 2, 3, 4, 5, 6, 7],
-                      getLabel: (v) => v.toString(),
-                      value: selectedDay,
-                      onChanged: (val) {
-                        context.read<HbncVisitBloc>().add(
-                              VisitDetailsChanged(field: 'visitNumber', value: val),
-                            );
-                      },
-                    ),
-                    const Divider(),
-                    CustomDatePicker(
-                      labelText: t.dateOfHomeVisitLabel,
-                      initialDate: visitDate,
-                      onDateChanged: (date) {
-                        context.read<HbncVisitBloc>().add(
-                              VisitDetailsChanged(field: 'visitDate', value: date),
-                            );
-                      },
-                    ),
-                    const Divider(),
-                  ],
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ApiDropdown<int>(
+                    labelText: t.homeVisitDayLabel,
+                    items: const [1, 2, 3, 4, 5, 6, 7],
+                    getLabel: (v) => v.toString(),
+                    value: selectedDay,
+                    onChanged: (val) {
+                      context.read<HbncVisitBloc>().add(
+                            VisitDetailsChanged(field: 'visitNumber', value: val),
+                          );
+                    },
+                  ),
+                  const Divider(),
+                  CustomDatePicker(
+                    labelText: t.dateOfHomeVisitLabel,
+                    hintText: t.dateOfHomeVisitLabel,
+                    initialDate: visitDate,
+                    onDateChanged: (date) {
+                      context.read<HbncVisitBloc>().add(
+                            VisitDetailsChanged(field: 'visitDate', value: date),
+                          );
+                    },
+                  ),
+                  const Divider(),
+                ],
               ),
             ),
           ],

@@ -486,6 +486,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       Expanded(
                         child: CustomTextField(
                           labelText: l.abhaAddressLabel,
+                          hintText: l.abhaAddressLabel,
                           initialValue: state.abhaAddress,
                           onChanged: (v) =>
                               context.read<SpousBloc>().add(SpUpdateAbhaAddress(v.trim())),

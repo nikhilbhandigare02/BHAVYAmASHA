@@ -103,10 +103,10 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                   color: AppColors.primary,
                   child: TabBar(
                     controller: _tabController,
-                    labelColor: Colors.white, // active tab text
-                    unselectedLabelColor:
-                    Colors.white70, // faded white for inactive tabs
-                    indicatorColor: Colors.white, // underline color
+                    isScrollable: true, // ✅ makes the tabs scrollable
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white70,
+                    indicatorColor: Colors.white,
                     indicatorWeight: 3,
                     labelStyle: const TextStyle(
                       fontWeight: FontWeight.w600,
@@ -115,11 +115,13 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                       Tab(text: t.tabGeneralDetails),
                       Tab(text: t.tabMotherDetails),
                       Tab(text: t.tabNewbornDetails),
+                      // ✅ You can add more tabs later without them getting hidden
                     ],
                     onTap: (index) =>
                         context.read<HbncVisitBloc>().add(TabChanged(index)),
                   ),
                 ),
+
 
                 // 🔹 Tab content
                 Expanded(
@@ -139,7 +141,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                 // 🔹 Navigation Buttons
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   child: AnimatedBuilder(
                     animation: _tabController,
                     builder: (context, _) {

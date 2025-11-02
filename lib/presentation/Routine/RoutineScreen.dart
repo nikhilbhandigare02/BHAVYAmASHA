@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -150,6 +152,7 @@ class _RoutinescreenState extends State<Routinescreen> {
 
   Widget _routineCard(Map<String, dynamic> item) {
     final primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
     return Container(
 
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -217,12 +220,12 @@ class _RoutinescreenState extends State<Routinescreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'अगली प्रसव पूर्व तिथि: ${item['nextVisit'] ?? '-'}',
+                        '${l10n!.antenatal} ${item['nextVisit'] ?? '-'}',
                         style: const TextStyle(color: Colors.white, fontSize: 12),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'मोबाइल सं.: ${item['mobile'] ?? '-'}',
+                        '${l10n!.mobileLabel} ${item['mobile'] ?? '-'}',
                         style: const TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ],

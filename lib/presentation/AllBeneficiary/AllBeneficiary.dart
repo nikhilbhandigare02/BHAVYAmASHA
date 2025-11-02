@@ -107,7 +107,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       appBar: AppHeader(
         screenTitle: l10n?.householdBeneficiaryTitle ?? 'Household Beneficiary',
         showBack: false,
-        icon2: Icons.home,
+        icon2Image: 'assets/images/home.png',
         onIcon2Tap: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(

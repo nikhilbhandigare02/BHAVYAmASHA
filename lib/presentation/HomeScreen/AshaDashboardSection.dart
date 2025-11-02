@@ -51,7 +51,7 @@ class AshaDashboardSection extends StatelessWidget {
     };
 
     final List<Map<String, dynamic>> bottomGridItems = [
-      {"image": 'assets/images/announcement.png', "label": l10n.announcement},
+      {"image": 'assets/images/announcement.png', "label": l10n.announcements},
       {"image": 'assets/images/help-icon.png', "label": '${l10n.help}\nनियम'},
       {"image": 'assets/images/autoimmune-disease.png', "label": l10n.ncd, "count": 7},
     ];
@@ -216,7 +216,7 @@ class AshaDashboardSection extends StatelessWidget {
                         child: Stack(
                           children: [
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
+                              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.9.h),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -235,7 +235,7 @@ class AshaDashboardSection extends StatelessWidget {
                                         textAlign: TextAlign.center,
                                         softWrap: true,
                                         style: TextStyle(
-                                          fontWeight: FontWeight.w500,
+                                          fontWeight: FontWeight.w400,
                                           fontSize: 15.sp,
                                           color: AppColors.onSurface,
                                         ),

@@ -86,10 +86,10 @@ class _HouseHold_BeneficiaryScreenState
       appBar: AppHeader(
         screenTitle: l10n?.householdBeneficiaryTitle ?? 'Household Beneficiary',
         showBack: true,
-        icon1: CupertinoIcons.arrow_left_right,
+        icon1Image: 'assets/images/left-right-arrow.png',
         onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.MigrationSplitOption),
-        icon2: Icons.home,
-        onIcon2Tap: () => Navigator.pushReplacement(
+        icon3Image: 'assets/images/home.png',
+        onIcon3Tap: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => HomeScreen(initialTabIndex: 1),

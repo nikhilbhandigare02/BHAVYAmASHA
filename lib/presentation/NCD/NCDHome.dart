@@ -34,7 +34,8 @@ class _NCDHomeState extends State<NCDHome> {
       appBar: AppHeader(
         screenTitle: l10n?.ncdTitle ?? 'NCD',
         showBack: false,
-        icon1: Icons.home,
+        icon1Image: 'assets/images/home.png',
+
         onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
       ),
       drawer: const CustomDrawer(),

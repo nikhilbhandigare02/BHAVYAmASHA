@@ -41,7 +41,8 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       appBar: AppHeader(
         screenTitle: l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple',
         showBack: false,
-        icon1: Icons.home,
+        icon1Image: 'assets/images/home.png',
+
         onIcon1Tap: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(

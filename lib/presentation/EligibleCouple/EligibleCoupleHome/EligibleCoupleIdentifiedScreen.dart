@@ -88,7 +88,8 @@ class _EligibleCoupleIdentifiedScreenState
       appBar: AppHeader(
         screenTitle: l10n?.updatedEligibleCoupleListTitle ?? 'Eligible Couple List',
         showBack: false,
-        icon1: Icons.home,
+        icon1Image: 'assets/images/home.png',
+
         onIcon1Tap: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(

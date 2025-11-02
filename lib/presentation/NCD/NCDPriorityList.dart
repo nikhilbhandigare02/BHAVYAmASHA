@@ -108,7 +108,8 @@ class _NCDHomeState extends State<Ncdprioritylist> {
       appBar: AppHeader(
         screenTitle: l10n?.ncdListTitle ?? 'NCD List',
         showBack: false,
-        icon2: Icons.home,
+        icon2Image: 'assets/images/home.png',
+
         onIcon2Tap: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(

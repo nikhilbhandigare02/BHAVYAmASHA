@@ -68,7 +68,7 @@ class _OutcomeFormView extends StatelessWidget {
             // 🔹 Form Area
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(8),
                 child: const _OutcomeFormFields(),
               ),
             ),
@@ -101,7 +101,7 @@ class _OutcomeFormFields extends StatelessWidget {
         const SizedBox(height: 8),
 
         Padding(
-          padding: const EdgeInsets.only(left: 8.0),
+          padding: const EdgeInsets.only(left: 4.0),
           child: Row(
             children: [
               Expanded(
@@ -210,7 +210,7 @@ class _OutcomeFormFields extends StatelessWidget {
         const SizedBox(height: 8),
 
         Padding(
-          padding: const EdgeInsets.only(left: 10.0),
+          padding: const EdgeInsets.only(left: 4.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

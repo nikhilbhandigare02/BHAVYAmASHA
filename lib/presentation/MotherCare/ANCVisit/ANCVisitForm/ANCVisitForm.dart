@@ -97,6 +97,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                           CustomDatePicker(
                             labelText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
+                            hintText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
                             initialDate: state.dateOfInspection,
                             onDateChanged: (d) => bloc.add(DateOfInspectionChanged(d)),
                           ),
@@ -105,24 +106,28 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                           CustomTextField(
                             labelText: l10n?.houseNumberLabel ?? 'House number',
+                            hintText: l10n?.houseNumberLabel ?? 'House number',
                             initialValue: state.houseNumber,
                             onChanged: (v) => bloc.add(HouseNumberChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
                             labelText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
+                            hintText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
                             initialValue: state.womanName,
                             onChanged: (v) => bloc.add(WomanNameChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
                             labelText: l10n?.husbandNameLabel ?? "Husband's name",
+                            hintText: l10n?.husbandNameLabel ?? "Husband's name",
                             initialValue: state.husbandName,
                             onChanged: (v) => bloc.add(HusbandNameChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
                             labelText: l10n?.rchNumberLabel ?? 'RCH number',
+                            hintText: l10n?.rchNumberLabel ?? 'RCH number',
                             initialValue: state.rchNumber,
                             onChanged: (v) => bloc.add(RchNumberChanged(v)),
                           ),
@@ -130,9 +135,9 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                           Container(
                             decoration: const BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.all(Radius.circular(4))),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                             child: CustomDatePicker(
                               labelText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
+                              hintText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
                               initialDate: state.lmpDate,
                               onDateChanged: (d) => bloc.add(LmpDateChanged(d)),
                             ),
@@ -140,6 +145,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomDatePicker(
                             labelText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
+                            hintText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
                             initialDate: state.eddDate,
                             onDateChanged: (d) => bloc.add(EddDateChanged(d)),
                           ),
@@ -147,40 +153,38 @@ class _AncvisitformState extends State<Ancvisitform> {
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
                             labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
+                            hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                             initialValue: state.weeksOfPregnancy,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                           ),
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 16),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)', style: TextStyle(fontSize: 14.sp),),
-                                const SizedBox(height: 6),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    _qtyButton(icon: Icons.remove, onTap: () => bloc.add(const GravidaDecremented())),
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      width: 40,
-                                      height: 32,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: AppColors.outlineVariant),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text('${state.gravida}'),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)', style: TextStyle(fontSize: 14.sp),),
+                              const SizedBox(height: 6),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  _qtyButton(icon: Icons.remove, onTap: () => bloc.add(const GravidaDecremented())),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    width: 40,
+                                    height: 32,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: AppColors.outlineVariant),
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
-                                    const SizedBox(width: 6),
-                                    _qtyButton(icon: Icons.add, onTap: () => bloc.add(const GravidaIncremented())),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                    child: Text('${state.gravida}'),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _qtyButton(icon: Icons.add, onTap: () => bloc.add(const GravidaIncremented())),
+                                ],
+                              ),
+                            ],
                           ),
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 16),
@@ -196,18 +200,21 @@ class _AncvisitformState extends State<Ancvisitform> {
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomDatePicker(
                             labelText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
+                            hintText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
                             initialDate: state.td1Date,
                             onDateChanged: (d) => bloc.add(Td1DateChanged(d)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomDatePicker(
                             labelText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
+                            hintText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
                             initialDate: state.td2Date,
                             onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomDatePicker(
                             labelText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
+                            hintText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
                             initialDate: state.tdBoosterDate,
                             onDateChanged: (d) => bloc.add(TdBoosterDateChanged(d)),
                           ),
@@ -215,6 +222,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
                             labelText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
+                            hintText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
                             initialValue: state.folicAcidTablets,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
@@ -239,6 +247,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
                             labelText: l10n?.weightKgLabel ?? 'Weight (Kg)',
+                            hintText: l10n?.weightKgLabel ?? 'Weight (Kg)',
                             initialValue: state.weight,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(WeightChanged(v)),
@@ -246,6 +255,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
                             labelText: l10n?.systolicLabel ?? 'Systolic',
+                            hintText: l10n?.systolicLabel ?? 'Systolic',
                             initialValue: state.systolic,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(SystolicChanged(v)),
@@ -253,6 +263,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
                             labelText: l10n?.diastolicLabel ?? 'Diastolic',
+                            hintText: l10n?.diastolicLabel ?? 'Diastolic',
                             initialValue: state.diastolic,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(DiastolicChanged(v)),
@@ -260,6 +271,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
                             labelText: l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
+                            hintText: l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
                             initialValue: state.hemoglobin,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(HemoglobinChanged(v)),

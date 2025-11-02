@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
 import 'bloc/abpmjay_bloc/abpmjay_bloc.dart';
@@ -42,13 +43,13 @@ class ABPMJAYScreen extends StatelessWidget {
 
           // ✅ Questions
           final List<String> labels = [
-            'Under AB-PMJAY, for patients brought by Asha for treatment in government hospitals (who will get medical benefits after getting admitted in the hospital)',
+            AppLocalizations.of(context)!.abpmjayQuestion1,
           ];
 
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'AB-PMJAY Program',
+              screenTitle: AppLocalizations.of(context)!.abpmjayScreenTitle,
               showBack: true,
             ),
             body: Padding(
@@ -165,12 +166,12 @@ class ABPMJAYScreen extends StatelessWidget {
                               alignment: Alignment.centerRight,
                               child: RoundButton(
                                 width: 14.h,
-                                title: 'Save',
+                                title: AppLocalizations.of(context)!.saveButton,
                                 onPress: () {
                                   bloc.add(SaveAbpmjayData());
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('AB-PMJAY data saved successfully!'),
+                                     SnackBar(
+                                      content: Text(AppLocalizations.of(context)!.abpmjayDataSaved),
                                       backgroundColor: Colors.green,
                                     ),
                                   );
@@ -183,7 +184,7 @@ class ABPMJAYScreen extends StatelessWidget {
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 16.0),
                                   child: Text(
-                                    'Data saved successfully!',
+                                    AppLocalizations.of(context)!.dataSavedSuccessfully,
                                     style: TextStyle(
                                       color: Colors.green,
                                       fontWeight: FontWeight.bold,

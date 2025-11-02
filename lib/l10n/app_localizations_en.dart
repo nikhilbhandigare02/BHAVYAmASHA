@@ -305,6 +305,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get announcement => 'Announcements List';
 
   @override
+  String get announcements => 'Announcement';
+
+  @override
+  String get antenatal => 'Next Antenatal Date:';
+
+  @override
   String get announcementItem1Body => 'In the local primary health center, smart phones were given to the ASHA workers of the block area for health related work. PHC in-charge Dr. Purushottam Priyadarshi said that a total of 126 ASHA workers of the block area have been given smart phones to make them hi-tech.He told that writing ASHA in the register will now give freedom. The mobile is specially designed for health related programs. Mobile cannot be used for any other purpose.All ASHA workers can send claim form for honorarium from their smart phone itself. On the basis of this, the amount of honorarium will be sent to their bank account. BCM Sanjit Kumar said that there are a total of 120 ASHA workers and 6 facilitators in the block area. Out of which smart phones have been made available to 122.';
 
   @override
@@ -1093,7 +1099,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get dataSavedSuccessfully => 'New house has been added successfully';
+  String get dataSavedSuccessfully => 'Data saved successfully!';
 
   @override
   String get closeButton => 'CLOSE';
@@ -2250,7 +2256,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updatedEligibleCoupleListSubtitle => 'List of eligible couples';
 
   @override
-  String get updatedEligibleCoupleListTitle => 'updated Eligible Couple List ';
+  String get updatedEligibleCoupleListTitle => 'Updated Eligible Couple List ';
 
   @override
   String get updatedEligibleCoupleSearchHint => 'Updated Eligible Couple Search';
@@ -3083,6 +3089,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmYes => 'Yes';
 
   @override
+  String get nationalProgramsTitle => 'National Programs';
+
+  @override
+  String get tbEradicationProgram => 'Tuberculosis Eradication Program';
+
+  @override
+  String get leprosyEradicationProgram => 'Leprosy Eradication Program';
+
+  @override
+  String get kalaAzarEradicationProgram => 'Kala-azar Eradication Program';
+
+  @override
+  String get malariaEradicationProgram => 'Malaria Eradication Program';
+
+  @override
+  String get filariaEradicationProgram => 'Filaria Eradication Program';
+
+  @override
+  String get aesJeEradicationProgram => 'AES/JE Eradication Program';
+
+  @override
+  String get ambEradicationProgram => 'AMB Eradication Program';
+
+  @override
+  String get niddcpProgram => 'NIDDCP Program';
+
+  @override
+  String get abPmjayProgram => 'AB-PMJAY Program';
+
+  @override
+  String get abpmjayScreenTitle => 'AB-PMJAY Program';
+
+  @override
+  String get abpmjayQuestion1 => 'Under AB-PMJAY, for patients brought by Asha for treatment in government hospitals (who will get medical benefits after getting admitted in the hospital)';
+
+  @override
+  String get abpmjayDataSaved => 'AB-PMJAY data saved successfully!';
+
+  @override
   String get visitHbnc => 'HBNC Visit Form';
 
   @override
@@ -3285,4 +3330,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cbacC_workingPollutedIndustries => 'Working in industries with gas and smoke pollution such as brick kiln and glass industry etc.';
+
+  @override
+  String get aesJeProgram => 'AES/JE Eradication Program';
+
+  @override
+  String get aesJeScreenTitle => 'AES/JE Eradication Program';
+
+  @override
+  String get aesJeQuestion1 => 'Amount payable to ASHA as community catalyst in 1000 population during IRS spraying';
+
+  @override
+  String get aesJeQuestion2 => 'Patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer';
+
+  @override
+  String get aesJeDataSaved => 'AES/JE data saved successfully!';
 }
