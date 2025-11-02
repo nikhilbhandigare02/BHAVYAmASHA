@@ -679,6 +679,8 @@
   "savingButton": "SAVING...",
   "search": "SEARCH",
   "searchHint": "Search Registered Child Beneficiary",
+  "searchEligibleCouple": "Search Eligible Couple",
+
   "searchHintRegisterChildDueList": "Child Registered Due Search",
   "searchHintHbycBen": "Search HBYC Beneficiary",
   "searchPlaceholder": "Search...",
@@ -756,7 +758,7 @@
   "unmarried": "Unmarried",
   "updateButton": "UPDATE",
   "updatedEligibleCoupleListSubtitle": "List of eligible couples",
-  "updatedEligibleCoupleListTitle": "Eligible Couple List",
+  "updatedEligibleCoupleListTitle": "updated Eligible Couple List ",
   "updatedEligibleCoupleSearchHint": "Updated Eligible Couple Search",
   "eligibleCoupleSearchHint": "Search Eligible Couple",
   "userHfrIdLabel": "HFR ID:",

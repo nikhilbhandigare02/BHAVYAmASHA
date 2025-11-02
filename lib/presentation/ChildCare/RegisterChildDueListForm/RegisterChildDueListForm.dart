@@ -53,13 +53,14 @@ class RegisterChildDueListFormScreen extends StatelessWidget {
 
                           CustomTextField(
                             labelText: l10n?.rchIdChildLabel ?? 'RCH ID (Child)',
-                            hintText: l10n?.rchChildSerialHint ?? 'Serial number of the child in the RCH register',
+                            hintText: l10n?.rchChildSerialHint ?? 'Enter RCH ID of the child',
                             initialValue: state.rchIdChild,
                             onChanged: (v) => bloc.add(RchIdChildChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
-                            labelText:  l10n?.rchChildSerialHint ?? 'Serial number of the child in the RCH register',
+                            labelText: l10n?.rchChildSerialHint ?? 'Register Serial Number',
+                            hintText: 'Enter serial number ',
                             initialValue: state.registerSerialNumber,
                             onChanged: (v) => bloc.add(SerialNumberOFRegister(v)),
                           ),
@@ -80,23 +81,28 @@ class RegisterChildDueListFormScreen extends StatelessWidget {
 
                           CustomTextField(
                             labelText: l10n?.childNameLabel ?? "Child's name *",
+                            hintText: 'Enter full name of the child',
                             initialValue: state.childName,
                             onChanged: (v) => bloc.add(ChildNameChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                          ApiDropdown<String>(
-                            labelText: l10n?.genderLabel ?? 'gender',
-                            items: [l10n?.male ?? 'Male', l10n?.female ?? 'Female', l10n?.other ?? 'Other'],
-                            value: state.gender.isEmpty ? null : state.gender,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(GenderChanged(v ?? '')),
-                            hintText: l10n?.select ?? 'Select',
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: ApiDropdown<String>(
+                              labelText: l10n?.genderLabel ?? 'gender',
+                              items: [l10n?.male ?? 'Male', l10n?.female ?? 'Female', l10n?.other ?? 'Other'],
+                              value: state.gender.isEmpty ? null : state.gender,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(GenderChanged(v ?? '')),
+                              hintText: l10n?.select ?? 'Select',
+                            ),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           CustomTextField(
                             labelText: l10n?.motherNameLabel ?? "Mother's name*",
+                            hintText: 'Enter mother\'s  name',
                             initialValue: state.motherName,
                             onChanged: (v) => bloc.add(MotherNameChanged(v)),
                           ),
@@ -104,6 +110,7 @@ class RegisterChildDueListFormScreen extends StatelessWidget {
 
                           CustomTextField(
                             labelText: l10n?.fatherNameLabel ?? "Father's name",
+                            hintText: 'Enter father\'s   name',
                             initialValue: state.fatherName,
                             onChanged: (v) => bloc.add(FatherNameChanged(v)),
                           ),
@@ -111,29 +118,34 @@ class RegisterChildDueListFormScreen extends StatelessWidget {
 
                           CustomTextField(
                             labelText: l10n?.addressLabel ?? 'Address',
+                            hintText: 'Enter address ',
                             initialValue: state.address,
                             onChanged: (v) => bloc.add(AddressChanged(v)),
                             maxLines: 2,
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                          ApiDropdown<String>(
-                            labelText: "${l10n?.whoseMobileNumberLabel} *" ?? 'Whose mobile number is this',
-                            items: [
-                              l10n?.headOfFamily ?? 'Head of the family',
-                              l10n?.mother ?? 'Mother',
-                              l10n?.father ?? 'Father',
-                              l10n?.other ?? 'Other',
-                            ],
-                            value: state.whoseMobileNumber.isEmpty ? null : state.whoseMobileNumber,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(WhoseMobileNumberChanged(v ?? '')),
-                            hintText: l10n?.select ?? 'Select',
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                            child: ApiDropdown<String>(
+                              labelText: "${l10n?.whoseMobileNumberLabel} *" ?? 'Whose mobile number is this',
+                              items: [
+                                l10n?.headOfFamily ?? 'Head of the family',
+                                l10n?.mother ?? 'Mother',
+                                l10n?.father ?? 'Father',
+                                l10n?.other ?? 'Other',
+                              ],
+                              value: state.whoseMobileNumber.isEmpty ? null : state.whoseMobileNumber,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(WhoseMobileNumberChanged(v ?? '')),
+                              hintText: l10n?.select ?? 'Select',
+                            ),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           CustomTextField(
-                            labelText: l10n?.mobileNumberLabel ?? 'mobile number *',
+                            labelText: l10n?.mobileNumberLabel ?? 'Mobile number *',
+                            hintText: 'Enter 10-digit mobile number',
                             initialValue: state.mobileNumber,
                             keyboardType: TextInputType.phone,
                             onChanged: (v) => bloc.add(MobileNumberChanged(v)),
@@ -142,23 +154,28 @@ class RegisterChildDueListFormScreen extends StatelessWidget {
 
                           CustomTextField(
                             labelText: l10n?.mothersRchIdLabel ?? "Mother's RCH ID number",
+                            hintText: 'Enter mother\'s RCH ID  ',
                             initialValue: state.mothersRchIdNumber,
                             onChanged: (v) => bloc.add(MothersRchIdNumberChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                          ApiDropdown<String>(
-                            labelText: l10n?.birthCertificateIssuedLabel ?? 'Has the birth certificate been issued?',
-                            items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                            value: state.birthCertificateIssued.isEmpty ? null : state.birthCertificateIssued,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(BirthCertificateIssuedChanged(v ?? '')),
-                            hintText: l10n?.choose ?? 'choose',
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: ApiDropdown<String>(
+                              labelText: l10n?.birthCertificateIssuedLabel ?? 'Has the birth certificate been issued?',
+                              items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
+                              value: state.birthCertificateIssued.isEmpty ? null : state.birthCertificateIssued,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(BirthCertificateIssuedChanged(v ?? '')),
+                              hintText: l10n?.choose ?? 'choose',
+                            ),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           CustomTextField(
-                            labelText: l10n?.birthCertificateNumberLabel ?? 'birth certificate number',
+                            labelText: l10n?.birthCertificateNumberLabel ?? 'Birth Certificate Number',
+                            hintText: 'Enter birth certificate number if available',
                             initialValue: state.birthCertificateNumber,
                             onChanged: (v) => bloc.add(BirthCertificateNumberChanged(v)),
                           ),
@@ -166,41 +183,48 @@ class RegisterChildDueListFormScreen extends StatelessWidget {
 
                           CustomTextField(
                             labelText: l10n?.weightGramLabel ?? 'Weight (g)',
+                            hintText: 'Enter weight  ',
                             initialValue: state.weightGrams,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(WeightGramsChanged(v)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                          ApiDropdown<String>(
-                            labelText: l10n?.religionLabel ?? 'Religion',
-                            items: [
-                              l10n?.religionHindu ?? 'Hindu',
-                              l10n?.religionMuslim ?? 'Muslim',
-                              l10n?.religionChristian ?? 'Christian',
-                              l10n?.religionSikh ?? 'Sikh',
-                              l10n?.other ?? 'Other',
-                            ],
-                            value: state.religion.isEmpty ? null : state.religion,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(ReligionChanged(v ?? '')),
-                            hintText: l10n?.choose ?? 'choose',
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: ApiDropdown<String>(
+                              labelText: l10n?.religionLabel ?? 'Religion',
+                              items: [
+                                l10n?.religionHindu ?? 'Hindu',
+                                l10n?.religionMuslim ?? 'Muslim',
+                                l10n?.religionChristian ?? 'Christian',
+                                l10n?.religionSikh ?? 'Sikh',
+                                l10n?.other ?? 'Other',
+                              ],
+                              value: state.religion.isEmpty ? null : state.religion,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(ReligionChanged(v ?? '')),
+                              hintText: l10n?.choose ?? 'choose',
+                            ),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                          ApiDropdown<String>(
-                            labelText: l10n?.casteLabel ?? 'Caste',
-                            items: [
-                              l10n?.casteGeneral ?? 'General',
-                              l10n?.casteObc ?? 'OBC',
-                              l10n?.casteSc ?? 'SC',
-                              l10n?.casteSt ?? 'ST',
-                              l10n?.other ?? 'Other',
-                            ],
-                            value: state.caste.isEmpty ? null : state.caste,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(CasteChanged(v ?? '')),
-                            hintText: l10n?.choose ?? 'choose',
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: ApiDropdown<String>(
+                              labelText: l10n?.casteLabel ?? 'Caste',
+                              items: [
+                                l10n?.casteGeneral ?? 'General',
+                                l10n?.casteObc ?? 'OBC',
+                                l10n?.casteSc ?? 'SC',
+                                l10n?.casteSt ?? 'ST',
+                                l10n?.other ?? 'Other',
+                              ],
+                              value: state.caste.isEmpty ? null : state.caste,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(CasteChanged(v ?? '')),
+                              hintText: l10n?.choose ?? 'choose',
+                            ),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                         ],

@@ -186,7 +186,7 @@ class _RoutinescreenState extends State<Routinescreen> {
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Text(
-                    item['badge']?.toString() ?? 'एएनसी',
+                    item['badge']?.toString() ?? 'ANC',
                     style: const TextStyle(color: Color(0xFF0E7C3A), fontWeight: FontWeight.w700, fontSize: 12),
                   ),
                 ),

@@ -6,7 +6,9 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/utils/enums.dart';
+import 'PreviousVisits.dart';
 import 'bloc/track_eligible_couple_bloc.dart';
+
 
 class TrackEligibleCoupleScreen extends StatelessWidget {
   const TrackEligibleCoupleScreen({super.key});
@@ -160,11 +162,11 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                           value: state.fpMethod,
                           decoration: InputDecoration(hintText: t?.selectArea ?? 'चुनें', border: const UnderlineInputBorder()),
                           items: const [
-                            DropdownMenuItem(value: 'कंडोम', child: Text('कंडोम')),
-                            DropdownMenuItem(value: 'माला-एन (साप्ताहिक गर्भनिरोधक गोली)', child: Text('माला-एन (साप्ताहिक गर्भनिरोधक गोली)')),
-                            DropdownMenuItem(value: 'गोलियाँ', child: Text('गोलियाँ')),
-                            DropdownMenuItem(value: 'आईयूडी', child: Text('आईयूडी')),
-                            DropdownMenuItem(value: 'अन्य', child: Text('अन्य')),
+                            DropdownMenuItem(value: 'Condom', child: Text('Condom')),
+                            DropdownMenuItem(value: 'Mala -N', child: Text('Mala -N')),
+                            DropdownMenuItem(value: 'Atra injection', child: Text('Atra injection')),
+                            DropdownMenuItem(value: 'Copper -T (IUCD)', child: Text('Copper -T (IUCD)')),
+                            DropdownMenuItem(value: 'Any Other Specify', child: Text('Any Other Specify')),
                           ],
                           onChanged: (v) => context.read<TrackEligibleCoupleBloc>().add(FpMethodChanged(v ?? '')),
                         ),
@@ -187,7 +189,9 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) =>   PreviousVisitsScreen()));
+                    },
                     style: OutlinedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

@@ -28,6 +28,7 @@ class _UpdatedEligibleCoupleListScreenState
       {
         'hhId': 'HH001',
         'RegistrationDate': '10-10-2025',
+        'status' : 'Unprotected',
         'RegistrationType': 'GA',
         'BeneficiaryID': 'VA001',
         'Name': 'Rohit Chavan',
@@ -39,6 +40,7 @@ class _UpdatedEligibleCoupleListScreenState
       },
       {
         'hhId': 'HH002',
+        'status' : 'Unprotected',
         'RegistrationDate': '11-10-2025',
         'RegistrationType': 'GA',
         'BeneficiaryID': 'VA002',
@@ -51,6 +53,7 @@ class _UpdatedEligibleCoupleListScreenState
       },
       {
         'hhId': 'HH003',
+        'status' : 'Unprotected',
         'RegistrationDate': '12-10-2025',
         'RegistrationType': 'GA',
         'BeneficiaryID': 'VA003',
@@ -63,6 +66,7 @@ class _UpdatedEligibleCoupleListScreenState
       },
       {
         'hhId': 'HH004',
+        'status' : 'Unprotected',
         'RegistrationDate': '13-10-2025',
         'RegistrationType': 'GA',
         'BeneficiaryID': 'VA004',
@@ -75,6 +79,7 @@ class _UpdatedEligibleCoupleListScreenState
       },
       {
         'hhId': 'HH005',
+        'status' : 'Unprotected',
         'RegistrationDate': '14-10-2025',
         'RegistrationType': 'GA',
         'BeneficiaryID': 'VA005',
@@ -155,7 +160,7 @@ class _UpdatedEligibleCoupleListScreenState
                 controller: _search,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: t?.eligibleCoupleSearchHint ?? 'Search Updated Eligible Couple',
+                  hintText: t?.updatedEligibleCoupleSearchHint ?? 'Search Updated Eligible Couple',
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
                   fillColor: AppColors.background,
@@ -291,6 +296,23 @@ class _UpdatedEligibleCoupleListScreenState
                       style: TextStyle(color: primary, fontWeight: FontWeight.w600),
                     ),
                   ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      data['status'] ?? '',
+                      style:  TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+
                   const SizedBox(width: 8),
                   SizedBox(
                     width: 60,

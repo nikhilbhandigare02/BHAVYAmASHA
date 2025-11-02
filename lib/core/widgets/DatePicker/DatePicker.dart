@@ -77,7 +77,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     return RichText(
       text: TextSpan(
         style: TextStyle(
-          fontSize: 15.sp,
+          fontSize: 13.sp,
           color: AppColors.onSurfaceVariant,
           //fontWeight: FontWeight.w500,
         ),

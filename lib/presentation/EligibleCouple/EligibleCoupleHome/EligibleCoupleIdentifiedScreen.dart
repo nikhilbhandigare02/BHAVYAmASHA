@@ -105,7 +105,7 @@ class _EligibleCoupleIdentifiedScreenState
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: l10n?.gridAllHousehold ?? 'All Household',
+                hintText: l10n?.searchEligibleCouple ?? 'search Eligible Couple',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -138,27 +138,6 @@ class _EligibleCoupleIdentifiedScreenState
             ),
           ),
 
-          // Bottom Button
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: RoundButton(
-                  title: l10n?.gridRegisterNewHousehold
-                      .toUpperCase() ??
-                      'NEW HOUSEHOLD REGISTRATION',
-                  color: AppColors.primary,
-                  borderRadius: 8,
-                  onPress: () {
-                    Navigator.pushNamed(
-                        context, Route_Names.RegisterNewHousehold);
-                  },
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

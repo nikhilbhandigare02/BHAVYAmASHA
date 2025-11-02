@@ -16,7 +16,6 @@ class ApiDropdown<T> extends StatelessWidget {
   final List<T> selectedValues;
   final Function(List<T>)? onMultiChanged;
 
-  /// 🔹 New parameter to control label font size
   final double? labelFontSize;
 
   const ApiDropdown({

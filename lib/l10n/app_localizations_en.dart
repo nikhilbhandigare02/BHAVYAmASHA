@@ -2025,6 +2025,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchHint => 'Search Registered Child Beneficiary';
 
   @override
+  String get searchEligibleCouple => 'Search Eligible Couple';
+
+  @override
   String get searchHintRegisterChildDueList => 'Child Registered Due Search';
 
   @override
@@ -2247,7 +2250,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updatedEligibleCoupleListSubtitle => 'List of eligible couples';
 
   @override
-  String get updatedEligibleCoupleListTitle => 'Eligible Couple List';
+  String get updatedEligibleCoupleListTitle => 'updated Eligible Couple List ';
 
   @override
   String get updatedEligibleCoupleSearchHint => 'Updated Eligible Couple Search';

@@ -4103,6 +4103,12 @@ abstract class AppLocalizations {
   /// **'Search Registered Child Beneficiary'**
   String get searchHint;
 
+  /// No description provided for @searchEligibleCouple.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Eligible Couple'**
+  String get searchEligibleCouple;
+
   /// No description provided for @searchHintRegisterChildDueList.
   ///
   /// In en, this message translates to:
@@ -4550,7 +4556,7 @@ abstract class AppLocalizations {
   /// No description provided for @updatedEligibleCoupleListTitle.
   ///
   /// In en, this message translates to:
-  /// **'Eligible Couple List'**
+  /// **'updated Eligible Couple List '**
   String get updatedEligibleCoupleListTitle;
 
   /// No description provided for @updatedEligibleCoupleSearchHint.

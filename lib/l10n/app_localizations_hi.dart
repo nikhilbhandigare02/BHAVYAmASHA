@@ -2025,6 +2025,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get searchHint => 'Search by ID/Name/Contact';
 
   @override
+  String get searchEligibleCouple => 'योग्य दम्पति की खोज';
+
+  @override
   String get searchHintRegisterChildDueList => 'देय पंजीकरण खोजें';
 
   @override
