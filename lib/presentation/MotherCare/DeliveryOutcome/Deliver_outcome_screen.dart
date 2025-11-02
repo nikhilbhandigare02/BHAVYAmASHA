@@ -71,7 +71,7 @@ class _DeliveryOutcomeScreenState
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle:  'प्रसव परिणाम सूची',
+        screenTitle:  l10n!.deliveryOutcomeList,
         showBack: true,
 
 
@@ -84,7 +84,7 @@ class _DeliveryOutcomeScreenState
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  'प्रसव परिणाम खोज',
+                hintText:  l10n!.searchDeliveryOutcome,
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
