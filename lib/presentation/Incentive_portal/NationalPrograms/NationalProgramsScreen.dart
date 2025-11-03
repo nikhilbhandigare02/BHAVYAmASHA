@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/Incentive_portal/NationalPrograms/TBScreen.dart';
 import 'package:sizer/sizer.dart';
+import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'AESJEScreen.dart';
 import 'AMBScreen.dart';
 import 'FilariasisScreen.dart';
@@ -15,54 +17,55 @@ import 'ABPMJAYscreen.dart';
 
 
 class NationalProgramsScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> programs = [
-    {
-      'icon': 'assets/images/capsule2.png',
-      'title': 'Tuberculosis Eradication Program',
-      'route': (context) => TbProgramScreen(),
-    },
-    {
-      'icon': 'assets/images/capsule2.png',
-      'title': 'Leprosy Eradication program',
-      'route': (context) => LeprosyScreen(),
-    },
-    {
-      'icon': 'assets/images/capsule2.png',
-      'title': 'Kala-azar Eradication Program',
-      'route': (context) => KalaAzarScreen(),
-    },
-    {
-      'icon': 'assets/images/capsule2.png',
-      'title': 'Malaria Eradication Program',
-      'route': (context) => MalariaScreen(),
-    },
-    {
-      'icon': 'assets/images/capsule2.png',
-      'title': 'Filaria Eradication Program',
-       'route': (context) => FilariasisScreen(),
-    },
-    {
-      'icon': 'assets/images/capsule2.png',
-      'title': 'AES/JE Eradication Program ',
-       'route': (context) => AESJEScreen(),
-    },
-    {
-      'icon': 'assets/images/capsule2.png',
-      'title': 'AMB Eradication Program',
-       'route': (context) => AMBScreen(),
-    },
-    {
-      'icon': 'assets/images/capsule2.png',
-      'title': 'NIDDCP Program',
-      'route': (context) => NIDDCPScreen(),
-    },
-    {
-      'icon': 'assets/images/capsule2.png',
-      'title': 'AB-PMJAY Program',
-      'route': (context) => ABPMJAYScreen(),
-    },
-
-  ];
+  List<Map<String, dynamic>> _getPrograms(BuildContext context) {
+    return [
+      {
+        'icon': 'assets/images/capsule2.png',
+        'title': AppLocalizations.of(context)!.tbEradicationProgram,
+        'route': (context) => TbProgramScreen(),
+      },
+      {
+        'icon': 'assets/images/capsule2.png',
+        'title': AppLocalizations.of(context)!.leprosyEradicationProgram,
+        'route': (context) => LeprosyScreen(),
+      },
+      {
+        'icon': 'assets/images/capsule2.png',
+        'title': AppLocalizations.of(context)!.kalaAzarEradicationProgram,
+        'route': (context) => KalaAzarScreen(),
+      },
+      {
+        'icon': 'assets/images/capsule2.png',
+        'title': AppLocalizations.of(context)!.malariaEradicationProgram,
+        'route': (context) => MalariaScreen(),
+      },
+      {
+        'icon': 'assets/images/capsule2.png',
+        'title': AppLocalizations.of(context)!.filariaEradicationProgram,
+        'route': (context) => FilariasisScreen(),
+      },
+      {
+        'icon': 'assets/images/capsule2.png',
+        'title': AppLocalizations.of(context)!.aesJeEradicationProgram,
+        'route': (context) => AESJEScreen(),
+      },
+      {
+        'icon': 'assets/images/capsule2.png',
+        'title': AppLocalizations.of(context)!.ambEradicationProgram,
+        'route': (context) => AMBScreen(),
+      },
+      {
+        'icon': 'assets/images/capsule2.png',
+        'title': AppLocalizations.of(context)!.niddcpProgram,
+        'route': (context) => NIDDCPScreen(),
+      },
+      {
+        'icon': 'assets/images/capsule2.png',
+        'title': AppLocalizations.of(context)!.abPmjayProgram,
+        'route': (context) => ABPMJAYScreen(),
+      },
+    ];
+  }
 
   NationalProgramsScreen({super.key});
 
@@ -73,16 +76,16 @@ class NationalProgramsScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: Colors.grey[100],
           appBar: AppHeader(
-            screenTitle: 'National Program',
+            screenTitle: AppLocalizations.of(context)!.nationalProgramsTitle,
             showBack: true,
           ),
           body: Padding(
             padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
             child: ListView.separated(
-              itemCount: programs.length,
+              itemCount: _getPrograms(context).length,
               separatorBuilder: (_, __) => SizedBox(height: 1.h),
               itemBuilder: (context, index) {
-                final item = programs[index];
+                final item = _getPrograms(context)[index];
                 return Card(
                   elevation: 2,
                   shape: RoundedRectangleBorder(

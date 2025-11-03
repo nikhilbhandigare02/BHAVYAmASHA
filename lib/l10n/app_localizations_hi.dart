@@ -305,6 +305,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get announcement => 'घोषणा';
 
   @override
+  String get announcements => 'घोषणा';
+
+  @override
+  String get antenatal => 'अगली प्रसव पूर्व तिथि:';
+
+  @override
   String get announcementItem1Body => 'स्थानीय प्राथमिक स्वास्थ्य केंद्र में ब्लॉक क्षेत्र की आशा कार्यकर्ताओं को स्वास्थ्य संबंधी कार्यों के लिए स्मार्ट फोन दिए गए। पीएचसी प्रभारी डॉ. पुरुषोत्तम प्रियदर्शी ने बताया कि ब्लॉक क्षेत्र की कुल 126 आशा कार्यकर्ताओं को हाई-टेक बनाने के लिए स्मार्ट फोन दिए गए हैं। उन्होंने कहा कि अब रजिस्टर में लिखने की आज़ादी मिलेगी। यह मोबाइल विशेष रूप से स्वास्थ्य संबंधी कार्यक्रमों के लिए तैयार किया गया है और इसे किसी अन्य कार्य के लिए उपयोग नहीं किया जा सकता। सभी आशा कार्यकर्ता अपने स्मार्ट फोन से ही मानदेय के लिए क्लेम फॉर्म भेज सकती हैं। इसके आधार पर मानदेय की राशि उनके बैंक खाते में भेजी जाएगी। बीसीएम संजीत कुमार ने बताया कि ब्लॉक क्षेत्र में कुल 120 आशा कार्यकर्ता और 6 फेसिलिटेटर हैं, जिनमें से 122 को स्मार्ट फोन उपलब्ध करा दिए गए हैं।';
 
   @override
@@ -1093,7 +1099,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get dataSavedSuccessfully => 'नवीन घर यशस्वीरित्या जोडले गेले आहे';
+  String get dataSavedSuccessfully => 'डेटा सफलतापूर्वक सहेजा गया!';
 
   @override
   String get closeButton => 'बंद करा';
@@ -2010,7 +2016,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get routineSampoornTikakaran => 'सम्पूर्ण टीकाकरण की संख्या';
 
   @override
-  String get saveButton => 'संरक्षित करें';
+  String get saveButton => 'सहेजें';
 
   @override
   String get saveSuccess => 'Saved successfully';
@@ -3083,6 +3089,45 @@ class AppLocalizationsHi extends AppLocalizations {
   String get confirmYes => 'Yes';
 
   @override
+  String get nationalProgramsTitle => 'राष्ट्रीय कार्यक्रम';
+
+  @override
+  String get tbEradicationProgram => 'क्षय रोग उन्मूलन कार्यक्रम';
+
+  @override
+  String get leprosyEradicationProgram => 'कुष्ठ उन्मूलन कार्यक्रम';
+
+  @override
+  String get kalaAzarEradicationProgram => 'काला-अजार उन्मूलन कार्यक्रम';
+
+  @override
+  String get malariaEradicationProgram => 'मलेरिया उन्मूलन कार्यक्रम';
+
+  @override
+  String get filariaEradicationProgram => 'फाइलेरिया उन्मूलन कार्यक्रम';
+
+  @override
+  String get aesJeEradicationProgram => 'एईएस/जेई उन्मूलन कार्यक्रम';
+
+  @override
+  String get ambEradicationProgram => 'एएमबी उन्मूलन कार्यक्रम';
+
+  @override
+  String get niddcpProgram => 'एनआईडीडीसीपी कार्यक्रम';
+
+  @override
+  String get abPmjayProgram => 'आयुष्मान भारत-पीएमजेएवाई कार्यक्रम';
+
+  @override
+  String get abpmjayScreenTitle => 'आयुष्मान भारत-पीएमजेएवाई कार्यक्रम';
+
+  @override
+  String get abpmjayQuestion1 => 'आयुष्मान भारत-पीएमजेएवाई के तहत, आशा द्वारा सरकारी अस्पतालों में इलाज के लिए लाए गए रोगियों के लिए (जिन्हें अस्पताल में भर्ती होने के बाद चिकित्सा लाभ मिलेगा)';
+
+  @override
+  String get abpmjayDataSaved => 'आयुष्मान भारत-पीएमजेएवाई डेटा सफलतापूर्वक सहेजा गया!';
+
+  @override
   String get visitHbnc => 'एचबीएनसी विजिट फॉर्म';
 
   @override
@@ -3285,4 +3330,19 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get cbacC_workingPollutedIndustries => 'ईंट भट्ठे और कांच उद्योग जैसे गैस और धुएं के प्रदूषण वाले उद्योगों में काम करना';
+
+  @override
+  String get aesJeProgram => 'एईएस/जेई उन्मूलन कार्यक्रम';
+
+  @override
+  String get aesJeScreenTitle => 'एईएस/जेई उन्मूलन कार्यक्रम';
+
+  @override
+  String get aesJeQuestion1 => 'आईआरएस छिड़काव के दौरान 1000 जनसंख्या में समुदाय उत्प्रेरक के रूप में आशा को देय राशि';
+
+  @override
+  String get aesJeQuestion2 => 'आशा द्वारा निकटतम पीएचसी, सीएचसी, रेफरल, डीएच या मेडिकल कॉलेज अस्पताल में भेजे गए रोगी, जिनका अज्ञात एईएस या जापानी इंसेफेलाइटिस (जेई) चिकित्सा अधिकारी द्वारा पुष्टि की गई है';
+
+  @override
+  String get aesJeDataSaved => 'एईएस/जेई डेटा सफलतापूर्वक सहेजा गया!';
 }

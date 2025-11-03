@@ -94,14 +94,16 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppHeader(
         screenTitle: l10n.homeTitle,
         showBack: false,
-        icon1: Icons.search,
+        icon1Image: 'assets/images/search.png',
         onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.GuestBeneficiarySearch),
-        icon2: Icons.notifications,
+        icon2Image: 'assets/images/img_1.png',
         onIcon2Tap: () => print("Notifications tapped"),
-        icon3: Icons.home,
-        onIcon3Tap: () => Navigator.push(
+        icon3Image: 'assets/images/home.png',
+        onIcon3Tap: () => Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) =>   HomeScreen()),
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialTabIndex: 1),
+          ),
         ),
       ),
       drawer: CustomDrawer(),

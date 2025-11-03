@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 
 import '../../../core/widgets/TextField/TextField.dart';
 import 'bloc/aes_je_bloc/aes_je_bloc.dart';
@@ -36,8 +37,8 @@ class AESJEScreen extends StatelessWidget {
 
           // ✅ AES/JE Program Questions
           final List<String> labels = [
-            'Amount payable to ASHA as community catalyst in 1000 population during IRS spraying',
-            'Patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer',
+            AppLocalizations.of(context)!.aesJeQuestion1,
+            AppLocalizations.of(context)!.aesJeQuestion2,
           ];
 
           // ✅ Date setup
@@ -49,7 +50,7 @@ class AESJEScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'AES/JE Eradication Program ',
+              screenTitle: AppLocalizations.of(context)!.aesJeScreenTitle,
               showBack: true,
             ),
             body: Padding(
@@ -169,12 +170,12 @@ class AESJEScreen extends StatelessWidget {
                               alignment: Alignment.centerRight,
                               child: RoundButton(
                                 width: 14.h,
-                                title: 'Save',
+                                title: AppLocalizations.of(context)!.saveButton,
                                 onPress: () {
                                   bloc.add(SaveAesJeData());
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('AES/JE data saved successfully!'),
+                                     SnackBar(
+                                      content: Text(AppLocalizations.of(context)!.aesJeDataSaved),
                                       backgroundColor: Colors.green,
                                     ),
                                   );

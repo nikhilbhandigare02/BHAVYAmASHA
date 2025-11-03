@@ -401,6 +401,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                             CustomTextField(
                               key: ValueKey('member_mobile_${state.mobileNo ?? ''}'),
                               labelText: '${l.mobileLabel} *',
+                              hintText: '${l.mobileLabel} *',
                               keyboardType: TextInputType.number,
                               maxLength: 10,
                               initialValue: state.mobileNo,
@@ -668,6 +669,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     Expanded(
                                       child: CustomTextField(
                                         labelText: l.abhaAddressLabel,
+                                        hintText: l.abhaAddressLabel,
                                         initialValue: state.abhaAddress,
                                         onChanged: (v) => context
                                             .read<AddnewfamilymemberBloc>()
@@ -700,6 +702,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                           _section(
                             CustomTextField(
                               labelText: l.accountNumberLabel,
+                              hintText: l.accountNumberLabel,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateBankAcc(v.trim())),
                             ),
@@ -708,6 +711,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                           _section(
                             CustomTextField(
                               labelText: l.ifscLabel,
+                              hintText: l.ifscLabel,
                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateIfsc(v.trim())),
                             ),
                           ),
@@ -778,11 +782,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                       ],
 
                           // IDs
-                          _section(CustomTextField(labelText: l.voterIdLabel, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateVoterId(v.trim())),)),
+                          _section(CustomTextField(labelText: l.voterIdLabel,hintText: l.voterIdLabel, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateVoterId(v.trim())),)),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          _section(CustomTextField(labelText: l.rationCardIdLabel, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateRationId(v.trim())),)),
+                          _section(CustomTextField(labelText: l.rationCardIdLabel, hintText: l.rationCardIdLabel,onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateRationId(v.trim())),)),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          _section(CustomTextField(labelText: l.personalHealthIdLabel, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdatePhId(v.trim())),)),
+                          _section(CustomTextField(labelText: l.personalHealthIdLabel,hintText: l.personalHealthIdLabel, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdatePhId(v.trim())),)),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           _section(

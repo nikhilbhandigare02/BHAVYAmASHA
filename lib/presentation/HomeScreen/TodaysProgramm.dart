@@ -367,7 +367,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                     ),
                   ),
                   Divider(
-                    color: AppColors.divider, 
+                    color: AppColors.divider,
                     thickness: 1,
                     height: 1,
                   ),

@@ -126,7 +126,7 @@ class _DeliveryOutcomeScreenState
     final Color primary = Theme.of(context).primaryColor;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end, // align CBAC button to right
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         InkWell(
           onTap: () {
@@ -158,7 +158,6 @@ class _DeliveryOutcomeScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header section
                 Container(
                   decoration: const BoxDecoration(
                     color: AppColors.background,

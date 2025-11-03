@@ -47,7 +47,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
   Widget _buildFamilyHeadForm(BuildContext context, AddFamilyHeadState state, AppLocalizations l) {
     return GestureDetector(
       onTap: () {
-        // Dismiss keyboard when tapping outside of text fields
         FocusScope.of(context).unfocus();
       },
       behavior: HitTestBehavior.opaque,
@@ -349,6 +348,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               Expanded(
                 child: CustomTextField(
                   labelText: l.abhaAddressLabel,
+                  hintText: l.abhaAddressLabel,
                   onChanged: (v) =>
                       context.read<AddFamilyHeadBloc>().add(AfhABHAChange(v.trim())),
                 ),

@@ -34,7 +34,8 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
       appBar: AppHeader(
         screenTitle: (l10n?.gridChildCare ?? 'Child Care').toString(),
         showBack: false,
-        icon1: Icons.home,
+          icon1Image: 'assets/images/home.png',
+
         onIcon1Tap: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(

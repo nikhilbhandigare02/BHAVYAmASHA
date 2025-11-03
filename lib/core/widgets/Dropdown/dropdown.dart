@@ -76,7 +76,7 @@ class ApiDropdown<T> extends StatelessWidget {
       onTap: () => _showSelectDialog(context),
       child: AbsorbPointer(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
 
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

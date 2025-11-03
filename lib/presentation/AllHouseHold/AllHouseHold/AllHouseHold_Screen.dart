@@ -158,8 +158,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       appBar: AppHeader(
         screenTitle: l10n?.gridAllHousehold ?? 'All Household',
         showBack: false,
-        icon1: Icons.home,
-        onIcon1Tap: () => Navigator.pushReplacement(
+        icon2Image: 'assets/images/home.png',
+        onIcon2Tap: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => HomeScreen(initialTabIndex: 1),

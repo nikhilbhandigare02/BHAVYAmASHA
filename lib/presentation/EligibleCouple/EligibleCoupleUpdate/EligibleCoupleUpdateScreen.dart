@@ -273,75 +273,60 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
 
 
 
-                            Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(child: Text(t?.totalChildrenBornLabel ?? 'Total number of children born', style: TextStyle(fontSize: 15.sp),)),
-                                  _buildCountBoxField(state.totalChildrenBorn, (v) => bloc.add(TotalChildrenBornChanged(v))),
-                                ],
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(child: Text(t?.totalChildrenBornLabel ?? 'Total number of children born', style: TextStyle(fontSize: 15.sp),)),
+                                _buildCountBoxField(state.totalChildrenBorn, (v) => bloc.add(TotalChildrenBornChanged(v))),
+                              ],
                             ),
                             const SizedBox(height: 8),
 
                             Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                             const SizedBox(height: 8),
 
-                            Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(child: Text(t?.totalLiveChildrenLabel ?? 'Total number of live children',style: TextStyle(fontSize: 15.sp))),
-                                  _buildCountBoxField(state.totalLiveChildren, (v) => bloc.add(TotalLiveChildrenChanged(v))),
-                                ],
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(child: Text(t?.totalLiveChildrenLabel ?? 'Total number of live children',style: TextStyle(fontSize: 15.sp))),
+                                _buildCountBoxField(state.totalLiveChildren, (v) => bloc.add(TotalLiveChildrenChanged(v))),
+                              ],
                             ),
                             const SizedBox(height: 8),
 
                             Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                             const SizedBox(height: 8),
 
-                            Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(child: Text(t?.totalMaleChildrenLabel ?? 'Total number of male children',style: TextStyle(fontSize: 15.sp))),
-                                  _buildCountBoxField(state.totalMaleChildren, (v) => bloc.add(TotalMaleChildrenChanged(v))),
-                                ],
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(child: Text(t?.totalMaleChildrenLabel ?? 'Total number of male children',style: TextStyle(fontSize: 15.sp))),
+                                _buildCountBoxField(state.totalMaleChildren, (v) => bloc.add(TotalMaleChildrenChanged(v))),
+                              ],
                             ),
                             const SizedBox(height: 8),
 
                             Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                             const SizedBox(height: 8),
 
-                            Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(child: Text(t?.totalFemaleChildrenLabel ?? 'Total number of female children',style: TextStyle(fontSize: 15.sp))),
-                                  _buildCountBoxField(state.totalFemaleChildren, (v) => bloc.add(TotalFemaleChildrenChanged(v))),
-                                ],
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(child: Text(t?.totalFemaleChildrenLabel ?? 'Total number of female children',style: TextStyle(fontSize: 15.sp))),
+                                _buildCountBoxField(state.totalFemaleChildren, (v) => bloc.add(TotalFemaleChildrenChanged(v))),
+                              ],
                             ),
                             const SizedBox(height: 8),
 
                             Divider(color: AppColors.divider, thickness: 0.5,height: 0,),
                             const SizedBox(height: 8),
 
-                            Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(child: Text(t?.youngestChildAgeLabel ?? 'Age of youngest child')),
-                                  _buildCountBoxField(state.youngestChildAge, (v) => bloc.add(YoungestChildAgeChanged(v))),
-                                ],
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(child: Text(t?.youngestChildAgeLabel ?? 'Age of youngest child')),
+                                _buildCountBoxField(state.youngestChildAge, (v) => bloc.add(YoungestChildAgeChanged(v))),
+                              ],
                             ),
                             const SizedBox(height: 8),
 

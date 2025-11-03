@@ -683,6 +683,18 @@ abstract class AppLocalizations {
   /// **'Announcements List'**
   String get announcement;
 
+  /// No description provided for @announcements.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement'**
+  String get announcements;
+
+  /// No description provided for @antenatal.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Antenatal Date:'**
+  String get antenatal;
+
   /// No description provided for @announcementItem1Body.
   ///
   /// In en, this message translates to:
@@ -2246,7 +2258,7 @@ abstract class AppLocalizations {
   /// No description provided for @dataSavedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'New house has been added successfully'**
+  /// **'Data saved successfully!'**
   String get dataSavedSuccessfully;
 
   /// No description provided for @closeButton.
@@ -4556,7 +4568,7 @@ abstract class AppLocalizations {
   /// No description provided for @updatedEligibleCoupleListTitle.
   ///
   /// In en, this message translates to:
-  /// **'updated Eligible Couple List '**
+  /// **'Updated Eligible Couple List '**
   String get updatedEligibleCoupleListTitle;
 
   /// No description provided for @updatedEligibleCoupleSearchHint.
@@ -6215,6 +6227,84 @@ abstract class AppLocalizations {
   /// **'Yes'**
   String get confirmYes;
 
+  /// No description provided for @nationalProgramsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'National Programs'**
+  String get nationalProgramsTitle;
+
+  /// No description provided for @tbEradicationProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuberculosis Eradication Program'**
+  String get tbEradicationProgram;
+
+  /// No description provided for @leprosyEradicationProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Leprosy Eradication Program'**
+  String get leprosyEradicationProgram;
+
+  /// No description provided for @kalaAzarEradicationProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Kala-azar Eradication Program'**
+  String get kalaAzarEradicationProgram;
+
+  /// No description provided for @malariaEradicationProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Malaria Eradication Program'**
+  String get malariaEradicationProgram;
+
+  /// No description provided for @filariaEradicationProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Filaria Eradication Program'**
+  String get filariaEradicationProgram;
+
+  /// No description provided for @aesJeEradicationProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'AES/JE Eradication Program'**
+  String get aesJeEradicationProgram;
+
+  /// No description provided for @ambEradicationProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'AMB Eradication Program'**
+  String get ambEradicationProgram;
+
+  /// No description provided for @niddcpProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'NIDDCP Program'**
+  String get niddcpProgram;
+
+  /// No description provided for @abPmjayProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'AB-PMJAY Program'**
+  String get abPmjayProgram;
+
+  /// No description provided for @abpmjayScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AB-PMJAY Program'**
+  String get abpmjayScreenTitle;
+
+  /// No description provided for @abpmjayQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'Under AB-PMJAY, for patients brought by Asha for treatment in government hospitals (who will get medical benefits after getting admitted in the hospital)'**
+  String get abpmjayQuestion1;
+
+  /// No description provided for @abpmjayDataSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'AB-PMJAY data saved successfully!'**
+  String get abpmjayDataSaved;
+
   /// No description provided for @visitHbnc.
   ///
   /// In en, this message translates to:
@@ -6622,6 +6712,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Working in industries with gas and smoke pollution such as brick kiln and glass industry etc.'**
   String get cbacC_workingPollutedIndustries;
+
+  /// No description provided for @aesJeProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'AES/JE Eradication Program'**
+  String get aesJeProgram;
+
+  /// No description provided for @aesJeScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AES/JE Eradication Program'**
+  String get aesJeScreenTitle;
+
+  /// No description provided for @aesJeQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount payable to ASHA as community catalyst in 1000 population during IRS spraying'**
+  String get aesJeQuestion1;
+
+  /// No description provided for @aesJeQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'Patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer'**
+  String get aesJeQuestion2;
+
+  /// No description provided for @aesJeDataSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'AES/JE data saved successfully!'**
+  String get aesJeDataSaved;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
