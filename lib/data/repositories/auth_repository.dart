@@ -11,7 +11,6 @@ class AuthRepository {
 
   Future<LoginResponseModel> login(String username, String password) async {
     try {
-      // Create the request body
       final requestBody = {
         'username': username.trim(),
         'password': password.trim(),
@@ -20,7 +19,6 @@ class AuthRepository {
       print('Login Request: ${Endpoints.login}');
       print('Request Body: ${jsonEncode(requestBody)}');
 
-      // Make the API call using NetworkServiceApi
       final response = await _apiService.postApi(
         Endpoints.login,
         requestBody,
@@ -30,17 +28,14 @@ class AuthRepository {
         },
       );
       
-      // Log the raw response
       print('Raw Login Response (Type: ${response.runtimeType}): $response');
       
-      // Ensure response is a Map
-      final responseData = response is Map<String, dynamic> 
+      final responseData = response is Map<String, dynamic>
           ? response 
           : (response is String ? jsonDecode(response) : response);
       
       print('Processed Response: $responseData');
       
-      // Parse the response
       final loginResponse = LoginResponseModel.fromJson(
         responseData is Map<String, dynamic> 
             ? responseData 
@@ -54,7 +49,7 @@ class AuthRepository {
       return loginResponse;
       
     } on AppExceptions {
-      rethrow; // Re-throw any AppExceptions from NetworkServiceApi
+      rethrow;
     } catch (e) {
       throw AppExceptions('An error occurred during login. Please try again.');
     }

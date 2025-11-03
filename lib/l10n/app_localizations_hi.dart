@@ -308,6 +308,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get announcements => 'घोषणा';
 
   @override
+  String get selectOptions => 'विकल्प चुनें';
+
+  @override
   String get antenatal => 'अगली प्रसव पूर्व तिथि:';
 
   @override
@@ -3345,4 +3348,52 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get aesJeDataSaved => 'एईएस/जेई डेटा सफलतापूर्वक सहेजा गया!';
+
+  @override
+  String get ambProgram => 'एएमबी उन्मूलन कार्यक्रम';
+
+  @override
+  String get ambScreenTitle => 'एएमबी उन्मूलन कार्यक्रम';
+
+  @override
+  String get ambQuestion1 => 'आशा द्वारा अपने क्षेत्र की प्रजनन आयु (20 से 49 वर्ष) की गर्भवती या यात्रा करने वाली महिलाओं का लाइन लिस्टिंग रजिस्टर में रखरखाव और उन महिलाओं को प्रति माह 4 आईएफए लाल गोलियों के वितरण के लिए देय राशि।';
+
+  @override
+  String get ambQuestion2 => 'आशा क्षेत्र के 6 महीने से 59 महीने तक के बच्चों के लाइन लिस्टिंग रजिस्टर को नियमित करने और उन बच्चों के अभिभावकों/माता-पिता को आईएफए सिरप वितरित करने के लिए देय राशि।';
+
+  @override
+  String get ambDataSaved => 'एएमबी डेटा सफलतापूर्वक सहेजा गया!';
+
+  @override
+  String get filariasisProgram => 'फाइलेरिया उन्मूलन कार्यक्रम';
+
+  @override
+  String get filariasisScreenTitle => 'फाइलेरिया उन्मूलन कार्यक्रम';
+
+  @override
+  String get filariasisQuestion1 => 'फाइलेरिया चक्र के दौरान आशा द्वारा प्रति 50 घरों के लिए एमडीए कार्यक्रम के तहत दवा का सामने से वितरण (एक हजार जनसंख्या को कवर करने के लिए)';
+
+  @override
+  String get kalaAzarProgram => 'काला-अजार उन्मूलन कार्यक्रम';
+
+  @override
+  String get kalaAzarScreenTitle => 'काला-अजार उन्मूलन कार्यक्रम';
+
+  @override
+  String get kalaAzarQuestion1 => 'आशा को काला-अजार रोगी की खोज, पीएचसी, जांच, पूर्ण उपचार, 6 महीने तक निगरानी के लिए देय राशि।';
+
+  @override
+  String get kalaAzarQuestion2 => 'मुख्यमंत्री काला-अजार राहत योजना के तहत सरकारी अस्पताल में काला-अजार रोगियों के उपचार पूरा होने पर आशा को देय राशि';
+
+  @override
+  String get kalaAzarDataSaved => 'काला-अजार स्क्रीनिंग डेटा सफलतापूर्वक सहेजा गया!';
+
+  @override
+  String get niddcpScreenTitle => 'एनआईडीडीसीपी कार्यक्रम';
+
+  @override
+  String get niddcpQuestion1 => 'एनआईडीडीसीपी के तहत आशा को प्रोत्साहन राशि';
+
+  @override
+  String get niddcpDataSaved => 'एनआईडीडीसीपी डेटा सफलतापूर्वक सहेजा गया!';
 }

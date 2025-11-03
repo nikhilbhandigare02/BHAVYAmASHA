@@ -308,6 +308,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get announcements => 'Announcement';
 
   @override
+  String get selectOptions => 'Select Options';
+
+  @override
   String get antenatal => 'Next Antenatal Date:';
 
   @override
@@ -3345,4 +3348,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aesJeDataSaved => 'AES/JE data saved successfully!';
+
+  @override
+  String get ambProgram => 'AMB Eradication Program';
+
+  @override
+  String get ambScreenTitle => 'AMB Eradication Program';
+
+  @override
+  String get ambQuestion1 => 'ASHA women of reproductive age (20 to 49 years) in their area who are pregnant or traveling maintenance in their Line Listing Register and the amount due for distribution of 4 IFA red pills per month to those women.';
+
+  @override
+  String get ambQuestion2 => 'Amount payable for regularizing the line listing register of the children of ASHA area from 6 months to 59 months and for distribution of syrup of IFA to those guardians/parents of the children.';
+
+  @override
+  String get ambDataSaved => 'AMB data saved successfully!';
+
+  @override
+  String get filariasisProgram => 'Filariasis Eradication Program';
+
+  @override
+  String get filariasisScreenTitle => 'Filariasis Eradication Program';
+
+  @override
+  String get filariasisQuestion1 => 'Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)';
+
+  @override
+  String get kalaAzarProgram => 'Kala-azar Eradication Program';
+
+  @override
+  String get kalaAzarScreenTitle => 'Kala-azar Eradication Program';
+
+  @override
+  String get kalaAzarQuestion1 => 'Amount payable to ASHA for search of Kala-azar patient, to PHC, investigation, complete treatment, monitoring for 6 months.';
+
+  @override
+  String get kalaAzarQuestion2 => 'ASHA on completion of treatment of Kala-azar patients in the government hospital under the chief minister Kala-azar Relief Scheme';
+
+  @override
+  String get kalaAzarDataSaved => 'Kala-azar screening data saved successfully!';
+
+  @override
+  String get niddcpScreenTitle => 'NIDDCP Program';
+
+  @override
+  String get niddcpQuestion1 => 'ASHA Incentive under NIDDCP';
+
+  @override
+  String get niddcpDataSaved => 'NIDDCP data saved successfully!';
 }

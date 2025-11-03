@@ -228,7 +228,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   height: 44,
                   onPress: () {
                     if (disableNext) {
-                      // ✅ Show snackbar instead of disabling button
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(

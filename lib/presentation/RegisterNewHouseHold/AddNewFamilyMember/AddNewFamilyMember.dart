@@ -31,8 +31,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isEdit = false;
   bool _argsHandled = false;
-  String _fatherOption = 'Select';
-  String _motherOption = 'Select';
+  String _fatherOption = '';
+  String _motherOption = '';
 
   int _ageFromDob(DateTime dob) => DateTime.now().year - dob.year;
 
@@ -464,8 +464,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     children: [
                                       Expanded(
                                         child: CustomTextField(
-                                          labelText: 'Years',
-                                          hintText: 'Years',
+                                          labelText: l.years,
+                                          hintText: l.years,
                                           initialValue: state.updateYear ?? '',
                                           keyboardType: TextInputType.number,
                                           onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateYearChanged(v.trim())),
@@ -483,8 +483,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       // --- Months ---
                                       Expanded(
                                         child: CustomTextField(
-                                          labelText: 'Months',
-                                          hintText: 'Months',
+                                          labelText: l.months,
+                                          hintText: l.months,
                                           initialValue: state.updateMonth ?? '',
                                           keyboardType: TextInputType.number,
                                           onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateMonthChanged(v.trim())),
@@ -501,8 +501,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                                       Expanded(
                                         child: CustomTextField(
-                                          labelText: 'Days',
-                                          hintText: 'Days',
+                                          labelText: l.days,
+                                          hintText: l.days,
                                           initialValue: state.updateDay ?? '',
                                           keyboardType: TextInputType.number,
                                           onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateDayChanged(v.trim())),

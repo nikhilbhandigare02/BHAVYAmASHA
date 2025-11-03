@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 
 import '../../../core/widgets/TextField/TextField.dart';
 import 'bloc/amb_bloc/amb_bloc.dart';
@@ -36,8 +37,8 @@ class AMBScreen extends StatelessWidget {
 
           // ✅ AMB Program Questions
           final List<String> labels = [
-            'ASHA women of reproductive age (20 to 49 years) in their area who are pregnant or traveling maintenance in their Line Listing Register and the amount due for distribution of 4 IFA red pills per month to those women.',
-            'Amount payable for regularizing the line listing register of the children of ASHA area from 6 months to 59 months and for distribution of syrup of IFA to those guardians/parents of the children.',
+            AppLocalizations.of(context)!.ambQuestion1,
+            AppLocalizations.of(context)!.ambQuestion2,
           ];
 
           // ✅ Date setup
@@ -49,7 +50,7 @@ class AMBScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'AMB Eradication Program',
+              screenTitle: AppLocalizations.of(context)!.ambScreenTitle,
               showBack: true,
             ),
             body: Padding(
@@ -168,12 +169,12 @@ class AMBScreen extends StatelessWidget {
                               alignment: Alignment.centerRight,
                               child: RoundButton(
                                 width: 14.h,
-                                title: 'Save',
+                                title: AppLocalizations.of(context)!.saveButton,
                                 onPress: () {
                                   bloc.add(SaveAmbData());
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('AMB data saved successfully!'),
+                                     SnackBar(
+                                      content: Text(AppLocalizations.of(context)!.ambDataSaved),
                                       backgroundColor: Colors.green,
                                     ),
                                   );

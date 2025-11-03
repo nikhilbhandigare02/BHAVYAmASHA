@@ -397,11 +397,11 @@ class _PartATab extends StatelessWidget {
         final bloc = context.read<CbacFormBloc>();
 
         final age = state.data['partA.age'] as String?;
-        final tobacco = state.data['partA.tobacco'] as String?; // Yes/No
-        final alcohol = state.data['partA.alcohol'] as String?; // Yes/No
-        final activity = state.data['partA.activity'] as String?; // Yes/No (Yes = meets 150m)
-        final waist = state.data['partA.waist'] as String?; // 80 or less / 81-90 / 90+ (dropdown)
-        final familyHx = state.data['partA.familyHistory'] as String?; // Yes/No
+        final tobacco = state.data['partA.tobacco'] as String?;
+        final alcohol = state.data['partA.alcohol'] as String?;
+        final activity = state.data['partA.activity'] as String?;
+        final waist = state.data['partA.waist'] as String?;
+        final familyHx = state.data['partA.familyHistory'] as String?;
         final l10n = AppLocalizations.of(context)!;
 
         Widget header() => Row(
@@ -412,7 +412,7 @@ class _PartATab extends StatelessWidget {
               ],
             );
         Widget rowScore(int score) => SizedBox(
-              // width: 28,
+              width: 28,
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text('$score', style: const TextStyle(color: Colors.black54)),
@@ -506,7 +506,6 @@ class _PartATab extends StatelessWidget {
               score: scoreAge,
             ),
 
-            // Tobacco row
             qRow(
               question: l10n.cbacA_tobaccoQ,
               items: itemsTobacco,

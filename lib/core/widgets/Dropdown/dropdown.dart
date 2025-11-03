@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class ApiDropdown<T> extends StatelessWidget {
   final String? labelText;
   final List<T> items;
@@ -227,7 +229,7 @@ class ApiDropdown<T> extends StatelessWidget {
 
   Future<void> _showMultiSelectDialog(BuildContext context) async {
     List<T> tempValues = List<T>.from(selectedValues);
-
+  final l10n = AppLocalizations.of(context);
     await showDialog<List<T>>(
       context: context,
       barrierDismissible: false,
@@ -239,7 +241,7 @@ class ApiDropdown<T> extends StatelessWidget {
           title: Column(
             children: <Widget>[
               Text(
-                (labelText ?? 'Select Options').replaceAll(' *', ''),
+                (labelText ?? l10n!.selectOption).replaceAll(' *', ''),
                 style: TextStyle(
                   fontSize: labelFontSize ?? 16.sp, // ✅ applied here too
                   fontWeight: FontWeight.w600,
