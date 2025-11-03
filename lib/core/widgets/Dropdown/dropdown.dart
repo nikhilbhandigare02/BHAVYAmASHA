@@ -34,7 +34,7 @@ class ApiDropdown<T> extends StatelessWidget {
     this.multiSelect = false,
     this.selectedValues = const [],
     this.onMultiChanged,
-    this.labelFontSize, // ✅ new param
+    this.labelFontSize,
   });
 
   Widget? get _labelWidget {
@@ -48,7 +48,7 @@ class ApiDropdown<T> extends StatelessWidget {
     return RichText(
       text: TextSpan(
         style: TextStyle(
-          fontSize: labelFontSize ?? 15.sp, // ✅ configurable
+          fontSize: labelFontSize ?? 15.sp,
           color: AppColors.onSurfaceVariant,
         ),
         children: [

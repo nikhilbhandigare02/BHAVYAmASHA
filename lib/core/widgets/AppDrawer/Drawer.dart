@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
@@ -41,9 +43,31 @@ class _CustomDrawerState extends State<CustomDrawer> {
     }
     
     try {
-      print('Loading user data...');
+      developer.log('Loading user data from secure storage...', name: 'Drawer');
       final data = await SecureStorageService.getCurrentUserData();
-      print('Loaded user data: $data');
+      developer.log('User data loaded: ${data != null}', name: 'Drawer');
+      
+      if (data == null || data.isEmpty) {
+        developer.log('No user data found in secure storage, trying legacy format...', name: 'Drawer');
+        // Try to get legacy format data
+        final legacyData = await SecureStorageService.getUserData();
+        if (legacyData != null && legacyData.isNotEmpty) {
+          try {
+            final parsedData = jsonDecode(legacyData);
+            if (parsedData is Map<String, dynamic>) {
+              if (mounted) {
+                setState(() {
+                  userData = parsedData;
+                  isLoading = false;
+                });
+                return;
+              }
+            }
+          } catch (e) {
+            developer.log('Error parsing legacy user data: $e', name: 'Drawer', error: e);
+          }
+        }
+      }
       
       if (mounted) {
         setState(() {
@@ -52,7 +76,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         });
       }
     } catch (e) {
-      print('Error in _loadUserData: $e');
+      developer.log('Error in _loadUserData: $e', name: 'Drawer', error: e);
       if (mounted) {
         setState(() {
           isLoading = false;
@@ -95,9 +119,33 @@ class _CustomDrawerState extends State<CustomDrawer> {
   String _appVersion = ''; // Default version
 
 
+  Widget _buildLoadingState() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 2.h),
+        child: CircularProgressIndicator(strokeWidth: 2.0),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 1.h),
+      child: Text(
+        message,
+        style: TextStyle(
+          color: Colors.orange,
+          fontSize: 12.sp,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     return Drawer(
       backgroundColor: Colors.white,
       child: SafeArea(
@@ -172,36 +220,32 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (isLoading)
-                          const Center(child: CircularProgressIndicator())
-                        else if (userData != null) ...[                          
-                          _UserInfoRow(
-                            label: l10n.userNameLabel, 
-                            value: _getFullName(),
-                          ),
-                          _UserInfoRow(
-                            label: l10n.userRoleLabel, 
-                            value: 'ASHA Worker', // Default role, adjust as needed
-                          ),
-                          _UserInfoRow(
-                            label: l10n.userVillageLabel, 
-                            value: _getWorkingLocation('village'),
-                          ),
-                          _UserInfoRow(
-                            label: l10n.userHscLabel, 
-                            value: _getWorkingLocation('hsc_name'),
-                          ),
-                          _UserInfoRow(
-                            label: l10n.userHfrIdLabel, 
-                            value: _getWorkingLocation('hsc_hfr_id'),
-                          ),
-                        ] else
-                          Text(
-                            'Failed to load user data',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                              fontSize: 12.sp,
+                          _buildLoadingState()
+                        else if (userData != null && userData!.isNotEmpty) 
+                          ...[
+                            _UserInfoRow(
+                              label: l10n.userNameLabel, 
+                              value: _getFullName(),
                             ),
-                          ),
+                            _UserInfoRow(
+                              label: l10n.userRoleLabel, 
+                              value: userData!['role_name']?.toString() ?? 'ASHA Worker',
+                            ),
+                            _UserInfoRow(
+                              label: l10n.userVillageLabel, 
+                              value: _getWorkingLocation('village'),
+                            ),
+                            _UserInfoRow(
+                              label: l10n.userHscLabel, 
+                              value: _getWorkingLocation('hsc_name'),
+                            ),
+                            _UserInfoRow(
+                              label: l10n.userHfrIdLabel, 
+                              value: _getWorkingLocation('hsc_hfr_id'),
+                            ),
+                          ]
+                        else
+                          _buildErrorState('User data not available'),
                         SizedBox(height: 1.h),
                         Text(
                           _appVersion,

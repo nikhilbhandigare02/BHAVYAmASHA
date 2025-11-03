@@ -4094,7 +4094,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveButton.
   ///
   /// In en, this message translates to:
-  /// **'Save'**
+  /// **'SAVE'**
   String get saveButton;
 
   /// No description provided for @saveSuccess.
@@ -6749,6 +6749,7 @@ abstract class AppLocalizations {
   /// **'AES/JE data saved successfully!'**
   String get aesJeDataSaved;
 
+<<<<<<< HEAD
   /// No description provided for @ambProgram.
   ///
   /// In en, this message translates to:
@@ -6844,6 +6845,133 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'NIDDCP data saved successfully!'**
   String get niddcpDataSaved;
+=======
+  /// No description provided for @trackingDueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking Due'**
+  String get trackingDueTitle;
+
+  /// No description provided for @birthDoses.
+  ///
+  /// In en, this message translates to:
+  /// **'BIRTH DOSES'**
+  String get birthDoses;
+
+  /// No description provided for @sixWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'6 WEEK'**
+  String get sixWeek;
+
+  /// No description provided for @tenWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'10 WEEK'**
+  String get tenWeek;
+
+  /// No description provided for @fourteenWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'14 WEEK'**
+  String get fourteenWeek;
+
+  /// No description provided for @nineMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'9 MONTHS'**
+  String get nineMonths;
+
+  /// No description provided for @sixteenToTwentyFourMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'16-24 MONTHS'**
+  String get sixteenToTwentyFourMonths;
+
+  /// No description provided for @fiveToSixYear.
+  ///
+  /// In en, this message translates to:
+  /// **'5-6 YEAR'**
+  String get fiveToSixYear;
+
+  /// No description provided for @tenYear.
+  ///
+  /// In en, this message translates to:
+  /// **'10 YEAR'**
+  String get tenYear;
+
+  /// No description provided for @sixteenYear.
+  ///
+  /// In en, this message translates to:
+  /// **'16 YEAR'**
+  String get sixteenYear;
+
+  /// No description provided for @dateOfVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of visit'**
+  String get dateOfVisit;
+
+  /// No description provided for @weightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (1.2–90)kg'**
+  String get weightLabel;
+
+  /// No description provided for @enterWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter weight'**
+  String get enterWeight;
+
+  /// No description provided for @doseTableDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date'**
+  String get doseTableDueDate;
+
+  /// No description provided for @doseTableActualDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual Date'**
+  String get doseTableActualDate;
+
+  /// No description provided for @datePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'dd-mm-yyyy'**
+  String get datePlaceholder;
+
+  /// No description provided for @contentComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Coming Soon...'**
+  String get contentComingSoon;
+
+  /// No description provided for @anyOtherSpecify.
+  ///
+  /// In en, this message translates to:
+  /// **'Any other (specify)'**
+  String get anyOtherSpecify;
+
+  /// No description provided for @sixWeekDoses.
+  ///
+  /// In en, this message translates to:
+  /// **'6 Week Doses'**
+  String get sixWeekDoses;
+
+  /// No description provided for @tenWeekDoses.
+  ///
+  /// In en, this message translates to:
+  /// **'10 Week Doses'**
+  String get tenWeekDoses;
+
+  /// No description provided for @fourteenWeekDoses.
+  ///
+  /// In en, this message translates to:
+  /// **'14 Week Doses'**
+  String get fourteenWeekDoses;
+>>>>>>> 9f2a034e02f342ea81ecc20d1a6cbdc2939debdf
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

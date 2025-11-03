@@ -290,3 +290,10 @@ class DcmMobileChanged extends ProfileEvent {
   @override
   List<Object?> get props => [value];
 }
+
+class UpdateProfileState extends ProfileEvent {
+  final ProfileState newState;
+  const UpdateProfileState(this.newState);
+  @override
+  List<Object?> get props => [newState];
+}

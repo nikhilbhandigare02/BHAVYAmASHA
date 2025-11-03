@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:medixcel_new/core/error/Exception/app_exception.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import '../../../core/utils/enums.dart';
+import '../../../data/models/auth/login_response_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 
 part 'login_event.dart';
@@ -66,68 +67,48 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         state.password.trim(),
       );
 
-      print('Login response received. Success: ${response.success}');
-      print('Token: ${response.token}');
-      print('User Data: ${response.data}');
+      final loginResponse = response['loginResponse'] as LoginResponseModel;
+      final isNewUser = response['isNewUser'] as bool? ?? true;
+      final userData = response['user'] as Map<String, dynamic>?;
 
-      if (response.success) {
+      print('Login response received. Success: ${loginResponse.success}');
+      print('Token: ${loginResponse.token}');
+      print('User Data: ${loginResponse.data}');
+      print('Is New User: $isNewUser');
+
+      if (loginResponse.success) {
         await SecureStorageService.setLoginFlag(1);
         
         // Save token to secure storage
-        if (response.token != null) {
-          await SecureStorageService.saveToken(response.token!);
+        if (loginResponse.token != null) {
+          await SecureStorageService.saveToken(loginResponse.token!);
           print('Token saved successfully');
           
-          // Save user data with unique key if available
-          if (response.data != null) {
-            try {
-              print('Saving user data: ${response.data}');
-              final userData = response.data!;
-              final uniqueKey = userData['unique_key'] ?? 
-                              userData['id']?.toString() ?? 
-                              userData['username'] ?? 
-                              'default_key';
-              
-              print('Using unique key: $uniqueKey');
-              await SecureStorageService.saveUserDataWithKey(uniqueKey, userData);
-              
-              // Verify data was saved
-              final savedData = await SecureStorageService.getCurrentUserData();
-              print('Verification - Retrieved saved data: $savedData');
-            } catch (e) {
-              print('Error saving user data: $e');
-              // Don't fail the login if we can't save user data
-            }
-          } else {
-            print('No user data in response');
-          }
+          // Update state with login success and user status
+          emit(state.copyWith(
+            postApiStatus: PostApiStatus.success,
+            isNewUser: isNewUser,
+          ));
+          
+          // Navigation will be handled in the UI based on isNewUser
         } else {
-          print('No token in response');
+          emit(state.copyWith(
+            postApiStatus: PostApiStatus.error,
+            error: 'No authentication token received',
+          ));
         }
-        
-        emit(state.copyWith(
-          postApiStatus: PostApiStatus.success,
-          error: '',
-          showValidationErrors: false,
-        ));
       } else {
         emit(state.copyWith(
           postApiStatus: PostApiStatus.error,
-          error: response.msg ?? 'Login failed',
-          showValidationErrors: true,
+          error: loginResponse.msg ?? 'Login failed',
         ));
       }
-    } on AppExceptions catch (e) {
-      emit(state.copyWith(
-        postApiStatus: PostApiStatus.error,
-        error: e.toString(),
-        showValidationErrors: true,
-      ));
     } catch (e) {
+      print('Login error: $e');
       emit(state.copyWith(
         postApiStatus: PostApiStatus.error,
-        error: 'An unexpected error occurred. Please try again.',
-        showValidationErrors: true,
+        error: 'An error occurred during login. Please try again.',
       ));
     }
-  }}
+  }
+}

@@ -1,7 +1,7 @@
 class UsersTable {
   static const table = 'users';
 
-  static const create = '''
+  static const create = ''' 
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_name TEXT,

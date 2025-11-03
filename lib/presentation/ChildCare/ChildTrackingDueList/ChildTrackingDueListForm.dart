@@ -1,6 +1,7 @@
+
 import 'package:flutter/material.dart';
- import 'package:medixcel_new/core/config/themes/CustomColors.dart';
- import '../../../core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
 import 'case_closure_widget.dart';
@@ -15,26 +16,58 @@ class ChildTrackingDueListForm extends StatefulWidget {
 class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isCaseClosureChecked = false;
-  String? _selectedClosureReason;
+  final Map<int, Map<String, dynamic>> _tabCaseClosureState = {};
+  final Map<int, TextEditingController> _otherCauseControllers = {};
+  final Map<int, TextEditingController> _otherReasonControllers = {};
 
-  DateTime? _dateOfDeath;
-  String? _probableCauseOfDeath;
-  String? _deathPlace;
-  String? _reasonOfDeath;
-  
+  void _initializeTabState(int tabIndex) {
+    _tabCaseClosureState[tabIndex] ??= {
+      'isCaseClosureChecked': false,
+      'selectedClosureReason': null,
+      'migrationType': null,
+      'dateOfDeath': null,
+      'probableCauseOfDeath': null,
+      'deathPlace': null,
+      'reasonOfDeath': null,
+      'showOtherCauseField': false,
+    };
+    _otherCauseControllers[tabIndex] ??= TextEditingController();
+    _otherReasonControllers[tabIndex] ??= TextEditingController();
+  }
 
-  String? _migrationType;
+  bool _getIsCaseClosureChecked(int tabIndex) =>
+      _tabCaseClosureState[tabIndex]?['isCaseClosureChecked'] ?? false;
+  String? _getSelectedClosureReason(int tabIndex) =>
+      _tabCaseClosureState[tabIndex]?['selectedClosureReason'];
+  String? _getMigrationType(int tabIndex) =>
+      _tabCaseClosureState[tabIndex]?['migrationType'];
+  DateTime? _getDateOfDeath(int tabIndex) =>
+      _tabCaseClosureState[tabIndex]?['dateOfDeath'];
+  String? _getProbableCauseOfDeath(int tabIndex) =>
+      _tabCaseClosureState[tabIndex]?['probableCauseOfDeath'];
+  String? _getDeathPlace(int tabIndex) =>
+      _tabCaseClosureState[tabIndex]?['deathPlace'];
+  String? _getReasonOfDeath(int tabIndex) =>
+      _tabCaseClosureState[tabIndex]?['reasonOfDeath'];
+  bool _getShowOtherCauseField(int tabIndex) =>
+      _tabCaseClosureState[tabIndex]?['showOtherCauseField'] ?? false;
 
-  final TextEditingController _otherReasonController = TextEditingController();
+  void _updateTabState(int tabIndex, String key, dynamic value) {
+    setState(() {
+      _initializeTabState(tabIndex);
+      _tabCaseClosureState[tabIndex]![key] = value;
+    });
+  }
 
-  TextEditingController _otherCauseController = TextEditingController();
-  bool _showOtherCauseField = false;
-  
   @override
   void dispose() {
-    _otherCauseController.dispose();
-    _otherReasonController.dispose();
+    for (var c in _otherCauseControllers.values) {
+      c.dispose();
+    }
+    for (var c in _otherReasonControllers.values) {
+      c.dispose();
+    }
+    _tabController.dispose();
     super.dispose();
   }
   final List<String> tabs = [
@@ -56,6 +89,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildBirthDoseTab() {
+    final tabIndex = 0; // Birth Dose tab
+    _initializeTabState(tabIndex);
     return SafeArea(
       child: Column(
         children: [
@@ -87,78 +122,63 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CaseClosureWidget(
-                        isCaseClosureChecked: _isCaseClosureChecked,
-                        selectedClosureReason: _selectedClosureReason,
-                        migrationType: _migrationType,
-                        dateOfDeath: _dateOfDeath,
-                        probableCauseOfDeath: _probableCauseOfDeath,
-                        deathPlace: _deathPlace,
-                        reasonOfDeath: _reasonOfDeath,
-                        showOtherCauseField: _showOtherCauseField,
-                        otherCauseController: _otherCauseController,
-                        otherReasonController: _otherReasonController,
+                        isCaseClosureChecked: _getIsCaseClosureChecked(tabIndex),
+                        selectedClosureReason: _getSelectedClosureReason(tabIndex),
+                        migrationType: _getMigrationType(tabIndex),
+                        dateOfDeath: _getDateOfDeath(tabIndex),
+                        probableCauseOfDeath: _getProbableCauseOfDeath(tabIndex),
+                        deathPlace: _getDeathPlace(tabIndex),
+                        reasonOfDeath: _getReasonOfDeath(tabIndex),
+                        showOtherCauseField: _getShowOtherCauseField(tabIndex),
+                        otherCauseController: _otherCauseControllers[tabIndex]!,
+                        otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          setState(() {
-                            _isCaseClosureChecked = value;
-                            if (!value) {
-                              _selectedClosureReason = null;
-                              _migrationType = null;
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                              _otherReasonController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
+                          if (!value) {
+                            _updateTabState(tabIndex, 'selectedClosureReason', null);
+                            _updateTabState(tabIndex, 'migrationType', null);
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                            _otherReasonControllers[tabIndex]!.clear();
+                          }
                         },
                         onClosureReasonChanged: (value) {
-                          setState(() {
-                            _selectedClosureReason = value;
-                            if (value != 'Death') {
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'selectedClosureReason', value);
+                          if (value != 'Death') {
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onMigrationTypeChanged: (value) {
-                          setState(() {
-                            _migrationType = value;
-                          });
+                          _updateTabState(tabIndex, 'migrationType', value);
                         },
                         onDateOfDeathChanged: (value) {
-                          setState(() {
-                            _dateOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'dateOfDeath', value);
                         },
                         onProbableCauseChanged: (value) {
-                          setState(() {
-                            _probableCauseOfDeath = value;
-                            _showOtherCauseField = (value == 'Any other (specify)');
-                            if (!_showOtherCauseField) {
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'probableCauseOfDeath', value);
+                          final showOther = (value == 'Any other (specify)');
+                          _updateTabState(tabIndex, 'showOtherCauseField', showOther);
+                          if (!showOther) {
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onDeathPlaceChanged: (value) {
-                          setState(() {
-                            _deathPlace = value;
-                          });
+                          _updateTabState(tabIndex, 'deathPlace', value);
                         },
                         onReasonOfDeathChanged: (value) {
-                          setState(() {
-                            _reasonOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'reasonOfDeath', value);
                         },
                         onShowOtherCauseFieldChanged: (value) {
-                          setState(() {
-                            _showOtherCauseField = value;
-                          });
+                          _updateTabState(tabIndex, 'showOtherCauseField', value);
                         },
                       ),
                     ],
@@ -179,7 +199,7 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
             ),
           ),
         ],
-      ), 
+      ),
     );
   }
 
@@ -261,7 +281,7 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           ),
           Expanded(
             child: TabBarView(
-              controller: _tabController, 
+              controller: _tabController,
               children: tabs.map((tabName) {
                 if (tabName == 'BIRTH DOSES') {
                   return _buildBirthDoseTab();
@@ -405,6 +425,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildFourteenWeekTab() {
+    final tabIndex = 3; // 14 Week tab
+    _initializeTabState(tabIndex);
     String? isBeneficiaryAbsent;
     final List<String> absentOptions = ['No', 'Yes'];
 
@@ -445,81 +467,66 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                           const SizedBox(height: 16),
 
                           const SizedBox(height: 8),
-                          
+
                           // Case Closure Widget
                           CaseClosureWidget(
-                            isCaseClosureChecked: _isCaseClosureChecked,
-                            selectedClosureReason: _selectedClosureReason,
-                            migrationType: _migrationType,
-                            dateOfDeath: _dateOfDeath,
-                            probableCauseOfDeath: _probableCauseOfDeath,
-                            deathPlace: _deathPlace,
-                            reasonOfDeath: _reasonOfDeath,
-                            showOtherCauseField: _showOtherCauseField,
-                            otherCauseController: _otherCauseController,
-                            otherReasonController: _otherReasonController,
+                            isCaseClosureChecked: _getIsCaseClosureChecked(tabIndex),
+                            selectedClosureReason: _getSelectedClosureReason(tabIndex),
+                            migrationType: _getMigrationType(tabIndex),
+                            dateOfDeath: _getDateOfDeath(tabIndex),
+                            probableCauseOfDeath: _getProbableCauseOfDeath(tabIndex),
+                            deathPlace: _getDeathPlace(tabIndex),
+                            reasonOfDeath: _getReasonOfDeath(tabIndex),
+                            showOtherCauseField: _getShowOtherCauseField(tabIndex),
+                            otherCauseController: _otherCauseControllers[tabIndex]!,
+                            otherReasonController: _otherReasonControllers[tabIndex]!,
                             onCaseClosureChanged: (value) {
-                              setState(() {
-                                _isCaseClosureChecked = value;
-                                if (!value) {
-                                  _selectedClosureReason = null;
-                                  _migrationType = null;
-                                  _dateOfDeath = null;
-                                  _probableCauseOfDeath = null;
-                                  _deathPlace = null;
-                                  _reasonOfDeath = null;
-                                  _showOtherCauseField = false;
-                                  _otherCauseController.clear();
-                                  _otherReasonController.clear();
-                                }
-                              });
+                              _updateTabState(tabIndex, 'isCaseClosureChecked', value);
+                              if (!value) {
+                                _updateTabState(tabIndex, 'selectedClosureReason', null);
+                                _updateTabState(tabIndex, 'migrationType', null);
+                                _updateTabState(tabIndex, 'dateOfDeath', null);
+                                _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                                _updateTabState(tabIndex, 'deathPlace', null);
+                                _updateTabState(tabIndex, 'reasonOfDeath', null);
+                                _updateTabState(tabIndex, 'showOtherCauseField', false);
+                                _otherCauseControllers[tabIndex]!.clear();
+                                _otherReasonControllers[tabIndex]!.clear();
+                              }
                             },
                             onClosureReasonChanged: (value) {
-                              setState(() {
-                                _selectedClosureReason = value;
-                                if (value != 'Death') {
-                                  _dateOfDeath = null;
-                                  _probableCauseOfDeath = null;
-                                  _deathPlace = null;
-                                  _reasonOfDeath = null;
-                                  _showOtherCauseField = false;
-                                  _otherCauseController.clear();
-                                }
-                              });
+                              _updateTabState(tabIndex, 'selectedClosureReason', value);
+                              if (value != 'Death') {
+                                _updateTabState(tabIndex, 'dateOfDeath', null);
+                                _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                                _updateTabState(tabIndex, 'deathPlace', null);
+                                _updateTabState(tabIndex, 'reasonOfDeath', null);
+                                _updateTabState(tabIndex, 'showOtherCauseField', false);
+                                _otherCauseControllers[tabIndex]!.clear();
+                              }
                             },
                             onMigrationTypeChanged: (value) {
-                              setState(() {
-                                _migrationType = value;
-                              });
+                              _updateTabState(tabIndex, 'migrationType', value);
                             },
                             onDateOfDeathChanged: (value) {
-                              setState(() {
-                                _dateOfDeath = value;
-                              });
+                              _updateTabState(tabIndex, 'dateOfDeath', value);
                             },
                             onProbableCauseChanged: (value) {
-                              setState(() {
-                                _probableCauseOfDeath = value;
-                                _showOtherCauseField = (value == 'Any other (specify)');
-                                if (!_showOtherCauseField) {
-                                  _otherCauseController.clear();
-                                }
-                              });
+                              _updateTabState(tabIndex, 'probableCauseOfDeath', value);
+                              final showOther = (value == 'Any other (specify)');
+                              _updateTabState(tabIndex, 'showOtherCauseField', showOther);
+                              if (!showOther) {
+                                _otherCauseControllers[tabIndex]!.clear();
+                              }
                             },
                             onDeathPlaceChanged: (value) {
-                              setState(() {
-                                _deathPlace = value;
-                              });
+                              _updateTabState(tabIndex, 'deathPlace', value);
                             },
                             onReasonOfDeathChanged: (value) {
-                              setState(() {
-                                _reasonOfDeath = value;
-                              });
+                              _updateTabState(tabIndex, 'reasonOfDeath', value);
                             },
                             onShowOtherCauseFieldChanged: (value) {
-                              setState(() {
-                                _showOtherCauseField = value ?? false;
-                              });
+                              _updateTabState(tabIndex, 'showOtherCauseField', value);
                             },
                           ),
                           const SizedBox(height: 16),
@@ -568,6 +575,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildTenWeekTab() {
+    final tabIndex = 2; // 10 Week tab
+    _initializeTabState(tabIndex);
     return SafeArea(
       child: Column(
         children: [
@@ -599,78 +608,63 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CaseClosureWidget(
-                        isCaseClosureChecked: _isCaseClosureChecked,
-                        selectedClosureReason: _selectedClosureReason,
-                        migrationType: _migrationType,
-                        dateOfDeath: _dateOfDeath,
-                        probableCauseOfDeath: _probableCauseOfDeath,
-                        deathPlace: _deathPlace,
-                        reasonOfDeath: _reasonOfDeath,
-                        showOtherCauseField: _showOtherCauseField,
-                        otherCauseController: _otherCauseController,
-                        otherReasonController: _otherReasonController,
+                        isCaseClosureChecked: _getIsCaseClosureChecked(tabIndex),
+                        selectedClosureReason: _getSelectedClosureReason(tabIndex),
+                        migrationType: _getMigrationType(tabIndex),
+                        dateOfDeath: _getDateOfDeath(tabIndex),
+                        probableCauseOfDeath: _getProbableCauseOfDeath(tabIndex),
+                        deathPlace: _getDeathPlace(tabIndex),
+                        reasonOfDeath: _getReasonOfDeath(tabIndex),
+                        showOtherCauseField: _getShowOtherCauseField(tabIndex),
+                        otherCauseController: _otherCauseControllers[tabIndex]!,
+                        otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          setState(() {
-                            _isCaseClosureChecked = value;
-                            if (!value) {
-                              _selectedClosureReason = null;
-                              _migrationType = null;
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                              _otherReasonController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
+                          if (!value) {
+                            _updateTabState(tabIndex, 'selectedClosureReason', null);
+                            _updateTabState(tabIndex, 'migrationType', null);
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                            _otherReasonControllers[tabIndex]!.clear();
+                          }
                         },
                         onClosureReasonChanged: (value) {
-                          setState(() {
-                            _selectedClosureReason = value;
-                            if (value != 'Death') {
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'selectedClosureReason', value);
+                          if (value != 'Death') {
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onMigrationTypeChanged: (value) {
-                          setState(() {
-                            _migrationType = value;
-                          });
+                          _updateTabState(tabIndex, 'migrationType', value);
                         },
                         onDateOfDeathChanged: (value) {
-                          setState(() {
-                            _dateOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'dateOfDeath', value);
                         },
                         onProbableCauseChanged: (value) {
-                          setState(() {
-                            _probableCauseOfDeath = value;
-                            _showOtherCauseField = (value == 'Any other (specify)');
-                            if (!_showOtherCauseField) {
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'probableCauseOfDeath', value);
+                          final showOther = (value == 'Any other (specify)');
+                          _updateTabState(tabIndex, 'showOtherCauseField', showOther);
+                          if (!showOther) {
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onDeathPlaceChanged: (value) {
-                          setState(() {
-                            _deathPlace = value;
-                          });
+                          _updateTabState(tabIndex, 'deathPlace', value);
                         },
                         onReasonOfDeathChanged: (value) {
-                          setState(() {
-                            _reasonOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'reasonOfDeath', value);
                         },
                         onShowOtherCauseFieldChanged: (value) {
-                          setState(() {
-                            _showOtherCauseField = value;
-                          });
+                          _updateTabState(tabIndex, 'showOtherCauseField', value);
                         },
                       ),
                     ],
@@ -696,6 +690,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildSixWeekTab() {
+    final tabIndex = 1; // 6 Week tab
+    _initializeTabState(tabIndex);
     return SafeArea(
       child: Column(
         children: [
@@ -727,78 +723,63 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CaseClosureWidget(
-                        isCaseClosureChecked: _isCaseClosureChecked,
-                        selectedClosureReason: _selectedClosureReason,
-                        migrationType: _migrationType,
-                        dateOfDeath: _dateOfDeath,
-                        probableCauseOfDeath: _probableCauseOfDeath,
-                        deathPlace: _deathPlace,
-                        reasonOfDeath: _reasonOfDeath,
-                        showOtherCauseField: _showOtherCauseField,
-                        otherCauseController: _otherCauseController,
-                        otherReasonController: _otherReasonController,
+                        isCaseClosureChecked: _getIsCaseClosureChecked(tabIndex),
+                        selectedClosureReason: _getSelectedClosureReason(tabIndex),
+                        migrationType: _getMigrationType(tabIndex),
+                        dateOfDeath: _getDateOfDeath(tabIndex),
+                        probableCauseOfDeath: _getProbableCauseOfDeath(tabIndex),
+                        deathPlace: _getDeathPlace(tabIndex),
+                        reasonOfDeath: _getReasonOfDeath(tabIndex),
+                        showOtherCauseField: _getShowOtherCauseField(tabIndex),
+                        otherCauseController: _otherCauseControllers[tabIndex]!,
+                        otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          setState(() {
-                            _isCaseClosureChecked = value;
-                            if (!value) {
-                              _selectedClosureReason = null;
-                              _migrationType = null;
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                              _otherReasonController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
+                          if (!value) {
+                            _updateTabState(tabIndex, 'selectedClosureReason', null);
+                            _updateTabState(tabIndex, 'migrationType', null);
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                            _otherReasonControllers[tabIndex]!.clear();
+                          }
                         },
                         onClosureReasonChanged: (value) {
-                          setState(() {
-                            _selectedClosureReason = value;
-                            if (value != 'Death') {
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'selectedClosureReason', value);
+                          if (value != 'Death') {
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onMigrationTypeChanged: (value) {
-                          setState(() {
-                            _migrationType = value;
-                          });
+                          _updateTabState(tabIndex, 'migrationType', value);
                         },
                         onDateOfDeathChanged: (value) {
-                          setState(() {
-                            _dateOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'dateOfDeath', value);
                         },
                         onProbableCauseChanged: (value) {
-                          setState(() {
-                            _probableCauseOfDeath = value;
-                            _showOtherCauseField = (value == 'Any other (specify)');
-                            if (!_showOtherCauseField) {
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'probableCauseOfDeath', value);
+                          final showOther = (value == 'Any other (specify)');
+                          _updateTabState(tabIndex, 'showOtherCauseField', showOther);
+                          if (!showOther) {
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onDeathPlaceChanged: (value) {
-                          setState(() {
-                            _deathPlace = value;
-                          });
+                          _updateTabState(tabIndex, 'deathPlace', value);
                         },
                         onReasonOfDeathChanged: (value) {
-                          setState(() {
-                            _reasonOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'reasonOfDeath', value);
                         },
                         onShowOtherCauseFieldChanged: (value) {
-                          setState(() {
-                            _showOtherCauseField = value;
-                          });
+                          _updateTabState(tabIndex, 'showOtherCauseField', value);
                         },
                       ),
                     ],
@@ -890,6 +871,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildNineMonthTab() {
+    final tabIndex = 4; // 9 Months tab
+    _initializeTabState(tabIndex);
     return SafeArea(
       child: Column(
         children: [
@@ -920,81 +903,66 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      
+
                       // Case Closure Widget
                       CaseClosureWidget(
-                        isCaseClosureChecked: _isCaseClosureChecked,
-                        selectedClosureReason: _selectedClosureReason,
-                        migrationType: _migrationType,
-                        dateOfDeath: _dateOfDeath,
-                        probableCauseOfDeath: _probableCauseOfDeath,
-                        deathPlace: _deathPlace,
-                        reasonOfDeath: _reasonOfDeath,
-                        showOtherCauseField: _showOtherCauseField,
-                        otherCauseController: _otherCauseController,
-                        otherReasonController: _otherReasonController,
+                        isCaseClosureChecked: _getIsCaseClosureChecked(tabIndex),
+                        selectedClosureReason: _getSelectedClosureReason(tabIndex),
+                        migrationType: _getMigrationType(tabIndex),
+                        dateOfDeath: _getDateOfDeath(tabIndex),
+                        probableCauseOfDeath: _getProbableCauseOfDeath(tabIndex),
+                        deathPlace: _getDeathPlace(tabIndex),
+                        reasonOfDeath: _getReasonOfDeath(tabIndex),
+                        showOtherCauseField: _getShowOtherCauseField(tabIndex),
+                        otherCauseController: _otherCauseControllers[tabIndex]!,
+                        otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          setState(() {
-                            _isCaseClosureChecked = value;
-                            if (!value) {
-                              _selectedClosureReason = null;
-                              _migrationType = null;
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                              _otherReasonController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
+                          if (!value) {
+                            _updateTabState(tabIndex, 'selectedClosureReason', null);
+                            _updateTabState(tabIndex, 'migrationType', null);
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                            _otherReasonControllers[tabIndex]!.clear();
+                          }
                         },
                         onClosureReasonChanged: (value) {
-                          setState(() {
-                            _selectedClosureReason = value;
-                            if (value != 'Death') {
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'selectedClosureReason', value);
+                          if (value != 'Death') {
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onMigrationTypeChanged: (value) {
-                          setState(() {
-                            _migrationType = value;
-                          });
+                          _updateTabState(tabIndex, 'migrationType', value);
                         },
                         onDateOfDeathChanged: (value) {
-                          setState(() {
-                            _dateOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'dateOfDeath', value);
                         },
                         onProbableCauseChanged: (value) {
-                          setState(() {
-                            _probableCauseOfDeath = value;
-                            _showOtherCauseField = (value == 'Any other (specify)');
-                            if (!_showOtherCauseField) {
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'probableCauseOfDeath', value);
+                          final showOther = (value == 'Any other (specify)');
+                          _updateTabState(tabIndex, 'showOtherCauseField', showOther);
+                          if (!showOther) {
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onDeathPlaceChanged: (value) {
-                          setState(() {
-                            _deathPlace = value;
-                          });
+                          _updateTabState(tabIndex, 'deathPlace', value);
                         },
                         onReasonOfDeathChanged: (value) {
-                          setState(() {
-                            _reasonOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'reasonOfDeath', value);
                         },
                         onShowOtherCauseFieldChanged: (value) {
-                          setState(() {
-                            _showOtherCauseField = value ?? false;
-                          });
+                          _updateTabState(tabIndex, 'showOtherCauseField', value);
                         },
                       ),
                     ],
@@ -1076,6 +1044,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildSixteenToTwentyFourMonthTab() {
+    final tabIndex = 5; // 16-24 Months tab
+    _initializeTabState(tabIndex);
     return SafeArea(
       child: Column(
         children: [
@@ -1107,78 +1077,63 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CaseClosureWidget(
-                        isCaseClosureChecked: _isCaseClosureChecked,
-                        selectedClosureReason: _selectedClosureReason,
-                        migrationType: _migrationType,
-                        dateOfDeath: _dateOfDeath,
-                        probableCauseOfDeath: _probableCauseOfDeath,
-                        deathPlace: _deathPlace,
-                        reasonOfDeath: _reasonOfDeath,
-                        showOtherCauseField: _showOtherCauseField,
-                        otherCauseController: _otherCauseController,
-                        otherReasonController: _otherReasonController,
+                        isCaseClosureChecked: _getIsCaseClosureChecked(tabIndex),
+                        selectedClosureReason: _getSelectedClosureReason(tabIndex),
+                        migrationType: _getMigrationType(tabIndex),
+                        dateOfDeath: _getDateOfDeath(tabIndex),
+                        probableCauseOfDeath: _getProbableCauseOfDeath(tabIndex),
+                        deathPlace: _getDeathPlace(tabIndex),
+                        reasonOfDeath: _getReasonOfDeath(tabIndex),
+                        showOtherCauseField: _getShowOtherCauseField(tabIndex),
+                        otherCauseController: _otherCauseControllers[tabIndex]!,
+                        otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          setState(() {
-                            _isCaseClosureChecked = value;
-                            if (!value) {
-                              _selectedClosureReason = null;
-                              _migrationType = null;
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                              _otherReasonController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
+                          if (!value) {
+                            _updateTabState(tabIndex, 'selectedClosureReason', null);
+                            _updateTabState(tabIndex, 'migrationType', null);
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                            _otherReasonControllers[tabIndex]!.clear();
+                          }
                         },
                         onClosureReasonChanged: (value) {
-                          setState(() {
-                            _selectedClosureReason = value;
-                            if (value != 'Death') {
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'selectedClosureReason', value);
+                          if (value != 'Death') {
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onMigrationTypeChanged: (value) {
-                          setState(() {
-                            _migrationType = value;
-                          });
+                          _updateTabState(tabIndex, 'migrationType', value);
                         },
                         onDateOfDeathChanged: (value) {
-                          setState(() {
-                            _dateOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'dateOfDeath', value);
                         },
                         onProbableCauseChanged: (value) {
-                          setState(() {
-                            _probableCauseOfDeath = value;
-                            _showOtherCauseField = (value == 'Any other (specify)');
-                            if (!_showOtherCauseField) {
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'probableCauseOfDeath', value);
+                          final showOther = (value == 'Any other (specify)');
+                          _updateTabState(tabIndex, 'showOtherCauseField', showOther);
+                          if (!showOther) {
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onDeathPlaceChanged: (value) {
-                          setState(() {
-                            _deathPlace = value;
-                          });
+                          _updateTabState(tabIndex, 'deathPlace', value);
                         },
                         onReasonOfDeathChanged: (value) {
-                          setState(() {
-                            _reasonOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'reasonOfDeath', value);
                         },
                         onShowOtherCauseFieldChanged: (value) {
-                          setState(() {
-                            _showOtherCauseField = value ?? false;
-                          });
+                          _updateTabState(tabIndex, 'showOtherCauseField', value);
                         },
                       ),
                     ],
@@ -1255,6 +1210,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildFiveToSixYearTab() {
+    final tabIndex = 6; // 5-6 Year tab
+    _initializeTabState(tabIndex);
     return SafeArea(
       child: Column(
         children: [
@@ -1286,78 +1243,63 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CaseClosureWidget(
-                        isCaseClosureChecked: _isCaseClosureChecked,
-                        selectedClosureReason: _selectedClosureReason,
-                        migrationType: _migrationType,
-                        dateOfDeath: _dateOfDeath,
-                        probableCauseOfDeath: _probableCauseOfDeath,
-                        deathPlace: _deathPlace,
-                        reasonOfDeath: _reasonOfDeath,
-                        showOtherCauseField: _showOtherCauseField,
-                        otherCauseController: _otherCauseController,
-                        otherReasonController: _otherReasonController,
+                        isCaseClosureChecked: _getIsCaseClosureChecked(tabIndex),
+                        selectedClosureReason: _getSelectedClosureReason(tabIndex),
+                        migrationType: _getMigrationType(tabIndex),
+                        dateOfDeath: _getDateOfDeath(tabIndex),
+                        probableCauseOfDeath: _getProbableCauseOfDeath(tabIndex),
+                        deathPlace: _getDeathPlace(tabIndex),
+                        reasonOfDeath: _getReasonOfDeath(tabIndex),
+                        showOtherCauseField: _getShowOtherCauseField(tabIndex),
+                        otherCauseController: _otherCauseControllers[tabIndex]!,
+                        otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          setState(() {
-                            _isCaseClosureChecked = value;
-                            if (!value) {
-                              _selectedClosureReason = null;
-                              _migrationType = null;
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                              _otherReasonController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
+                          if (!value) {
+                            _updateTabState(tabIndex, 'selectedClosureReason', null);
+                            _updateTabState(tabIndex, 'migrationType', null);
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                            _otherReasonControllers[tabIndex]!.clear();
+                          }
                         },
                         onClosureReasonChanged: (value) {
-                          setState(() {
-                            _selectedClosureReason = value;
-                            if (value != 'Death') {
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'selectedClosureReason', value);
+                          if (value != 'Death') {
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onMigrationTypeChanged: (value) {
-                          setState(() {
-                            _migrationType = value;
-                          });
+                          _updateTabState(tabIndex, 'migrationType', value);
                         },
                         onDateOfDeathChanged: (value) {
-                          setState(() {
-                            _dateOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'dateOfDeath', value);
                         },
                         onProbableCauseChanged: (value) {
-                          setState(() {
-                            _probableCauseOfDeath = value;
-                            _showOtherCauseField = (value == 'Any other (specify)');
-                            if (!_showOtherCauseField) {
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'probableCauseOfDeath', value);
+                          final showOther = (value == 'Any other (specify)');
+                          _updateTabState(tabIndex, 'showOtherCauseField', showOther);
+                          if (!showOther) {
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onDeathPlaceChanged: (value) {
-                          setState(() {
-                            _deathPlace = value;
-                          });
+                          _updateTabState(tabIndex, 'deathPlace', value);
                         },
                         onReasonOfDeathChanged: (value) {
-                          setState(() {
-                            _reasonOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'reasonOfDeath', value);
                         },
                         onShowOtherCauseFieldChanged: (value) {
-                          setState(() {
-                            _showOtherCauseField = value ?? false;
-                          });
+                          _updateTabState(tabIndex, 'showOtherCauseField', value);
                         },
                       ),
                     ],
@@ -1434,6 +1376,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildTenYearTab() {
+    final tabIndex = 7; // 10 Year tab
+    _initializeTabState(tabIndex);
     return SafeArea(
       child: Column(
         children: [
@@ -1465,78 +1409,63 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CaseClosureWidget(
-                        isCaseClosureChecked: _isCaseClosureChecked,
-                        selectedClosureReason: _selectedClosureReason,
-                        migrationType: _migrationType,
-                        dateOfDeath: _dateOfDeath,
-                        probableCauseOfDeath: _probableCauseOfDeath,
-                        deathPlace: _deathPlace,
-                        reasonOfDeath: _reasonOfDeath,
-                        showOtherCauseField: _showOtherCauseField,
-                        otherCauseController: _otherCauseController,
-                        otherReasonController: _otherReasonController,
+                        isCaseClosureChecked: _getIsCaseClosureChecked(tabIndex),
+                        selectedClosureReason: _getSelectedClosureReason(tabIndex),
+                        migrationType: _getMigrationType(tabIndex),
+                        dateOfDeath: _getDateOfDeath(tabIndex),
+                        probableCauseOfDeath: _getProbableCauseOfDeath(tabIndex),
+                        deathPlace: _getDeathPlace(tabIndex),
+                        reasonOfDeath: _getReasonOfDeath(tabIndex),
+                        showOtherCauseField: _getShowOtherCauseField(tabIndex),
+                        otherCauseController: _otherCauseControllers[tabIndex]!,
+                        otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          setState(() {
-                            _isCaseClosureChecked = value;
-                            if (!value) {
-                              _selectedClosureReason = null;
-                              _migrationType = null;
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                              _otherReasonController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
+                          if (!value) {
+                            _updateTabState(tabIndex, 'selectedClosureReason', null);
+                            _updateTabState(tabIndex, 'migrationType', null);
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                            _otherReasonControllers[tabIndex]!.clear();
+                          }
                         },
                         onClosureReasonChanged: (value) {
-                          setState(() {
-                            _selectedClosureReason = value;
-                            if (value != 'Death') {
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'selectedClosureReason', value);
+                          if (value != 'Death') {
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onMigrationTypeChanged: (value) {
-                          setState(() {
-                            _migrationType = value;
-                          });
+                          _updateTabState(tabIndex, 'migrationType', value);
                         },
                         onDateOfDeathChanged: (value) {
-                          setState(() {
-                            _dateOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'dateOfDeath', value);
                         },
                         onProbableCauseChanged: (value) {
-                          setState(() {
-                            _probableCauseOfDeath = value;
-                            _showOtherCauseField = (value == 'Any other (specify)');
-                            if (!_showOtherCauseField) {
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'probableCauseOfDeath', value);
+                          final showOther = (value == 'Any other (specify)');
+                          _updateTabState(tabIndex, 'showOtherCauseField', showOther);
+                          if (!showOther) {
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onDeathPlaceChanged: (value) {
-                          setState(() {
-                            _deathPlace = value;
-                          });
+                          _updateTabState(tabIndex, 'deathPlace', value);
                         },
                         onReasonOfDeathChanged: (value) {
-                          setState(() {
-                            _reasonOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'reasonOfDeath', value);
                         },
                         onShowOtherCauseFieldChanged: (value) {
-                          setState(() {
-                            _showOtherCauseField = value ?? false;
-                          });
+                          _updateTabState(tabIndex, 'showOtherCauseField', value);
                         },
                       ),
                     ],
@@ -1613,6 +1542,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildSixteenYearTab() {
+    final tabIndex = 8; // 16 Year tab
+    _initializeTabState(tabIndex);
     return SafeArea(
       child: Column(
         children: [
@@ -1644,78 +1575,63 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CaseClosureWidget(
-                        isCaseClosureChecked: _isCaseClosureChecked,
-                        selectedClosureReason: _selectedClosureReason,
-                        migrationType: _migrationType,
-                        dateOfDeath: _dateOfDeath,
-                        probableCauseOfDeath: _probableCauseOfDeath,
-                        deathPlace: _deathPlace,
-                        reasonOfDeath: _reasonOfDeath,
-                        showOtherCauseField: _showOtherCauseField,
-                        otherCauseController: _otherCauseController,
-                        otherReasonController: _otherReasonController,
+                        isCaseClosureChecked: _getIsCaseClosureChecked(tabIndex),
+                        selectedClosureReason: _getSelectedClosureReason(tabIndex),
+                        migrationType: _getMigrationType(tabIndex),
+                        dateOfDeath: _getDateOfDeath(tabIndex),
+                        probableCauseOfDeath: _getProbableCauseOfDeath(tabIndex),
+                        deathPlace: _getDeathPlace(tabIndex),
+                        reasonOfDeath: _getReasonOfDeath(tabIndex),
+                        showOtherCauseField: _getShowOtherCauseField(tabIndex),
+                        otherCauseController: _otherCauseControllers[tabIndex]!,
+                        otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          setState(() {
-                            _isCaseClosureChecked = value;
-                            if (!value) {
-                              _selectedClosureReason = null;
-                              _migrationType = null;
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                              _otherReasonController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
+                          if (!value) {
+                            _updateTabState(tabIndex, 'selectedClosureReason', null);
+                            _updateTabState(tabIndex, 'migrationType', null);
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                            _otherReasonControllers[tabIndex]!.clear();
+                          }
                         },
                         onClosureReasonChanged: (value) {
-                          setState(() {
-                            _selectedClosureReason = value;
-                            if (value != 'Death') {
-                              _dateOfDeath = null;
-                              _probableCauseOfDeath = null;
-                              _deathPlace = null;
-                              _reasonOfDeath = null;
-                              _showOtherCauseField = false;
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'selectedClosureReason', value);
+                          if (value != 'Death') {
+                            _updateTabState(tabIndex, 'dateOfDeath', null);
+                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
+                            _updateTabState(tabIndex, 'deathPlace', null);
+                            _updateTabState(tabIndex, 'reasonOfDeath', null);
+                            _updateTabState(tabIndex, 'showOtherCauseField', false);
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onMigrationTypeChanged: (value) {
-                          setState(() {
-                            _migrationType = value;
-                          });
+                          _updateTabState(tabIndex, 'migrationType', value);
                         },
                         onDateOfDeathChanged: (value) {
-                          setState(() {
-                            _dateOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'dateOfDeath', value);
                         },
                         onProbableCauseChanged: (value) {
-                          setState(() {
-                            _probableCauseOfDeath = value;
-                            _showOtherCauseField = (value == 'Any other (specify)');
-                            if (!_showOtherCauseField) {
-                              _otherCauseController.clear();
-                            }
-                          });
+                          _updateTabState(tabIndex, 'probableCauseOfDeath', value);
+                          final showOther = (value == 'Any other (specify)');
+                          _updateTabState(tabIndex, 'showOtherCauseField', showOther);
+                          if (!showOther) {
+                            _otherCauseControllers[tabIndex]!.clear();
+                          }
                         },
                         onDeathPlaceChanged: (value) {
-                          setState(() {
-                            _deathPlace = value;
-                          });
+                          _updateTabState(tabIndex, 'deathPlace', value);
                         },
                         onReasonOfDeathChanged: (value) {
-                          setState(() {
-                            _reasonOfDeath = value;
-                          });
+                          _updateTabState(tabIndex, 'reasonOfDeath', value);
                         },
                         onShowOtherCauseFieldChanged: (value) {
-                          setState(() {
-                            _showOtherCauseField = value ?? false;
-                          });
+                          _updateTabState(tabIndex, 'showOtherCauseField', value);
                         },
                       ),
                     ],
