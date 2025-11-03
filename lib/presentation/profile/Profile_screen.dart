@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
-
 import '../../core/config/routes/Route_Name.dart';
 import '../../core/widgets/Dropdown/Dropdown.dart';
 import '../../core/widgets/Dropdown/dropdown.dart' hide ApiDropdown;
@@ -72,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       months += 12;
       years--;
     }
-    
+
     // Build the age string
     final parts = <String>[];
     if (years > 0) parts.add('$years ${years == 1 ? 'year' : 'years'}');
@@ -109,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
 
       print('3. Found user data, processing...');
-      
+
       // Ensure the widget is still mounted and get the BLoC instance
       if (!mounted) return;
       final bloc = context.read<ProfileBloc>();
@@ -463,15 +461,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   Divider(color: AppColors.divider, thickness: 0.5),
 
+                  // State field with value from API
                   BlocBuilder<ProfileBloc, ProfileState>(
                     buildWhen: (previous, current) => previous.stateName != current.stateName,
                     builder: (context, state) {
+                      print('Rebuilding state field with value: ${state.stateName}');
                       return CustomTextField(
                         key: ValueKey('state_field_${state.stateName}'),
                         labelText: l10n.stateLabel,
-                        hintText: state.stateName.isNotEmpty ? state.stateName : l10n.stateHint,
+                        hintText: l10n.stateHint,
                         initialValue: state.stateName,
-                        onChanged: (v) => bloc.add(StateChanged(v)),
+                        onChanged: (v) {},
+                        readOnly: true,
                       );
                     },
                   ),
@@ -481,12 +482,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   BlocBuilder<ProfileBloc, ProfileState>(
                     buildWhen: (previous, current) => previous.division != current.division,
                     builder: (context, state) {
+                      print('Rebuilding division field with value: ${state.division}');
                       return CustomTextField(
                         key: ValueKey('division_field_${state.division}'),
                         labelText: l10n.divisionLabel,
-                        hintText: state.division.isNotEmpty ? state.division : l10n.divisionHint,
+                        hintText: l10n.divisionHint,
                         initialValue: state.division,
-                        onChanged: (v) => bloc.add(DivisionChanged(v)),
+                        onChanged: (v) {},
+                        readOnly: true,
                       );
                     },
                   ),
@@ -496,12 +499,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   BlocBuilder<ProfileBloc, ProfileState>(
                     buildWhen: (previous, current) => previous.district != current.district,
                     builder: (context, state) {
+                      print('Rebuilding district field with value: ${state.district}');
                       return CustomTextField(
                         key: ValueKey('district_field_${state.district}'),
                         labelText: l10n.districtLabel,
-                        hintText: state.district.isNotEmpty ? state.district : l10n.districtHint,
+                        hintText: l10n.districtHint,
                         initialValue: state.district,
-                        onChanged: (v) => bloc.add(DistrictChanged(v)),
+                        onChanged: (v) {},
+                        readOnly: true,
                       );
                     },
                   ),
@@ -511,12 +516,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   BlocBuilder<ProfileBloc, ProfileState>(
                     buildWhen: (previous, current) => previous.block != current.block,
                     builder: (context, state) {
+                      print('Rebuilding block field with value: ${state.block}');
                       return CustomTextField(
                         key: ValueKey('block_field_${state.block}'),
                         labelText: l10n.blockLabel,
-                        hintText: state.block.isNotEmpty ? state.block : l10n.blockHint,
+                        hintText: l10n.blockHint,
                         initialValue: state.block,
-                        onChanged: (v) => bloc.add(BlockChanged(v)),
+                        onChanged: (v) {},
+                        readOnly: true,
                       );
                     },
                   ),

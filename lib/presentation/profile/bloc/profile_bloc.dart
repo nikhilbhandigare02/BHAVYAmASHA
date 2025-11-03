@@ -52,6 +52,27 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(newState);
     });
     
+    on<PanchayatChanged>((event, emit) {
+      print('Processing PanchayatChanged event: ${event.value}');
+      final newState = state.copyWith(panchayat: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<VillageChanged>((event, emit) {
+      print('Processing VillageChanged event: ${event.value}');
+      final newState = state.copyWith(village: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<TolaChanged>((event, emit) {
+      print('Processing TolaChanged event: ${event.value}');
+      final newState = state.copyWith(tola: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
     // Handle bulk state update - only one handler for UpdateProfileState
     on<UpdateProfileState>((event, emit) {
       print('Processing UpdateProfileState event');
@@ -60,20 +81,176 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(event.newState);
     });
     
+    // Form field event handlers with logging
+    on<AshaIdChanged>((event, emit) {
+      print('Processing AshaIdChanged event: ${event.value}');
+      final newState = state.copyWith(ashaId: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<AshaNameChanged>((event, emit) {
+      print('Processing AshaNameChanged event: ${event.value}');
+      final newState = state.copyWith(ashaName: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<FatherSpouseChanged>((event, emit) {
+      print('Processing FatherSpouseChanged event: ${event.value}');
+      final newState = state.copyWith(fatherSpouse: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<MobileChanged>((event, emit) {
+      print('Processing MobileChanged event: ${event.value}');
+      final newState = state.copyWith(mobile: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<AltMobileChanged>((event, emit) {
+      print('Processing AltMobileChanged event: ${event.value}');
+      final newState = state.copyWith(altMobile: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<DobChanged>((event, emit) {
+      print('Processing DobChanged event: ${event.value}');
+      final newState = state.copyWith(dob: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<HscNameChanged>((event, emit) {
+      print('Processing HscNameChanged event: ${event.value}');
+      final newState = state.copyWith(hscName: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<HwcNameChanged>((event, emit) {
+      print('Processing HwcNameChanged event: ${event.value}');
+      final newState = state.copyWith(hwcName: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<AccountNumberChanged>((event, emit) {
+      print('Processing AccountNumberChanged event: ${event.value}');
+      final newState = state.copyWith(accountNumber: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<IfscChanged>((event, emit) {
+      print('Processing IfscChanged event: ${event.value}');
+      final newState = state.copyWith(ifsc: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<PopulationCoveredChanged>((event, emit) {
+      print('Processing PopulationCoveredChanged event: ${event.value}');
+      final newState = state.copyWith(populationCovered: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
     // Other event handlers
-    on<ChoNameChanged>((e, emit) => emit(state.copyWith(choName: e.value)));
-    on<ChoMobileChanged>((e, emit) => emit(state.copyWith(choMobile: e.value)));
-    on<AwwNameChanged>((e, emit) => emit(state.copyWith(awwName: e.value)));
-    on<AwwMobileChanged>((e, emit) => emit(state.copyWith(awwMobile: e.value)));
-    on<AnganwadiCenterNoChanged>((e, emit) => emit(state.copyWith(anganwadiCenterNo: e.value)));
-    on<Anm1NameChanged>((e, emit) => emit(state.copyWith(anm1Name: e.value)));
-    on<Anm1MobileChanged>((e, emit) => emit(state.copyWith(anm1Mobile: e.value)));
-    on<Anm2NameChanged>((e, emit) => emit(state.copyWith(anm2Name: e.value)));
-    on<Anm2MobileChanged>((e, emit) => emit(state.copyWith(anm2Mobile: e.value)));
-    on<BcmNameChanged>((e, emit) => emit(state.copyWith(bcmName: e.value)));
-    on<BcmMobileChanged>((e, emit) => emit(state.copyWith(bcmMobile: e.value)));
-    on<DcmNameChanged>((e, emit) => emit(state.copyWith(dcmName: e.value)));
-    on<DcmMobileChanged>((e, emit) => emit(state.copyWith(dcmMobile: e.value)));
+    on<ChoNameChanged>((event, emit) {
+      print('Processing ChoNameChanged event: ${event.value}');
+      final newState = state.copyWith(choName: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<ChoMobileChanged>((event, emit) {
+      print('Processing ChoMobileChanged event: ${event.value}');
+      final newState = state.copyWith(choMobile: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<AwwNameChanged>((event, emit) {
+      print('Processing AwwNameChanged event: ${event.value}');
+      final newState = state.copyWith(awwName: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<AwwMobileChanged>((event, emit) {
+      print('Processing AwwMobileChanged event: ${event.value}');
+      final newState = state.copyWith(awwMobile: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<AnganwadiCenterNoChanged>((event, emit) {
+      print('Processing AnganwadiCenterNoChanged event: ${event.value}');
+      final newState = state.copyWith(anganwadiCenterNo: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<Anm1NameChanged>((event, emit) {
+      print('Processing Anm1NameChanged event: ${event.value}');
+      final newState = state.copyWith(anm1Name: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<Anm1MobileChanged>((event, emit) {
+      print('Processing Anm1MobileChanged event: ${event.value}');
+      final newState = state.copyWith(anm1Mobile: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<Anm2NameChanged>((event, emit) {
+      print('Processing Anm2NameChanged event: ${event.value}');
+      final newState = state.copyWith(anm2Name: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<Anm2MobileChanged>((event, emit) {
+      print('Processing Anm2MobileChanged event: ${event.value}');
+      final newState = state.copyWith(anm2Mobile: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<BcmNameChanged>((event, emit) {
+      print('Processing BcmNameChanged event: ${event.value}');
+      final newState = state.copyWith(bcmName: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<BcmMobileChanged>((event, emit) {
+      print('Processing BcmMobileChanged event: ${event.value}');
+      final newState = state.copyWith(bcmMobile: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<DcmNameChanged>((event, emit) {
+      print('Processing DcmNameChanged event: ${event.value}');
+      final newState = state.copyWith(dcmName: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
+    on<DcmMobileChanged>((event, emit) {
+      print('Processing DcmMobileChanged event: ${event.value}');
+      final newState = state.copyWith(dcmMobile: event.value);
+      logStateChanges(state, newState);
+      emit(newState);
+    });
+    
     on<SubmitProfile>(_onSubmit);
   }
 
