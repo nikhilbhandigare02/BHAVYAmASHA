@@ -849,7 +849,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                           : (state.hasChildren == 'Yes' ? '1+' : '0'),
                     }
                   ];
-                  // Add spouse row when available
                   if ((state.maritalStatus == 'Married') && (state.spouseName != null) && state.spouseName!.isNotEmpty) {
                     final spouseGender = (state.gender == 'Male')
                         ? 'Female'

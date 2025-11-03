@@ -13,6 +13,7 @@ import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Hea
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/Loader/Loader.dart';
 import '../../HomeScreen/HomeScreen.dart';
+import '../HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
 
 class AllhouseholdScreen extends StatefulWidget {
   const AllhouseholdScreen({super.key});
@@ -26,6 +27,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
   List<Map<String, dynamic>> _items = [];
   List<Map<String, dynamic>> _filtered = [];
   bool _isLoading = true;
+  Map<String, dynamic>? _headForm;
+  final List<Map<String, String>> _members = [];
 
   @override
   void initState() {
@@ -114,6 +117,16 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         if (ageYears != null && ageYears >= 65) elderly++;
       }
 
+      // Calculate remaining children to add
+      final int childrenAdded = all.where((m) {
+        final t = (m['Type'] ?? '').toString().toLowerCase();
+        final r = (m['Relation'] ?? '').toString().toLowerCase();
+        return t == 'child' || t == 'infant' || r == 'son' || r == 'daughter';
+      }).length;
+      final int childrenTarget = int.tryParse((head['children'] ?? '0').toString()) ?? 0;
+      // Calculate remaining as (target - 1) - already added members
+      final int remainingChildren = (childrenTarget - 1 - childrenAdded).clamp(0, 9999);
+
       return {
         'hhId': hhId,
         'houseNo': houseNo,
@@ -126,6 +139,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         'child0to1': child0to1,
         'child1to2': child1to2,
         'child2to5': child2to5,
+        'remainingChildren': remainingChildren,
+        'hasChildrenTarget': childrenTarget > 0,
         '_raw': r,
       };
     }).toList();
@@ -213,26 +228,54 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                             return _householdCard(context, data);
                           },
                         ),
-                ),
 
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-              child: SizedBox(
-                width: double.infinity,
-                height: 35,
-                child: RoundButton(
-                  title: l10n?.gridRegisterNewHousehold.toUpperCase() ?? 'NEW HOUSEHOLD REGISTRATION',
-                  color: AppColors.primary,
-                  borderRadius: 8,
-                  height: 6.h,
-                  onPress: () {
-                    Navigator.pushNamed(context, Route_Names.RegisterNewHousehold);
-                    },
                 ),
-              ),
-            ),
-          ),
+            //     Builder(builder: (_) {
+            //       final int childrenTarget = int.tryParse((_headForm?['children'] ?? '').toString()) ?? 0;
+            //       final int childrenAdded = _members.where((m) {
+            //         final t = (m['Type'] ?? '');
+            //         final r = (m['Relation'] ?? '');
+            //         return t == 'Child' || t == 'Infant' || r == 'Son' || r == 'Daughter';
+            //       }).length;
+            //       final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
+            //       if (childrenTarget <= 0) return const SizedBox.shrink();
+            //       return Padding(
+            //         padding: EdgeInsets.all(2.w),
+            //         child: Container(
+            //           color: AppColors.background,
+            //           child: Row(
+            //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //             children: [
+            //               Text(
+            //                 "${l10n!.memberRemainsToAdd} :",
+            //                 style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.warning, fontSize: 17.sp),
+            //               ),
+            //               Text(
+            //                 '$remaining ',
+            //                 style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 17.sp),
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       );
+            //     }),          SafeArea(
+            // child: Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+            //   child: SizedBox(
+            //     width: double.infinity,
+            //     height: 35,
+            //     child: RoundButton(
+            //       title: l10n?.gridRegisterNewHousehold.toUpperCase() ?? 'NEW HOUSEHOLD REGISTRATION',
+            //       color: AppColors.primary,
+            //       borderRadius: 8,
+            //       height: 6.h,
+            //       onPress: () {
+            //         Navigator.pushNamed(context, Route_Names.RegisterNewHousehold);
+            //         },
+            //     ),
+            //   ),
+            // ),
+          // ),
         ],
       ),
     );
@@ -241,46 +284,48 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
-
     final Color primary = Theme.of(context).primaryColor;
 
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(
+        Navigator.push(
           context,
-          Route_Names.houseHoldBeneficiaryScreen,
-          arguments: data,
+          MaterialPageRoute(
+            builder: (context) => HouseHold_BeneficiaryScreen(
+              houseNo: data['houseNo']?.toString(),
+            ),
+          ),
         );
       },
       borderRadius: BorderRadius.circular(8),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-            boxShadow: [
-              // Bottom shadow
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 2,
-                spreadRadius: 1,
-                offset: const Offset(0, 2), // down
-              ),
-              // Top shadow
-              BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 2,
-                spreadRadius: 1,
-                offset: const Offset(0, -2), // up
-              ),
-            ],
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.white, // full card base
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 2,
+              spreadRadius: 1,
+              offset: const Offset(0, 2),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 2,
+              spreadRadius: 1,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Top section
             Container(
               decoration: const BoxDecoration(
                 color: AppColors.background,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
               ),
               padding: const EdgeInsets.all(4),
               child: Row(
@@ -289,12 +334,18 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   Expanded(
                     child: Text(
                       data['hhId'] ?? '',
-                      style: TextStyle(color: primary, fontWeight: FontWeight.w600, fontSize: 14.sp),
+                      style: TextStyle(
+                          color: primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp),
                     ),
                   ),
                   Text(
                     '${l10n?.houseNoLabel ?? 'House No.'} : ${data['houseNo']}',
-                    style: TextStyle(color: primary, fontWeight: FontWeight.w700, fontSize: 14.sp),
+                    style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14.sp),
                   ),
                   const SizedBox(width: 8),
                   SizedBox(
@@ -303,7 +354,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                     child: RoundButton(
                       icon: Icons.edit,
                       iconSize: 14.sp,
-                      title:  l10n?.edit ?? 'Edit',
+                      title: l10n?.edit ?? 'Edit',
                       color: AppColors.primary,
                       borderRadius: 4,
                       height: 3.h,
@@ -327,10 +378,13 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                 ],
               ),
             ),
+
+            // Middle stats section
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+                borderRadius:
+                const BorderRadius.vertical(bottom: Radius.circular(0)),
               ),
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -338,36 +392,89 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.thName ?? 'Name', data['name'])),
+                      Expanded(
+                          child:
+                          _rowText(l10n?.thName ?? 'Name', data['name'])),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile no.', data['mobile'])),
+                      Expanded(
+                          child: _rowText(
+                              l10n?.mobileLabelSimple ?? 'Mobile no.',
+                              data['mobile'])),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.rnhTotalMembers ?? 'No. of total members', data['totalMembers'].toString())),
+                      Expanded(
+                          child: _rowText(
+                              l10n?.rnhTotalMembers ??
+                                  'No. of total members',
+                              data['totalMembers'].toString())),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.eligibleCouples ?? 'Eligible couples', data['eligibleCouples'].toString())),
+                      Expanded(
+                          child: _rowText(
+                              l10n?.eligibleCouples ?? 'Eligible couples',
+                              data['eligibleCouples'].toString())),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.pregnantWomen ?? 'Pregnant women', data['pregnantWomen'].toString())),
+                      Expanded(
+                          child: _rowText(
+                              l10n?.pregnantWomen ?? 'Pregnant women',
+                              data['pregnantWomen'].toString())),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.elderlyAbove65 ?? 'Elderly (>65 Y)', data['elderly'].toString())),
+                      Expanded(
+                          child: _rowText(
+                              l10n?.elderlyAbove65 ?? 'Elderly (>65 Y)',
+                              data['elderly'].toString())),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.children0to1 ?? '0-1 year old children', data['child0to1'].toString())),
+                      Expanded(
+                          child: _rowText(
+                              l10n?.children0to1 ?? '0-1 year old children',
+                              data['child0to1'].toString())),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.children1to2 ?? '1-2 year old children', data['child1to2'].toString())),
+                      Expanded(
+                          child: _rowText(
+                              l10n?.children1to2 ?? '1-2 year old children',
+                              data['child1to2'].toString())),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.children2to5 ?? '2-5 year old children', data['child2to5'].toString())),
+                      Expanded(
+                          child: _rowText(
+                              l10n?.children2to5 ?? '2-5 year old children',
+                              data['child2to5'].toString())),
                     ],
                   ),
                 ],
               ),
             ),
+
+            // Bottom white info section (remaining member)
+            if (data['hasChildrenTarget'] == true &&
+                data['remainingChildren'] > 0)
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(8)),
+                  border: Border(
+                      top: BorderSide(
+                          color: AppColors.outlineVariant, width: 0.5)),
+                ),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Text(
+                  '${l10n?.memberRemainsToAdd ?? 'Remaining to add'}: '
+                      '${data['remainingChildren']} '
+                      'member${data['remainingChildren'] > 1 ? 's' : ''}',
+                  style: TextStyle(
+                      color: AppColors.warning,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.sp),
+                ),
+              ),
           ],
         ),
       ),

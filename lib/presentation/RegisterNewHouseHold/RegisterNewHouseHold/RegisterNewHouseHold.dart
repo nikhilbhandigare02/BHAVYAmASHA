@@ -18,6 +18,7 @@ import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
 import '../AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 import '../AddNewFamilyMember/AddNewFamilyMember.dart';
+import 'bloc/registernewhousehold_bloc.dart';
 
 class RegisterNewHouseHoldScreen extends StatefulWidget {
   final List<Map<String, String>>? initialMembers;
@@ -58,7 +59,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     });
     _hhBloc = HouseholdDetailsAmenitiesBloc();
 
-    // Initialize from incoming data if provided
     if (widget.initialMembers != null && widget.initialMembers!.isNotEmpty) {
       _members.clear();
       _members.addAll(widget.initialMembers!);
@@ -68,7 +68,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     _hideAddMemberButton = widget.hideAddMemberButton;
   }
 
-  // Deep-convert all 'Yes'/'No' values to 1/0 for storage
   dynamic _convertYesNoDynamic(dynamic value) {
     if (value is String) {
       if (value == 'Yes') return 1;
@@ -222,94 +221,74 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     ? (l10n?.saveButton ?? 'SAVE')
                     : (l10n?.nextButton ?? 'NEXT');
 
-                return RoundButton(
-                  title: rightTitle,
-                  color: AppColors.primary,
-                  height: 44,
-                  onPress: () {
-                    if (disableNext) {
+                // Get the household bloc
+                final householdBloc = context.read<RegisterNewHouseholdBloc>();
+                
+                return BlocConsumer<RegisterNewHouseholdBloc, RegisterHouseholdState>(
+                  listener: (context, state) {
+                    if (state.isSaved) {
+                      _skipExitConfirm = true;
+                      showSuccessDialog(context).then((shouldNavigate) {
+                        if (shouldNavigate == true && mounted) {
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            Route_Names.homeScreen,
+                            (route) => false,
+                          );
+                        }
+                      });
+                    } else if (state.error != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'Please add family head details',
+                            state.error!,
                             style: const TextStyle(color: Colors.white),
                           ),
                           backgroundColor: Colors.redAccent,
                           behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
+                          duration: const Duration(seconds: 3),
                         ),
                       );
-                      return;
-                    }
-
-                    if (idx < 2) {
-                      _tabController.animateTo(idx + 1);
-                    } else {
-                      final now = DateTime.now();
-                      final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-                      final s = _hhBloc.state;
-                      final householdFormJson = {
-                        'headdetails': _headForm ?? {},
-                        'memberdetails': _memberForms,
-                        'spousedetails': _headForm?['spousedetails'] ?? {},
-                        'childrendetails': _headForm?['childrendetails'] ?? {},
-                        'amenities': {
-                          'residentialArea': s.residentialArea,
-                          'ownershipType': s.ownershipType,
-                          'houseType': s.houseType,
-                          'houseKitchen': s.houseKitchen,
-                          'cookingFuel': s.cookingFuel,
-                          'waterSource': s.waterSource,
-                          'electricity': s.electricity,
-                          'toilet': s.toilet,
-                        },
-                      };
-                      final normalizedHouseholdInfo =
-                      _convertYesNoMap(Map<String, dynamic>.from(householdFormJson));
-                      debugPrint(jsonEncode(normalizedHouseholdInfo));
-
-                      final payload = {
-                        'server_id': null,
-                        'unique_key': 'HH_${now.millisecondsSinceEpoch}',
-                        'address': {},
-                        'geo_location': {},
-                        'head_id': _headForm?['unique_key'] ?? _headForm?['id'],
-                        'household_info': normalizedHouseholdInfo,
-                        'device_details': {
-                          'platform': Platform.operatingSystem,
-                        },
-                        'app_details': {
-                          'app_name': 'BHAVYA mASHA UAT',
-                        },
-                        'parent_user': {},
-                        'current_user_key': 'local_user',
-                        'facility_id': 283,
-                        'created_date_time': ts,
-                        'modified_date_time': ts,
-                        'is_synced': 0,
-                        'is_deleted': 0,
-                      };
-
-                      debugPrint(jsonEncode(payload));
-
-                      LocalStorageDao.instance.insertHousehold(payload).then((_) async {
-                        _skipExitConfirm = true;
-                        if (!mounted) return;
-
-                        if (mounted) {
-                          final shouldNavigate = await showSuccessDialog(context);
-                          if (shouldNavigate == true && mounted) {
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              Route_Names.homeScreen,
-                                  (route) => false,
-                            );
-                          }
-                        }
-                      });
                     }
                   },
+                  builder: (context, state) {
+                    return RoundButton(
+                      title: rightTitle,
+                      color: AppColors.primary,
+                      height: 44,
+                      isLoading: state.isSaving,
+                      onPress: () async {
+                        if (disableNext) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Please add family head details',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              backgroundColor: Colors.redAccent,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (idx < 2) {
+                          _tabController.animateTo(idx + 1);
+                        } else {
+                          householdBloc.add(
+                            SaveHousehold(
+                              headForm: _headForm,
+                              memberForms: _memberForms,
+                              hhBloc: _hhBloc,
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
                 );
+
               },
             ),
           ),
@@ -657,7 +636,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
 
   Future<bool?> showSuccessDialog(BuildContext context) {
-    final memberCount = _members.length + 1;
+    final memberCount = _members.length;
     final l10n = AppLocalizations.of(context);
     return showDialog<bool>(
       context: context,
