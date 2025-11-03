@@ -90,46 +90,47 @@ class SecureStorageService {
     }
   }
 
-  // Get user data using unique key
-  static Future<Map<String, dynamic>?> getUserDataByKey(String uniqueKey) async {
-    try {
-      final userDataKey = '${_keyUserData}_$uniqueKey';
-      print('Fetching user data with key: $userDataKey');
-      
-      final userDataString = await _storage.read(key: userDataKey);
-      print('Retrieved user data string: $userDataString');
-      
-      if (userDataString != null && userDataString.isNotEmpty) {
-        final userData = jsonDecode(userDataString) as Map<String, dynamic>;
-        print('Successfully parsed user data');
-        return userData;
-      } else {
-        print('No user data found for key: $userDataKey');
-      }
-    } catch (e) {
-      print('Error parsing user data: $e');
-    }
-    return null;
-  }
-
   // Get current user data
   static Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
-      print('Getting current user data...');
-      final currentUser = await _storage.read(key: _keyCurrentUser);
-      print('Current user key: $currentUser');
+      // First try to get the current user's unique key
+      final currentUserKey = await _storage.read(key: _keyCurrentUser);
+      if (currentUserKey == null || currentUserKey.isEmpty) {
+        print('No current user key found');
+        return null;
+      }
       
-      if (currentUser != null) {
-        final userData = await getUserDataByKey(currentUser);
-        print('Retrieved user data: $userData');
+      final userDataKey = '${_keyUserData}_$currentUserKey';
+      print('Fetching current user data with key: $userDataKey');
+      
+      final userDataString = await _storage.read(key: userDataKey);
+      print('Retrieved current user data string: $userDataString');
+      
+      if (userDataString == null || userDataString.isEmpty) {
+        print('No user data found for key: $userDataKey');
+        
+        // Fallback to legacy user data format if available
+        final legacyUserData = await _storage.read(key: _keyUserData);
+        if (legacyUserData != null && legacyUserData.isNotEmpty) {
+          print('Falling back to legacy user data format');
+          return jsonDecode(legacyUserData) as Map<String, dynamic>;
+        }
+        
+        return null;
+      }
+      
+      try {
+        final userData = jsonDecode(userDataString) as Map<String, dynamic>;
+        print('Successfully parsed user data');
         return userData;
-      } else {
-        print('No current user found in secure storage');
+      } catch (e) {
+        print('Error parsing user data: $e');
+        return null;
       }
     } catch (e) {
       print('Error getting current user data: $e');
+      return null;
     }
-    return null;
   }
 
   // Get current user's unique key

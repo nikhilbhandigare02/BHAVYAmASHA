@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/presentation/Abha_Generation/ABHA_Generationscreen.dart';
+import 'package:medixcel_new/presentation/profile/bloc/profile_bloc.dart';
 import 'package:medixcel_new/presentation/AboutUs/AboutUs.dart';
 import 'package:medixcel_new/presentation/AllBeneficiary/AllBeneficiary.dart';
 import 'package:medixcel_new/presentation/AllHouseHold/AllHouseHold/AllHouseHold_Screen.dart';
@@ -86,7 +86,12 @@ class Routes{
         case Route_Names.Ncdlist:
         return MaterialPageRoute(builder: (context) => Ncdlist(),);
       case Route_Names.profileScreen:
-        return MaterialPageRoute(builder: (context) => ProfileScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => BlocProvider(
+            create: (context) => ProfileBloc(),
+            child: ProfileScreen(),
+          ),
+        );
       case Route_Names.MISScreen:
         return MaterialPageRoute(builder: (context) => Misreport(),);
       case Route_Names.Resetpassword:

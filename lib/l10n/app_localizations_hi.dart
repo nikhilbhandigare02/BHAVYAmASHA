@@ -3345,4 +3345,67 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get aesJeDataSaved => 'एईएस/जेई डेटा सफलतापूर्वक सहेजा गया!';
+
+  @override
+  String get trackingDueTitle => 'Tracking Due';
+
+  @override
+  String get birthDoses => 'BIRTH DOSES';
+
+  @override
+  String get sixWeek => '6 WEEK';
+
+  @override
+  String get tenWeek => '10 WEEK';
+
+  @override
+  String get fourteenWeek => '14 WEEK';
+
+  @override
+  String get nineMonths => '9 MONTHS';
+
+  @override
+  String get sixteenToTwentyFourMonths => '16-24 MONTHS';
+
+  @override
+  String get fiveToSixYear => '5-6 YEAR';
+
+  @override
+  String get tenYear => '10 YEAR';
+
+  @override
+  String get sixteenYear => '16 YEAR';
+
+  @override
+  String get dateOfVisit => 'Date of visit';
+
+  @override
+  String get weightLabel => 'Weight (1.2–90)kg';
+
+  @override
+  String get enterWeight => 'Enter weight';
+
+  @override
+  String get doseTableDueDate => 'Due Date';
+
+  @override
+  String get doseTableActualDate => 'Actual Date';
+
+  @override
+  String get datePlaceholder => 'dd-mm-yyyy';
+
+  @override
+  String get contentComingSoon => 'Content Coming Soon...';
+
+  @override
+  String get anyOtherSpecify => 'Any other (specify)';
+
+  @override
+  String get sixWeekDoses => '6 Week Doses';
+
+  @override
+  String get tenWeekDoses => '10 Week Doses';
+
+  @override
+  String get fourteenWeekDoses => '14 Week Doses';
 }
