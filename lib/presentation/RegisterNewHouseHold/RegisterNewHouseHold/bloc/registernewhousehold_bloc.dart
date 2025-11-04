@@ -59,52 +59,55 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
         final now = DateTime.now();
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
 
-        // Debug prints for head and member details
-        print('Head Details:');
-        print(const JsonEncoder.withIndent('  ').convert(event.headForm ?? {}));
-        print('Member Details:');
-        print(const JsonEncoder.withIndent('  ').convert(event.memberForms));
+        // print('Head Details:');
+        // print(const JsonEncoder.withIndent('  ').convert(event.headForm ?? {}));
+        // print('Member Details:');
+        // print(const JsonEncoder.withIndent('  ').convert(event.memberForms));
 
-        // Get the current state from amenities bloc
-        final hhState = event.hhBloc.state;
-
-        // Create household info with all amenities data
-        final householdInfo = <String, dynamic>{
-          'residentialArea': hhState.residentialArea,
-          'ownershipType': hhState.ownershipType,
-          'houseType': hhState.houseType,
-          'houseKitchen': hhState.houseKitchen,
-          'cookingFuel': hhState.cookingFuel,
-          'waterSource': hhState.waterSource,
-          'electricity': hhState.electricity,
-          'toilet': hhState.toilet,
-        };
-
-        // Encode the household info to JSON string
-        final householdInfoJson = jsonEncode(householdInfo);
-        print('Household Amenities JSON: $householdInfoJson');
-
-        // Prepare and encode beneficiary info
-        final beneficiaryInfo = jsonEncode({
-          'head_details': event.headForm ?? {},
-          'spouse_details': event.headForm?['spousedetails'] ?? {},
-          'children_details': event.headForm?['childrendetails'] ?? {},
-          'member_details': event.memberForms,
+        // Log all received data
+        print('📋 Raw Form Data from Event:');
+        event.amenitiesData.forEach((key, value) {
+          print('- $key: $value (${value?.runtimeType})');
         });
-        print('Beneficiary Info JSON: $beneficiaryInfo');
 
-        // Generate unique keys
+        final householdInfo = {
+          // Basic Information
+          'residentialArea': event.amenitiesData['residentialArea']?.toString().trim() ?? 'Not Specified',
+          'houseType': event.amenitiesData['houseType']?.toString().trim() ?? 'Not Specified',
+          'ownershipType': event.amenitiesData['ownershipType']?.toString().trim() ?? 'Not Specified',
+          
+          'houseKitchen': event.amenitiesData['houseKitchen']?.toString().trim() ?? 'Not Specified',
+          'cookingFuel': event.amenitiesData['cookingFuel']?.toString().trim() ?? 'Not Specified',
+          'waterSource': event.amenitiesData['waterSource']?.toString().trim() ?? 'Not Specified',
+          'electricity': event.amenitiesData['electricity']?.toString().trim() ?? 'Not Specified',
+          'toilet': event.amenitiesData['toilet']?.toString().trim() ?? 'Not Specified',
+          
+          // Metadata
+          'lastUpdated': DateTime.now().toIso8601String(),
+          'createdAt': DateTime.now().toIso8601String(),
+        };
+        
+        // Log the final data being saved
+        print('💾 Final Household Data to be saved:');
+        householdInfo.forEach((key, value) {
+          print('   - $key: $value');
+        });
+        
+        final householdInfoJson = jsonEncode(householdInfo);
+        print('📄 Household Info JSON: $householdInfoJson');
+
+
+
         final householdKey = 'HH_${now.millisecondsSinceEpoch}';
         final headId = event.headForm?['unique_key'] ?? event.headForm?['id'];
 
-        // Prepare household payload for database
         final householdPayload = {
           'server_id': null,
           'unique_key': householdKey,
           'address': jsonEncode({}),
           'geo_location': jsonEncode({}),
           'head_id': headId,
-          'household_info': householdInfoJson, // Use the pre-encoded JSON string
+          'household_info': householdInfoJson,
           'device_details': jsonEncode({'platform': Platform.operatingSystem}),
           'app_details': jsonEncode({'app_name': 'BHAVYA mASHA UAT'}),
           'parent_user': jsonEncode({}),
@@ -119,6 +122,16 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
         print('Saving household with payload: ${jsonEncode(householdPayload)}');
 
         await LocalStorageDao.instance.insertHousehold(householdPayload);
+
+        final beneficiaryInfo = jsonEncode({
+          'head_details': event.headForm ?? {},
+          'spouse_details': event.headForm?['spousedetails'] ?? {},
+          'children_details': event.headForm?['childrendetails'] ?? {},
+          'member_details': event.memberForms,
+        });
+        print('Beneficiary Info JSON: $beneficiaryInfo');
+
+
 
         final beneficiaryPayload = {
           'server_id': null,

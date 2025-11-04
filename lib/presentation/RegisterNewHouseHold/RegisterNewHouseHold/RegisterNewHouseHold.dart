@@ -48,23 +48,15 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   late final HouseholdDetailsAmenitiesBloc _hhBloc;
   bool _skipExitConfirm = false;
 
-
-
   @override
   void initState() {
     super.initState();
+    _hhBloc = HouseholdDetailsAmenitiesBloc();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
-    _hhBloc = HouseholdDetailsAmenitiesBloc();
-
-    if (widget.initialMembers != null && widget.initialMembers!.isNotEmpty) {
-      _members.clear();
-      _members.addAll(widget.initialMembers!);
-      totalMembers = _members.length;
-    }
-    headAdded = widget.headAddedInit || _members.isNotEmpty;
+    headAdded = widget.headAddedInit;
     _hideAddMemberButton = widget.hideAddMemberButton;
   }
 
@@ -170,16 +162,19 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
 
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                physics: (!headAdded)
-                    ? const NeverScrollableScrollPhysics()
-                    : null,
-                children: [
-                  _buildMemberDetails(context),
-                  BlocProvider.value(value: _hhBloc, child: const HouseHoldDetails()),
-                  BlocProvider.value(value: _hhBloc, child: const HouseHoldAmenities()),
-                ],
+              child: BlocProvider.value(
+                value: _hhBloc,
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: (!headAdded)
+                      ? const NeverScrollableScrollPhysics()
+                      : null,
+                  children: [
+                    _buildMemberDetails(context),
+                    const HouseHoldDetails(),
+                    const HouseHoldAmenities(),
+                  ],
+                ),
               ),
             ),
           ],
@@ -275,13 +270,49 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                         if (idx < 2) {
                           _tabController.animateTo(idx + 1);
                         } else {
-                          householdBloc.add(
-                            SaveHousehold(
-                              headForm: _headForm,
-                              memberForms: _memberForms,
-                              hhBloc: _hhBloc,
-                            ),
-                          );
+                          try {
+                            _hhBloc.emit(_hhBloc.state);
+                            final amenitiesState = _hhBloc.state;
+                            print(' Current Amenities State: ${amenitiesState.toString()}');
+                            
+                            // Create a map with all the amenities data
+                            final amenitiesData = {
+                              'residentialArea': amenitiesState.residentialArea,
+                              'ownershipType': amenitiesState.ownershipType,
+                              'houseType': amenitiesState.houseType,
+                              'houseKitchen': amenitiesState.houseKitchen,
+                              'cookingFuel': amenitiesState.cookingFuel,
+                              'waterSource': amenitiesState.waterSource,
+                              'electricity': amenitiesState.electricity,
+                              'toilet': amenitiesState.toilet,
+                            };
+                            
+                            // Remove any null or empty values
+                            amenitiesData.removeWhere((key, value) => 
+                                value == null || 
+                                (value is String && value.isEmpty) ||
+                                value == '');
+                            
+                            print('📤 Prepared Amenities Data: $amenitiesData');
+                            
+                            if (amenitiesData.isEmpty) {
+                              print('⚠️ Warning: No amenities data to save');
+                            }
+                            
+                            householdBloc.add(
+                              SaveHousehold(
+                                headForm: _headForm,
+                                memberForms: _memberForms,
+                                amenitiesData: amenitiesData,
+                              ),
+                            );
+                          } catch (e, stackTrace) {
+                            print('❌ Error preparing amenities data:');
+                            print('   Error: $e');
+                            print('   Stack trace: $stackTrace');
+                            // Re-throw to show error to user
+                            rethrow;
+                          }
                         }
                       },
                     );

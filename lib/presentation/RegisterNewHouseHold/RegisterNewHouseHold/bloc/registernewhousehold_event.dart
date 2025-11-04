@@ -20,11 +20,11 @@ final class RegisterReset extends RegisternewhouseholdEvent {}
 final class SaveHousehold extends RegisternewhouseholdEvent {
   final Map<String, dynamic>? headForm;
   final List<Map<String, dynamic>> memberForms;
-  final HouseholdDetailsAmenitiesBloc hhBloc;
+  final Map<String, dynamic> amenitiesData;
   
-   SaveHousehold({
+  SaveHousehold({
     required this.headForm,
     required this.memberForms,
-    required this.hhBloc,
+    required this.amenitiesData,
   });
 }
