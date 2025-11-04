@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import '../../../data/Local_Storage/User_Info.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
@@ -279,6 +280,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _onSubmit(SubmitProfile event, Emitter<ProfileState> emit) async {
     emit(state.copyWith(submitting: true, success: false, error: null));
     try {
+      await UserInfo.updatePopulationCovered(state.populationCovered);
       // Placeholder for API call or persistence.
       await Future<void>.delayed(const Duration(milliseconds: 500));
       emit(state.copyWith(submitting: false, success: true));

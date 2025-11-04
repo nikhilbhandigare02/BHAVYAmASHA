@@ -2,6 +2,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
+import 'dart:developer';
+
 import 'package:crypto/crypto.dart';
 import 'tables/users_table.dart';
 
@@ -232,6 +234,59 @@ class UserInfo {
       }
     }
     return {'isNewUser': true};
+  }
+
+  static Future<void> updatePopulationCovered(String populationCovered) async {
+    Database? db;
+    try {
+      db = await openDatabase(
+        join(await getDatabasesPath(), 'bhavya_masha.db'),
+      );
+
+      // Get the current user directly from this database instance
+      final result = await db.query(
+        'users',
+        where: 'is_deleted = 0',
+        orderBy: 'modified_date_time DESC',
+        limit: 1,
+      );
+
+      if (result.isNotEmpty) {
+        final user = result.first;
+        
+        // Parse the details JSON
+        final details = user['details'] is String
+            ? jsonDecode(user['details'] as String)
+            : user['details'];
+
+        // Update the population_covered_by_asha field
+        details['population_covered_by_asha'] = populationCovered;
+
+        final detailsJson = jsonEncode(details);
+        final now = DateTime.now().toIso8601String();
+
+        // Update the database
+        await db.update(
+          'users',
+          {
+            'details': detailsJson,
+            'modified_date_time': now,
+          },
+          where: 'user_name = ?',
+          whereArgs: [user['user_name']],
+        );
+        log('User population covered updated in the database: $populationCovered');
+      } else {
+        log('No active user found to update');
+      }
+    } catch (e) {
+      log('Error in updatePopulationCovered: $e');
+      rethrow;
+    } finally {
+      if (db != null && db.isOpen) {
+        await db.close();
+      }
+    }
   }
 
 
