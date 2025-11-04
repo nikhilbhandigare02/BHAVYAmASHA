@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 
+// A custom date picker widget that provides a text field interface.
 class CustomDatePicker extends StatefulWidget {
   final DateTime? initialDate;
   final bool isEditable;
@@ -13,11 +14,13 @@ class CustomDatePicker extends StatefulWidget {
   final int? labelMaxLines;
   final DateTime? firstDate;
   final DateTime? lastDate;
+  final bool readOnly;
 
   const CustomDatePicker({
     super.key,
     this.initialDate,
     this.isEditable = true,
+    this.readOnly = false,
     this.onDateChanged,
     this.labelText = 'Select Date',
     this.hintText,
@@ -47,7 +50,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   }
 
   Future<void> _pickDate(BuildContext context) async {
-    if (!widget.isEditable) return;
+    if (!widget.isEditable || widget.readOnly) return;
 
     final picked = await showDatePicker(
       context: context,
@@ -109,7 +112,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     );
 
     return GestureDetector(
-      onTap: widget.isEditable ? () => _pickDate(context) : null,
+      onTap: widget.isEditable && !widget.readOnly ? () => _pickDate(context) : null,
       child: AbsorbPointer(
         child: TextFormField(
           controller: _controller,
@@ -127,7 +130,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
             inputStyle.copyWith(color: AppColors.onSurfaceVariant),
 
 
-            suffixIcon: widget.isEditable
+            suffixIcon: widget.isEditable && !widget.readOnly
                 ? Padding(
               padding: EdgeInsets.only(right: 2.w),
               child: Icon(

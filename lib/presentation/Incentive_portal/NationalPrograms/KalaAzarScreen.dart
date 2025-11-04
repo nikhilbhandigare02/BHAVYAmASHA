@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 
 import '../../../core/widgets/TextField/TextField.dart';
 import 'bloc/KalaAzarBloc/kala_azar_bloc.dart';
@@ -37,14 +38,13 @@ class KalaAzarScreen extends StatelessWidget {
           // ✅ Questions for Kala-Azar Screening
           final List<Map<String, dynamic>> questions = [
             {
-              'question': 'Amount payable to ASHA for search of Kala azar patient, to PHC, investigation, complete treatment, monitoring for 6 months.',
+              'question': AppLocalizations.of(context)!.kalaAzarQuestion1,
               'hint': '0',
             },
             {
-              'question': 'ASHA on completion of treatment of kala azar patients in the government hospital under the chief minister Kala-azar Relief Scheme',
+              'question': AppLocalizations.of(context)!.kalaAzarQuestion2,
               'hint': '0',
             },
-
           ];
 
           // ✅ Date setup
@@ -56,7 +56,7 @@ class KalaAzarScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'Kala-azar Eradication Program',
+              screenTitle: AppLocalizations.of(context)!.kalaAzarScreenTitle,
               showBack: true,
             ),
             body: Padding(
@@ -184,14 +184,14 @@ class KalaAzarScreen extends StatelessWidget {
                             onPress: () {
                               bloc.add(const SaveKalaAzarData());
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                  Text('स्क्रीनिंग डेटा सफलतापूर्वक सहेजा गया!'),
+                                 SnackBar(
+                                  content: Text(
+                                      AppLocalizations.of(context)!.kalaAzarDataSaved),
                                   backgroundColor: Colors.green,
                                 ),
                               );
                             },
-                            title: 'सबमिट करें',
+                            title: AppLocalizations.of(context)!.saveButton,
                             isLoading: false,
                           ),
                         ),

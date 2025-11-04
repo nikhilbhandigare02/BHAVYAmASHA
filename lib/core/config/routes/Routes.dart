@@ -60,6 +60,7 @@ import '../../../presentation/NCD/NCDeligibleList.dart';
 import '../../../presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
 import '../../../presentation/RegisterNewHouseHold/AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart';
 import '../../../presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
+import '../../../presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
 import '../../../presentation/ResetPassword/ResetPassword.dart';
 import '../../../presentation/Routine/RoutineScreen.dart' show Routinescreen;
 import '../../../presentation/SyncStatus/SyncStatusScreen.dart';
@@ -107,7 +108,12 @@ class Routes{
       case Route_Names.GuestBeneficiarySearch:
         return MaterialPageRoute(builder: (context) => GuestBeneficiarySearch(),);
       case Route_Names.RegisterNewHousehold:
-        return MaterialPageRoute(builder: (context) => RegisterNewHouseHoldScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => BlocProvider(
+            create: (context) => RegisterNewHouseholdBloc(),
+            child: RegisterNewHouseHoldScreen(),
+          ),
+        );
       case Route_Names.AllHousehold:
         return MaterialPageRoute(builder: (context) => AllhouseholdScreen(),);
       case Route_Names.houseHoldBeneficiaryScreen:

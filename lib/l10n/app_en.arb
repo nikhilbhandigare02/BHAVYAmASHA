@@ -99,6 +99,7 @@
   "anmNameLabel": "ANM Name",
   "announcement": "Announcements List",
   "announcements": "Announcement",
+  "selectOptions": "Select Options",
   "antenatal": "Next Antenatal Date:",
   "announcementItem1Body": "In the local primary health center, smart phones were given to the ASHA workers of the block area for health related work. PHC in-charge Dr. Purushottam Priyadarshi said that a total of 126 ASHA workers of the block area have been given smart phones to make them hi-tech.He told that writing ASHA in the register will now give freedom. The mobile is specially designed for health related programs. Mobile cannot be used for any other purpose.All ASHA workers can send claim form for honorarium from their smart phone itself. On the basis of this, the amount of honorarium will be sent to their bank account. BCM Sanjit Kumar said that there are a total of 120 ASHA workers and 6 facilitators in the block area. Out of which smart phones have been made available to 122.",
   "announcementItem1Title": "Distribution: Smart phones given to ASHA workers",
@@ -1178,6 +1179,26 @@
   "aesJeQuestion1": "Amount payable to ASHA as community catalyst in 1000 population during IRS spraying",
   "aesJeQuestion2": "Patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer",
   "aesJeDataSaved": "AES/JE data saved successfully!",
+<<<<<<< HEAD
+  "ambProgram": "AMB Eradication Program",
+  "ambScreenTitle": "AMB Eradication Program",
+  "ambQuestion1": "ASHA women of reproductive age (20 to 49 years) in their area who are pregnant or traveling maintenance in their Line Listing Register and the amount due for distribution of 4 IFA red pills per month to those women.",
+  "ambQuestion2": "Amount payable for regularizing the line listing register of the children of ASHA area from 6 months to 59 months and for distribution of syrup of IFA to those guardians/parents of the children.",
+  "ambDataSaved": "AMB data saved successfully!",
+  "filariasisProgram": "Filariasis Eradication Program",
+  "filariasisScreenTitle": "Filariasis Eradication Program",
+  "filariasisQuestion1": "Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)",
+ 
+  "kalaAzarProgram": "Kala-azar Eradication Program",
+  "kalaAzarScreenTitle": "Kala-azar Eradication Program",
+  "kalaAzarQuestion1": "Amount payable to ASHA for search of Kala-azar patient, to PHC, investigation, complete treatment, monitoring for 6 months.",
+  "kalaAzarQuestion2": "ASHA on completion of treatment of Kala-azar patients in the government hospital under the chief minister Kala-azar Relief Scheme",
+  "kalaAzarDataSaved": "Kala-azar screening data saved successfully!",
+  "niddcpProgram": "NIDDCP Program",
+  "niddcpScreenTitle": "NIDDCP Program",
+  "niddcpQuestion1": "ASHA Incentive under NIDDCP",
+  "niddcpDataSaved": "NIDDCP data saved successfully!"
+=======
   "trackingDueTitle": "Tracking Due",
   "birthDoses": "BIRTH DOSES",
   "sixWeek": "6 WEEK",
@@ -1200,4 +1221,5 @@
   "sixWeekDoses": "6 Week Doses",
   "tenWeekDoses": "10 Week Doses",
   "fourteenWeekDoses": "14 Week Doses"
+>>>>>>> 9f2a034e02f342ea81ecc20d1a6cbdc2939debdf
 }

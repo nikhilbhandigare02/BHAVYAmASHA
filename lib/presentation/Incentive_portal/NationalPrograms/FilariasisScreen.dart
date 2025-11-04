@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/TextField/TextField.dart';
 import 'bloc/filariasis_bloc/filariasis_bloc.dart';
 
@@ -35,7 +36,7 @@ class FilariasisScreen extends StatelessWidget {
 
           // ✅ Filariasis Questions
           final List<String> labels = [
-            'Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)',
+            AppLocalizations.of(context)!.filariasisQuestion1,
           ];
 
           // ✅ Date setup
@@ -47,7 +48,7 @@ class FilariasisScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'Filaria Eradication Program',
+              screenTitle: AppLocalizations.of(context)!.filariasisScreenTitle,
               showBack: true,
             ),
             body: Padding(
@@ -166,13 +167,13 @@ class FilariasisScreen extends StatelessWidget {
                               alignment: Alignment.centerRight,
                               child: RoundButton(
                                 width: 14.h,
-                                title: 'Save',
+                                title: AppLocalizations.of(context)!.saveButton,
                                 onPress: () {
                                   bloc.add(SaveFilariasisData());
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                     SnackBar(
                                       content: Text(
-                                          'Filariasis MDA data saved successfully!'),
+                                          AppLocalizations.of(context)!.dataSavedSuccessfully),
                                       backgroundColor: Colors.green,
                                     ),
                                   );

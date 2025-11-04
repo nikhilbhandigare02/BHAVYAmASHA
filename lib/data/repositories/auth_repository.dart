@@ -34,14 +34,12 @@ class AuthRepository {
 
       print('Raw Login Response (Type: ${response.runtimeType}): $response');
       
-      // Ensure response is a Map
-      final responseData = response is Map<String, dynamic> 
+      final responseData = response is Map<String, dynamic>
           ? response 
           : (response is String ? jsonDecode(response) : response);
       
       print('Processed Response: $responseData');
       
-      // Parse the response
       final loginResponse = LoginResponseModel.fromJson(
         responseData is Map<String, dynamic> 
             ? responseData 
@@ -89,10 +87,9 @@ class AuthRepository {
           print('Error saving to secure storage: $e');
         }
         
-        // Print stored user data for verification
+
         await UserInfo.printUserData();
-        
-        // Return both login response and user data status
+
         return {
           'loginResponse': loginResponse,
           'isNewUser': userData['isNewUser'],
@@ -102,7 +99,7 @@ class AuthRepository {
       
       return {
         'loginResponse': loginResponse,
-        'isNewUser': true, // Default to true if we can't determine
+        'isNewUser': true,
         'user': null
       };
       

@@ -135,8 +135,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     // --- Years ---
                     Expanded(
                       child: CustomTextField(
-                        labelText: 'Year',
-                        hintText: 'Year',
+                        labelText: l.years,
+                        hintText: l.years,
                         initialValue: state.years ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateYears(v.trim())),
@@ -154,8 +154,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     // --- Months ---
                     Expanded(
                       child: CustomTextField(
-                        labelText: 'Month',
-                        hintText: 'Month',
+                        labelText: l.months,
+                        hintText: l.months,
                         initialValue: state.months ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateMonths(v.trim())),
@@ -173,8 +173,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     // --- Days ---
                     Expanded(
                       child: CustomTextField(
-                        labelText: 'Day',
-                        hintText: 'Day',
+                        labelText: l.days,
+                        hintText: l.days,
                         initialValue: state.days ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateDays(v.trim())),
@@ -459,7 +459,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: '${l.mobileLabel} *',
-            hintText: 'Enter mobile number',
+            hintText: '${l.mobileLabel} *',
             keyboardType: TextInputType.number,
             maxLength: 10,
             initialValue: state.mobileNo,
@@ -475,7 +475,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.villageNameLabel,
-            hintText: 'Enter village name',
+            hintText: l.villageNameLabel,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVillage(v.trim())),
           ),
         ),
@@ -484,7 +484,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.wardNoLabel,
-            hintText: 'Enter ward number',
+            hintText: l.wardNoLabel,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateWard(v.trim())),
           ),
         ),
@@ -493,7 +493,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.mohallaTolaNameLabel,
-            hintText: 'Enter mohalla/tola name',
+            hintText: l.mohallaTolaNameLabel,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMohalla(v.trim())),
           ),
         ),
@@ -510,7 +510,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                 _Section(
                   child: CustomTextField(
                     labelText: l.accountNumberLabel,
-                    hintText: 'Enter bank account number',
+                    hintText: l.accountNumberLabel,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(v.trim())),
@@ -529,7 +529,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.ifscLabel,
-            hintText:'IFSC code' ,
+            hintText:l.ifscLabel,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateIfsc(v.trim())),
           ),
         ),
@@ -538,7 +538,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.voterIdLabel,
-            hintText: 'Enter voter ID',
+            hintText: l.voterIdLabel,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVoterId(v.trim())),
           ),
         ),
@@ -547,7 +547,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.rationCardIdLabel,
-            hintText: 'Enter ration card number',
+            hintText: l.rationCardIdLabel,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateRationId(v.trim())),
           ),
         ),
@@ -556,7 +556,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
         _Section(
           child: CustomTextField(
             labelText: l.personalHealthIdLabel,
-            hintText: 'personal health id',
+            hintText:  l.personalHealthIdLabel,
             onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdatePhId(v.trim())),
           ),
         ),
@@ -849,7 +849,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                           : (state.hasChildren == 'Yes' ? '1+' : '0'),
                     }
                   ];
-                  // Add spouse row when available
                   if ((state.maritalStatus == 'Married') && (state.spouseName != null) && state.spouseName!.isNotEmpty) {
                     final spouseGender = (state.gender == 'Male')
                         ? 'Female'

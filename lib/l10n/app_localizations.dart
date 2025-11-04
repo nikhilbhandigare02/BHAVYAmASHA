@@ -689,6 +689,12 @@ abstract class AppLocalizations {
   /// **'Announcement'**
   String get announcements;
 
+  /// No description provided for @selectOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Options'**
+  String get selectOptions;
+
   /// No description provided for @antenatal.
   ///
   /// In en, this message translates to:
@@ -6743,6 +6749,99 @@ abstract class AppLocalizations {
   /// **'AES/JE data saved successfully!'**
   String get aesJeDataSaved;
 
+
+  String get ambProgram;
+
+  /// No description provided for @ambScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AMB Eradication Program'**
+  String get ambScreenTitle;
+
+  /// No description provided for @ambQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA women of reproductive age (20 to 49 years) in their area who are pregnant or traveling maintenance in their Line Listing Register and the amount due for distribution of 4 IFA red pills per month to those women.'**
+  String get ambQuestion1;
+
+  /// No description provided for @ambQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount payable for regularizing the line listing register of the children of ASHA area from 6 months to 59 months and for distribution of syrup of IFA to those guardians/parents of the children.'**
+  String get ambQuestion2;
+
+  /// No description provided for @ambDataSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'AMB data saved successfully!'**
+  String get ambDataSaved;
+
+  /// No description provided for @filariasisProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Filariasis Eradication Program'**
+  String get filariasisProgram;
+
+  /// No description provided for @filariasisScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filariasis Eradication Program'**
+  String get filariasisScreenTitle;
+
+  /// No description provided for @filariasisQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)'**
+  String get filariasisQuestion1;
+
+  /// No description provided for @kalaAzarProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Kala-azar Eradication Program'**
+  String get kalaAzarProgram;
+
+  /// No description provided for @kalaAzarScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kala-azar Eradication Program'**
+  String get kalaAzarScreenTitle;
+
+  /// No description provided for @kalaAzarQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount payable to ASHA for search of Kala-azar patient, to PHC, investigation, complete treatment, monitoring for 6 months.'**
+  String get kalaAzarQuestion1;
+
+  /// No description provided for @kalaAzarQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA on completion of treatment of Kala-azar patients in the government hospital under the chief minister Kala-azar Relief Scheme'**
+  String get kalaAzarQuestion2;
+
+  /// No description provided for @kalaAzarDataSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Kala-azar screening data saved successfully!'**
+  String get kalaAzarDataSaved;
+
+  /// No description provided for @niddcpScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'NIDDCP Program'**
+  String get niddcpScreenTitle;
+
+  /// No description provided for @niddcpQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA Incentive under NIDDCP'**
+  String get niddcpQuestion1;
+
+  /// No description provided for @niddcpDataSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'NIDDCP data saved successfully!'**
+  String get niddcpDataSaved;
+
   /// No description provided for @trackingDueTitle.
   ///
   /// In en, this message translates to:
@@ -6868,6 +6967,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'14 Week Doses'**
   String get fourteenWeekDoses;
+
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

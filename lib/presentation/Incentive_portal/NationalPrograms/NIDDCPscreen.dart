@@ -5,6 +5,7 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 
 import 'bloc/niddcp_bloc/niddcp_bloc.dart';
 
@@ -42,13 +43,13 @@ class NIDDCPScreen extends StatelessWidget {
 
           // ✅ Questions
           final List<String> labels = [
-            'ASHA Incentive under NIDDCP',
+            AppLocalizations.of(context)!.niddcpQuestion1,
           ];
 
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'NIDDCP Program',
+              screenTitle: AppLocalizations.of(context)!.niddcpScreenTitle,
               showBack: true,
             ),
             body: Padding(
@@ -117,7 +118,6 @@ class NIDDCPScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // ✅ Single Question (AES/JE layout)
                             for (int i = 0; i < labels.length; i++) ...[
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +148,7 @@ class NIDDCPScreen extends StatelessWidget {
                                     width: 12.w,
                                     child: CustomTextField(
                                       initialValue: state.value == '0'
-                                          ? ''
+                                          ? '0'
                                           : state.value,
                                       keyboardType: TextInputType.number,
                                       onChanged: (val) =>
@@ -167,13 +167,13 @@ class NIDDCPScreen extends StatelessWidget {
                               alignment: Alignment.centerRight,
                               child: RoundButton(
                                 width: 14.h,
-                                title: 'Save',
+                                title: AppLocalizations.of(context)!.saveButton,
                                 onPress: () {
                                   bloc.add(SaveNiddcpData());
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                     SnackBar(
                                       content: Text(
-                                          'NIDDCP data saved successfully!'),
+                                          AppLocalizations.of(context)!.niddcpDataSaved),
                                       backgroundColor: Colors.green,
                                     ),
                                   );
@@ -186,7 +186,7 @@ class NIDDCPScreen extends StatelessWidget {
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 16.0),
                                   child: Text(
-                                    'Data saved successfully!',
+                                    AppLocalizations.of(context)!.dataSavedSuccessfully,
                                     style: TextStyle(
                                       color: Colors.green,
                                       fontWeight: FontWeight.bold,
