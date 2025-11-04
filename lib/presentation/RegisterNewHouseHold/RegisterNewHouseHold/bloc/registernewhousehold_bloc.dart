@@ -84,13 +84,14 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
         final householdInfoJson = jsonEncode(householdInfo);
         print('Household Amenities JSON: $householdInfoJson');
 
-        // Prepare beneficiary info
-        final beneficiaryInfo = {
+        // Prepare and encode beneficiary info
+        final beneficiaryInfo = jsonEncode({
           'head_details': event.headForm ?? {},
           'spouse_details': event.headForm?['spousedetails'] ?? {},
           'children_details': event.headForm?['childrendetails'] ?? {},
           'member_details': event.memberForms,
-        };
+        });
+        print('Beneficiary Info JSON: $beneficiaryInfo');
 
         // Generate unique keys
         final householdKey = 'HH_${now.millisecondsSinceEpoch}';
@@ -125,7 +126,7 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
           'unique_key': headId,
           'beneficiary_state': 'active',
           'pregnancy_count': 0,
-          'beneficiary_info': beneficiaryInfo,
+          'beneficiary_info': beneficiaryInfo, // This is now a JSON string
           'geo_location': {},
           'spouse_key': event.headForm?['spousedetails']?['unique_key'],
           'mother_key': null,
