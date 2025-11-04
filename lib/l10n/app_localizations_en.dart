@@ -3350,7 +3350,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aesJeDataSaved => 'AES/JE data saved successfully!';
 
   @override
-<<<<<<< HEAD
+
   String get ambProgram => 'AMB Eradication Program';
 
   @override
@@ -3397,7 +3397,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get niddcpDataSaved => 'NIDDCP data saved successfully!';
-=======
   String get trackingDueTitle => 'Tracking Due';
 
   @override
@@ -3459,5 +3458,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fourteenWeekDoses => '14 Week Doses';
->>>>>>> 9f2a034e02f342ea81ecc20d1a6cbdc2939debdf
 }

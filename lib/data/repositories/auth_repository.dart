@@ -31,10 +31,7 @@ class AuthRepository {
         },
       );
       
-<<<<<<< HEAD
-=======
 
->>>>>>> 9f2a034e02f342ea81ecc20d1a6cbdc2939debdf
       print('Raw Login Response (Type: ${response.runtimeType}): $response');
       
       final responseData = response is Map<String, dynamic>

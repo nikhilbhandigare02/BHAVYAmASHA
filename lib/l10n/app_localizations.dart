@@ -6749,7 +6749,7 @@ abstract class AppLocalizations {
   /// **'AES/JE data saved successfully!'**
   String get aesJeDataSaved;
 
-<<<<<<< HEAD
+
   /// No description provided for @ambProgram.
   ///
   /// In en, this message translates to:
@@ -6845,7 +6845,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'NIDDCP data saved successfully!'**
   String get niddcpDataSaved;
-=======
+
   /// No description provided for @trackingDueTitle.
   ///
   /// In en, this message translates to:
@@ -6971,7 +6971,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'14 Week Doses'**
   String get fourteenWeekDoses;
->>>>>>> 9f2a034e02f342ea81ecc20d1a6cbdc2939debdf
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

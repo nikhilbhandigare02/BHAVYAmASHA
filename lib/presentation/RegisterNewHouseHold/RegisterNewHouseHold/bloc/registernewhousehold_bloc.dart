@@ -59,18 +59,17 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
         final now = DateTime.now();
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
 
-        // 🟢 Print Head Details
-        print('👤 Head Details:');
+        // Debug prints for head and member details
+        print('Head Details:');
         print(const JsonEncoder.withIndent('  ').convert(event.headForm ?? {}));
-
-        // 🟢 Print Member Details
-        print('👥 Member Details:');
+        print('Member Details:');
         print(const JsonEncoder.withIndent('  ').convert(event.memberForms));
 
-        // 🟢 Print Amenities Details
+        // Get the current state from amenities bloc
         final hhState = event.hhBloc.state;
-        print('🏠 Amenities Details:');
-        print(const JsonEncoder.withIndent('  ').convert({
+
+        // Create household info with all amenities data
+        final householdInfo = <String, dynamic>{
           'residentialArea': hhState.residentialArea,
           'ownershipType': hhState.ownershipType,
           'houseType': hhState.houseType,
@@ -79,36 +78,65 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
           'waterSource': hhState.waterSource,
           'electricity': hhState.electricity,
           'toilet': hhState.toilet,
-        }));
-
-        // Continue your existing code...
-        final householdFormJson = {
-          'headdetails': event.headForm ?? {},
-          'memberdetails': event.memberForms,
-          'spousedetails': event.headForm?['spousedetails'] ?? {},
-          'childrendetails': event.headForm?['childrendetails'] ?? {},
-          'amenities': {
-            'residentialArea': hhState.residentialArea,
-            'ownershipType': hhState.ownershipType,
-            'houseType': hhState.houseType,
-            'houseKitchen': hhState.houseKitchen,
-            'cookingFuel': hhState.cookingFuel,
-            'waterSource': hhState.waterSource,
-            'electricity': hhState.electricity,
-            'toilet': hhState.toilet,
-          },
         };
 
-        // Normalize and save...
-        final normalizedHouseholdInfo =
-        _convertYesNoMap(Map<String, dynamic>.from(householdFormJson));
-        final payload = {
+        // Encode the household info to JSON string
+        final householdInfoJson = jsonEncode(householdInfo);
+        print('Household Amenities JSON: $householdInfoJson');
+
+        // Prepare beneficiary info
+        final beneficiaryInfo = {
+          'head_details': event.headForm ?? {},
+          'spouse_details': event.headForm?['spousedetails'] ?? {},
+          'children_details': event.headForm?['childrendetails'] ?? {},
+          'member_details': event.memberForms,
+        };
+
+        // Generate unique keys
+        final householdKey = 'HH_${now.millisecondsSinceEpoch}';
+        final headId = event.headForm?['unique_key'] ?? event.headForm?['id'];
+
+        // Prepare household payload for database
+        final householdPayload = {
           'server_id': null,
-          'unique_key': 'HH_${now.millisecondsSinceEpoch}',
-          'address': {},
+          'unique_key': householdKey,
+          'address': jsonEncode({}),
+          'geo_location': jsonEncode({}),
+          'head_id': headId,
+          'household_info': householdInfoJson, // Use the pre-encoded JSON string
+          'device_details': jsonEncode({'platform': Platform.operatingSystem}),
+          'app_details': jsonEncode({'app_name': 'BHAVYA mASHA UAT'}),
+          'parent_user': jsonEncode({}),
+          'current_user_key': 'local_user',
+          'facility_id': 283,
+          'created_date_time': ts,
+          'modified_date_time': ts,
+          'is_synced': 0,
+          'is_deleted': 0,
+        };
+
+        print('Saving household with payload: ${jsonEncode(householdPayload)}');
+
+        await LocalStorageDao.instance.insertHousehold(householdPayload);
+
+        final beneficiaryPayload = {
+          'server_id': null,
+          'household_ref_key': householdKey,
+          'unique_key': headId,
+          'beneficiary_state': 'active',
+          'pregnancy_count': 0,
+          'beneficiary_info': beneficiaryInfo,
           'geo_location': {},
-          'head_id': event.headForm?['unique_key'] ?? event.headForm?['id'],
-          'household_info': normalizedHouseholdInfo,
+          'spouse_key': event.headForm?['spousedetails']?['unique_key'],
+          'mother_key': null,
+          'father_key': null,
+          'is_family_planning': 0,
+          'is_adult': 1,
+          'is_guest': 0,
+          'is_death': 0,
+          'death_details': {},
+          'is_migrated': 0,
+          'is_separated': 0,
           'device_details': {'platform': Platform.operatingSystem},
           'app_details': {'app_name': 'BHAVYA mASHA UAT'},
           'parent_user': {},
@@ -120,9 +148,8 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
           'is_deleted': 0,
         };
 
-        await LocalStorageDao.instance.insertHousehold(payload);
+        await LocalStorageDao.instance.insertBeneficiary(beneficiaryPayload);
 
-        // 🟢 Print confirmation
         print('✅ Household saved successfully!');
         emit(state.saved());
       } catch (e, stackTrace) {

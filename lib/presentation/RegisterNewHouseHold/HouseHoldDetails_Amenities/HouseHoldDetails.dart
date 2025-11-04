@@ -61,7 +61,7 @@ class _HouseHoldDetailsState extends State<HouseHoldDetails> {
                               return s;
                           }
                         },
-                        value: (state.residentialArea.isEmpty) ? null : state.residentialArea,
+                        value: (state.residentialArea!.isEmpty) ? null : state.residentialArea,
                         onChanged: (v) => context
                             .read<HouseholdDetailsAmenitiesBloc>()
                             .add(ResidentialAreaChange( residentialArea: v ?? '')),
@@ -88,7 +88,7 @@ class _HouseHoldDetailsState extends State<HouseHoldDetails> {
                               return s;
                           }
                         },
-                        value: (state.houseType.isEmpty) ? null : state.houseType,
+                        value: (state.houseType!.isEmpty) ? null : state.houseType,
                         onChanged: (v) => context
                             .read<HouseholdDetailsAmenitiesBloc>()
                             .add(HouseTypeChange( houseType: v ?? '')),
@@ -111,7 +111,7 @@ class _HouseHoldDetailsState extends State<HouseHoldDetails> {
                               return s;
                           }
                         },
-                        value: (state.ownershipType.isEmpty) ? null : state.ownershipType,
+                        value: (state.ownershipType!.isEmpty) ? null : state.ownershipType,
                         onChanged: (v) => context
                             .read<HouseholdDetailsAmenitiesBloc>()
                             .add(OwnershipTypeChange( ownershipType: v ?? '')),
