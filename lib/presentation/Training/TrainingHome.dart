@@ -20,7 +20,6 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    // 🔹 2 cards per row with even spacing
     final double totalHorizontalPadding = 12 * 2;
     final double spacingBetweenCards = 8;
     final double cardWidth = (MediaQuery.of(context).size.width -
@@ -54,8 +53,9 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
         ),
       ),
 
-      // 🔹 Scrollable content area
+
       body: SafeArea(
+        bottom: true,
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
           child: Column(
@@ -112,11 +112,11 @@ class _FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
-    final double cardHeight = 15.h; // Equal card height for all
+    final double cardHeight = 15.h;
 
     return InkWell(
       onTap: onClick,
-      borderRadius: BorderRadius.circular(10),
+       borderRadius: BorderRadius.circular(10),
       child: SizedBox(
         width: width,
         height: cardHeight,

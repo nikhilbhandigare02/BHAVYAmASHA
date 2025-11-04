@@ -2,13 +2,12 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import '../../../data/Local_Storage/User_Info.dart';
-
 part 'profile_event.dart';
 part 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc() : super(const ProfileState()) {
-    // Add a method to log state changes
+
     void logStateChanges(ProfileState oldState, ProfileState newState) {
       if (oldState.stateName != newState.stateName) {
         print('StateName changed from "${oldState.stateName}" to "${newState.stateName}"');

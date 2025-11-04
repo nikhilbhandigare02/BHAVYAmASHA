@@ -368,7 +368,7 @@
                         items: countries,
                         value: selectedCountry,
                         getLabel: (country) => country.name,
-                        hintText: l10n.selectArea,
+                         hintText: l10n.selectArea,
                         // Setting onChanged to null makes the dropdown read-only
                         onChanged: null,
                         // onChanged: (value) {
