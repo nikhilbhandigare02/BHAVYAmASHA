@@ -838,7 +838,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               ],
 
-
+                              if (_isEdit == true)...[
                               if (state.maritalStatus == 'Married') ...[
                                 _section(
                                   CustomTextField(
@@ -900,7 +900,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                                   ),
                                 ),
-                              ],
+                              ],]
                             ],
                           );
                         },

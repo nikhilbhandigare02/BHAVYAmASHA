@@ -221,7 +221,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     ? (l10n?.saveButton ?? 'SAVE')
                     : (l10n?.nextButton ?? 'NEXT');
 
-                // Get the household bloc
                 final householdBloc = context.read<RegisterNewHouseholdBloc>();
                 
                 return BlocConsumer<RegisterNewHouseholdBloc, RegisterHouseholdState>(

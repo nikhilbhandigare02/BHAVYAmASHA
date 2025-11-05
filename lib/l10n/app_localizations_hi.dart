@@ -3350,7 +3350,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get aesJeDataSaved => 'एईएस/जेई डेटा सफलतापूर्वक सहेजा गया!';
 
   @override
-
   String get ambProgram => 'एएमबी उन्मूलन कार्यक्रम';
 
   @override
@@ -3397,7 +3396,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get niddcpDataSaved => 'एनआईडीडीसीपी डेटा सफलतापूर्वक सहेजा गया!';
-
   String get trackingDueTitle => 'Tracking Due';
 
   @override
@@ -3459,5 +3457,4 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get fourteenWeekDoses => '14 Week Doses';
-
 }

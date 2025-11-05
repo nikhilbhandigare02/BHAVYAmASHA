@@ -3397,7 +3397,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get niddcpDataSaved => 'NIDDCP data saved successfully!';
-
   String get trackingDueTitle => 'Tracking Due';
 
   @override
@@ -3459,5 +3458,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fourteenWeekDoses => '14 Week Doses';
-
 }

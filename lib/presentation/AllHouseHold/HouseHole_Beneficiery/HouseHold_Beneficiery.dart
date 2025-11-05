@@ -131,7 +131,7 @@ class _HouseHold_BeneficiaryScreenState
   Map<String, dynamic> _mapToBeneficiary(
       Map<String, dynamic> data, String relation, String hhId) {
     final Map<String, dynamic> householdInfo = data['_householdInfo'] is Map
-        ? Map<String, dynamic>.from(data['_householdInfo'] as Map<dynamic, dynamic>) 
+        ? Map<String, dynamic>.from(data['_householdInfo'] as Map<dynamic, dynamic>)
         : <String, dynamic>{};
     try {
       DateTime? dob;
@@ -171,59 +171,59 @@ class _HouseHold_BeneficiaryScreenState
           : 'Other';
 
       final name = (data['name'] ??
-                  data['headName'] ?? 
+                  data['headName'] ??
                   data['beneficiaryName'] ??
                   'N/A').toString().trim();
-      
+
       String relationName = 'N/A';
-      String motherName = (data['motherName'] ?? 'N/A').toString().trim();
+      // String motherName = (data['motherName'] ?? 'N/A').toString().trim();
       String relationType = relation.toLowerCase();
-      
+
       if (relationType == 'head') {
         relationName = (data['spouseName'] ??
-                       data['spouse_name'] ?? 
+                       data['spouse_name'] ??
                        'N/A').toString().trim();
       } else if (relationType == 'spouse') {
         relationName = (data['headName'] ??
-                       data['husbandName'] ?? 
+                       data['husbandName'] ??
                        'N/A').toString().trim();
       } else if (relationType == 'son' || relationType == 'daughter') {
         relationName = (data['fatherName'] ??
-                       data['father_name'] ?? 
+                       data['father_name'] ??
                        data['headName'] ??
                        'N/A').toString().trim();
-        motherName = (data['motherName'] ??
-                     (householdInfo.isNotEmpty && householdInfo['spousedetails'] is Map 
-                       ? (householdInfo['spousedetails']?['name'] ?? 'N/A').toString().trim()
-                       : 'N/A')).toString().trim();
+        // motherName = (data['motherName'] ??
+        //              (householdInfo.isNotEmpty && householdInfo['spousedetails'] is Map
+        //                ? (householdInfo['spousedetails']?['name'] ?? 'N/A').toString().trim()
+        //                : 'N/A')).toString().trim();
       } else if (relationType == 'wife') {
         relationName = (data['husbandName'] ??
                        data['headName'] ??
                        'N/A').toString().trim();
       } else {
         relationName = (data['fatherName'] ??
-                       data['father_name'] ?? 
+                       data['father_name'] ??
                        'N/A').toString().trim();
       }
-      
+
       final result = {
         'hhId': hhId,
-        'RegitrationDate': data['createdAt'] ?? 
-                         data['registrationDate'] ?? 
+        'RegitrationDate': data['createdAt'] ??
+                         data['registrationDate'] ??
                          DateTime.now().toIso8601String().split('T')[0],
-        'RegitrationType': data['memberType'] ?? 
-                         data['registrationType'] ?? 
+        'RegitrationType': data['memberType'] ??
+                         data['registrationType'] ??
                          'General',
         'BeneficiaryID': data['beneficiaryId']?.toString() ??
                         data['id']?.toString() ??
                         '${DateTime.now().millisecondsSinceEpoch}',
         'Name': name,
         'Age|Gender': '$age Y | $displayGender',
-        'Mobileno.': data['mobileNo']?.toString() ?? 
-                    data['mobile']?.toString() ?? 
+        'Mobileno.': data['mobileNo']?.toString() ??
+                    data['mobile']?.toString() ??
                     data['phone']?.toString() ?? 'N/A',
         'RelationName': relationName,
-        'MotherName': motherName,
+        // 'MotherName': motherName,
         'Relation': relation,
         'MaritalStatus': data['maritalStatus'] ?? 'N/A',
         '_raw': data,
@@ -267,7 +267,7 @@ class _HouseHold_BeneficiaryScreenState
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: widget.houseNo != null 
+        screenTitle: widget.houseNo != null
             ? '${l10n?.householdBeneficiaryTitle ?? 'Household'} '
             : l10n?.householdBeneficiaryTitle ?? 'Household Beneficiary',
         showBack: true,
@@ -389,7 +389,7 @@ class _HouseHold_BeneficiaryScreenState
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
-    
+
     return InkWell(
       onTap: () {
         Navigator.pushNamed(

@@ -1,6 +1,6 @@
 part of 'household_details_amenities_bloc.dart';
 
-class HouseholdDetailsAmenitiesState extends Equatable{
+class HouseholdDetailsAmenitiesState extends Equatable {
   const HouseholdDetailsAmenitiesState({
     this.residentialArea = '',
     this.ownershipType = '',
@@ -8,11 +8,12 @@ class HouseholdDetailsAmenitiesState extends Equatable{
     this.houseKitchen = '',
     this.cookingFuel = '',
     this.waterSource = '',
-    this.toilet = '',
     this.electricity = '',
+    this.toilet = '',
     this.error = '',
     this.postApiStatus = PostApiStatus.initial,
-});
+  });
+  
   final String residentialArea;
   final String ownershipType;
   final String houseType;

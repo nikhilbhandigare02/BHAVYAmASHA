@@ -6750,6 +6750,10 @@ abstract class AppLocalizations {
   String get aesJeDataSaved;
 
 
+  /// No description provided for @ambProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'AMB Eradication Program'**
   String get ambProgram;
 
   /// No description provided for @ambScreenTitle.
@@ -6967,7 +6971,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'14 Week Doses'**
   String get fourteenWeekDoses;
-
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

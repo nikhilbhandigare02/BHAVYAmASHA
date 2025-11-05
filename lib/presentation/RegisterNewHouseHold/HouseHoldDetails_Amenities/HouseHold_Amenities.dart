@@ -57,7 +57,7 @@ class _HouseHoldAmenitiesState extends State<HouseHoldAmenities> {
                                 return s;
                             }
                           },
-                          value: (state.houseKitchen.isEmpty) ? null : state.houseKitchen,
+                          value: (state.houseKitchen!.isEmpty) ? null : state.houseKitchen,
                           onChanged: (v) => context
                               .read<HouseholdDetailsAmenitiesBloc>()
                               .add(KitchenChange(houseKitchen: v ?? '')),
@@ -94,7 +94,7 @@ class _HouseHoldAmenitiesState extends State<HouseHoldAmenities> {
                                 return s;
                             }
                           },
-                          value: (state.cookingFuel.isEmpty) ? null : state.cookingFuel,
+                          value: (state.cookingFuel!.isEmpty) ? null : state.cookingFuel,
                           onChanged: (v) => context
                               .read<HouseholdDetailsAmenitiesBloc>()
                               .add(CookingFuelTypeChange(cookingFuel: v ?? '')),
@@ -140,7 +140,7 @@ class _HouseHoldAmenitiesState extends State<HouseHoldAmenities> {
                                 return s;
                             }
                           },
-                          value: (state.waterSource.isEmpty) ? null : state.waterSource,
+                          value: (state.waterSource!.isEmpty) ? null : state.waterSource,
                           onChanged: (v) => context
                               .read<HouseholdDetailsAmenitiesBloc>()
                               .add(WaterSourceChange(waterSource: v ?? '')),
@@ -171,7 +171,7 @@ class _HouseHoldAmenitiesState extends State<HouseHoldAmenities> {
                                 return s;
                             }
                           },
-                          value: (state.electricity.isEmpty) ? null : state.electricity,
+                          value: (state.electricity!.isEmpty) ? null : state.electricity,
                           onChanged: (v) => context
                               .read<HouseholdDetailsAmenitiesBloc>()
                               .add(ElectricityChange(electricity: v ?? '')),
@@ -190,7 +190,7 @@ class _HouseHoldAmenitiesState extends State<HouseHoldAmenities> {
                                 return s;
                             }
                           },
-                          value: (state.toilet.isEmpty) ? null : state.toilet,
+                          value: (state.toilet!.isEmpty) ? null : state.toilet,
                           onChanged: (v) => context
                               .read<HouseholdDetailsAmenitiesBloc>()
                               .add(ToiletChange(toilet: v ?? '')),
