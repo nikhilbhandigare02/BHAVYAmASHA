@@ -8,6 +8,10 @@ class AddnewfamilymemberState extends Equatable {
   final String? RichIDChanged;
   final String? BirthCertificateChange;
   final String? relation;
+  final String? memberStatus;
+  final DateTime? dateOfDeath;
+  final String? deathReason;
+  final String? deathPlace;
   final String? name;
   final String? ChildSchool;
   final String? WeightChange;
@@ -86,6 +90,10 @@ class AddnewfamilymemberState extends Equatable {
     this.spouseName,
     this.hasChildren,
     this.isPregnant,
+    this.dateOfDeath,
+    this.deathPlace,
+    this.deathReason,
+    this.memberStatus,
     this.errorMessage,
 
   });
@@ -131,6 +139,10 @@ class AddnewfamilymemberState extends Equatable {
     String? isPregnant,
     bool clearDob = false,
     bool clearError = false,
+    final String? memberStatus,
+    final DateTime? dateOfDeath,
+    final String? deathReason,
+    final String? deathPlace,
     String? errorMessage,
 
   }) {
@@ -173,6 +185,10 @@ class AddnewfamilymemberState extends Equatable {
       spouseName: spouseName ?? this.spouseName,
       hasChildren: hasChildren ?? this.hasChildren,
       isPregnant: isPregnant ?? this.isPregnant,
+      deathReason: deathReason ?? this.deathReason,
+      deathPlace: deathPlace ?? this.deathPlace,
+      dateOfDeath: dateOfDeath ?? this.dateOfDeath,
+      memberStatus: memberStatus ?? this.memberStatus,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
 
     );
@@ -218,6 +234,10 @@ class AddnewfamilymemberState extends Equatable {
     ageAtMarriage,
     spouseName,
     hasChildren,
+    deathPlace,
+    dateOfDeath,
+    deathReason,
+    memberStatus,
     isPregnant,
   ];
 
@@ -253,6 +273,10 @@ class AddnewfamilymemberState extends Equatable {
       'spouseName': spouseName,
       'hasChildren': hasChildren,
       'isPregnant': isPregnant,
+      'memberStatus': memberStatus,
+      'dateOfDeath': dateOfDeath,
+      'deathReason': deathReason,
+      'deathPlace': isPregnant,
       'errorMessage': errorMessage,
       'RichIDChanged': RichIDChanged,
       'BirthCertificateChange': BirthCertificateChange,

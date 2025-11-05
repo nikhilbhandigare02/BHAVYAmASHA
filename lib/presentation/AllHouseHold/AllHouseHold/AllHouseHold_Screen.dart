@@ -253,13 +253,14 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
-    return InkWell(
+    return InkWell( 
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => HouseHold_BeneficiaryScreen(
               houseNo: data['houseNo']?.toString(),
+              hhId: data['_raw']['household_ref_key']?.toString() ?? '',
             ),
           ),
         );

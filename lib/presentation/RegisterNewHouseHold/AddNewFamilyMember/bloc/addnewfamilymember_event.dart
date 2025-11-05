@@ -249,7 +249,38 @@ final class UpdateDayChanged extends AddnewfamilymemberEvent {
   List<Object> get props => [value];
 }
 
-// Separate submit for update flow
+
+final class UpdateIsMemberStatus extends AddnewfamilymemberEvent{
+  final String value;
+  const UpdateIsMemberStatus(this.value);
+
+  @override
+  List<Object> get props => [value];
+}
+
+final class UpdateDateOfDeath extends AddnewfamilymemberEvent{
+  final DateTime value;
+  const UpdateDateOfDeath(this.value);
+
+  @override
+  List<Object> get props => [value];
+}
+final class UpdateDatePlace extends AddnewfamilymemberEvent{
+  final String value;
+  const UpdateDatePlace(this.value);
+
+  @override
+  List<Object> get props => [value];
+}
+
+final class UpdateReasonOfDeath extends AddnewfamilymemberEvent{
+  final String value;
+  const UpdateReasonOfDeath(this.value);
+
+  @override
+  List<Object> get props => [value];
+}
+
 final class AnmUpdateSubmit extends AddnewfamilymemberEvent {
   const AnmUpdateSubmit();
 }

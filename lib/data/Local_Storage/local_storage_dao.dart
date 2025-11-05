@@ -22,8 +22,21 @@ class LocalStorageDao {
     try {
       final db = await _db;
       
-      // Log the incoming data for debugging
-      print('Inserting household with data: ${data.toString()}');
+
+      
+      final householdInfo = data['household_info'];
+      if (householdInfo is String) {
+        try {
+          final parsed = jsonDecode(householdInfo);
+          print('   (JSON String) $parsed');
+        } catch (e) {
+          print('   (Invalid JSON String) $householdInfo');
+        }
+      } else if (householdInfo is Map) {
+        print('   (Map) $householdInfo');
+      } else {
+        print('   (${householdInfo.runtimeType}) $householdInfo');
+      }
       
       final row = <String, dynamic>{
         'server_id': data['server_id'],
@@ -31,9 +44,9 @@ class LocalStorageDao {
         'address': data['address'] is String ? data['address'] : jsonEncode(data['address'] ?? {}),
         'geo_location': data['geo_location'] is String ? data['geo_location'] : jsonEncode(data['geo_location'] ?? {}),
         'head_id': data['head_id'],
-        'household_info': data['household_info'] is String 
-            ? data['household_info']  // Already a JSON string
-            : jsonEncode(data['household_info'] ?? {}),
+        'household_info': householdInfo is String 
+            ? householdInfo  // Already a JSON string
+            : jsonEncode(householdInfo ?? {}),
         'device_details': data['device_details'] is String 
             ? data['device_details'] 
             : jsonEncode(data['device_details'] ?? {}),
@@ -51,12 +64,18 @@ class LocalStorageDao {
         'is_deleted': data['is_deleted'] ?? 0,
       };
       
+      print('\n Database Row to Insert:');
+      row.forEach((key, value) {
+        print('   $key: ${value.toString().substring(0, value.toString().length > 100 ? 100 : value.toString().length)}...');
+      });
+      
       final id = await db.insert('households', row);
-      print('Household inserted with id: $id');
+      print(' Household inserted with ID: $id\n');
       return id;
     } catch (e, stackTrace) {
-      print('Error inserting household: $e');
-      print('Stack trace: $stackTrace');
+      print('Error inserting household:');
+      print('   Error: $e');
+      print('   Stack trace: $stackTrace');
       rethrow;
     }
   }
