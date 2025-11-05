@@ -33,7 +33,7 @@ class AshaDashboardSection extends StatelessWidget {
     final List<Map<String, dynamic>> mainGridItems = [
       {"image": 'assets/images/plus.png', "label": l10n.gridRegisterNewHousehold},
       {"image": 'assets/images/home.png', "label": l10n.gridAllHousehold, "count": householdCount ?? 0},
-      {"image": 'assets/images/dashboard.png', "label": l10n.gridAllBeneficiaries, "count": 5},
+      {"image": 'assets/images/dashboard.png', "label": l10n.gridAllBeneficiaries, "count": 3},
       {"image": 'assets/images/beneficiaries.png', "label": l10n.gridMyBeneficiaries},
       {"image": 'assets/images/id-card.png', "label": l10n.gridAbhaGeneration},
       {"image": 'assets/images/work-in-progress.png', "label": l10n.gridWorkProgress},

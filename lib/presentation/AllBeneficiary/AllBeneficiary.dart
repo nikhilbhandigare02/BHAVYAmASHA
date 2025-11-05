@@ -92,7 +92,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           'Relation': 'Spouse',
         });
       }
-      // Children (if any)
+
       final children = (head['childrenDetails'] as List?) ?? [];
       for (final child in children) {
         if (child is Map) {
@@ -208,6 +208,10 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         ),
       ),
       drawer: const CustomDrawer(),
+// Pass the count to AshaDashboardSection
+// Example usage:
+// AshaDashboardSection(allBeneficiaryCount: _allBeneficiaries.length,allBeneficiaryCount: _allBeneficiaries.length)
+
       body: _isLoading
           ? const CenterBoxLoader()
           : Column(
@@ -317,7 +321,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          data['hhId'] ?? '',
+                          (data['hhId']?.toString().length ?? 0) > 11 ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
                           style: TextStyle(
                             color: primary,
                             fontWeight: FontWeight.w600,

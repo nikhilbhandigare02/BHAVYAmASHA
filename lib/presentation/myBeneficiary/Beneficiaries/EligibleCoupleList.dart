@@ -155,7 +155,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
                       const Icon(Icons.home, color: Colors.black54, size: 18),
                       const SizedBox(width: 6),
                       Text(
-                        data['hhId'] ?? '',
+                        (data['hhId']?.toString().length ?? 0) > 11 ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
