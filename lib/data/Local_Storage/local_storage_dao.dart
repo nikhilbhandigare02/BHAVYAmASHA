@@ -34,14 +34,9 @@ class LocalStorageDao {
     try {
       final db = await _db;
       
-      print('\n🏠 === INSERT HOUSEHOLD DATA ===');
-      print('📋 Raw input data:');
-      data.forEach((key, value) {
-        print('   $key: ${value.toString().substring(0, value.toString().length > 100 ? 100 : value.toString().length)}...');
-      });
+
       
       final householdInfo = data['household_info'];
-      print('\n🔍 Household Info Details:');
       if (householdInfo is String) {
         try {
           final parsed = jsonDecode(householdInfo);
@@ -81,16 +76,16 @@ class LocalStorageDao {
         'is_deleted': data['is_deleted'] ?? 0,
       };
       
-      print('\n💾 Database Row to Insert:');
+      print('\n Database Row to Insert:');
       row.forEach((key, value) {
         print('   $key: ${value.toString().substring(0, value.toString().length > 100 ? 100 : value.toString().length)}...');
       });
       
       final id = await db.insert('households', row);
-      print('✅ Household inserted with ID: $id\n');
+      print(' Household inserted with ID: $id\n');
       return id;
     } catch (e, stackTrace) {
-      print('❌ Error inserting household:');
+      print('Error inserting household:');
       print('   Error: $e');
       print('   Stack trace: $stackTrace');
       rethrow;
