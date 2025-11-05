@@ -260,11 +260,11 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           child: ElevatedButton(
             onPressed: _isMemberTypeSelected
                 ? () async {
-                    final confirm = await _showConfirmDialog();
-                    if (confirm) {
-                      _handleMigration();
-                    }
-                  }
+              final confirm = await _showConfirmDialog();
+              if (confirm) {
+                _handleMigration();
+              }
+            }
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
@@ -438,14 +438,14 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           width: 100,
           child: ElevatedButton(
             onPressed: _isMemberTypeSelected &&
-                    _selectedFamilyHead != null &&
-                    _houseNoController.text.trim().isNotEmpty
+                _selectedFamilyHead != null &&
+                _houseNoController.text.trim().isNotEmpty
                 ? () async {
-                    final confirm = await _showConfirmDialog();
-                    if (confirm) {
-                      _handleSplit();
-                    }
-                  }
+              final confirm = await _showConfirmDialog();
+              if (confirm) {
+                _handleSplit();
+              }
+            }
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
