@@ -7,6 +7,8 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
+import '../../../data/Local_Storage/local_storage_dao.dart';
+
 class FamliyUpdate extends StatefulWidget {
   const FamliyUpdate({super.key});
 
@@ -17,27 +19,32 @@ class FamliyUpdate extends StatefulWidget {
 class _FamliyUpdateState extends State<FamliyUpdate> {
   final TextEditingController _searchCtrl = TextEditingController();
 
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'name': 'Ramesh Kumar',
-      'mobile': '9876543210',
-      'mohalla': 'Ward No. 5, Shivpuri',
-    },
-    {
-      'hhId': '51016121848',
-      'name': 'Sita Devi',
-      'mobile': '9876543222',
-      'mohalla': 'Ram Nagar, Patna',
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  List<Map<String, dynamic>> _filtered = [];
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _loadHeads();
+  }
+
+  Future<void> _loadHeads() async {
+    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    final heads = <Map<String, dynamic>>[];
+    for (final row in rows) {
+      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+      if (head.isNotEmpty) {
+        heads.add({
+          'hhId': row['household_ref_key']?.toString() ?? '',
+          'name': head['headName']?.toString() ?? '',
+          'mobile': head['mobileNo']?.toString() ?? '',
+          'mohalla': head['mohalla']?.toString() ?? '',
+        });
+      }
+    }
+    setState(() {
+      _filtered = heads;
+    });
   }
 
   @override
@@ -87,7 +94,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
@@ -136,7 +143,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow('', data['name']),
+                  _infoRow('', data['name'], isBold: true),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +151,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                       Expanded(
                         child: _infoRow('Mobile :', data['mobile']),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 13),
                       Expanded(
                         child: _infoRow(
                           'Mohalla :',
@@ -165,7 +172,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     );
   }
 
-  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
+  Widget _infoRow(String? title, String value,{bool isWrappable = false, bool isBold = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -180,10 +187,10 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? 'N/A' : value,
+              value.isEmpty ? 'Not Available' : value,
               style:  TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w400,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
                 fontSize: 13.sp,
               ),
               overflow: TextOverflow.ellipsis,

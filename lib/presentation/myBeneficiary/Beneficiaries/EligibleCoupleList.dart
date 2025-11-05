@@ -7,6 +7,8 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
+import '../../../data/Local_Storage/local_storage_dao.dart';
+
 class EligibleCoupleList extends StatefulWidget {
   const EligibleCoupleList({super.key});
 
@@ -17,27 +19,68 @@ class EligibleCoupleList extends StatefulWidget {
 class _EligibleCoupleListState extends State<EligibleCoupleList> {
   final TextEditingController _searchCtrl = TextEditingController();
 
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'name': 'Ramesh Kumar',
-      'age/gender': '18 Y / Male',
-      'status':  'Eligible Couple'
-    },
-    {
-      'hhId': '51016121848',
-      'name': 'Sita Devi',
-      'age/gender': '18 Y / Female',
-      'status': 'Eligible Couple'
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  List<Map<String, dynamic>> _filtered = [];
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _loadEligibleCouples();
+  }
+
+  Future<void> _loadEligibleCouples() async {
+    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    final couples = <Map<String, dynamic>>[];
+    for (final row in rows) {
+      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+      final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+      if ((head['maritalStatus']?.toString().toLowerCase() == 'married') && (spouse['gender']?.toString().toLowerCase() == 'female') && (spouse['memberName']?.toString()?.isNotEmpty ?? false)) {
+        int age = _calculateAge(spouse['dob']);
+        if (age <= 40) {
+          couples.add({
+            'hhId': row['household_ref_key']?.toString() ?? '',
+            'name': spouse['memberName']?.toString() ?? '',
+            'age/gender': _formatAgeGender(spouse['dob'], spouse['gender']),
+            'status': 'Eligible Couple',
+          });
+        }
+      }
+    }
+
+    setState(() {
+      _filtered = couples;
+    });
+  }
+
+  int _calculateAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
+    String age = 'N/A';
+    String gender = (genderRaw?.toString().toLowerCase() ?? '');
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+      DateTime? dob;
+      try {
+        dob = DateTime.tryParse(dobRaw.toString());
+      } catch (_) {}
+      if (dob != null) {
+        age = '${DateTime.now().difference(dob).inDays ~/ 365}';
+      }
+    }
+    String displayGender = gender == 'm' || gender == 'male'
+        ? 'Male'
+        : gender == 'f' || gender == 'female'
+            ? 'Female'
+            : 'Other';
+    return '$age Y / $displayGender';
   }
 
   @override
@@ -81,7 +124,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
 
     return InkWell(
       onTap: () {
-        // Navigator.pushNamed(context, Route_Names.FamliyUpdate);
+
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -125,13 +168,13 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.15), // ✅ Background color
+                      color: Colors.green.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       data['status'] ?? '',
                       style: const TextStyle(
-                        color: Colors.green, // ✅ Text color
+                        color: Colors.green,
                         fontWeight: FontWeight.bold,
                         fontSize: 12.5,
                       ),
