@@ -11,6 +11,7 @@ class AddnewfamilymemberState extends Equatable {
   final String? memberStatus;
   final DateTime? dateOfDeath;
   final String? deathReason;
+  final String? otherDeathReason;
   final String? deathPlace;
   final String? name;
   final String? ChildSchool;
@@ -93,6 +94,7 @@ class AddnewfamilymemberState extends Equatable {
     this.dateOfDeath,
     this.deathPlace,
     this.deathReason,
+    this.otherDeathReason,
     this.memberStatus,
     this.errorMessage,
 
@@ -142,6 +144,7 @@ class AddnewfamilymemberState extends Equatable {
     final String? memberStatus,
     final DateTime? dateOfDeath,
     final String? deathReason,
+    final String? otherDeathReason,
     final String? deathPlace,
     String? errorMessage,
 
@@ -186,6 +189,7 @@ class AddnewfamilymemberState extends Equatable {
       hasChildren: hasChildren ?? this.hasChildren,
       isPregnant: isPregnant ?? this.isPregnant,
       deathReason: deathReason ?? this.deathReason,
+      otherDeathReason: otherDeathReason ?? this.otherDeathReason,
       deathPlace: deathPlace ?? this.deathPlace,
       dateOfDeath: dateOfDeath ?? this.dateOfDeath,
       memberStatus: memberStatus ?? this.memberStatus,
@@ -206,6 +210,7 @@ class AddnewfamilymemberState extends Equatable {
     fatherName,
     motherName,
     useDob,
+    otherDeathReason,
     updateYear,
     updateMonth,
     updateDay,
@@ -276,12 +281,13 @@ class AddnewfamilymemberState extends Equatable {
       'memberStatus': memberStatus,
       'dateOfDeath': dateOfDeath,
       'deathReason': deathReason,
-      'deathPlace': isPregnant,
+      'deathPlace': deathPlace,
       'errorMessage': errorMessage,
       'RichIDChanged': RichIDChanged,
       'BirthCertificateChange': BirthCertificateChange,
       'ChildSchool': ChildSchool,
       'WeightChange': WeightChange,
+      'otherDeathReason': otherDeathReason,
       'children': children,
     };
   }

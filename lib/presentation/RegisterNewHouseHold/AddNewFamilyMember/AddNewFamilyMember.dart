@@ -38,9 +38,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
   Widget _section(Widget child) => Padding(padding: const EdgeInsets.only(bottom: 4), child: child);
 
+  late final AddnewfamilymemberBloc _bloc;
+
   @override
   void initState() {
     super.initState();
+    _bloc = AddnewfamilymemberBloc();
+    
     final String? maleParentName = (widget.headGender == 'Male')
         ? widget.headName
         : ((widget.headGender == 'Female') ? widget.spouseName : (widget.headName ?? widget.spouseName));
@@ -53,14 +57,19 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final bloc = context.read<AddnewfamilymemberBloc>();
       if (_fatherOption != 'Other') {
-        bloc.add(AnmUpdateFatherName(_fatherOption));
+        _bloc.add(AnmUpdateFatherName(_fatherOption));
       }
       if (_motherOption != 'Other') {
-        bloc.add(AnmUpdateMotherName(_motherOption));
+        _bloc.add(AnmUpdateMotherName(_motherOption));
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _bloc.close();
+    super.dispose();
   }
 
   @override
@@ -82,8 +91,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     // Derive parent names from head/spouse and headGender
     final String? maleParentName = (widget.headGender == 'Male') ? widget.headName : ((widget.headGender == 'Female') ? widget.spouseName : (widget.headName ?? widget.spouseName));
     final String? femaleParentName = (widget.headGender == 'Female') ? widget.headName : ((widget.headGender == 'Male') ? widget.spouseName : widget.spouseName ?? widget.headName);
-    return BlocProvider(
-      create: (_) => AddnewfamilymemberBloc(),
+    return BlocProvider.value(
+      value: _bloc,
       child: WillPopScope(
           onWillPop: () async {
             final shouldExit = await showConfirmationDialog(
@@ -125,19 +134,16 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                           return ListView(
                             padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
                             children: [
-                              // Member type
                               _section(
                                 ApiDropdown<String>(
                                   labelText: l.memberTypeLabel,
-                                  items: const ['Adult', 'Child', 'Infant'],
+                                  items: const ['Adult', 'Child', ],
                                   getLabel: (s) {
                                     switch (s) {
                                       case 'Adult':
                                         return l.memberTypeAdult;
                                       case 'Child':
                                         return l.memberTypeChild;
-                                      case 'Infant':
-                                        return l.memberTypeInfant;
                                       default:
                                         return s;
                                     }
@@ -146,6 +152,131 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMemberType(v ?? 'Adult')),
                                 ),
                               ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                              _section(
+                                ApiDropdown<String>(
+                                  labelText: 'Member Status',
+                                  items: const ['Alive', 'Death'],
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Alive':
+                                        return 'Alive';
+                                      case 'Death':
+                                        return 'Death';
+
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.memberStatus,
+                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateIsMemberStatus(v ?? 'Alive')),
+                                ),
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                              if(state.memberStatus == 'Death')...[
+                                _section(
+                                  CustomDatePicker(
+                                    labelText: 'Date of death',
+                                    hintText: 'Date of death',
+                                    onDateChanged: (d) => context.read<AddnewfamilymemberBloc>().add(UpdateDateOfDeath(d!)),
+                                    // validator: (date) => Validations.validateDOB(l, date),
+
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                _section(
+                                  ApiDropdown<String>(
+                                    labelText: 'Place of Death',
+                                    items: const ['Home', 'Migrated Out', 'On the way','Facility','Other'],
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Home':
+                                          return 'Home';
+                                        case 'Migrated Out':
+                                          return 'Migrated Out';
+                                        case 'On the way':
+                                          return 'On the way';
+                                        case 'Facility':
+                                          return 'Facility';
+                                        case 'Other':
+                                          return 'Other';
+
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.deathPlace,
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateDatePlace(v ?? 'Alive')),
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                _section(
+                                  ApiDropdown<String>(
+                                    labelText: 'Reason of Death',
+                                    items: const [
+                                      'PH',
+                                      'PPH',
+                                      'Severe Anaemia',
+                                      'Sepsis',
+                                      'Obstructed Labour',
+                                      'Malpresentation',
+                                      'Eclampsia/Severe Hypertension',
+                                      'Unsafe Abortion',
+                                      'Surgical Complication',
+                                      'Other reason apart from maternal complication',
+                                      'Other (Specify)',
+                                    ],
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'PH':
+                                          return 'Postpartum Hemorrhage (PH)';
+                                        case 'PPH':
+                                          return 'Primary Postpartum Hemorrhage (PPH)';
+                                        case 'Severe Anaemia':
+                                          return 'Severe Anaemia';
+                                        case 'Sepsis':
+                                          return 'Sepsis';
+                                        case 'Obstructed Labour':
+                                          return 'Obstructed Labour';
+                                        case 'Malpresentation':
+                                          return 'Malpresentation';
+                                        case 'Eclampsia/Severe Hypertension':
+                                          return 'Eclampsia / Severe Hypertension';
+                                        case 'Unsafe Abortion':
+                                          return 'Unsafe Abortion';
+                                        case 'Surgical Complication':
+                                          return 'Surgical Complication';
+                                        case 'Other reason apart from maternal complication':
+                                          return 'Other reason apart from maternal complication';
+                                        case 'Other (Specify)':
+                                          return 'Other (Specify)';
+                                        default:
+                                          return s;
+                                      }
+                                    },
+
+                                    value: state.deathReason,
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateReasonOfDeath(v ?? 'Alive')),
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                if(state.deathReason == 'Other (Specify)')...[
+                                  _section(
+                                    CustomTextField(
+                                      labelText: 'Other reason of death',
+                                      hintText: 'Other reason of death',
+                                      onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateOtherReasonOfDeath(v.trim())),
+                                    ),
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                ]
+                              ],
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               if (state.memberType == 'Child') ...[
                                 _section(
@@ -178,7 +309,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               ],
-                              // Relation with head
                               _section(
                                 ApiDropdown<String>(
                                   labelText: '${l.relationWithHeadLabel} *',
@@ -808,7 +938,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              if(state.memberType== 'Adult')...[
                                 _section(
                                   ApiDropdown<String>(
                                     labelText: '${l.maritalStatusLabel} *',
@@ -836,7 +965,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              ],
+
 
                               if (_isEdit == true)...[
                               if (state.maritalStatus == 'Married') ...[

@@ -163,10 +163,10 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
         await LocalStorageDao.instance.insertHousehold(householdPayload);
 
         final beneficiaryInfo = jsonEncode({
-          'head_details': event.headForm ?? {},
-          'spouse_details': event.headForm?['spousedetails'] ?? {},
-          'children_details': event.headForm?['childrendetails'] ?? {},
-          'member_details': event.memberForms,
+          'head_details': _toJsonSafe(event.headForm) ?? {},
+          'spouse_details': _toJsonSafe(event.headForm?['spousedetails']) ?? {},
+          'children_details': _toJsonSafe(event.headForm?['childrendetails']) ?? {},
+          'member_details': event.memberForms.map((m) => _toJsonSafe(m)).toList(),
         });
         print('Beneficiary Info JSON: $beneficiaryInfo');
 
@@ -184,7 +184,7 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
           'mother_key': null,
           'father_key': null,
           'is_family_planning': 0,
-          'is_adult': 1,
+          'is_adult': 1, 
           'is_guest': 0,
           'is_death': 0,
           'death_details': {},
@@ -212,7 +212,53 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
 
         await LocalStorageDao.instance.insertBeneficiary(beneficiaryPayload);
 
-        print('✅ Household saved successfully!');
+        for (var member in event.memberForms) {
+          final isAdult = (member['memberType']?.toString().toLowerCase() == 'adult') ? 1 : 0;
+          final isDeath = (member['memberStatus']?.toString().toLowerCase() == 'death') ? 1 : 0;
+
+          final memberPayload = {
+            'server_id': null,
+            'household_ref_key': householdKey,
+            'unique_key': member['unique_key'] ?? 'member_${DateTime.now().millisecondsSinceEpoch}',
+            'beneficiary_state': 'active',
+            'pregnancy_count': 0,
+            'beneficiary_info': jsonEncode(_toJsonSafe(member)),
+            'geo_location': geoLocationJson,
+            'spouse_key': null,
+            'mother_key': member['mother_key'],
+            'father_key': member['father_key'],
+            'is_family_planning': 0,
+            'is_adult': isAdult,
+            'is_guest': 0,
+            'is_death': isDeath,
+            'death_details': {},
+            'is_migrated': 0,
+            'is_separated': 0,
+            'device_details': {
+              'id': deviceInfo.deviceId,
+              'platform': deviceInfo.platform,
+              'version': deviceInfo.osVersion
+            },
+            'app_details': jsonEncode({
+              'app_version': deviceInfo.appVersion.split('+').first,
+              'app_name': deviceInfo.appName,
+              'build_number': deviceInfo.buildNumber,
+              'package_name': deviceInfo.packageName,
+            }),
+            'parent_user': {},
+            'current_user_key': 'local_user',
+            'facility_id': 283,
+            'created_date_time': ts,
+            'modified_date_time': ts,
+            'is_synced': 0,
+            'is_deleted': 0,
+          };
+
+          await LocalStorageDao.instance.insertBeneficiary(memberPayload);
+          print('✅ Saved family member: ${member['name']} (${isAdult == 1 ? 'Adult' : 'Child'})');
+        }
+
+        print('✅ Household and all members saved successfully!');
         emit(state.saved());
       } catch (e, stackTrace) {
         print('❌ Error saving household data: $e');
@@ -241,5 +287,19 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
       out[k] = _convertYesNoDynamic(v);
     });
     return out;
+  }
+
+  // Helper method to safely convert objects to JSON-serializable format
+  dynamic _toJsonSafe(dynamic value) {
+    if (value == null) return null;
+    if (value is String || value is num || value is bool) return value;
+    if (value is DateTime) return value.toIso8601String();
+    if (value is Map) {
+      return Map.fromEntries(
+        value.entries.map((e) => MapEntry(e.key, _toJsonSafe(e.value))),
+      );
+    }
+    if (value is Iterable) return value.map(_toJsonSafe).toList();
+    return value.toString();
   }
 }

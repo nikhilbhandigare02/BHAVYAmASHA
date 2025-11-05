@@ -280,6 +280,13 @@ final class UpdateReasonOfDeath extends AddnewfamilymemberEvent{
   @override
   List<Object> get props => [value];
 }
+final class UpdateOtherReasonOfDeath extends AddnewfamilymemberEvent{
+  final String value;
+  const UpdateOtherReasonOfDeath(this.value);
+
+  @override
+  List<Object> get props => [value];
+}
 
 final class AnmUpdateSubmit extends AddnewfamilymemberEvent {
   const AnmUpdateSubmit();
