@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
+import '../../../data/Local_Storage/Migration_process.dart';
 
 
 enum MigrationSplitOption { migration, split }
@@ -22,11 +23,19 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   String? _selectedFamilyHead;
   final TextEditingController _houseNoController = TextEditingController();
 
-  // Member type options
+  // Member type options with family relationships
   final List<Map<String, dynamic>> _memberTypes = [
-    {'value': 'hs', 'label': 'hs (Family Head)', 'selected': false},
-    {'value': 'va', 'label': 'va', 'selected': false},
+    {'value': 'head', 'label': 'Family Head', 'selected': false, 'isFamilyMember': true},
+    {'value': 'spouse', 'label': 'Spouse', 'selected': false, 'isFamilyMember': true},
+    {'value': 'son', 'label': 'Son', 'selected': false, 'isFamilyMember': true},
+    {'value': 'daughter', 'label': 'Daughter', 'selected': false, 'isFamilyMember': true},
+    {'value': 'father', 'label': 'Father', 'selected': false, 'isFamilyMember': true},
+    {'value': 'mother', 'label': 'Mother', 'selected': false, 'isFamilyMember': true},
+    {'value': 'other', 'label': 'Other', 'selected': false, 'isFamilyMember': false},
   ];
+  
+  // Store family member details
+  Map<String, dynamic>? _familyMembers;
 
   // Sample children data - replace with your actual data source
   final List<String> _children = [
@@ -44,14 +53,28 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
     'Maria Garcia',
   ];
 
-  // Get comma-separated list of selected member types
+  // Get comma-separated list of selected member types with family member names
   String get _selectedMemberLabel {
     final selected = _memberTypes.where((type) => type['selected'] == true).toList();
     if (selected.isEmpty) {
       return 'Select member type';
     }
-    // Show selected labels in the input field
-    return selected.map((type) => type['label']).join(', ');
+    
+    // Map to store family member names
+    final Map<String, String> familyMemberNames = {
+      'head': _familyMembers?['head']?['name'] ?? 'Head',
+      'father': _familyMembers?['father']?['name'] ?? 'Father',
+      'mother': _familyMembers?['mother']?['name'] ?? 'Mother',
+    };
+    
+    // Format the selected member types with family member names where applicable
+    return selected.map((type) {
+      final typeValue = type['value'] as String;
+      if (familyMemberNames.containsKey(typeValue)) {
+        return '${type['label']} (${familyMemberNames[typeValue]})';
+      }
+      return type['label'] as String;
+    }).join(', ');
   }
 
   // Check if any member type is selected
@@ -70,6 +93,31 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
     _houseNoController.addListener(() {
       setState(() {});
     });
+    
+    // Load family member details
+    _loadFamilyMembers();
+  }
+  
+  // Load family member details from local storage
+  Future<void> _loadFamilyMembers() async {
+    try {
+
+      final familyHead = await MigrationProcess.getBeneficiaryByUniqueKey('family_head_key');
+      final parents = await MigrationProcess.getParentsDetails(
+        'mother_key', 
+        'father_key'
+      );
+      
+      setState(() {
+        _familyMembers = {
+          'head': familyHead,
+          'mother': parents['mother'],
+          'father': parents['father'],
+        };
+      });
+    } catch (e) {
+      debugPrint('Error loading family members: $e');
+    }
   }
 
   @override
@@ -560,16 +608,13 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  // Check if 'va' is being deselected
                   bool wasVaSelected = _memberTypes.any((t) => t['value'] == 'va' && t['selected'] == true);
                   bool isVaNowSelected = localMemberTypes.any((t) => t['value'] == 'va' && t['selected'] == true);
 
-                  // Update the main state with the selection
                   setState(() {
                     for (int i = 0; i < _memberTypes.length; i++) {
                       _memberTypes[i]['selected'] = localMemberTypes[i]['selected'];
                     }
-                    // Update _selectedMemberType if needed for backward compatibility
                     final selected = localMemberTypes.firstWhere(
                           (t) => t['selected'] == true,
                       orElse: () => <String, dynamic>{},

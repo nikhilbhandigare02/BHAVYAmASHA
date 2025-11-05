@@ -23,22 +23,11 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
-          child: TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 0.8, end: 1.1),
-            duration: const Duration(seconds: 2),
-            curve: Curves.easeInOut,
-            builder: (context, scale, child) {
-              return Transform.scale(
-                scale: scale,
-                child: child,
-              );
-            },
-            child: Image.asset(
-              'assets/images/bhr1.png',
-              width: 250,
-              height: 250,
-              fit: BoxFit.contain,
-            ),
+          child:  Image.asset(
+            'assets/images/bhr1.png',
+            width: 250,
+            height: 250,
+            fit: BoxFit.contain,
           ),
         ),
       ),

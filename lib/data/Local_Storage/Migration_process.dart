@@ -36,7 +36,6 @@ class MigrationProcess {
     }
   }
 
-  /// Get parent details (mother/father) for a beneficiary
   static Future<Map<String, dynamic>?> getParentDetails(String? parentKey) async {
     if (parentKey == null || parentKey.isEmpty) return null;
 
