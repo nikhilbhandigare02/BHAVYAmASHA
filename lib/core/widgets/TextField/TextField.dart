@@ -110,7 +110,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     final TextStyle inputStyle = TextStyle(
       fontSize: 15.sp,
       color: AppColors.onSurfaceVariant,
-      height: 1,
+      height: 1.5,
     );
 
     return TextFormField(

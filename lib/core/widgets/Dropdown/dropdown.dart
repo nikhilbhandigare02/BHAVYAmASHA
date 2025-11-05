@@ -71,7 +71,7 @@ class ApiDropdown<T> extends StatelessWidget {
       fontSize: 15.sp,
       fontWeight: FontWeight.w500,
       color: AppColors.onSurface,
-      height: 1.4,
+      height: 1.5,
     );
 
     return GestureDetector(
