@@ -7,6 +7,8 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
+import '../../../data/Local_Storage/local_storage_dao.dart';
+
 class PregnantWomenList extends StatefulWidget {
   const PregnantWomenList({super.key});
 
@@ -17,27 +19,13 @@ class PregnantWomenList extends StatefulWidget {
 class _PregnantWomenListState extends State<PregnantWomenList> {
   final TextEditingController _searchCtrl = TextEditingController();
 
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'name': 'Ramesh Kumar',
-      'age/gender': '18 Y / Male',
-      'status': 'ANC DUE'
-    },
-    {
-      'hhId': '51016121848',
-      'name': 'Sita Devi',
-      'age/gender': '18 Y / Female',
-      'status': 'ANC DUE'
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  List<Map<String, dynamic>> _filtered = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _loadPregnantWomen();
     _searchCtrl.addListener(_onSearchChanged);
   }
 
@@ -48,13 +36,74 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
     super.dispose();
   }
 
+  Future<void> _loadPregnantWomen() async {
+    setState(() { _isLoading = true; });
+    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    final pregnantList = <Map<String, dynamic>>[];
+    for (final row in rows) {
+      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+      final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+      // Head
+      if (_isPregnant(head)) {
+        pregnantList.add(_formatCardData(row, head));
+      }
+      // Spouse
+      if (spouse.isNotEmpty && _isPregnant(spouse)) {
+        pregnantList.add(_formatCardData(row, spouse));
+      }
+      // Family members
+      final familyMembers = List<Map<String, dynamic>>.from((info['family_details'] as List?) ?? []);
+      for (final member in familyMembers) {
+        if (_isPregnant(member)) {
+          pregnantList.add(_formatCardData(row, member));
+        }
+      }
+    }
+    setState(() {
+      _filtered = pregnantList;
+      _isLoading = false;
+    });
+  }
+
+  bool _isPregnant(Map<String, dynamic> person) {
+    final flag = person['isPregnant']?.toString().toLowerCase();
+    final typoFlag = person['isPregrant']?.toString().toLowerCase();
+    final statusFlag = person['pregnancyStatus']?.toString().toLowerCase();
+    return flag == 'yes' || typoFlag == 'yes' || statusFlag == 'pregnant';
+  }
+
+  Map<String, dynamic> _formatCardData(Map<String, dynamic> row, Map<String, dynamic> person) {
+    final name = person['memberName']?.toString() ?? person['headName']?.toString() ?? '';
+    final gender = person['gender']?.toString().toLowerCase();
+    final displayGender = gender == 'm' ? 'Male' : gender == 'f' ? 'Female' : 'Other';
+    final age = _calculateAge(person['dob']);
+    return {
+      'hhId': row['household_ref_key']?.toString() ?? '',
+      'name': name,
+      'age/gender': '${age > 0 ? '$age Y' : 'N/A'} / $displayGender',
+      'status': 'ANC DUE', // Static for now, can be dynamic if needed
+    };
+  }
+
+  int _calculateAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   void _onSearchChanged() {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _loadPregnantWomen();
       } else {
-        _filtered = _staticHouseholds.where((e) {
+        _filtered = _filtered.where((e) {
           return (e['hhId'] as String).toLowerCase().contains(q) ||
               (e['name'] as String).toLowerCase().contains(q);
         }).toList();
