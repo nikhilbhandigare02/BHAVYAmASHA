@@ -47,11 +47,11 @@ class _EligibleCoupleIdentifiedScreenState
       final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
       final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
       final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-      // Check head (female, married, 15-49)
+
       if (_isEligibleFemale(head)) {
         couples.add(_formatCoupleData(row, head, spouse, isHead: true));
       }
-      // Check spouse (female, married, 15-49)
+
       if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
         couples.add(_formatCoupleData(row, spouse, head, isHead: false));
       }
