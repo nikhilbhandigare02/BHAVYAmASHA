@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:medixcel_new/core/utils/device_info_utils.dart';
 import 'package:medixcel_new/core/utils/geolocation_utils.dart';
-
+import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
 
 import '../../../../data/Local_Storage/local_storage_dao.dart';
 import '../../HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
@@ -62,7 +62,6 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
         final now = DateTime.now();
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
         
-        // Get device location
         final geoLocation = await GeoLocation.getCurrentLocation();
         print(geoLocation.hasCoordinates 
             ? '📍 Location obtained - Lat: ${geoLocation.latitude}, Long: ${geoLocation.longitude}, Accuracy: ${geoLocation.accuracy?.toStringAsFixed(2)}m'
@@ -76,12 +75,6 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
         } catch (e) {
           print('Error getting package/device info: $e');
         }
-
-        // print('Head Details:');
-        // print(const JsonEncoder.withIndent('  ').convert(event.headForm ?? {}));
-        // print('Member Details:');
-        // print(const JsonEncoder.withIndent('  ').convert(event.memberForms));
-
         print('📋 Raw Form Data from Event:');
         event.amenitiesData.forEach((key, value) {
           print('- $key: $value (${value?.runtimeType})');
@@ -131,10 +124,26 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
         final geoLocationJson = jsonEncode(locationData);
         print('🌐 Final location data: $geoLocationJson');
         
+        final currentUser = await UserInfo.getCurrentUser();
+        final userDetails = currentUser?['details'] is String 
+            ? jsonDecode(currentUser?['details'] ?? '{}')
+            : currentUser?['details'] ?? {};
+            
+        final address = {
+          'state_name': userDetails['stateName'] ?? 'Bihar',
+          'state_id': userDetails['stateId'] ?? 1,
+          'state_lgd_code': userDetails['stateLgdCode'] ?? 1,
+          'division_name': userDetails['division'] ?? 'Patna',
+          'division_id': userDetails['divisionId'] ?? 27,
+          'division_lgd_code': userDetails['divisionLgdCode'] ?? 198
+        };
+        
+        print('📝 Using address from user profile: $address');
+
         final householdPayload = {
           'server_id': null,
           'unique_key': householdKey,
-          'address': jsonEncode({}),
+          'address': jsonEncode(address),
           'geo_location': geoLocationJson,
           'head_id': headId,
           'household_info': householdInfoJson,
@@ -231,7 +240,16 @@ class RegisterNewHouseholdBloc extends Bloc<RegisternewhouseholdEvent, RegisterH
             'is_adult': isAdult,
             'is_guest': 0,
             'is_death': isDeath,
-            'death_details': {},
+            'death_details': isDeath == 1 ? {
+              'date_of_death': member['dateOfDeath'] != null 
+                  ? member['dateOfDeath'] is DateTime 
+                      ? DateFormat('yyyy-MM-dd').format(member['dateOfDeath'])
+                      : DateFormat('yyyy-MM-dd').format(DateTime.parse(member['dateOfDeath'].toString()))
+                  : null,
+              'place_of_death': member['deathPlace'],
+              'death_reason': member['deathReason'],
+              'other_reason': member['otherDeathReason']
+            } : null,
             'is_migrated': 0,
             'is_separated': 0,
             'device_details': {
