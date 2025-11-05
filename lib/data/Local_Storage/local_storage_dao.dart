@@ -16,19 +16,7 @@ class LocalStorageDao {
     return v;
   }
 
-  Future<int> insertUser(Map<String, dynamic> data) async {
-    final db = await _db;
-    final row = <String, dynamic>{
-      'user_name': data['user_name'],
-      'password': data['password'],
-      'role_id': data['role_id'],
-      'details': _encodeIfObject(data['details']),
-      'created_date_time': data['created_date_time'],
-      'modified_date_time': data['modified_date_time'],
-      'is_deleted': data['is_deleted'] ?? 0,
-    };
-    return db.insert('users', row);
-  }
+
 
   Future<int> insertHousehold(Map<String, dynamic> data) async {
     try {
@@ -246,7 +234,7 @@ class LocalStorageDao {
           }
         }
         
-        // Decode all JSON fields
+
         mapped['address'] = safeJsonDecode(mapped['address']);
         mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
         mapped['household_info'] = safeJsonDecode(mapped['household_info']);
@@ -262,6 +250,50 @@ class LocalStorageDao {
       
     } catch (e, stackTrace) {
       print('Error getting households: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAllBeneficiaries() async {
+    try {
+      final db = await _db;
+      print('Fetching all beneficiaries from database...');
+      final rows = await db.query('beneficiaries',
+        where: 'is_deleted = ?',
+        whereArgs: [0],
+        orderBy: 'created_date_time DESC');
+      print('Found [1m${rows.length}[0m beneficiaries');
+      final result = rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        dynamic safeJsonDecode(String? jsonString) {
+          if (jsonString == null || jsonString.isEmpty) return {};
+          try {
+            return jsonDecode(jsonString);
+          } catch (e) {
+            print('Error decoding JSON: $e');
+            return {};
+          }
+        }
+        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+        return mapped;
+      }).toList();
+      print('Successfully decoded ${result.length} beneficiaries');
+      for (final beneficiary in result) {
+        print('Beneficiary:');
+        beneficiary.forEach((key, value) {
+          print('  $key: $value');
+        });
+        print('---');
+      }
+      return result;
+    } catch (e, stackTrace) {
+      print('Error getting beneficiaries: $e');
       print('Stack trace: $stackTrace');
       rethrow;
     }

@@ -13,10 +13,12 @@ import '../MigrtionSplitScreen/MigrationSplitScreen.dart';
 
 class HouseHold_BeneficiaryScreen extends StatefulWidget {
   final String? houseNo;
+  final String? hhId;
   
   const HouseHold_BeneficiaryScreen({
     super.key,
     this.houseNo,
+    this.hhId,
   });
 
   @override
@@ -54,62 +56,75 @@ class _HouseHold_BeneficiaryScreenState
     }
 
     try {
-      final rows = await LocalStorageDao.instance.getAllHouseholds();
-      debugPrint('Fetched ${rows.length} households from LocalStorageDao');
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      debugPrint('Fetched ${rows.length} beneficiaries from LocalStorageDao');
 
       final List<Map<String, dynamic>> beneficiaries = [];
 
       for (final row in rows) {
-        debugPrint('Processing row with keys: ${row.keys}');
-        final rowMap = row is Map ? Map<String, dynamic>.from(row as Map<dynamic, dynamic>) : <String, dynamic>{};
-
-        final hhId = rowMap['unique_key']?.toString() ??
-            rowMap['hhId']?.toString() ??
-            'HH-${DateTime.now().millisecondsSinceEpoch}';
-
-        if (rowMap.containsKey('household_info') &&
-            rowMap['household_info'] is Map) {
-          final householdInfo =
-          Map<String, dynamic>.from(rowMap['household_info'] as Map<dynamic, dynamic>);
-
-          final headDetails = householdInfo['headdetails'] is Map
-              ? Map<String, dynamic>.from(householdInfo['headdetails'] as Map<dynamic, dynamic>)
-              : <String, dynamic>{};
-          
-          if (widget.houseNo != null &&
-              (headDetails['houseNo']?.toString() ?? '') != widget.houseNo) {
-            continue;
-          }
-
-          if (householdInfo['headdetails'] is Map) {
-            final headDetails = Map<String, dynamic>.from(householdInfo['headdetails'] as Map<dynamic, dynamic>);
-            headDetails['_householdInfo'] = householdInfo;
-            beneficiaries.add(_mapToBeneficiary(headDetails, 'Head', hhId));
-          }
-
-          if (householdInfo['spousedetails'] is Map) {
-            final spouseDetails = Map<String, dynamic>.from(householdInfo['spousedetails'] as Map<dynamic, dynamic>);
-            spouseDetails['_householdInfo'] = householdInfo;
-            beneficiaries.add(_mapToBeneficiary(spouseDetails, 'Spouse', hhId));
-          }
-
-          if (householdInfo['memberdetails'] is List) {
-            final members = List<dynamic>.from(householdInfo['memberdetails']);
-            for (final member in members) {
-              if (member is Map) {
-                final memberMap = Map<String, dynamic>.from(member as Map<dynamic, dynamic>);
-                memberMap['_householdInfo'] = householdInfo;
-                beneficiaries.add(_mapToBeneficiary(
-                    memberMap,
-                    memberMap['relation']?.toString() ?? 'Member',
-                    hhId));
-              }
+        final rowHhId = row['household_ref_key']?.toString() ?? '';
+        final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+        final headHouseNo = head['houseNo']?.toString() ?? '';
+        // Show if either hhId or houseNo matches (if both are provided, both must match)
+        final matchByHhId = widget.hhId != null && rowHhId == widget.hhId;
+        final matchByHouseNo = widget.houseNo != null && headHouseNo == widget.houseNo;
+        final match = (widget.hhId != null && widget.houseNo != null)
+          ? (matchByHhId && matchByHouseNo)
+          : (matchByHhId || matchByHouseNo);
+        if (match) {
+          // Head card
+          if (head.isNotEmpty) {
+            final gender = (head['gender']?.toString().toLowerCase() ?? '');
+            final regType = 'General';
+            final isFemale = gender == 'female' || gender == 'f';
+            final isChild = regType.toLowerCase() == 'child';
+            final richId = head['RichIDChanged']?.toString() ?? head['richIdChanged']?.toString() ?? '';
+            final card = {
+              'hhId': rowHhId,
+              'RegitrationDate': row['created_date_time']?.toString() ?? '',
+              'RegitrationType': regType,
+              'BeneficiaryID': row['id']?.toString() ?? '',
+              'Name': head['headName']?.toString() ?? '',
+              'Age|Gender': _formatAgeGender(head['dob'], head['gender']),
+              'Mobileno.': head['mobileNo']?.toString() ?? '',
+              'RelationName': spouse['memberName']?.toString() ?? '',
+              'Relation': 'Head',
+              'MaritalStatus': head['maritalStatus']?.toString() ?? '',
+              '_raw': row,
+            };
+            if (isFemale || isChild) {
+              card['Rich_id'] = richId;
             }
+            beneficiaries.add(card);
           }
-        } else {
-          if (widget.houseNo == null) {
-            beneficiaries.add(_mapToBeneficiary(rowMap, 'Member', hhId));
+          // Spouse card (if exists)
+          if (spouse.isNotEmpty) {
+            final gender = (spouse['gender']?.toString().toLowerCase() ?? '');
+            final regType = 'General';
+            final isFemale = gender == 'female' || gender == 'f';
+            final isChild = regType.toLowerCase() == 'child';
+            final richId = spouse['RichIDChanged']?.toString() ?? spouse['richIdChanged']?.toString() ?? '';
+            final card = {
+              'hhId': rowHhId,
+              'RegitrationDate': row['created_date_time']?.toString() ?? '',
+              'RegitrationType': regType,
+              'BeneficiaryID': row['id']?.toString() ?? '',
+              'Name': spouse['memberName']?.toString() ?? '',
+              'Age|Gender': _formatAgeGender(spouse['dob'], spouse['gender']),
+              'Mobileno.': spouse['mobileNo']?.toString() ?? '',
+              'RelationName': head['headName']?.toString() ?? '',
+              'Relation': 'Spouse',
+              'MaritalStatus': spouse['maritalStatus']?.toString() ?? '',
+              '_raw': row,
+            };
+            if (isFemale || isChild) {
+              card['Rich_id'] = richId;
+            }
+            beneficiaries.add(card);
           }
+          break;
         }
       }
 
@@ -128,122 +143,24 @@ class _HouseHold_BeneficiaryScreenState
     }
   }
 
-  Map<String, dynamic> _mapToBeneficiary(
-      Map<String, dynamic> data, String relation, String hhId) {
-    final Map<String, dynamic> householdInfo = data['_householdInfo'] is Map
-        ? Map<String, dynamic>.from(data['_householdInfo'] as Map<dynamic, dynamic>)
-        : <String, dynamic>{};
-    try {
+  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
+    String age = 'N/A';
+    String gender = (genderRaw?.toString().toLowerCase() ?? '');
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
       DateTime? dob;
-      if (data['dob'] != null) {
-        if (data['dob'] is String) {
-          dob = DateTime.tryParse(data['dob']);
-          if (dob == null && data['dob'].contains('-')) {
-            final parts = data['dob'].split('-');
-            if (parts.length == 3) {
-              final year = int.tryParse(parts[0]);
-              final month = int.tryParse(parts[1]);
-              final day = int.tryParse(parts[2]);
-              if (year != null && month != null && day != null) {
-                dob = DateTime(year, month, day);
-              }
-            }
-          }
-        } else if (data['dob'] is int) {
-          dob = DateTime.fromMillisecondsSinceEpoch(data['dob']);
-        }
-      }
-
-      String age;
+      try {
+        dob = DateTime.tryParse(dobRaw.toString());
+      } catch (_) {}
       if (dob != null) {
         age = '${DateTime.now().difference(dob).inDays ~/ 365}';
-      } else {
-        age = data['age']?.toString() ??
-            data['approxAge']?.toString() ??
-            'N/A';
       }
-
-      final gender = (data['gender']?.toString() ?? '').toLowerCase();
-      final displayGender = gender == 'm' || gender == 'male'
-          ? 'Male'
-          : gender == 'f' || gender == 'female'
-          ? 'Female'
-          : 'Other';
-
-      final name = (data['name'] ??
-                  data['headName'] ??
-                  data['beneficiaryName'] ??
-                  'N/A').toString().trim();
-
-      String relationName = 'N/A';
-      // String motherName = (data['motherName'] ?? 'N/A').toString().trim();
-      String relationType = relation.toLowerCase();
-
-      if (relationType == 'head') {
-        relationName = (data['spouseName'] ??
-                       data['spouse_name'] ??
-                       'N/A').toString().trim();
-      } else if (relationType == 'spouse') {
-        relationName = (data['headName'] ??
-                       data['husbandName'] ??
-                       'N/A').toString().trim();
-      } else if (relationType == 'son' || relationType == 'daughter') {
-        relationName = (data['fatherName'] ??
-                       data['father_name'] ??
-                       data['headName'] ??
-                       'N/A').toString().trim();
-        // motherName = (data['motherName'] ??
-        //              (householdInfo.isNotEmpty && householdInfo['spousedetails'] is Map
-        //                ? (householdInfo['spousedetails']?['name'] ?? 'N/A').toString().trim()
-        //                : 'N/A')).toString().trim();
-      } else if (relationType == 'wife') {
-        relationName = (data['husbandName'] ??
-                       data['headName'] ??
-                       'N/A').toString().trim();
-      } else {
-        relationName = (data['fatherName'] ??
-                       data['father_name'] ??
-                       'N/A').toString().trim();
-      }
-
-      final result = {
-        'hhId': hhId,
-        'RegitrationDate': data['createdAt'] ??
-                         data['registrationDate'] ??
-                         DateTime.now().toIso8601String().split('T')[0],
-        'RegitrationType': data['memberType'] ??
-                         data['registrationType'] ??
-                         'General',
-        'BeneficiaryID': data['beneficiaryId']?.toString() ??
-                        data['id']?.toString() ??
-                        '${DateTime.now().millisecondsSinceEpoch}',
-        'Name': name,
-        'Age|Gender': '$age Y | $displayGender',
-        'Mobileno.': data['mobileNo']?.toString() ??
-                    data['mobile']?.toString() ??
-                    data['phone']?.toString() ?? 'N/A',
-        'RelationName': relationName,
-        // 'MotherName': motherName,
-        'Relation': relation,
-        'MaritalStatus': data['maritalStatus'] ?? 'N/A',
-        '_raw': data,
-      };
-
-      return result;
-    } catch (e, s) {
-      debugPrint('Error mapping beneficiary: $e\n$s');
-      return {
-        'hhId': hhId,
-        'RegitrationDate': 'Error',
-        'RegitrationType': 'Error',
-        'BeneficiaryID': 'Error',
-        'Name': 'Error loading data',
-        'Age|Gender': 'Error',
-        'Mobileno.': 'Error',
-        'FatherName': 'Error',
-        'Relation': relation,
-      };
     }
+    String displayGender = gender == 'm' || gender == 'male'
+        ? 'Male'
+        : gender == 'f' || gender == 'female'
+            ? 'Female'
+            : 'Other';
+    return '$age Y | $displayGender';
   }
 
   void _onSearchChanged() {
@@ -484,6 +401,11 @@ class _HouseHold_BeneficiaryScreenState
                       Expanded(child: _rowText('Mobile no.', data['Mobileno.'] ?? '')),
                     ],
                   ),
+                  if (((data['Relation'] == 'Head' || data['Relation'] == 'Spouse') && ((data['Age|Gender']?.toString().toLowerCase().contains('female') ?? false) || (data['RegitrationType']?.toString().toLowerCase() == 'child'))))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _rowText('Rich_id', data['Rich_id'] ?? ''),
+                    ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -567,4 +489,5 @@ class _HouseHold_BeneficiaryScreenState
       ],
     );
   }
+
 }

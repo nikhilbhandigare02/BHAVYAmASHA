@@ -2,6 +2,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
+import 'dart:developer';
+
 import 'package:crypto/crypto.dart';
 import 'tables/users_table.dart';
 
@@ -101,7 +103,7 @@ class UserInfo {
     try {
       final db = await database;
       
-      // First, ensure the users table exists
+ 
       await db.execute('''
         CREATE TABLE IF NOT EXISTS users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -234,6 +236,59 @@ class UserInfo {
     return {'isNewUser': true};
   }
 
+  static Future<void> updatePopulationCovered(String populationCovered) async {
+    Database? db;
+    try {
+      db = await openDatabase(
+        join(await getDatabasesPath(), 'bhavya_masha.db'),
+      );
+
+      // Get the current user directly from this database instance
+      final result = await db.query(
+        'users',
+        where: 'is_deleted = 0',
+        orderBy: 'modified_date_time DESC',
+        limit: 1,
+      );
+
+      if (result.isNotEmpty) {
+        final user = result.first;
+        
+        // Parse the details JSON
+        final details = user['details'] is String
+            ? jsonDecode(user['details'] as String)
+            : user['details'];
+
+        // Update the population_covered_by_asha field
+        details['population_covered_by_asha'] = populationCovered;
+
+        final detailsJson = jsonEncode(details);
+        final now = DateTime.now().toIso8601String();
+
+        // Update the database
+        await db.update(
+          'users',
+          {
+            'details': detailsJson,
+            'modified_date_time': now,
+          },
+          where: 'user_name = ?',
+          whereArgs: [user['user_name']],
+        );
+        log('User population covered updated in the database: $populationCovered');
+      } else {
+        log('No active user found to update');
+      }
+    } catch (e) {
+      log('Error in updatePopulationCovered: $e');
+      rethrow;
+    } finally {
+      if (db != null && db.isOpen) {
+        await db.close();
+      }
+    }
+  }
+
 
   
 
@@ -306,20 +361,34 @@ class UserInfo {
         print('Details (raw): ${user['details']}');
         
         try {
-          final detailsString = user['details'].toString();
-          final cleanJson = detailsString.replaceAll(r'\', '').replaceAll(r'"', '"');
-          if (cleanJson.startsWith('"') && cleanJson.endsWith('"')) {
-            final unquoted = cleanJson.substring(1, cleanJson.length - 1);
-            final details = jsonDecode(unquoted);
-            print('Details (parsed):');
-            (details as Map<String, dynamic>).forEach((key, value) {
-              print('  $key: $value');
-            });
+          final detailsRaw = user['details'];
+          print('Details (raw type): ${detailsRaw.runtimeType}');
+          
+          if (detailsRaw is String) {
+            print('Details is String, attempting to parse...');
+            final details = jsonDecode(detailsRaw);
+            print('Details (parsed type): ${details.runtimeType}');
+            print('Details (parsed keys): ${(details as Map<String, dynamic>).keys.toList()}');
+            
+            if (details.containsKey('data')) {
+              print('Found "data" key in details');
+              final dataContent = details['data'];
+              print('Data content type: ${dataContent.runtimeType}');
+              if (dataContent is Map) {
+                print('Data keys: ${(dataContent as Map<String, dynamic>).keys.toList()}');
+                if (dataContent.containsKey('working_location')) {
+                  print('Working location: ${dataContent['working_location']}');
+                }
+              }
+            } else {
+              print('No "data" key found, top-level keys: ${details.keys.toList()}');
+            }
           } else {
-            print('Details is not a valid JSON string');
+            print('Details is not a String: $detailsRaw');
           }
         } catch (e) {
           print('Could not parse details JSON: $e');
+          print('Raw details value: ${user['details']}');
         }
         print('-' * 40);
       }

@@ -87,10 +87,9 @@ class AuthRepository {
           print('Error saving to secure storage: $e');
         }
         
-        // Print stored user data for verification
+
         await UserInfo.printUserData();
-        
-        // Return both login response and user data status
+
         return {
           'loginResponse': loginResponse,
           'isNewUser': userData['isNewUser'],
@@ -100,7 +99,7 @@ class AuthRepository {
       
       return {
         'loginResponse': loginResponse,
-        'isNewUser': true, // Default to true if we can't determine
+        'isNewUser': true,
         'user': null
       };
       

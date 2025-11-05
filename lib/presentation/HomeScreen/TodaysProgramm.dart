@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
-
 import '../../l10n/app_localizations.dart';
 
 class TodayProgramSection extends StatefulWidget {
@@ -22,6 +21,15 @@ class TodayProgramSection extends StatefulWidget {
 
 class _TodayProgramSectionState extends State<TodayProgramSection> {
   String? _expandedKey;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onGridTap(0);
+    });
+  }
 
   bool _isExpanded(String key) {
     return _expandedKey == key;
@@ -172,19 +180,22 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     return Column(
-      spacing: 5,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Grid Boxes
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
+            spacing: 4,
             children: [
               Expanded(
+                flex: 1,
                 child: InkWell(
                   onTap: () => widget.onGridTap(0),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                   child: Card(
                     elevation: 3,
                     color: widget.selectedGridIndex == 0 ? AppColors.primary : AppColors.surface,
@@ -200,8 +211,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 width: 30,
                                 height: 30,
                                 decoration: BoxDecoration(
-                                  color: AppColors.surface, // background color
-                                  shape: BoxShape.circle, // circular shape
+                                  color: AppColors.surface,
+                                  shape: BoxShape.circle,
                                 ),
                                 child: Center(
                                   child: Image.asset(
@@ -237,11 +248,13 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   ),
                 ),
               ),
-              const SizedBox(width: 4),
               // Grid Box 2
               Expanded(
+                flex: 1,
                 child: InkWell(
                   onTap: () => widget.onGridTap(1),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                   child: Card(
                     elevation: 3,
                     color: widget.selectedGridIndex == 1 ? AppColors.primary : AppColors.surface,

@@ -34,7 +34,10 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
   void initState() {
     super.initState();
     _loadData();
+
+    LocalStorageDao.instance.getAllBeneficiaries();
     _searchCtrl.addListener(_onSearchChanged);
+    
   }
 
   @override
@@ -68,82 +71,49 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     }
     
     try {
-      final rows = await LocalStorageDao.instance.getAllHouseholds();
-    final mapped = rows.map<Map<String, dynamic>>((r) {
-      final info = Map<String, dynamic>.from((r['household_info'] as Map?) ?? const {});
-      final head = Map<String, dynamic>.from((info['headdetails'] as Map?) ?? const {});
-      final spouse = Map<String, dynamic>.from((info['spousedetails'] as Map?) ?? const {});
-      final List<dynamic> membersRaw = (info['memberdetails'] as List?) ?? const <dynamic>[];
-      final List<Map<String, dynamic>> members = membersRaw
-          .whereType<Map>()
-          .map<Map<String, dynamic>>((m) => Map<String, dynamic>.from(m))
-          .toList();
-
-      final String hhId = (r['unique_key'] ?? r['id']?.toString() ?? '').toString();
-      final String houseNo = (head['houseNo'] ?? '').toString();
-      final String name = (head['headName'] ?? '').toString();
-      final String mobile = (head['mobileNo'] ?? '').toString();
-      final int totalMembers = 1 + members.length + (spouse.isNotEmpty ? 1 : 0);
-
-      final String headMarital = (head['maritalStatus'] ?? '').toString();
-      final int eligibleCouples = headMarital == 'Married' ? (totalMembers - 1).clamp(0, totalMembers) : 0;
-
-      int preg = 0;
-      final List<Map<String, dynamic>> all = [head, if (spouse.isNotEmpty) spouse, ...members];
-      for (final m in all) {
-        final v = m['isPregnant'];
-        if (v == 1 || v == 'Yes' || v == true) { preg = 1; break; }
-      }
-
-      int elderly = 0;
-      int child0to1 = 0;
-      int child1to2 = 0;
-      int child2to5 = 0;
-      for (final m in all) {
-        int? ageYears;
-        final String? dobIso = m['dob'] as String?;
-        if (dobIso != null && dobIso.isNotEmpty) {
-          final dob = DateTime.tryParse(dobIso);
-          if (dob != null) {
-            final now = DateTime.now();
-            ageYears = now.year - dob.year - ((now.month < dob.month || (now.month == dob.month && now.day < dob.day)) ? 1 : 0);
-            final ageMonths = (now.year - dob.year) * 12 + (now.month - dob.month) - (now.day < dob.day ? 1 : 0);
-            if (ageMonths <= 12) child0to1++;
-            else if (ageMonths <= 24) child1to2++;
-            else if (ageMonths <= 60) child2to5++;
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final mapped = rows.map<Map<String, dynamic>>((r) {
+        final info = Map<String, dynamic>.from((r['beneficiary_info'] as Map?) ?? const {});
+        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+        final String name = (head['headName'] ?? '').toString();
+        final String mobile = (head['mobileNo'] ?? '').toString();
+        int totalMembers = 1;
+        if ((head['maritalStatus'] ?? '').toString() == 'Married') totalMembers++;
+        // Count children if present
+        final childrenCount = int.tryParse((head['children'] ?? '0').toString()) ?? 0;
+        totalMembers += childrenCount;
+        final int eligibleCouples = (head['maritalStatus'] ?? '') == 'Married' ? 1 : 0;
+        // Calculate elderly count (head and spouse, age 65+)
+        int elderly = 0;
+        DateTime? parseDob(String? dobStr) {
+          if (dobStr == null || dobStr.isEmpty) return null;
+          try {
+            return DateTime.parse(dobStr);
+          } catch (_) {
+            return null;
           }
         }
-        ageYears ??= int.tryParse((m['approxAge'] ?? '').toString());
-        if (ageYears != null && ageYears >= 65) elderly++;
-      }
-
-      // Calculate remaining children to add
-      final int childrenAdded = all.where((m) {
-        final t = (m['Type'] ?? '').toString().toLowerCase();
-        final r = (m['Relation'] ?? '').toString().toLowerCase();
-        return t == 'child' || t == 'infant' || r == 'son' || r == 'daughter';
-      }).length;
-      final int childrenTarget = int.tryParse((head['children'] ?? '0').toString()) ?? 0;
-      // Calculate remaining as (target - 1) - already added members
-      final int remainingChildren = (childrenTarget - 1 - childrenAdded).clamp(0, 9999);
-
-      return {
-        'hhId': hhId,
-        'houseNo': houseNo,
-        'name': name,
-        'mobile': mobile,
-        'totalMembers': totalMembers,
-        'eligibleCouples': eligibleCouples,
-        'pregnantWomen': preg,
-        'elderly': elderly,
-        'child0to1': child0to1,
-        'child1to2': child1to2,
-        'child2to5': child2to5,
-        'remainingChildren': remainingChildren,
-        'hasChildrenTarget': childrenTarget > 0,
-        '_raw': r,
-      };
-    }).toList();
+        int calcAge(DateTime? dob) {
+          if (dob == null) return 0;
+          final now = DateTime.now();
+          int age = now.year - dob.year;
+          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) age--;
+          return age;
+        }
+        final headDob = parseDob(head['dob']?.toString());
+        final spouseDob = parseDob(spouse['dob']?.toString());
+        if (calcAge(headDob) >= 65) elderly++;
+        if (calcAge(spouseDob) >= 65) elderly++;
+        return {
+          'name': name,
+          'mobile': mobile,
+          'totalMembers': totalMembers,
+          'eligibleCouples': eligibleCouples,
+          'elderly': elderly,
+          '_raw': r,
+        };
+      }).toList();
 
       if (mounted) {
         setState(() {
@@ -158,10 +128,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           _isLoading = false;
         });
       }
-      // Optionally show error message
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('Failed to load household data')),
-      // );
+
     }
   }
 
@@ -276,7 +243,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             //   ),
             // ),
           // ),
-        ],
+        ], 
       ),
     );
   }
@@ -286,13 +253,14 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
-    return InkWell(
+    return InkWell( 
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => HouseHold_BeneficiaryScreen(
               houseNo: data['houseNo']?.toString(),
+              hhId: data['_raw']['household_ref_key']?.toString() ?? '',
             ),
           ),
         );
@@ -333,7 +301,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   const Icon(Icons.home, color: Colors.black54, size: 18),
                   Expanded(
                     child: Text(
-                      data['hhId'] ?? '',
+                      data['_raw']['household_ref_key'] ?? '',
                       style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
@@ -341,7 +309,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                     ),
                   ),
                   Text(
-                    '${l10n?.houseNoLabel ?? 'House No.'} : ${data['houseNo']}',
+                    '${l10n?.houseNoLabel ?? 'House No.'} : ${data['_raw']['beneficiary_info']?['head_details']?['houseNo'] ?? ''}',
                     style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w700,
@@ -365,9 +333,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                             builder: (_) => AddNewFamilyHeadScreen(
                               isEdit: true,
                               initial: {
-                                'houseNo': data['houseNo'],
-                                'name': data['name'],
-                                'mobile': data['mobile'],
+                                'houseNo': data['houseNo']?.toString() ?? '',
+                                'name': data['name']?.toString() ?? '',
+                                'mobile': data['mobile']?.toString() ?? '',
                               },
                             ),
                           ),
@@ -379,7 +347,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               ),
             ),
 
-            // Middle stats section
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
@@ -450,7 +417,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               ),
             ),
 
-            // Bottom white info section (remaining member)
+
             if (data['hasChildrenTarget'] == true &&
                 data['remainingChildren'] > 0)
               Container(
