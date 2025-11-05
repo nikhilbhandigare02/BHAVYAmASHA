@@ -260,7 +260,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           MaterialPageRoute(
             builder: (context) => HouseHold_BeneficiaryScreen(
               houseNo: data['houseNo']?.toString(),
-              hhId: data['_raw']['household_ref_key']?.toString() ?? '',
+              hhId: (data['_raw']['household_ref_key']?.toString().length ?? 0) > 11 ? data['_raw']['household_ref_key'].toString().substring(data['_raw']['household_ref_key'].toString().length - 11) : (data['_raw']['household_ref_key']?.toString() ?? ''),
             ),
           ),
         );

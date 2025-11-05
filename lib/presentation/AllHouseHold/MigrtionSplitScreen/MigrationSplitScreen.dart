@@ -139,12 +139,12 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Migration/Split Toggle
+
               Row(
                 children: [
                   Expanded(
                     child: RadioListTile<MigrationSplitOption>(
-                      title: Text('Migration'),
+                      title: Text('Migration', style: TextStyle(fontSize: 15.sp),),
                       value: MigrationSplitOption.migration,
                       groupValue: _selectedOption,
                       onChanged: (value) {
@@ -154,7 +154,6 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                           _selectedChild = null;
                           _selectedFamilyHead = null;
                           _houseNoController.clear();
-                          // Reset member types selection
                           for (var type in _memberTypes) {
                             type['selected'] = false;
                           }
@@ -164,7 +163,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                   ),
                   Expanded(
                     child: RadioListTile<MigrationSplitOption>(
-                      title: Text('Split'),
+                      title: Text('Split',style: TextStyle(fontSize: 15.sp)),
                       value: MigrationSplitOption.split,
                       groupValue: _selectedOption,
                       onChanged: (value) {

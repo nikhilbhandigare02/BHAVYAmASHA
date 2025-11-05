@@ -121,7 +121,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      data['hhId'] ?? '',
+                      (data['hhId']?.toString().length ?? 0) > 11 ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w600,
