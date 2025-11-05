@@ -66,22 +66,17 @@ class RegisterNewHouseholdBloc
         emit(state.saving());
 
         final now = DateTime.now();
-        // Convert to Excel serial date format (days since 1899-12-30 + fraction of day)
-        final excelEpoch = DateTime(1899, 12, 30);
-        final difference = now.difference(excelEpoch);
-        final days = difference.inDays.toDouble();
-        final fractionOfDay = (now.hour * 3600 + now.minute * 60 + now.second) / 86400.0;
-        final ts = (days + fractionOfDay).toStringAsFixed(10);
+        final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
 
         //  Get Location
         final geoLocation = await GeoLocation.getCurrentLocation();
         print(
           geoLocation.hasCoordinates
-              ? ' Location obtained - Lat: ${geoLocation.latitude}, Long: ${geoLocation.longitude}, Accuracy: ${geoLocation.accuracy?.toStringAsFixed(2)}m'
-              : '️ Could not obtain location: ${geoLocation.error}',
+              ? '📍 Location obtained - Lat: ${geoLocation.latitude}, Long: ${geoLocation.longitude}, Accuracy: ${geoLocation.accuracy?.toStringAsFixed(2)}m'
+              : '⚠️ Could not obtain location: ${geoLocation.error}',
         );
 
-        // Device Info
+        // 📱 Device Info
         late DeviceInfo deviceInfo;
         try {
           deviceInfo = await DeviceInfo.getDeviceInfo();
@@ -137,7 +132,7 @@ class RegisterNewHouseholdBloc
         final householdInfoJson = jsonEncode(householdInfo);
         print(' Household Info JSON: $householdInfoJson');
 
-        // 🗝 Generate Household Key with delay
+        // 🗝️ Generate Household Key with delay
         final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
         await Future.delayed(const Duration(seconds: 1));
         final headId = await IdGenerator.generateUniqueId(deviceInfo);
