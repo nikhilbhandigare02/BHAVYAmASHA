@@ -260,7 +260,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           MaterialPageRoute(
             builder: (context) => HouseHold_BeneficiaryScreen(
               houseNo: data['houseNo']?.toString(),
-              hhId: (data['_raw']['household_ref_key']?.toString().length ?? 0) > 11 ? data['_raw']['household_ref_key'].toString().substring(data['_raw']['household_ref_key'].toString().length - 11) : (data['_raw']['household_ref_key']?.toString() ?? ''),
+              hhId: (data['_raw']['household_ref_key']?.toString().length ?? 0) > 11 ? data['_raw']['household_ref_key'].toString().substring(data['_raw']['household_ref_key'].toString().length - 11) : ((data['_raw']['household_ref_key']?.toString().length ?? 0) > 11 ? data['_raw']['household_ref_key'].toString().substring(data['_raw']['household_ref_key'].toString().length - 11) : (data['_raw']['household_ref_key']?.toString() ?? '')),
             ),
           ),
         );
@@ -301,7 +301,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   const Icon(Icons.home, color: Colors.black54, size: 18),
                   Expanded(
                     child: Text(
-                      data['_raw']['household_ref_key'] ?? '',
+                      (data['_raw']['household_ref_key']?.toString().length ?? 0) > 11 ? data['_raw']['household_ref_key'].toString().substring(data['_raw']['household_ref_key'].toString().length - 11) : (data['_raw']['household_ref_key']?.toString() ?? ''),
                       style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
