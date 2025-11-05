@@ -8,6 +8,7 @@ import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../HomeScreen/HomeScreen.dart';
+import '../../../data/Local_Storage/local_storage_dao.dart';
 
 class EligibleCoupleIdentifiedScreen extends StatefulWidget {
   const EligibleCoupleIdentifiedScreen({super.key});
@@ -21,40 +22,13 @@ class _EligibleCoupleIdentifiedScreenState
     extends State<EligibleCoupleIdentifiedScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
 
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': 'HH001',
-      'houseNo': '12A',
-      'RegistrationDate': '10-10-2025',
-      'RegistrationType': 'ga',
-      'BeneficiaryID': 'VA001',
-      'Name': 'Rohit Chavan',
-      'age': 30,
-      'RichID': 123,
-      'mobileno': '9923175398',
-      'HusbandName': 'Rajesh Chavan',
-    },
-    {
-      'hhId': 'HH002',
-      'houseNo': '15B',
-      'RegistrationDate': '11-10-2025',
-      'RegistrationType': 'ga',
-      'BeneficiaryID': 'VA002',
-      'Name': 'Suresh Patil',
-      'age': 28,
-      'RichID': 124,
-      'mobileno': '9876543210',
-      'HusbandName': 'Mahesh Patil',
-    },
-    // Add more sample entries if needed
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  List<Map<String, dynamic>> _filtered = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _loadEligibleCouples();
     _searchCtrl.addListener(_onSearchChanged);
   }
 
@@ -65,15 +39,96 @@ class _EligibleCoupleIdentifiedScreenState
     super.dispose();
   }
 
+  Future<void> _loadEligibleCouples() async {
+    setState(() { _isLoading = true; });
+    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    final couples = <Map<String, dynamic>>[];
+    for (final row in rows) {
+      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+      final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+      // Check head (female, married, 15-49)
+      if (_isEligibleFemale(head)) {
+        couples.add(_formatCoupleData(row, head, spouse, isHead: true));
+      }
+      // Check spouse (female, married, 15-49)
+      if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
+        couples.add(_formatCoupleData(row, spouse, head, isHead: false));
+      }
+    }
+    setState(() {
+      _filtered = couples;
+      _isLoading = false;
+    });
+  }
+
+  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
+    if (person.isEmpty) return false;
+    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
+    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? head?['maritalStatus']?.toString().toLowerCase() ?? '';
+    final gender = genderRaw == 'f' || genderRaw == 'female';
+    final maritalStatus = maritalStatusRaw == 'married';
+    final dob = person['dob'];
+    final age = _calculateAge(dob);
+    return gender && maritalStatus && age >= 15 && age <= 49;
+  }
+
+  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
+    final hhId = row['household_ref_key']?.toString() ?? '';
+    final uniqueKey = row['unique_key']?.toString() ?? '';
+    final createdDate = row['created_date_time']?.toString() ?? '';
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
+    final gender = female['gender']?.toString().toLowerCase();
+    final displayGender = gender == 'f' ? 'Female' : gender == 'm' ? 'Male' : 'Other';
+    final age = _calculateAge(female['dob']);
+    final richId = female['RichID']?.toString() ?? '';
+    final mobile = female['mobileNo']?.toString() ?? '';
+    final husbandName = isHead
+      ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
+      : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
+    return {
+      'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
+      'RegistrationDate': _formatDate(createdDate),
+      'RegistrationType': 'General',
+      'BeneficiaryID': uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey,
+      'Name': name,
+      'age': age > 0 ? '$age Y / $displayGender' : 'N/A',
+      'RichID': richId,
+      'mobileno': mobile,
+      'HusbandName': husbandName,
+    };
+  }
+
+  int _calculateAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final dt = DateTime.tryParse(dateStr);
+      if (dt == null) return '';
+      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+    } catch (_) {
+      return '';
+    }
+  }
+
   void _onSearchChanged() {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _loadEligibleCouples();
       } else {
-        _filtered = _staticHouseholds.where((e) {
+        _filtered = _filtered.where((e) {
           return ((e['hhId'] ?? '') as String).toLowerCase().contains(q) ||
-              ((e['houseNo'] ?? '') as String).toLowerCase().contains(q) ||
               ((e['Name'] ?? '') as String).toLowerCase().contains(q) ||
               ((e['mobileno'] ?? '') as String).toLowerCase().contains(q);
         }).toList();
@@ -86,7 +141,7 @@ class _EligibleCoupleIdentifiedScreenState
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.updatedEligibleCoupleListTitle ?? 'Eligible Couple List',
+        screenTitle: l10n?.updatedEligibleCoupleListSubtitle ?? 'Eligible Couple List',
         showBack: false,
         icon1Image: 'assets/images/home.png',
 
@@ -229,7 +284,7 @@ class _EligibleCoupleIdentifiedScreenState
                     children: [
                       Expanded(child: _rowText(l10n?.nameOfMemberLabel ?? 'Name', data['Name'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.ageLabelSimple ?? 'Age', data['age']?.toString() ?? '')),
+                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age', data['age']?.toString() ?? '')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('Rich ID', data['RichID']?.toString() ?? '')),
                     ],
@@ -241,7 +296,7 @@ class _EligibleCoupleIdentifiedScreenState
                           child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['mobileno']?.toString() ?? '')),
                       const SizedBox(width: 12),
                       Expanded(
-                          child: _rowText(l10n?.spouseNameLabel ?? 'Husband Name', data['HusbandName'] ?? '')),
+                          child: _rowText(l10n?.husbandLabel ?? 'Husband Name', data['HusbandName'] ?? '')),
                     ],
                   ),
                 ],

@@ -6,7 +6,6 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-
 import '../../../data/Local_Storage/local_storage_dao.dart';
 
 class EligibleCoupleList extends StatefulWidget {
@@ -36,7 +35,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
       final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
       if ((head['maritalStatus']?.toString().toLowerCase() == 'married') && (spouse['gender']?.toString().toLowerCase() == 'female') && (spouse['memberName']?.toString()?.isNotEmpty ?? false)) {
         int age = _calculateAge(spouse['dob']);
-        if (age <= 40) {
+        if (age >= 15 && age <= 49) {
           couples.add({
             'hhId': row['household_ref_key']?.toString() ?? '',
             'name': spouse['memberName']?.toString() ?? '',
@@ -166,7 +165,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.green.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
@@ -186,7 +185,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
               ),
             ),
 
-            // 🔸 Body
+
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
@@ -197,8 +196,25 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow('', data['name']),
-                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            data['name'] ?? '',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
                   _infoRow(
                     '',
                     data['age/gender'] ?? '',
