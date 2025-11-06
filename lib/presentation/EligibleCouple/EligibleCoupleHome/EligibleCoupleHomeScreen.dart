@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
+import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -16,6 +19,109 @@ class EligibleCoupleHomeScreen extends StatefulWidget {
 }
 
 class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
+  int eligibleCouplesCount = 0;
+  int updatedEligibleCouplesCount = 0;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounts();
+  }
+
+  Future<void> _loadCounts() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      
+      // Get total eligible couples
+      final eligibleCouples = await db.query('beneficiaries');
+      int totalEligible = 0;
+      
+      // Count eligible females in the household
+      for (final row in eligibleCouples) {
+        try {
+          final info = jsonDecode(row['beneficiary_info'] as String? ?? '{}');
+          final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+          final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+          
+          // Check if head is eligible female
+          if (_isEligibleFemale(head)) {
+            totalEligible++;
+          }
+          
+          // Check if spouse is eligible female
+          if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
+            totalEligible++;
+          }
+        } catch (e) {
+          print('Error processing beneficiary: $e');
+        }
+      }
+      
+      // Count all eligible couples (both protected and unprotected)
+      // We'll use the same logic as in _loadCouples to count eligible females
+      int totalUpdatedEligible = 0;
+      
+      for (final row in eligibleCouples) {
+        try {
+          final info = jsonDecode(row['beneficiary_info'] as String? ?? '{}');
+          final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+          final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+          
+          // Check if head is eligible female
+          if (_isEligibleFemale(head)) {
+            totalUpdatedEligible++;
+          }
+          
+          // Check if spouse is eligible female
+          if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
+            totalUpdatedEligible++;
+          }
+        } catch (e) {
+          print('Error processing beneficiary for updated count: $e');
+        }
+      }
+      
+      if (mounted) {
+        setState(() {
+          eligibleCouplesCount = totalEligible;
+          updatedEligibleCouplesCount = totalUpdatedEligible; // This now includes all eligible couples
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading counts: $e');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
+    // Check if person is female and within childbearing age (15-49)
+    final gender = person['gender']?.toString().toLowerCase() ?? '';
+    if (gender != 'f' && gender != 'female') return false;
+    
+    // Check age if available
+    final dobStr = person['dob']?.toString() ?? '';
+    if (dobStr.isNotEmpty) {
+      try {
+        final dob = DateTime.tryParse(dobStr);
+        if (dob != null) {
+          final age = DateTime.now().difference(dob).inDays ~/ 365;
+          return age >= 15 && age <= 49;
+        }
+      } catch (e) {
+        print('Error parsing date: $e');
+      }
+    }
+    
+    // If we can't determine age, assume eligible if female
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -23,13 +129,13 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     final cards = [
       {
         'image': 'assets/images/couple.png',
-        'count': '12',
+        'count': isLoading ? '...' : eligibleCouplesCount.toString(),
         'title': l10n?.gridEligibleCouple ?? 'Eligible Couple',
         'route': Route_Names.EligibleCoupleIdentified,
       },
       {
         'image': 'assets/images/npcb-refer.png',
-        'count': '0',
+        'count': isLoading ? '...' : updatedEligibleCouplesCount.toString(),
         'title': l10n?.updatedEligibleCoupleListTitle ??
             'Updated Eligible Couple List',
         'route': Route_Names.UpdatedEligibleCoupleScreen,

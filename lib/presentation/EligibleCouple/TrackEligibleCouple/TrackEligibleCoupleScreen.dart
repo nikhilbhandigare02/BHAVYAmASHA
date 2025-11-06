@@ -11,13 +11,26 @@ import 'bloc/track_eligible_couple_bloc.dart';
 
 
 class TrackEligibleCoupleScreen extends StatelessWidget {
-  const TrackEligibleCoupleScreen({super.key});
+  final String beneficiaryId;
+  
+  const TrackEligibleCoupleScreen({super.key, required this.beneficiaryId});
+
+  static Route route({required String beneficiaryId}) => MaterialPageRoute(
+        builder: (context) => TrackEligibleCoupleScreen(beneficiaryId: beneficiaryId),
+      );
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => TrackEligibleCoupleBloc(),
-      child: const _TrackEligibleCoupleView(),
+      create: (_) => TrackEligibleCoupleBloc(beneficiaryId: beneficiaryId),
+      child: BlocListener<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
+        listener: (context, state) {
+          if (state.status == FormStatus.success) {
+            Navigator.of(context).pop(true);
+          }
+        },
+        child: const _TrackEligibleCoupleView(),
+      ),
     );
   }
 }
@@ -203,10 +216,13 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: enabled ? () => context.read<TrackEligibleCoupleBloc>().add(const SubmitTrackForm()) : null,
+                    onPressed: enabled ? () {
+                      context.read<TrackEligibleCoupleBloc>().add(
+                        const SubmitTrackForm(),
+                      );
+                    } : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       minimumSize: const Size.fromHeight(48),
                     ),

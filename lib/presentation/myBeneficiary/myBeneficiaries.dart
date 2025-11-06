@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 import 'package:sizer/sizer.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -15,33 +16,111 @@ class Mybeneficiaries extends StatefulWidget {
 }
 
 class _MybeneficiariesState extends State<Mybeneficiaries> {
-  // Moved _items list to build method to access localization
+  int familyUpdateCount = 0;
+  int eligibleCoupleCount = 0;
+  int pregnantWomenCount = 0;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounts();
+  }
+
+  Future<void> _loadCounts() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      int familyCount = 0;
+      int coupleCount = 0;
+      int pregnantCount = 0;
+
+      for (final row in rows) {
+        final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+
+        // Count family updates (all heads of household)
+        if (head.isNotEmpty) {
+          familyCount++;
+        }
+
+        // Count eligible couples (married females 15-49)
+        if ((head['maritalStatus']?.toString().toLowerCase() == 'married') &&
+            (spouse['gender']?.toString().toLowerCase() == 'female') &&
+            (spouse['memberName']?.toString().isNotEmpty ?? false)) {
+          final age = _calculateAge(spouse['dob']?.toString() ?? '');
+          if (age >= 15 && age <= 49) {
+            coupleCount++;
+          }
+        }
+
+        // Count pregnant women
+        final children = (head['childrenDetails'] as List?) ?? [];
+        for (final child in children) {
+          final childData = Map<String, dynamic>.from(child as Map? ?? const {});
+          if (childData['isPregnant'] == true) {
+            pregnantCount++;
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          familyUpdateCount = familyCount;
+          eligibleCoupleCount = coupleCount;
+          pregnantWomenCount = pregnantCount;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading beneficiary counts: $e');
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  int _calculateAge(String? dobString) {
+    if (dobString == null || dobString.isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobString);
+      if (dob == null) return 0;
+      final now = DateTime.now();
+      int age = now.year - dob.year;
+      if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+        age--;
+      }
+      return age;
+    } catch (e) {
+      print('Error calculating age: $e');
+      return 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    
+    final l10n = AppLocalizations.of(context)!;
+
     final List<_BeneficiaryTileData> _items = [
       _BeneficiaryTileData(
-        title: l10n!.familyUpdate,
+        title: l10n.familyUpdate,
         asset: 'assets/images/family.png',
-        count: 8,
+        count: isLoading ? 0 : familyUpdateCount,
       ),
       _BeneficiaryTileData(
         title: l10n.eligibleCoupleList,
         asset: 'assets/images/couple.png',
-        count: 5,
+        count: isLoading ? 0 : eligibleCoupleCount,
       ),
       _BeneficiaryTileData(
         title: l10n.pregnantWomenList,
         asset: 'assets/images/pregnant-woman.png',
-        count: 5,
+        count: isLoading ? 0 : pregnantWomenCount,
       ),
       _BeneficiaryTileData(
         title: l10n.pregnancyOutcome,
         asset: 'assets/images/mother.png',
         count: 0,
-        highlighted: true,
       ),
       _BeneficiaryTileData(
         title: l10n.hbcnList,

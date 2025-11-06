@@ -1,7 +1,6 @@
 class FollowupFormDataTable {
   static const table = 'followup_form_data';
 
-  // Form type keys - these are fixed and should not change
   static const String eligibleCoupleRegistration = 'eligible_couple_registration';
   static const String eligibleCoupleTrackingDue = 'eligible_couple_tracking_due';
   static const String eligibleCoupleReregistration = 'eligible_couple_re_registration';

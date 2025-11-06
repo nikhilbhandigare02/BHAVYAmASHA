@@ -57,4 +57,7 @@ class FpAdoptionDateChanged extends TrackEligibleCoupleEvent {
 
 class SubmitTrackForm extends TrackEligibleCoupleEvent {
   const SubmitTrackForm();
+  
+  @override
+  List<Object?> get props => [];
 }

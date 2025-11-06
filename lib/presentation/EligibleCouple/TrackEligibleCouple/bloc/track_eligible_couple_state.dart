@@ -1,6 +1,7 @@
 part of 'track_eligible_couple_bloc.dart';
 
- class TrackEligibleCoupleState extends Equatable {
+class TrackEligibleCoupleState extends Equatable {
+   final String beneficiaryId;
    final DateTime? visitDate;
    final String financialYear; // derived from visitDate
    final bool? isPregnant; // null = not chosen
@@ -15,6 +16,7 @@ part of 'track_eligible_couple_bloc.dart';
    final String? error;
 
    const TrackEligibleCoupleState({
+    required this.beneficiaryId,
     this.visitDate,
     this.financialYear = '',
     this.isPregnant,
@@ -27,7 +29,8 @@ part of 'track_eligible_couple_bloc.dart';
     this.error,
    });
 
-   factory TrackEligibleCoupleState.initial() => const TrackEligibleCoupleState();
+   factory TrackEligibleCoupleState.initial({required String beneficiaryId}) => 
+      TrackEligibleCoupleState(beneficiaryId: beneficiaryId);
 
    bool get isValid {
      if (visitDate == null || financialYear.isEmpty || isPregnant == null) return false;
@@ -44,6 +47,7 @@ part of 'track_eligible_couple_bloc.dart';
    }
 
    TrackEligibleCoupleState copyWith({
+     String? beneficiaryId,
      DateTime? visitDate,
      String? financialYear,
      bool? isPregnant,
@@ -59,6 +63,7 @@ part of 'track_eligible_couple_bloc.dart';
      bool clearNonPregnantFields = false,
    }) {
      return TrackEligibleCoupleState(
+       beneficiaryId: beneficiaryId ?? this.beneficiaryId,
        visitDate: visitDate ?? this.visitDate,
        financialYear: financialYear ?? this.financialYear,
        isPregnant: isPregnant ?? this.isPregnant,
@@ -74,6 +79,7 @@ part of 'track_eligible_couple_bloc.dart';
 
    @override
    List<Object?> get props => [
+     beneficiaryId,
      visitDate,
      financialYear,
      isPregnant,

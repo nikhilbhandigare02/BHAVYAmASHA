@@ -37,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   int householdCount = 0;
   int beneficiariesCount = 0;
+  int eligibleCouplesCount = 0;
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchApiData();
     _loadHouseholdCount();
     _loadBeneficiariesCount();
+    _loadEligibleCouplesCount();
   }
 
   Future<void> _loadHouseholdCount() async {
@@ -84,6 +86,67 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       print('Error loading beneficiaries count: $e');
     }
+  }
+
+  Future<void> _loadEligibleCouplesCount() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      int count = 0;
+      
+      for (final row in rows) {
+        final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+        
+        // Check if head is eligible female
+        if (_isEligibleFemale(head)) {
+          count++;
+        }
+        
+        // Check if spouse is eligible female
+        if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
+          count++;
+        }
+      }
+      
+      if (mounted) {
+        setState(() {
+          eligibleCouplesCount = count;
+        });
+      }
+    } catch (e) {
+      print('Error loading eligible couples count: $e');
+    }
+  }
+  
+  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
+    if (person.isEmpty) return false;
+    
+    // Check gender
+    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
+    if (genderRaw != 'f' && genderRaw != 'female') return false;
+    
+    // Check marital status (use head's marital status if person is spouse)
+    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? 
+                           head?['maritalStatus']?.toString().toLowerCase() ?? '';
+    if (maritalStatusRaw != 'married') return false;
+    
+    // Check age (15-49 years)
+    final dob = person['dob']?.toString();
+    if (dob != null && dob.isNotEmpty) {
+      try {
+        final birthDate = DateTime.tryParse(dob);
+        if (birthDate != null) {
+          final age = DateTime.now().difference(birthDate).inDays ~/ 365;
+          return age >= 15 && age <= 49;
+        }
+      } catch (e) {
+        print('Error parsing date of birth: $e');
+      }
+    }
+    
+    // If we can't determine age, assume eligible
+    return true;
   }
 
   Future<void> fetchApiData() async {
@@ -245,6 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: AshaDashboardSection(
                 householdCount: householdCount,
                 beneficiariesCount: beneficiariesCount,
+                eligibleCouplesCount: eligibleCouplesCount,
                 selectedGridIndex: selectedGridIndex,
                 onGridTap: (index) =>
                     setState(() => selectedGridIndex = index),

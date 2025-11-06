@@ -163,7 +163,12 @@ class Routes{
       case Route_Names.Ncdeligiblelist:
         return MaterialPageRoute(builder: (context) => const Ncdeligiblelist(),);
       case Route_Names.TrackEligibleCoupleScreen:
-        return MaterialPageRoute(builder: (context) => const TrackEligibleCoupleScreen(),);
+        final args = setting.arguments as Map<String, dynamic>?;
+        final beneficiaryId = args?['beneficiaryId'] ?? '';
+        return MaterialPageRoute(
+          builder: (context) => TrackEligibleCoupleScreen(beneficiaryId: beneficiaryId),
+        );
+
       case Route_Names.cbacScreen:
         return MaterialPageRoute(builder: (context) => const Cbacform(),);
       case Route_Names.Abhalinkscreen:

@@ -19,7 +19,7 @@ part 'registernewhousehold_state.dart';
 class RegisterNewHouseholdBloc
     extends Bloc<RegisternewhouseholdEvent, RegisterHouseholdState> {
   RegisterNewHouseholdBloc() : super(const RegisterHouseholdState()) {
-    // 🧩 Add Head
+    //  Add Head
     on<RegisterAddHead>((event, emit) {
       final current = state;
 
@@ -76,7 +76,7 @@ class RegisterNewHouseholdBloc
               : '⚠️ Could not obtain location: ${geoLocation.error}',
         );
 
-        // 📱 Device Info
+        //  Device Info
         late DeviceInfo deviceInfo;
         try {
           deviceInfo = await DeviceInfo.getDeviceInfo();
@@ -84,13 +84,13 @@ class RegisterNewHouseholdBloc
           print('Error getting package/device info: $e');
         }
 
-        // 🧾 Debug: Raw Data
-        print('📋 Raw Form Data from Event:');
+        //  Debug: Raw Data
+        print(' Raw Form Data from Event:');
         event.amenitiesData.forEach((key, value) {
           print('- $key: $value (${value?.runtimeType})');
         });
 
-        // 🏠 Household Info
+        //  Household Info
         final householdInfo = {
           'residentialArea':
           event.amenitiesData['residentialArea']?.toString().trim() ??
@@ -132,12 +132,10 @@ class RegisterNewHouseholdBloc
         final householdInfoJson = jsonEncode(householdInfo);
         print(' Household Info JSON: $householdInfoJson');
 
-        // 🗝️ Generate Household Key with delay
         final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
         await Future.delayed(const Duration(seconds: 1));
         final headId = await IdGenerator.generateUniqueId(deviceInfo);
 
-        //  Geo Location JSON
         final locationData = geoLocation.toJson();
         locationData['source'] = 'gps';
         if (!geoLocation.hasCoordinates) {
@@ -199,11 +197,9 @@ class RegisterNewHouseholdBloc
         print('Saving household with payload: ${jsonEncode(householdPayload)}');
         await LocalStorageDao.instance.insertHousehold(householdPayload);
 
-        // Generate spouse key with 1 second delay after headId
         await Future.delayed(const Duration(seconds: 1));
         final spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
         
-        // Prepare spouse details with the new key
         final spouseDetails = _toJsonSafe(event.headForm?['spousedetails']) ?? {};
         if (spouseDetails is Map) {
           spouseDetails['unique_key'] = spouseKey;
@@ -318,7 +314,7 @@ class RegisterNewHouseholdBloc
             }),
             'parent_user': {},
             'current_user_key': 'local_user',
-            'facility_id': 283,
+            'facility_id': facilityId,
             'created_date_time': ts,
             'modified_date_time': ts,
             'is_synced': 0,

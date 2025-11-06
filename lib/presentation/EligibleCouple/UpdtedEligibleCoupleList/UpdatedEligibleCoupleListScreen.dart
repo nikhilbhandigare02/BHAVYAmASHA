@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
+import '../../../data/Local_Storage/database_provider.dart';
 
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../TrackEligibleCouple/TrackEligibleCoupleScreen.dart';
 
 class UpdatedEligibleCoupleListScreen extends StatefulWidget {
   const UpdatedEligibleCoupleListScreen({super.key});
@@ -28,20 +32,32 @@ class _UpdatedEligibleCoupleListScreenState
   }
 
   Future<void> _loadCouples() async {
-    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    final db = await DatabaseProvider.instance.database;
+    // Query beneficiaries and order by created_date_time in descending order (newest first)
+    final rows = await db.query(
+      'beneficiaries',
+      orderBy: 'created_date_time DESC',
+    );
+    
     final List<Map<String, dynamic>> couples = [];
+    
     for (final row in rows) {
-      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-      final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-
-      // Female eligible in head
-      if (_isEligibleFemale(head)) {
-        couples.add(_formatData(row, head, spouse, isHead: true));
-      }
-      // Female eligible in spouse
-      if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-        couples.add(_formatData(row, spouse, head, isHead: false));
+      try {
+        final info = jsonDecode(row['beneficiary_info'] as String? ?? '{}');
+        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+        
+        final isFamilyPlanning = row['is_family_planning'] == 1;
+        
+        if (_isEligibleFemale(head)) {
+          couples.add(_formatData(row, head, spouse, isHead: true, isFamilyPlanning: isFamilyPlanning));
+        }
+        // Female eligible in spouse
+        if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
+          couples.add(_formatData(row, spouse, head, isHead: false, isFamilyPlanning: isFamilyPlanning));
+        }
+      } catch (e) {
+        print('Error processing beneficiary ${row['id']}: $e');
       }
     }
     if (mounted) {
@@ -62,7 +78,10 @@ class _UpdatedEligibleCoupleListScreenState
     return isFemale && isMarried && age >= 15 && age <= 49;
   }
 
-  Map<String, dynamic> _formatData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> counterpart, {required bool isHead}) {
+  Map<String, dynamic> _formatData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> counterpart, {
+    required bool isHead,
+    bool isFamilyPlanning = false,
+  }) {
     final hhId = (row['household_ref_key']?.toString() ?? '');
     final uniqueKey = (row['unique_key']?.toString() ?? '');
     final createdDate = row['created_date_time']?.toString() ?? '';
@@ -89,7 +108,8 @@ class _UpdatedEligibleCoupleListScreenState
       'RichID': female['RichID']?.toString() ?? '',
       'mobileno': mobile,
       'HusbandName': husbandName,
-      'status': 'Unprotected',
+      'status': isFamilyPlanning ? 'Protected' : 'Unprotected',
+      'is_family_planning': isFamilyPlanning,
     };
   }
 
@@ -116,6 +136,14 @@ class _UpdatedEligibleCoupleListScreenState
   }
 
   bool _isProtected(Map<String, dynamic> data) {
+    // First check is_family_planning flag (1 = true, 0 = false)
+    if (data['is_family_planning'] == 1) return true;
+    
+    // Then check status field
+    final status = data['status']?.toString().toLowerCase();
+    if (status == 'protected') return true;
+    
+    // For backward compatibility, check other common protection status fields
     final dynamic raw = data['ProtectionStatus'] ??
         data['Protection'] ??
         data['protected'] ??
@@ -270,15 +298,23 @@ class _UpdatedEligibleCoupleListScreenState
     );
   }
 
-  // 📦 Household Card
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final primary = Theme.of(context).primaryColor;
     final t = AppLocalizations.of(context);
 
     return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context,  Route_Names.TrackEligibleCoupleScreen);
+      onTap: () async {
+        final result = await Navigator.push(
+          context,
+          TrackEligibleCoupleScreen.route(beneficiaryId: data['BeneficiaryID'].toString()),
+        );
+        
+        // If the form was submitted successfully (returned true), refresh the data
+        if (result == true && mounted) {
+          await _loadCouples();
+        }
       },
+
       borderRadius: BorderRadius.circular(8),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
