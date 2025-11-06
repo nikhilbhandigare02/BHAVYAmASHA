@@ -147,13 +147,13 @@ class RegisterNewHouseholdBloc
         final geoLocationJson = jsonEncode(locationData);
         print(' Final location data: $geoLocationJson');
 
-        //  Current User
+
         final currentUser = await UserInfo.getCurrentUser();
         final userDetails = currentUser?['details'] is String
             ? jsonDecode(currentUser?['details'] ?? '{}')
             : currentUser?['details'] ?? {};
 
-        // Extract address and facility ID from user details
+
         final address = {
           'state_name': userDetails['stateName'] ?? 'Bihar',
           'state_id': userDetails['stateId'] ?? 1,
@@ -163,13 +163,12 @@ class RegisterNewHouseholdBloc
           'division_lgd_code': userDetails['divisionLgdCode'] ?? 198,
         };
 
-        // Get facility ID from user details, default to 0 if not found
+
         final facilityId = userDetails['asha_associated_with_facility_id'] ?? 0;
         
         print('📝 Using address from user profile: $address');
         print('🏥 Using facility ID from user profile: $facilityId');
 
-        //  Household Payload
         final householdPayload = {
           'server_id': null,
           'unique_key': uniqueKey,

@@ -36,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool isLoading = true;
   int householdCount = 0;
+  int beneficiariesCount = 0;
 
   @override
   void initState() {
@@ -43,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
     selectedIndex = widget.initialTabIndex;
     fetchApiData();
     _loadHouseholdCount();
+    _loadBeneficiariesCount();
   }
 
   Future<void> _loadHouseholdCount() async {
@@ -55,6 +57,32 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       print('Error loading household count: $e');
+    }
+  }
+
+  Future<void> _loadBeneficiariesCount() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      int count = 0;
+      for (final row in rows) {
+        final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+        // Head card
+        if (head.isNotEmpty) count += 1;
+        // Spouse card
+        if (spouse.isNotEmpty) count += 1;
+        // Children cards (+ father card per child)
+        final children = (head['childrenDetails'] as List?) ?? const [];
+        count += (children.length * 2);
+      }
+      if (mounted) {
+        setState(() {
+          beneficiariesCount = count;
+        });
+      }
+    } catch (e) {
+      print('Error loading beneficiaries count: $e');
     }
   }
 
@@ -216,6 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 : SingleChildScrollView(
               child: AshaDashboardSection(
                 householdCount: householdCount,
+                beneficiariesCount: beneficiariesCount,
                 selectedGridIndex: selectedGridIndex,
                 onGridTap: (index) =>
                     setState(() => selectedGridIndex = index),

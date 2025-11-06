@@ -5,6 +5,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/config/routes/Route_Name.dart';
+import '../../../data/Local_Storage/local_storage_dao.dart';
 
 class UpdatedEligibleCoupleListScreen extends StatefulWidget {
   const UpdatedEligibleCoupleListScreen({super.key});
@@ -23,74 +24,95 @@ class _UpdatedEligibleCoupleListScreenState
   @override
   void initState() {
     super.initState();
-    // Static demo data
-    _households = [
-      {
-        'hhId': 'HH001',
-        'RegistrationDate': '10-10-2025',
-        'status' : 'Unprotected',
-        'RegistrationType': 'GA',
-        'BeneficiaryID': 'VA001',
-        'Name': 'Rohit Chavan',
-        'age': 30,
-        'RichID': 123,
-        'mobileno': '9923175398',
-        'HusbandName': 'Sagar Chavan',
-        'ProtectionStatus': 'Unprotected',
-      },
-      {
-        'hhId': 'HH002',
-        'status' : 'Unprotected',
-        'RegistrationDate': '11-10-2025',
-        'RegistrationType': 'GA',
-        'BeneficiaryID': 'VA002',
-        'Name': 'Anita Patil',
-        'age': 28,
-        'RichID': 124,
-        'mobileno': '9876543210',
-        'HusbandName': 'Ravi Patil',
-        'Protection': 'Protected',
-      },
-      {
-        'hhId': 'HH003',
-        'status' : 'Unprotected',
-        'RegistrationDate': '12-10-2025',
-        'RegistrationType': 'GA',
-        'BeneficiaryID': 'VA003',
-        'Name': 'Ramesh Jadhav',
-        'age': 32,
-        'RichID': 125,
-        'mobileno': '9998887776',
-        'HusbandName': 'Vikram Jadhav',
-        'Protected': 'Y',
-      },
-      {
-        'hhId': 'HH004',
-        'status' : 'Unprotected',
-        'RegistrationDate': '13-10-2025',
-        'RegistrationType': 'GA',
-        'BeneficiaryID': 'VA004',
-        'Name': 'Sneha More',
-        'age': 26,
-        'RichID': 126,
-        'mobileno': '9988776655',
-        'HusbandName': 'Nilesh More',
-        'isProtected': false,
-      },
-      {
-        'hhId': 'HH005',
-        'status' : 'Unprotected',
-        'RegistrationDate': '14-10-2025',
-        'RegistrationType': 'GA',
-        'BeneficiaryID': 'VA005',
-        'Name': 'Kiran Deshmukh',
-        'age': 29,
-        'RichID': 127,
-        'mobileno': '9012345678',
-        'HusbandName': 'Amit Deshmukh',
-        'IsProtected': 1,
-      },
-    ];
+    _loadCouples();
+  }
+
+  Future<void> _loadCouples() async {
+    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    final List<Map<String, dynamic>> couples = [];
+    for (final row in rows) {
+      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+      final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+
+      // Female eligible in head
+      if (_isEligibleFemale(head)) {
+        couples.add(_formatData(row, head, spouse, isHead: true));
+      }
+      // Female eligible in spouse
+      if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
+        couples.add(_formatData(row, spouse, head, isHead: false));
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _households = couples;
+      });
+    }
+  }
+
+  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
+    if (person.isEmpty) return false;
+    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
+    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? head?['maritalStatus']?.toString().toLowerCase() ?? '';
+    final isFemale = genderRaw == 'f' || genderRaw == 'female';
+    final isMarried = maritalStatusRaw == 'married';
+    final dob = person['dob'];
+    final age = _calculateAge(dob);
+    return isFemale && isMarried && age >= 15 && age <= 49;
+  }
+
+  Map<String, dynamic> _formatData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> counterpart, {required bool isHead}) {
+    final hhId = (row['household_ref_key']?.toString() ?? '');
+    final uniqueKey = (row['unique_key']?.toString() ?? '');
+    final createdDate = row['created_date_time']?.toString() ?? '';
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
+    final age = _calculateAge(female['dob']);
+    final gender = (female['gender']?.toString().toLowerCase() ?? '');
+    final displayAgeGender = age > 0
+        ? '$age Y / ${gender == 'f' || gender == 'female' ? 'Female' : gender == 'm' || gender == 'male' ? 'Male' : 'Other'}'
+        : 'N/A';
+    final mobile = female['mobileNo']?.toString() ?? '';
+    final husbandName = isHead
+        ? (counterpart['memberName']?.toString() ?? counterpart['spouseName']?.toString() ?? '')
+        : (counterpart['headName']?.toString() ?? counterpart['memberName']?.toString() ?? '');
+
+    String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
+
+    return {
+      'hhId': last11(hhId),
+      'RegistrationDate': _formatDate(createdDate),
+      'RegistrationType': 'General',
+      'BeneficiaryID': last11(uniqueKey),
+      'Name': name,
+      'age': displayAgeGender,
+      'RichID': female['RichID']?.toString() ?? '',
+      'mobileno': mobile,
+      'HusbandName': husbandName,
+      'status': 'Unprotected',
+    };
+  }
+
+  int _calculateAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final dt = DateTime.tryParse(dateStr);
+      if (dt == null) return '';
+      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+    } catch (_) {
+      return '';
+    }
   }
 
   bool _isProtected(Map<String, dynamic> data) {

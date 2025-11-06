@@ -34,6 +34,8 @@ class _HouseHold_BeneficiaryScreenState
   late List<Map<String, dynamic>> _filtered;
   List<Map<String, dynamic>> _beneficiaries = [];
   bool _isLoading = true;
+  String? _village;
+  String? _mohalla;
 
   @override
   void initState() {
@@ -60,6 +62,8 @@ class _HouseHold_BeneficiaryScreenState
       debugPrint('Fetched ${rows.length} beneficiaries from LocalStorageDao');
 
       final List<Map<String, dynamic>> beneficiaries = [];
+      String? headerVillage;
+      String? headerMohalla;
 
       for (final row in rows) {
         final rowHhId = row['household_ref_key']?.toString() ?? '';
@@ -74,6 +78,8 @@ class _HouseHold_BeneficiaryScreenState
           ? (matchByHhId && matchByHouseNo)
           : (matchByHhId || matchByHouseNo);
         if (match) {
+          headerVillage = head['village']?.toString();
+          headerMohalla = head['mohalla']?.toString();
           // Head card
           if (head.isNotEmpty) {
             final gender = (head['gender']?.toString().toLowerCase() ?? '');
@@ -133,6 +139,8 @@ class _HouseHold_BeneficiaryScreenState
           _beneficiaries = beneficiaries;
           _filtered = List<Map<String, dynamic>>.from(beneficiaries);
           _isLoading = false;
+          _village = headerVillage;
+          _mohalla = headerMohalla;
         });
       }
     } catch (e) {
@@ -234,10 +242,14 @@ class _HouseHold_BeneficiaryScreenState
                 children: [
                   _infoColumn(
                       l10n?.villageLabel ?? 'Village',
-                      l10n?.notAvailable ?? 'Not Available'),
+                      ((_village != null && _village!.trim().isNotEmpty)
+                          ? _village!
+                          : (l10n?.notAvailable ?? 'Not Available'))),
                   _infoColumn(
                       l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
-                      l10n?.notAvailable ?? 'Not Available'),
+                      ((_mohalla != null && _mohalla!.trim().isNotEmpty)
+                          ? _mohalla!
+                          : (l10n?.notAvailable ?? 'Not Available'))),
                 ],
               ),
             ),
