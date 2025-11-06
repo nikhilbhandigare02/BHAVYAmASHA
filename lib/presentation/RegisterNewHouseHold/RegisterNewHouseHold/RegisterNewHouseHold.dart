@@ -287,7 +287,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                               'toilet': amenitiesState.toilet,
                             };
                             
-                            // Remove any null or empty values
+
                             amenitiesData.removeWhere((key, value) => 
                                 value == null || 
                                 (value is String && value.isEmpty) ||

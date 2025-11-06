@@ -89,7 +89,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     value: value,
                     decoration: InputDecoration(hintText: t?.selectArea ?? 'चुनें', border: const UnderlineInputBorder()),
                     items: [
-                      DropdownMenuItem(value: true, child: Text(t?.yes ?? 'हाँ')), 
+                      DropdownMenuItem(value: true, child: Text(t?.yes ?? 'हाँ')),
                       DropdownMenuItem(value: false, child: Text(t?.no ?? 'नहीं'))
                     ],
                     onChanged: (v) => context.read<TrackEligibleCoupleBloc>().add(IsPregnantChanged(v ?? false)),
@@ -224,8 +224,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
   }
 
   Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Text(text, style: const TextStyle(fontSize: 13, color: Colors.black87)),
-      );
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Text(text, style: const TextStyle(fontSize: 13, color: Colors.black87)),
+  );
 }
-

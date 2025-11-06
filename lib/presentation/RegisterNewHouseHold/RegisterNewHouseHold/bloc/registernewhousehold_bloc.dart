@@ -19,7 +19,7 @@ part 'registernewhousehold_state.dart';
 class RegisterNewHouseholdBloc
     extends Bloc<RegisternewhouseholdEvent, RegisterHouseholdState> {
   RegisterNewHouseholdBloc() : super(const RegisterHouseholdState()) {
-    // 🧩 Add Head
+
     on<RegisterAddHead>((event, emit) {
       final current = state;
 

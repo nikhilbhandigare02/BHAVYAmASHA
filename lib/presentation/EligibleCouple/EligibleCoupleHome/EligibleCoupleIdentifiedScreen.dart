@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -77,6 +79,8 @@ class _EligibleCoupleIdentifiedScreenState
     final hhId = row['household_ref_key']?.toString() ?? '';
     final uniqueKey = row['unique_key']?.toString() ?? '';
     final createdDate = row['created_date_time']?.toString() ?? '';
+    final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+    final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
     final gender = female['gender']?.toString().toLowerCase();
     final displayGender = gender == 'f' ? 'Female' : gender == 'm' ? 'Male' : 'Other';
@@ -86,6 +90,21 @@ class _EligibleCoupleIdentifiedScreenState
     final husbandName = isHead
       ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
       : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
+
+    // children summary can live at top-level children_details or under head childrendetails/childrenDetails
+    final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
+    Map<String, dynamic>? childrenSummary;
+    if (childrenRaw is Map) {
+      childrenSummary = {
+        'totalBorn': childrenRaw['totalBorn'],
+        'totalLive': childrenRaw['totalLive'],
+        'totalMale': childrenRaw['totalMale'],
+        'totalFemale': childrenRaw['totalFemale'],
+        'youngestAge': childrenRaw['youngestAge'],
+        'ageUnit': childrenRaw['ageUnit'],
+        'youngestGender': childrenRaw['youngestGender'],
+      }..removeWhere((k, v) => v == null);
+    }
     return {
       'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
       'RegistrationDate': _formatDate(createdDate),
@@ -96,6 +115,8 @@ class _EligibleCoupleIdentifiedScreenState
       'RichID': richId,
       'mobileno': mobile,
       'HusbandName': husbandName,
+      'childrenSummary': childrenSummary,
+      '_rawRow': row,
     };
   }
 
@@ -202,13 +223,122 @@ class _EligibleCoupleIdentifiedScreenState
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final primary = Theme.of(context).primaryColor;
     final l10n = AppLocalizations.of(context);
-
+    final rowData = data['_rawRow'] ?? {};
+    final beneficiaryInfo = Map<String, dynamic>.from((rowData['beneficiary_info'] as Map?) ?? {});
+    final headDetails = Map<String, dynamic>.from((beneficiaryInfo['head_details'] as Map?) ?? {});
+    final spouseDetails = Map<String, dynamic>.from(
+      (beneficiaryInfo['spouse_details'] as Map?) ?? {},
+    );
     return InkWell(
       onTap: () {
+        // Extract children details from either children_details or childrendetails
+        final childrenDetails = Map<String, dynamic>.from(
+          (beneficiaryInfo['children_details'] as Map? ?? 
+           beneficiaryInfo['childrendetails'] as Map? ?? {}),
+        );
+        
+        // Extract head and spouse details with fallbacks
+        final headName = headDetails['headName']?.toString() ?? '';
+        final spouseName = spouseDetails['memberName']?.toString() ?? 
+                          spouseDetails['spouseName']?.toString() ?? '';
+        
+        // Determine if current card is for head or spouse
+        final isHead = (data['Name']?.toString() ?? '').toLowerCase() == headName.toLowerCase();
+        final womanName = isHead ? headName : spouseName;
+        
+        // Calculate current age from DOB if available
+        String currentAge = '';
+        try {
+          final dob = isHead 
+              ? headDetails['dob']?.toString() 
+              : spouseDetails['dob']?.toString();
+          if (dob != null && dob.isNotEmpty) {
+            final birthDate = DateTime.tryParse(dob);
+            if (birthDate != null) {
+              final age = (DateTime.now().difference(birthDate).inDays / 365).floor();
+              currentAge = age.toString();
+            }
+          }
+        } catch (e) {
+          print('Error calculating age: $e');
+        }
+        
+        // Prepare navigation data with all fields needed for auto-fill
+        final navigationData = {
+          // Basic info
+          'rchId': data['RichID']?.toString() ?? '',
+          'womanName': womanName,
+          'currentAge': currentAge,
+          'ageAtMarriage': (isHead 
+              ? headDetails['ageAtMarriage']?.toString() 
+              : spouseDetails['ageAtMarriage']?.toString()) ?? '',
+          
+          // Address
+          'address': [
+            headDetails['village']?.toString(),
+            headDetails['mohalla']?.toString() ?? headDetails['tola']?.toString(),
+            headDetails['ward']?.toString(),
+          ].where((e) => e != null && e.isNotEmpty).join(', '),
+          
+          // Mobile details
+          'whoseMobile': isHead ? 'Wife' : 'Self', // Assuming if it's the wife's card, it's her mobile
+          'mobileNo': isHead 
+              ? (spouseDetails['mobileNo']?.toString() ?? headDetails['mobileNo']?.toString() ?? '')
+              : (headDetails['mobileNo']?.toString() ?? ''),
+          
+          // Religion and category
+          'religion': headDetails['religion']?.toString() ?? '',
+          'category': headDetails['category']?.toString() ?? headDetails['caste']?.toString() ?? '',
+          
+          // Children details
+          'totalChildrenBorn': childrenDetails['totalBorn']?.toString() ?? '0',
+          'totalLiveChildren': childrenDetails['totalLive']?.toString() ?? '0',
+          'totalMaleChildren': childrenDetails['totalMale']?.toString() ?? '0',
+          'totalFemaleChildren': childrenDetails['totalFemale']?.toString() ?? '0',
+          'youngestChildAge': childrenDetails['youngestAge']?.toString() ?? '0',
+          'youngestChildAgeUnit': (childrenDetails['ageUnit']?.toString() ?? 'Years').toLowerCase().contains('month') ? 'Months' : 'Years',
+          'youngestChildGender': childrenDetails['youngestGender']?.toString() ?? '',
+          
+          // Additional fields for reference
+          'registrationDate': DateTime.now().toIso8601String(),
+          
+          // Raw data for debugging
+          '_rawRow': rowData,
+          'head_details': headDetails,
+          'spouse_details': spouseDetails,
+        }..removeWhere((key, value) => value == null || value == '');
+        
+        // Debug print the navigation data
+        print('🚀 Navigating with data: ${jsonEncode(navigationData)}');
+
+        print('🚀 Navigating with data: $navigationData');
+        
+        // Ensure all required fields are present in the navigation data
+        final Map<String, dynamic> updateData = {
+          'rchId': navigationData['rchId'] ?? '',
+          'womanName': navigationData['womanName'] ?? '',
+          'currentAge': navigationData['currentAge'] ?? '',
+          'ageAtMarriage': navigationData['ageAtMarriage'] ?? '',
+          'address': navigationData['address'] ?? '',
+          'whoseMobile': navigationData['whoseMobile'] ?? 'Self',
+          'mobileNo': navigationData['mobileNo'] ?? '',
+          'religion': navigationData['religion'] ?? '',
+          'category': navigationData['category'] ?? '',
+          'totalChildrenBorn': navigationData['totalChildrenBorn'] ?? '0',
+          'totalLiveChildren': navigationData['totalLiveChildren'] ?? '0',
+          'totalMaleChildren': navigationData['totalMaleChildren'] ?? '0',
+          'totalFemaleChildren': navigationData['totalFemaleChildren'] ?? '0',
+          'youngestChildAge': navigationData['youngestChildAge'] ?? '0',
+          'youngestChildAgeUnit': navigationData['youngestChildAgeUnit'] ?? 'Years',
+          'youngestChildGender': navigationData['youngestChildGender'] ?? '',
+          'registrationDate': navigationData['registrationDate'] ?? DateTime.now().toIso8601String(),
+          '_rawRow': navigationData['_rawRow'],
+        };
+        
         Navigator.pushNamed(
           context,
           Route_Names.UpdatedEligibleCoupleList,
-          arguments: data,
+          arguments: updateData,
         );
       },
       borderRadius: BorderRadius.circular(8),

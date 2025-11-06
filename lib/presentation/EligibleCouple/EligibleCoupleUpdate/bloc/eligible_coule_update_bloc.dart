@@ -8,6 +8,7 @@ part 'eligible_coule_update_state.dart';
 class EligibleCouleUpdateBloc
     extends Bloc<EligibleCouleUpdateEvent, EligibleCouleUpdateState> {
   EligibleCouleUpdateBloc() : super(EligibleCouleUpdateState.initial()) {
+    on<InitializeForm>(_onInitializeForm);
     on<RegistrationDateChanged>((e, emit) =>
         emit(state.copyWith(registrationDate: e.date, clearError: true)));
     on<RchIdChanged>((e, emit) => emit(state.copyWith(rchId: e.rchId, clearError: true)));
@@ -28,8 +29,54 @@ class EligibleCouleUpdateBloc
         emit(state.copyWith(youngestChildAgeUnit: e.unit, clearError: true)));
     on<YoungestChildGenderChanged>((e, emit) =>
         emit(state.copyWith(youngestChildGender: e.gender, clearError: true)));
-
     on<SubmitPressed>(_onSubmit);
+  }
+
+  void _onInitializeForm(InitializeForm event, Emitter<EligibleCouleUpdateState> emit) {
+    final data = event.initialData;
+    print('🚀 Initializing form with data: $data');
+
+    try {
+      // Log all keys in the incoming data
+      print('📋 Available data keys: ${data.keys.join(', ')}');
+      emit(state.copyWith(
+        // Basic info
+        rchId: data['rchId']?.toString() ?? '',
+        womanName: data['womanName']?.toString() ?? '',
+        currentAge: data['currentAge']?.toString() ?? '',
+        ageAtMarriage: data['ageAtMarriage']?.toString() ?? '',
+        
+        // Address and contact
+        address: data['address']?.toString() ?? '',
+        whoseMobile: data['whoseMobile']?.toString() ?? 'Self',
+        mobileNo: data['mobileNo']?.toString() ?? '',
+        
+        // Personal details
+        religion: data['religion']?.toString() ?? '',
+        category: data['category']?.toString() ?? '',
+        
+        // Children details
+        totalChildrenBorn: data['totalChildrenBorn']?.toString() ?? '0',
+        totalLiveChildren: data['totalLiveChildren']?.toString() ?? '0',
+        totalMaleChildren: data['totalMaleChildren']?.toString() ?? '0',
+        totalFemaleChildren: data['totalFemaleChildren']?.toString() ?? '0',
+        youngestChildAge: data['youngestChildAge']?.toString() ?? '0',
+        youngestChildAgeUnit: data['youngestChildAgeUnit']?.toString() ?? 'Years',
+        youngestChildGender: data['youngestChildGender']?.toString() ?? '',
+        
+        // Set registration date to now if not provided
+        registrationDate: data['registrationDate'] != null 
+            ? DateTime.tryParse(data['registrationDate']) ?? DateTime.now()
+            : DateTime.now(),
+      ));
+    } catch (e, stackTrace) {
+      print('Error initializing form: $e');
+      print('Stack trace: $stackTrace');
+      // Emit error state if needed
+      emit(state.copyWith(
+        error: 'Failed to initialize form: ${e.toString()}',
+      ));
+    }
   }
 
   Future<void> _onSubmit(
