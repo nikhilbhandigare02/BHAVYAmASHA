@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'dart:convert';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -16,33 +18,16 @@ class DeathRegister extends StatefulWidget {
 
 class _DeathRegisterState extends State<DeathRegister> {
   final TextEditingController _searchCtrl = TextEditingController();
-
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'name': 'Ramesh Kumar',
-      'age/gender': '18 Y / Male',
-      'date': '22/10/2025', // ✅ changed to lowercase
-      'place': 'Home',
-      'status': 'Adult',
-    },
-    {
-      'hhId': '51016121847',
-      'name': 'Ramesh Kumar',
-      'age/gender': '18 Y / Male',
-      'date': '22/10/2025', // ✅ changed to lowercase
-      'place': 'Home',
-      'status': 'Adult',
-    },
-  ];
-
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _deathRecords = [];
   late List<Map<String, dynamic>> _filtered;
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _filtered = [];
     _searchCtrl.addListener(_onSearchChanged);
+    _loadDeathRecords();
   }
 
   @override
@@ -52,17 +37,36 @@ class _DeathRegisterState extends State<DeathRegister> {
     super.dispose();
   }
 
+  Future<void> _loadDeathRecords() async {
+    try {
+      final records = await LocalStorageDao.instance.getDeathRecords();
+      if (mounted) {
+        setState(() {
+          _deathRecords = records;
+          _filtered = List<Map<String, dynamic>>.from(_deathRecords);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   void _onSearchChanged() {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _filtered = List<Map<String, dynamic>>.from(_deathRecords);
       } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['name'] as String).toLowerCase().contains(q) ||
-              (e['mobile'] as String).toLowerCase().contains(q) ||
-              (e['mohalla'] as String).toLowerCase().contains(q);
+        _filtered = _deathRecords.where((e) {
+          return (e['hhId']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['name']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['mobile']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['mohalla']?.toString().toLowerCase() ?? '').contains(q);
         }).toList();
       }
     });
@@ -106,16 +110,25 @@ class _DeathRegisterState extends State<DeathRegister> {
             ),
           ),
 
-          // 📋 Household List
+          // 📋 Death Records List
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _filtered.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No death records found',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                        itemCount: _filtered.length,
+                        itemBuilder: (context, index) {
+                          final data = _filtered[index];
+                          return _householdCard(context, data);
+                        },
+                      ),
           ),
         ],
       ),

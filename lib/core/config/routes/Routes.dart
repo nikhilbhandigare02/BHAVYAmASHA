@@ -135,7 +135,10 @@ class Routes{
       case Route_Names.EligibleCoupleIdentified:
         return MaterialPageRoute(builder: (context) => const EligibleCoupleIdentifiedScreen(),);
       case Route_Names.UpdatedEligibleCoupleList:
-        return MaterialPageRoute(builder: (context) => const EligibleCoupleUpdateScreen(),);
+        return MaterialPageRoute(
+          settings: setting,
+          builder: (context) => const EligibleCoupleUpdateScreen(),
+        );
       case Route_Names.EligibleCoupleHomeScreen:
         return MaterialPageRoute(builder: (context) => const EligibleCoupleHomeScreen(),);
       case Route_Names.UpdatedEligibleCoupleScreen:

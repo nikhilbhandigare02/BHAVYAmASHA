@@ -64,13 +64,20 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                 listener: (context, state) {
                   if (state.error != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.error!)),);
+                      SnackBar(content: Text(state.error!)),
+                    );
                   }
                   if (state.isSuccess) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(
                           t?.profileUpdated ?? 'Updated successfully')),
                     );
+                    // Add navigation back after a short delay to show the success message
+                    Future.delayed(const Duration(milliseconds: 1500), () {
+                      if (context.mounted) {
+                        Navigator.of(context).pop(true); // Pass true to indicate success
+                      }
+                    });
                   }
                 },
                 builder: (context, state) {
@@ -122,6 +129,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                     context.read<EligibleCouleUpdateBloc>().add(
                                         RchIdChanged(v)),
                                 keyboardType: TextInputType.number,
+                                readOnly: true,
                               ),
                               // Divider(color: AppColors.divider, thickness: 0.5, height: 0,),
                               // CustomDatePicker(
@@ -143,6 +151,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 onChanged: (v) =>
                                     context.read<EligibleCouleUpdateBloc>().add(
                                         WomanNameChanged(v)),
+                                readOnly: true,
                               ),
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
@@ -159,6 +168,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 onChanged: (v) =>
                                     context.read<EligibleCouleUpdateBloc>().add(
                                         CurrentAgeChanged(v)),
+                                readOnly: true,
                               ),
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
@@ -175,6 +185,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 onChanged: (v) =>
                                     context.read<EligibleCouleUpdateBloc>().add(
                                         AgeAtMarriageChanged(v)),
+                                readOnly: true,
                               ),
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
@@ -189,14 +200,16 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 onChanged: (v) =>
                                     context.read<EligibleCouleUpdateBloc>().add(
                                         AddressChanged(v)),
+                                readOnly: true,
                               ),
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
                                 height: 0,),
-                              ApiDropdown<String>(
-                                key: const ValueKey('whoseMobileField'),
-                                labelText: t?.whoseMobileLabel ??
-                                    'Whose mobile no.',
+                              IgnorePointer(
+                                child: ApiDropdown<String>(
+                                  key: const ValueKey('whoseMobileField'),
+                                  labelText: t?.whoseMobileLabel ??
+                                      'Whose mobile no.',
                                 items: const [
                                   'Self',
                                   'Wife',
@@ -238,12 +251,11 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                       return s;
                                   }
                                 },
-                                value: state.whoseMobile.isEmpty ? null : state
-                                    .whoseMobile,
-                                onChanged: (v) =>
-                                    context.read<EligibleCouleUpdateBloc>().add(
-                                        WhoseMobileChanged(v ?? '')),
-                                hintText: t?.select ?? 'Select',
+                                  value: state.whoseMobile.isEmpty ? null : state
+                                      .whoseMobile,
+                                  onChanged: null, // Readonly
+                                  hintText: t?.select ?? 'Select',
+                                ),
                               ),
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
@@ -261,13 +273,15 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 onChanged: (v) =>
                                     context.read<EligibleCouleUpdateBloc>().add(
                                         MobileNoChanged(v)),
+                                readOnly: true,
                               ),
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
                                 height: 0,),
-                              ApiDropdown<String>(
-                                key: const ValueKey('religionField'),
-                                labelText: t?.religionLabel ?? 'Religion',
+                              IgnorePointer(
+                                child: ApiDropdown<String>(
+                                  key: const ValueKey('religionField'),
+                                  labelText: t?.religionLabel ?? 'Religion',
                                 items: const [
                                   'Do not want to disclose',
                                   'Hindu',
@@ -279,13 +293,12 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                   'Parsi',
                                   'Other'
                                 ],
-                                getLabel: (s) => s,
-                                value: state.religion.isEmpty ? null : state
-                                    .religion,
-                                onChanged: (v) =>
-                                    context.read<EligibleCouleUpdateBloc>().add(
-                                        ReligionChanged(v ?? '')),
-                                hintText: t?.select ?? 'Select',
+                                  getLabel: (s) => s,
+                                  value: state.religion.isEmpty ? null : state
+                                      .religion,
+                                  onChanged: null, // Readonly
+                                  hintText: t?.select ?? 'Select',
+                                ),
                               ),
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,

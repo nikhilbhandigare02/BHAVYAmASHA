@@ -24,11 +24,41 @@ class _UpdatedEligibleCoupleListScreenState
   final TextEditingController _search = TextEditingController();
   int _tab = 0; // 0 = All, 1 = Protected, 2 = Unprotected
   List<Map<String, dynamic>> _households = [];
+  Map<String, dynamic>? _initialData;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get the arguments passed from the previous screen
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is Map<String, dynamic>) {
+      _initialData = args;
+      print('📋 Received initial data: ${_initialData?.keys}');
+      _processInitialData();
+    }
     _loadCouples();
+  }
+
+  void _processInitialData() {
+    if (_initialData == null) return;
+    
+    print('🔍 Processing initial data: ${_initialData?.keys}');
+    
+    // Here you can process the initial data as needed
+    // For example, you might want to pre-fill a form or filter the list
+    // based on the passed data
+    
+    // If the data contains a search term, set it in the search controller
+    if (_initialData?['searchTerm'] != null) {
+      _search.text = _initialData!['searchTerm'].toString();
+    }
+    
+    // If you need to select a specific tab based on the data
+    if (_initialData?['status'] == 'Protected') {
+      _tab = 1;
+    } else if (_initialData?['status'] == 'Unprotected') {
+      _tab = 2;
+    }
   }
 
   Future<void> _loadCouples() async {

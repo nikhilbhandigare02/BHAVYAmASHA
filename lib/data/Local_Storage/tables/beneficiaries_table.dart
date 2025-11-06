@@ -8,7 +8,7 @@ class BeneficiariesTable {
     household_ref_key TEXT,
     unique_key TEXT,
     beneficiary_state TEXT,
-    pregnancy_count INTEGER,
+    pregnancy_count INTEGER, 
     beneficiary_info TEXT,
     geo_location TEXT,
     spouse_key TEXT,

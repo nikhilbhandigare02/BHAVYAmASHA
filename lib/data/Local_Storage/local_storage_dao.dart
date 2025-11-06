@@ -263,7 +263,7 @@ class LocalStorageDao {
         where: 'is_deleted = ?',
         whereArgs: [0],
         orderBy: 'created_date_time DESC');
-      print('Found [1m${rows.length}[0m beneficiaries');
+      print('Found ${rows.length} beneficiaries');
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
         dynamic safeJsonDecode(String? jsonString) {
@@ -296,6 +296,117 @@ class LocalStorageDao {
       print('Error getting beneficiaries: $e');
       print('Stack trace: $stackTrace');
       rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getDeathRecords() async {
+    try {
+      final db = await _db;
+      print('Fetching death records from database...');
+      
+      // Query beneficiaries where is_death = 1 and is_deleted = 0
+      final rows = await db.query(
+        'beneficiaries',
+        where: 'is_death = ? AND is_deleted = ?',
+        whereArgs: [1, 0],
+        orderBy: 'created_date_time DESC',
+      );
+      
+      print('Found ${rows.length} death records');
+      
+      // Process and format the death records
+      final result = <Map<String, dynamic>>[];
+      
+      for (final row in rows) {
+        try {
+          final mapped = Map<String, dynamic>.from(row);
+          
+          // Helper function to safely decode JSON strings
+          dynamic safeJsonDecode(String? jsonString) {
+            if (jsonString == null || jsonString.isEmpty) return {};
+            try {
+              return jsonDecode(jsonString);
+            } catch (e) {
+              print('Error decoding JSON: $e');
+              return {};
+            }
+          }
+          
+          // Decode JSON fields
+          final beneficiaryInfo = safeJsonDecode(mapped['beneficiary_info']);
+          final deathDetails = safeJsonDecode(mapped['death_details']);
+          
+          // Extract head details or use beneficiary_info directly
+          final headDetails = beneficiaryInfo is Map 
+              ? (beneficiaryInfo['head_details'] ?? {}) 
+              : {};
+          
+          // Format the death record
+          final deathRecord = {
+            'id': mapped['id'],
+            'hhId': mapped['household_ref_key'],
+            'name': headDetails['headName'] ?? headDetails['memberName'] ?? 'Unknown',
+            'age/gender': _getAgeGender(headDetails),
+            'date': _formatDeathDate(deathDetails),
+            'place': deathDetails['placeOfDeath'] ?? 'Not specified',
+            'status': headDetails['maritalStatus'] ?? 'Unknown',
+            'beneficiary_info': beneficiaryInfo,
+            'death_details': deathDetails,
+          };
+          
+          result.add(deathRecord);
+          
+        } catch (e) {
+          print('Error processing death record: $e');
+        }
+      }
+      
+      print('Successfully processed ${result.length} death records');
+      return result;
+      
+    } catch (e, stackTrace) {
+      print('Error getting death records: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+  
+  String _getAgeGender(Map<String, dynamic> headDetails) {
+    final dob = headDetails['dob'];
+    if (dob == null) return 'Unknown';
+    
+    try {
+      final birthDate = DateTime.tryParse(dob);
+      if (birthDate == null) return 'Unknown';
+      
+      final now = DateTime.now();
+      int age = now.year - birthDate.year;
+      
+      // Adjust age if birthday hasn't occurred yet this year
+      if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+        age--;
+      }
+      
+      final gender = (headDetails['gender'] ?? '').toString().toLowerCase();
+      final genderDisplay = gender == 'm' ? 'Male' : gender == 'f' ? 'Female' : 'Unknown';
+      
+      return '$age Y / $genderDisplay';
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
+  
+  String _formatDeathDate(Map<String, dynamic> deathDetails) {
+    final dateStr = deathDetails['dateOfDeath'];
+    if (dateStr == null) return 'Date not available';
+    
+    try {
+      final date = DateTime.tryParse(dateStr);
+      if (date == null) return dateStr; // Return original string if parsing fails
+      
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    } catch (e) {
+      return dateStr; // Return original string if any error occurs
     }
   }
 }
