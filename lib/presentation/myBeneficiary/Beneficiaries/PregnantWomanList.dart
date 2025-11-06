@@ -72,7 +72,6 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
     final statusFlag = person['pregnancyStatus']?.toString().toLowerCase();
     return flag == 'yes' || typoFlag == 'yes' || statusFlag == 'pregnant';
   }
-
   Map<String, dynamic> _formatCardData(Map<String, dynamic> row, Map<String, dynamic> person) {
     final name = person['memberName']?.toString() ?? person['headName']?.toString() ?? '';
     final gender = person['gender']?.toString().toLowerCase();

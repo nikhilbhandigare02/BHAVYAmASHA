@@ -96,7 +96,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                 children: [
                   Expanded(
                     child: RadioListTile<MigrationSplitOption>(
-                      title: Text('Migration'),
+                      title: Text('Migration',style: TextStyle(fontSize: 15.sp),),
                       value: MigrationSplitOption.migration,
                       groupValue: _selectedOption,
                       onChanged: (value) {
@@ -116,7 +116,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                   ),
                   Expanded(
                     child: RadioListTile<MigrationSplitOption>(
-                      title: Text('Split'),
+                      title: Text('Split',style: TextStyle(fontSize: 15.sp)),
                       value: MigrationSplitOption.split,
                       groupValue: _selectedOption,
                       onChanged: (value) {

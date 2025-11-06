@@ -350,7 +350,7 @@ class _HouseHold_BeneficiaryScreenState
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      data['hhId'] ?? '',
+                      (data['hhId'] != null && data['hhId'].toString().length > 11) ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w600,
@@ -388,7 +388,11 @@ class _HouseHold_BeneficiaryScreenState
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('Registration Type', data['RegitrationType'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryID'] ?? '')),
+                      Expanded(child: _rowText('Beneficiary ID',
+  data['Relation'] == 'Head'
+    ? ((data['_raw']['unique_key']?.toString().length ?? 0) > 11 ? data['_raw']['unique_key'].toString().substring(data['_raw']['unique_key'].toString().length - 11) : (data['_raw']['unique_key']?.toString() ?? ''))
+    : ((data['_raw']['spouse_key']?.toString().length ?? 0) > 11 ? data['_raw']['spouse_key'].toString().substring(data['_raw']['spouse_key'].toString().length - 11) : (data['_raw']['spouse_key']?.toString() ?? ''))
+)),
                     ],
                   ),
                   const SizedBox(height: 10),
