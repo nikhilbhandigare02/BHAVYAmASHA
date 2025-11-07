@@ -62,6 +62,7 @@ import '../../../presentation/RegisterNewHouseHold/AddNewFamilyMember/bloc/addne
 import '../../../presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 import '../../../presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
 import '../../../presentation/ResetPassword/ResetPassword.dart';
+import '../../../presentation/AllHouseHold/updateMemberDetail/UpdateMemberDetail.dart';
 import '../../../presentation/Routine/RoutineScreen.dart' show Routinescreen;
 import '../../../presentation/SyncStatus/SyncStatusScreen.dart';
 import '../../../presentation/Training/ReceivedTraining/RecievedTraining.dart' show TrainingReceived;
@@ -225,6 +226,14 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const DeseasedList(),);
       case Route_Names.ChildTrackingDueListForm:
         return MaterialPageRoute(builder: (context) => const ChildTrackingDueListForm(),);
+      case Route_Names.updateMemberDetail:
+        final args = setting.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (context) => UpdateMemberDetailScreen(
+            memberId: args['memberId'],
+           // isEdit: args['isEdit'] ?? false,
+          ),
+        );
       case Route_Names.NationalProgramsScreen :
         return MaterialPageRoute(builder: (context) =>  NationalProgramsScreen (),);
       case Route_Names.addFamilyHead:

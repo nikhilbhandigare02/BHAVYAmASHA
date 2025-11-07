@@ -225,36 +225,65 @@ class _HouseHold_BeneficiaryScreenState
     }
   }
 
-  // Helper method to get the head's name
-  String _getHeadName() {
-    try {
-      final head = _beneficiaries.firstWhere(
-        (b) => b['Relation'] == 'Head',
-        orElse: () => {'Name': 'Not Available'},
-      );
-      return head['Name']?.toString() ?? 'Not Available';
-    } catch (e) {
-      return 'Not Available';
-    }
-  }
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
     String age = 'N/A';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
+    
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
-      DateTime? dob;
       try {
-        dob = DateTime.tryParse(dobRaw.toString());
-      } catch (_) {}
-      if (dob != null) {
-        age = '${DateTime.now().difference(dob).inDays ~/ 365}';
+        // Handle different date formats
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+        
+        // Try parsing as DateTime first (for ISO format)
+        dob = DateTime.tryParse(dateStr);
+        
+        // If that fails, try parsing as timestamp (milliseconds since epoch)
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            // If the number is too large, it's probably in milliseconds, otherwise seconds
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+        
+        // If we have a valid date, calculate age
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          
+          // Adjust for month and day to handle cases where birthday hasn't occurred yet this year
+          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+            years--;
+          }
+          
+          // Don't show negative ages
+          age = years >= 0 ? years.toString() : '0';
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
       }
     }
-    String displayGender = gender == 'm' || gender == 'male'
-        ? 'Male'
-        : gender == 'f' || gender == 'female'
-            ? 'Female'
-            : 'Other';
+    
+    // Format gender
+    String displayGender;
+    switch (gender) {
+      case 'm':
+      case 'male':
+        displayGender = 'Male';
+        break;
+      case 'f':
+      case 'female':
+        displayGender = 'Female';
+        break;
+      default:
+        displayGender = 'Other';
+    }
+    
     return '$age Y | $displayGender';
   }
 
@@ -444,7 +473,7 @@ class _HouseHold_BeneficiaryScreenState
           (b) => b['Relation'] == 'Spouse',
           orElse: () => {'Name': '', 'Gender': ''},
         );
-        
+
         // Format gender to standard format (Male/Female/Other)
         String formatGender(dynamic gender) {
           if (gender == null) return 'Other';
@@ -453,13 +482,16 @@ class _HouseHold_BeneficiaryScreenState
           if (g == 'f' || g == 'female') return 'Female';
           return 'Other';
         }
-        
+
+
+        final memberId = int.tryParse(widget.hhId ?? '0') ?? 0;
+
         Navigator.pushNamed(
           context,
-          Route_Names.addFamilyMember,
+          Route_Names.updateMemberDetail,
           arguments: {
-            'hhId': widget.hhId,
-            'isEdit': false,
+            'memberId': memberId, // Pass the parsed integer ID
+            'isEdit': true, // Set to true for editing existing member
           },
         );
       },
@@ -502,8 +534,8 @@ class _HouseHold_BeneficiaryScreenState
 
                       Expanded(
                         child: Text(
-                          (data['hhId'] != null && data['hhId'].toString().length > 11) 
-                              ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) 
+                          (data['hhId'] != null && data['hhId'].toString().length > 11)
+                              ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
                               : (data['hhId']?.toString() ?? ''),
                           style: TextStyle(
                             color: primary,
@@ -618,7 +650,6 @@ class _HouseHold_BeneficiaryScreenState
       ],
     );
   }
-
   Widget _infoColumn(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
