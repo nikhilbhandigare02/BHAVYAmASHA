@@ -2885,6 +2885,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
+  String get formSavedTitle => 'Form has been saved successfully';
+
+  @override
+  String get pregnancyAddedToAncMessage => 'Pregnant beneficiary has been added to antenatal care (ANC) list';
+
+  @override
+  String get okButton => 'OK';
+
+  @override
   String get exclusiveBreastfeedingStartedLabel => 'Has exclusive breastfeeding started?*';
 
   @override
@@ -3350,7 +3359,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aesJeDataSaved => 'AES/JE data saved successfully!';
 
   @override
-
   String get ambProgram => 'AMB Eradication Program';
 
   @override
@@ -3397,6 +3405,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get niddcpDataSaved => 'NIDDCP data saved successfully!';
+
+  @override
   String get trackingDueTitle => 'Tracking Due';
 
   @override

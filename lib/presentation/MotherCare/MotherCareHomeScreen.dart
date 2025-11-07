@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
@@ -16,6 +18,125 @@ class Mothercarehomescreen extends StatefulWidget {
 }
 
 class _MothercarehomescreenState extends State<Mothercarehomescreen> {
+  int _ancVisitCount = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEligiblePregnantWomenCount();
+  }
+
+  Future<void> _loadEligiblePregnantWomenCount() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      int count = 0;
+
+      for (final row in rows) {
+        try {
+          // Check if is_family_planning is set
+          final isFamilyPlanning = row['is_family_planning'] == 1 || 
+                                 row['is_family_planning'] == '1' ||
+                                 (row['is_family_planning']?.toString().toLowerCase() == 'true');
+          
+          if (!isFamilyPlanning) continue;
+
+          // Parse the beneficiary info
+          final dynamic rawInfo = row['beneficiary_info'];
+          if (rawInfo == null) continue;
+
+          Map<String, dynamic> info = {};
+          try {
+            info = rawInfo is String ? jsonDecode(rawInfo) as Map<String, dynamic>
+                : Map<String, dynamic>.from(rawInfo as Map);
+          } catch (e) {
+            continue;
+          }
+
+          // Process head and spouse
+          final head = (info['head_details'] is Map)
+              ? Map<String, dynamic>.from(info['head_details'] as Map)
+              : <String, dynamic>{};
+
+          final spouse = (info['spouse_details'] is Map)
+              ? Map<String, dynamic>.from(info['spouse_details'] as Map)
+              : <String, dynamic>{};
+
+          // Check if head is eligible pregnant woman
+          if (_isEligiblePregnantWoman(head, spouse)) {
+            count++;
+          }
+
+          // Check if spouse is eligible pregnant woman
+          if (spouse.isNotEmpty && _isEligiblePregnantWoman(spouse, head)) {
+            count++;
+          }
+        } catch (e) {
+          print('Error processing beneficiary: $e');
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _ancVisitCount = count;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading eligible pregnant women count: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  bool _isEligiblePregnantWoman(Map<String, dynamic> person, Map<String, dynamic> otherPerson) {
+    try {
+      final gender = (person['gender']?.toString().toLowerCase()?.trim() ?? '');
+      
+      final maritalStatus = (person['maritalStatus']?.toString().toLowerCase()?.trim() ??
+          person['marital_status']?.toString().toLowerCase()?.trim() ??
+          otherPerson['maritalStatus']?.toString().toLowerCase()?.trim() ??
+          otherPerson['marital_status']?.toString().toLowerCase()?.trim() ??
+          '');
+
+      final isPregnant = person['isPregnant']?.toString().toLowerCase() == 'true' ||
+          person['isPregnant']?.toString().toLowerCase() == 'yes' ||
+          person['pregnancyStatus']?.toString().toLowerCase() == 'pregnant';
+
+      final dob = person['dob'] ?? person['dateOfBirth'];
+      final age = _calculateAge(dob);
+
+      return (gender == 'f' || gender == 'female') &&
+          (maritalStatus == 'married' || maritalStatus == 'm') &&
+          (age != null && age >= 15 && age <= 49) &&
+          isPregnant;
+    } catch (e) {
+      print('Error checking eligibility: $e');
+      return false;
+    }
+  }
+
+  int? _calculateAge(dynamic dob) {
+    if (dob == null) return null;
+    try {
+      String dateStr = dob.toString();
+      if (dateStr.contains('T')) {
+        dateStr = dateStr.split('T')[0];
+      }
+      final birthDate = DateTime.tryParse(dateStr);
+      if (birthDate == null) return null;
+
+      final now = DateTime.now();
+      int age = now.year - birthDate.year;
+      if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+        age--;
+      }
+      return age;
+    } catch (e) {
+      return null;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -54,7 +175,7 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
                   _FeatureCard(
                     width: cardWidth,
                     title: (l10n?.motherAncVisitTitle ?? 'ANC Visit').toString(),
-                    count: 6,
+                    count: _isLoading ? 0 : _ancVisitCount,
                     image: 'assets/images/pregnant-woman.png',
                     onClick: () {
                       Navigator.pushNamed(

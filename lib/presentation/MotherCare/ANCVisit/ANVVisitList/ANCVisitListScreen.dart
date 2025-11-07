@@ -117,37 +117,30 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
   Map<String, dynamic>? _processPerson(Map<String, dynamic> row, Map<String, dynamic> person, Map<String, dynamic> otherPerson, {required bool isHead}) {
     try {
-      // Extract and normalize data
       final gender = (person['gender']?.toString().toLowerCase()?.trim() ?? '');
 
-      // Get marital status with fallbacks (check both person and otherPerson)
       String maritalStatus = (person['maritalStatus']?.toString().toLowerCase()?.trim() ??
           person['marital_status']?.toString().toLowerCase()?.trim() ??
           otherPerson['maritalStatus']?.toString().toLowerCase()?.trim() ??
           otherPerson['marital_status']?.toString().toLowerCase()?.trim() ??
           '');
 
-      // Check pregnancy status with multiple possible field names
       final isPregnant = person['isPregnant']?.toString().toLowerCase() == 'true' ||
           person['isPregnant']?.toString().toLowerCase() == 'yes' ||
           person['pregnancyStatus']?.toString().toLowerCase() == 'pregnant';
 
-      // Calculate age from DOB
       final dob = person['dob'] ?? person['dateOfBirth'];
       final age = _calculateAge(dob);
 
-      // Get name with fallbacks
       final name = (person['name'] ??
           person['memberName'] ??
           person['headName'] ??
           person['beneficiary_name'] ??
           'Unknown').toString().trim();
 
-      // Debug logging
       print('ℹ️ Processing person: $name');
       print('  - Gender: $gender, Marital Status: $maritalStatus, Age: $age, Pregnant: $isPregnant');
 
-      // Check eligibility criteria
       final isEligible = (gender == 'f' || gender == 'female') &&
           (maritalStatus == 'married' || maritalStatus == 'm') &&
           (age != null && age >= 15 && age <= 49) &&
@@ -165,7 +158,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
       print('✅ Found eligible beneficiary: $name');
 
-      // Format the data for display
       return _formatCoupleData(row, person, otherPerson, isHead: isHead);
     } catch (e, stackTrace) {
       print('⚠️ Error processing person: $e');
@@ -173,8 +165,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       return null;
     }
   }
-
-  // This method is no longer needed as we've moved the logic to _processPerson
 
   Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
     try {
@@ -185,58 +175,44 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       final createdDate = row['created_date_time']?.toString() ?? '';
       final info = Map<String, dynamic>.from((row['beneficiary_info'] is Map ? row['beneficiary_info'] : const {}) as Map);
 
-      // Extract name with multiple fallbacks
       final name = (female['name'] ??
           female['memberName'] ??
           female['headName'] ??
           female['beneficiary_name'] ??
           'Unknown').toString().trim();
 
-      // Extract gender with normalization
       final gender = (female['gender']?.toString().toLowerCase()?.trim() ?? '');
       final displayGender = gender == 'f' ? 'Female' :
       gender == 'm' ? 'Male' :
       gender == 'female' ? 'Female' :
       gender == 'male' ? 'Male' : 'Other';
 
-      // Calculate age with multiple possible DOB fields
       final dob = female['dob'] ?? female['dateOfBirth'];
       final age = _calculateAge(dob);
 
-      // Extract Rich ID with multiple possible field names
       final richId = (female['RichID'] ??
           female['richId'] ??
           female['abhaId'] ??
           female['abha_id'] ?? '').toString();
 
-      // Extract mobile number with multiple possible field names
       final mobile = (female['mobileNo'] ??
           female['mobile'] ??
           female['phoneNumber'] ??
           female['phone_number'] ?? '').toString();
 
-      // Extract husband's name based on whether this is the head or spouse
       String husbandName = '';
       if (isHead) {
-        // If this is the head, get spouse's name
         husbandName = (headOrSpouse['memberName'] ??
             headOrSpouse['spouseName'] ??
             headOrSpouse['name'] ?? '').toString().trim();
       } else {
-        // If this is the spouse, get head's name
         husbandName = (headOrSpouse['headName'] ??
             headOrSpouse['memberName'] ??
             headOrSpouse['name'] ?? '').toString().trim();
       }
 
-      // Get pregnancy status
-      final isPregnant = female['isPregnant']?.toString().toLowerCase() == 'true' ||
-          female['isPregnant']?.toString().toLowerCase() == 'yes';
 
-      // Get EDD if available
-      final edd = female['edd']?.toString() ?? '';
 
-      // Get children details if available
       Map<String, dynamic>? childrenSummary;
       final dynamic childrenRaw = info['children_details'];
       if (childrenRaw is Map) {
@@ -310,28 +286,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     }
   }
 
-  List<Map<String, dynamic>> _filterCouples(List<Map<String, dynamic>> couples, String query) {
-    // First filter by eligibility (should already be filtered, but just in case)
-    final eligibleCouples = couples.where((couple) {
-      final gender = (couple['gender']?.toString().toLowerCase() ?? '');
-      final age = couple['age'] is int ? couple['age'] : _calculateAge(couple['dob']);
-      final maritalStatus = (couple['maritalStatus']?.toString().toLowerCase() ?? '');
-
-      return (gender == 'f' || gender == 'female') &&
-          (maritalStatus == 'married' || maritalStatus == 'm') &&
-          (age != null && age >= 15 && age <= 49);
-    }).toList();
-
-    // Then apply search filter
-    if (query.isEmpty) return eligibleCouples;
-
-    final lowerQuery = query.toLowerCase();
-    return eligibleCouples.where((couple) {
-      return (couple['Name']?.toString().toLowerCase().contains(lowerQuery) ?? false) ||
-          (couple['hhId']?.toString().toLowerCase().contains(lowerQuery) ?? false) ||
-          (couple['mobileno']?.toString().toLowerCase().contains(lowerQuery) ?? false);
-    }).toList();
-  }
 
 
   @override

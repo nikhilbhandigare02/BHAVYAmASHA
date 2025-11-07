@@ -2885,6 +2885,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
+  String get formSavedTitle => 'फॉर्म सफलतापूर्वक सहेजा गया';
+
+  @override
+  String get pregnancyAddedToAncMessage => 'गर्भवती लाभार्थी को प्रसव पूर्व देखभाल (एएनसी) सूची में जोड़ दिया गया है';
+
+  @override
+  String get okButton => 'ठीक है';
+
+  @override
   String get exclusiveBreastfeedingStartedLabel => 'क्या केवल स्तनपान की शुरुआत हो गई है? *';
 
   @override
@@ -3396,6 +3405,8 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get niddcpDataSaved => 'एनआईडीडीसीपी डेटा सफलतापूर्वक सहेजा गया!';
+
+  @override
   String get trackingDueTitle => 'Tracking Due';
 
   @override
