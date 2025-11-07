@@ -8,6 +8,7 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../data/Local_Storage/database_provider.dart';
 import '../../HomeScreen/HomeScreen.dart';
 import '../MigrtionSplitScreen/MigrationSplitScreen.dart';
 
@@ -29,8 +30,6 @@ class HouseHold_BeneficiaryScreen extends StatefulWidget {
 class _HouseHold_BeneficiaryScreenState
     extends State<HouseHold_BeneficiaryScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
-
-
   late List<Map<String, dynamic>> _filtered;
   List<Map<String, dynamic>> _beneficiaries = [];
   bool _isLoading = true;
@@ -41,6 +40,7 @@ class _HouseHold_BeneficiaryScreenState
   void initState() {
     super.initState();
     _filtered = [];
+    _beneficiaries = [];
     _loadBeneficiaries();
     _searchCtrl.addListener(_onSearchChanged);
   }
@@ -53,90 +53,164 @@ class _HouseHold_BeneficiaryScreenState
   }
 
   Future<void> _loadBeneficiaries() async {
-    if (mounted) {
-      setState(() => _isLoading = true);
-    }
+    if (!mounted) return;
+    
+    setState(() => _isLoading = true);
 
     try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      debugPrint('Fetched ${rows.length} beneficiaries from LocalStorageDao');
+      final db = await DatabaseProvider.instance.database;
+      final List<Map<String, dynamic>> rows = await db.query(
+        'beneficiaries',
+        where: widget.hhId != null ? 'household_ref_key = ?' : null,
+        whereArgs: widget.hhId != null ? [widget.hhId] : null,
+      );
 
-      final List<Map<String, dynamic>> beneficiaries = [];
+      final beneficiaries = <Map<String, dynamic>>[];
       String? headerVillage;
       String? headerMohalla;
 
       for (final row in rows) {
-        final rowHhId = row['household_ref_key']?.toString() ?? '';
-        final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-        final headHouseNo = head['houseNo']?.toString() ?? '';
-        // Show if either hhId or houseNo matches (if both are provided, both must match)
-        final matchByHhId = widget.hhId != null && rowHhId == widget.hhId;
-        final matchByHouseNo = widget.houseNo != null && headHouseNo == widget.houseNo;
-        final match = (widget.hhId != null && widget.houseNo != null)
-          ? (matchByHhId && matchByHouseNo)
-          : (matchByHhId || matchByHouseNo);
-        if (match) {
-          headerVillage = head['village']?.toString();
-          headerMohalla = head['mohalla']?.toString();
-          // Head card
-          if (head.isNotEmpty) {
-            final gender = (head['gender']?.toString().toLowerCase() ?? '');
-            final regType = 'General';
-            final isFemale = gender == 'female' || gender == 'f';
-            final isChild = regType.toLowerCase() == 'child';
-            final richId = head['RichIDChanged']?.toString() ?? head['richIdChanged']?.toString() ?? '';
-            final card = {
-              'hhId': rowHhId,
-              'RegitrationDate': row['created_date_time']?.toString() ?? '',
-              'RegitrationType': regType,
-              'BeneficiaryID': row['id']?.toString() ?? '',
-              'Name': head['headName']?.toString() ?? '',
-              'Age|Gender': _formatAgeGender(head['dob'], head['gender']),
-              'Mobileno.': head['mobileNo']?.toString() ?? '',
-              'RelationName': spouse['memberName']?.toString() ?? '',
-              'Relation': 'Head',
-              'MaritalStatus': head['maritalStatus']?.toString() ?? '',
-              '_raw': row,
-            };
-            if (isFemale || isChild) {
-              card['Rich_id'] = richId;
-            }
-            beneficiaries.add(card);
+        final rowHhId = row['household_ref_key']?.toString();
+        if (rowHhId == null) continue;
+
+        final info = row['beneficiary_info'] is String
+            ? jsonDecode(row['beneficiary_info'] as String)
+            : row['beneficiary_info'];
+
+        if (info is! Map) continue;
+
+        final head = info['head_details'] is Map ? info['head_details'] : {};
+        final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
+        final children = info['children_details'] is Map ? info['children_details'] : {};
+        final members = info['member_details'] is List ? info['member_details'] : [];
+
+        headerVillage ??= info['village']?.toString();
+        headerMohalla ??= info['mohalla']?.toString();
+
+        // Helper function to create a card
+        void addCard(Map<String, dynamic> person, String relation, {bool isChild = false}) {
+          if (person.isEmpty) return;
+          
+          final gender = (person['gender']?.toString().toLowerCase() ?? '');
+          final isFemale = gender == 'female' || gender == 'f';
+          final richId = person['RichIDChanged']?.toString() ?? 
+                         person['richIdChanged']?.toString() ?? 
+                         person['richId']?.toString() ?? '';
+          
+          // Format the card data to match the existing format
+          // Get name from multiple possible fields
+          final name = person['memberName']?.toString() ?? 
+                      person['name']?.toString() ??
+                      person['headName']?.toString() ?? // For head
+                      person['member_name']?.toString() ??
+                      person['memberNameLocal']?.toString() ??
+                      '';
+          
+          final card = <String, dynamic>{
+            'hhId': rowHhId,
+            'RegitrationDate': row['created_date_time']?.toString() ?? '',
+            'RegitrationType': isChild ? 'Child' : 'General',
+            'BeneficiaryID': row['id']?.toString() ?? '',
+            'Name': name,
+            'Age|Gender': _formatAgeGender(person['dob'], person['gender']),
+            'Mobileno.': person['mobileNo']?.toString() ?? 
+                        person['mobile']?.toString() ??
+                        person['mobile_number']?.toString() ??
+                        '',
+            'Relation': relation,
+            'MaritalStatus': person['maritalStatus']?.toString() ?? 
+                           person['marital_status']?.toString() ??
+                           '',
+            'FatherName': person['fatherName']?.toString() ?? 
+                         person['father_name']?.toString() ??
+                         (relation == 'Head' ? '' : head['headName']?.toString() ?? ''),
+            'MotherName': person['motherName']?.toString() ?? 
+                         person['mother_name']?.toString() ??
+                         (relation == 'Spouse' ? '' : spouse['memberName']?.toString() ?? ''),
+            '_raw': row,  // Keep the raw row data for reference
+            '_memberData': person,  // Store the full member data
+          };
+
+          // For children, show father's name from head if not available
+          if (isChild && person['fatherName'] == null) {
+            card['FatherName'] = head['headName']?.toString() ?? '';
           }
-          // Spouse card (if exists)
-          if (spouse.isNotEmpty) {
-            final gender = (spouse['gender']?.toString().toLowerCase() ?? '');
-            final regType = 'General';
-            final isFemale = gender == 'female' || gender == 'f';
-            final isChild = regType.toLowerCase() == 'child';
-            final richId = spouse['RichIDChanged']?.toString() ?? spouse['richIdChanged']?.toString() ?? '';
-            final card = {
-              'hhId': rowHhId,
-              'RegitrationDate': row['created_date_time']?.toString() ?? '',
-              'RegitrationType': regType,
-              'BeneficiaryID': row['id']?.toString() ?? '',
-              'Name': spouse['memberName']?.toString() ?? '',
-              'Age|Gender': _formatAgeGender(spouse['dob'], spouse['gender']),
-              'Mobileno.': spouse['mobileNo']?.toString() ?? '',
-              'RelationName': head['headName']?.toString() ?? '',
-              'Relation': 'Spouse',
-              'MaritalStatus': spouse['maritalStatus']?.toString() ?? '',
-              '_raw': row,
-            };
-            if (isFemale || isChild) {
-              card['Rich_id'] = richId;
-            }
-            beneficiaries.add(card);
+
+          // For children, show mother's name from spouse if not available
+          if (isChild && person['motherName'] == null) {
+            card['MotherName'] = spouse['memberName']?.toString() ?? '';
           }
-          break;
+
+          // Add RICH ID for females and children
+          if (isFemale || isChild) {
+            card['Rich_id'] = richId;
+          }
+          
+          // Set relation name for spouse display
+          if (relation == 'Head' && spouse.isNotEmpty) {
+            card['RelationName'] = spouse['memberName']?.toString() ?? spouse['name']?.toString() ?? '';
+          } else if (relation == 'Spouse' && head.isNotEmpty) {
+            card['RelationName'] = head['headName']?.toString() ?? head['name']?.toString() ?? '';
+          }
+          
+          beneficiaries.add(card);
+        }
+
+        // Add head of household
+        if (head.isNotEmpty) {
+          addCard(head, 'Head');
+        }
+        
+        // Add spouse
+        if (spouse.isNotEmpty) {
+          addCard(spouse, 'Spouse');
+        }
+        
+        // Add children from children_details
+        if (children.isNotEmpty) {
+          final totalChildren = (children['totalLive'] is num ? children['totalLive'] : 0) as int;
+          if (totalChildren > 0) {
+            for (int i = 0; i < totalChildren; i++) {
+              final child = {
+                'name': 'Child ${i + 1}',
+                'gender': i < (children['totalMale'] ?? 0) ? 'Male' : 'Female',
+                'fatherName': head['headName']?.toString() ?? '',
+                'motherName': spouse['memberName']?.toString() ?? '',
+                'memberType': 'Child',
+                'dob': null, // Add default values for required fields
+                'mobileNo': '',
+                'maritalStatus': '',
+              };
+              addCard(child, 'Child', isChild: true);
+            }
+          }
+        }
+        
+        // Add other family members from member_details
+        if (members.isNotEmpty && members is List) {
+          for (final member in members) {
+            if (member is Map) {
+              final memberData = Map<String, dynamic>.from(member);
+              // Ensure all required fields exist
+              memberData['memberName'] = memberData['memberName'] ?? memberData['name'] ?? '';
+              memberData['gender'] = memberData['gender'] ?? '';
+              memberData['dob'] = memberData['dob'] ?? '';
+              memberData['mobileNo'] = memberData['mobileNo'] ?? '';
+              memberData['maritalStatus'] = memberData['maritalStatus'] ?? '';
+              
+              addCard(
+                memberData,
+                memberData['memberType'] == 'Child' ? 'Child' : 'Member',
+                isChild: memberData['memberType'] == 'Child',
+              );
+            }
+          }
         }
       }
 
       if (mounted) {
         setState(() {
-          _beneficiaries = beneficiaries;
+          _beneficiaries = List<Map<String, dynamic>>.from(beneficiaries);
           _filtered = List<Map<String, dynamic>>.from(beneficiaries);
           _isLoading = false;
           _village = headerVillage;
@@ -148,6 +222,19 @@ class _HouseHold_BeneficiaryScreenState
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  // Helper method to get the head's name
+  String _getHeadName() {
+    try {
+      final head = _beneficiaries.firstWhere(
+        (b) => b['Relation'] == 'Head',
+        orElse: () => {'Name': 'Not Available'},
+      );
+      return head['Name']?.toString() ?? 'Not Available';
+    } catch (e) {
+      return 'Not Available';
     }
   }
 
@@ -172,6 +259,8 @@ class _HouseHold_BeneficiaryScreenState
   }
 
   void _onSearchChanged() {
+    if (!mounted) return;
+    
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
@@ -190,6 +279,8 @@ class _HouseHold_BeneficiaryScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    if (!mounted) return const SizedBox.shrink();
+    
     return Scaffold(
       appBar: AppHeader(
         screenTitle: widget.houseNo != null
@@ -399,31 +490,40 @@ class _HouseHold_BeneficiaryScreenState
                 color: AppColors.background,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
               ),
-              padding: const EdgeInsets.all(4),
-              child: Row(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.home, color: Colors.black54, size: 18),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      (data['hhId'] != null && data['hhId'].toString().length > 11) ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14.sp,
+
+                  Row(
+                    children: [
+                      const Icon(Icons.home, color: AppColors.primary, size: 16),
+                      const SizedBox(width: 6),
+
+                      Expanded(
+                        child: Text(
+                          (data['hhId'] != null && data['hhId'].toString().length > 11) 
+                              ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) 
+                              : (data['hhId']?.toString() ?? ''),
+                          style: TextStyle(
+                            color: primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.sp,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.asset(
-                      'assets/images/sync.png',
-                      width: 7.w,
-                      height: 7.w,
-                      fit: BoxFit.cover,
-                    ),
+                      const SizedBox(width: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.asset(
+                          'assets/images/sync.png',
+                          width: 6.w,
+                          height: 6.w,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -467,30 +567,24 @@ class _HouseHold_BeneficiaryScreenState
                       child: _rowText('Rich_id', data['Rich_id'] ?? ''),
                     ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _rowText(
-                          data['Relation'] == 'Head' 
-                              ? 'Wife Name'
-                              : data['Relation'] == 'Spouse' 
-                                  ? 'Husband Name' 
-                                  : data['Relation'] == 'Wife' 
-                                      ? 'Husband Name'
-                                      : 'Father Name', 
-                          data['RelationName'] ?? ''
-                        ),
+                  // Show Father's name for children, otherwise show spouse name
+                  if (data['Relation'] == 'Child')
+                    _rowText(
+                      'Father\'s Name',
+                      data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+                    ),
+                  if (data['Relation'] == 'Child' && data['MotherName']?.isNotEmpty == true)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _rowText(
+                        'Mother\'s Name',
+                        data['MotherName'] ?? 'N/A',
                       ),
-                      const SizedBox(width: 12),
-                      if (data['MotherName'] != null && data['MotherName'] != 'N/A')
-                        Expanded(
-                          child: _rowText(
-                            'Mother Name',
-                            data['MotherName'] ?? 'N/A',
-                          ),
-                        ),
-                    ],
-                  ),
+                    ),
+                  if (data['Relation'] == 'Head' && data['RelationName']?.isNotEmpty == true)
+                    _rowText('Wife\'s Name', data['RelationName'] ?? 'N/A'),
+                  if (data['Relation'] == 'Spouse' && data['RelationName']?.isNotEmpty == true)
+                    _rowText('Husband\'s Name', data['RelationName'] ?? 'N/A'),
                 ],
               ),
             ),
