@@ -1,77 +1,329 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
-import 'package:sizer/sizer.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:sizer/sizer.dart';
 
-class PreviousVisitsScreen extends StatelessWidget {
-  const PreviousVisitsScreen({super.key});
+class PreviousVisitsScreen extends StatefulWidget {
+  final String beneficiaryId;
+
+  const PreviousVisitsScreen({super.key, required this.beneficiaryId});
 
   @override
-  Widget build(BuildContext context) {
+  State<PreviousVisitsScreen> createState() => _PreviousVisitsScreenState();
+}
 
+class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
+  List<Map<String, dynamic>> _visits = [];
+  bool _isLoading = true;
+  String _errorMessage = '';
 
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppHeader(
-        screenTitle: 'Previous Visits',
-        showBack: false,
-       // showClose: true,
-      ),
-      drawer: CustomDrawer(),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 1.w, vertical: 1.h),
-        child: Column(
-          children: [
-            // Table Header
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 1.h),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                ),
-              ),
-              child: Card(
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Padding(
-                  padding:  EdgeInsets.all(1.h),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          'Sr No.',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.sp,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'Visit Date',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.sp,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+  @override
+  void initState() {
+    super.initState();
+    _initializeDatabaseAndLoadVisits();
+  }
 
-            SizedBox(height: 1.h),
+  Future<void> _initializeDatabaseAndLoadVisits() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      _loadVisits();
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Failed to initialize database: $e';
+      });
+    }
+  }
 
+  Future<void> _loadVisits() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
 
-          ],
+      // First, check if the table exists
+      final tables = await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='followup_form_data'"
+      );
+
+      if (tables.isEmpty) {
+        throw Exception('followup_form_data table does not exist');
+      }
+
+      // Query for all eligible couple related forms
+      final visits = await db.query(
+        'followup_form_data',
+        where: 'beneficiary_ref_key = ? AND (form_json LIKE ? OR form_json LIKE ? OR form_json LIKE ?)',
+        whereArgs: [
+          widget.beneficiaryId, 
+          '%"form_type":"eligible_couple_tracking_due"%',
+          '%"form_type":"eligible_couple_registration"%',
+          '%"form_type":"eligible_couple_re_registration"%',
+        ],
+        orderBy: 'created_date_time DESC',
+      );
+
+      // Parse the form_json data
+      final parsedVisits = visits.map((visit) {
+        try {
+          final formJson = jsonDecode(visit['form_json'] as String? ?? '{}');
+          
+          // Get form type for display
+          String formType = 'Visit';
+          if (formJson is Map) {
+            if (formJson['form_type'] == 'eligible_couple_registration') {
+              formType = 'Registration';
+            } else if (formJson['form_type'] == 'eligible_couple_re_registration') {
+              formType = 'Re-registration';
+            } else if (formJson['form_type'] == 'eligible_couple_tracking_due') {
+              formType = 'Follow-up';
+            }
+          }
+          
+          return {
+            ...visit,
+            'form_type': formType,
+            'form_data': formJson is Map ? formJson : {},
+            'created_date_time': visit['created_date_time'] ?? visit['created_at']
+          };
+        } catch (e, stackTrace) {
+          print('Error parsing form data: $e');
+          print('Stack trace: $stackTrace');
+          return {
+            ...visit,
+            'form_type': 'Unknown',
+            'form_data': {},
+            'error': 'Failed to parse form data: $e'
+          };
+        }
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          _visits = parsedVisits;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Error loading visits: $e';
+        });
+      }
+    }
+  }
+
+  String _formatDate(String? dateString) {
+    if (dateString == null) return 'N/A';
+    try {
+      final date = DateTime.tryParse(dateString);
+      return date != null
+          ? '${_twoDigits(date.day)}/${_twoDigits(date.month)}/${date.year}'
+          : dateString;
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  String _twoDigits(int n) => n.toString().padLeft(2, '0');
+
+  // Helper method to format the value for display
+  String _formatValue(dynamic value) {
+    if (value == null) return 'N/A';
+    if (value is String) return value.isNotEmpty ? value : 'N/A';
+    if (value is Map || value is List) return jsonEncode(value);
+    return value.toString();
+  }
+
+  // Helper method to build a section header
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.blue,
         ),
       ),
     );
   }
+
+  // Helper method to build a key-value row
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppHeader(
+        screenTitle: 'Previous Visits',
+        showBack: true,
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage.isNotEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      _errorMessage,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+              : _visits.isEmpty
+                  ? const Center(
+                      child: Text('No previous visits found'),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _visits.length,
+                      itemBuilder: (context, index) {
+                        final visit = _visits[index];
+                        final formData = visit['form_data'] is Map
+                            ? visit['form_data'] as Map<String, dynamic>
+                            : <String, dynamic>{};
+
+                        // Extract form data
+                        final formValues = formData['form_data'] is Map
+                            ? formData['form_data'] as Map<String, dynamic>
+                            : <String, dynamic>{};
+
+                        // Extract basic info
+                        final visitType = visit['form_type'] ?? 'Visit';
+                        final visitDate = _formatDate(visit['created_date_time']);
+                        final visitId = visit['id']?.toString() ?? 'N/A';
+                        final syncStatus = visit['is_synced'] == 1
+                            ? 'Synced'
+                            : 'Not Synced';
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          elevation: 2,
+                          child: ExpansionTile(
+                            title: Text(
+                              '$visitType - $visitDate',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            subtitle: Text('ID: $visitId • $syncStatus'),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (visit['error'] != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 16),
+                                        child: Text(
+                                          'Error: ${visit['error']}',
+                                          style: const TextStyle(
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+
+                                    // Basic Info Section
+                                    _buildSectionHeader('Visit Information'),
+                                    _buildInfoRow('Visit ID:', visitId),
+                                    _buildInfoRow('Type:', visitType),
+                                    _buildInfoRow('Date:', visitDate),
+                                    _buildInfoRow('Status:', syncStatus),
+
+                                    // Form Data Section
+                                    if (formValues.isNotEmpty) ...[
+                                      _buildSectionHeader('Form Data'),
+                                      ...formValues.entries.map((entry) {
+                                        // Skip null or empty values
+                                        if (entry.value == null ||
+                                            (entry.value is String &&
+                                                (entry.value as String).isEmpty) ||
+                                            entry.key == 'form_type') {
+                                          return const SizedBox.shrink();
+                                        }
+
+                                        // Format the key for display
+                                        String displayKey = entry.key
+                                            .toString()
+                                            .replaceAll('_', ' ')
+                                            .split(' ')
+                                            .map((str) => str.isNotEmpty
+                                                ? '${str[0].toUpperCase()}${str.substring(1)}'
+                                                : '')
+                                            .join(' ');
+
+                                        return _buildInfoRow(
+                                          '$displayKey:',
+                                          _formatValue(entry.value),
+                                        );
+                                      }).toList(),
+                                    ],
+
+                                    // Raw Data Section (for debugging)
+                                    if (formData.isNotEmpty) ...[
+                                      _buildSectionHeader('Raw Data'),
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: Colors.grey[300]!),
+                                        ),
+                                        child: Text(
+                                          const JsonEncoder.withIndent('  ')
+                                              .convert(formData),
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+    );
+  }
+
+
+
 }

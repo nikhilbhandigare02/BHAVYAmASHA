@@ -61,15 +61,7 @@ class FollowupFormDataTable {
     parent_user TEXT,
     current_user_key TEXT,
     facility_id INTEGER,
-    form_json TEXT, -- Stores JSON object with form data structure:
-                    -- {
-                    --   "form_type": "form_key",
-                    --   "form_name": "Form Display Name",
-                    --   "unique_key": "unique_form_identifier",
-                    --   "form_data": { ...form specific data... },
-                    --   "created_at": "timestamp",
-                    --   "updated_at": "timestamp"
-                    -- }
+    form_json TEXT, 
     created_date_time TEXT,
     modified_date_time TEXT,
     is_synced INTEGER,

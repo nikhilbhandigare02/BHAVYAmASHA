@@ -304,9 +304,13 @@ class _UpdatedEligibleCoupleListScreenState
 
     return InkWell(
       onTap: () async {
+        final isProtected = _isProtected(data);
         final result = await Navigator.push(
           context,
-          TrackEligibleCoupleScreen.route(beneficiaryId: data['BeneficiaryID'].toString()),
+          TrackEligibleCoupleScreen.route(
+            beneficiaryId: data['BeneficiaryID'].toString(),
+            isProtected: isProtected,
+          ),
         );
         
         // If the form was submitted successfully (returned true), refresh the data

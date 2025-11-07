@@ -54,11 +54,22 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
           }
         }
 
-        // Count pregnant women
-        final children = (head['childrenDetails'] as List?) ?? [];
-        for (final child in children) {
-          final childData = Map<String, dynamic>.from(child as Map? ?? const {});
-          if (childData['isPregnant'] == true) {
+        // Count pregnant women (check head, spouse, and family members)
+        // Check if head is pregnant
+        if (_isPregnant(head)) {
+          pregnantCount++;
+        }
+        
+        // Check if spouse is pregnant
+        if (spouse.isNotEmpty && _isPregnant(spouse)) {
+          pregnantCount++;
+        }
+        
+        // Check family members
+        final familyMembers = (info['family_details'] as List?) ?? [];
+        for (final member in familyMembers) {
+          final memberData = Map<String, dynamic>.from(member as Map? ?? const {});
+          if (_isPregnant(memberData)) {
             pregnantCount++;
           }
         }
@@ -80,17 +91,20 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
     }
   }
 
-  int _calculateAge(String? dobString) {
-    if (dobString == null || dobString.isEmpty) return 0;
+  bool _isPregnant(Map<String, dynamic> person) {
+    if (person.isEmpty) return false;
+    final flag = person['isPregnant']?.toString().toLowerCase();
+    final typoFlag = person['isPregrant']?.toString().toLowerCase();
+    final statusFlag = person['pregnancyStatus']?.toString().toLowerCase();
+    return flag == 'true' || flag == 'yes' || typoFlag == 'true' || typoFlag == 'yes' || statusFlag == 'pregnant';
+  }
+
+  int _calculateAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
     try {
-      final dob = DateTime.tryParse(dobString);
+      final dob = DateTime.tryParse(dobRaw.toString());
       if (dob == null) return 0;
-      final now = DateTime.now();
-      int age = now.year - dob.year;
-      if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
-        age--;
-      }
-      return age;
+      return DateTime.now().difference(dob).inDays ~/ 365;
     } catch (e) {
       print('Error calculating age: $e');
       return 0;
