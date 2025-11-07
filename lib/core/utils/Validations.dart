@@ -179,6 +179,16 @@ class Validations {
     return null;
   }
 
+  static String? validateMemberType(AppLocalizations l10n, String? memberType) {
+    if (memberType == null || memberType.isEmpty) {
+      return 'Member type is required';
+    }
+    if (!['Adult', 'Child'].contains(memberType)) {
+      return 'Invalid member type';
+    }
+    return null;
+  }
+
   static String? validateBankAccountNumber(AppLocalizations l10n, String? accountNumber) {
     // If the field is empty, it's valid (not required)
     if (accountNumber == null || accountNumber.trim().isEmpty) {

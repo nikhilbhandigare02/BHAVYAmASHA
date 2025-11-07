@@ -398,10 +398,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
         builder: (_) => AddNewFamilyMemberScreen(
-          headName: _headForm?['headName']?.toString(),
-          spouseName: _headForm?['spouseName']?.toString(),
-          headGender: _headForm?['gender']?.toString(),
-          headMobileNo: _headForm?['mobileNo']?.toString(),
+
         ),
       ),
     );

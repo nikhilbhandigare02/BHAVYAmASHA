@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,11 +20,13 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 
 class AddNewFamilyMemberScreen extends StatefulWidget {
   final bool isEdit;
-  final String? headName;
-  final String? spouseName;
-  final String? headGender; // 'Male' | 'Female' | 'Other'
-  final String? headMobileNo;
-  const AddNewFamilyMemberScreen({super.key, this.isEdit = false, this.headName, this.spouseName, this.headGender, this.headMobileNo});
+  final String? hhId;
+
+  const AddNewFamilyMemberScreen({
+    super.key,
+    this.isEdit = false,
+    this.hhId,
+  });
 
   @override
   State<AddNewFamilyMemberScreen> createState() => _AddNewFamilyMemberScreenState();
@@ -40,17 +45,22 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
   late final AddnewfamilymemberBloc _bloc;
 
+  // Helper method to format gender consistently
+  String _formatGender(String? gender) {
+    if (gender == null) return 'Other';
+    final g = gender.toString().toLowerCase();
+    if (g == 'm' || g == 'male') return 'Male';
+    if (g == 'f' || g == 'female') return 'Female';
+    return 'Other';
+  }
+
   @override
   void initState() {
     super.initState();
     _bloc = AddnewfamilymemberBloc();
     
-    final String? maleParentName = (widget.headGender == 'Male')
-        ? widget.headName
-        : ((widget.headGender == 'Female') ? widget.spouseName : (widget.headName ?? widget.spouseName));
-    final String? femaleParentName = (widget.headGender == 'Female')
-        ? widget.headName
-        : ((widget.headGender == 'Male') ? widget.spouseName : widget.spouseName ?? widget.headName);
+    // Debug print
+    print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
 
     _fatherOption = 'Select';
     _motherOption = 'Select';
@@ -88,10 +98,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       _argsHandled = true;
     }
     _isEdit = _isEdit || widget.isEdit;
-    // Derive parent names from head/spouse and headGender
-    final String? maleParentName = (widget.headGender == 'Male') ? widget.headName : ((widget.headGender == 'Female') ? widget.spouseName : (widget.headName ?? widget.spouseName));
-    final String? femaleParentName = (widget.headGender == 'Female') ? widget.headName : ((widget.headGender == 'Male') ? widget.spouseName : widget.spouseName ?? widget.headName);
-    return BlocProvider.value(
+   return BlocProvider.value(
       value: _bloc,
       child: WillPopScope(
           onWillPop: () async {
@@ -149,166 +156,58 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     }
                                   },
                                   value: state.memberType,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMemberType(v ?? 'Adult')),
-                                ),
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                              _section(
-                                ApiDropdown<String>(
-                                  labelText: 'Member Status',
-                                  items: const ['Alive', 'Death'],
-                                  getLabel: (s) {
-                                    switch (s) {
-                                      case 'Alive':
-                                        return 'Alive';
-                                      case 'Death':
-                                        return 'Death';
-
-                                      default:
-                                        return s;
+                                  onChanged: (v) {
+                                    final bloc = context.read<AddnewfamilymemberBloc>();
+                                    bloc.add(AnmUpdateMemberType(v ?? ''));
+                                    // Clear marital status when changing to Child
+                                    if (v == 'Child') {
+                                      bloc.add(const AnmUpdateMaritalStatus(''));
                                     }
                                   },
-                                  value: state.memberStatus,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateIsMemberStatus(v ?? 'Alive')),
+                                  validator: (value) => Validations.validateMemberType(l, value),
+
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                              if(state.memberStatus == 'Death')...[
-                                _section(
-                                  CustomDatePicker(
-                                    labelText: 'Date of death',
-                                    hintText: 'Date of death',
-                                    onDateChanged: (d) => context.read<AddnewfamilymemberBloc>().add(UpdateDateOfDeath(d!)),
-                                    // validator: (date) => Validations.validateDOB(l, date),
-
-                                  ),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                _section(
-                                  ApiDropdown<String>(
-                                    labelText: 'Place of Death',
-                                    items: const ['Home', 'Migrated Out', 'On the way','Facility','Other'],
-                                    getLabel: (s) {
-                                      switch (s) {
-                                        case 'Home':
-                                          return 'Home';
-                                        case 'Migrated Out':
-                                          return 'Migrated Out';
-                                        case 'On the way':
-                                          return 'On the way';
-                                        case 'Facility':
-                                          return 'Facility';
-                                        case 'Other':
-                                          return 'Other';
-
-                                        default:
-                                          return s;
-                                      }
-                                    },
-                                    value: state.deathPlace,
-                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateDatePlace(v ?? 'Alive')),
-                                  ),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                _section(
-                                  ApiDropdown<String>(
-                                    labelText: 'Reason of Death',
-                                    items: const [
-                                      'PH',
-                                      'PPH',
-                                      'Severe Anaemia',
-                                      'Sepsis',
-                                      'Obstructed Labour',
-                                      'Malpresentation',
-                                      'Eclampsia/Severe Hypertension',
-                                      'Unsafe Abortion',
-                                      'Surgical Complication',
-                                      'Other reason apart from maternal complication',
-                                      'Other (Specify)',
-                                    ],
-                                    getLabel: (s) {
-                                      switch (s) {
-                                        case 'PH':
-                                          return 'Postpartum Hemorrhage (PH)';
-                                        case 'PPH':
-                                          return 'Primary Postpartum Hemorrhage (PPH)';
-                                        case 'Severe Anaemia':
-                                          return 'Severe Anaemia';
-                                        case 'Sepsis':
-                                          return 'Sepsis';
-                                        case 'Obstructed Labour':
-                                          return 'Obstructed Labour';
-                                        case 'Malpresentation':
-                                          return 'Malpresentation';
-                                        case 'Eclampsia/Severe Hypertension':
-                                          return 'Eclampsia / Severe Hypertension';
-                                        case 'Unsafe Abortion':
-                                          return 'Unsafe Abortion';
-                                        case 'Surgical Complication':
-                                          return 'Surgical Complication';
-                                        case 'Other reason apart from maternal complication':
-                                          return 'Other reason apart from maternal complication';
-                                        case 'Other (Specify)':
-                                          return 'Other (Specify)';
-                                        default:
-                                          return s;
-                                      }
-                                    },
-
-                                    value: state.deathReason,
-                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateReasonOfDeath(v ?? 'Alive')),
-                                  ),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                if(state.deathReason == 'Other (Specify)')...[
-                                  _section(
-                                    CustomTextField(
-                                      labelText: 'Other reason of death',
-                                      hintText: 'Other reason of death',
-                                      onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateOtherReasonOfDeath(v.trim())),
-                                    ),
-                                  ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                ]
-                              ],
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               if (state.memberType == 'Child') ...[
                                 _section(
-                                  Row(
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(
-                                        child: CustomTextField(
-                                          labelText: l.richIdLabel,
-                                          initialValue: state.RichIDChanged,
-                                          onChanged: (v) =>
-                                              context.read<AddnewfamilymemberBloc>().add(RichIDChanged(v.trim())
-                                              ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      SizedBox(
-                                        height: 25,
-                                        width: 120,
-                                        child: RoundButton(
-                                          title: 'VERIFY',
-                                          width: 160,
-                                          borderRadius: 8,
-                                          fontSize: 12,
-                                          onPress: () {
-                                          },
-                                        ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: CustomTextField(
+                                              labelText: "RICH ID",
+                                              hintText: 'RICH ID',
+                                              initialValue: state.RichIDChanged,
+                                              onChanged: (v) => context
+                                                  .read<AddnewfamilymemberBloc>()
+                                                  .add(RichIDChanged(v ?? '')),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          SizedBox(
+                                            height: 30,
+                                            child: RoundButton(
+                                              title: 'VERIFY',
+                                              width: 100,
+                                              borderRadius: 8,
+                                              fontSize: 12,
+                                              onPress: () {
+                                                Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               ],
+
                               _section(
                                 ApiDropdown<String>(
                                   labelText: '${l.relationWithHeadLabel} *',
@@ -362,7 +261,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       hintText: "${l.motherNameLabel} *",
                                       items: [
                                         'Select',
-                                        if ((femaleParentName ?? '').isNotEmpty) femaleParentName!,
+
                                         'Other',
                                       ],
                                       getLabel: (s) => s,
@@ -401,7 +300,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       labelText: '${l.fatherGuardianNameLabel} *',
                                       items: [
                                         'Select',
-                                        if ((maleParentName ?? '').isNotEmpty) maleParentName!,
+
                                         'Other',
                                       ],
                                       getLabel: (s) => s,
@@ -515,10 +414,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     final bloc = context.read<AddnewfamilymemberBloc>();
                                     bloc.add(AnmUpdateMobileOwner(v));
                                     if (v == 'Family Head') {
-                                      final headNo = widget.headMobileNo ?? '';
-                                      if (headNo.isNotEmpty) {
-                                        bloc.add(AnmUpdateMobileNo(headNo));
-                                      }
+                                      // final headNo = widget. ?? '';
+                                      // if (headNo.isNotEmpty) {
+                                      //   bloc.add(AnmUpdateMobileNo(headNo));
+                                      // }
                                     }
                                   },
                                   validator: (value) => Validations.validateWhoMobileNo(l, value),
@@ -528,16 +427,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               _section(
                                 CustomTextField(
-                                  key: ValueKey('member_mobile_${state.mobileNo ?? ''}'),
+                                  key: ValueKey('member_mobile_${state.mobileOwner ?? ''}'),
+                                  controller: TextEditingController(text: state.mobileNo ?? '')
+                                    ..selection = TextSelection.collapsed(offset: state.mobileNo?.length ?? 0),
                                   labelText: '${l.mobileLabel} *',
                                   hintText: '${l.mobileLabel} *',
                                   keyboardType: TextInputType.number,
                                   maxLength: 10,
-                                  initialValue: state.mobileNo,
                                   onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(v.trim())),
                                   validator: (value) => Validations.validateMobileNo(l, value),
                                   inputFormatters: [
                                     FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(10),
                                   ],
                                 ),
                               ),
@@ -938,6 +839,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              if(state.memberType != 'Child')
                                 _section(
                                   ApiDropdown<String>(
                                     labelText: '${l.maritalStatusLabel} *',
@@ -964,6 +866,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                                   ),
                                 ),
+                              if(state.memberType != 'Child')
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
@@ -1077,7 +980,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     borderRadius: 8,
                                     height: 44,
                                     isLoading: isLoading,
-                                    onPress: () {
+                                    onPress: () async {
                                       final formState = _formKey.currentState;
                                       if (formState == null) return;
 
@@ -1094,10 +997,123 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         return;
                                       }
 
-                                      if (_isEdit) {
-                                        context.read<AddnewfamilymemberBloc>().add(const AnmUpdateSubmit());
-                                      } else {
-                                        context.read<AddnewfamilymemberBloc>().add(const AnmSubmit());
+                                      try {
+                                        // Get current state
+                                        final bloc = context.read<AddnewfamilymemberBloc>();
+                                        final state = bloc.state;
+
+                                        // Prepare member data
+                                        final memberData = {
+                                          'memberType': state.memberType,
+                                          'name': state.name,
+                                          'relation': state.relation,
+                                          'fatherName': state.fatherName,
+                                          'motherName': state.motherName,
+                                          'gender': state.gender,
+                                          'dob': state.dob?.toIso8601String(),
+                                          'approxAge': state.approxAge,
+                                          'maritalStatus': state.maritalStatus,
+                                          'mobileNo': state.mobileNo,
+                                          'mobileOwner': state.mobileOwner,
+                                          'education': state.education,
+                                          'occupation': state.occupation,
+                                          'religion': state.religion,
+                                          'category': state.category,
+                                          'bankAcc': state.bankAcc,
+                                          'ifsc': state.ifsc,
+                                          'voterId': state.voterId,
+                                          'rationId': state.rationId,
+                                          'phId': state.phId,
+                                          'abhaAddress': state.abhaAddress,
+                                          'richId': state.RichIDChanged,
+                                          'birthCertificate': state.BirthCertificateChange,
+                                          'weight': state.WeightChange,
+                                          'school': state.ChildSchool,
+                                          'hasChildren': state.hasChildren,
+                                          'isPregnant': state.isPregnant,
+                                          'ageAtMarriage': state.ageAtMarriage,
+                                          'spouseName': state.spouseName,
+                                          'createdAt': DateTime.now().toIso8601String(),
+                                        };
+
+                                        // Print the member data that will be saved to beneficiary_info
+                                        print('Submitting member data: ${jsonEncode(memberData)}');
+
+                                        // Fetch and print the complete household record
+                                        try {
+                                          final db = await DatabaseProvider.instance.database;
+                                          final householdRecords = await db.query(
+                                            'beneficiaries',
+                                            where: 'household_ref_key = ?',
+                                            whereArgs: [widget.hhId],
+                                          );
+                                          
+                                          if (householdRecords.isNotEmpty) {
+                                            print('\n=== COMPLETE HOUSEHOLD RECORD ===');
+                                            for (var record in householdRecords) {
+                                              print('Beneficiary ID: ${record['id']}');
+                                              print('Household Ref Key: ${record['household_ref_key']}');
+                                              print('Beneficiary State: ${record['beneficiary_state']}');
+                                              print('Is Adult: ${record['is_adult']}');
+                                              
+                                              // Print beneficiary_info with proper formatting
+                                              // Print complete beneficiary_info without truncation
+                                              final beneficiaryInfo = record['beneficiary_info'];
+                                              if (beneficiaryInfo is String) {
+                                                try {
+                                                  // Print the raw JSON string to avoid any formatting/truncation issues
+                                                  print('beneficiary_info: $beneficiaryInfo');
+                                                  
+                                                  // Also print a formatted version for better readability
+                                                  try {
+                                                    final decoded = jsonDecode(beneficiaryInfo);
+                                                    print('=== FORMATTED beneficiary_info ===');
+                                                    print(const JsonEncoder.withIndent('  ').convert(decoded));
+                                                    print('=== END FORMATTED ===');
+                                                  } catch (e) {
+                                                    print('Could not format JSON: $e');
+                                                  }
+                                                } catch (e) {
+                                                  print('Error processing beneficiary_info: $e');
+                                                }
+                                              } else if (beneficiaryInfo != null) {
+                                                // If it's not a string, try to convert it to JSON
+                                                print('beneficiary_info: ${jsonEncode(beneficiaryInfo)}');
+                                              } else {
+                                                print('beneficiary_info: null');
+                                              }
+                                              
+                                              print('----------------------------------------');
+                                            }
+                                            print('=== END OF HOUSEHOLD RECORD ===\n');
+                                          } else {
+                                            print('No household records found for HHID: ${widget.hhId}');
+                                          }
+                                        } catch (e) {
+                                          print('Error fetching household record: $e');
+                                        }
+
+                                        if (_isEdit) {
+                                          if (widget.hhId != null) {
+                                            bloc.add(AnmUpdateSubmit(hhid: widget.hhId!));
+                                          } else {
+                                            throw Exception('Household ID is missing');
+                                          }
+                                        } else {
+                                          if (widget.hhId != null) {
+                                            bloc.add(AnmUpdateSubmit(hhid: widget.hhId!));
+                                          } else {
+                                            throw Exception('Household ID is missing');
+                                          }
+                                        }
+                                      } catch (e) {
+                                        print('Error preparing member data: $e');
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Error preparing data. Please try again.'),
+                                            backgroundColor: Colors.redAccent,
+                                          ),
+                                        );
                                       }
                                     },
                                   )

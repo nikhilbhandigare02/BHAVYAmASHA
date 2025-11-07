@@ -236,11 +236,15 @@ class Routes{
           ),
         );
       case Route_Names.addFamilyMember:
+        final args = setting.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
           settings: setting,
           builder: (_) => BlocProvider(
             create: (_) => AddnewfamilymemberBloc(),
-            child: const AddNewFamilyMemberScreen(),
+            child: AddNewFamilyMemberScreen(
+              hhId: args?['hhId'],
+              isEdit: args?['isEdit'] ?? false,
+            ),
           ),
         );
       default :

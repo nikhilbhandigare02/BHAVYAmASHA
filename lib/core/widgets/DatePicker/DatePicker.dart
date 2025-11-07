@@ -35,18 +35,40 @@ class CustomDatePicker extends StatefulWidget {
 }
 
 class _CustomDatePickerState extends State<CustomDatePicker> {
-  DateTime? selectedDate;
-  late final TextEditingController _controller;
+  DateTime? _selectedDate;
+  late TextEditingController _controller;
+  
+  DateTime? get selectedDate => _selectedDate;
+  set selectedDate(DateTime? value) {
+    if (_selectedDate != value) {
+      _selectedDate = value;
+      _updateControllerText();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    selectedDate = widget.initialDate;
-    _controller = TextEditingController(
-      text: selectedDate != null
-          ? DateFormat('dd/MM/yy').format(selectedDate!)
-          : '',
-    );
+    _selectedDate = widget.initialDate;
+    _controller = TextEditingController();
+    _updateControllerText();
+  }
+
+  @override
+  void didUpdateWidget(CustomDatePicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialDate != oldWidget.initialDate) {
+      _selectedDate = widget.initialDate;
+      _updateControllerText();
+    }
+  }
+
+  void _updateControllerText() {
+    if (_selectedDate != null) {
+      _controller.text = DateFormat('dd/MM/yy').format(_selectedDate!);
+    } else {
+      _controller.clear();
+    }
   }
 
   Future<void> _pickDate(BuildContext context) async {
@@ -54,15 +76,15 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
     final picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime.now(),
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: widget.firstDate ?? DateTime(1900),
       lastDate: widget.lastDate ?? DateTime(2100),
     );
 
     if (picked != null) {
       setState(() {
-        selectedDate = picked;
-        _controller.text = DateFormat('dd/MM/yy').format(picked);
+        _selectedDate = picked;
+        _updateControllerText();
       });
       widget.onDateChanged?.call(picked);
     }

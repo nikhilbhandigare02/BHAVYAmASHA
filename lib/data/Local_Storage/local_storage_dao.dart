@@ -8,7 +8,21 @@ class LocalStorageDao {
   LocalStorageDao._();
   static final LocalStorageDao instance = LocalStorageDao._();
 
+  // Factory constructor to return the same instance
+  factory LocalStorageDao() => instance;
+
   Future<Database> get _db async => DatabaseProvider.instance.database;
+
+
+  dynamic safeJsonDecode(String? jsonString) {
+    if (jsonString == null || jsonString.isEmpty) return null;
+    try {
+      return jsonDecode(jsonString);
+    } catch (e) {
+      print('Error decoding JSON: $e');
+      return null;
+    }
+  }
 
   dynamic _encodeIfObject(dynamic v) {
     if (v == null) return null;
@@ -251,6 +265,74 @@ class LocalStorageDao {
     } catch (e, stackTrace) {
       print('Error getting households: $e');
       print('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getBeneficiariesByHousehold(String householdId) async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'beneficiaries',
+        where: 'household_ref_key = ? AND is_deleted = ?',
+        whereArgs: [householdId, 0],
+      );
+      
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error getting beneficiaries by household: $e');
+      rethrow;
+    }
+  }
+
+  Future<int> updateBeneficiary(Map<String, dynamic> data) async {
+    try {
+      final db = await _db;
+      final id = data['id'];
+      if (id == null) throw Exception('Beneficiary ID is required for update');
+      
+      final row = Map<String, dynamic>.from(data);
+      row.remove('id');
+      
+      // Convert nested objects to JSON strings
+      if (row['beneficiary_info'] is Map) {
+        row['beneficiary_info'] = jsonEncode(row['beneficiary_info']);
+      }
+      if (row['geo_location'] is Map) {
+        row['geo_location'] = jsonEncode(row['geo_location']);
+      }
+      if (row['death_details'] is Map) {
+        row['death_details'] = jsonEncode(row['death_details']);
+      }
+      if (row['device_details'] is Map) {
+        row['device_details'] = jsonEncode(row['device_details']);
+      }
+      if (row['app_details'] is Map) {
+        row['app_details'] = jsonEncode(row['app_details']);
+      }
+      if (row['parent_user'] is Map) {
+        row['parent_user'] = jsonEncode(row['parent_user']);
+      }
+      
+      row['modified_date_time'] = DateTime.now().toIso8601String();
+      
+      return await db.update(
+        'beneficiaries',
+        row,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      print('Error updating beneficiary: $e');
       rethrow;
     }
   }
