@@ -19,6 +19,11 @@ class EligibleCouleUpdateState extends Equatable {
   final String youngestChildGender; // Male/Female
   final DateTime? registrationDate;
 
+  // Database tracking fields
+  final int? dbRowId;
+  final String? householdRefKey;
+  final String? beneficiaryName;
+
   final bool isSubmitting;
   final bool isSuccess;
   final String? error;
@@ -41,6 +46,9 @@ class EligibleCouleUpdateState extends Equatable {
     this.youngestChildAgeUnit = '',
     this.youngestChildGender = '',
     this.registrationDate,
+    this.dbRowId,
+    this.householdRefKey,
+    this.beneficiaryName,
     this.isSubmitting = false,
     this.isSuccess = false,
     this.error,
@@ -66,6 +74,9 @@ class EligibleCouleUpdateState extends Equatable {
     String? youngestChildAgeUnit,
     String? youngestChildGender,
     DateTime? registrationDate,
+    int? dbRowId,
+    String? householdRefKey,
+    String? beneficiaryName,
     bool? isSubmitting,
     bool? isSuccess,
     String? error,
@@ -89,6 +100,9 @@ class EligibleCouleUpdateState extends Equatable {
       youngestChildAgeUnit: youngestChildAgeUnit ?? this.youngestChildAgeUnit,
       youngestChildGender: youngestChildGender ?? this.youngestChildGender,
       registrationDate: registrationDate ?? this.registrationDate,
+      dbRowId: dbRowId ?? this.dbRowId,
+      householdRefKey: householdRefKey ?? this.householdRefKey,
+      beneficiaryName: beneficiaryName ?? this.beneficiaryName,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isSuccess: isSuccess ?? this.isSuccess,
       error: clearError ? null : (error ?? this.error),
@@ -116,6 +130,9 @@ class EligibleCouleUpdateState extends Equatable {
         youngestChildAgeUnit,
         youngestChildGender,
         registrationDate,
+        dbRowId,
+        householdRefKey,
+        beneficiaryName,
         isSubmitting,
         isSuccess,
         error,

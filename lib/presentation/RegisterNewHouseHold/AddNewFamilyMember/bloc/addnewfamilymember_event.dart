@@ -289,5 +289,9 @@ final class UpdateOtherReasonOfDeath extends AddnewfamilymemberEvent{
 }
 
 final class AnmUpdateSubmit extends AddnewfamilymemberEvent {
-  const AnmUpdateSubmit();
+  final String hhid;
+  const AnmUpdateSubmit({required this.hhid});
+  
+  @override
+  List<Object> get props => [hhid];
 }

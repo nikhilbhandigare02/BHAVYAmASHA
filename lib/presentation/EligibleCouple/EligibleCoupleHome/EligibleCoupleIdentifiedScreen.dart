@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -9,6 +11,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../HomeScreen/HomeScreen.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../EligibleCoupleUpdate/EligibleCoupleUpdateScreen.dart';
 
 class EligibleCoupleIdentifiedScreen extends StatefulWidget {
   const EligibleCoupleIdentifiedScreen({super.key});
@@ -77,6 +80,8 @@ class _EligibleCoupleIdentifiedScreenState
     final hhId = row['household_ref_key']?.toString() ?? '';
     final uniqueKey = row['unique_key']?.toString() ?? '';
     final createdDate = row['created_date_time']?.toString() ?? '';
+    final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+    final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
     final gender = female['gender']?.toString().toLowerCase();
     final displayGender = gender == 'f' ? 'Female' : gender == 'm' ? 'Male' : 'Other';
@@ -86,6 +91,21 @@ class _EligibleCoupleIdentifiedScreenState
     final husbandName = isHead
       ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
       : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
+
+    // children summary can live at top-level children_details or under head childrendetails/childrenDetails
+    final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
+    Map<String, dynamic>? childrenSummary;
+    if (childrenRaw is Map) {
+      childrenSummary = {
+        'totalBorn': childrenRaw['totalBorn'],
+        'totalLive': childrenRaw['totalLive'],
+        'totalMale': childrenRaw['totalMale'],
+        'totalFemale': childrenRaw['totalFemale'],
+        'youngestAge': childrenRaw['youngestAge'],
+        'ageUnit': childrenRaw['ageUnit'],
+        'youngestGender': childrenRaw['youngestGender'],
+      }..removeWhere((k, v) => v == null);
+    }
     return {
       'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
       'RegistrationDate': _formatDate(createdDate),
@@ -96,6 +116,8 @@ class _EligibleCoupleIdentifiedScreenState
       'RichID': richId,
       'mobileno': mobile,
       'HusbandName': husbandName,
+      'childrenSummary': childrenSummary,
+      '_rawRow': row,
     };
   }
 
@@ -201,16 +223,56 @@ class _EligibleCoupleIdentifiedScreenState
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final primary = Theme.of(context).primaryColor;
-    final l10n = AppLocalizations.of(context);
-
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          Route_Names.UpdatedEligibleCoupleList,
-          arguments: data,
-        );
-      },
+    final t = AppLocalizations.of(context);
+    
+    // Extract the raw row data and beneficiary info
+    final rowData = data['_rawRow'] ?? {};
+    final beneficiaryInfo = rowData['beneficiary_info'] is String 
+        ? jsonDecode(rowData['beneficiary_info']) 
+        : (rowData['beneficiary_info'] ?? {});
+    
+    // Extract head and spouse details with proper fallbacks
+    final headDetails = (beneficiaryInfo['head_details'] ?? {}) as Map<String, dynamic>;
+    final spouseDetails = (beneficiaryInfo['spouse_details'] ?? {}) as Map<String, dynamic>;
+    
+    // Get children details with fallbacks
+    final childrenDetails = (beneficiaryInfo['children_details'] ?? 
+                           headDetails['childrendetails'] ?? 
+                           headDetails['childrenDetails'] ?? 
+                           {}) as Map<String, dynamic>;
+    
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: () async {
+          // Get last 11 digits of household_ref_key
+          final fullHhId = rowData['household_ref_key']?.toString() ?? '';
+          final hhIdLast11 = fullHhId.length > 11 ? fullHhId.substring(fullHhId.length - 11) : fullHhId;
+          final name = data['Name']?.toString() ?? '';
+          
+          print('🚀 Navigating to update screen with:');
+          print('   Household ID (last 11): $hhIdLast11');
+          print('   Name: $name');
+          
+          final result = await Navigator.pushNamed(
+            context,
+            Route_Names.UpdatedEligibleCoupleList,
+            arguments: {
+              'hhId': hhIdLast11,
+              'name': name,
+            },
+          );
+          
+          // Refresh the list when returning from the update screen
+          if (result == true) {
+            _loadEligibleCouples();
+          }
+        },
       borderRadius: BorderRadius.circular(8),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -272,19 +334,19 @@ class _EligibleCoupleIdentifiedScreenState
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegistrationDate'] ?? '')),
+                      Expanded(child: _rowText('Registration Date', data['RegistrationDate'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegistrationType'] ?? '')),
+                      Expanded(child: _rowText('Registration Type', data['RegistrationType'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID'] ?? '')),
+                      Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryID'] ?? '')),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.nameOfMemberLabel ?? 'Name', data['Name'] ?? '')),
+                      Expanded(child: _rowText(  'Name', data['Name'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age', data['age']?.toString() ?? '')),
+                      Expanded(child: _rowText( 'Age', data['age']?.toString() ?? '')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('Rich ID', data['RichID']?.toString() ?? '')),
                     ],
@@ -293,10 +355,10 @@ class _EligibleCoupleIdentifiedScreenState
                   Row(
                     children: [
                       Expanded(
-                          child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['mobileno']?.toString() ?? '')),
+                          child: _rowText( 'Mobile No.', data['mobileno']?.toString() ?? '')),
                       const SizedBox(width: 12),
                       Expanded(
-                          child: _rowText(l10n?.husbandLabel ?? 'Husband Name', data['HusbandName'] ?? '')),
+                          child: _rowText('Husband Name', data['HusbandName'] ?? '')),
                     ],
                   ),
                 ],
@@ -305,6 +367,7 @@ class _EligibleCoupleIdentifiedScreenState
           ],
         ),
       ),
+      )
     );
   }
 

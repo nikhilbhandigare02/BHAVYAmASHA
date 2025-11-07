@@ -7,6 +7,14 @@ abstract class EligibleCouleUpdateEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class InitializeForm extends EligibleCouleUpdateEvent {
+  final Map<String, dynamic> initialData;
+  const InitializeForm(this.initialData);
+  
+  @override
+  List<Object?> get props => [initialData];
+}
+
 class RegistrationDateChanged extends EligibleCouleUpdateEvent {
   final DateTime? date;
   const RegistrationDateChanged(this.date);

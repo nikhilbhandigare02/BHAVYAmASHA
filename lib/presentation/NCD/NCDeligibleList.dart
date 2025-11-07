@@ -65,7 +65,7 @@ class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
   }
 
   Future<void> _loadData() async {
-    // Simulate network/database delay
+
     await Future.delayed(const Duration(milliseconds: 500));
     if (mounted) {
       setState(() {

@@ -287,7 +287,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                               'toilet': amenitiesState.toilet,
                             };
                             
-                            // Remove any null or empty values
+
                             amenitiesData.removeWhere((key, value) => 
                                 value == null || 
                                 (value is String && value.isEmpty) ||
@@ -398,10 +398,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
         builder: (_) => AddNewFamilyMemberScreen(
-          headName: _headForm?['headName']?.toString(),
-          spouseName: _headForm?['spouseName']?.toString(),
-          headGender: _headForm?['gender']?.toString(),
-          headMobileNo: _headForm?['mobileNo']?.toString(),
+
         ),
       ),
     );

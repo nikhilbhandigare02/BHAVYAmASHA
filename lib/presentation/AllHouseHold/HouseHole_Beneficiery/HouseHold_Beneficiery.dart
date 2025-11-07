@@ -304,7 +304,31 @@ class _HouseHold_BeneficiaryScreenState
                   borderRadius: 8,
                   height: 50,
                   onPress: () {
-                    Navigator.pushNamed(context, Route_Names.addFamilyMember);
+                    final head = _beneficiaries.firstWhere(
+                      (b) => b['Relation'] == 'Head',
+                      orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': ''},
+                    );
+                    final spouse = _beneficiaries.firstWhere(
+                      (b) => b['Relation'] == 'Spouse',
+                      orElse: () => {'Name': '', 'Gender': ''},
+                    );
+                    
+                    // Format gender to standard format (Male/Female/Other)
+                    String formatGender(dynamic gender) {
+                      if (gender == null) return 'Other';
+                      final g = gender.toString().toLowerCase();
+                      if (g == 'm' || g == 'male') return 'Male';
+                      if (g == 'f' || g == 'female') return 'Female';
+                      return 'Other';
+                    }
+                    
+                    Navigator.pushNamed(
+                      context, 
+                      Route_Names.addFamilyMember,
+                      arguments: {
+                        'hhId': widget.hhId,
+                      },
+                    );
                   },
                 ),
               ),
@@ -321,11 +345,31 @@ class _HouseHold_BeneficiaryScreenState
 
     return InkWell(
       onTap: () {
+        final head = _beneficiaries.firstWhere(
+          (b) => b['Relation'] == 'Head',
+          orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': ''},
+        );
+        final spouse = _beneficiaries.firstWhere(
+          (b) => b['Relation'] == 'Spouse',
+          orElse: () => {'Name': '', 'Gender': ''},
+        );
+        
+        // Format gender to standard format (Male/Female/Other)
+        String formatGender(dynamic gender) {
+          if (gender == null) return 'Other';
+          final g = gender.toString().toLowerCase();
+          if (g == 'm' || g == 'male') return 'Male';
+          if (g == 'f' || g == 'female') return 'Female';
+          return 'Other';
+        }
+        
         Navigator.pushNamed(
           context,
           Route_Names.addFamilyMember,
-          arguments: {'isEdit': false,'name': data['Name'],},
-
+          arguments: {
+            'hhId': widget.hhId,
+            'isEdit': false,
+          },
         );
       },
       child: Container(

@@ -75,13 +75,24 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       final mapped = rows.map<Map<String, dynamic>>((r) {
         final info = Map<String, dynamic>.from((r['beneficiary_info'] as Map?) ?? const {});
         final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+        // spouse may be stored either under head_details.spousedetails or at top-level spouse_details
+        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? (info['spouse_details'] as Map?) ?? const {});
+        // children may be stored at top-level children_details (preferred) or under head_details.childrenDetails/childrendetails
+        final dynamic childrenRaw = info['children_details'] ?? head['childrenDetails'] ?? head['childrendetails'];
+        final List childrenList = childrenRaw is List
+            ? childrenRaw
+            : childrenRaw is Map
+                ? childrenRaw.values.whereType<Map>().toList()
+                : const [];
         final String name = (head['headName'] ?? '').toString();
         final String mobile = (head['mobileNo'] ?? '').toString();
         int totalMembers = 1;
-        if ((head['maritalStatus'] ?? '').toString() == 'Married') totalMembers++;
-        // Count children if present
-        final childrenCount = int.tryParse((head['children'] ?? '0').toString()) ?? 0;
+        if ((head['maritalStatus'] ?? '').toString() == 'Married' && spouse.isNotEmpty) totalMembers++;
+        // Count children from stored children details, fallback to head.children numeric if details absent
+        int childrenCount = childrenList.length;
+        if (childrenCount == 0) {
+          childrenCount = int.tryParse((head['children'] ?? '0').toString()) ?? 0;
+        }
         totalMembers += childrenCount;
         final int eligibleCouples = (head['maritalStatus'] ?? '') == 'Married' ? 1 : 0;
         // Calculate elderly count (head and spouse, age 65+)
