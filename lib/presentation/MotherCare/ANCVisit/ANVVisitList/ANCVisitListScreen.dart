@@ -1,4 +1,4 @@
-import 'dart:convert' show jsonDecode;
+import 'dart:convert' show jsonDecode, jsonEncode;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +14,7 @@ import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../../data/SecureStorage/SecureStorage.dart';
 import '../ANCVisitForm/ANCVisitForm.dart';
 
 
@@ -103,6 +104,59 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       }
 
       print('✅ Found ${couples.length} eligible couples');
+
+      // Save the data to secure storage with proper structure
+      try {
+        print('\n📦 Current secure storage data:');
+        String? existingData = await SecureStorageService.getUserData();
+        print('   - Raw data: ${existingData ?? 'No data found'}');
+        
+        Map<String, dynamic> dataToStore = {};
+        
+        if (existingData != null && existingData.isNotEmpty) {
+          try {
+            dataToStore = jsonDecode(existingData);
+            print('   - Decoded data: ${dataToStore.toString()}');
+          } catch (e) {
+            print('⚠️ Error parsing existing secure storage data: $e');
+          }
+        } else {
+          print('   - No existing data in secure storage, will create new');
+        }
+        
+        // Update the visits list
+        dataToStore['visits'] = couples;
+        final dataToStoreJson = jsonEncode(dataToStore);
+        
+        print('\n💾 Saving to secure storage:');
+        print('   - Couples count: ${couples.length}');
+        print('   - First couple: ${couples.isNotEmpty ? couples.first.toString() : 'No couples'}');
+        print('   - Data size: ${dataToStoreJson.length} characters');
+        
+        // Save back to secure storage
+        await SecureStorageService.saveUserData(dataToStoreJson);
+        
+        // Verify the data was saved correctly
+        final savedData = await SecureStorageService.getUserData();
+        if (savedData != null && savedData.isNotEmpty) {
+          print('\n✅ Successfully saved to secure storage:');
+          print('   - Raw saved data: ${savedData.length} characters');
+          try {
+            final savedJson = jsonDecode(savedData);
+            print('   - Decoded saved data: ${savedJson.toString()}');
+            if (savedJson['visits'] is List) {
+              print('   - Saved visits count: ${savedJson['visits'].length}');
+            }
+          } catch (e) {
+            print('⚠️ Error parsing saved data: $e');
+          }
+        } else {
+          print('⚠️ Failed to verify saved data - secure storage is empty');
+        }
+      } catch (e, stackTrace) {
+        print('⚠️ Error saving to secure storage: $e');
+        print('Stack trace: $stackTrace');
+      }
 
       setState(() {
         _filtered = couples;
@@ -326,10 +380,35 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       appBar: AppHeader(
         screenTitle: l10n?.ancVisitListTitle ?? 'ANC Visit List',
         showBack: true,
-        icon1: Icons.refresh,
-        onIcon1Tap: () => setState(() {}),
+        icon1Widget: InkWell(
+          onTap: () async {
+            setState(() {
+              _isLoading = true; // show loader
+            });
+            await _loadEligibleCouples(); // fetch new data
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: Row(
+              children: [
+                // const Icon(Icons.refresh, color: Colors.white, size: 20),
+                const SizedBox(width: 6),
+                Container(
+                  color: AppColors.background,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4),
+                    child: Text(
+                      'Refresh',
+                      style: TextStyle(color: AppColors.onSurface, fontSize: 14.sp),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
-      body: Column(
+        body: Column(
         children: [
           // Search
           Padding(
@@ -389,12 +468,10 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     final l10n = AppLocalizations.of(context);
     final primary = Theme.of(context).primaryColor;
     
-    // Format the date for display
     final registrationDate = data['RegistrationDate'] is String && data['RegistrationDate'].isNotEmpty
         ? data['RegistrationDate']
         : l10n?.notAvailable ?? 'N/A';
         
-    // Format age and gender
     final ageGender = data['age'] is String && data['age'].isNotEmpty
         ? data['age']
         : l10n?.notAvailable ?? 'N/A';

@@ -77,8 +77,13 @@ class WeeksOfPregnancyChanged extends AnvvisitformEvent {
   List<Object?> get props => [value];
 }
 
-class GravidaDecremented extends AnvvisitformEvent { const GravidaDecremented(); }
-class GravidaIncremented extends AnvvisitformEvent { const GravidaIncremented(); }
+class GravidaDecremented extends AnvvisitformEvent {
+  const GravidaDecremented();
+}
+
+class GravidaIncremented extends AnvvisitformEvent {
+  const GravidaIncremented();
+}
 
 class IsBreastFeedingChanged extends AnvvisitformEvent {
   final String value;
@@ -87,17 +92,73 @@ class IsBreastFeedingChanged extends AnvvisitformEvent {
   List<Object?> get props => [value];
 }
 
-class Td1DateChanged extends AnvvisitformEvent { final DateTime? value; const Td1DateChanged(this.value); }
-class Td2DateChanged extends AnvvisitformEvent { final DateTime? value; const Td2DateChanged(this.value); }
-class TdBoosterDateChanged extends AnvvisitformEvent { final DateTime? value; const TdBoosterDateChanged(this.value); }
+class Td1DateChanged extends AnvvisitformEvent {
+  final DateTime? value;
+  const Td1DateChanged(this.value);
+}
 
-class FolicAcidTabletsChanged extends AnvvisitformEvent { final String value; const FolicAcidTabletsChanged(this.value); }
-class PreExistingDiseaseChanged extends AnvvisitformEvent { final String value; const PreExistingDiseaseChanged(this.value); }
-class WeightChanged extends AnvvisitformEvent { final String value; const WeightChanged(this.value); }
-class SystolicChanged extends AnvvisitformEvent { final String value; const SystolicChanged(this.value); }
-class DiastolicChanged extends AnvvisitformEvent { final String value; const DiastolicChanged(this.value); }
-class HemoglobinChanged extends AnvvisitformEvent { final String value; const HemoglobinChanged(this.value); }
-class HighRiskChanged extends AnvvisitformEvent { final String value; const HighRiskChanged(this.value); }
-class BeneficiaryAbsentChanged extends AnvvisitformEvent { final String value; const BeneficiaryAbsentChanged(this.value); }
+class Td2DateChanged extends AnvvisitformEvent {
+  final DateTime? value;
+  const Td2DateChanged(this.value);
+}
 
-class SubmitPressed extends AnvvisitformEvent { const SubmitPressed(); }
+class TdBoosterDateChanged extends AnvvisitformEvent {
+  final DateTime? value;
+  const TdBoosterDateChanged(this.value);
+}
+
+class FolicAcidTabletsChanged extends AnvvisitformEvent {
+  final String value;
+  const FolicAcidTabletsChanged(this.value);
+}
+
+class PreExistingDiseaseChanged extends AnvvisitformEvent {
+  final String value;
+  const PreExistingDiseaseChanged(this.value);
+}
+
+class WeightChanged extends AnvvisitformEvent {
+  final String value;
+  const WeightChanged(this.value);
+}
+
+class SystolicChanged extends AnvvisitformEvent {
+  final String value;
+  const SystolicChanged(this.value);
+}
+
+class DiastolicChanged extends AnvvisitformEvent {
+  final String value;
+  const DiastolicChanged(this.value);
+}
+
+class HemoglobinChanged extends AnvvisitformEvent {
+  final String value;
+  const HemoglobinChanged(this.value);
+}
+
+class HighRiskChanged extends AnvvisitformEvent {
+  final String value;
+  const HighRiskChanged(this.value);
+}
+
+class BeneficiaryAbsentChanged extends AnvvisitformEvent {
+  final String value;
+  const BeneficiaryAbsentChanged(this.value);
+}
+class GivesBirthToBaby extends AnvvisitformEvent {
+  final String value;
+  const GivesBirthToBaby(this.value);
+}
+
+class BeneficiaryIdSet extends AnvvisitformEvent {
+  final String beneficiaryId;
+  const BeneficiaryIdSet(this.beneficiaryId);
+
+  @override
+  List<Object?> get props => [beneficiaryId];
+}
+
+class SubmitPressed extends AnvvisitformEvent {
+  const SubmitPressed();
+}

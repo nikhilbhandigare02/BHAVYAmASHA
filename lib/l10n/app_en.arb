@@ -631,6 +631,7 @@
   "rationCardIdLabel": "Ration Card Id",
   "rchIdLabel": "RCH ID",
   "rchNumberLabel": "RCH number",
+  "submissionCountLabel": "Form Submissions",
   "readLess": "Read less",
   "readMore": "Read more",
   "reenterPasswordEmpty": "Re-enter password cannot be empty",
