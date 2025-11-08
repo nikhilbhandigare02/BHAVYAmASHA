@@ -149,4 +149,35 @@ class SecureStorageService {
     await _storage.delete(key: _keyRefreshToken);
     await _storage.write(key: _keyIsLoggedIn, value: '0');
   }
+
+  // Get submission count for a beneficiary
+  static Future<int> getSubmissionCount(String beneficiaryId) async {
+    try {
+      final key = 'submission_count_$beneficiaryId';
+      final countStr = await _storage.read(key: key);
+      if (countStr == null) {
+        // If no count exists yet, initialize it to 1
+        await _storage.write(key: key, value: '1');
+        return 1;
+      }
+      return int.tryParse(countStr) ?? 1; // Default to 1 if parsing fails
+    } catch (e) {
+      print('Error getting submission count: $e');
+      return 1; // Return 1 as default instead of 0
+    }
+  }
+
+  // Increment submission count for a beneficiary
+  static Future<int> incrementSubmissionCount(String beneficiaryId) async {
+    try {
+      final key = 'submission_count_$beneficiaryId';
+      final currentCount = await getSubmissionCount(beneficiaryId);
+      final newCount = currentCount + 1;
+      await _storage.write(key: key, value: newCount.toString());
+      return newCount;
+    } catch (e) {
+      print('Error incrementing submission count: $e');
+      return 1; // Return 1 as default
+    }
+  }
 }

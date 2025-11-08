@@ -9,7 +9,7 @@ class CenterBoxLoader extends StatelessWidget {
     return Stack(
       children: [
         // Dimmed background
-        Container(color: AppColors.scrim.withOpacity(0.38)),
+        Container(color: AppColors.background),
         Center(
           child: Container(
             width: 90,

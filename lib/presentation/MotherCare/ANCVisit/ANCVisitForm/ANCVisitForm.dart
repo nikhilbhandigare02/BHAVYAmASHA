@@ -7,8 +7,12 @@ import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'dart:convert';
+import 'dart:convert';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
+import '../../../../data/SecureStorage/SecureStorage.dart';
 import 'bloc/anvvisitform_bloc.dart';
 
 class Ancvisitform extends StatefulWidget {
@@ -21,50 +25,174 @@ class Ancvisitform extends StatefulWidget {
 }
 
 class _AncvisitformState extends State<Ancvisitform> {
+  late final AnvvisitformBloc _bloc;
+
   @override
   void initState() {
     super.initState();
+    _bloc = AnvvisitformBloc();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeForm();
+    });
   }
+
+  @override
+  void dispose() {
+    _bloc.close();
+    super.dispose();
+  }
+
+  Future<void> _initializeForm() async {
+    final data = widget.beneficiaryData;
+    String? houseNo;
+    
+    // Try to get houseNo from secure storage first
+    if (data != null) {
+      final dataId = data['id']?.toString();
+      final dataBeneficiaryId = data['BeneficiaryID']?.toString();
+      
+      if (dataId != null || dataBeneficiaryId != null) {
+        try {
+          final storageData = await SecureStorageService.getUserData();
+          if (storageData != null && storageData.isNotEmpty) {
+            print('🔍 Found data in secure storage, searching for matching beneficiary...');
+            
+            try {
+              final Map<String, dynamic> parsedData = jsonDecode(storageData);
+              if (parsedData['visits'] is List) {
+                for (var visit in parsedData['visits']) {
+                  try {
+                    final visitId = visit['id']?.toString();
+                    final visitBeneficiaryId = visit['BeneficiaryID']?.toString();
+                    
+                    // Try to get houseNo from different possible locations
+                    String? visitHouseNo;
+                    
+                    // 1. Check direct field first
+                    visitHouseNo = visit['houseNo']?.toString();
+                    
+                    // 2. Check nested in beneficiary_info.head_details if not found directly
+                    if (visitHouseNo == null && visit['beneficiary_info'] is Map) {
+                      final beneficiaryInfo = visit['beneficiary_info'] as Map;
+                      if (beneficiaryInfo['head_details'] is Map) {
+                        final headDetails = beneficiaryInfo['head_details'] as Map;
+                        visitHouseNo = headDetails['houseNo']?.toString();
+                        if (visitHouseNo != null) {
+                          print('   - Found houseNo in beneficiary_info.head_details');
+                        }
+                      }
+                    }
+                    
+                    // 3. Check _rawRow if still not found
+                    if (visitHouseNo == null && visit['_rawRow'] is Map) {
+                      final rawRow = visit['_rawRow'] as Map;
+                      
+                      // First try direct houseNo in _rawRow
+                      if (rawRow['houseNo'] != null) {
+                        visitHouseNo = rawRow['houseNo'].toString();
+                        if (visitHouseNo != null) {
+                          print('   - Found houseNo in _rawRow');
+                        }
+                      } 
+                      // Then try nested in _rawRow.beneficiary_info.head_details
+                      else if (rawRow['beneficiary_info'] is Map) {
+                        final rawBeneficiaryInfo = rawRow['beneficiary_info'] as Map;
+                        if (rawBeneficiaryInfo['head_details'] is Map) {
+                          final headDetails = rawBeneficiaryInfo['head_details'] as Map;
+                          visitHouseNo = headDetails['houseNo']?.toString();
+                          if (visitHouseNo != null) {
+                            print('   - Found houseNo in _rawRow.beneficiary_info.head_details');
+                          }
+                        }
+                      }
+                    }
+                    
+                    final isMatch = (dataId != null && (visitId == dataId || visitBeneficiaryId == dataId)) ||
+                                 (dataBeneficiaryId != null && (visitId == dataBeneficiaryId || visitBeneficiaryId == dataBeneficiaryId));
+                    
+                    if (isMatch) {
+                      houseNo = visitHouseNo;
+                      print('🏠 Found matching beneficiary in secure storage');
+                      print('   - ID: ${visitId ?? 'N/A'}');
+                      print('   - BeneficiaryID: ${visitBeneficiaryId ?? 'N/A'}');
+                      print('   - House No: ${houseNo ?? 'Not found'}');
+                      
+                      // Print the full visit data for debugging
+                      print('   - Full visit data: $visit');
+                      
+                      break;
+                    }
+                  } catch (e) {
+                    print('⚠️ Error processing visit data: $e');
+                  }
+                }
+              }
+            } catch (e) {
+              print('⚠️ Error parsing secure storage data: $e');
+            }
+          } else {
+            print('ℹ️ No data found in secure storage');
+          }
+        } catch (e) {
+          print('⚠️ Error accessing secure storage: $e');
+        }
+      } else {
+        print('ℹ️ No valid ID or BeneficiaryID provided for secure storage lookup');
+      }
+    }
+    
+    // Set initial values
+    _bloc.add(LmpDateChanged(DateTime.now()));
+
+    if (data != null) {
+      // Set name if available
+      if (data['Name'] != null) {
+        _bloc.add(WomanNameChanged(data['Name'].toString()));
+      }
+
+      // Set husband's name if available
+      if (data['HusbandName'] != null) {
+        _bloc.add(HusbandNameChanged(data['HusbandName'].toString()));
+      }
+
+      // Set RCH number if available
+      final rchNumber = data['_rawRow']?['rch_number'];
+      if (rchNumber != null) {
+        _bloc.add(RchNumberChanged(rchNumber.toString()));
+      }
+
+      // Set house number - prefer secure storage value over raw data
+      if (houseNo != null) {
+        _bloc.add(HouseNumberChanged(houseNo));
+      } else {
+        final rawHouseNo = data['_rawRow']?['houseNo'];
+        if (rawHouseNo != null) {
+          _bloc.add(HouseNumberChanged(rawHouseNo.toString()));
+        }
+      }
+
+      // Set beneficiary ID from the first available source
+      if (data['id'] != null) {
+        _bloc.add(BeneficiaryIdSet(data['id'].toString()));
+      } else if (data['_rawRow']?['id'] != null) {
+        _bloc.add(BeneficiaryIdSet(data['_rawRow']!['id'].toString()));
+      } else if (data['BeneficiaryID'] != null) {
+        _bloc.add(BeneficiaryIdSet(data['BeneficiaryID'].toString()));
+      }
+    }  // If no data but we have houseNo from storage, set it
+      if (houseNo != null) {
+        _bloc.add(HouseNumberChanged(houseNo));
+      }
+    }
+
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    // Create the bloc with the initial state
-    final bloc = AnvvisitformBloc();
-
-    // Prefill data if we have beneficiary data
-    if (widget.beneficiaryData != null) {
-      final data = widget.beneficiaryData!;
-      final rawRow = data['_rawRow'] as Map<String, dynamic>?;
-
-      // Set initial values
-      bloc.add(LmpDateChanged(DateTime.now()));
-
-      if (data['Name'] != null) {
-        bloc.add(WomanNameChanged(data['Name'].toString()));
-      }
-
-      if (data['HusbandName'] != null) {
-        bloc.add(HusbandNameChanged(data['HusbandName'].toString()));
-      }
-
-      if (rawRow?['rch_number'] != null) {
-        bloc.add(RchNumberChanged(rawRow!['rch_number'].toString()));
-      }
-
-      if (rawRow?['house_number'] != null) {
-        bloc.add(HouseNumberChanged(rawRow!['house_number'].toString()));
-      } else if (data['hhId'] != null) {
-        bloc.add(HouseNumberChanged(data['hhId'].toString()));
-      }
-    } else {
-      // If no beneficiary data, just set LMP to current date
-      bloc.add(LmpDateChanged(DateTime.now()));
-    }
 
     return BlocProvider.value(
-      value: bloc,
+      value: _bloc,
       child: Scaffold(
         appBar: AppHeader(
           screenTitle: l10n?.ancVisitFormTitle ?? 'ANC Visit Form',
@@ -97,9 +225,20 @@ class _AncvisitformState extends State<Ancvisitform> {
                             child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: TextStyle(fontSize: 14.sp)),
                           ),
                           const SizedBox(height: 6),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12.0),
-                            child: Text('${state.ancVisitNo}', style: const TextStyle(fontSize: 16)),
+                          FutureBuilder<int>(
+                            future: state.beneficiaryId != null && state.beneficiaryId!.isNotEmpty
+                                ? SecureStorageService.getSubmissionCount(state.beneficiaryId!)
+                                : Future.value(0),
+                            builder: (context, snapshot) {
+                              final count = snapshot.data ?? 0;
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 12.0),
+                                child: Text(
+                                  '$count',
+                                  style:  TextStyle(fontSize: 14.sp, ),
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 12),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -108,10 +247,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           ApiDropdown<String>(
                             labelText: l10n?.visitTypeLabel ?? 'Visit type *',
                             items: [
-                              l10n?.visitTypeHome ?? 'Home',
-                              l10n?.visitTypeSubcenter ?? 'Subcenter',
-                              l10n?.visitTypePhc ?? 'PHC',
-                              l10n?.visitTypeHospital ?? 'Hospital',
+                              'ANC', 'PMSMA'
                             ],
                             value: state.visitType.isEmpty ? null : state.visitType,
                             getLabel: (s) => s,
@@ -123,12 +259,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                           ApiDropdown<String>(
                             labelText: l10n?.placeOfAncLabel ?? 'Place of ANC',
                             items: [
-                              l10n?.visitTypeHome ?? 'Home',
-                              l10n?.visitTypeSubcenter ?? 'Subcenter',
-                              l10n?.visitTypePhc ?? 'PHC',
-                              l10n?.visitTypeHospital ?? 'Hospital',
+                              'VHSND/Anganwadi', 'Health Sub-center/Health & Wealth Centre(HSC/HWC)','Primary Health Centre(PHC)','Community Health Centre(CHC)','Referral Hospital(RH)','District Hospital(DH)','Medical College Hospital(MCH)','PMSMA Site'
                             ],
-                            value: state.placeOfAnc.isEmpty ? null : state.placeOfAnc,
+                             value: state.placeOfAnc.isEmpty ? null : state.placeOfAnc,
                             getLabel: (s) => s,
                             onChanged: (v) => bloc.add(PlaceOfAncChanged(v ?? '')),
                             hintText: l10n?.select ?? 'Select',
@@ -304,6 +437,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                             initialValue: state.systolic,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(SystolicChanged(v)),
+                            readOnly: true,
+
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
@@ -312,6 +447,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                             initialValue: state.diastolic,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(DiastolicChanged(v)),
+                            readOnly: true,
+
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           CustomTextField(
@@ -320,11 +457,12 @@ class _AncvisitformState extends State<Ancvisitform> {
                             initialValue: state.hemoglobin,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(HemoglobinChanged(v)),
+                            readOnly: true,
                           ),
 
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           ApiDropdown<String>(
-                            labelText: l10n?.anyHighRiskProblemLabel ?? 'Is there any high risk problem?',
+                              labelText: l10n?.anyHighRiskProblemLabel ?? 'Is there any high risk problem?',
                             items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                             value: state.highRisk.isEmpty ? null : state.highRisk,
                             getLabel: (s) => s,
@@ -332,6 +470,20 @@ class _AncvisitformState extends State<Ancvisitform> {
                             hintText: l10n?.select ?? 'Select',
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                          if (int.tryParse(state.weeksOfPregnancy) != null &&
+                              int.parse(state.weeksOfPregnancy) < 3) ...[
+                            ApiDropdown<String>(
+                              labelText: 'Did the pregnant woman give birth to a baby?',
+                              items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
+                              value: state.givesBirthToBaby.isEmpty ? null : state.givesBirthToBaby,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(GivesBirthToBaby(v ?? '')),
+                              hintText: l10n?.select ?? 'Select',
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                          ],
+
+
                           ApiDropdown<String>(
                             labelText: l10n?.beneficiaryAbsentLabel ?? 'Is Beneficiary Absent?',
                             items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
