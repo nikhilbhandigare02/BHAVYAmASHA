@@ -1,12 +1,29 @@
+import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:medixcel_new/core/utils/app_info_utils.dart';
+import 'package:medixcel_new/core/utils/device_info_utils.dart';
+import 'package:medixcel_new/core/utils/enums.dart' show FormStatus;
+import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
+import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 import 'package:meta/meta.dart';
 
 part 'register_child_form_event.dart';
 part 'register_child_form_state.dart';
 
 class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFormState> {
-  RegisterChildFormBloc() : super(RegisterChildFormState.initial()) {
+  static const _secureStorage = FlutterSecureStorage();
+  final String? beneficiaryId;
+  final String? householdId;
+
+  RegisterChildFormBloc({
+    this.beneficiaryId,
+    this.householdId,
+  }) : super(RegisterChildFormState.initial()) {
     on<RchIdChildChanged>((e, emit) => emit(state.copyWith(rchIdChild: e.value, clearError: true)));
     on<SerialNumberChanged>((e, emit) => emit(state.copyWith(serialNumber: e.value, clearError: true)));
     on<DateOfBirthChanged>((e, emit) => emit(state.copyWith(dateOfBirth: e.value, clearError: true)));
@@ -44,7 +61,212 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
     }
 
     emit(state.copyWith(isSubmitting: true, clearError: true, isSuccess: false));
-    await Future.delayed(const Duration(milliseconds: 600));
-    emit(state.copyWith(isSubmitting: false, isSuccess: true));
+
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final now = DateTime.now().toIso8601String();
+
+      final formType = FollowupFormDataTable.childRegistrationDue;
+      final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Child Registration Due';
+      final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '2ol35gbp7rczyvn6';
+
+      final formData = {
+        'form_type': formType,
+        'form_name': formName,
+        'unique_key': formsRefKey,
+        'form_data': {
+          'rch_id_child': state.rchIdChild,
+          'register_serial_number': state.registerSerialNumber,
+          'date_of_birth': state.dateOfBirth?.toIso8601String(),
+          'date_of_registration': state.dateOfRegistration?.toIso8601String(),
+          'child_name': state.childName,
+          'gender': state.gender,
+          'mother_name': state.motherName,
+          'father_name': state.fatherName,
+          'address': state.address,
+          'whose_mobile_number': state.whoseMobileNumber,
+          'mobile_number': state.mobileNumber,
+          'mothers_rch_id_number': state.mothersRchIdNumber,
+          'birth_certificate_issued': state.birthCertificateIssued,
+          'birth_certificate_number': state.birthCertificateNumber,
+          'weight_grams': state.weightGrams,
+          'religion': state.religion,
+          'caste': state.caste,
+        },
+        'created_at': now,
+        'updated_at': now,
+      };
+
+      // Get beneficiary details
+      String householdRefKey = '';
+      String motherKey = '';
+      String fatherKey = '';
+      String beneficiaryRefKey = beneficiaryId ?? '';
+
+      if (householdId != null && householdId!.isNotEmpty) {
+        List<Map<String, dynamic>> beneficiaryMaps = await db.query(
+          'beneficiaries',
+          where: 'household_ref_key = ?',
+          whereArgs: [householdId],
+        );
+
+        if (beneficiaryMaps.isEmpty) {
+          beneficiaryMaps = await db.query(
+            'beneficiaries',
+            where: 'id = ?',
+            whereArgs: [int.tryParse(householdId!) ?? 0],
+          );
+        }
+
+        if (beneficiaryMaps.isNotEmpty) {
+          final beneficiary = beneficiaryMaps.first;
+          householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
+          motherKey = beneficiary['mother_key'] as String? ?? '';
+          fatherKey = beneficiary['father_key'] as String? ?? '';
+        }
+      }
+
+      final formJson = jsonEncode(formData);
+      print('💾 Form JSON to be saved: $formJson');
+      print('💾 Form JSON length: ${formJson.length}');
+
+      late DeviceInfo deviceInfo;
+      try {
+        deviceInfo = await DeviceInfo.getDeviceInfo();
+      } catch (e) {
+        print('Error getting package/device info: $e');
+
+        deviceInfo = DeviceInfo(
+          deviceId: 'unknown',
+          platform: 'unknown',
+          osVersion: 'unknown',
+          appInfo: AppInfo(
+            appVersion: '1.0.0',
+            appName: 'BHAVYA mASHA',
+            buildNumber: '1',
+            packageName: 'com.medixcel.bhavyamasha',
+          ),
+        );
+      }
+
+      // Get current user
+      final currentUser = await UserInfo.getCurrentUser();
+      print('Current User: $currentUser');
+
+      Map<String, dynamic> userDetails = {};
+      if (currentUser != null) {
+        if (currentUser['details'] is String) {
+          try {
+            userDetails = jsonDecode(currentUser['details'] ?? '{}');
+          } catch (e) {
+            print('Error parsing user details: $e');
+            userDetails = {};
+          }
+        } else if (currentUser['details'] is Map) {
+          userDetails = Map<String, dynamic>.from(currentUser['details']);
+        }
+        print('User Details: $userDetails');
+      }
+
+      // Try different possible keys for facility ID
+      final facilityId = userDetails['asha_associated_with_facility_id'] ??
+          userDetails['facility_id'] ??
+          userDetails['facilityId'] ??
+          userDetails['facility'] ??
+          0;
+
+      print('Using Facility ID: $facilityId');
+
+      final formDataForDb = {
+        'server_id': '',
+        'forms_ref_key': formsRefKey,
+        'household_ref_key': householdRefKey,
+        'beneficiary_ref_key': beneficiaryRefKey,
+        'mother_key': motherKey,
+        'father_key': fatherKey,
+        'child_care_state': '',
+        'device_details': jsonEncode({
+          'id': deviceInfo.deviceId,
+          'platform': deviceInfo.platform,
+          'version': deviceInfo.osVersion,
+        }),
+        'app_details': jsonEncode({
+          'app_version': deviceInfo.appVersion.split('+').first,
+          'app_name': deviceInfo.appName,
+          'build_number': deviceInfo.buildNumber,
+          'package_name': deviceInfo.packageName,
+        }),
+        'parent_user': '',
+        'current_user_key': '',
+        'facility_id': facilityId,
+        'form_json': formJson,
+        'created_date_time': now,
+        'modified_date_time': now,
+        'is_synced': 0,
+        'is_deleted': 0,
+      };
+
+      try {
+        print('\n📝 Data being inserted to DB:');
+        print('form_json field: ${formDataForDb['form_json']}');
+        print('form_json is null: ${formDataForDb['form_json'] == null}');
+        print('form_json length: ${(formDataForDb['form_json'] as String?)?.length}');
+        
+        final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
+
+        if (formId > 0) {
+          print('✅ Form saved successfully with ID: $formId');
+          print('📋 Form Data: $formJson');
+          print('🏠 Household Ref Key: $householdRefKey');
+          print('👤 Beneficiary Ref Key: $beneficiaryRefKey');
+          print('📱 Form Type: $formType');
+          print('📝 Form Name: $formName');
+          print('🔑 Forms Ref Key: $formsRefKey');
+
+          // Store in secure storage
+          try {
+            final secureStorageKey = 'child_registration_${beneficiaryRefKey}_${DateTime.now().millisecondsSinceEpoch}';
+            await _secureStorage.write(
+              key: secureStorageKey,
+              value: formJson,
+            );
+            print('🔒 Form data stored in secure storage with key: $secureStorageKey');
+          } catch (e) {
+            print('⚠️ Error storing form data in secure storage: $e');
+          }
+
+          // Print the saved data from database
+          try {
+            final savedData = await db.query(
+              'followup_form_data',
+              where: 'id = ?',
+              whereArgs: [formId],
+            );
+            if (savedData.isNotEmpty) {
+              print('\n📊 Saved Data from Database:');
+              print(savedData.first);
+            }
+          } catch (e) {
+            print('⚠️ Error reading saved data: $e');
+          }
+
+          emit(state.copyWith(isSubmitting: false, isSuccess: true));
+        } else {
+          throw Exception('Failed to save form data');
+        }
+      } catch (e) {
+        print('❌ Error saving form data: $e');
+        emit(state.copyWith(
+          isSubmitting: false,
+          error: 'Failed to save form: $e',
+        ));
+      }
+    } catch (e) {
+      print('❌ Error in form submission: $e');
+      emit(state.copyWith(
+        isSubmitting: false,
+        error: 'Error: $e',
+      ));
+    }
   }
 }

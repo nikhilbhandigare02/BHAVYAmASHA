@@ -16,6 +16,7 @@ class AshaDashboardSection extends StatelessWidget {
   final int? householdCount;
   final int? beneficiariesCount;
   final int? eligibleCouplesCount;
+  final int? pregnantWomenCount;
 
   const AshaDashboardSection({
     super.key,
@@ -28,6 +29,7 @@ class AshaDashboardSection extends StatelessWidget {
     this.householdCount,
     this.beneficiariesCount,
     this.eligibleCouplesCount,
+    this.pregnantWomenCount,
   });
 
   @override
@@ -42,7 +44,7 @@ class AshaDashboardSection extends StatelessWidget {
       {"image": 'assets/images/id-card.png', "label": l10n.gridAbhaGeneration},
       {"image": 'assets/images/work-in-progress.png', "label": l10n.gridWorkProgress},
       {"image": 'assets/images/couple.png', "label": l10n.gridEligibleCoupleASHA, "count": eligibleCouplesCount ?? 0},
-      {"image": 'assets/images/mother.png', "label": l10n.gridMotherCare, "count": 1},
+      {"image": 'assets/images/mother.png', "label": l10n.gridMotherCare, "count": pregnantWomenCount ?? 0},
       {"image": 'assets/images/toddler.png', "label": l10n.gridChildCare, "count": 5},
       {"image": 'assets/images/hrp.png', "label": l10n.gridHighRisk, "count": 7},
       {"image": 'assets/images/video.png', "label": l10n.gridAshaKiDuniya},

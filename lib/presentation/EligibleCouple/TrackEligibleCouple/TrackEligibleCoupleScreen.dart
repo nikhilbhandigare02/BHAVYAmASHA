@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
@@ -22,12 +23,16 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
     this.isProtected = false,
   });
 
-  static Route route({required String beneficiaryId, bool isProtected = false}) => MaterialPageRoute(
-    builder: (context) => TrackEligibleCoupleScreen(
-      beneficiaryId: beneficiaryId,
-      isProtected: isProtected,
-    ),
-  );
+  static Route route({
+    required String beneficiaryId,
+    bool isProtected = false,
+  }) =>
+      MaterialPageRoute(
+        builder: (context) => TrackEligibleCoupleScreen(
+          beneficiaryId: beneficiaryId,
+          isProtected: isProtected,
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +44,23 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
       child: BlocListener<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
         listener: (context, state) {
           if (state.status == FormStatus.success) {
-            Navigator.of(context).pop(true);
+            if (state.fpAdopting == true) {
+              showConfirmationDialog(
+                context: context,
+                title: 'Form has been saved successfully',
+                message:
+                'Pregnant beneficiary has been added to antenatal care (ANC) list.',
+                yesText: 'Yes',
+                onYes: () => Navigator.pop(context),
+                titleBackgroundColor: AppColors.background,
+                titleTextColor: AppColors.primary,
+                messageTextColor: Colors.black87,
+                yesButtonColor: AppColors.primary,
+                dialogBackgroundColor: Colors.white,
+              );
+            } else {
+              Navigator.of(context).pop(true);
+            }
           }
         },
         child: _TrackEligibleCoupleView(beneficiaryId: beneficiaryId),
@@ -53,22 +74,20 @@ class _TrackEligibleCoupleView extends StatelessWidget {
 
   const _TrackEligibleCoupleView({required this.beneficiaryId});
 
-  // Date formatter is now handled by CustomDatePicker
-
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppHeader(
-        screenTitle:
-        t?.trackEligibleCoupleTitle ?? 'योग्य दम्पतियों की ट्रैकिंग',
+        screenTitle: t?.trackEligibleCoupleTitle ?? 'योग्य दम्पतियों की ट्रैकिंग',
         showBack: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child:  Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Visit Date
@@ -79,7 +98,9 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                 lastDate: DateTime(2100),
                 onDateChanged: (date) {
                   if (date != null) {
-                    context.read<TrackEligibleCoupleBloc>().add(VisitDateChanged(date));
+                    context
+                        .read<TrackEligibleCoupleBloc>()
+                        .add(VisitDateChanged(date));
                   }
                 },
               ),
@@ -95,7 +116,9 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     labelText: t?.financialYearLabel ?? 'वित्तीय वर्ष',
                     readOnly: true,
                     controller: TextEditingController(
-                      text: state.financialYear.isEmpty ? 'YYYY' : state.financialYear,
+                      text: state.financialYear.isEmpty
+                          ? 'YYYY'
+                          : state.financialYear,
                     ),
                   );
                 },
@@ -103,7 +126,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               const Divider(thickness: 1, color: Colors.grey),
               const SizedBox(height: 8),
 
-              // Pregnant?
+              // Is Pregnant
               BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
                 builder: (context, state) {
                   return ApiDropdown<bool>(
@@ -125,7 +148,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               const Divider(thickness: 1, color: Colors.grey),
               const SizedBox(height: 8),
 
-              // Conditional sections
+              // Conditional Sections
               BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
                 builder: (context, state) {
                   if (state.isPregnant == true) {
@@ -138,20 +161,24 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                           lastDate: DateTime(2100),
                           onDateChanged: (date) {
                             if (date != null) {
-                              context.read<TrackEligibleCoupleBloc>().add(LmpDateChanged(date));
+                              context
+                                  .read<TrackEligibleCoupleBloc>()
+                                  .add(LmpDateChanged(date));
                             }
                           },
                         ),
                         const Divider(thickness: 1, color: Colors.grey),
                         const SizedBox(height: 8),
-
                         CustomDatePicker(
-                          labelText: '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
+                          labelText:
+                          '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
                           firstDate: DateTime(1900),
                           lastDate: DateTime(2100),
                           onDateChanged: (date) {
                             if (date != null) {
-                              context.read<TrackEligibleCoupleBloc>().add(EddDateChanged(date));
+                              context
+                                  .read<TrackEligibleCoupleBloc>()
+                                  .add(EddDateChanged(date));
                             }
                           },
                         ),
@@ -171,7 +198,9 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                           value: state.fpAdopting,
                           onChanged: (value) {
                             if (value != null) {
-                              context.read<TrackEligibleCoupleBloc>().add(FpAdoptingChanged(value));
+                              context
+                                  .read<TrackEligibleCoupleBloc>()
+                                  .add(FpAdoptingChanged(value));
                             }
                           },
                         ),
@@ -196,110 +225,137 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                             value: state.fpMethod,
                             onChanged: (value) {
                               if (value != null) {
-                                context.read<TrackEligibleCoupleBloc>().add(FpMethodChanged(value));
+                                context
+                                    .read<TrackEligibleCoupleBloc>()
+                                    .add(FpMethodChanged(value));
                               }
                             },
                           ),
                           const Divider(thickness: 1, color: Colors.grey),
-
                         ],
 
-                        if(state.fpMethod == 'Copper -T (IUCD)')...[
+                        if (state.fpMethod == 'Copper -T (IUCD)') ...[
                           CustomDatePicker(
-                            labelText:  'Date of removal',
+                            labelText: 'Date of removal',
                             initialDate: DateTime.now(),
                             firstDate: DateTime(1900),
                             lastDate: DateTime(2100),
                             onDateChanged: (date) {
                               if (date != null) {
-                                context.read<TrackEligibleCoupleBloc>().add(RemovalDAteChange(date));
+                                context
+                                    .read<TrackEligibleCoupleBloc>()
+                                    .add(RemovalDAteChange(date));
                               }
                             },
                           ),
                           const Divider(thickness: 1, color: Colors.grey),
-
                           CustomTextField(
                             labelText: 'Reason for Removal',
                             hintText: 'Enter reason for removal',
                             onChanged: (value) {
-                              context.read<TrackEligibleCoupleBloc>().add(RemovalReasonChanged(value));
+                              context
+                                  .read<TrackEligibleCoupleBloc>()
+                                  .add(RemovalReasonChanged(value));
                             },
                           ),
                           const Divider(thickness: 1, color: Colors.grey),
                         ],
-                        // Quantities based on FP method
+
                         if (state.fpMethod == 'Condom') ...[
                           CustomTextField(
                             labelText: 'Quantity of Condoms',
                             hintText: 'Enter quantity',
                             keyboardType: TextInputType.number,
                             onChanged: (value) {
-                              context.read<TrackEligibleCoupleBloc>().add(CondomQuantity(value));
+                              context
+                                  .read<TrackEligibleCoupleBloc>()
+                                  .add(CondomQuantity(value));
                             },
                           ),
                           const Divider(thickness: 1, color: Colors.grey),
                         ],
-                        if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)') ...[
+                        if (state.fpMethod ==
+                            'Mala -N (Daily Contraceptive pill)') ...[
                           CustomTextField(
-                            labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
+                            labelText:
+                            'Quantity of Mala -N (Daily Contraceptive pill)',
                             hintText: 'Enter quantity',
                             keyboardType: TextInputType.number,
                             onChanged: (value) {
-                              context.read<TrackEligibleCoupleBloc>().add(MalaQuantity(value));
+                              context
+                                  .read<TrackEligibleCoupleBloc>()
+                                  .add(MalaQuantity(value));
                             },
                           ),
                           const Divider(thickness: 1, color: Colors.grey),
                         ],
-                        if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)') ...[
+                        if (state.fpMethod ==
+                            'Chhaya (Weekly Contraceptive pill)') ...[
                           CustomTextField(
                             labelText: 'Chhaya (Weekly Contraceptive pill)',
                             hintText: 'Enter quantity',
                             keyboardType: TextInputType.number,
                             onChanged: (value) {
-                              context.read<TrackEligibleCoupleBloc>().add(ChayaQuantity(value));
+                              context
+                                  .read<TrackEligibleCoupleBloc>()
+                                  .add(ChayaQuantity(value));
                             },
                           ),
                           const Divider(thickness: 1, color: Colors.grey),
                         ],
-                        if (state.fpMethod == 'ECP (Emergency Contraceptive pill)') ...[
+                        if (state.fpMethod ==
+                            'ECP (Emergency Contraceptive pill)') ...[
                           CustomTextField(
                             labelText: 'ECP (Emergency Contraceptive pill)',
                             hintText: 'Enter quantity',
                             keyboardType: TextInputType.number,
                             onChanged: (value) {
-                              context.read<TrackEligibleCoupleBloc>().add(ECPQuantity(value));
+                              context
+                                  .read<TrackEligibleCoupleBloc>()
+                                  .add(ECPQuantity(value));
                             },
                           ),
                           const Divider(thickness: 1, color: Colors.grey),
                         ],
-
-                        ApiDropdown<bool>(
-                          labelText: 'Is Beneficiary Absent',
-                          items: [true, false],
-                          getLabel: (value) =>
-                          value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
-                          value: state.beneficiaryAbsentCHanged,
-                          onChanged: (value) {
-                            if (value != null) {
-                              context
-                                  .read<TrackEligibleCoupleBloc>()
-                                  .add(BeneficiaryAbsentCHanged(value));
-                            }
-                          },
-                        ),
-                        const Divider(thickness: 1, color: Colors.grey),
-                        const SizedBox(height: 12),
                       ],
                     );
                   }
                   return const SizedBox.shrink();
                 },
               ),
+
+              // ✅ Always show "Is Beneficiary Absent"
+              BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
+                builder: (context, state) {
+                  final t = AppLocalizations.of(context);
+                  return Column(
+                    children: [
+                      const SizedBox(height: 8),
+                      ApiDropdown<bool>(
+                        labelText: 'Is Beneficiary Absent',
+                        items: [true, false],
+                        getLabel: (value) =>
+                        value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
+                        value: state.beneficiaryAbsentCHanged,
+                        onChanged: (value) {
+                          if (value != null) {
+                            context
+                                .read<TrackEligibleCoupleBloc>()
+                                .add(BeneficiaryAbsentCHanged(value));
+                          }
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
-
         ),
       ),
+
+      // Bottom Buttons
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
@@ -314,7 +370,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PreviousVisitsScreen(beneficiaryId: beneficiaryId),
+                          builder: (context) =>
+                              PreviousVisitsScreen(beneficiaryId: beneficiaryId),
                         ),
                       );
                     },
@@ -347,7 +404,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       minimumSize: const Size.fromHeight(48),
                     ),
                     child: state.status == FormStatus.submitting
@@ -355,11 +413,17 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
-                        : Text(t?.saveButton ?? 'संरक्षित करें',
-                        style: TextStyle(
-                            color: AppColors.background, fontSize: 15.sp)),
+                        : Text(
+                      t?.saveButton ?? 'संरक्षित करें',
+                      style: TextStyle(
+                        color: AppColors.background,
+                        fontSize: 15.sp,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -369,5 +433,4 @@ class _TrackEligibleCoupleView extends StatelessWidget {
       ),
     );
   }
-
 }

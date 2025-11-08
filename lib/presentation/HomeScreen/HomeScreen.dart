@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
@@ -38,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int householdCount = 0;
   int beneficiariesCount = 0;
   int eligibleCouplesCount = 0;
+  int pregnantWomenCount = 0;
 
   @override
   void initState() {
@@ -47,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadHouseholdCount();
     _loadBeneficiariesCount();
     _loadEligibleCouplesCount();
+    _loadPregnantWomenCount();
   }
 
   Future<void> _loadHouseholdCount() async {
@@ -128,25 +132,104 @@ class _HomeScreenState extends State<HomeScreen> {
     
     // Check marital status (use head's marital status if person is spouse)
     final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? 
-                           head?['maritalStatus']?.toString().toLowerCase() ?? '';
-    if (maritalStatusRaw != 'married') return false;
+                           person['marital_status']?.toString().toLowerCase() ??
+                           head?['maritalStatus']?.toString().toLowerCase() ??
+                           head?['marital_status']?.toString().toLowerCase() ??
+                           '';
+    if (maritalStatusRaw != 'married' && maritalStatusRaw != 'm') return false;
+    
+    // Check if pregnant
+    final isPregnant = person['isPregnant']?.toString().toLowerCase() == 'true' ||
+        person['isPregnant']?.toString().toLowerCase() == 'yes' ||
+        person['pregnancyStatus']?.toString().toLowerCase() == 'pregnant';
+    
+    if (!isPregnant) return false;
     
     // Check age (15-49 years)
-    final dob = person['dob']?.toString();
+    final dob = person['dob']?.toString() ?? person['dateOfBirth']?.toString();
     if (dob != null && dob.isNotEmpty) {
       try {
-        final birthDate = DateTime.tryParse(dob);
+        String dateStr = dob.toString();
+        if (dateStr.contains('T')) {
+          dateStr = dateStr.split('T')[0];
+        }
+        final birthDate = DateTime.tryParse(dateStr);
         if (birthDate != null) {
-          final age = DateTime.now().difference(birthDate).inDays ~/ 365;
+          final now = DateTime.now();
+          int age = now.year - birthDate.year;
+          if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+            age--;
+          }
           return age >= 15 && age <= 49;
         }
       } catch (e) {
         print('Error parsing date of birth: $e');
+        return false;
       }
     }
     
     // If we can't determine age, assume eligible
     return true;
+  }
+  
+  Future<void> _loadPregnantWomenCount() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      int count = 0;
+      
+      for (final row in rows) {
+        try {
+          // Check if is_family_planning is set
+          final isFamilyPlanning = row['is_family_planning'] == 1 || 
+                                 row['is_family_planning'] == '1' ||
+                                 (row['is_family_planning']?.toString().toLowerCase() == 'true');
+          
+          if (!isFamilyPlanning) continue;
+
+          // Parse the beneficiary info
+          final dynamic rawInfo = row['beneficiary_info'];
+          if (rawInfo == null) continue;
+
+          Map<String, dynamic> info = {};
+          try {
+            info = rawInfo is String 
+                ? Map<String, dynamic>.from(jsonDecode(rawInfo) as Map) 
+                : Map<String, dynamic>.from(rawInfo as Map);
+          } catch (e) {
+            continue;
+          }
+
+          // Process head and spouse
+          final head = (info['head_details'] is Map)
+              ? Map<String, dynamic>.from(info['head_details'] as Map)
+              : <String, dynamic>{};
+
+          final spouse = (info['spouse_details'] is Map)
+              ? Map<String, dynamic>.from(info['spouse_details'] as Map)
+              : <String, dynamic>{};
+
+          // Check if head is eligible pregnant woman
+          if (_isEligibleFemale(head, head: head)) {
+            count++;
+          }
+
+          // Check if spouse is eligible pregnant woman
+          if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
+            count++;
+          }
+        } catch (e) {
+          print('Error processing beneficiary for pregnant women count: $e');
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          pregnantWomenCount = count;
+        });
+      }
+    } catch (e) {
+      print('Error loading pregnant women count: $e');
+    }
   }
 
   Future<void> fetchApiData() async {
@@ -309,6 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 householdCount: householdCount,
                 beneficiariesCount: beneficiariesCount,
                 eligibleCouplesCount: eligibleCouplesCount,
+                pregnantWomenCount: pregnantWomenCount,
                 selectedGridIndex: selectedGridIndex,
                 onGridTap: (index) =>
                     setState(() => selectedGridIndex = index),

@@ -166,43 +166,43 @@ class _HouseHold_BeneficiaryScreenState
           addCard(spouse, 'Spouse');
         }
         
-        // Add children from children_details
-        if (children.isNotEmpty) {
-          final totalChildren = (children['totalLive'] is num ? children['totalLive'] : 0) as int;
-          if (totalChildren > 0) {
-            for (int i = 0; i < totalChildren; i++) {
-              final child = {
-                'name': 'Child ${i + 1}',
-                'gender': i < (children['totalMale'] ?? 0) ? 'Male' : 'Female',
-                'fatherName': head['headName']?.toString() ?? '',
-                'motherName': spouse['memberName']?.toString() ?? '',
-                'memberType': 'Child',
-                'dob': null, // Add default values for required fields
-                'mobileNo': '',
-                'maritalStatus': '',
-              };
-              addCard(child, 'Child', isChild: true);
-            }
-          }
-        }
+        // Children are now only added from member_details with memberType 'Child'
         
-        // Add other family members from member_details
+        // Add family members from member_details
         if (members.isNotEmpty && members is List) {
           for (final member in members) {
             if (member is Map) {
               final memberData = Map<String, dynamic>.from(member);
-              // Ensure all required fields exist
-              memberData['memberName'] = memberData['memberName'] ?? memberData['name'] ?? '';
-              memberData['gender'] = memberData['gender'] ?? '';
-              memberData['dob'] = memberData['dob'] ?? '';
-              memberData['mobileNo'] = memberData['mobileNo'] ?? '';
-              memberData['maritalStatus'] = memberData['maritalStatus'] ?? '';
-              
-              addCard(
-                memberData,
-                memberData['memberType'] == 'Child' ? 'Child' : 'Member',
-                isChild: memberData['memberType'] == 'Child',
-              );
+              // Only process members with memberType 'Child' for children
+              if (memberData['memberType'] == 'Child') {
+                // Ensure all required fields exist
+                memberData['memberName'] = memberData['memberName'] ?? memberData['name'] ?? '';
+                memberData['gender'] = memberData['gender'] ?? '';
+                memberData['dob'] = memberData['dob'] ?? '';
+                memberData['mobileNo'] = memberData['mobileNo'] ?? '';
+                memberData['maritalStatus'] = memberData['maritalStatus'] ?? '';
+                
+                // Add father's name from head if not available
+                if (memberData['fatherName'] == null) {
+                  memberData['fatherName'] = head['headName']?.toString() ?? '';
+                }
+                
+                // Add mother's name from spouse if not available
+                if (memberData['motherName'] == null) {
+                  memberData['motherName'] = spouse['memberName']?.toString() ?? '';
+                }
+                
+                addCard(memberData, 'Child', isChild: true);
+              } else {
+                // Handle other member types (non-children)
+                memberData['memberName'] = memberData['memberName'] ?? memberData['name'] ?? '';
+                memberData['gender'] = memberData['gender'] ?? '';
+                memberData['dob'] = memberData['dob'] ?? '';
+                memberData['mobileNo'] = memberData['mobileNo'] ?? '';
+                memberData['maritalStatus'] = memberData['maritalStatus'] ?? '';
+                
+                addCard(memberData, 'Member', isChild: false);
+              }
             }
           }
         }
@@ -434,7 +434,7 @@ class _HouseHold_BeneficiaryScreenState
                       return 'Other';
                     }
                     
-                    // Get head and spouse details from the loaded beneficiaries
+
                     final head = _beneficiaries.firstWhere(
                       (b) => b['Relation'] == 'Head',
                       orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': '', '_memberData': {}},

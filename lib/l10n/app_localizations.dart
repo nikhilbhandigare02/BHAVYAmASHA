@@ -5819,6 +5819,24 @@ abstract class AppLocalizations {
   /// **'Please fill all required fields'**
   String get pleaseFillAllFields;
 
+  /// No description provided for @formSavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Form has been saved successfully'**
+  String get formSavedTitle;
+
+  /// No description provided for @pregnancyAddedToAncMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant beneficiary has been added to antenatal care (ANC) list'**
+  String get pregnancyAddedToAncMessage;
+
+  /// No description provided for @okButton.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get okButton;
+
   /// No description provided for @exclusiveBreastfeedingStartedLabel.
   ///
   /// In en, this message translates to:
@@ -6748,7 +6766,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AES/JE data saved successfully!'**
   String get aesJeDataSaved;
-
 
   /// No description provided for @ambProgram.
   ///

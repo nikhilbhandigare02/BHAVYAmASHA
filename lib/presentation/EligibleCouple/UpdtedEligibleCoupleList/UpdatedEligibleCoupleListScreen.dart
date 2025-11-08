@@ -77,7 +77,15 @@ class _UpdatedEligibleCoupleListScreenState
         final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
         final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
         
-        final isFamilyPlanning = row['is_family_planning'] == 1;
+        // Check if the beneficiary is on family planning
+        final isFamilyPlanning = (row['is_family_planning']?.toString().toLowerCase() == 'yes' ||
+                               row['is_family_planning']?.toString() == '1' ||
+                               row['is_family_planning'] == true);
+        
+        // Skip this record if the beneficiary is on family planning
+        if (isFamilyPlanning) {
+          continue;
+        }
         
         if (_isEligibleFemale(head)) {
           couples.add(_formatData(row, head, spouse, isHead: true, isFamilyPlanning: isFamilyPlanning));

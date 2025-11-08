@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import '../../config/themes/CustomColors.dart';
 
 Future<bool?> showConfirmationDialog({
@@ -6,15 +7,25 @@ Future<bool?> showConfirmationDialog({
   required String title,
   required String message,
   required String yesText,
-  required String noText,
-  VoidCallback? onYes, // ✅ Optional callback
-  VoidCallback? onNo,  // ✅ Optional callback
+  String? noText, // ✅ Optional for single-button case
+  VoidCallback? onYes,
+  VoidCallback? onNo,
+
+  // ✅ Optional color customizations
+  Color? titleBackgroundColor,
+  Color? titleTextColor,
+  Color? messageTextColor,
+  Color? yesButtonColor,
+  Color? noButtonColor,
+  Color? dialogBackgroundColor,
 }) {
   return showDialog<bool>(
     context: context,
     builder: (context) {
+      final hasTwoButtons = noText != null && noText.isNotEmpty;
+
       return AlertDialog(
-        backgroundColor: AppColors.background,
+        backgroundColor: dialogBackgroundColor ?? AppColors.background,
         elevation: 8,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
@@ -22,56 +33,65 @@ Future<bool?> showConfirmationDialog({
         titlePadding: EdgeInsets.zero,
         contentPadding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+
+        // 🟡 Title Section
         title: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppColors.warning,
-            borderRadius: BorderRadius.circular(4),
+            color: titleBackgroundColor ?? AppColors.warning,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
           child: Text(
             title,
-            style: const TextStyle(
-              color: AppColors.background,
+            style: TextStyle(
+              color: titleTextColor ?? AppColors.background,
               fontWeight: FontWeight.bold,
-              fontSize: 20,
+              fontSize: 16.sp,
             ),
           ),
         ),
+
+        // 🟡 Message Section
         content: Padding(
           padding: const EdgeInsets.only(top: 16.0),
           child: Text(
             message,
-            style: const TextStyle(
-              color: AppColors.warning,
-              fontSize: 16,
+            style: TextStyle(
+              color: messageTextColor ?? AppColors.warning,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
         ),
+
+        // 🟡 Buttons (Dynamic Layout)
+        actionsAlignment:
+        hasTwoButtons ? MainAxisAlignment.end : MainAxisAlignment.end,
         actions: [
+          if (hasTwoButtons)
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+                if (onNo != null) onNo();
+              },
+              child: Text(
+                noText!,
+                style: TextStyle(
+                  color: noButtonColor ?? AppColors.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(true);
-              if (onYes != null) onYes(); // ✅ Optional callback
+              if (onYes != null) onYes();
             },
             child: Text(
               yesText,
-              style: const TextStyle(
-                color: AppColors.error,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-              if (onNo != null) onNo(); // ✅ Optional callback
-            },
-            child: Text(
-              noText,
-              style: const TextStyle(
-                color: AppColors.error,
+              style: TextStyle(
+                color: yesButtonColor ?? AppColors.error,
                 fontWeight: FontWeight.w600,
               ),
             ),
