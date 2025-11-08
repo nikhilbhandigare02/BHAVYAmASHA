@@ -315,15 +315,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                             ),
                                           );
                                           
-                                          // Navigate based on whether the user is new or existing
                                           Future.delayed(const Duration(milliseconds: 500), () {
                                             if (state.isNewUser) {
-                                              // New user - go to profile screen
                                               Navigator.pushNamedAndRemoveUntil(
                                                 context,
                                                 Route_Names.profileScreen,
                                                 (route) => false,
                                               );
+
                                             } else {
 
                                               Navigator.pushNamedAndRemoveUntil(

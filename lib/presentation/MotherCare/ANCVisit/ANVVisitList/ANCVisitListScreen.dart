@@ -14,6 +14,7 @@ import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../../../data/Local_Storage/local_storage_dao.dart';
+import '../ANCVisitForm/ANCVisitForm.dart';
 
 
 class Ancvisitlistscreen extends StatefulWidget {
@@ -406,8 +407,12 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () {
-        Navigator.pushNamed(context, Route_Names.Ancvisitform);
-      },
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Ancvisitform(beneficiaryData: data),
+          ),
+        );      },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
@@ -415,9 +420,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 4,
+              offset: const Offset(4, 4),
             ),
           ],
         ),

@@ -12,7 +12,9 @@ import 'package:sizer/sizer.dart';
 import 'bloc/anvvisitform_bloc.dart';
 
 class Ancvisitform extends StatefulWidget {
-  const Ancvisitform({super.key});
+  final Map<String, dynamic>? beneficiaryData;
+
+  const Ancvisitform({super.key, this.beneficiaryData});
 
   @override
   State<Ancvisitform> createState() => _AncvisitformState();
@@ -20,10 +22,49 @@ class Ancvisitform extends StatefulWidget {
 
 class _AncvisitformState extends State<Ancvisitform> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return BlocProvider(
-      create: (_) => AnvvisitformBloc(),
+
+    // Create the bloc with the initial state
+    final bloc = AnvvisitformBloc();
+
+    // Prefill data if we have beneficiary data
+    if (widget.beneficiaryData != null) {
+      final data = widget.beneficiaryData!;
+      final rawRow = data['_rawRow'] as Map<String, dynamic>?;
+
+      // Set initial values
+      bloc.add(LmpDateChanged(DateTime.now()));
+
+      if (data['Name'] != null) {
+        bloc.add(WomanNameChanged(data['Name'].toString()));
+      }
+
+      if (data['HusbandName'] != null) {
+        bloc.add(HusbandNameChanged(data['HusbandName'].toString()));
+      }
+
+      if (rawRow?['rch_number'] != null) {
+        bloc.add(RchNumberChanged(rawRow!['rch_number'].toString()));
+      }
+
+      if (rawRow?['house_number'] != null) {
+        bloc.add(HouseNumberChanged(rawRow!['house_number'].toString()));
+      } else if (data['hhId'] != null) {
+        bloc.add(HouseNumberChanged(data['hhId'].toString()));
+      }
+    } else {
+      // If no beneficiary data, just set LMP to current date
+      bloc.add(LmpDateChanged(DateTime.now()));
+    }
+
+    return BlocProvider.value(
+      value: bloc,
       child: Scaffold(
         appBar: AppHeader(
           screenTitle: l10n?.ancVisitFormTitle ?? 'ANC Visit Form',
@@ -98,7 +139,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           CustomDatePicker(
                             labelText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
                             hintText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
-                            initialDate: state.dateOfInspection,
+                            initialDate: state.dateOfInspection ?? DateTime.now(),
                             onDateChanged: (d) => bloc.add(DateOfInspectionChanged(d)),
                           ),
 
@@ -138,7 +179,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             child: CustomDatePicker(
                               labelText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
                               hintText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
-                              initialDate: state.lmpDate,
+                              initialDate: state.lmpDate ?? DateTime.now(),
                               onDateChanged: (d) => bloc.add(LmpDateChanged(d)),
                             ),
                           ),
@@ -209,6 +250,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                             labelText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
                             hintText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
                             initialDate: state.td2Date,
+                            readOnly: true,
+
                             onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -216,6 +259,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                             labelText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
                             hintText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
                             initialDate: state.tdBoosterDate,
+                            readOnly: true,
+
                             onDateChanged: (d) => bloc.add(TdBoosterDateChanged(d)),
                           ),
 
