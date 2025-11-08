@@ -110,7 +110,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
       try {
         final formData = event.formData;
         print('Processing form data: $formData');
-        
+
         DateTime? parseDate(dynamic dateValue) {
           if (dateValue == null) return null;
           if (dateValue is String) {
@@ -126,7 +126,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           }
           return null;
         }
-        
+
         final financialYear = formData['financial_year']?.toString() ?? state.financialYear;
         final isPregnant = formData['is_pregnant'] as bool?;
         final lmpDate = parseDate(formData['lmp_date']);
@@ -140,7 +140,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         final removalReason = formData['removal_reason']?.toString();
         final fpAdoptionDate = parseDate(formData['fp_adoption_date']);
         final antraInjectionDate = parseDate(formData['antra_injection_date']);
-        
+
         print('Updating state with form data:');
         print('- financialYear: $financialYear');
         print('- isPregnant: $isPregnant');
@@ -148,7 +148,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         print('- eddDate: $eddDate');
         print('- fpAdopting: $fpAdopting');
         print('- fpMethod: $fpMethod');
-        
+
         emit(state.copyWith(
           financialYear: financialYear,
           isPregnant: isPregnant,
@@ -164,7 +164,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           fpAdoptionDate: fpAdoptionDate,
           antraInjectionDateChanged: antraInjectionDate,
         ));
-        
+
         print('Successfully updated state with previous form data');
       } catch (e, stackTrace) {
         print('Error in LoadPreviousFormData handler: $e');
@@ -339,7 +339,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
 
           if (formId > 0) {
-            // Update the is_family_planning flag based on fpAdopting value
             try {
               await db.update(
                 'beneficiaries',
@@ -364,7 +363,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               print('Error storing form data in secure storage: $e');
               // Don't fail the form submission if secure storage fails
             }
-            
+
             emit(state.copyWith(status: FormStatus.success));
           } else {
             emit(state.copyWith(status: FormStatus.failure, error: 'Failed to save form data'));
@@ -395,24 +394,24 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
       // Get all keys from secure storage
       final allKeys = await _secureStorage.readAll();
       print('Found ${allKeys.length} keys in secure storage');
-      
+
       if (allKeys.isEmpty) {
         print('No keys found in secure storage');
         return;
       }
-      
+
       // Find all form data keys for this beneficiary
       final formDataKeys = allKeys.entries
           .where((entry) => entry.key.startsWith('ec_tracking_${state.beneficiaryId}_'))
           .toList();
-      
+
       print('Found ${formDataKeys.length} form data entries for beneficiary');
-      
+
       if (formDataKeys.isEmpty) {
         print('No form data found for beneficiary: ${state.beneficiaryId}');
         return;
       }
-      
+
       // Sort by timestamp (newest first)
       formDataKeys.sort((a, b) {
         final aParts = a.key.split('_');
@@ -421,34 +420,34 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         final bTime = bParts.length >= 4 ? int.tryParse(bParts[3]) ?? 0 : 0;
         return bTime.compareTo(aTime); // Sort in descending order
       });
-      
+
       // Get the most recent form data
       final latestKey = formDataKeys.first.key;
       print('Loading most recent form data with key: $latestKey');
-      
+
       final formData = await _secureStorage.read(key: latestKey);
       if (formData != null) {
         try {
           print('Raw form data from storage: $formData');
           final jsonData = jsonDecode(formData);
-          
+
           if (jsonData is! Map<String, dynamic>) {
             print('Error: Expected JSON object but got ${jsonData.runtimeType}');
             return;
           }
-          
+
           print('Parsed JSON data: $jsonData');
-          
+
           // Check if we have nested form_data
           Map<String, dynamic> formDataToUse = jsonData;
           if (jsonData.containsKey('form_data') && jsonData['form_data'] is Map) {
             formDataToUse = jsonData['form_data'] as Map<String, dynamic>;
             print('Using nested form_data: $formDataToUse');
           }
-          
+
           // Update state with previous form data
           add(LoadPreviousFormData(formDataToUse));
-          
+
         } catch (e, stackTrace) {
           print('Error parsing form data: $e');
           print('Stack trace: $stackTrace');
@@ -456,7 +455,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
       } else {
         print('No form data found for key: $latestKey');
       }
-      
+
     } catch (e, stackTrace) {
       print('Error loading previous form data: $e');
       print('Stack trace: $stackTrace');

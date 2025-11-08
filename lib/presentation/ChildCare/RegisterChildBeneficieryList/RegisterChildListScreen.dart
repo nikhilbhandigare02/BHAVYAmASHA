@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import '../../../core/config/routes/Route_Name.dart';
+import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import '../../../data/Local_Storage/database_provider.dart';
 
 class RegisterChildScreen extends StatefulWidget {
   const RegisterChildScreen({super.key});
@@ -16,100 +19,139 @@ class RegisterChildScreen extends StatefulWidget {
 
 class _RegisterChildScreenState extends State<RegisterChildScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
+  List<Map<String, dynamic>> _childBeneficiaries = [];
+  late List<Map<String, dynamic>> _filtered;
   bool _isLoading = true;
-  List<Map<String, dynamic>> _childMembers = [];
-  List<Map<String, dynamic>> _filteredChildMembers = [];
 
   @override
   void initState() {
     super.initState();
-    _loadChildMembers();
+    _filtered = [];
+    _childBeneficiaries = [];
+    _loadChildBeneficiaries();
+    _searchCtrl.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
+    _searchCtrl.removeListener(_onSearchChanged);
     _searchCtrl.dispose();
     super.dispose();
   }
-  
-  void _onSearchChanged(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        _filteredChildMembers = List<Map<String, dynamic>>.from(_childMembers);
-      });
-      return;
-    }
-    
-    final searchTerm = query.toLowerCase();
-    setState(() {
-      _filteredChildMembers = _childMembers.where((child) {
-        return (child['Name']?.toString().toLowerCase().contains(searchTerm) ?? false) ||
-               (child['hhId']?.toString().toLowerCase().contains(searchTerm) ?? false) ||
-               (child['BeneficiaryID']?.toString().toLowerCase().contains(searchTerm) ?? false);
-      }).toList();
-    });
-  }
 
-  Future<void> _loadChildMembers() async {
+  Future<void> _loadChildBeneficiaries() async {
+    if (!mounted) return;
+    
+    setState(() => _isLoading = true);
+
     try {
       final db = await DatabaseProvider.instance.database;
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries',
-        where: 'is_deleted = 0', // Only non-deleted records
+        where: 'is_deleted = ?',
+        whereArgs: [0],
       );
 
-      final List<Map<String, dynamic>> childMembers = [];
+      final childBeneficiaries = <Map<String, dynamic>>[];
 
       for (final row in rows) {
-        try {
-          final info = row['beneficiary_info'] is String 
-              ? jsonDecode(row['beneficiary_info'] as String) 
-              : row['beneficiary_info'];
+        final rowHhId = row['household_ref_key']?.toString();
+        if (rowHhId == null) continue;
 
-          if (info is! Map) continue;
+        final info = row['beneficiary_info'] is String
+            ? jsonDecode(row['beneficiary_info'] as String)
+            : row['beneficiary_info'];
 
-          // Check if this is a child member
-          final memberDetails = info['member_details'] as List? ?? [];
-          for (final member in memberDetails) {
-            if (member is Map && 
-                member['memberType']?.toString().toLowerCase() == 'child') {
+        if (info is! Map) continue;
+
+        final head = info['head_details'] is Map ? info['head_details'] : {};
+        final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
+        final members = info['member_details'] is List ? info['member_details'] : [];
+
+        // Extract children from member_details where memberType is "Child"
+        if (members.isNotEmpty && members is List) {
+          for (final member in members) {
+            if (member is Map) {
+              final memberType = member['memberType']?.toString() ?? '';
               
-              final head = info['head_details'] is Map ? info['head_details'] : {};
-              final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
-              
-              childMembers.add({
-                'hhId': row['household_ref_key']?.toString() ?? '',
-                'RegitrationDate': row['created_date_time']?.toString() ?? '',
-                'RegitrationType': 'Child',
-                'BeneficiaryID': member['memberId']?.toString() ?? '',
-                'Name': member['memberName']?.toString() ?? '',
-                'Age|Gender': _formatAgeGender(member['dob'], member['gender']),
-                'FatherName': head['headName']?.toString() ?? '',
-                'MotherName': spouse['memberName']?.toString() ?? '',
-                'Gender': member['gender']?.toString() ?? '',
-                'DOB': member['dob']?.toString() ?? '',
-                '_raw': row,
-                '_memberData': member,
-              });
+              // Only process if memberType is "Child"
+              if (memberType == 'Child') {
+                final memberData = Map<String, dynamic>.from(member);
+                
+                // Get name from multiple possible fields
+                final name = memberData['memberName']?.toString() ?? 
+                            memberData['name']?.toString() ??
+                            memberData['member_name']?.toString() ??
+                            memberData['memberNameLocal']?.toString() ??
+                            '';
+                
+                // Get father's name (from member data or head)
+                final fatherName = memberData['fatherName']?.toString() ?? 
+                                  memberData['father_name']?.toString() ??
+                                  head['headName']?.toString() ?? 
+                                  head['memberName']?.toString() ?? '';
+                
+                // Get mother's name (from member data or spouse)
+                final motherName = memberData['motherName']?.toString() ?? 
+                                  memberData['mother_name']?.toString() ??
+                                  spouse['memberName']?.toString() ?? 
+                                  spouse['headName']?.toString() ?? '';
+                
+                // Get mobile number
+                final mobileNo = memberData['mobileNo']?.toString() ?? 
+                                memberData['mobile']?.toString() ??
+                                memberData['mobile_number']?.toString() ??
+                                head['mobileNo']?.toString() ?? '';
+                
+                // Get RCH ID
+                final richId = memberData['RichIDChanged']?.toString() ?? 
+                              memberData['richIdChanged']?.toString() ?? 
+                              memberData['richId']?.toString() ?? '';
+                
+                final card = <String, dynamic>{
+                  'hhId': rowHhId,
+                  'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+                  'RegitrationType': 'Child',
+                  'BeneficiaryID': memberData['unique_key']?.toString() ?? row['id']?.toString() ?? '',
+                  'RchID': richId,
+                  'Name': name,
+                  'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
+                  'Mobileno.': mobileNo,
+                  'FatherName': fatherName,
+                  'MotherName': motherName,
+                  '_raw': row,
+                  '_memberData': memberData,
+                };
+                
+                childBeneficiaries.add(card);
+              }
             }
           }
-        } catch (e) {
-          debugPrint('Error processing beneficiary: $e');
         }
       }
 
       if (mounted) {
         setState(() {
-          _childMembers = childMembers;
-          _filteredChildMembers = List.from(childMembers);
+          _childBeneficiaries = List<Map<String, dynamic>>.from(childBeneficiaries);
+          _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
           _isLoading = false;
         });
       }
     } catch (e) {
-      debugPrint('Error loading child members: $e');
+      debugPrint('Error loading child beneficiaries: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'N/A';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (e) {
+      return dateStr;
     }
   }
 
@@ -119,304 +161,308 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
       try {
-        final dob = DateTime.tryParse(dobRaw.toString());
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+        
+        dob = DateTime.tryParse(dateStr);
+        
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+        
         if (dob != null) {
           final now = DateTime.now();
           int years = now.year - dob.year;
-          int months = now.month - dob.month;
           
-          if (months < 0 || (months == 0 && now.day < dob.day)) {
+          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
             years--;
-            months += 12;
           }
           
-          age = years > 0 ? '$years Y' : '$months M';
+          age = years >= 0 ? years.toString() : '0';
         }
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
+      }
     }
     
-    String displayGender = gender == 'm' || gender == 'male'
-        ? 'Male'
-        : gender == 'f' || gender == 'female'
-            ? 'Female'
-            : 'Other';
-            
-    return '$age | $displayGender';
+    String displayGender;
+    switch (gender) {
+      case 'm':
+      case 'male':
+        displayGender = 'Male';
+        break;
+      case 'f':
+      case 'female':
+        displayGender = 'Female';
+        break;
+      default:
+        displayGender = 'Other';
+    }
+    
+    return '$age Y | $displayGender';
   }
 
-
-
+  void _onSearchChanged() {
+    if (!mounted) return;
+    
+    final q = _searchCtrl.text.trim().toLowerCase();
+    setState(() {
+      if (q.isEmpty) {
+        _filtered = List<Map<String, dynamic>>.from(_childBeneficiaries);
+      } else {
+        _filtered = _childBeneficiaries.where((e) {
+          return (e['hhId']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['Name']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['Mobileno.']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['FatherName']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['MotherName']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['BeneficiaryID']?.toString().toLowerCase() ?? '').contains(q);
+        }).toList();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    if (_childMembers.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Child Registration'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.child_care_outlined,
-                size: 64,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'No child records found',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 16),
-              RoundButton(
-                title: 'Refresh',
-                onPress: () {
-                  setState(() => _isLoading = true);
-                  _loadChildMembers();
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.childRegisteredBeneficiaryListTitle ?? 'Register child beneficiary list',
+        screenTitle:  l10n?.childRegisteredBeneficiaryListTitle ?? 'Register child beneficiary list',
         showBack: true,
+
       ),
       body: Column(
         children: [
-          // Search Field
+          // 🔍 Search Field
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: l10n?.search ?? 'Search by name or ID...',
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                hintText:  l10n?.searchHint ?? 'Search All Beneficiary',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: AppColors.background,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.outlineVariant),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                ),
               ),
-              style: const TextStyle(fontSize: 14),
             ),
           ),
 
-          // List of Children
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _loadChildMembers,
-              child: _filteredChildMembers.isEmpty
-                  ? Center(
-                      child: Text(
-                          'No matching children found',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
+
+
+          // 📋 List of Child Beneficiaries
+          _isLoading
+              ? const Expanded(
+                  child: Center(child: CircularProgressIndicator()))
+              : _filtered.isEmpty
+                  ? Expanded(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            _childBeneficiaries.isEmpty
+                                ? 'No child beneficiaries found. Add a new child to get started.'
+                                : 'No matching child beneficiaries found.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 16, color: Colors.grey[600]),
+                          ),
                         ),
                       ),
                     )
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      itemCount: _filteredChildMembers.length,
-                      itemBuilder: (context, index) {
-                        final child = _filteredChildMembers[index];
-                        return _childCard(context, child);
-                      },
+                  : Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: _loadChildBeneficiaries,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                          itemCount: _filtered.length,
+                          itemBuilder: (context, index) {
+                            final data = _filtered[index];
+                            return _householdCard(context, data);
+                          },
+                        ),
+                      ),
                     ),
-            ),
-          ),
+
+
         ],
       ),
     );
   }
 
-  // Original Card Design
-  Widget _childCard(BuildContext context, Map<String, dynamic> child) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Header with blue background
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.blue[50],
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+  // 🧱 Child Beneficiary Card UI
+  Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context);
+    final Color primary = Theme.of(context).primaryColor;
+
+    return InkWell(
+      onTap: () {
+        // Navigate to child detail screen if needed
+        // Navigator.pushNamed(
+        //   context,
+        //   Route_Names.childDetail,
+        //   arguments: {'childData': data},
+        // );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 2,
+              spreadRadius: 1,
+              offset: const Offset(0, 2),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.child_care, color: Colors.blue, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Child ID: ${child['BeneficiaryID'] ?? 'N/A'}',
-                    style: const TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 2,
+              spreadRadius: 1,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header Row
+            Container(
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+              ),
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  const Icon(Icons.home, color: AppColors.primary, size: 16),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      (data['hhId'] != null && data['hhId'].toString().length > 11)
+                          ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
+                          : (data['hhId']?.toString() ?? ''),
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13.sp,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.asset(
+                      'assets/images/sync.png',
+                      width: 6.w,
+                      height: 6.w,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          
-          // Card content
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // First row: Name and Age|Gender
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Name',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            child['Name'] ?? 'N/A',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+
+            // Card Body
+            Container(
+              decoration: BoxDecoration(
+                color: primary.withOpacity(0.95),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate'] ?? 'N/A')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType'] ?? 'Child')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', 
+                        (data['BeneficiaryID']?.toString().length ?? 0) > 11 
+                          ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11) 
+                          : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: _rowText(l10n?.nameLabelSimple ?? 'Name', data['Name'] ?? 'N/A')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.'] ?? 'N/A')),
+                    ],
+                  ),
+                  if (data['RchID']?.isNotEmpty == true)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID'] ?? 'N/A'),
+                    ),
+                  const SizedBox(height: 10),
+                  _rowText(
+                    l10n?.fatherNameLabel ?? 'Father\'s Name',
+                    data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+                  ),
+                  if (data['MotherName']?.isNotEmpty == true)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _rowText(
+                        l10n?.motherNameLabel ?? 'Mother\'s Name',
+                        data['MotherName'] ?? 'N/A',
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Age | Gender',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            child['Age|Gender'] ?? 'N/A',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 12),
-                
-                // Second row: Father and Mother
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Father',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            child['FatherName'] ?? 'N/A',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Mother',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            child['MotherName'] ?? 'N/A',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 12),
-                
-                // Registration Date
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Registration Date',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      child['RegitrationDate'] ?? 'N/A',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+
+  Widget _rowText(String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: AppColors.background,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w400,
+            fontSize: 13.sp,
+          ),
+        ),
+      ],
+    );
+  }
+
 }

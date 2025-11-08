@@ -20,11 +20,19 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 class AddNewFamilyMemberScreen extends StatefulWidget {
   final bool isEdit;
   final String? hhId;
+  final String? headName;
+  final String? headGender;
+  final String? spouseName;
+  final String? spouseGender;
 
   const AddNewFamilyMemberScreen({
     super.key,
     this.isEdit = false,
     this.hhId,
+    this.headName,
+    this.headGender,
+    this.spouseName,
+    this.spouseGender,
   });
 
   @override
@@ -38,13 +46,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   String _fatherOption = 'Select';
   String _motherOption = 'Select';
 
+  String? _headName;
+  String? _headGender;
+  String? _spouseName;
+  String? _spouseGender;
+
   int _ageFromDob(DateTime dob) => DateTime.now().year - dob.year;
 
   Widget _section(Widget child) => Padding(padding: const EdgeInsets.only(bottom: 4), child: child);
 
   late final AddnewfamilymemberBloc _bloc;
 
-  // Helper method to format gender consistently
   String _formatGender(String? gender) {
     if (gender == null) return 'Other';
     final g = gender.toString().toLowerCase();
@@ -63,6 +75,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
     _fatherOption = 'Select';
     _motherOption = 'Select';
+    
+    // Use passed arguments instead of querying database
+    _headName = widget.headName;
+    _headGender = widget.headGender;
+    _spouseName = widget.spouseName;
+    _spouseGender = widget.spouseGender;
+    
+    print('=== RECEIVED HOUSEHOLD DATA ===');
+    print('Head: $_headName ($_headGender)');
+    print('Spouse: $_spouseName ($_spouseGender)');
+    print('==============================');
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -73,6 +96,38 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
         _bloc.add(AnmUpdateMotherName(_motherOption));
       }
     });
+  }
+  
+    
+  void _updateParentNames(String relation) {
+    // Determine father and mother based on head and spouse gender
+    String? fatherName;
+    String? motherName;
+    
+    if (_headGender == 'Male' && _spouseGender == 'Female') {
+      fatherName = _headName;
+      motherName = _spouseName;
+    } else if (_headGender == 'Female' && _spouseGender == 'Male') {
+      fatherName = _spouseName;
+      motherName = _headName;
+    } else if (_headGender == 'Male') {
+      fatherName = _headName;
+    } else if (_headGender == 'Female') {
+      motherName = _headName;
+    }
+    
+    // Update the dropdowns and bloc state
+    if (relation == 'Father' && fatherName != null) {
+      setState(() {
+        _fatherOption = fatherName!;
+      });
+      _bloc.add(AnmUpdateFatherName(fatherName));
+    } else if (relation == 'Mother' && motherName != null) {
+      setState(() {
+        _motherOption = motherName!;
+      });
+      _bloc.add(AnmUpdateMotherName(motherName));
+    }
   }
 
   @override
@@ -161,6 +216,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     // Clear marital status when changing to Child
                                     if (v == 'Child') {
                                       bloc.add(const AnmUpdateMaritalStatus(''));
+                                      // Clear relation if it's 'Spouse' (not valid for children)
+                                      if (state.relation == 'Spouse') {
+                                        bloc.add(AnmUpdateRelation(''));
+                                      }
                                     }
                                   },
                                   validator: (value) => Validations.validateMemberType(l, value),
@@ -210,7 +269,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               _section(
                                 ApiDropdown<String>(
                                   labelText: '${l.relationWithHeadLabel} *',
-                                  items: const ['Spouse', 'Son', 'Daughter', 'Father', 'Mother', 'Brother', 'Sister', 'Other'],
+                                  items: state.memberType == 'Child'
+                                      ? const ['Father', 'Mother', 'Brother', 'Sister', 'Other']
+                                      : const ['Spouse', 'Son', 'Daughter', 'Father', 'Mother', 'Brother', 'Sister', 'Other'],
                                   getLabel: (s) {
                                     switch (s) {
                                       case 'Spouse':
@@ -234,7 +295,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     }
                                   },
                                   value: state.relation,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateRelation(v ?? '')),
+                                  onChanged: (v) {
+                                    context.read<AddnewfamilymemberBloc>().add(AnmUpdateRelation(v ?? ''));
+                                    // Auto-populate father/mother names based on relation
+                                    if (state.memberType == 'Child' && (v == 'Father' || v == 'Mother')) {
+                                      _updateParentNames(v!);
+                                    }
+                                  },
                                   validator: (value) => Validations.validateFamilyHead(l, value),
 
                                 ),
@@ -255,26 +322,35 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    ApiDropdown<String>(
-                                      labelText: "${l.motherNameLabel} *",
-                                      hintText: "${l.motherNameLabel} *",
-                                      items: [
-                                        'Select',
-
-                                        'Other',
-                                      ],
-                                      getLabel: (s) => s,
-                                      value: _motherOption,
-                                      onChanged: (v) {
-                                        if (v == null) return;
-                                        setState(() {
-                                          _motherOption = v;
-                                        });
-                                        if (v != 'Select' && v != 'Other') {
-                                          context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v));
-                                        } else {
-                                          context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(''));
-                                        }
+                                    Builder(
+                                      builder: (context) {
+                                        final motherItems = [
+                                          'Select',
+                                          if (_headGender == 'Female' && _headName != null) _headName!,
+                                          if (_spouseGender == 'Female' && _spouseName != null) _spouseName!,
+                                          'Other',
+                                        ];
+                                        print('Mother dropdown items: $motherItems');
+                                        print('Current mother option: $_motherOption');
+                                        
+                                        return ApiDropdown<String>(
+                                          labelText: "${l.motherNameLabel} *",
+                                          hintText: "${l.motherNameLabel} *",
+                                          items: motherItems,
+                                          getLabel: (s) => s,
+                                          value: _motherOption,
+                                          onChanged: (v) {
+                                            if (v == null) return;
+                                            setState(() {
+                                              _motherOption = v;
+                                            });
+                                            if (v != 'Select' && v != 'Other') {
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v));
+                                            } else {
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(''));
+                                            }
+                                          },
+                                        );
                                       },
                                     ),
                                     if (_motherOption == 'Other')
@@ -295,30 +371,39 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    ApiDropdown<String>(
-                                      labelText: '${l.fatherGuardianNameLabel} *',
-                                      items: [
-                                        'Select',
-
-                                        'Other',
-                                      ],
-                                      getLabel: (s) => s,
-                                      value: _fatherOption,
-                                      onChanged: (v) {
-                                        if (v == null) return;
-                                        setState(() {
-                                          _fatherOption = v;
-                                        });
-                                        if (v != 'Select' && v != 'Other') {
-                                          context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v));
-                                        } else {
-                                          context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(''));
-                                        }
-                                      },
-                                      validator: (_) {
-                                        if (_fatherOption == 'Select') return l.select;
-                                        if (_fatherOption == 'Other') return null;
-                                        return null;
+                                    Builder(
+                                      builder: (context) {
+                                        final fatherItems = [
+                                          'Select',
+                                          if (_headGender == 'Male' && _headName != null) _headName!,
+                                          if (_spouseGender == 'Male' && _spouseName != null) _spouseName!,
+                                          'Other',
+                                        ];
+                                        print('Father dropdown items: $fatherItems');
+                                        print('Current father option: $_fatherOption');
+                                        
+                                        return ApiDropdown<String>(
+                                          labelText: '${l.fatherGuardianNameLabel} *',
+                                          items: fatherItems,
+                                          getLabel: (s) => s,
+                                          value: _fatherOption,
+                                          onChanged: (v) {
+                                            if (v == null) return;
+                                            setState(() {
+                                              _fatherOption = v;
+                                            });
+                                            if (v != 'Select' && v != 'Other') {
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v));
+                                            } else {
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(''));
+                                            }
+                                          },
+                                          validator: (_) {
+                                            if (_fatherOption == 'Select') return l.select;
+                                            if (_fatherOption == 'Other') return null;
+                                            return null;
+                                          },
+                                        );
                                       },
                                     ),
                                     if (_fatherOption == 'Other')

@@ -1,3 +1,5 @@
+import 'dart:convert' show jsonDecode;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -11,6 +13,7 @@ import 'package:sizer/sizer.dart';
 import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/widgets/AppDrawer/Drawer.dart';
+import '../../../../data/Local_Storage/local_storage_dao.dart';
 
 
 class Ancvisitlistscreen extends StatefulWidget {
@@ -22,68 +25,320 @@ class Ancvisitlistscreen extends StatefulWidget {
 
 class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   final TextEditingController _searchCtrl = TextEditingController();
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'houseNo': 'ga',
-      'name': 'va',
-      'mobile': '9923175398',
-      'totalMembers': 1,
-      'eligibleCouples': 0,
-      'pregnantWomen': 0,
-      'elderly': 0,
-      'child0to1': 0,
-      'child1to2': 0,
-      'child2to5': 0,
-    },
-    {
-      'hhId': '51016102919',
-      'houseNo': 'gaa',
-      'name': 'hs',
-      'mobile': '7620593001',
-      'totalMembers': 1,
-      'eligibleCouples': 0,
-      'pregnantWomen': 0,
-      'elderly': 0,
-      'child0to1': 0,
-      'child1to2': 0,
-      'child2to5': 0,
-    },
-    {
-      'hhId': '51014184212',
-      'houseNo': 'A006',
-      'name': 'Shrikant jadhav',
-      'mobile': '9657908015',
-      'totalMembers': 3,
-      'eligibleCouples': 1,
-      'pregnantWomen': 0,
-      'elderly': 0,
-      'child0to1': 0,
-      'child1to2': 0,
-      'child2to5': 0,
-    },
-    {
-      'hhId': '51014110459',
-      'houseNo': 'A003',
-      'name': 'Shrikant patil',
-      'mobile': '7620593002',
-      'totalMembers': 2,
-      'eligibleCouples': 1,
-      'pregnantWomen': 1,
-      'elderly': 0,
-      'child0to1': 0,
-      'child1to2': 0,
-      'child2to5': 0,
-    },
-  ];
+  List<Map<String, dynamic>> _filtered = [];
+  bool _isLoading = true;
 
-  late List<Map<String, dynamic>> _filtered;
+
+  Future<void> _loadEligibleCouples() async {
+    setState(() { _isLoading = true; });
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final couples = <Map<String, dynamic>>[];
+
+      print('ℹ️ Found ${rows.length} beneficiaries to process');
+
+      for (final row in rows) {
+        try {
+          // Check if is_family_planning is 1
+          final isFamilyPlanning = row['is_family_planning'] == 1 || 
+                                 row['is_family_planning'] == '1' ||
+                                 (row['is_family_planning']?.toString().toLowerCase() == 'true');
+          
+          if (!isFamilyPlanning) {
+            print('ℹ️ Skipping - is_family_planning flag is not set');
+            continue;
+          }
+
+          // Parse the beneficiary info
+          final dynamic rawInfo = row['beneficiary_info'];
+          if (rawInfo == null) {
+            print('⚠️ Skipping - No beneficiary_info found');
+            continue;
+          }
+
+          Map<String, dynamic> info = {};
+          try {
+            info = rawInfo is String ? jsonDecode(rawInfo) as Map<String, dynamic>
+                : Map<String, dynamic>.from(rawInfo as Map);
+          } catch (e) {
+            print('⚠️ Error parsing beneficiary_info: $e');
+            continue;
+          }
+
+          // Extract head and spouse details with null safety
+          final head = (info['head_details'] is Map)
+              ? Map<String, dynamic>.from(info['head_details'] as Map)
+              : <String, dynamic>{};
+
+          final spouse = (info['spouse_details'] is Map)
+              ? Map<String, dynamic>.from(info['spouse_details'] as Map)
+              : <String, dynamic>{};
+
+          print('ℹ️ Processing household: ${head['headName'] ?? 'Unknown'}');
+
+          // Process head if exists
+          if (head.isNotEmpty) {
+            print('  👤 Processing head of household');
+            final coupleData = _processPerson(row, head, spouse, isHead: true);
+            if (coupleData != null) {
+              print('  ✅ Added eligible head: ${coupleData['Name']}');
+              couples.add(coupleData);
+            }
+          }
+
+          // Process spouse if exists
+          if (spouse.isNotEmpty) {
+            print('  👥 Processing spouse');
+            final coupleData = _processPerson(row, spouse, head, isHead: false);
+            if (coupleData != null) {
+              print('  ✅ Added eligible spouse: ${coupleData['Name']}');
+              couples.add(coupleData);
+            }
+          }
+        } catch (e, stackTrace) {
+          print('⚠️ Error processing beneficiary row: $e');
+          print('Stack trace: $stackTrace');
+        }
+      }
+
+      print('✅ Found ${couples.length} eligible couples');
+
+      setState(() {
+        _filtered = couples;
+        _isLoading = false;
+      });
+
+    } catch (e, stackTrace) {
+      print('❌ Fatal error in _loadEligibleCouples: $e');
+      print('Stack trace: $stackTrace');
+      setState(() { _isLoading = false; });
+    }
+  }
+
+  Map<String, dynamic>? _processPerson(Map<String, dynamic> row, Map<String, dynamic> person, Map<String, dynamic> otherPerson, {required bool isHead}) {
+    try {
+      // Extract and normalize data
+      final gender = (person['gender']?.toString().toLowerCase()?.trim() ?? '');
+
+      // Get marital status with fallbacks (check both person and otherPerson)
+      String maritalStatus = (person['maritalStatus']?.toString().toLowerCase()?.trim() ??
+          person['marital_status']?.toString().toLowerCase()?.trim() ??
+          otherPerson['maritalStatus']?.toString().toLowerCase()?.trim() ??
+          otherPerson['marital_status']?.toString().toLowerCase()?.trim() ??
+          '');
+
+      // Check pregnancy status with multiple possible field names
+      final isPregnant = person['isPregnant']?.toString().toLowerCase() == 'true' ||
+          person['isPregnant']?.toString().toLowerCase() == 'yes' ||
+          person['pregnancyStatus']?.toString().toLowerCase() == 'pregnant';
+
+      // Calculate age from DOB
+      final dob = person['dob'] ?? person['dateOfBirth'];
+      final age = _calculateAge(dob);
+
+      // Get name with fallbacks
+      final name = (person['name'] ??
+          person['memberName'] ??
+          person['headName'] ??
+          person['beneficiary_name'] ??
+          'Unknown').toString().trim();
+
+      // Debug logging
+      print('ℹ️ Processing person: $name');
+      print('  - Gender: $gender, Marital Status: $maritalStatus, Age: $age, Pregnant: $isPregnant');
+
+      // Check eligibility criteria
+      final isEligible = (gender == 'f' || gender == 'female') &&
+          (maritalStatus == 'married' || maritalStatus == 'm') &&
+          (age != null && age >= 15 && age <= 49) &&
+          isPregnant;
+
+      if (!isEligible) {
+        print('ℹ️ Skipping - Not eligible: '
+            'Name: $name, '
+            'Gender: $gender, '
+            'Marital Status: $maritalStatus, '
+            'Age: $age, '
+            'Pregnant: $isPregnant');
+        return null;
+      }
+
+      print('✅ Found eligible beneficiary: $name');
+
+      // Format the data for display
+      return _formatCoupleData(row, person, otherPerson, isHead: isHead);
+    } catch (e, stackTrace) {
+      print('⚠️ Error processing person: $e');
+      print('Stack trace: $stackTrace');
+      return null;
+    }
+  }
+
+  // This method is no longer needed as we've moved the logic to _processPerson
+
+  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
+    try {
+      print('🔍 Formatting couple data...');
+
+      final hhId = row['household_ref_key']?.toString() ?? '';
+      final uniqueKey = row['unique_key']?.toString() ?? '';
+      final createdDate = row['created_date_time']?.toString() ?? '';
+      final info = Map<String, dynamic>.from((row['beneficiary_info'] is Map ? row['beneficiary_info'] : const {}) as Map);
+
+      // Extract name with multiple fallbacks
+      final name = (female['name'] ??
+          female['memberName'] ??
+          female['headName'] ??
+          female['beneficiary_name'] ??
+          'Unknown').toString().trim();
+
+      // Extract gender with normalization
+      final gender = (female['gender']?.toString().toLowerCase()?.trim() ?? '');
+      final displayGender = gender == 'f' ? 'Female' :
+      gender == 'm' ? 'Male' :
+      gender == 'female' ? 'Female' :
+      gender == 'male' ? 'Male' : 'Other';
+
+      // Calculate age with multiple possible DOB fields
+      final dob = female['dob'] ?? female['dateOfBirth'];
+      final age = _calculateAge(dob);
+
+      // Extract Rich ID with multiple possible field names
+      final richId = (female['RichID'] ??
+          female['richId'] ??
+          female['abhaId'] ??
+          female['abha_id'] ?? '').toString();
+
+      // Extract mobile number with multiple possible field names
+      final mobile = (female['mobileNo'] ??
+          female['mobile'] ??
+          female['phoneNumber'] ??
+          female['phone_number'] ?? '').toString();
+
+      // Extract husband's name based on whether this is the head or spouse
+      String husbandName = '';
+      if (isHead) {
+        // If this is the head, get spouse's name
+        husbandName = (headOrSpouse['memberName'] ??
+            headOrSpouse['spouseName'] ??
+            headOrSpouse['name'] ?? '').toString().trim();
+      } else {
+        // If this is the spouse, get head's name
+        husbandName = (headOrSpouse['headName'] ??
+            headOrSpouse['memberName'] ??
+            headOrSpouse['name'] ?? '').toString().trim();
+      }
+
+      // Get pregnancy status
+      final isPregnant = female['isPregnant']?.toString().toLowerCase() == 'true' ||
+          female['isPregnant']?.toString().toLowerCase() == 'yes';
+
+      // Get EDD if available
+      final edd = female['edd']?.toString() ?? '';
+
+      // Get children details if available
+      Map<String, dynamic>? childrenSummary;
+      final dynamic childrenRaw = info['children_details'];
+      if (childrenRaw is Map) {
+        childrenSummary = {
+          'totalBorn': childrenRaw['totalBorn'],
+          'totalLive': childrenRaw['totalLive'],
+          'totalMale': childrenRaw['totalMale'],
+          'totalFemale': childrenRaw['totalFemale'],
+          'youngestAge': childrenRaw['youngestAge'],
+          'ageUnit': childrenRaw['ageUnit'],
+          'youngestGender': childrenRaw['youngestGender'],
+        }..removeWhere((k, v) => v == null);
+      }
+      return {
+        'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
+        'RegistrationDate': _formatDate(createdDate),
+        'RegistrationType': 'General',
+        'BeneficiaryID': uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey,
+        'Name': name,
+        'age': (age ?? 0) > 0 ? '$age Y / $displayGender' : 'N/A',
+        'RichID': richId,
+        'mobileno': mobile,
+        'HusbandName': husbandName,
+        'childrenSummary': childrenSummary,
+        '_rawRow': row,
+      };
+    } catch (e) {
+      print('⚠️ Error formatting couple data: $e');
+      return {};
+    }
+  }
+
+  int? _calculateAge(dynamic dob) {
+    if (dob == null) return null;
+    try {
+      String dateStr = dob.toString();
+      // Handle different date formats
+      if (dateStr.contains('T')) {
+        dateStr = dateStr.split('T')[0];
+      }
+
+      final birthDate = DateTime.tryParse(dateStr);
+      if (birthDate == null) {
+        print('⚠️ Could not parse date: $dob');
+        return null;
+      }
+
+      final now = DateTime.now();
+      int age = now.year - birthDate.year;
+
+      // Adjust age if birthday hasn't occurred yet this year
+      if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+        age--;
+      }
+
+      return age;
+    } catch (e) {
+      print('⚠️ Error calculating age for $dob: $e');
+      return null;
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final dt = DateTime.tryParse(dateStr);
+      if (dt == null) return '';
+      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  List<Map<String, dynamic>> _filterCouples(List<Map<String, dynamic>> couples, String query) {
+    // First filter by eligibility (should already be filtered, but just in case)
+    final eligibleCouples = couples.where((couple) {
+      final gender = (couple['gender']?.toString().toLowerCase() ?? '');
+      final age = couple['age'] is int ? couple['age'] : _calculateAge(couple['dob']);
+      final maritalStatus = (couple['maritalStatus']?.toString().toLowerCase() ?? '');
+
+      return (gender == 'f' || gender == 'female') &&
+          (maritalStatus == 'married' || maritalStatus == 'm') &&
+          (age != null && age >= 15 && age <= 49);
+    }).toList();
+
+    // Then apply search filter
+    if (query.isEmpty) return eligibleCouples;
+
+    final lowerQuery = query.toLowerCase();
+    return eligibleCouples.where((couple) {
+      return (couple['Name']?.toString().toLowerCase().contains(lowerQuery) ?? false) ||
+          (couple['hhId']?.toString().toLowerCase().contains(lowerQuery) ?? false) ||
+          (couple['mobileno']?.toString().toLowerCase().contains(lowerQuery) ?? false);
+    }).toList();
+  }
+
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
     _searchCtrl.addListener(_onSearchChanged);
+    _loadEligibleCouples();
   }
 
   @override
@@ -95,18 +350,18 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
   void _onSearchChanged() {
     final q = _searchCtrl.text.trim().toLowerCase();
-    setState(() {
-      if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-      } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['houseNo'] as String).toLowerCase().contains(q) ||
-              (e['name'] as String).toLowerCase().contains(q) ||
-              (e['mobile'] as String).toLowerCase().contains(q);
+    if (q.isEmpty) {
+      _loadEligibleCouples();
+    } else {
+      setState(() {
+        _filtered = _filtered.where((e) {
+          return (e['hhId']?.toString().toLowerCase().contains(q) ?? false) ||
+              (e['Name']?.toString().toLowerCase().contains(q) ?? false) ||
+              (e['mobileno']?.toString().toLowerCase().contains(q) ?? false) ||
+              (e['HusbandName']?.toString().toLowerCase().contains(q) ?? false);
         }).toList();
-      }
-    });
+      });
+    }
   }
 
   @override
@@ -147,16 +402,28 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             ),
           ),
 
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _ancCard(context, data);
-              },
-            ),
-          ),
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _filtered.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No ANC beneficiaries found',
+                        style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                      ),
+                    )
+                  : Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: _loadEligibleCouples,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                          itemCount: _filtered.length,
+                          itemBuilder: (context, index) {
+                            final data = _filtered[index];
+                            return _ancCard(context, data);
+                          },
+                        ),
+                      ),
+                    ),
         ],
       ),
     );
@@ -165,8 +432,22 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
   Widget _ancCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
-
     final primary = Theme.of(context).primaryColor;
+    
+    // Format the date for display
+    final registrationDate = data['RegistrationDate'] is String && data['RegistrationDate'].isNotEmpty
+        ? data['RegistrationDate']
+        : l10n?.notAvailable ?? 'N/A';
+        
+    // Format age and gender
+    final ageGender = data['age'] is String && data['age'].isNotEmpty
+        ? data['age']
+        : l10n?.notAvailable ?? 'N/A';
+        
+    // Get husband's name
+    final husbandName = data['HusbandName'] is String && data['HusbandName'].isNotEmpty
+        ? data['HusbandName']
+        : l10n?.notAvailable ?? 'N/A';
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -227,41 +508,81 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             ),
 
             // Blue body
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: primary,
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['hhId'] ?? '')),
-                      Expanded(child: _rowText(l10n?.nameLabel ?? 'Name', data['name'] ?? '')),
-                      Expanded(child: _rowText(l10n?.ageLabel ?? 'Age', l10n?.notAvailable ?? 'Not Available')),
-                      Expanded(child: _rowText(l10n?.husbandLabel ?? 'Husband', l10n?.notAvailable ?? 'Not Available')),
-                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', l10n?.notAvailable ?? 'Not Available')),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', l10n?.notAvailable ?? 'Not Available')),
-                      Expanded(child: _rowText(l10n?.firstAncLabel ?? 'First ANC', l10n?.notAvailable ?? 'Not Available')),
-                      Expanded(child: _rowText(l10n?.secondAncLabel ?? 'Second ANC', l10n?.notAvailable ?? 'Not Available')),
-                      Expanded(child: _rowText(l10n?.thirdAncLabel ?? 'Third ANC', l10n?.notAvailable ?? 'Not Available')),
-                      Expanded(child: _rowText(l10n?.pmsmaLabel ?? 'PMSMA', l10n?.notAvailable ?? 'Not Available')),
-                    ],
-                  ),
-                ],
-              ),
+      Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: primary,
+          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+        ),
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- First Row: 6 items (auto-wraps if space is tight) ---
+            Wrap(
+              spacing: 8, // horizontal gap
+              runSpacing: 8, // vertical gap if wrapped
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 4 - 25,
+                  child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID'] ?? ''),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 4 - 55,
+                  child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? ''),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 4 - 55,
+                  child: _rowText(l10n?.ageLabel ?? 'Age/Gender', ageGender),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 4 - 49,
+                  child: _rowText(l10n?.husbandLabel ?? 'Husband', husbandName),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width /4 - 25,
+                  child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', registrationDate),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 7 - 13,
+                  child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', 'N/A'),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // --- Second Row: 5 items ---
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 4 - 30,
+                  child: _rowText(l10n?.firstAncLabel ?? 'First ANC', l10n?.notAvailable ?? 'N/A'),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 4 - 35,
+                  child: _rowText(l10n?.secondAncLabel ?? 'Second ANC', l10n?.notAvailable ?? 'N/A'),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 4 - 35,
+                  child: _rowText(l10n?.thirdAncLabel ?? 'Third ANC', l10n?.notAvailable ?? 'N/A'),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 4 - 35,
+                  child: _rowText( 'Fourth ANC', l10n?.notAvailable ?? 'N/A'),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 4 - 30,
+                  child: _rowText(l10n?.pmsmaLabel ?? 'PMSMA', l10n?.notAvailable ?? 'N/A'),
+                ),
+              ],
             ),
           ],
+        ),
+      )
+      ],
         ),
       ),
     );
@@ -273,12 +594,12 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       children: [
         Text(
           title,
-          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style:  TextStyle(color: AppColors.background, fontSize: 13.sp, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 12.sp),
         ),
       ],
     );

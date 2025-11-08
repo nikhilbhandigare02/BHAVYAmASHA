@@ -424,16 +424,8 @@ class _HouseHold_BeneficiaryScreenState
                   borderRadius: 8,
                   height: 50,
                   onPress: () {
-                    final head = _beneficiaries.firstWhere(
-                      (b) => b['Relation'] == 'Head',
-                      orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': ''},
-                    );
-                    final spouse = _beneficiaries.firstWhere(
-                      (b) => b['Relation'] == 'Spouse',
-                      orElse: () => {'Name': '', 'Gender': ''},
-                    );
-                    
-                    // Format gender to standard format (Male/Female/Other)
+
+
                     String formatGender(dynamic gender) {
                       if (gender == null) return 'Other';
                       final g = gender.toString().toLowerCase();
@@ -442,11 +434,25 @@ class _HouseHold_BeneficiaryScreenState
                       return 'Other';
                     }
                     
+                    // Get head and spouse details from the loaded beneficiaries
+                    final head = _beneficiaries.firstWhere(
+                      (b) => b['Relation'] == 'Head',
+                      orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': '', '_memberData': {}},
+                    );
+                    final spouse = _beneficiaries.firstWhere(
+                      (b) => b['Relation'] == 'Spouse',
+                      orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': '', '_memberData': {}},
+                    );
+
                     Navigator.pushNamed(
                       context, 
                       Route_Names.addFamilyMember,
                       arguments: {
                         'hhId': widget.hhId,
+                        'headName': head['Name']?.toString() ?? '',
+                        'headGender': formatGender(head['Gender']),
+                        'spouseName': spouse['Name']?.toString() ?? '',
+                        'spouseGender': formatGender(spouse['Gender']),
                       },
                     );
                   },
