@@ -62,6 +62,10 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'anc Due Registration';
       final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
 
+      String? beneficiaryRefKey;
+      if (state.beneficiaryId != null && state.beneficiaryId!.contains('_')) {
+        beneficiaryRefKey = state.beneficiaryId;
+      }
 
       final formData = {
         'form_type': formType,
@@ -70,6 +74,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         'form_data': {
           'anc_visit_no': state.ancVisitNo,
           'visit_type': state.visitType,
+          'beneficiaryId': state.beneficiaryId,
+          'beneficiary_ref_key': beneficiaryRefKey,
           'place_of_anc': state.placeOfAnc,
           'date_of_inspection': state.dateOfInspection?.toIso8601String(),
           'house_number': state.houseNumber,
@@ -98,93 +104,32 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         'updated_at': now,
       };
 
+      String householdRefKey = '';
+      String motherKey = '';
+      String fatherKey = '';
 
-      List<Map<String, dynamic>> beneficiaryMaps = await db.query(
-        'beneficiaries',
-        where: 'unique_key LIKE ?',
-        whereArgs: ['%${state.beneficiaryId}'],
-      );
-
-      if (beneficiaryMaps.isEmpty) {
-        beneficiaryMaps = await db.query(
+      if (state.beneficiaryId != null && state.beneficiaryId!.isNotEmpty) {
+        List<Map<String, dynamic>> beneficiaryMaps = await db.query(
           'beneficiaries',
-          where: 'id = ?',
-          whereArgs: [int.tryParse(state.beneficiaryId) ?? 0],
+          where: 'unique_key = ?',
+          whereArgs: [state.beneficiaryId],
         );
-      }
 
-      if (beneficiaryMaps.isEmpty) {
-        throw Exception('Beneficiary not found');
-      }
-
-      final beneficiary = beneficiaryMaps.first;
-      final householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
-      final motherKey = beneficiary['mother_key'] as String? ?? '';
-      final fatherKey = beneficiary['father_key'] as String? ?? '';
-
-      // final now = DateTime.now().toIso8601String();
-      //
-      // final formType = FollowupFormDataTable.eligibleCoupleTrackingDue;
-      // final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Track Eligible Couple';
-      // final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
-
-      // final formData = {
-      //   'form_type': formType,
-      //   'form_name': formName,
-      //   'unique_key': formsRefKey,
-      //   'form_data': {
-      //     'visit_date': state.visitDate?.toIso8601String(),
-      //     'financial_year': state.financialYear,
-      //     'is_pregnant': state.isPregnant,
-      //     'lmp_date': state.lmpDate?.toIso8601String(),
-      //     'edd_date': state.eddDate?.toIso8601String(),
-      //     'fp_adopting': state.fpAdopting,
-      //     'fp_method': state.fpMethod,
-      //     'fp_adoption_date': state.fpAdoptionDate?.toIso8601String(),
-      //     'protection_status': state.fpAdopting == true ? 'Protected' : 'Unprotected',
-      //
-      //   },
-      //   'created_at': now,
-      //   'updated_at': now,
-      // };
-
-      final formJson = jsonEncode(formData);
-
-
-
-      late DeviceInfo deviceInfo;
-      try {
-        deviceInfo = await DeviceInfo.getDeviceInfo();
-      } catch (e) {
-        print('Error getting package/device info: $e');
-      }
-
-      final currentUser = await UserInfo.getCurrentUser();
-      print('Current User: $currentUser');
-
-      Map<String, dynamic> userDetails = {};
-      if (currentUser != null) {
-        if (currentUser['details'] is String) {
-          try {
-            userDetails = jsonDecode(currentUser['details'] ?? '{}');
-          } catch (e) {
-            print('Error parsing user details: $e');
-            userDetails = {};
-          }
-        } else if (currentUser['details'] is Map) {
-          userDetails = Map<String, dynamic>.from(currentUser['details']);
+        if (beneficiaryMaps.isEmpty) {
+          beneficiaryMaps = await db.query(
+            'beneficiaries',
+            where: 'id = ?',
+            whereArgs: [int.tryParse(state.beneficiaryId) ?? 0],
+          );
         }
-        print('User Details: $userDetails');
+
+        if (beneficiaryMaps.isNotEmpty) {
+          final beneficiary = beneficiaryMaps.first;
+          householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
+          motherKey = beneficiary['mother_key'] as String? ?? '';
+          fatherKey = beneficiary['father_key'] as String? ?? '';
+        }
       }
-
-      // Try different possible keys for facility ID
-      final facilityId = userDetails['asha_associated_with_facility_id'] ??
-          userDetails['facility_id'] ??
-          userDetails['facilityId'] ??
-          userDetails['facility'] ??
-          0;
-
-      print('Using Facility ID: $facilityId');
 
       final formDataForDb = {
         'server_id': '',
@@ -195,20 +140,43 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         'father_key': fatherKey,
         'child_care_state': '',
         'device_details': jsonEncode({
-          'id': deviceInfo.deviceId,
-          'platform': deviceInfo.platform,
-          'version': deviceInfo.osVersion,
+          'id': await DeviceInfo.getDeviceInfo().then((value) => value.deviceId),
+          'platform': await DeviceInfo.getDeviceInfo().then((value) => value.platform),
+          'version': await DeviceInfo.getDeviceInfo().then((value) => value.osVersion),
         }),
         'app_details': jsonEncode({
-          'app_version': deviceInfo.appVersion.split('+').first,
-          'app_name': deviceInfo.appName,
-          'build_number': deviceInfo.buildNumber,
-          'package_name': deviceInfo.packageName,
+          'app_version': await DeviceInfo.getDeviceInfo().then((value) => value.appVersion.split('+').first),
+          'app_name': await DeviceInfo.getDeviceInfo().then((value) => value.appName),
+          'build_number': await DeviceInfo.getDeviceInfo().then((value) => value.buildNumber),
+          'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
         }),
-        'parent_user':  '',
-        'current_user_key':  '',
-        'facility_id': facilityId,
-        'form_json': formJson,
+        'parent_user': '',
+        'current_user_key': '',
+        'facility_id': await UserInfo.getCurrentUser().then((value) {
+          if (value != null) {
+            if (value['details'] is String) {
+              try {
+                final userDetails = jsonDecode(value['details'] ?? '{}');
+                return userDetails['asha_associated_with_facility_id'] ??
+                    userDetails['facility_id'] ??
+                    userDetails['facilityId'] ??
+                    userDetails['facility'] ??
+                    0;
+              } catch (e) {
+                return 0;
+              }
+            } else if (value['details'] is Map) {
+              final userDetails = Map<String, dynamic>.from(value['details']);
+              return userDetails['asha_associated_with_facility_id'] ??
+                  userDetails['facility_id'] ??
+                  userDetails['facilityId'] ??
+                  userDetails['facility'] ??
+                  0;
+            }
+          }
+          return 0;
+        }),
+        'form_json': jsonEncode(formData),
         'created_date_time': now,
         'modified_date_time': now,
         'is_synced': 0,
@@ -217,8 +185,45 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
 
       try {
         final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
+
+        try {
+          final visitData = {
+            'id': formId,
+            'beneficiaryId': state.beneficiaryId.length >= 11
+                ? state.beneficiaryId.substring(state.beneficiaryId.length - 11)
+                : state.beneficiaryId,
+            'house_number': state.houseNumber,
+            'woman_name': state.womanName,
+            'husband_name': state.husbandName,
+            'rch_number': state.rchNumber,
+            'visit_type': state.visitType,
+            'place_of_anc': state.placeOfAnc,
+            'date_of_inspection': state.dateOfInspection?.toIso8601String(),
+            'lmp_date': state.lmpDate?.toIso8601String(),
+            'edd_date': state.eddDate?.toIso8601String(),
+            'weeks_of_pregnancy': state.weeksOfPregnancy,
+            'gravida': state.gravida,
+            'is_breast_feeding': state.isBreastFeeding,
+            'td1_date': state.td1Date?.toIso8601String(),
+            'td2_date': state.td2Date?.toIso8601String(),
+            'td_booster_date': state.tdBoosterDate?.toIso8601String(),
+            'folic_acid_tablets': state.folicAcidTablets,
+            'pre_existing_disease': state.preExistingDisease,
+            'weight': state.weight,
+            'systolic': state.systolic,
+            'diastolic': state.diastolic,
+            'hemoglobin': state.hemoglobin,
+            'high_risk': state.highRisk,
+            'beneficiary_absent': state.beneficiaryAbsent,
+            'form_data': formDataForDb,
+          };
+          
+          await SecureStorageService.saveAncVisit(visitData);
+          print('ANC visit data saved to secure storage');
+        } catch (e) {
+          print('Error saving to secure storage: $e');
+        }
         
-        // Increment submission counter for this beneficiary
         if (state.beneficiaryId != null && state.beneficiaryId!.isNotEmpty) {
           try {
             final newCount = await SecureStorageService.incrementSubmissionCount(state.beneficiaryId!);

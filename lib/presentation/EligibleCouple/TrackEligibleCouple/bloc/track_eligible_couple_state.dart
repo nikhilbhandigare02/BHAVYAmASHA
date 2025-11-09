@@ -2,6 +2,7 @@ part of 'track_eligible_couple_bloc.dart';
 
 class TrackEligibleCoupleState extends Equatable {
   final String beneficiaryId;
+  final String? beneficiaryRefKey;
   final DateTime? visitDate;
   final DateTime? removalDAteChange;
   final DateTime? antraInjectionDateChanged;
@@ -25,6 +26,7 @@ class TrackEligibleCoupleState extends Equatable {
 
   const TrackEligibleCoupleState({
     required this.beneficiaryId,
+    this.beneficiaryRefKey,
     this.visitDate,
     this.removalDAteChange,
     this.antraInjectionDateChanged,
@@ -47,6 +49,7 @@ class TrackEligibleCoupleState extends Equatable {
 
   factory TrackEligibleCoupleState.initial({
     required String beneficiaryId,
+    String? beneficiaryRefKey,
     bool isProtected = false,
     Map<String, dynamic>? previousFormData,
   }) {
@@ -60,6 +63,7 @@ class TrackEligibleCoupleState extends Equatable {
       final formData = previousFormData['form_data'] as Map<String, dynamic>? ?? {};
       return TrackEligibleCoupleState(
         beneficiaryId: beneficiaryId,
+        beneficiaryRefKey: beneficiaryRefKey,
         visitDate: now,
         financialYear: formData['financial_year']?.toString() ?? financialYear,
         isPregnant: formData['is_pregnant'] as bool?,
@@ -83,6 +87,7 @@ class TrackEligibleCoupleState extends Equatable {
 
     return TrackEligibleCoupleState(
       beneficiaryId: beneficiaryId,
+      beneficiaryRefKey: beneficiaryRefKey,
       visitDate: now,
       financialYear: financialYear,
       fpAdopting: isProtected,
@@ -105,6 +110,7 @@ class TrackEligibleCoupleState extends Equatable {
 
   TrackEligibleCoupleState copyWith({
     String? beneficiaryId,
+    String? beneficiaryRefKey,
     DateTime? visitDate,
     DateTime? removalDAteChange,
     DateTime? antraInjectionDateChanged,
@@ -115,11 +121,11 @@ class TrackEligibleCoupleState extends Equatable {
     DateTime? eddDate,
     bool? fpAdopting,
     String? fpMethod,
-    String? removalReasonChanged,
-    String? mala,
     String? ecp,
-    String? condom,
     String? chhaya,
+    String? condom,
+    String? mala,
+    String? removalReasonChanged,
     DateTime? fpAdoptionDate,
     FormStatus? status,
     String? error,
@@ -129,6 +135,7 @@ class TrackEligibleCoupleState extends Equatable {
   }) {
     return TrackEligibleCoupleState(
       beneficiaryId: beneficiaryId ?? this.beneficiaryId,
+      beneficiaryRefKey: beneficiaryRefKey ?? this.beneficiaryRefKey,
       visitDate: visitDate ?? this.visitDate,
       chhaya: chhaya ?? this.chhaya,
       ecp: ecp ?? this.ecp,

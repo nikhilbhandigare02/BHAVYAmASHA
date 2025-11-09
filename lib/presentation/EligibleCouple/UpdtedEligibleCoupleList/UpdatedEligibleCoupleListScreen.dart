@@ -121,6 +121,7 @@ class _UpdatedEligibleCoupleListScreenState
     bool isFamilyPlanning = false,
   }) {
     final hhId = (row['household_ref_key']?.toString() ?? '');
+    final beneficiary_ref = (row['unique_key']?.toString() ?? '');
     final uniqueKey = (row['unique_key']?.toString() ?? '');
     final createdDate = row['created_date_time']?.toString() ?? '';
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
@@ -138,6 +139,7 @@ class _UpdatedEligibleCoupleListScreenState
 
     return {
       'hhId': last11(hhId),
+      'beneficiary_ref': beneficiary_ref,
       'RegistrationDate': _formatDate(createdDate),
       'RegistrationType': 'General',
       'BeneficiaryID': last11(uniqueKey),
@@ -348,6 +350,7 @@ class _UpdatedEligibleCoupleListScreenState
           TrackEligibleCoupleScreen.route(
             beneficiaryId: data['BeneficiaryID'].toString(),
             isProtected: isProtected,
+            beneficiaryRefKey: data['beneficiary_ref']?.toString(),
           ),
         );
         

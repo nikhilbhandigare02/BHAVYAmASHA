@@ -16,21 +16,25 @@ import 'bloc/track_eligible_couple_bloc.dart';
 class TrackEligibleCoupleScreen extends StatelessWidget {
   final String beneficiaryId;
   final bool isProtected;
+  final String? beneficiaryRefKey;
 
   const TrackEligibleCoupleScreen({
     super.key,
     required this.beneficiaryId,
     this.isProtected = false,
+    this.beneficiaryRefKey,
   });
 
   static Route route({
     required String beneficiaryId,
     bool isProtected = false,
+    String? beneficiaryRefKey,
   }) =>
       MaterialPageRoute(
         builder: (context) => TrackEligibleCoupleScreen(
           beneficiaryId: beneficiaryId,
           isProtected: isProtected,
+          beneficiaryRefKey: beneficiaryRefKey,
         ),
       );
 
@@ -39,6 +43,7 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => TrackEligibleCoupleBloc(
         beneficiaryId: beneficiaryId,
+        beneficiaryRefKey: beneficiaryRefKey,
         isProtected: isProtected,
       ),
       child: BlocListener<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(

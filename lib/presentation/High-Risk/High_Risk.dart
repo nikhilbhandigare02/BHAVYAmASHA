@@ -37,81 +37,121 @@ class _EligibleCoupleListState extends State<HighRisk> {
         _error = '';
       });
 
-      final storageData = await SecureStorageService.getUserData();
-      print('Raw storage data: $storageData');
+      // Get high-risk beneficiary IDs from getAncVisits
+      Map<String, dynamic> highRiskBeneficiaries = {};
+      try {
+        final storageVisits = await SecureStorageService.getAncVisits();
+        for (var visit in storageVisits) {
+          final beneficiaryId = visit['beneficiaryId']?.toString();
+          final highRiskValue = visit['high_risk']?.toString().toLowerCase();
+          final isHighRisk = highRiskValue == 'yes' ||
+              highRiskValue == 'true' ||
+              highRiskValue == '1';
 
+          if (beneficiaryId != null && isHighRisk) {
+            // Store the most recent visit for each high-risk beneficiary
+            final visitDate = visit['date_of_inspection'] != null
+                ? DateTime.tryParse(visit['date_of_inspection'].toString())
+                : null;
+
+            if (!highRiskBeneficiaries.containsKey(beneficiaryId) ||
+                (visitDate != null &&
+                    highRiskBeneficiaries[beneficiaryId]?['date'] != null &&
+                    visitDate.isAfter(highRiskBeneficiaries[beneficiaryId]!['date']))) {
+              highRiskBeneficiaries[beneficiaryId] = {
+                'date': visitDate,
+                'visit': visit,
+              };
+            }
+          }
+        }
+      } catch (e) {
+        print('Error getting high-risk visits: $e');
+      }
+
+      // If no high-risk beneficiaries found, show message
+      if (highRiskBeneficiaries.isEmpty) {
+        setState(() {
+          _error = 'No high-risk ANC visits found';
+          _isLoading = false;
+          _ancVisits = [];
+          _filteredVisits = [];
+        });
+        return;
+      }
+
+      // Get all visits from getUserData and match with high-risk beneficiaries
+      final storageData = await SecureStorageService.getUserData();
       if (storageData != null && storageData.isNotEmpty) {
         try {
           final Map<String, dynamic> parsedData = jsonDecode(storageData);
-          print('Parsed data keys: ${parsedData.keys.toList()}');
-          
-          final List<ANCVisitModel> visits = [];
-          
+          final List<ANCVisitModel> highRiskVisits = [];
+
           if (parsedData['visits'] is List) {
-            print('Found visits list with ${parsedData['visits'].length} items');
-            
             for (var visit in parsedData['visits']) {
               try {
-                print('Processing visit: ${visit['Name']}');
-                print('Visit data: $visit');
-                
+                final beneficiaryId = visit['BeneficiaryID']?.toString();
+                if (beneficiaryId == null || !highRiskBeneficiaries.containsKey(beneficiaryId)) {
+                  continue; // Skip if not a high-risk beneficiary
+                }
+
                 final rawRow = visit['_rawRow'] ?? {};
                 final beneficiaryInfo = visit['beneficiary_info'] ?? {};
                 final headDetails = beneficiaryInfo['head_details'] ?? {};
-                
+
                 // Extract age and gender from the visit data
                 final String? ageWithGender = visit['age']?.toString();
                 String? extractedAge;
                 String? extractedGender;
-                
+
                 if (ageWithGender != null && ageWithGender.isNotEmpty) {
-                  // Split by '/' and trim whitespace
                   final parts = ageWithGender.split('/').map((e) => e.trim()).toList();
                   if (parts.isNotEmpty) {
-                    extractedAge = parts[0]; // First part is age (e.g., '23 Y')
+                    extractedAge = parts[0];
                     if (parts.length > 1) {
-                      extractedGender = parts[1]; // Second part is gender (e.g., 'Female')
+                      extractedGender = parts[1];
                     }
                   }
                 }
-                
-                final Map<String, dynamic> visitData = {
-                  'id': visit['BeneficiaryID'],
+
+                final visitData = {
+                  'id': beneficiaryId,
                   'hhId': visit['hhId'],
                   'house_number': headDetails['houseNo'],
-                  'gender': extractedGender ?? headDetails['gender'] ?? 'F', // Use extracted gender or fallback
-                  'age': extractedAge ?? visit['age'], // Use extracted age or original
+                  'gender': extractedGender ?? headDetails['gender'] ?? 'F',
+                  'age': extractedAge ?? visit['age'],
                   'woman_name': visit['Name'],
                   'husband_name': visit['HusbandName'],
                   'rch_number': visit['RichID'],
                   'visit_type': visit['RegistrationType'],
-                  'high_risk': rawRow['high_risk'] ?? false,
+                  'high_risk': true, // Since we already filtered high-risk beneficiaries
                   'date_of_inspection': visit['RegistrationDate'],
                   'mobileNumber': visit['mobileno'],
                 };
 
-                print('Processed visit data: $visitData');
-                
-
-                visits.add(ANCVisitModel.fromJson(visitData));
-                
+                highRiskVisits.add(ANCVisitModel.fromJson(visitData));
               } catch (e) {
                 print('Error processing visit: $e\nVisit data: $visit');
               }
             }
-          } else {
-            print('No form_data or visits list found in storage data');
-            print('Available keys: ${parsedData.keys.toList()}');
           }
 
+          // Sort by date descending to show most recent first
+          highRiskVisits.sort((a, b) {
+            if (a.dateOfInspection == null) return 1;
+            if (b.dateOfInspection == null) return -1;
+            return b.dateOfInspection!.compareTo(a.dateOfInspection!);
+          });
+
           setState(() {
-            _ancVisits = visits;
+            _ancVisits = highRiskVisits;
+            _filteredVisits = List.from(_ancVisits);
             _isLoading = false;
-            if (visits.isEmpty) {
-              _error = 'No high-risk ANC visits found in the data';
+            if (_ancVisits.isEmpty) {
+              _error = 'No matching high-risk ANC visits found';
             }
           });
-          
+
         } catch (e) {
           print('Error parsing JSON data: $e');
           setState(() {
@@ -120,21 +160,21 @@ class _EligibleCoupleListState extends State<HighRisk> {
           });
         }
       } else {
-        print('No data found in secure storage');
         setState(() {
-          _error = 'No ANC visit data found in storage';
+          _error = 'No ANC visit data found';
           _isLoading = false;
+          _ancVisits = [];
+          _filteredVisits = [];
         });
       }
     } catch (e) {
+      print('Error loading ANC visits: $e');
       setState(() {
         _error = 'Failed to load ANC visits: $e';
         _isLoading = false;
       });
-      print('Error loading ANC visits: $e');
     }
   }
-
   List<ANCVisitModel> _filteredVisits = [];
 
   void _onSearchChanged() {
@@ -145,8 +185,8 @@ class _EligibleCoupleListState extends State<HighRisk> {
       } else {
         _filteredVisits = _ancVisits.where((visit) {
           return (visit.houseNumber?.toLowerCase().contains(query) ?? false) ||
-                 (visit.womanName?.toLowerCase().contains(query) ?? false) ||
-                 (visit.rchNumber?.toLowerCase().contains(query) ?? false);
+              (visit.womanName?.toLowerCase().contains(query) ?? false) ||
+              (visit.rchNumber?.toLowerCase().contains(query) ?? false);
         }).toList();
       }
     });
@@ -201,31 +241,31 @@ class _EligibleCoupleListState extends State<HighRisk> {
               ),
             )
           else if (displayVisits.isEmpty)
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.assignment_late_outlined, size: 48, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No high-risk ANC visits found',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.assignment_late_outlined, size: 48, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No high-risk ANC visits found',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  itemCount: displayVisits.length,
+                  itemBuilder: (context, index) {
+                    return _ancVisitCard(context, displayVisits[index]);
+                  },
                 ),
               ),
-            )
-          else
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                itemCount: displayVisits.length,
-                itemBuilder: (context, index) {
-                  return _ancVisitCard(context, displayVisits[index]);
-                },
-              ),
-            ),
         ],
       ),
     );
@@ -267,7 +307,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                 children: [
                   Row(
                     children: [
-                       Icon(Icons.home, color: Colors.black54, size: 14.sp),
+                      Icon(Icons.home, color: Colors.black54, size: 14.sp),
                       const SizedBox(width: 6),
                       Text(
                         visit.hhId ?? 'N/A',
@@ -385,7 +425,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
             child: Text(
               value.isEmpty ? 'N/A' : value,
               style: textStyle ??
-                   TextStyle(
+                  TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                     fontSize: 14.sp,

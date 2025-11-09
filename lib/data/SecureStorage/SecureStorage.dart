@@ -48,6 +48,48 @@ class SecureStorageService {
     await _storage.delete(key: key);
   }
 
+  // Save ANC visit data
+  static const String _keyAncVisits = 'anc_visits';
+  
+  static Future<void> saveAncVisit(Map<String, dynamic> visitData) async {
+    try {
+      // Get existing visits
+      final existingData = await _storage.read(key: _keyAncVisits);
+      List<dynamic> visits = [];
+      
+      if (existingData != null) {
+        visits = jsonDecode(existingData);
+      }
+      
+      // Add new visit
+      visits.add({
+        ...visitData,
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+      
+      // Save back to storage
+      await _storage.write(
+        key: _keyAncVisits,
+        value: jsonEncode(visits),
+      );
+    } catch (e) {
+      print('Error saving ANC visit: $e');
+      rethrow;
+    }
+  }
+  
+  // Get all ANC visits
+  static Future<List<dynamic>> getAncVisits() async {
+    try {
+      final data = await _storage.read(key: _keyAncVisits);
+      if (data == null) return [];
+      return jsonDecode(data);
+    } catch (e) {
+      print('Error getting ANC visits: $e');
+      return [];
+    }
+  }
+
   // Check if user is logged in
   static Future<bool> isLoggedIn() async {
     final token = await getToken();

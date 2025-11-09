@@ -18,13 +18,19 @@ part 'track_eligible_couple_state.dart';
 
 class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligibleCoupleState> {
   final String beneficiaryId;
+  final String? beneficiaryRefKey;
   final bool isProtected;
   static const _secureStorage = FlutterSecureStorage();
 
   TrackEligibleCoupleBloc({
     required this.beneficiaryId,
+    this.beneficiaryRefKey,
     this.isProtected = false,
-  }) : super(TrackEligibleCoupleState.initial(beneficiaryId: beneficiaryId, isProtected: isProtected)) {
+  }) : super(TrackEligibleCoupleState.initial(
+          beneficiaryId: beneficiaryId,
+          beneficiaryRefKey: beneficiaryRefKey,
+          isProtected: isProtected,
+        )) {
     // Load previous form data if this is a protected beneficiary
     if (isProtected) {
       _loadPreviousFormData();
@@ -310,7 +316,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           'server_id': '',
           'forms_ref_key': formsRefKey,
           'household_ref_key': householdRefKey,
-          'beneficiary_ref_key': state.beneficiaryId,
+          'beneficiary_ref_key': state.beneficiaryRefKey ?? state.beneficiaryId,
           'mother_key': motherKey,
           'father_key': fatherKey,
           'child_care_state': '',

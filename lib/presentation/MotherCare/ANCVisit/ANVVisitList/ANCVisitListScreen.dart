@@ -42,10 +42,10 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       for (final row in rows) {
         try {
           // Check if is_family_planning is 1
-          final isFamilyPlanning = row['is_family_planning'] == 1 || 
-                                 row['is_family_planning'] == '1' ||
-                                 (row['is_family_planning']?.toString().toLowerCase() == 'true');
-          
+          final isFamilyPlanning = row['is_family_planning'] == 1 ||
+              row['is_family_planning'] == '1' ||
+              (row['is_family_planning']?.toString().toLowerCase() == 'true');
+
           if (!isFamilyPlanning) {
             print('ℹ️ Skipping - is_family_planning flag is not set');
             continue;
@@ -110,9 +110,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         print('\n📦 Current secure storage data:');
         String? existingData = await SecureStorageService.getUserData();
         print('   - Raw data: ${existingData ?? 'No data found'}');
-        
+
         Map<String, dynamic> dataToStore = {};
-        
+
         if (existingData != null && existingData.isNotEmpty) {
           try {
             dataToStore = jsonDecode(existingData);
@@ -123,19 +123,19 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         } else {
           print('   - No existing data in secure storage, will create new');
         }
-        
+
         // Update the visits list
         dataToStore['visits'] = couples;
         final dataToStoreJson = jsonEncode(dataToStore);
-        
+
         print('\n💾 Saving to secure storage:');
         print('   - Couples count: ${couples.length}');
         print('   - First couple: ${couples.isNotEmpty ? couples.first.toString() : 'No couples'}');
         print('   - Data size: ${dataToStoreJson.length} characters');
-        
+
         // Save back to secure storage
         await SecureStorageService.saveUserData(dataToStoreJson);
-        
+
         // Verify the data was saved correctly
         final savedData = await SecureStorageService.getUserData();
         if (savedData != null && savedData.isNotEmpty) {
@@ -146,8 +146,31 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             print('   - Decoded saved data: ${savedJson.toString()}');
             if (savedJson['visits'] is List) {
               print('   - Saved visits count: ${savedJson['visits'].length}');
-            }
-          } catch (e) {
+
+              // Print BeneficiaryID and unique_key for each visit
+              if (savedJson['visits'] is List) {
+                print('\n🔍 Extracted Beneficiary IDs and Unique Keys:');
+                final visits = savedJson['visits'] as List;
+                for (int i = 0; i < visits.length; i++) {
+                  final visit = visits[i] as Map<String, dynamic>;
+                  print('\n🔹 Visit #${i + 1}:');
+                  print(
+                      '   - BeneficiaryID: ${visit['BeneficiaryID'] ?? 'N/A'}');
+
+                  // Get the _rawRow to access unique_key
+                  if (visit['_rawRow'] is Map) {
+                    final rawRow = visit['_rawRow'] as Map;
+                    print('   - Unique Key: ${rawRow['unique_key'] ?? 'N/A'}');
+                  } else {
+                    print('   - Unique Key: Not available (no _rawRow)');
+                  }
+
+                  // Print additional info for reference
+                  print('   - Name: ${visit['Name'] ?? 'N/A'}');
+                  print('   - HH ID: ${visit['hhId'] ?? 'N/A'}');
+                }
+              }
+            }} catch (e) {
             print('⚠️ Error parsing saved data: $e');
           }
         } else {
@@ -408,7 +431,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           ),
         ),
       ),
-        body: Column(
+      body: Column(
         children: [
           // Search
           Padding(
@@ -439,25 +462,25 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _filtered.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No ANC beneficiaries found',
-                        style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                      ),
-                    )
-                  : Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: _loadEligibleCouples,
-                        child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                          itemCount: _filtered.length,
-                          itemBuilder: (context, index) {
-                            final data = _filtered[index];
-                            return _ancCard(context, data);
-                          },
-                        ),
-                      ),
-                    ),
+              ? Center(
+            child: Text(
+              'No ANC beneficiaries found',
+              style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+            ),
+          )
+              : Expanded(
+            child: RefreshIndicator(
+              onRefresh: _loadEligibleCouples,
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                itemCount: _filtered.length,
+                itemBuilder: (context, index) {
+                  final data = _filtered[index];
+                  return _ancCard(context, data);
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -467,15 +490,15 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   Widget _ancCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final primary = Theme.of(context).primaryColor;
-    
+
     final registrationDate = data['RegistrationDate'] is String && data['RegistrationDate'].isNotEmpty
         ? data['RegistrationDate']
         : l10n?.notAvailable ?? 'N/A';
-        
+
     final ageGender = data['age'] is String && data['age'].isNotEmpty
         ? data['age']
         : l10n?.notAvailable ?? 'N/A';
-        
+
     // Get husband's name
     final husbandName = data['HusbandName'] is String && data['HusbandName'].isNotEmpty
         ? data['HusbandName']
@@ -484,12 +507,28 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () {
+        // Create a new map with only the required fields
+        final beneficiaryData = <String, dynamic>{};
+        
+        if (data['_rawRow'] is Map) {
+          final rawRow = data['_rawRow'] as Map;
+          // Only pass these two specific fields
+          beneficiaryData['unique_key'] = rawRow['unique_key'];
+          beneficiaryData['BeneficiaryID'] = rawRow['BeneficiaryID'];
+          
+          // Log the values being passed
+          print('🔑 Passing to form:');
+          print('   - unique_key: ${beneficiaryData['unique_key']}');
+          print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
+        }
+        
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Ancvisitform(beneficiaryData: data),
+            builder: (context) => Ancvisitform(beneficiaryData: beneficiaryData),
           ),
-        );      },
+        );
+      },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
@@ -544,81 +583,81 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             ),
 
             // Blue body
-      Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: primary,
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // --- First Row: 6 items (auto-wraps if space is tight) ---
-            Wrap(
-              spacing: 8, // horizontal gap
-              runSpacing: 8, // vertical gap if wrapped
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 4 - 25,
-                  child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID'] ?? ''),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 4 - 55,
-                  child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? ''),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 4 - 55,
-                  child: _rowText(l10n?.ageLabel ?? 'Age/Gender', ageGender),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 4 - 49,
-                  child: _rowText(l10n?.husbandLabel ?? 'Husband', husbandName),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width /4 - 25,
-                  child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', registrationDate),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 7 - 13,
-                  child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', 'N/A'),
-                ),
-              ],
-            ),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: primary,
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+              ),
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // --- First Row: 6 items (auto-wraps if space is tight) ---
+                  Wrap(
+                    spacing: 8, // horizontal gap
+                    runSpacing: 8, // vertical gap if wrapped
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 4 - 25,
+                        child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID'] ?? ''),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 4 - 55,
+                        child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? ''),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 4 - 55,
+                        child: _rowText(l10n?.ageLabel ?? 'Age/Gender', ageGender),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 4 - 49,
+                        child: _rowText(l10n?.husbandLabel ?? 'Husband', husbandName),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width /4 - 25,
+                        child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', registrationDate),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 7 - 13,
+                        child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', 'N/A'),
+                      ),
+                    ],
+                  ),
 
-            const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-            // --- Second Row: 5 items ---
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 4 - 30,
-                  child: _rowText(l10n?.firstAncLabel ?? 'First ANC', l10n?.notAvailable ?? 'N/A'),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 4 - 35,
-                  child: _rowText(l10n?.secondAncLabel ?? 'Second ANC', l10n?.notAvailable ?? 'N/A'),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 4 - 35,
-                  child: _rowText(l10n?.thirdAncLabel ?? 'Third ANC', l10n?.notAvailable ?? 'N/A'),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 4 - 35,
-                  child: _rowText( 'Fourth ANC', l10n?.notAvailable ?? 'N/A'),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 4 - 30,
-                  child: _rowText(l10n?.pmsmaLabel ?? 'PMSMA', l10n?.notAvailable ?? 'N/A'),
-                ),
-              ],
-            ),
+                  // --- Second Row: 5 items ---
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 4 - 30,
+                        child: _rowText(l10n?.firstAncLabel ?? 'First ANC', l10n?.notAvailable ?? 'N/A'),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 4 - 35,
+                        child: _rowText(l10n?.secondAncLabel ?? 'Second ANC', l10n?.notAvailable ?? 'N/A'),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 4 - 35,
+                        child: _rowText(l10n?.thirdAncLabel ?? 'Third ANC', l10n?.notAvailable ?? 'N/A'),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 4 - 35,
+                        child: _rowText( 'Fourth ANC', l10n?.notAvailable ?? 'N/A'),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 4 - 30,
+                        child: _rowText(l10n?.pmsmaLabel ?? 'PMSMA', l10n?.notAvailable ?? 'N/A'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )
           ],
-        ),
-      )
-      ],
         ),
       ),
     );

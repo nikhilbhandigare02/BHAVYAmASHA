@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
@@ -8,6 +10,9 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+
+import '../../../core/models/anc_visit_model.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 
 class DeliveryOutcomeScreen extends StatefulWidget {
   const DeliveryOutcomeScreen({super.key});
@@ -20,28 +25,177 @@ class DeliveryOutcomeScreen extends StatefulWidget {
 class _DeliveryOutcomeScreenState
     extends State<DeliveryOutcomeScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-      'Name': 0,
-      'Age|Gender': '19 Y | Male',
-      'Mobileno.': '1365124512',
-      'HusbandName': 'flagyht ujy',
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  List<ANCVisitModel> _ancVisits = [];
+  bool _isLoading = true;
+  String _error = '';
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _loadANCVisits();
     _searchCtrl.addListener(_onSearchChanged);
   }
+
+  Future<void> _loadANCVisits() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = '';
+      });
+
+      Map<String, dynamic> highRiskBeneficiaries = {};
+      try {
+        final storageVisits = await SecureStorageService.getAncVisits();
+        for (var visit in storageVisits) {
+          final beneficiaryId = visit['beneficiaryId']?.toString();
+          final highRiskValue = visit['high_risk']?.toString().toLowerCase();
+          final isHighRisk = highRiskValue == 'yes' ||
+              highRiskValue == 'true' ||
+              highRiskValue == '1';
+
+          if (beneficiaryId != null && isHighRisk) {
+            // Store the most recent visit for each high-risk beneficiary
+            final visitDate = visit['date_of_inspection'] != null
+                ? DateTime.tryParse(visit['date_of_inspection'].toString())
+                : null;
+
+            if (!highRiskBeneficiaries.containsKey(beneficiaryId) ||
+                (visitDate != null &&
+                    highRiskBeneficiaries[beneficiaryId]?['date'] != null &&
+                    visitDate.isAfter(highRiskBeneficiaries[beneficiaryId]!['date']))) {
+              highRiskBeneficiaries[beneficiaryId] = {
+                'date': visitDate,
+                'visit': visit,
+              };
+            }
+          }
+        }
+      } catch (e) {
+        print('Error getting high-risk visits: $e');
+      }
+
+      // If no high-risk beneficiaries found, show message
+      if (highRiskBeneficiaries.isEmpty) {
+        setState(() {
+          _error = 'No high-risk ANC visits found';
+          _isLoading = false;
+          _ancVisits = [];
+          _filteredVisits = [];
+        });
+        return;
+      }
+
+      // Get all visits from getUserData and match with high-risk beneficiaries
+      final storageData = await SecureStorageService.getUserData();
+      if (storageData != null && storageData.isNotEmpty) {
+        try {
+          final Map<String, dynamic> parsedData = jsonDecode(storageData);
+          final List<ANCVisitModel> highRiskVisits = [];
+
+          if (parsedData['visits'] is List) {
+            for (var visit in parsedData['visits']) {
+              try {
+                final beneficiaryId = visit['BeneficiaryID']?.toString();
+                if (beneficiaryId == null || !highRiskBeneficiaries.containsKey(beneficiaryId)) {
+                  continue; // Skip if not a high-risk beneficiary
+                }
+
+                final rawRow = visit['_rawRow'] ?? {};
+                final beneficiaryInfo = visit['beneficiary_info'] ?? {};
+                final headDetails = beneficiaryInfo['head_details'] ?? {};
+
+                // Extract age and gender from the visit data
+                final String? ageWithGender = visit['age']?.toString();
+                String? extractedAge;
+                String? extractedGender;
+
+                if (ageWithGender != null && ageWithGender.isNotEmpty) {
+                  final parts = ageWithGender.split('/').map((e) => e.trim()).toList();
+                  if (parts.isNotEmpty) {
+                    extractedAge = parts[0];
+                    if (parts.length > 1) {
+                      extractedGender = parts[1];
+                    }
+                  }
+                }
+
+                final visitData = {
+                  'id': beneficiaryId,
+                  'hhId': visit['hhId'],
+                  'house_number': headDetails['houseNo'],
+                  'gender': extractedGender ?? headDetails['gender'] ?? 'F',
+                  'age': extractedAge ?? visit['age'],
+                  'woman_name': visit['Name'],
+                  'husband_name': visit['HusbandName'],
+                  'rch_number': visit['RichID'],
+                  'visit_type': visit['RegistrationType'],
+                  'high_risk': true,
+                  'date_of_inspection': visit['RegistrationDate'],
+                  'mobileNumber': visit['mobileno'],
+                };
+
+                highRiskVisits.add(ANCVisitModel.fromJson(visitData));
+              } catch (e) {
+                print('Error processing visit: $e\nVisit data: $visit');
+              }
+            }
+          }
+
+          highRiskVisits.sort((a, b) {
+            if (a.dateOfInspection == null) return 1;
+            if (b.dateOfInspection == null) return -1;
+            return b.dateOfInspection!.compareTo(a.dateOfInspection!);
+          });
+
+          setState(() {
+            _ancVisits = highRiskVisits;
+            _filteredVisits = List.from(_ancVisits);
+            _isLoading = false;
+            if (_ancVisits.isEmpty) {
+              _error = 'No matching high-risk ANC visits found';
+            }
+          });
+
+        } catch (e) {
+          print('Error parsing JSON data: $e');
+          setState(() {
+            _error = 'Error parsing data: $e';
+            _isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          _error = 'No ANC visit data found';
+          _isLoading = false;
+          _ancVisits = [];
+          _filteredVisits = [];
+        });
+      }
+    } catch (e) {
+      print('Error loading ANC visits: $e');
+      setState(() {
+        _error = 'Failed to load ANC visits: $e';
+        _isLoading = false;
+      });
+    }
+  }
+  List<ANCVisitModel> _filteredVisits = [];
+
+  void _onSearchChanged() {
+    final query = _searchCtrl.text.toLowerCase().trim();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredVisits = List.from(_ancVisits);
+      } else {
+        _filteredVisits = _ancVisits.where((visit) {
+          return (visit.houseNumber?.toLowerCase().contains(query) ?? false) ||
+              (visit.womanName?.toLowerCase().contains(query) ?? false) ||
+              (visit.rchNumber?.toLowerCase().contains(query) ?? false);
+        }).toList();
+      }
+    });
+  }
+
 
   @override
   void dispose() {
@@ -50,25 +204,12 @@ class _DeliveryOutcomeScreenState
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    final q = _searchCtrl.text.trim().toLowerCase();
-    setState(() {
-      if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-      } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['houseNo'] as String).toLowerCase().contains(q) ||
-              (e['name'] as String).toLowerCase().contains(q) ||
-              (e['mobile'] as String).toLowerCase().contains(q);
-        }).toList();
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final displayVisits = _searchCtrl.text.isEmpty ? _ancVisits : _filteredVisits;
+
     return Scaffold(
       appBar: AppHeader(
         screenTitle:  l10n!.deliveryOutcomeList,
@@ -78,50 +219,64 @@ class _DeliveryOutcomeScreenState
       ),
       body: Column(
         children: [
-          // Search
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText:  l10n!.searchDeliveryOutcome,
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+          if (_isLoading)
+            const Expanded(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_error.isNotEmpty)
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      _error,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadANCVisits,
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
-          ),
+            )
+          else if (displayVisits.isEmpty)
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.assignment_late_outlined, size: 48, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No high-risk ANC visits found',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  itemCount: displayVisits.length,
+                  itemBuilder: (context, index) {
+                    return _householdCard(context, displayVisits[index]);
+                  },
+                ),
+              ),
         ],
       ),
     );
   }
 
-  Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
+  Widget _householdCard(BuildContext context, ANCVisitModel visit) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
@@ -170,7 +325,7 @@ class _DeliveryOutcomeScreenState
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          data['hhId'] ?? '',
+                         visit.hhId?? '',
                           style: TextStyle(
                             color: primary,
                             fontWeight: FontWeight.w500,fontSize: 14.sp
@@ -209,14 +364,14 @@ class _DeliveryOutcomeScreenState
                           Expanded(
                             child: _rowText(
                               l10n?.registrationDateLabel ?? 'Registration Date',
-                              data['RegitrationDate'],
+                              visit.registrationDate ??'',
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _rowText(
                               l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
-                              (data['BeneficiaryID'] ?? '').toString(),
+                              visit.id ?? '',
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -232,19 +387,19 @@ class _DeliveryOutcomeScreenState
                       Row(
                         children: [
                           Expanded(
-                              child: _rowText(l10n?.thName ?? 'Name', (data['Name'] ?? '').toString())),
+                              child: _rowText(l10n?.thName ?? 'Name', visit.womanName ?? '')),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _rowText(
                               l10n?.ageGenderLabel ?? 'Age | Gender',
-                              (data['Age|Gender'] ?? '').toString(),
+                              visit.age ?? '',
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _rowText(
                               l10n?.mobileLabelSimple ?? 'Mobile no.',
-                              (data['Mobileno'] ?? data['Mobileno.'] ?? '').toString(),
+                              visit.mobileNumber ?? '',
                             ),
                           ),
                         ],
@@ -255,7 +410,7 @@ class _DeliveryOutcomeScreenState
                           Expanded(
                             child: _rowText(
                                'Husband Name',
-                              (data['HusbandName'] ?? data['HusbandName'] ?? '').toString(),
+                              visit.husbandName ?? '',
                             ),
                           ),
                         ],

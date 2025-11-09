@@ -46,10 +46,35 @@ class _AncvisitformState extends State<Ancvisitform> {
     final data = widget.beneficiaryData;
     String? houseNo;
     
-    // Try to get houseNo from secure storage first
+    // Set beneficiary ID in the bloc if available
     if (data != null) {
+      print('🔍 Initializing form with beneficiary data: ${jsonEncode(data)}');
+      
       final dataId = data['id']?.toString();
       final dataBeneficiaryId = data['BeneficiaryID']?.toString();
+      final uniqueKey = data['unique_key']?.toString();
+      
+      print('🔑 Extracted IDs - dataId: $dataId, dataBeneficiaryId: $dataBeneficiaryId, uniqueKey: $uniqueKey');
+      
+      // Use the most specific ID available
+      String? beneficiaryIdToUse;
+      
+      if (dataId != null) {
+        beneficiaryIdToUse = dataId;
+        print('📌 Using ID from dataId: $dataId');
+      } else if (dataBeneficiaryId != null) {
+        beneficiaryIdToUse = dataBeneficiaryId;
+        print('📌 Using ID from dataBeneficiaryId: $dataBeneficiaryId');
+      } else if (uniqueKey != null) {
+        beneficiaryIdToUse = uniqueKey;
+        print('📌 Using unique_key as ID: $uniqueKey');
+      }
+      
+      if (beneficiaryIdToUse != null) {
+        _bloc.add(BeneficiaryIdSet(beneficiaryIdToUse));
+      } else {
+        print('⚠️ No valid beneficiary ID or unique key found in the provided data');
+      }
       
       if (dataId != null || dataBeneficiaryId != null) {
         try {
@@ -207,6 +232,7 @@ class _AncvisitformState extends State<Ancvisitform> {
               }
               if (state.isSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n?.saveSuccess ?? 'Saved successfully')));
+                Navigator.pop(context);
               }
             },
             builder: (context, state) {
