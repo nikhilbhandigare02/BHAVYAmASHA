@@ -36,37 +36,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     _loadChildTrackingData();
   }
 
-   Future<void> _checkDatabaseRecords() async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      
-      // First, check total records in the table
-      final countResult = await db.rawQuery('SELECT COUNT(*) as count FROM ${FollowupFormDataTable.table}');
-      final totalRecords = countResult.first['count'] as int;
-      debugPrint('Total records in followup_form_data: $totalRecords');
-      
-      // Check for any records with the child_tracking_due form type
-      final results = await db.query(
-        FollowupFormDataTable.table,
-        where: 'form_json LIKE ?',
-        whereArgs: ['%${FollowupFormDataTable.childTrackingDue}%'],
-      );
-      
-      debugPrint('Found ${results.length} records with child_tracking_due form type');
-      
-      // If no records found, check for any records with similar form types
-      if (results.isEmpty) {
-        final allResults = await db.query(FollowupFormDataTable.table, limit: 5);
-        debugPrint('Sample of first 5 records:');
-        for (var i = 0; i < allResults.length; i++) {
-          debugPrint('Record $i: ${allResults[i]}');
-        }
-      }
-    } catch (e) {
-      debugPrint('Error checking database records: $e');
-    }
-  }
-
   Future<void> _loadChildTrackingData() async {
     if (!mounted) return;
 
@@ -76,33 +45,34 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     });
 
     try {
-      await _checkDatabaseRecords(); // Check database records first
-      
       final db = await DatabaseProvider.instance.database;
+
+      // First, let's see ALL records in the table (newest first)
+      final allRecords = await db.query(
+        FollowupFormDataTable.table,
+        orderBy: 'id DESC',
+      );
+      debugPrint('📋 Total records in followup_form_data table: ${allRecords.length}');
       
-      // Try different query approaches to find matching records
-      List<Map<String, dynamic>> results = [];
-      
-      // First try: Exact form_type match
-      results = await db.query(
+      for (var i = 0; i < allRecords.length && i < 5; i++) {
+        final record = allRecords[i];
+        debugPrint('\n--- Record ${i + 1} (ID: ${record['id']}) ---');
+        debugPrint('household_ref_key: ${record['household_ref_key']}');
+        debugPrint('beneficiary_ref_key: ${record['beneficiary_ref_key']}');
+        debugPrint('created_date_time: ${record['created_date_time']}');
+        debugPrint('form_json: ${record['form_json']}');
+        debugPrint('form_json length: ${(record['form_json'] as String?)?.length ?? 0}');
+      }
+
+      // Query followup_form_data for child registration entries
+      final results = await db.query(
         FollowupFormDataTable.table,
         where: 'form_json LIKE ?',
-        whereArgs: ['%"form_type":"${FollowupFormDataTable.childTrackingDue}"%'],
+        whereArgs: ['%child_registration_due%'],
+        orderBy: 'id DESC',
       );
-      
-      // If no results, try case-insensitive search
-      if (results.isEmpty) {
-        debugPrint('No results with exact form_type match, trying case-insensitive search');
-        results = await db.rawQuery('''
-          SELECT * FROM ${FollowupFormDataTable.table} 
-          WHERE LOWER(form_json) LIKE ?
-        ''', ['%${FollowupFormDataTable.childTrackingDue.toLowerCase()}%']);
-      }
-      
-      debugPrint('Found ${results.length} child tracking records');
-      if (results.isNotEmpty) {
-        debugPrint('First record: ${results.first}');
-      }
+
+      debugPrint('\n🔍 Found ${results.length} child registration records after filtering');
 
       final List<Map<String, dynamic>> childTrackingList = [];
 
@@ -110,55 +80,65 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         try {
           final formJson = row['form_json'] as String?;
           if (formJson == null || formJson.isEmpty) {
-            debugPrint('Skipping empty form_json');
+            debugPrint('Skipping row with empty form_json');
             continue;
           }
 
-          debugPrint('Processing form_json: $formJson');
-          
+          debugPrint('Processing form_json: ${formJson.substring(0, formJson.length > 100 ? 100 : formJson.length)}...');
+
           final formData = jsonDecode(formJson);
           final formType = formData['form_type']?.toString() ?? '';
-          
-          debugPrint('Form type: $formType');
-          
-          // Skip if not a child tracking form
-          if (formType != FollowupFormDataTable.childTrackingDue) {
-            debugPrint('Skipping non-child tracking form: $formType');
+
+          debugPrint('Form type found: $formType');
+
+          // Skip if not a child registration form
+          if (formType != FollowupFormDataTable.childRegistrationDue) {
+            debugPrint('Skipping form with type: $formType');
             continue;
           }
-          
+
           final formDataMap = formData['form_data'] as Map<String, dynamic>? ?? {};
           final childName = formDataMap['child_name']?.toString() ?? '';
-          
-          debugPrint('Child name: $childName');
-          
+
+          debugPrint('Child name found: $childName');
+
           // Skip if no child name
           if (childName.isEmpty) {
             debugPrint('Skipping record with empty child name');
             continue;
           }
-          
+
+          // Format registration date
+          final registrationDate = row['created_date_time'] != null 
+              ? _formatDate(row['created_date_time'].toString())
+              : 'N/A';
+
           // Extract other fields with null safety
           final childData = {
-            'hhId': row['household_ref_key']?.toString() ?? '',
-            'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
-            'RegitrationType': 'Child Tracking',
-            'BeneficiaryID': row['beneficiary_ref_key']?.toString() ?? '',
-            'RchID': formDataMap['rch_id']?.toString() ?? '',
+            'hhId': row['household_ref_key']?.toString() ?? 'N/A',
+            'RegitrationDate': registrationDate,
+            'RegitrationType': 'Child Registration',
+            'BeneficiaryID': row['beneficiary_ref_key']?.toString() ?? 'N/A',
+            'RchID': formDataMap['rch_id_child']?.toString() ?? 'N/A',
             'Name': childName,
             'Age|Gender': _formatAgeGender(formDataMap['date_of_birth'], formDataMap['gender']),
-            'Mobileno.': formDataMap['mobile_number']?.toString() ?? '',
-            'FatherName': formDataMap['father_name']?.toString() ?? '',
-            'formData': formDataMap, // Store full form data for potential future use
+            'Mobileno.': formDataMap['mobile_number']?.toString() ?? 'N/A',
+            'FatherName': formDataMap['father_name']?.toString() ?? 'N/A',
+            'MotherName': formDataMap['mother_name']?.toString() ?? 'N/A',
+            'Address': formDataMap['address']?.toString() ?? 'N/A',
+            'Weight': formDataMap['weight_grams']?.toString() ?? 'N/A',
+            'formData': formDataMap,
           };
-          
-          debugPrint('Processed child data: $childData');
+
           childTrackingList.add(childData);
+          debugPrint('✅ Successfully added child: $childName');
         } catch (e) {
-          debugPrint('Error processing child tracking record: $e');
+          debugPrint('❌ Error processing child registration record: $e');
           continue;
         }
       }
+
+      debugPrint('📊 Total child records processed: ${childTrackingList.length}');
 
       if (mounted) {
         setState(() {
@@ -168,10 +148,10 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         });
       }
     } catch (e) {
-      debugPrint('Error loading child tracking data: $e');
+      debugPrint('Error loading child registration data: $e');
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to load child tracking data. Please try again.';
+          _errorMessage = 'Failed to load child registration data. Please try again.';
           _isLoading = false;
         });
       }
@@ -304,40 +284,25 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                         controller: _searchCtrl,
                         decoration: InputDecoration(
                           hintText: 'Search by name, ID, or mobile...',
-                          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                          prefixIcon: const Icon(Icons.search),
+                          filled: true,
+                          fillColor: AppColors.background,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: AppColors.outlineVariant),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color:AppColors.primary, width: 1.5),
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                          filled: true,
-                          fillColor: Colors.white,
                         ),
                       ),
                     ),
 
-                    // 🔄 Refresh button
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          icon: const Icon(Icons.refresh, size: 20),
-                          label: Text('Refresh', style: TextStyle(fontSize: 12.sp)),
-                          onPressed: _loadChildTrackingData,
-                        ),
-                      ),
-                    ),
-
-                    // 📋 List of Children
                     Expanded(
                       child: _filtered.isEmpty
                           ? Center(
@@ -353,7 +318,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                           : RefreshIndicator(
                               onRefresh: _loadChildTrackingData,
                               child: ListView.builder(
-                                padding: const EdgeInsets.only(bottom: 20),
+                                padding: const EdgeInsets.fromLTRB(5, 0, 5, 12),
                                 itemCount: _filtered.length,
                                 itemBuilder: (context, index) {
                                   final childData = _filtered[index];
@@ -370,89 +335,130 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
   // 🧱 Household Card UI
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    final Color primary = Theme.of(context).primaryColor;
+
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          Route_Names.ChildTrackingDueListForm,
+          arguments: {
+            'formData': data['formData'],
+            'isEdit': true,
+          },
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+        height: 180,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 3,
+              spreadRadius: 1,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 🔹 First Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: _infoChip(
-                    'HHID: ${data['hhId'] ?? 'N/A'}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+            // Header Row
+            Container(
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.home, color: AppColors.primary, size: 16),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      (data['hhId'] != null && data['hhId'].toString().length > 11)
+                          ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
+                          : (data['hhId']?.toString() ?? ''),
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                _infoChip(data['RegitrationDate'] ?? 'N/A'),
-                const SizedBox(width: 8),
-                _infoChip(
-                  data['RegitrationType'] ?? 'N/A',
-                  color: _getStatusColor(data['RegitrationType']),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // 🔹 Second Row
-            Row(
-              children: [
-                Expanded(
-                  child: _infoChip(
-                    'Beneficiary ID: ${data['BeneficiaryID'] ?? 'N/A'}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (data['RchID']?.toString().isNotEmpty ?? false) ...[
                   const SizedBox(width: 8),
-                  _infoChip('RCH ID: ${data['RchID']}'),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.asset(
+                      'assets/images/sync.png',
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => 
+                          const Icon(Icons.sync, size: 24, color: Colors.grey),
+                    ),
+                  ),
                 ],
-              ],
+              ),
             ),
-            const SizedBox(height: 12),
 
-            // 🔹 Divider
-            const Divider(height: 1, thickness: 1),
-            const SizedBox(height: 12),
-
-            // 🔹 Name and Age/Gender
-            _infoRow('Name', data['Name']?.toString() ?? 'N/A'),
-            const SizedBox(height: 8),
-            _infoRow('Age | Gender', data['Age|Gender']?.toString() ?? 'N/A'),
-            if (data['Mobileno.']?.toString().isNotEmpty ?? false) ...[
-              const SizedBox(height: 8),
-              _infoRow('Mobile No.', data['Mobileno.']!),
-            ],
-            if (data['FatherName']?.toString().isNotEmpty ?? false) ...[
-              const SizedBox(height: 8),
-              _infoRow("Father's Name", data['FatherName']!),
-            ],
-
-            // 🔹 View/Edit Button
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: RoundButton(
-                onPress: () {
-                  Navigator.pushNamed(
-                    context,
-                    Route_Names.ChildTrackingDueListForm,
-                    arguments: data['formData'],
-                  );
-                },
-                title: 'View/Edit',
-                color: AppColors.primary,
+            // Card Body
+            Container(
+              decoration: BoxDecoration(
+                color: primary.withOpacity(0.95),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate'] ?? 'N/A')),
+                      const SizedBox(width: 8),
+                      Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType'] ?? 'Child Registration')),
+                      const SizedBox(width: 8),
+                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', 
+                        (data['BeneficiaryID']?.toString().length ?? 0) > 11 
+                          ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11) 
+                          : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: _rowText(l10n?.nameLabelSimple ?? 'Name', data['Name'] ?? 'N/A')),
+                      const SizedBox(width: 8),
+                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
+                      const SizedBox(width: 8),
+                      Expanded(child: _rowText(
+                        l10n?.rchIdLabel ?? 'RCH ID', 
+                        data['RchID']?.isNotEmpty == true ? data['RchID'] : 'N/A',
+                      )),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _rowText(
+                          l10n?.mobileLabelSimple ?? 'Mobile No.',
+                          data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _rowText(
+                          l10n?.fatherNameLabel ?? 'Father\'s Name',
+                          data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -461,101 +467,32 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     );
   }
 
- 
-  Widget _infoChip(String text, {Color? color, int? maxLines, TextOverflow? overflow}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color ?? Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        maxLines: maxLines,
-        overflow: overflow,
-        style: TextStyle(
-          fontSize: 10.sp,
-          color: color != null ? Colors.white : Colors.grey[800],
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  // Helper method to create an info row with label and value
-  Widget _infoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: Colors.grey[900],
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Helper method to get status color
-  Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase()) {
-      case 'child tracking':
-        return Colors.blue;
-      case 'completed':
-        return Colors.green;
-      case 'pending':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Widget _buildRow(List<Widget> children) {
-    return Row(
-      children: [
-        for (int i = 0; i < children.length; i++) ...[
-          Expanded(child: children[i]),
-          if (i < children.length - 1) const SizedBox(width: 10),
-        ]
-      ],
-    );
-  }
-
   Widget _rowText(String title, String value) {
+    final Color primary = Theme.of(context).primaryColor;
+    final bool isLight = primary.computeLuminance() > 0.5;
+    final textColor = isLight ? Colors.black87 : Colors.white;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: textColor.withOpacity(0.9),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.w400,
+            fontSize: 12,
+          ),
         ),
       ],
     );
   }
-
 }
