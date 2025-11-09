@@ -1,83 +1,63 @@
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+
+import '../../../core/utils/app_info_utils.dart';
+import '../../../core/utils/device_info_utils.dart';
 import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
 import '../../../core/widgets/TextField/TextField.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
+import '../../../data/Local_Storage/User_Info.dart';
+import '../../../data/Local_Storage/database_provider.dart';
+import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import 'bloc/child_tracking_form_bloc.dart';
 import 'case_closure_widget.dart';
 
-class ChildTrackingDueListForm extends StatefulWidget {
+class ChildTrackingDueListForm extends StatelessWidget {
   const ChildTrackingDueListForm({Key? key}) : super(key: key);
 
   @override
-  State<ChildTrackingDueListForm> createState() => _ChildTrackingDueState();
+  Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final formData = args?['formData'] as Map<String, dynamic>? ?? {};
+
+    return BlocProvider(
+      create: (context) => ChildTrackingFormBloc()..add(LoadFormData(formData)),
+      child: const _ChildTrackingDueListFormView(),
+    );
+  }
 }
 
-class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
+class _ChildTrackingDueListFormView extends StatefulWidget {
+  const _ChildTrackingDueListFormView({Key? key}) : super(key: key);
+
+  @override
+  State<_ChildTrackingDueListFormView> createState() => _ChildTrackingDueState();
+}
+
+class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  final Map<String, dynamic> _formData = {};
   final Map<int, Map<String, dynamic>> _tabCaseClosureState = {};
+  bool _isSaving = false;
+  late DateTime _birthDate = DateTime.now();
+  late TabController _tabController;
   final Map<int, TextEditingController> _otherCauseControllers = {};
   final Map<int, TextEditingController> _otherReasonControllers = {};
-  late DateTime _birthDate;
-  late Map<String, dynamic> _formData;
-  String? _lastChildName;
 
   @override
   void initState() {
     super.initState();
-    _birthDate = DateTime.now();
-    _formData = {};
     _tabController = TabController(length: tabs.length, vsync: this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    
-    // Extract arguments in didChangeDependencies (safe to access context here)
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    if (args != null && args['formData'] != null) {
-      final newFormData = args['formData'] as Map<String, dynamic>;
-      final childName = newFormData['child_name']?.toString() ?? '';
-      
-      // Only update if this is a different child
-      if (_lastChildName != childName) {
-        _lastChildName = childName;
-        _formData = newFormData;
-        final dobStr = _formData['date_of_birth']?.toString() ?? '';
-        final weight = _formData['weight_grams']?.toString() ?? '';
-        
-        debugPrint('📋 ChildTrackingDueListForm - Received formData for NEW CHILD');
-        debugPrint('   - Child Name: ${_formData['child_name']}');
-        debugPrint('   - Date of Birth: $dobStr');
-        debugPrint('   - Weight (grams): $weight');
-        debugPrint('   - Gender: ${_formData['gender']}');
-        debugPrint('   - Father Name: ${_formData['father_name']}');
-        debugPrint('   - Mother Name: ${_formData['mother_name']}');
-        debugPrint('   - Mobile Number: ${_formData['mobile_number']}');
-        
-        if (dobStr.isNotEmpty) {
-          try {
-            _birthDate = DateTime.parse(dobStr);
-            debugPrint('✅ Birth date parsed successfully: $_birthDate');
-            setState(() {});
-          } catch (e) {
-            debugPrint('❌ Error parsing birth date: $e');
-            _birthDate = DateTime.now();
-          }
-        } else {
-          debugPrint('⚠️ No birth date provided, using current date');
-          _birthDate = DateTime.now();
-        }
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        context.read<ChildTrackingFormBloc>().add(TabChanged(_tabController.index));
       }
-    } else {
-      debugPrint('❌ No formData received in arguments');
-      _birthDate = DateTime.now();
-      _formData = {};
-      _lastChildName = null;
-    }
+    });
   }
 
   // Calculate due date for each vaccination schedule
@@ -127,6 +107,206 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
       _initializeTabState(tabIndex);
       _tabCaseClosureState[tabIndex]![key] = value;
     });
+  }
+
+  Future<void> _saveForm() async {
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final now = DateTime.now().toIso8601String();
+      final currentTabIndex = _tabController.index;
+      final currentTabName = tabs[currentTabIndex];
+
+      final formType = FollowupFormDataTable.childTrackingDue;
+      final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Child Tracking Due';
+      final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '30bycxe4gv7fqnt6';
+
+      // Prepare case closure data for the current tab
+      final caseClosureData = _getIsCaseClosureChecked(currentTabIndex)
+          ? {
+              'is_case_closure': true,
+              'closure_reason': _getSelectedClosureReason(currentTabIndex),
+              'migration_type': _getMigrationType(currentTabIndex),
+              'date_of_death': _getDateOfDeath(currentTabIndex)?.toIso8601String(),
+              'probable_cause_of_death': _getProbableCauseOfDeath(currentTabIndex),
+              'other_cause_of_death': _otherCauseControllers[currentTabIndex]?.text,
+              'death_place': _getDeathPlace(currentTabIndex),
+              'reason_of_death': _getReasonOfDeath(currentTabIndex),
+              'other_reason': _otherReasonControllers[currentTabIndex]?.text,
+            }
+          : {'is_case_closure': false};
+
+      final formData = {
+        'form_type': formType,
+        'form_name': formName,
+        'unique_key': formsRefKey,
+        'form_data': {
+          ..._formData,
+          'current_tab': currentTabName,
+          'current_tab_index': currentTabIndex,
+          'weight_grams': _formData['weight_grams'],
+          'case_closure': caseClosureData,
+          'visit_date': now,
+        },
+        'created_at': now,
+        'updated_at': now,
+      };
+
+      // Get beneficiary details from the existing form data
+      String householdRefKey = _formData['household_ref_key']?.toString() ?? '';
+      String motherKey = _formData['mother_key']?.toString() ?? '';
+      String fatherKey = _formData['father_key']?.toString() ?? '';
+      String beneficiaryRefKey = _formData['beneficiary_ref_key']?.toString() ?? '';
+
+      // If keys are not in form data, try to get them from the database
+      if (beneficiaryRefKey.isEmpty && _formData['beneficiary_id'] != null) {
+        beneficiaryRefKey = _formData['beneficiary_id'].toString();
+      }
+
+      if (householdRefKey.isEmpty && _formData['household_id'] != null) {
+        final householdId = _formData['household_id'].toString();
+        List<Map<String, dynamic>> beneficiaryMaps = await db.query(
+          'beneficiaries',
+          where: 'household_ref_key = ?',
+          whereArgs: [householdId],
+        );
+
+        if (beneficiaryMaps.isEmpty) {
+          beneficiaryMaps = await db.query(
+            'beneficiaries',
+            where: 'id = ?',
+            whereArgs: [int.tryParse(householdId) ?? 0],
+          );
+        }
+
+        if (beneficiaryMaps.isNotEmpty) {
+          final beneficiary = beneficiaryMaps.first;
+          householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
+          motherKey = beneficiary['mother_key'] as String? ?? '';
+          fatherKey = beneficiary['father_key'] as String? ?? '';
+          if (beneficiaryRefKey.isEmpty) {
+            beneficiaryRefKey = beneficiary['beneficiary_ref_key'] as String? ?? '';
+          }
+        }
+      }
+
+      final formJson = jsonEncode(formData);
+      debugPrint('💾 Child Tracking Form JSON to be saved: $formJson');
+
+      late DeviceInfo deviceInfo;
+      try {
+        deviceInfo = await DeviceInfo.getDeviceInfo();
+      } catch (e) {
+        debugPrint('Error getting device info: $e');
+        deviceInfo = DeviceInfo(
+          deviceId: 'unknown',
+          platform: 'unknown',
+          osVersion: 'unknown',
+          appInfo: AppInfo(
+            appVersion: '1.0.0',
+            appName: 'BHAVYA mASHA',
+            buildNumber: '1',
+            packageName: 'com.medixcel.bhavyamasha',
+          ),
+        );
+      }
+
+      // Get current user
+      final currentUser = await UserInfo.getCurrentUser();
+      Map<String, dynamic> userDetails = {};
+      if (currentUser != null) {
+        if (currentUser['details'] is String) {
+          try {
+            userDetails = jsonDecode(currentUser['details'] ?? '{}');
+          } catch (e) {
+            debugPrint('Error parsing user details: $e');
+          }
+        } else if (currentUser['details'] is Map) {
+          userDetails = Map<String, dynamic>.from(currentUser['details']);
+        }
+      }
+
+      final facilityId = userDetails['asha_associated_with_facility_id'] ??
+          userDetails['facility_id'] ??
+          userDetails['facilityId'] ??
+          0;
+
+      final formDataForDb = {
+        'server_id': '',
+        'forms_ref_key': formsRefKey,
+        'household_ref_key': householdRefKey,
+        'beneficiary_ref_key': beneficiaryRefKey,
+        'mother_key': motherKey,
+        'father_key': fatherKey,
+        'child_care_state': currentTabName,
+        'device_details': jsonEncode({
+          'id': deviceInfo.deviceId,
+          'platform': deviceInfo.platform,
+          'version': deviceInfo.osVersion,
+        }),
+        'app_details': jsonEncode({
+          'app_version': deviceInfo.appVersion.split('+').first,
+          'app_name': deviceInfo.appName,
+          'build_number': deviceInfo.buildNumber,
+          'package_name': deviceInfo.packageName,
+        }),
+        'parent_user': '',
+        'current_user_key': '',
+        'facility_id': facilityId,
+        'form_json': formJson,
+        'created_date_time': now,
+        'modified_date_time': now,
+        'is_synced': 0,
+        'is_deleted': 0,
+      };
+
+      final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
+
+      if (formId > 0) {
+        debugPrint('✅ Child Tracking Form saved successfully with ID: $formId');
+        debugPrint('📋 Tab: $currentTabName (Index: $currentTabIndex)');
+        debugPrint('🏠 Household Ref Key: $householdRefKey');
+        debugPrint('👤 Beneficiary Ref Key: $beneficiaryRefKey');
+        debugPrint('📱 Form Type: $formType');
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Form saved successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Pop with result to refresh the list
+          Navigator.pop(context, {'saved': true, 'formId': formId});
+        }
+      } else {
+        throw Exception('Failed to save form data');
+      }
+    } catch (e) {
+      debugPrint('❌ Error saving child tracking form: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving form: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
   }
 
   @override
@@ -257,8 +437,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -714,8 +894,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -813,8 +993,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -996,8 +1176,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -1152,8 +1332,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -1303,8 +1483,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -1454,8 +1634,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -1605,8 +1785,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
