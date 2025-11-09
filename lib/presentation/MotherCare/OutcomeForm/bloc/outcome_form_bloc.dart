@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../../../../core/utils/device_info_utils.dart';
@@ -40,18 +41,36 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     on<FamilyPlanningCounselingChanged>((event, emit) {
       emit(state.copyWith(familyPlanningCounseling: event.value, errorMessage: null));
     });
+    on<FpMethodChanged>((event, emit) {
+      emit(state.copyWith(fpMethod: event.value, errorMessage: null));
+    });
+    on<RemovalDateChanged>((event, emit) {
+      emit(state.copyWith(removalDate: event.date, errorMessage: null));
+    });
+    on<RemovalReasonChanged>((event, emit) {
+      emit(state.copyWith(removalReason: event.reason, errorMessage: null));
+    });
+    on<CondomQuantityChanged>((event, emit) {
+      emit(state.copyWith(condomQuantity: event.quantity, errorMessage: null));
+    });
+    on<MalaQuantityChanged>((event, emit) {
+      emit(state.copyWith(malaQuantity: event.quantity, errorMessage: null));
+    });
+    on<ChhayaQuantityChanged>((event, emit) {
+      emit(state.copyWith(chhayaQuantity: event.quantity, errorMessage: null));
+    });
+    on<ECPQuantityChanged>((event, emit) {
+      emit(state.copyWith(ecpQuantity: event.quantity, errorMessage: null));
+    });
 
     on<OutcomeFormSubmitted>((event, emit) async {
-      // Clear any previous submission state and set submitting to true
       emit(state.copyWith(submitted: false, submitting: true, errorMessage: null));
 
       try {
-        // Validate mandatory fields
         final isPlaceInvalid = state.placeOfDelivery.isEmpty || state.placeOfDelivery == 'Select';
         final isDeliveryTypeInvalid = state.deliveryType.isEmpty || state.deliveryType == 'Select';
         final isOutcomeInvalid = state.outcomeCount.isEmpty || int.tryParse(state.outcomeCount) == null;
 
-        // Check all validations and collect error messages
         String? errorMessage;
         if (state.deliveryDate == null) {
           errorMessage = 'Delivery date is required';
@@ -65,7 +84,6 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
           errorMessage = 'Family planning counseling is required';
         }
 
-        // If there are validation errors, show them and stop submission
         if (errorMessage != null) {
           emit(state.copyWith(
             errorMessage: errorMessage,
@@ -75,7 +93,6 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
           return;
         }
 
-        // If validation passes, proceed with form submission
         emit(state.copyWith(submitting: true, errorMessage: null));
 
         try {
@@ -105,6 +122,13 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               'complications': state.complications,
               'outcome_count': state.outcomeCount,
               'family_planning_counseling': state.familyPlanningCounseling,
+              'fp_method': state.fpMethod,
+              'removal_date': state.removalDate?.toIso8601String(),
+              'removal_reason': state.removalReason,
+              'condom_quantity': state.condomQuantity,
+              'mala_quantity': state.malaQuantity,
+              'chhaya_quantity': state.chhayaQuantity,
+              'ecp_quantity': state.ecpQuantity,
               'created_at': now,
               'updated_at': now,
             },
@@ -197,7 +221,9 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
             try {
               final outcomeData = {
                 'id': formId,
-                'beneficiaryId': event.beneficiaryData!['unique_key']?.toString() ?? '',
+                'beneficiaryId': beneficiaryId.length >= 11
+                    ? beneficiaryId.substring(beneficiaryId.length - 11)
+                    : beneficiaryId,
                 'delivery_date': state.deliveryDate?.toIso8601String(),
                 'gestation_weeks': state.gestationWeeks,
                 'delivery_time': state.deliveryTime,
@@ -206,6 +232,13 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                 'complications': state.complications,
                 'outcome_count': state.outcomeCount,
                 'family_planning_counseling': state.familyPlanningCounseling,
+                'fp_method': state.fpMethod,
+                'removal_date': state.removalDate?.toIso8601String(),
+                'removal_reason': state.removalReason,
+                'condom_quantity': state.condomQuantity,
+                'mala_quantity': state.malaQuantity,
+                'chhaya_quantity': state.chhayaQuantity,
+                'ecp_quantity': state.ecpQuantity,
                 'created_at': now,
                 'updated_at': now,
                 'form_data': formDataForDb,
@@ -221,17 +254,14 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                 errorMessage: null,
               ));
 
-              // Update submission count if beneficiary ID is available
               if (beneficiaryId.isNotEmpty) {
                 try {
                   final newCount = await SecureStorageService.incrementSubmissionCount(beneficiaryId);
                   print('Submission count for beneficiary $beneficiaryId: $newCount');
                 } catch (e) {
                   print('Error updating submission count: $e');
-                  // Don't fail the submission if counter update fails
                 }
               }
-
             } catch (e) {
               print('Error saving to secure storage: $e');
               emit(state.copyWith(

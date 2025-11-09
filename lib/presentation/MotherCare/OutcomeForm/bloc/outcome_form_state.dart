@@ -12,8 +12,22 @@ class OutcomeFormState extends Equatable {
   final bool submitting;
   final bool submitted;
   final String? errorMessage;
+  final String? fpMethod;
+  final DateTime? removalDate;
+  final String? removalReason;
+  final String? condomQuantity;
+  final String? malaQuantity;
+  final String? chhayaQuantity;
+  final String? ecpQuantity;
 
   const OutcomeFormState({
+    this.fpMethod,
+    this.removalDate,
+    this.removalReason,
+    this.condomQuantity,
+    this.malaQuantity,
+    this.chhayaQuantity,
+    this.ecpQuantity,
     required this.deliveryDate,
     required this.gestationWeeks,
     required this.deliveryTime,
@@ -27,8 +41,8 @@ class OutcomeFormState extends Equatable {
     required this.errorMessage,
   });
 
-  factory OutcomeFormState.initial() => OutcomeFormState(
-        deliveryDate: DateTime.now(),
+  factory OutcomeFormState.initial() => const OutcomeFormState(
+        deliveryDate: null,
         gestationWeeks: '',
         deliveryTime: null,
         placeOfDelivery: '',
@@ -39,6 +53,13 @@ class OutcomeFormState extends Equatable {
         submitting: false,
         submitted: false,
         errorMessage: null,
+        fpMethod: null,
+        removalDate: null,
+        removalReason: null,
+        condomQuantity: null,
+        malaQuantity: null,
+        chhayaQuantity: null,
+        ecpQuantity: null,
       );
 
   OutcomeFormState copyWith({
@@ -53,6 +74,13 @@ class OutcomeFormState extends Equatable {
     bool? submitting,
     bool? submitted,
     String? errorMessage,
+    String? fpMethod,
+    DateTime? removalDate,
+    String? removalReason,
+    String? condomQuantity,
+    String? malaQuantity,
+    String? chhayaQuantity,
+    String? ecpQuantity,
   }) {
     return OutcomeFormState(
       deliveryDate: deliveryDate ?? this.deliveryDate,
@@ -66,7 +94,14 @@ class OutcomeFormState extends Equatable {
           familyPlanningCounseling ?? this.familyPlanningCounseling,
       submitting: submitting ?? this.submitting,
       submitted: submitted ?? this.submitted,
-      errorMessage: errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
+      fpMethod: fpMethod ?? this.fpMethod,
+      removalDate: removalDate ?? this.removalDate,
+      removalReason: removalReason ?? this.removalReason,
+      condomQuantity: condomQuantity ?? this.condomQuantity,
+      malaQuantity: malaQuantity ?? this.malaQuantity,
+      chhayaQuantity: chhayaQuantity ?? this.chhayaQuantity,
+      ecpQuantity: ecpQuantity ?? this.ecpQuantity,
     );
   }
 
