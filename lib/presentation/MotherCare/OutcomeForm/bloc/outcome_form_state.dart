@@ -27,8 +27,8 @@ class OutcomeFormState extends Equatable {
     required this.errorMessage,
   });
 
-  factory OutcomeFormState.initial() => const OutcomeFormState(
-        deliveryDate: null,
+  factory OutcomeFormState.initial() => OutcomeFormState(
+        deliveryDate: DateTime.now(),
         gestationWeeks: '',
         deliveryTime: null,
         placeOfDelivery: '',

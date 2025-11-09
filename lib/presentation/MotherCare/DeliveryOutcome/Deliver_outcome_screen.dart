@@ -12,6 +12,7 @@ import '../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../HomeScreen/HomeScreen.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../OutcomeForm/OutcomeForm.dart';
 
 class DeliveryOutcomeScreen extends StatefulWidget {
   const DeliveryOutcomeScreen({super.key});
@@ -287,30 +288,26 @@ class _DeliveryOutcomeScreenState
           side: BorderSide(color: Colors.grey.shade200),
         ),
         child: InkWell(
-          onTap: () async {
+          onTap: () {
+            final beneficiaryData = <String, dynamic>{};
 
-            final fullHhId = rowData['household_ref_key']?.toString() ?? '';
-            final hhIdLast11 = fullHhId.length > 11 ? fullHhId.substring(fullHhId.length - 11) : fullHhId;
-            final name = data['Name']?.toString() ?? '';
+            if (data['_rawRow'] is Map) {
+              final rawRow = data['_rawRow'] as Map;
+              beneficiaryData['unique_key'] = rawRow['unique_key'];
 
-            print('🚀 Navigating to update screen with:');
-            print('   Household ID (last 11): $hhIdLast11');
-            print('   Name: $name');
-
-            final result = await Navigator.pushNamed(
-              context,
-              Route_Names.UpdatedEligibleCoupleList,
-              arguments: {
-                'hhId': hhIdLast11,
-                'name': name,
-              },
-            );
-
-
-            if (result == true) {
-              _loadPregnancyOutcomeeCouples();
+              print('🔑 Passing to form:');
+              print('   - unique_key: ${beneficiaryData['unique_key']}');
+              print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
             }
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OutcomeFormPage(beneficiaryData: beneficiaryData),
+              ),
+            );
           },
+
           borderRadius: BorderRadius.circular(8),
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 8),

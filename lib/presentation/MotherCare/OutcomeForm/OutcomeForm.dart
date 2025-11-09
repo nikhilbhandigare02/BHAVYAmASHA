@@ -11,19 +11,23 @@ import '../../../l10n/app_localizations.dart';
 import 'bloc/outcome_form_bloc.dart';
 
 class OutcomeFormPage extends StatelessWidget {
-  const OutcomeFormPage({super.key});
+  final Map<String, dynamic> beneficiaryData;
+  
+  const OutcomeFormPage({super.key, required this.beneficiaryData});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => OutcomeFormBloc(),
-      child: const _OutcomeFormView(),
+      child: _OutcomeFormView(beneficiaryData: beneficiaryData),
     );
   }
 }
 
 class _OutcomeFormView extends StatelessWidget {
-  const _OutcomeFormView();
+  final Map<String, dynamic> beneficiaryData;
+  
+  const _OutcomeFormView({required this.beneficiaryData});
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +63,7 @@ class _OutcomeFormView extends StatelessWidget {
                 duration: const Duration(seconds: 2),
               ),
             );
+            Navigator.pop(context);
           }
         },
         child: Column(
@@ -271,9 +276,11 @@ class _OutcomeFormFields extends StatelessWidget {
               borderRadius: 8,
               isLoading: state.submitting,
               color: AppColors.primary,
-              onPress: () => context.read<OutcomeFormBloc>().add(
-                const OutcomeFormSubmitted(),
-              ),
+              onPress: () {
+                final bloc = context.read<OutcomeFormBloc>();
+                final beneficiaryData = (context.findAncestorWidgetOfExactType<BlocProvider<OutcomeFormBloc>>()?.child as _OutcomeFormView).beneficiaryData;
+                bloc.add(OutcomeFormSubmitted(beneficiaryData: beneficiaryData));
+              },
             ),
           ),
         ),

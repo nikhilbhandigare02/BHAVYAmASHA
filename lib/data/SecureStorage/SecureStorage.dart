@@ -8,6 +8,9 @@ class SecureStorageService {
   static const _keyUserData = 'user_data';
   static const _keyIsLoggedIn = 'is_logged_in';
   static const _keyCurrentUser = 'current_user_id';
+  static const String _keyAncVisits = 'anc_visits';
+  static const String _keydelivery_outcome = 'delivery_outcome';
+
 
   static Future<void> saveToken(String token) async {
     await _storage.write(key: _keyToken, value: token);
@@ -49,7 +52,55 @@ class SecureStorageService {
   }
 
   // Save ANC visit data
-  static const String _keyAncVisits = 'anc_visits';
+
+  static Future<void> saveDeliveryOutcome(Map<String, dynamic> outcomeData) async {
+    try {
+      // Get existing outcomes
+      final existingData = await _storage.read(key: _keydelivery_outcome);
+      List<dynamic> outcomes = [];
+
+      if (existingData != null) {
+        outcomes = jsonDecode(existingData);
+      }
+
+      // Check if we have a beneficiaryId to look for
+      final String? beneficiaryId = outcomeData['beneficiaryId']?.toString();
+      bool found = false;
+
+      if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
+        // Look for existing entry with the same beneficiaryId
+        for (int i = 0; i < outcomes.length; i++) {
+          if (outcomes[i]['beneficiaryId']?.toString() == beneficiaryId) {
+            // Update existing entry
+            outcomes[i] = {
+              ...outcomes[i], // Keep existing data
+              ...outcomeData,  // Update with new data
+              'updatedAt': DateTime.now().toIso8601String(), // Add/update timestamp
+            };
+            found = true;
+            break;
+          }
+        }
+      }
+
+      // If no existing entry was found, add as new
+      if (!found) {
+        outcomes.add({
+          ...outcomeData,
+          'createdAt': DateTime.now().toIso8601String(),
+        });
+      }
+
+      // Save back to storage
+      await _storage.write(
+        key: _keydelivery_outcome,
+        value: jsonEncode(outcomes),
+      );
+    } catch (e) {
+      print('Error saving delivery outcome: $e');
+      rethrow;
+    }
+  }
 
   static Future<void> saveAncVisit(Map<String, dynamic> visitData) async {
     try {
@@ -74,6 +125,53 @@ class SecureStorageService {
               ...visits[i], // Keep existing data
               ...visitData,  // Update with new data
               'updatedAt': DateTime.now().toIso8601String(), // Add/update timestamp
+            };
+            found = true;
+            break;
+          }
+        }
+      }
+
+      // If no existing entry was found, add as new
+      if (!found) {
+        visits.add({
+          ...visitData,
+          'createdAt': DateTime.now().toIso8601String(),
+        });
+      }
+
+      // Save back to storage
+      await _storage.write(
+        key: _keyAncVisits,
+        value: jsonEncode(visits),
+      );
+    } catch (e) {
+      print('Error saving ANC visit: $e');
+      rethrow;
+    }
+  }
+
+
+  static Future<void> save_keydelivery_outcome(Map<String, dynamic> visitData) async {
+    try {
+      // Get existing visits
+      final existingData = await _storage.read(key: _keydelivery_outcome);
+      List<dynamic> visits = [];
+
+      if (existingData != null) {
+        visits = jsonDecode(existingData);
+      }
+
+      final String? beneficiaryId = visitData['beneficiaryId']?.toString();
+      bool found = false;
+
+      if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
+        for (int i = 0; i < visits.length; i++) {
+          if (visits[i]['beneficiaryId']?.toString() == beneficiaryId) {
+            visits[i] = {
+              ...visits[i],
+              ...visitData,
+              'updatedAt': DateTime.now().toIso8601String(),
             };
             found = true;
             break;

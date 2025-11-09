@@ -184,7 +184,10 @@ class Routes{
       case Route_Names.DeliveryOutcomeScreen:
         return MaterialPageRoute(builder: (context) => const DeliveryOutcomeScreen(),);
       case Route_Names.OutcomeFormScreen:
-        return MaterialPageRoute(builder: (context) => const OutcomeFormPage(),);
+        final args = setting.arguments as Map<String, dynamic>? ?? {};
+        return MaterialPageRoute(
+          builder: (context) => OutcomeFormPage(beneficiaryData: args['beneficiaryData'] ?? {}),
+        );
       case Route_Names.HBNCScreen:
         return MaterialPageRoute(builder: (context) => const HBNCListScreen(),);
       case Route_Names.HbncVisitFormScreen:

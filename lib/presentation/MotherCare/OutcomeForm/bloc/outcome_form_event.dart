@@ -72,5 +72,10 @@ class FamilyPlanningCounselingChanged extends OutcomeFormEvent {
 }
 
 class OutcomeFormSubmitted extends OutcomeFormEvent {
-  const OutcomeFormSubmitted();
+  final Map<String, dynamic>? beneficiaryData;
+  
+  const OutcomeFormSubmitted({this.beneficiaryData});
+  
+  @override
+  List<Object?> get props => [beneficiaryData];
 }
