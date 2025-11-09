@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
@@ -7,6 +8,7 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import '../../../data/Local_Storage/database_provider.dart';
 
 class RegisterChildScreen extends StatefulWidget {
   const RegisterChildScreen({super.key});
@@ -17,41 +19,16 @@ class RegisterChildScreen extends StatefulWidget {
 
 class _RegisterChildScreenState extends State<RegisterChildScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
-
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-
-      'RchID': 'RCH123456',
-      'Name': 'Rohit Sharma',
-      'Age|Gender': '27 Y | Male',
-      'Mobileno.': '9876543210',
-      'FatherName': 'Rajesh Sharma',
-
-    },
-    {
-      'hhId': '51016121847',
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-
-      'RchID': 'RCH123456',
-      'Name': 'Rohit Sharma',
-      'Age|Gender': '27 Y | Male',
-      'Mobileno.': '9876543210',
-      'FatherName': 'Rajesh Sharma',
-    },
-  ];
-
+  List<Map<String, dynamic>> _childBeneficiaries = [];
   late List<Map<String, dynamic>> _filtered;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _filtered = [];
+    _childBeneficiaries = [];
+    _loadChildBeneficiaries();
     _searchCtrl.addListener(_onSearchChanged);
   }
 
@@ -62,19 +39,190 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     super.dispose();
   }
 
+  Future<void> _loadChildBeneficiaries() async {
+    if (!mounted) return;
+    
+    setState(() => _isLoading = true);
+
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final List<Map<String, dynamic>> rows = await db.query(
+        'beneficiaries',
+        where: 'is_deleted = ?',
+        whereArgs: [0],
+      );
+
+      final childBeneficiaries = <Map<String, dynamic>>[];
+
+      for (final row in rows) {
+        final rowHhId = row['household_ref_key']?.toString();
+        if (rowHhId == null) continue;
+
+        final info = row['beneficiary_info'] is String
+            ? jsonDecode(row['beneficiary_info'] as String)
+            : row['beneficiary_info'];
+
+        if (info is! Map) continue;
+
+        final head = info['head_details'] is Map ? info['head_details'] : {};
+        final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
+        final members = info['member_details'] is List ? info['member_details'] : [];
+
+        // Extract children from member_details where memberType is "Child"
+        if (members.isNotEmpty && members is List) {
+          for (final member in members) {
+            if (member is Map) {
+              final memberType = member['memberType']?.toString() ?? '';
+              
+              // Only process if memberType is "Child"
+              if (memberType == 'Child') {
+                final memberData = Map<String, dynamic>.from(member);
+                
+                // Get name from multiple possible fields
+                final name = memberData['memberName']?.toString() ?? 
+                            memberData['name']?.toString() ??
+                            memberData['member_name']?.toString() ??
+                            memberData['memberNameLocal']?.toString() ??
+                            '';
+                
+                // Get father's name (from member data or head)
+                final fatherName = memberData['fatherName']?.toString() ?? 
+                                  memberData['father_name']?.toString() ??
+                                  head['headName']?.toString() ?? 
+                                  head['memberName']?.toString() ?? '';
+                
+                // Get mother's name (from member data or spouse)
+                final motherName = memberData['motherName']?.toString() ?? 
+                                  memberData['mother_name']?.toString() ??
+                                  spouse['memberName']?.toString() ?? 
+                                  spouse['headName']?.toString() ?? '';
+                
+                // Get mobile number
+                final mobileNo = memberData['mobileNo']?.toString() ?? 
+                                memberData['mobile']?.toString() ??
+                                memberData['mobile_number']?.toString() ??
+                                head['mobileNo']?.toString() ?? '';
+                
+                // Get RCH ID
+                final richId = memberData['RichIDChanged']?.toString() ?? 
+                              memberData['richIdChanged']?.toString() ?? 
+                              memberData['richId']?.toString() ?? '';
+                
+                final card = <String, dynamic>{
+                  'hhId': rowHhId,
+                  'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+                  'RegitrationType': 'Child',
+                  'BeneficiaryID': memberData['unique_key']?.toString() ?? row['id']?.toString() ?? '',
+                  'RchID': richId,
+                  'Name': name,
+                  'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
+                  'Mobileno.': mobileNo,
+                  'FatherName': fatherName,
+                  'MotherName': motherName,
+                  '_raw': row,
+                  '_memberData': memberData,
+                };
+                
+                childBeneficiaries.add(card);
+              }
+            }
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _childBeneficiaries = List<Map<String, dynamic>>.from(childBeneficiaries);
+          _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading child beneficiaries: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'N/A';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
+    String age = 'N/A';
+    String gender = (genderRaw?.toString().toLowerCase() ?? '');
+    
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+      try {
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+        
+        dob = DateTime.tryParse(dateStr);
+        
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+        
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          
+          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+            years--;
+          }
+          
+          age = years >= 0 ? years.toString() : '0';
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
+      }
+    }
+    
+    String displayGender;
+    switch (gender) {
+      case 'm':
+      case 'male':
+        displayGender = 'Male';
+        break;
+      case 'f':
+      case 'female':
+        displayGender = 'Female';
+        break;
+      default:
+        displayGender = 'Other';
+    }
+    
+    return '$age Y | $displayGender';
+  }
+
   void _onSearchChanged() {
+    if (!mounted) return;
+    
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _filtered = List<Map<String, dynamic>>.from(_childBeneficiaries);
       } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['Name'] as String).toLowerCase().contains(q) ||
-              (e['Mobileno.'] as String).toLowerCase().contains(q) ||
-              (e['village'] as String).toLowerCase().contains(q) ||
-              (e['Tola/Mohalla'] as String).toLowerCase().contains(q) ||
-              (e['BeneficiaryID'] as String).toLowerCase().contains(q);
+        _filtered = _childBeneficiaries.where((e) {
+          return (e['hhId']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['Name']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['Mobileno.']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['FatherName']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['MotherName']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['BeneficiaryID']?.toString().toLowerCase() ?? '').contains(q);
         }).toList();
       }
     });
@@ -119,17 +267,39 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
 
 
 
-          // 📋 List of Households
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
-          ),
+          // 📋 List of Child Beneficiaries
+          _isLoading
+              ? const Expanded(
+                  child: Center(child: CircularProgressIndicator()))
+              : _filtered.isEmpty
+                  ? Expanded(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            _childBeneficiaries.isEmpty
+                                ? 'No child beneficiaries found. Add a new child to get started.'
+                                : 'No matching child beneficiaries found.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 16, color: Colors.grey[600]),
+                          ),
+                        ),
+                      ),
+                    )
+                  : Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: _loadChildBeneficiaries,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                          itemCount: _filtered.length,
+                          itemBuilder: (context, index) {
+                            final data = _filtered[index];
+                            return _householdCard(context, data);
+                          },
+                        ),
+                      ),
+                    ),
 
 
         ],
@@ -137,123 +307,136 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     );
   }
 
-  // 🧱 Household Card UI
+  // 🧱 Child Beneficiary Card UI
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        InkWell(
-          onTap: () {
-            // Navigator.pushNamed(
-            //   context,
-            //   Route_Names.addFamilyMember,
-            //   arguments: {'isBeneficiary': true},
-            // );
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  blurRadius: 2,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+    return InkWell(
+      onTap: () {
+        // Navigate to child detail screen if needed
+        // Navigator.pushNamed(
+        //   context,
+        //   Route_Names.childDetail,
+        //   arguments: {'childData': data},
+        // );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 2,
+              spreadRadius: 1,
+              offset: const Offset(0, 2),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header Row
-                Container(
-                  decoration: const BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
-                  ),
-                  padding: const EdgeInsets.all(6),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.home, color: Colors.black54, size: 18),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          data['hhId'] ?? '',
-                          style: TextStyle(
-                            color: primary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.sp
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.asset(
-                          'assets/images/sync.png',
-                          width: 25,
-                          height: 25,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Card Body
-                Container(
-                  decoration: BoxDecoration(
-                    color: primary.withOpacity(0.95),
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(6)),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildRow([
-                        _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate']),
-                        _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType']),
-                        _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID']),
-                      ]),
-                      const SizedBox(height: 8),
-                      _buildRow([
-                        _rowText(l10n?.nameLabelSimple ?? 'Name', data['Name']),
-                        _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender']),
-                        _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID']),
-                      ]),
-                      const SizedBox(height: 8),
-                      _buildRow([
-                        _rowText(l10n?.fatherNameLabel ?? 'Father Name', data['FatherName']),
-
-                        _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.']),
-                      ]),
-
-                    ],
-                  ),
-                ),
-              ],
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 2,
+              spreadRadius: 1,
+              offset: const Offset(0, -2),
             ),
-          ),
+          ],
         ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header Row
+            Container(
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+              ),
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  const Icon(Icons.home, color: AppColors.primary, size: 16),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      (data['hhId'] != null && data['hhId'].toString().length > 11)
+                          ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
+                          : (data['hhId']?.toString() ?? ''),
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13.sp,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.asset(
+                      'assets/images/sync.png',
+                      width: 6.w,
+                      height: 6.w,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-
-      ],
-    );
-  }
-
-  Widget _buildRow(List<Widget> children) {
-    return Row(
-      children: [
-        for (int i = 0; i < children.length; i++) ...[
-          Expanded(child: children[i]),
-          if (i < children.length - 1) const SizedBox(width: 10),
-        ]
-      ],
+            // Card Body
+            Container(
+              decoration: BoxDecoration(
+                color: primary.withOpacity(0.95),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate'] ?? 'N/A')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType'] ?? 'Child')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', 
+                        (data['BeneficiaryID']?.toString().length ?? 0) > 11 
+                          ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11) 
+                          : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: _rowText(l10n?.nameLabelSimple ?? 'Name', data['Name'] ?? 'N/A')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.'] ?? 'N/A')),
+                    ],
+                  ),
+                  if (data['RchID']?.isNotEmpty == true)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID'] ?? 'N/A'),
+                    ),
+                  const SizedBox(height: 10),
+                  _rowText(
+                    l10n?.fatherNameLabel ?? 'Father\'s Name',
+                    data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+                  ),
+                  if (data['MotherName']?.isNotEmpty == true)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _rowText(
+                        l10n?.motherNameLabel ?? 'Mother\'s Name',
+                        data['MotherName'] ?? 'N/A',
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -263,12 +446,20 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       children: [
         Text(
           title,
-          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.background,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w400,
+            fontSize: 13.sp,
+          ),
         ),
       ],
     );

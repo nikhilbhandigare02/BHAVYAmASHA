@@ -193,6 +193,11 @@ class LocalStorageDao {
 
   Future<int> insertFollowupFormData(Map<String, dynamic> data) async {
     final db = await _db;
+    
+    print('💾 DAO: Inserting followup form data...');
+    print('💾 DAO: form_json value: ${data['form_json']}');
+    print('💾 DAO: form_json length: ${(data['form_json'] as String?)?.length ?? 0}');
+    
     final row = <String, dynamic>{
       'server_id': data['server_id'],
       'forms_ref_key': data['forms_ref_key'],
@@ -206,12 +211,19 @@ class LocalStorageDao {
       'parent_user': _encodeIfObject(data['parent_user']),
       'current_user_key': data['current_user_key'],
       'facility_id': data['facility_id'],
+      'form_json': data['form_json'],
       'created_date_time': data['created_date_time'],
       'modified_date_time': data['modified_date_time'],
       'is_synced': data['is_synced'] ?? 0,
       'is_deleted': data['is_deleted'] ?? 0,
     };
-    return db.insert('followup_form_data', row);
+    
+    print('💾 DAO: Row to insert has form_json: ${row['form_json'] != null}');
+    
+    final id = await db.insert('followup_form_data', row);
+    print('💾 DAO: Inserted with ID: $id');
+    
+    return id;
   }
 
   Future<int> getHouseholdCount() async {

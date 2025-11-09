@@ -104,7 +104,7 @@ class BirthCertificateNumberChanged extends RegisterChildFormEvent {
   List<Object?> get props => [value];
 }
 
-class WeightGramsChanged extends RegisterChildFormEvent {
+class WeightGramsChanged extends RegisterChildFormEvent { 
   final String value;
   const WeightGramsChanged(this.value);
   @override

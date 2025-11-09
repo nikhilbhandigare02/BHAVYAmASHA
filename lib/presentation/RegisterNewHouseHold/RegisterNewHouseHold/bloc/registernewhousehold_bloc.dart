@@ -60,8 +60,7 @@ class RegisterNewHouseholdBloc
       emit(const RegisterHouseholdState());
     });
 
-    //  Save Household
-    on<SaveHousehold>((event, emit) async {
+     on<SaveHousehold>((event, emit) async {
       try {
         emit(state.saving());
 
@@ -200,19 +199,40 @@ class RegisterNewHouseholdBloc
         await Future.delayed(const Duration(seconds: 1));
         final spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
         
+        // Process spouse details
         final spouseDetails = _toJsonSafe(event.headForm?['spousedetails']) ?? {};
         if (spouseDetails is Map) {
           spouseDetails['unique_key'] = spouseKey;
+          // Add default flags for spouse
+          spouseDetails['is_death'] = 0;
+          spouseDetails['is_migrated'] = 0;
         }
+        
+        // Process head details
+        final headDetails = _toJsonSafe(event.headForm) ?? {};
+        if (headDetails is Map) {
+          // Add default flags for head
+          headDetails['is_death'] = 0;
+          headDetails['is_migrated'] = 0;
+        }
+        
+        // Process member details
+        final memberDetails = event.memberForms.map((m) {
+          final member = _toJsonSafe(m) ?? {};
+          if (member is Map) {
+            // Add default flags for each member
+            member['is_death'] = 0;
+            member['is_migrated'] = 0;
+          }
+          return member;
+        }).toList();
         
         //  Beneficiary Info
         final beneficiaryInfo = jsonEncode({
-          'head_details': _toJsonSafe(event.headForm) ?? {},
+          'head_details': headDetails,
           'spouse_details': spouseDetails,
-          'children_details':
-          _toJsonSafe(event.headForm?['childrendetails']) ?? {},
-          'member_details':
-          event.memberForms.map((m) => _toJsonSafe(m)).toList(),
+          'children_details': _toJsonSafe(event.headForm?['childrendetails']) ?? {},
+          'member_details': memberDetails,
         });
         print('Beneficiary Info JSON: $beneficiaryInfo');
 

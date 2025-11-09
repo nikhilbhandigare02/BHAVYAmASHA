@@ -48,6 +48,7 @@ class Route_Names{
   static const String Abhalinkscreen = 'Abhalinkscreen';
   static const String cbacScreen = 'cbacScreen';
   static const String CHildTrackingDueList = 'CHildTrackingDueList';
+  static const String updateMemberDetail = 'updateMemberDetail';
   static const String HBYCList = 'HBYCList';
   static const String incentiveForm = 'incentiveForm';
   static const String HBYCChildCareForm = 'HBYCChildCareForm';

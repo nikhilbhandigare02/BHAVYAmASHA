@@ -250,7 +250,7 @@ class _EligibleCoupleIdentifiedScreenState
       ),
       child: InkWell(
         onTap: () async {
-          // Get last 11 digits of household_ref_key
+
           final fullHhId = rowData['household_ref_key']?.toString() ?? '';
           final hhIdLast11 = fullHhId.length > 11 ? fullHhId.substring(fullHhId.length - 11) : fullHhId;
           final name = data['Name']?.toString() ?? '';
@@ -268,7 +268,7 @@ class _EligibleCoupleIdentifiedScreenState
             },
           );
           
-          // Refresh the list when returning from the update screen
+          
           if (result == true) {
             _loadEligibleCouples();
           }

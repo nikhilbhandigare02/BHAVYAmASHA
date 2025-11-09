@@ -194,8 +194,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Track Eligible Couple';
         final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
 
-
-        // Prepare form data in the specified format
         final formData = {
           'form_type': formType,
           'form_name': formName,
@@ -223,8 +221,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           'updated_at': now,
         };
 
-
-        // Get beneficiary details
         List<Map<String, dynamic>> beneficiaryMaps = await db.query(
           'beneficiaries',
           where: 'unique_key LIKE ?',

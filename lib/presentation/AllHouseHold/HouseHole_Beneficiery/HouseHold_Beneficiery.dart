@@ -166,43 +166,43 @@ class _HouseHold_BeneficiaryScreenState
           addCard(spouse, 'Spouse');
         }
         
-        // Add children from children_details
-        if (children.isNotEmpty) {
-          final totalChildren = (children['totalLive'] is num ? children['totalLive'] : 0) as int;
-          if (totalChildren > 0) {
-            for (int i = 0; i < totalChildren; i++) {
-              final child = {
-                'name': 'Child ${i + 1}',
-                'gender': i < (children['totalMale'] ?? 0) ? 'Male' : 'Female',
-                'fatherName': head['headName']?.toString() ?? '',
-                'motherName': spouse['memberName']?.toString() ?? '',
-                'memberType': 'Child',
-                'dob': null, // Add default values for required fields
-                'mobileNo': '',
-                'maritalStatus': '',
-              };
-              addCard(child, 'Child', isChild: true);
-            }
-          }
-        }
+        // Children are now only added from member_details with memberType 'Child'
         
-        // Add other family members from member_details
+        // Add family members from member_details
         if (members.isNotEmpty && members is List) {
           for (final member in members) {
             if (member is Map) {
               final memberData = Map<String, dynamic>.from(member);
-              // Ensure all required fields exist
-              memberData['memberName'] = memberData['memberName'] ?? memberData['name'] ?? '';
-              memberData['gender'] = memberData['gender'] ?? '';
-              memberData['dob'] = memberData['dob'] ?? '';
-              memberData['mobileNo'] = memberData['mobileNo'] ?? '';
-              memberData['maritalStatus'] = memberData['maritalStatus'] ?? '';
-              
-              addCard(
-                memberData,
-                memberData['memberType'] == 'Child' ? 'Child' : 'Member',
-                isChild: memberData['memberType'] == 'Child',
-              );
+              // Only process members with memberType 'Child' for children
+              if (memberData['memberType'] == 'Child') {
+                // Ensure all required fields exist
+                memberData['memberName'] = memberData['memberName'] ?? memberData['name'] ?? '';
+                memberData['gender'] = memberData['gender'] ?? '';
+                memberData['dob'] = memberData['dob'] ?? '';
+                memberData['mobileNo'] = memberData['mobileNo'] ?? '';
+                memberData['maritalStatus'] = memberData['maritalStatus'] ?? '';
+                
+                // Add father's name from head if not available
+                if (memberData['fatherName'] == null) {
+                  memberData['fatherName'] = head['headName']?.toString() ?? '';
+                }
+                
+                // Add mother's name from spouse if not available
+                if (memberData['motherName'] == null) {
+                  memberData['motherName'] = spouse['memberName']?.toString() ?? '';
+                }
+                
+                addCard(memberData, 'Child', isChild: true);
+              } else {
+                // Handle other member types (non-children)
+                memberData['memberName'] = memberData['memberName'] ?? memberData['name'] ?? '';
+                memberData['gender'] = memberData['gender'] ?? '';
+                memberData['dob'] = memberData['dob'] ?? '';
+                memberData['mobileNo'] = memberData['mobileNo'] ?? '';
+                memberData['maritalStatus'] = memberData['maritalStatus'] ?? '';
+                
+                addCard(memberData, 'Member', isChild: false);
+              }
             }
           }
         }
@@ -225,36 +225,65 @@ class _HouseHold_BeneficiaryScreenState
     }
   }
 
-  // Helper method to get the head's name
-  String _getHeadName() {
-    try {
-      final head = _beneficiaries.firstWhere(
-        (b) => b['Relation'] == 'Head',
-        orElse: () => {'Name': 'Not Available'},
-      );
-      return head['Name']?.toString() ?? 'Not Available';
-    } catch (e) {
-      return 'Not Available';
-    }
-  }
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
     String age = 'N/A';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
+    
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
-      DateTime? dob;
       try {
-        dob = DateTime.tryParse(dobRaw.toString());
-      } catch (_) {}
-      if (dob != null) {
-        age = '${DateTime.now().difference(dob).inDays ~/ 365}';
+        // Handle different date formats
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+        
+        // Try parsing as DateTime first (for ISO format)
+        dob = DateTime.tryParse(dateStr);
+        
+        // If that fails, try parsing as timestamp (milliseconds since epoch)
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            // If the number is too large, it's probably in milliseconds, otherwise seconds
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+        
+        // If we have a valid date, calculate age
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          
+          // Adjust for month and day to handle cases where birthday hasn't occurred yet this year
+          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+            years--;
+          }
+          
+          // Don't show negative ages
+          age = years >= 0 ? years.toString() : '0';
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
       }
     }
-    String displayGender = gender == 'm' || gender == 'male'
-        ? 'Male'
-        : gender == 'f' || gender == 'female'
-            ? 'Female'
-            : 'Other';
+    
+    // Format gender
+    String displayGender;
+    switch (gender) {
+      case 'm':
+      case 'male':
+        displayGender = 'Male';
+        break;
+      case 'f':
+      case 'female':
+        displayGender = 'Female';
+        break;
+      default:
+        displayGender = 'Other';
+    }
+    
     return '$age Y | $displayGender';
   }
 
@@ -395,16 +424,8 @@ class _HouseHold_BeneficiaryScreenState
                   borderRadius: 8,
                   height: 50,
                   onPress: () {
-                    final head = _beneficiaries.firstWhere(
-                      (b) => b['Relation'] == 'Head',
-                      orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': ''},
-                    );
-                    final spouse = _beneficiaries.firstWhere(
-                      (b) => b['Relation'] == 'Spouse',
-                      orElse: () => {'Name': '', 'Gender': ''},
-                    );
-                    
-                    // Format gender to standard format (Male/Female/Other)
+
+
                     String formatGender(dynamic gender) {
                       if (gender == null) return 'Other';
                       final g = gender.toString().toLowerCase();
@@ -413,11 +434,25 @@ class _HouseHold_BeneficiaryScreenState
                       return 'Other';
                     }
                     
+
+                    final head = _beneficiaries.firstWhere(
+                      (b) => b['Relation'] == 'Head',
+                      orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': '', '_memberData': {}},
+                    );
+                    final spouse = _beneficiaries.firstWhere(
+                      (b) => b['Relation'] == 'Spouse',
+                      orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': '', '_memberData': {}},
+                    );
+
                     Navigator.pushNamed(
                       context, 
                       Route_Names.addFamilyMember,
                       arguments: {
                         'hhId': widget.hhId,
+                        'headName': head['Name']?.toString() ?? '',
+                        'headGender': formatGender(head['Gender']),
+                        'spouseName': spouse['Name']?.toString() ?? '',
+                        'spouseGender': formatGender(spouse['Gender']),
                       },
                     );
                   },
@@ -444,7 +479,7 @@ class _HouseHold_BeneficiaryScreenState
           (b) => b['Relation'] == 'Spouse',
           orElse: () => {'Name': '', 'Gender': ''},
         );
-        
+
         // Format gender to standard format (Male/Female/Other)
         String formatGender(dynamic gender) {
           if (gender == null) return 'Other';
@@ -453,13 +488,16 @@ class _HouseHold_BeneficiaryScreenState
           if (g == 'f' || g == 'female') return 'Female';
           return 'Other';
         }
-        
+
+
+        final memberId = int.tryParse(widget.hhId ?? '0') ?? 0;
+
         Navigator.pushNamed(
           context,
-          Route_Names.addFamilyMember,
+          Route_Names.updateMemberDetail,
           arguments: {
-            'hhId': widget.hhId,
-            'isEdit': false,
+            'memberId': memberId, // Pass the parsed integer ID
+            'isEdit': true, // Set to true for editing existing member
           },
         );
       },
@@ -502,8 +540,8 @@ class _HouseHold_BeneficiaryScreenState
 
                       Expanded(
                         child: Text(
-                          (data['hhId'] != null && data['hhId'].toString().length > 11) 
-                              ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) 
+                          (data['hhId'] != null && data['hhId'].toString().length > 11)
+                              ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
                               : (data['hhId']?.toString() ?? ''),
                           style: TextStyle(
                             color: primary,
@@ -618,7 +656,6 @@ class _HouseHold_BeneficiaryScreenState
       ],
     );
   }
-
   Widget _infoColumn(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
