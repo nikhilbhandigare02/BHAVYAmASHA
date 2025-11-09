@@ -50,23 +50,45 @@ class SecureStorageService {
 
   // Save ANC visit data
   static const String _keyAncVisits = 'anc_visits';
-  
+
   static Future<void> saveAncVisit(Map<String, dynamic> visitData) async {
     try {
       // Get existing visits
       final existingData = await _storage.read(key: _keyAncVisits);
       List<dynamic> visits = [];
-      
+
       if (existingData != null) {
         visits = jsonDecode(existingData);
       }
-      
-      // Add new visit
-      visits.add({
-        ...visitData,
-        'createdAt': DateTime.now().toIso8601String(),
-      });
-      
+
+      // Check if we have a beneficiaryId to look for
+      final String? beneficiaryId = visitData['beneficiaryId']?.toString();
+      bool found = false;
+
+      if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
+        // Look for existing entry with the same beneficiaryId
+        for (int i = 0; i < visits.length; i++) {
+          if (visits[i]['beneficiaryId']?.toString() == beneficiaryId) {
+            // Update existing entry
+            visits[i] = {
+              ...visits[i], // Keep existing data
+              ...visitData,  // Update with new data
+              'updatedAt': DateTime.now().toIso8601String(), // Add/update timestamp
+            };
+            found = true;
+            break;
+          }
+        }
+      }
+
+      // If no existing entry was found, add as new
+      if (!found) {
+        visits.add({
+          ...visitData,
+          'createdAt': DateTime.now().toIso8601String(),
+        });
+      }
+
       // Save back to storage
       await _storage.write(
         key: _keyAncVisits,
@@ -77,7 +99,7 @@ class SecureStorageService {
       rethrow;
     }
   }
-  
+
   // Get all ANC visits
   static Future<List<dynamic>> getAncVisits() async {
     try {

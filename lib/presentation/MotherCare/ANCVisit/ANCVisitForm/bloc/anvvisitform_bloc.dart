@@ -67,7 +67,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         beneficiaryRefKey = state.beneficiaryId;
       }
 
-      final formData = {
+      final formData  = {
         'form_type': formType,
         'form_name': formName,
         'unique_key': formsRefKey,
@@ -98,6 +98,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'hemoglobin': state.hemoglobin,
           'pregnantWoman': state.givesBirthToBaby,
           'high_risk': state.highRisk,
+          'gives_birth_to_baby': state.givesBirthToBaby,
           'beneficiary_absent': state.beneficiaryAbsent,
         },
         'created_at': now,
@@ -214,6 +215,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'diastolic': state.diastolic,
             'hemoglobin': state.hemoglobin,
             'high_risk': state.highRisk,
+            'gives_birth_to_baby': state.givesBirthToBaby,
             'beneficiary_absent': state.beneficiaryAbsent,
             'form_data': formDataForDb,
           };

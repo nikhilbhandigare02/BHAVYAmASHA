@@ -43,12 +43,8 @@ class _UpdatedEligibleCoupleListScreenState
     if (_initialData == null) return;
     
     print('🔍 Processing initial data: ${_initialData?.keys}');
+
     
-    // Here you can process the initial data as needed
-    // For example, you might want to pre-fill a form or filter the list
-    // based on the passed data
-    
-    // If the data contains a search term, set it in the search controller
     if (_initialData?['searchTerm'] != null) {
       _search.text = _initialData!['searchTerm'].toString();
     }

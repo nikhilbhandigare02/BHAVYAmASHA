@@ -2,17 +2,16 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
-
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-
-import '../../../core/models/anc_visit_model.dart';
+import '../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
+import '../../HomeScreen/HomeScreen.dart';
+import '../../../data/Local_Storage/local_storage_dao.dart';
 
 class DeliveryOutcomeScreen extends StatefulWidget {
   const DeliveryOutcomeScreen({super.key});
@@ -25,177 +24,16 @@ class DeliveryOutcomeScreen extends StatefulWidget {
 class _DeliveryOutcomeScreenState
     extends State<DeliveryOutcomeScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
-  List<ANCVisitModel> _ancVisits = [];
+
+  List<Map<String, dynamic>> _filtered = [];
   bool _isLoading = true;
-  String _error = '';
 
   @override
   void initState() {
     super.initState();
-    _loadANCVisits();
+    _loadPregnancyOutcomeeCouples();
     _searchCtrl.addListener(_onSearchChanged);
   }
-
-  Future<void> _loadANCVisits() async {
-    try {
-      setState(() {
-        _isLoading = true;
-        _error = '';
-      });
-
-      Map<String, dynamic> highRiskBeneficiaries = {};
-      try {
-        final storageVisits = await SecureStorageService.getAncVisits();
-        for (var visit in storageVisits) {
-          final beneficiaryId = visit['beneficiaryId']?.toString();
-          final highRiskValue = visit['high_risk']?.toString().toLowerCase();
-          final isHighRisk = highRiskValue == 'yes' ||
-              highRiskValue == 'true' ||
-              highRiskValue == '1';
-
-          if (beneficiaryId != null && isHighRisk) {
-            // Store the most recent visit for each high-risk beneficiary
-            final visitDate = visit['date_of_inspection'] != null
-                ? DateTime.tryParse(visit['date_of_inspection'].toString())
-                : null;
-
-            if (!highRiskBeneficiaries.containsKey(beneficiaryId) ||
-                (visitDate != null &&
-                    highRiskBeneficiaries[beneficiaryId]?['date'] != null &&
-                    visitDate.isAfter(highRiskBeneficiaries[beneficiaryId]!['date']))) {
-              highRiskBeneficiaries[beneficiaryId] = {
-                'date': visitDate,
-                'visit': visit,
-              };
-            }
-          }
-        }
-      } catch (e) {
-        print('Error getting high-risk visits: $e');
-      }
-
-      // If no high-risk beneficiaries found, show message
-      if (highRiskBeneficiaries.isEmpty) {
-        setState(() {
-          _error = 'No high-risk ANC visits found';
-          _isLoading = false;
-          _ancVisits = [];
-          _filteredVisits = [];
-        });
-        return;
-      }
-
-      // Get all visits from getUserData and match with high-risk beneficiaries
-      final storageData = await SecureStorageService.getUserData();
-      if (storageData != null && storageData.isNotEmpty) {
-        try {
-          final Map<String, dynamic> parsedData = jsonDecode(storageData);
-          final List<ANCVisitModel> highRiskVisits = [];
-
-          if (parsedData['visits'] is List) {
-            for (var visit in parsedData['visits']) {
-              try {
-                final beneficiaryId = visit['BeneficiaryID']?.toString();
-                if (beneficiaryId == null || !highRiskBeneficiaries.containsKey(beneficiaryId)) {
-                  continue; // Skip if not a high-risk beneficiary
-                }
-
-                final rawRow = visit['_rawRow'] ?? {};
-                final beneficiaryInfo = visit['beneficiary_info'] ?? {};
-                final headDetails = beneficiaryInfo['head_details'] ?? {};
-
-                // Extract age and gender from the visit data
-                final String? ageWithGender = visit['age']?.toString();
-                String? extractedAge;
-                String? extractedGender;
-
-                if (ageWithGender != null && ageWithGender.isNotEmpty) {
-                  final parts = ageWithGender.split('/').map((e) => e.trim()).toList();
-                  if (parts.isNotEmpty) {
-                    extractedAge = parts[0];
-                    if (parts.length > 1) {
-                      extractedGender = parts[1];
-                    }
-                  }
-                }
-
-                final visitData = {
-                  'id': beneficiaryId,
-                  'hhId': visit['hhId'],
-                  'house_number': headDetails['houseNo'],
-                  'gender': extractedGender ?? headDetails['gender'] ?? 'F',
-                  'age': extractedAge ?? visit['age'],
-                  'woman_name': visit['Name'],
-                  'husband_name': visit['HusbandName'],
-                  'rch_number': visit['RichID'],
-                  'visit_type': visit['RegistrationType'],
-                  'high_risk': true,
-                  'date_of_inspection': visit['RegistrationDate'],
-                  'mobileNumber': visit['mobileno'],
-                };
-
-                highRiskVisits.add(ANCVisitModel.fromJson(visitData));
-              } catch (e) {
-                print('Error processing visit: $e\nVisit data: $visit');
-              }
-            }
-          }
-
-          highRiskVisits.sort((a, b) {
-            if (a.dateOfInspection == null) return 1;
-            if (b.dateOfInspection == null) return -1;
-            return b.dateOfInspection!.compareTo(a.dateOfInspection!);
-          });
-
-          setState(() {
-            _ancVisits = highRiskVisits;
-            _filteredVisits = List.from(_ancVisits);
-            _isLoading = false;
-            if (_ancVisits.isEmpty) {
-              _error = 'No matching high-risk ANC visits found';
-            }
-          });
-
-        } catch (e) {
-          print('Error parsing JSON data: $e');
-          setState(() {
-            _error = 'Error parsing data: $e';
-            _isLoading = false;
-          });
-        }
-      } else {
-        setState(() {
-          _error = 'No ANC visit data found';
-          _isLoading = false;
-          _ancVisits = [];
-          _filteredVisits = [];
-        });
-      }
-    } catch (e) {
-      print('Error loading ANC visits: $e');
-      setState(() {
-        _error = 'Failed to load ANC visits: $e';
-        _isLoading = false;
-      });
-    }
-  }
-  List<ANCVisitModel> _filteredVisits = [];
-
-  void _onSearchChanged() {
-    final query = _searchCtrl.text.toLowerCase().trim();
-    setState(() {
-      if (query.isEmpty) {
-        _filteredVisits = List.from(_ancVisits);
-      } else {
-        _filteredVisits = _ancVisits.where((visit) {
-          return (visit.houseNumber?.toLowerCase().contains(query) ?? false) ||
-              (visit.womanName?.toLowerCase().contains(query) ?? false) ||
-              (visit.rchNumber?.toLowerCase().contains(query) ?? false);
-        }).toList();
-      }
-    });
-  }
-
 
   @override
   void dispose() {
@@ -204,93 +42,276 @@ class _DeliveryOutcomeScreenState
     super.dispose();
   }
 
+  Future<void> _loadPregnancyOutcomeeCouples() async {
+    setState(() { _isLoading = true; });
+
+    try {
+      final storageVisits = await SecureStorageService.getAncVisits();
+
+      final birthBeneficiaryIds = <String>{};
+
+      for (var visit in storageVisits) {
+        final givesBirth = visit['gives_birth_to_baby']?.toString() == 'Yes';
+        final beneficiaryId = visit['beneficiaryId']?.toString();
+
+        if (givesBirth && beneficiaryId != null) {
+          birthBeneficiaryIds.add(beneficiaryId);
+        }
+      }
+
+      if (birthBeneficiaryIds.isEmpty) {
+        setState(() {
+          _isLoading = false;
+          _filtered = [];
+        });
+        return;
+      }
+
+      // Get all beneficiaries and filter them
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final couples = <Map<String, dynamic>>[];
+
+      for (final row in rows) {
+        final uniqueKey = row['unique_key']?.toString() ?? '';
+
+        // Check if this beneficiary is in our birthBeneficiaryIds set
+        if (birthBeneficiaryIds.any((id) => uniqueKey.endsWith(id))) {
+          final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+          final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+          final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+
+          if (_isEligibleFemale(head)) {
+            couples.add(_formatCoupleData(row, head, spouse, isHead: true));
+          }
+
+          if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
+            couples.add(_formatCoupleData(row, spouse, head, isHead: false));
+          }
+        }
+      }
+
+      setState(() {
+        _filtered = couples;
+        _isLoading = false;
+      });
+
+    } catch (e) {
+      print('Error loading pregnancy outcome couples: $e');
+      setState(() {
+        _isLoading = false;
+        _filtered = [];
+      });
+    }
+  }
+  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
+    if (person.isEmpty) return false;
+    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
+    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? head?['maritalStatus']?.toString().toLowerCase() ?? '';
+    final gender = genderRaw == 'f' || genderRaw == 'female';
+    final maritalStatus = maritalStatusRaw == 'married';
+    final dob = person['dob'];
+    final age = _calculateAge(dob);
+    return gender && maritalStatus && age >= 15 && age <= 49;
+  }
+
+  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
+    final hhId = row['household_ref_key']?.toString() ?? '';
+    final uniqueKey = row['unique_key']?.toString() ?? '';
+    final createdDate = row['created_date_time']?.toString() ?? '';
+    final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+    final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
+    final gender = female['gender']?.toString().toLowerCase();
+    final displayGender = gender == 'f' ? 'Female' : gender == 'm' ? 'Male' : 'Other';
+    final age = _calculateAge(female['dob']);
+    final richId = female['RichID']?.toString() ?? '';
+    final mobile = female['mobileNo']?.toString() ?? '';
+    final husbandName = isHead
+        ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
+        : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
+
+    // children summary can live at top-level children_details or under head childrendetails/childrenDetails
+    final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
+    Map<String, dynamic>? childrenSummary;
+    if (childrenRaw is Map) {
+      childrenSummary = {
+        'totalBorn': childrenRaw['totalBorn'],
+        'totalLive': childrenRaw['totalLive'],
+        'totalMale': childrenRaw['totalMale'],
+        'totalFemale': childrenRaw['totalFemale'],
+        'youngestAge': childrenRaw['youngestAge'],
+        'ageUnit': childrenRaw['ageUnit'],
+        'youngestGender': childrenRaw['youngestGender'],
+      }..removeWhere((k, v) => v == null);
+    }
+    return {
+      'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
+      'RegistrationDate': _formatDate(createdDate),
+      'RegistrationType': 'General',
+      'BeneficiaryID': uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey,
+      'Name': name,
+      'age': age > 0 ? '$age Y / $displayGender' : 'N/A',
+      'RichID': richId,
+      'mobileno': mobile,
+      'HusbandName': husbandName,
+      'childrenSummary': childrenSummary,
+      '_rawRow': row,
+    };
+  }
+
+  int _calculateAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final dt = DateTime.tryParse(dateStr);
+      if (dt == null) return '';
+      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  void _onSearchChanged() {
+    final q = _searchCtrl.text.trim().toLowerCase();
+    setState(() {
+      if (q.isEmpty) {
+        _loadPregnancyOutcomeeCouples();
+      } else {
+        _filtered = _filtered.where((e) {
+          return ((e['hhId'] ?? '') as String).toLowerCase().contains(q) ||
+              ((e['Name'] ?? '') as String).toLowerCase().contains(q) ||
+              ((e['mobileno'] ?? '') as String).toLowerCase().contains(q);
+        }).toList();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final displayVisits = _searchCtrl.text.isEmpty ? _ancVisits : _filteredVisits;
-
     return Scaffold(
       appBar: AppHeader(
-        screenTitle:  l10n!.deliveryOutcomeList,
-        showBack: true,
+        screenTitle: l10n?.pregnancyOutcome ?? '',
+        showBack: false,
+        icon1Image: 'assets/images/home.png',
 
-
+        onIcon1Tap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialTabIndex: 1),
+          ),
+        ),
       ),
+      drawer: const CustomDrawer(),
       body: Column(
         children: [
-          if (_isLoading)
-            const Expanded(
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (_error.isNotEmpty)
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                    const SizedBox(height: 16),
-                    Text(
-                      _error,
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _loadANCVisits,
-                      child: const Text('Retry'),
-                    ),
-                  ],
+          // Search Field
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: l10n?.searchEligibleCouple ?? 'search Eligible Couple',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: AppColors.background,
+                contentPadding:
+                const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.outlineVariant),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
                 ),
               ),
-            )
-          else if (displayVisits.isEmpty)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.assignment_late_outlined, size: 48, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No high-risk ANC visits found',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  itemCount: displayVisits.length,
-                  itemBuilder: (context, index) {
-                    return _householdCard(context, displayVisits[index]);
-                  },
-                ),
-              ),
+            ),
+          ),
+
+          // Household List
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              itemCount: _filtered.length,
+              itemBuilder: (context, index) {
+                final data = _filtered[index];
+                return _householdCard(context, data);
+              },
+            ),
+          ),
+
         ],
       ),
     );
   }
 
-  Widget _householdCard(BuildContext context, ANCVisitModel visit) {
-    final l10n = AppLocalizations.of(context);
-    final Color primary = Theme.of(context).primaryColor;
+  Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
+    final primary = Theme.of(context).primaryColor;
+    final t = AppLocalizations.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        InkWell(
-          onTap: () {
-            Navigator.pushNamed(
+    // Extract the raw row data and beneficiary info
+    final rowData = data['_rawRow'] ?? {};
+    final beneficiaryInfo = rowData['beneficiary_info'] is String
+        ? jsonDecode(rowData['beneficiary_info'])
+        : (rowData['beneficiary_info'] ?? {});
+
+    // Extract head and spouse details with proper fallbacks
+    final headDetails = (beneficiaryInfo['head_details'] ?? {}) as Map<String, dynamic>;
+    final spouseDetails = (beneficiaryInfo['spouse_details'] ?? {}) as Map<String, dynamic>;
+
+    // Get children details with fallbacks
+    final childrenDetails = (beneficiaryInfo['children_details'] ??
+        headDetails['childrendetails'] ??
+        headDetails['childrenDetails'] ??
+        {}) as Map<String, dynamic>;
+
+    return Card(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: Colors.grey.shade200),
+        ),
+        child: InkWell(
+          onTap: () async {
+
+            final fullHhId = rowData['household_ref_key']?.toString() ?? '';
+            final hhIdLast11 = fullHhId.length > 11 ? fullHhId.substring(fullHhId.length - 11) : fullHhId;
+            final name = data['Name']?.toString() ?? '';
+
+            print('🚀 Navigating to update screen with:');
+            print('   Household ID (last 11): $hhIdLast11');
+            print('   Name: $name');
+
+            final result = await Navigator.pushNamed(
               context,
-              Route_Names.OutcomeFormScreen,
-              // arguments: {'isBeneficiary': true},
+              Route_Names.UpdatedEligibleCoupleList,
+              arguments: {
+                'hhId': hhIdLast11,
+                'name': name,
+              },
             );
+
+
+            if (result == true) {
+              _loadPregnancyOutcomeeCouples();
+            }
           },
+          borderRadius: BorderRadius.circular(8),
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
@@ -313,6 +334,7 @@ class _DeliveryOutcomeScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Header
                 Container(
                   decoration: const BoxDecoration(
                     color: AppColors.background,
@@ -322,97 +344,59 @@ class _DeliveryOutcomeScreenState
                   child: Row(
                     children: [
                       const Icon(Icons.home, color: Colors.black54, size: 18),
-                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                         visit.hhId?? '',
-                          style: TextStyle(
-                            color: primary,
-                            fontWeight: FontWeight.w500,fontSize: 14.sp
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                          data['hhId'] ?? '',
+                          style: TextStyle(color: primary, fontWeight: FontWeight.w600),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.asset(
-                          'assets/images/sync.png',
-                          width: 25,
-                          height: 25,
-                          fit: BoxFit.cover,
-                        ),
+                      SizedBox(
+                        width: 60,
+                        height: 24,
+                        child: Image.asset('assets/images/sync.png'),
                       ),
                     ],
                   ),
                 ),
-
-                // Body section
+                // Body
                 Container(
                   decoration: BoxDecoration(
-                    color: primary.withOpacity(0.95),
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(4),
-                    ),
+                    color: AppColors.primary,
+                    borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(8)),
                   ),
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Expanded(
-                            child: _rowText(
-                              l10n?.registrationDateLabel ?? 'Registration Date',
-                              visit.registrationDate ??'',
-                            ),
-                          ),
+                          Expanded(child: _rowText('Registration Date', data['RegistrationDate'] ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(
-                            child: _rowText(
-                              l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
-                              visit.id ?? '',
-                            ),
-                          ),
+                          Expanded(child: _rowText('Registration Type', data['RegistrationType'] ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(
-                            child: _rowText(
-                               'RCH ID',
-                              l10n?.notAvailable ?? 'Not Available',
-                            ),
-                          ),
+                          Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryID'] ?? '')),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(child: _rowText(  'Name', data['Name'] ?? '')),
+                          const SizedBox(width: 12),
+                          Expanded(child: _rowText( 'Age', data['age']?.toString() ?? '')),
+                          const SizedBox(width: 12),
+                          Expanded(child: _rowText('Rich ID', data['RichID']?.toString() ?? '')),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
                           Expanded(
-                              child: _rowText(l10n?.thName ?? 'Name', visit.womanName ?? '')),
+                              child: _rowText( 'Mobile No.', data['mobileno']?.toString() ?? '')),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _rowText(
-                              l10n?.ageGenderLabel ?? 'Age | Gender',
-                              visit.age ?? '',
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _rowText(
-                              l10n?.mobileLabelSimple ?? 'Mobile no.',
-                              visit.mobileNumber ?? '',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _rowText(
-                               'Husband Name',
-                              visit.husbandName ?? '',
-                            ),
-                          ),
+                              child: _rowText('Husband Name', data['HusbandName'] ?? '')),
                         ],
                       ),
                     ],
@@ -421,9 +405,7 @@ class _DeliveryOutcomeScreenState
               ],
             ),
           ),
-        ),
-
-      ],
+        )
     );
   }
 
@@ -443,5 +425,4 @@ class _DeliveryOutcomeScreenState
       ],
     );
   }
-
 }
