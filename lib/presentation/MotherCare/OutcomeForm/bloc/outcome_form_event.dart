@@ -1,5 +1,6 @@
 part of 'outcome_form_bloc.dart';
 
+@immutable
 abstract class OutcomeFormEvent extends Equatable {
   const OutcomeFormEvent();
 
@@ -9,6 +10,7 @@ abstract class OutcomeFormEvent extends Equatable {
 
 class DeliveryDateChanged extends OutcomeFormEvent {
   final DateTime? date;
+
   const DeliveryDateChanged(this.date);
 
   @override
@@ -17,6 +19,7 @@ class DeliveryDateChanged extends OutcomeFormEvent {
 
 class GestationWeeksChanged extends OutcomeFormEvent {
   final String weeks;
+
   const GestationWeeksChanged(this.weeks);
 
   @override
@@ -24,7 +27,8 @@ class GestationWeeksChanged extends OutcomeFormEvent {
 }
 
 class DeliveryTimeChanged extends OutcomeFormEvent {
-  final String? time; // hh:mm
+  final String? time;
+
   const DeliveryTimeChanged(this.time);
 
   @override
@@ -33,6 +37,7 @@ class DeliveryTimeChanged extends OutcomeFormEvent {
 
 class PlaceOfDeliveryChanged extends OutcomeFormEvent {
   final String value;
+
   const PlaceOfDeliveryChanged(this.value);
 
   @override
@@ -41,6 +46,7 @@ class PlaceOfDeliveryChanged extends OutcomeFormEvent {
 
 class DeliveryTypeChanged extends OutcomeFormEvent {
   final String value;
+
   const DeliveryTypeChanged(this.value);
 
   @override
@@ -49,6 +55,7 @@ class DeliveryTypeChanged extends OutcomeFormEvent {
 
 class ComplicationsChanged extends OutcomeFormEvent {
   final String value;
+
   const ComplicationsChanged(this.value);
 
   @override
@@ -57,6 +64,7 @@ class ComplicationsChanged extends OutcomeFormEvent {
 
 class OutcomeCountChanged extends OutcomeFormEvent {
   final String value;
+
   const OutcomeCountChanged(this.value);
 
   @override
@@ -65,12 +73,81 @@ class OutcomeCountChanged extends OutcomeFormEvent {
 
 class FamilyPlanningCounselingChanged extends OutcomeFormEvent {
   final String value;
+
   const FamilyPlanningCounselingChanged(this.value);
 
   @override
   List<Object?> get props => [value];
 }
 
+class FpMethodChanged extends OutcomeFormEvent {
+  final String? value;
+
+  const FpMethodChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class RemovalDateChanged extends OutcomeFormEvent {
+  final DateTime? date;
+
+  const RemovalDateChanged(this.date);
+
+  @override
+  List<Object?> get props => [date];
+}
+
+class RemovalReasonChanged extends OutcomeFormEvent {
+  final String? reason;
+
+  const RemovalReasonChanged(this.reason);
+
+  @override
+  List<Object?> get props => [reason];
+}
+
+class CondomQuantityChanged extends OutcomeFormEvent {
+  final String? quantity;
+
+  const CondomQuantityChanged(this.quantity);
+
+  @override
+  List<Object?> get props => [quantity];
+}
+
+class MalaQuantityChanged extends OutcomeFormEvent {
+  final String? quantity;
+
+  const MalaQuantityChanged(this.quantity);
+
+  @override
+  List<Object?> get props => [quantity];
+}
+
+class ChhayaQuantityChanged extends OutcomeFormEvent {
+  final String? quantity;
+
+  const ChhayaQuantityChanged(this.quantity);
+
+  @override
+  List<Object?> get props => [quantity];
+}
+
+class ECPQuantityChanged extends OutcomeFormEvent {
+  final String? quantity;
+
+  const ECPQuantityChanged(this.quantity);
+
+  @override
+  List<Object?> get props => [quantity];
+}
+
 class OutcomeFormSubmitted extends OutcomeFormEvent {
-  const OutcomeFormSubmitted();
+  final Map<String, dynamic>? beneficiaryData;
+  
+  const OutcomeFormSubmitted({this.beneficiaryData});
+  
+  @override
+  List<Object?> get props => [beneficiaryData];
 }

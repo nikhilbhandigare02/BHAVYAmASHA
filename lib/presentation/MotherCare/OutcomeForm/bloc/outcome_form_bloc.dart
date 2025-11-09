@@ -1,6 +1,16 @@
+import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
+
+import '../../../../core/utils/device_info_utils.dart';
+import '../../../../data/Local_Storage/User_Info.dart';
+import '../../../../data/Local_Storage/database_provider.dart';
+import '../../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../../../data/SecureStorage/SecureStorage.dart';
 
 part 'outcome_form_event.dart';
 part 'outcome_form_state.dart';
@@ -31,55 +41,258 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     on<FamilyPlanningCounselingChanged>((event, emit) {
       emit(state.copyWith(familyPlanningCounseling: event.value, errorMessage: null));
     });
+    on<FpMethodChanged>((event, emit) {
+      emit(state.copyWith(fpMethod: event.value, errorMessage: null));
+    });
+    on<RemovalDateChanged>((event, emit) {
+      emit(state.copyWith(removalDate: event.date, errorMessage: null));
+    });
+    on<RemovalReasonChanged>((event, emit) {
+      emit(state.copyWith(removalReason: event.reason, errorMessage: null));
+    });
+    on<CondomQuantityChanged>((event, emit) {
+      emit(state.copyWith(condomQuantity: event.quantity, errorMessage: null));
+    });
+    on<MalaQuantityChanged>((event, emit) {
+      emit(state.copyWith(malaQuantity: event.quantity, errorMessage: null));
+    });
+    on<ChhayaQuantityChanged>((event, emit) {
+      emit(state.copyWith(chhayaQuantity: event.quantity, errorMessage: null));
+    });
+    on<ECPQuantityChanged>((event, emit) {
+      emit(state.copyWith(ecpQuantity: event.quantity, errorMessage: null));
+    });
+
     on<OutcomeFormSubmitted>((event, emit) async {
-      // Clear any previous submission state
-      emit(state.copyWith(submitted: false));
-
-      // Validate mandatory fields
-      final isPlaceInvalid = state.placeOfDelivery.isEmpty || state.placeOfDelivery == 'चुनें';
-      final isCompInvalid = state.complications.isEmpty || state.complications == 'चुनें';
-      final isOutcomeInvalid = state.outcomeCount.isEmpty || int.tryParse(state.outcomeCount) == null;
-
-      // Check all validations and collect all errors
-      String? errorMessage;
-      if (state.deliveryDate == null) {
-        errorMessage = 'प्रसव की तिथि आवश्यक है।';
-      } else if (isPlaceInvalid) {
-        errorMessage = 'डिलिवरी का स्थान आवश्यक है।';
-      } else if (isCompInvalid) {
-        errorMessage = 'जटिलता चयन आवश्यक है।';
-      } else if (isOutcomeInvalid) {
-        errorMessage = 'प्रसव का परिणाम (संख्या) आवश्यक है।';
-      }
-
-      // If there are validation errors, show them and stop submission
-      if (errorMessage != null) {
-        emit(state.copyWith(
-          errorMessage: errorMessage,
-          submitted: false,
-          submitting: false,
-        ));
-        return;
-      }
-
-      // If validation passes, proceed with form submission
-      emit(state.copyWith(submitting: true, errorMessage: null));
+      emit(state.copyWith(submitted: false, submitting: true, errorMessage: null));
 
       try {
-        // Simulate API call
-        await Future<void>.delayed(const Duration(milliseconds: 300));
+        final isPlaceInvalid = state.placeOfDelivery.isEmpty || state.placeOfDelivery == 'Select';
+        final isDeliveryTypeInvalid = state.deliveryType.isEmpty || state.deliveryType == 'Select';
+        final isOutcomeInvalid = state.outcomeCount.isEmpty || int.tryParse(state.outcomeCount) == null;
 
-        // On success
-        emit(state.copyWith(
-          submitting: false,
-          submitted: true,
-          errorMessage: null,
-        ));
+        String? errorMessage;
+        if (state.deliveryDate == null) {
+          errorMessage = 'Delivery date is required';
+        } else if (isPlaceInvalid) {
+          errorMessage = 'Place of delivery is required';
+        } else if (isDeliveryTypeInvalid) {
+          errorMessage = 'Delivery type is required';
+        } else if (isOutcomeInvalid) {
+          errorMessage = 'Outcome count is required and must be a number';
+        } else if (state.familyPlanningCounseling.isEmpty || state.familyPlanningCounseling == 'Select') {
+          errorMessage = 'Family planning counseling is required';
+        }
+
+        if (errorMessage != null) {
+          emit(state.copyWith(
+            errorMessage: errorMessage,
+            submitting: false,
+            submitted: false,
+          ));
+          return;
+        }
+
+        emit(state.copyWith(submitting: true, errorMessage: null));
+
+        try {
+          final db = await DatabaseProvider.instance.database;
+          final now = DateTime.now().toIso8601String();
+          final beneficiaryId = event.beneficiaryData != null 
+              ? (event.beneficiaryData!['unique_key']?.toString() ?? '')
+              : '';
+
+          final formType = FollowupFormDataTable.deliveryOutcome;
+          final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Delivery Outcome';
+          final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
+
+          String? beneficiaryRefKey = beneficiaryId.isNotEmpty ? beneficiaryId : null;
+
+          final formData = {
+            'form_type': formType,
+            'form_name': formName,
+            'unique_key': formsRefKey,
+            'form_data': {
+              'beneficiaryId': beneficiaryId,
+              'delivery_date': state.deliveryDate?.toIso8601String(),
+              'gestation_weeks': state.gestationWeeks,
+              'delivery_time': state.deliveryTime,
+              'place_of_delivery': state.placeOfDelivery,
+              'delivery_type': state.deliveryType,
+              'complications': state.complications,
+              'outcome_count': state.outcomeCount,
+              'family_planning_counseling': state.familyPlanningCounseling,
+              'fp_method': state.fpMethod,
+              'removal_date': state.removalDate?.toIso8601String(),
+              'removal_reason': state.removalReason,
+              'condom_quantity': state.condomQuantity,
+              'mala_quantity': state.malaQuantity,
+              'chhaya_quantity': state.chhayaQuantity,
+              'ecp_quantity': state.ecpQuantity,
+              'created_at': now,
+              'updated_at': now,
+            },
+            'created_at': now,
+            'updated_at': now,
+          };
+
+          String householdRefKey = '';
+          String motherKey = '';
+          String fatherKey = '';
+
+          if (beneficiaryId.isNotEmpty) {
+            List<Map<String, dynamic>> beneficiaryMaps = await db.query(
+              'beneficiaries',
+              where: 'unique_key = ?',
+              whereArgs: [beneficiaryId],
+            );
+
+            if (beneficiaryMaps.isEmpty) {
+              beneficiaryMaps = await db.query(
+                'beneficiaries',
+                where: 'id = ?',
+                whereArgs: [int.tryParse(beneficiaryId) ?? 0],
+              );
+            }
+
+            if (beneficiaryMaps.isNotEmpty) {
+              final beneficiary = beneficiaryMaps.first;
+              householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
+              motherKey = beneficiary['mother_key'] as String? ?? '';
+              fatherKey = beneficiary['father_key'] as String? ?? '';
+            }
+          }
+
+          final formDataForDb = {
+            'server_id': '',
+            'forms_ref_key': formsRefKey,
+            'household_ref_key': householdRefKey,
+            'beneficiary_ref_key': beneficiaryId,
+            'mother_key': motherKey,
+            'father_key': fatherKey,
+            'child_care_state': '',
+            'device_details': jsonEncode({
+              'id': await DeviceInfo.getDeviceInfo().then((value) => value.deviceId),
+              'platform': await DeviceInfo.getDeviceInfo().then((value) => value.platform),
+              'version': await DeviceInfo.getDeviceInfo().then((value) => value.osVersion),
+            }),
+            'app_details': jsonEncode({
+              'app_version': await DeviceInfo.getDeviceInfo().then((value) => value.appVersion.split('+').first),
+              'app_name': await DeviceInfo.getDeviceInfo().then((value) => value.appName),
+              'build_number': await DeviceInfo.getDeviceInfo().then((value) => value.buildNumber),
+              'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
+            }),
+            'parent_user': '',
+            'current_user_key': '',
+            'facility_id': await UserInfo.getCurrentUser().then((value) {
+              if (value != null) {
+                if (value['details'] is String) {
+                  try {
+                    final userDetails = jsonDecode(value['details'] ?? '{}');
+                    return userDetails['asha_associated_with_facility_id'] ??
+                        userDetails['facility_id'] ??
+                        userDetails['facilityId'] ??
+                        userDetails['facility'] ??
+                        0;
+                  } catch (e) {
+                    return 0;
+                  }
+                } else if (value['details'] is Map) {
+                  final userDetails = Map<String, dynamic>.from(value['details']);
+                  return userDetails['asha_associated_with_facility_id'] ??
+                      userDetails['facility_id'] ??
+                      userDetails['facilityId'] ??
+                      userDetails['facility'] ??
+                      0;
+                }
+              }
+              return 0;
+            }),
+            'form_json': jsonEncode(formData),
+            'created_date_time': now,
+            'modified_date_time': now,
+            'is_synced': 0,
+            'is_deleted': 0,
+          };
+
+          try {
+            final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
+
+            try {
+              final outcomeData = {
+                'id': formId,
+                'beneficiaryId': beneficiaryId.length >= 11
+                    ? beneficiaryId.substring(beneficiaryId.length - 11)
+                    : beneficiaryId,
+                'delivery_date': state.deliveryDate?.toIso8601String(),
+                'gestation_weeks': state.gestationWeeks,
+                'delivery_time': state.deliveryTime,
+                'place_of_delivery': state.placeOfDelivery,
+                'delivery_type': state.deliveryType,
+                'complications': state.complications,
+                'outcome_count': state.outcomeCount,
+                'family_planning_counseling': state.familyPlanningCounseling,
+                'fp_method': state.fpMethod,
+                'removal_date': state.removalDate?.toIso8601String(),
+                'removal_reason': state.removalReason,
+                'condom_quantity': state.condomQuantity,
+                'mala_quantity': state.malaQuantity,
+                'chhaya_quantity': state.chhayaQuantity,
+                'ecp_quantity': state.ecpQuantity,
+                'created_at': now,
+                'updated_at': now,
+                'form_data': formDataForDb,
+              };
+
+              // Save to secure storage for offline access
+              await SecureStorageService.saveDeliveryOutcome(outcomeData);
+              
+              // Update submission status
+              emit(state.copyWith(
+                submitting: false,
+                submitted: true,
+                errorMessage: null,
+              ));
+
+              if (beneficiaryId.isNotEmpty) {
+                try {
+                  final newCount = await SecureStorageService.incrementSubmissionCount(beneficiaryId);
+                  print('Submission count for beneficiary $beneficiaryId: $newCount');
+                } catch (e) {
+                  print('Error updating submission count: $e');
+                }
+              }
+            } catch (e) {
+              print('Error saving to secure storage: $e');
+              emit(state.copyWith(
+                submitting: false,
+                submitted: false,
+                errorMessage: 'Failed to save delivery outcome to secure storage.',
+              ));
+            }
+          } catch (e) {
+            print('Error saving delivery outcome to database: $e');
+            emit(state.copyWith(
+              submitting: false,
+              submitted: false,
+              errorMessage: 'Failed to save delivery outcome to database.',
+            ));
+          }
+        } catch (e, stackTrace) {
+          print('Error in delivery outcome submission: $e');
+          print('Stack trace: $stackTrace');
+          emit(state.copyWith(
+            submitting: false,
+            submitted: false,
+            errorMessage: 'An unexpected error occurred. Please try again.',
+          ));
+        }
       } catch (e) {
-        // On error
+        // Handle any unexpected errors
         emit(state.copyWith(
           submitting: false,
-          errorMessage: 'An error occurred: $e',
+          submitted: false,
+          errorMessage: 'An unexpected error occurred. Please try again.',
         ));
       }
     });

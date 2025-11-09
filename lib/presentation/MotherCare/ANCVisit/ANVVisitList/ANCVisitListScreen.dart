@@ -499,7 +499,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         ? data['age']
         : l10n?.notAvailable ?? 'N/A';
 
-    // Get husband's name
     final husbandName = data['HusbandName'] is String && data['HusbandName'].isNotEmpty
         ? data['HusbandName']
         : l10n?.notAvailable ?? 'N/A';
@@ -507,16 +506,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () {
-        // Create a new map with only the required fields
         final beneficiaryData = <String, dynamic>{};
         
         if (data['_rawRow'] is Map) {
           final rawRow = data['_rawRow'] as Map;
-          // Only pass these two specific fields
           beneficiaryData['unique_key'] = rawRow['unique_key'];
           beneficiaryData['BeneficiaryID'] = rawRow['BeneficiaryID'];
           
-          // Log the values being passed
           print('🔑 Passing to form:');
           print('   - unique_key: ${beneficiaryData['unique_key']}');
           print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');

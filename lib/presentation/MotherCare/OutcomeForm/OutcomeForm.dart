@@ -11,29 +11,30 @@ import '../../../l10n/app_localizations.dart';
 import 'bloc/outcome_form_bloc.dart';
 
 class OutcomeFormPage extends StatelessWidget {
-  const OutcomeFormPage({super.key});
+  final Map<String, dynamic> beneficiaryData;
+
+  const OutcomeFormPage({super.key, required this.beneficiaryData});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => OutcomeFormBloc(),
-      child: const _OutcomeFormView(),
+      child: _OutcomeFormView(beneficiaryData: beneficiaryData),
     );
   }
 }
 
 class _OutcomeFormView extends StatelessWidget {
-  const _OutcomeFormView();
+  final Map<String, dynamic> beneficiaryData;
+
+  const _OutcomeFormView({required this.beneficiaryData});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppHeader(
-        screenTitle: l10n.deliveryOutcomeTitle,
-        showBack: true,
-      ),
+      appBar: AppHeader(screenTitle: l10n.deliveryOutcomeTitle, showBack: true),
       body: BlocListener<OutcomeFormBloc, OutcomeFormState>(
         listenWhen: (previous, current) => true,
         listener: (context, state) {
@@ -59,6 +60,7 @@ class _OutcomeFormView extends StatelessWidget {
                 duration: const Duration(seconds: 2),
               ),
             );
+            Navigator.pop(context);
           }
         },
         child: Column(
@@ -107,10 +109,9 @@ class _OutcomeFormFields extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.gestationWeeks,
-                  style:  TextStyle(
+                  style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
-
                   ),
                 ),
               ),
@@ -120,7 +121,10 @@ class _OutcomeFormFields extends StatelessWidget {
                   keyboardType: TextInputType.number,
                   onChanged: (v) => bloc.add(GestationWeeksChanged(v)),
                   decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
                     border: OutlineInputBorder(borderRadius: BorderRadius.zero),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey),
@@ -166,9 +170,17 @@ class _OutcomeFormFields extends StatelessWidget {
             l10n.privateHospital,
           ],
           getLabel: (s) => s,
-          value: state.placeOfDelivery.isEmpty ||
-              ![l10n.select, l10n.home, l10n.subCenter, l10n.phc, l10n.chc, l10n.districtHospital, l10n.privateHospital]
-                  .contains(state.placeOfDelivery)
+          value:
+              state.placeOfDelivery.isEmpty ||
+                  ![
+                    l10n.select,
+                    l10n.home,
+                    l10n.subCenter,
+                    l10n.phc,
+                    l10n.chc,
+                    l10n.districtHospital,
+                    l10n.privateHospital,
+                  ].contains(state.placeOfDelivery)
               ? l10n.select
               : state.placeOfDelivery,
           onChanged: (v) => bloc.add(PlaceOfDeliveryChanged(v ?? '')),
@@ -184,9 +196,14 @@ class _OutcomeFormFields extends StatelessWidget {
             l10n.assistedDelivery,
           ],
           getLabel: (s) => s,
-          value: state.deliveryType.isEmpty ||
-              ![l10n.select, l10n.normalDelivery, l10n.cesareanDelivery, l10n.assistedDelivery]
-                  .contains(state.deliveryType)
+          value:
+              state.deliveryType.isEmpty ||
+                  ![
+                    l10n.select,
+                    l10n.normalDelivery,
+                    l10n.cesareanDelivery,
+                    l10n.assistedDelivery,
+                  ].contains(state.deliveryType)
               ? l10n.select
               : state.deliveryType,
           onChanged: (v) => bloc.add(DeliveryTypeChanged(v ?? '')),
@@ -196,10 +213,15 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items:  [l10n.select, l10n.yes, l10n.no],
+          items: [l10n.select, l10n.yes, l10n.no],
           getLabel: (s) => s,
-          value: state.complications.isEmpty ||
-              ![l10n.select, l10n.yes, l10n.no].contains(state.complications)
+          value:
+              state.complications.isEmpty ||
+                  ![
+                    l10n.select,
+                    l10n.yes,
+                    l10n.no,
+                  ].contains(state.complications)
               ? l10n.select
               : state.complications,
           onChanged: (v) => bloc.add(ComplicationsChanged(v ?? '')),
@@ -217,7 +239,7 @@ class _OutcomeFormFields extends StatelessWidget {
               Expanded(
                 child: Text(
                   '${l10n.outcomeCount}',
-                  style:  TextStyle(
+                  style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
                   ),
@@ -230,7 +252,10 @@ class _OutcomeFormFields extends StatelessWidget {
                   keyboardType: TextInputType.number,
                   onChanged: (v) => bloc.add(OutcomeCountChanged(v)),
                   decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
                     border: OutlineInputBorder(borderRadius: BorderRadius.zero),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey),
@@ -250,7 +275,7 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items:  [l10n.select, l10n.yes, l10n.no],
+          items: [l10n.select, l10n.yes, l10n.no],
           getLabel: (s) => s,
           value: state.familyPlanningCounseling.isEmpty
               ? l10n.select
@@ -259,6 +284,124 @@ class _OutcomeFormFields extends StatelessWidget {
           hintText: l10n.selectOption,
           labelText: l10n.familyPlanningCounseling,
         ),
+
+        if (state.familyPlanningCounseling == 'Yes') ...[
+          const SizedBox(height: 8),
+          ApiDropdown<String>(
+            labelText: 'Family Planning Method',
+            items: const [
+              'Select',
+              'Condom',
+              'Mala -N (Daily Contraceptive pill)',
+              'Atra injection',
+              'Copper -T (IUCD)',
+              'Chhaya (Weekly Contraceptive pill)',
+              'ECP (Emergency Contraceptive pill)',
+              'Male Sterilization',
+              'Female Sterilization',
+              'Any Other Specify'
+            ],
+            getLabel: (value) => value,
+            value: state.fpMethod ?? 'Select',
+            onChanged: (value) {
+              if (value != null) {
+                context.read<OutcomeFormBloc>().add(FpMethodChanged(value));
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+        ],
+
+        if (state.fpMethod == 'Copper -T (IUCD)') ...[
+          CustomDatePicker(
+            labelText: 'Date of removal',
+            initialDate: state.removalDate ?? DateTime.now(),
+            firstDate: DateTime(1900),
+            lastDate: DateTime(2100),
+            onDateChanged: (date) {
+              if (date != null) {
+                context.read<OutcomeFormBloc>().add(RemovalDateChanged(date));
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Reason for Removal',
+              hintText: 'Enter reason for removal',
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (value) {
+              context.read<OutcomeFormBloc>().add(RemovalReasonChanged(value));
+            },
+            controller: TextEditingController(text: state.removalReason ?? ''),
+          ),
+          const SizedBox(height: 8),
+        ],
+
+        if (state.fpMethod == 'Condom') ...[
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Quantity of Condoms',
+              hintText: 'Enter quantity',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              context.read<OutcomeFormBloc>().add(CondomQuantityChanged(value));
+            },
+            controller: TextEditingController(text: state.condomQuantity ?? ''),
+          ),
+          const SizedBox(height: 8),
+        ],
+
+        if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)') ...[
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
+              hintText: 'Enter quantity',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              context.read<OutcomeFormBloc>().add(MalaQuantityChanged(value));
+            },
+            controller: TextEditingController(text: state.malaQuantity ?? ''),
+          ),
+          const SizedBox(height: 8),
+        ],
+
+        if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)') ...[
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Chhaya (Weekly Contraceptive pill)',
+              hintText: 'Enter quantity',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              context.read<OutcomeFormBloc>().add(ChhayaQuantityChanged(value));
+            },
+            controller: TextEditingController(text: state.chhayaQuantity ?? ''),
+          ),
+          const SizedBox(height: 8),
+        ],
+
+        if (state.fpMethod == 'ECP (Emergency Contraceptive pill)') ...[
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'ECP (Emergency Contraceptive pill)',
+              hintText: 'Enter quantity',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              context.read<OutcomeFormBloc>().add(ECPQuantityChanged(value));
+            },
+            controller: TextEditingController(text: state.ecpQuantity ?? ''),
+          ),
+          const SizedBox(height: 8),
+        ],
 
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         Padding(
@@ -271,9 +414,20 @@ class _OutcomeFormFields extends StatelessWidget {
               borderRadius: 8,
               isLoading: state.submitting,
               color: AppColors.primary,
-              onPress: () => context.read<OutcomeFormBloc>().add(
-                const OutcomeFormSubmitted(),
-              ),
+              onPress: () {
+                final bloc = context.read<OutcomeFormBloc>();
+                final beneficiaryData =
+                    (context
+                                .findAncestorWidgetOfExactType<
+                                  BlocProvider<OutcomeFormBloc>
+                                >()
+                                ?.child
+                            as _OutcomeFormView)
+                        .beneficiaryData;
+                bloc.add(
+                  OutcomeFormSubmitted(beneficiaryData: beneficiaryData),
+                );
+              },
             ),
           ),
         ),
@@ -294,7 +448,7 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Text(
         title,
-        style:  TextStyle(
+        style: TextStyle(
           fontSize: 16.sp,
           fontWeight: FontWeight.bold,
           color: AppColors.background,
