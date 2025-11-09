@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
+import '../../../core/widgets/TextField/TextField.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
 import 'case_closure_widget.dart';
 
@@ -19,6 +20,75 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   final Map<int, Map<String, dynamic>> _tabCaseClosureState = {};
   final Map<int, TextEditingController> _otherCauseControllers = {};
   final Map<int, TextEditingController> _otherReasonControllers = {};
+  late DateTime _birthDate;
+  late Map<String, dynamic> _formData;
+  String? _lastChildName;
+
+  @override
+  void initState() {
+    super.initState();
+    _birthDate = DateTime.now();
+    _formData = {};
+    _tabController = TabController(length: tabs.length, vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Extract arguments in didChangeDependencies (safe to access context here)
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args['formData'] != null) {
+      final newFormData = args['formData'] as Map<String, dynamic>;
+      final childName = newFormData['child_name']?.toString() ?? '';
+      
+      // Only update if this is a different child
+      if (_lastChildName != childName) {
+        _lastChildName = childName;
+        _formData = newFormData;
+        final dobStr = _formData['date_of_birth']?.toString() ?? '';
+        final weight = _formData['weight_grams']?.toString() ?? '';
+        
+        debugPrint('📋 ChildTrackingDueListForm - Received formData for NEW CHILD');
+        debugPrint('   - Child Name: ${_formData['child_name']}');
+        debugPrint('   - Date of Birth: $dobStr');
+        debugPrint('   - Weight (grams): $weight');
+        debugPrint('   - Gender: ${_formData['gender']}');
+        debugPrint('   - Father Name: ${_formData['father_name']}');
+        debugPrint('   - Mother Name: ${_formData['mother_name']}');
+        debugPrint('   - Mobile Number: ${_formData['mobile_number']}');
+        
+        if (dobStr.isNotEmpty) {
+          try {
+            _birthDate = DateTime.parse(dobStr);
+            debugPrint('✅ Birth date parsed successfully: $_birthDate');
+            setState(() {});
+          } catch (e) {
+            debugPrint('❌ Error parsing birth date: $e');
+            _birthDate = DateTime.now();
+          }
+        } else {
+          debugPrint('⚠️ No birth date provided, using current date');
+          _birthDate = DateTime.now();
+        }
+      }
+    } else {
+      debugPrint('❌ No formData received in arguments');
+      _birthDate = DateTime.now();
+      _formData = {};
+      _lastChildName = null;
+    }
+  }
+
+  // Calculate due date for each vaccination schedule
+  String _calculateDueDate(int weeksAfterBirth) {
+    final dueDate = _birthDate.add(Duration(days: weeksAfterBirth * 7));
+    return '${dueDate.day.toString().padLeft(2, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.year}';
+  }
+
+  String _getBirthDateFormatted() {
+    return '${_birthDate.day.toString().padLeft(2, '0')}-${_birthDate.month.toString().padLeft(2, '0')}-${_birthDate.year}';
+  }
 
   void _initializeTabState(int tabIndex) {
     _tabCaseClosureState[tabIndex] ??= {
@@ -82,12 +152,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
     '16 YEAR',
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: tabs.length, vsync: this);
-  }
-
   Widget _buildBirthDoseTab() {
     final tabIndex = 0; // Birth Dose tab
     _initializeTabState(tabIndex);
@@ -100,24 +164,27 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
+                  _infoRow('Date of Visits', _getBirthDateFormatted()),
                   const Divider(),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
+                  CustomTextField(
+                    labelText: 'Weight (1.2–90)kg',
+                    initialValue: _formData['weight_grams'] != null
+                        ? '${(int.tryParse(_formData['weight_grams'].toString()) ?? 0) / 1000}'
+                        : null,
                     keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      // Convert kg to grams and update form data
+                      final grams = (double.tryParse(value) ?? 0) * 1000;
+                      _formData['weight_grams'] = grams.round();
+                    },
                   ),
+                  const Divider(),
+                  const SizedBox(height: 8),
+
                   const SizedBox(height: 16),
                   _buildDoseTable(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 16),  
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -204,13 +271,14 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildSixWeekDoseTable() {
+    final sixWeekDueDate = _calculateDueDate(6);
     final data = [
-      {'name': 'O.P.V. -1', 'due': '14-10-2022'},
-      {'name': 'D.P.T. -1', 'due': '14-10-2022'},
-      {'name': 'Pentavelent 1', 'due': '14-10-2022'},
-      {'name': 'Rota-1', 'due': '14-10-2022'},
-      {'name': 'I.P.V.-1', 'due': '14-10-2022'},
-      {'name': 'P.C.V.-1', 'due': '14-10-2022'},
+      {'name': 'O.P.V. -1', 'due': sixWeekDueDate},
+      {'name': 'D.P.T. -1', 'due': sixWeekDueDate},
+      {'name': 'Pentavelent 1', 'due': sixWeekDueDate},
+      {'name': 'Rota-1', 'due': sixWeekDueDate},
+      {'name': 'I.P.V.-1', 'due': sixWeekDueDate},
+      {'name': 'P.C.V.-1', 'due': sixWeekDueDate},
     ];
 
     return Table(
@@ -317,10 +385,11 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildTenWeekDoseTable() {
+    final tenWeekDueDate = _calculateDueDate(10);
     final data = [
-      {'name': 'O.P.V.-2', 'due': '23-12-2022'},
-      {'name': 'Pentavelent -2', 'due': '23-12-2022'},
-      {'name': 'Rota-2', 'due': '23-12-2022'},
+      {'name': 'O.P.V.-2', 'due': tenWeekDueDate},
+      {'name': 'Pentavelent -2', 'due': tenWeekDueDate},
+      {'name': 'Rota-2', 'due': tenWeekDueDate},
     ];
 
     return Table(
@@ -370,12 +439,13 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildFourteenWeekDoseTable() {
+    final fourteenWeekDueDate = _calculateDueDate(14);
     final data = [
-      {'name': 'O.P.V.-3', 'due': '20-1-2023'},
-      {'name': 'Pentavalent-3', 'due': '20-1-2023'},
-      {'name': 'Rota 3', 'due': '20-1-2023'},
-      {'name': 'IPV 2', 'due': '20-1-2023'},
-      {'name': 'P.V.C. -2', 'due': '20-1-2023'},
+      {'name': 'O.P.V.-3', 'due': fourteenWeekDueDate},
+      {'name': 'Pentavalent-3', 'due': fourteenWeekDueDate},
+      {'name': 'Rota 3', 'due': fourteenWeekDueDate},
+      {'name': 'IPV 2', 'due': fourteenWeekDueDate},
+      {'name': 'P.V.C. -2', 'due': fourteenWeekDueDate},
     ];
 
     return Table(
@@ -441,22 +511,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                   child: ListView(
                     children: [
                       const SizedBox(height: 8),
-                      _infoRow('Date of visit', '30-10-2025'),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Weight (1.2–90)kg',
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          hintText: 'Enter weight',
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 16),
                       _buildFourteenWeekDoseTable(),
                       const SizedBox(height: 16),
                       Column(
@@ -586,22 +640,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildTenWeekDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -701,22 +739,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildSixWeekDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -988,12 +1010,13 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildSixteenToTwentyFourMonthDoseTable() {
+    final sixteenToTwentyFourMonthDueDate = _calculateDueDate(20);
     final data = [
-      {'name': 'O.P.V. Booster-1', 'due': '14-01-2024'},
-      {'name': 'D.P.T. Booster-1', 'due': '14-01-2024'},
+      {'name': 'O.P.V. Booster-1', 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': 'D.P.T. Booster-1', 'due': sixteenToTwentyFourMonthDueDate},
 
-      {'name': 'J.E Vaccine 2', 'due': '14-01-2024'},
-      {'name': 'M.R dose -2', 'due': '14-01-2024'},
+      {'name': 'J.E Vaccine 2', 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': 'M.R dose -2', 'due': sixteenToTwentyFourMonthDueDate},
 
     ];
 
@@ -1055,22 +1078,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildSixteenToTwentyFourMonthDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -1159,8 +1166,9 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildFiveToSixYearDoseTable() {
+    final fiveToSixYearDueDate = _calculateDueDate(260);
     final data = [
-      {'name': 'D.P.T Booster-2', 'due': '14-01-2028'},
+      {'name': 'D.P.T Booster-2', 'due': fiveToSixYearDueDate},
     ];
 
     return Table(
@@ -1221,22 +1229,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildFiveToSixYearDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -1325,8 +1317,9 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildTenYearDoseTable() {
+    final tenYearDueDate = _calculateDueDate(520);
     final data = [
-      {'name': 'Tetanus Diphtheria (Td)', 'due': '11-10-2032'},
+      {'name': 'Tetanus Diphtheria (Td)', 'due': tenYearDueDate},
     ];
 
     return Table(
@@ -1387,22 +1380,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildTenYearDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -1491,8 +1468,9 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildSixteenYearDoseTable() {
+    final sixteenYearDueDate = _calculateDueDate(832);
     final data = [
-      {'name': 'Tetanus Diphtheria (Td)', 'due': '10-10-2038'},
+      {'name': 'Tetanus Diphtheria (Td)', 'due': sixteenYearDueDate},
     ];
 
     return Table(
@@ -1553,22 +1531,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildSixteenYearDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -1657,11 +1619,12 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildDoseTable() {
+    final birthDueDate = _getBirthDateFormatted();
     final data = [
-      {'name': 'BCG', 'due': '14-10-2022'},
-      {'name': 'Hepatitis B - 0', 'due': '14-10-2022'},
-      {'name': 'O. P. V. - 0', 'due': '14-10-2022'},
-      {'name': 'VIT - K', 'due': '14-10-2022'},
+      {'name': 'BCG', 'due': birthDueDate},
+      {'name': 'Hepatitis B - 0', 'due': birthDueDate},
+      {'name': 'O. P. V. - 0', 'due': birthDueDate},
+      {'name': 'VIT - K', 'due': birthDueDate},
     ];
 
     return Table(
