@@ -44,6 +44,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   final Map<String, dynamic> _formData = {};
   final Map<int, Map<String, dynamic>> _tabCaseClosureState = {};
   bool _isSaving = false;
+  bool _formDataLoaded = false;
   late DateTime _birthDate = DateTime.now();
   late TabController _tabController;
   final Map<int, TextEditingController> _otherCauseControllers = {};
@@ -58,6 +59,23 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         context.read<ChildTrackingFormBloc>().add(TabChanged(_tabController.index));
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Load form data from arguments only once
+    if (!_formDataLoaded) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args['formData'] is Map<String, dynamic>) {
+        _formData.addAll(args['formData'] as Map<String, dynamic>);
+        debugPrint('Loaded form data with keys: ${_formData.keys.toList()}');
+        debugPrint('Household Ref Key: ${_formData['household_ref_key']}');
+        debugPrint('Beneficiary Ref Key: ${_formData['beneficiary_ref_key']}');
+      }
+      _formDataLoaded = true;
+    }
   }
 
   // Calculate due date for each vaccination schedule
@@ -126,7 +144,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Child Tracking Due';
       final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '30bycxe4gv7fqnt6';
 
-      // Prepare case closure data for the current tab
       final caseClosureData = _getIsCaseClosureChecked(currentTabIndex)
           ? {
               'is_case_closure': true,
@@ -152,24 +169,54 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           'weight_grams': _formData['weight_grams'],
           'case_closure': caseClosureData,
           'visit_date': now,
+          // Ensure household_id and beneficiary_id are saved (use ref_key if id not available)
+          'household_id': _formData['household_id'] ?? _formData['household_ref_key'] ?? _formData['hhId'] ?? '',
+          'beneficiary_id': _formData['beneficiary_id'] ?? _formData['beneficiary_ref_key'] ?? _formData['BeneficiaryID'] ?? '',
+          // Save child details for deceased list
+          'child_details': {
+            'name': _formData['child_name'] ?? '',
+            'age': _formData['age'] ?? '',
+            'gender': _formData['gender'] ?? '',
+            'father_name': _formData['father_name'] ?? '',
+            'mother_name': _formData['mother_name'] ?? '',
+          },
+          // Save registration details
+          'registration_data': {
+            'registration_type': _formData['registration_type'] ?? 'Child Registration',
+            'registration_date': _formData['registration_date'] ?? '',
+          },
         },
         'created_at': now,
         'updated_at': now,
       };
+      
+      debugPrint('Form data to be saved:');
+      final formDataMap = formData['form_data'] as Map<String, dynamic>?;
+      debugPrint('  child_details: ${formDataMap?['child_details']}');
+      debugPrint('  registration_data: ${formDataMap?['registration_data']}');
 
-      // Get beneficiary details from the existing form data
+
       String householdRefKey = _formData['household_ref_key']?.toString() ?? '';
       String motherKey = _formData['mother_key']?.toString() ?? '';
       String fatherKey = _formData['father_key']?.toString() ?? '';
       String beneficiaryRefKey = _formData['beneficiary_ref_key']?.toString() ?? '';
 
-      // If keys are not in form data, try to get them from the database
+      debugPrint('Initial keys from _formData:');
+      debugPrint('  householdRefKey: $householdRefKey');
+      debugPrint('  beneficiaryRefKey: $beneficiaryRefKey');
+      debugPrint('  motherKey: $motherKey');
+      debugPrint('  fatherKey: $fatherKey');
+
+
       if (beneficiaryRefKey.isEmpty && _formData['beneficiary_id'] != null) {
         beneficiaryRefKey = _formData['beneficiary_id'].toString();
+        debugPrint('Got beneficiaryRefKey from beneficiary_id: $beneficiaryRefKey');
       }
 
       if (householdRefKey.isEmpty && _formData['household_id'] != null) {
         final householdId = _formData['household_id'].toString();
+        debugPrint('Querying beneficiaries with household_id: $householdId');
+        
         List<Map<String, dynamic>> beneficiaryMaps = await db.query(
           'beneficiaries',
           where: 'household_ref_key = ?',
@@ -192,6 +239,13 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           if (beneficiaryRefKey.isEmpty) {
             beneficiaryRefKey = beneficiary['beneficiary_ref_key'] as String? ?? '';
           }
+          debugPrint('Got keys from beneficiaries table:');
+          debugPrint('  householdRefKey: $householdRefKey');
+          debugPrint('  beneficiaryRefKey: $beneficiaryRefKey');
+          debugPrint('  motherKey: $motherKey');
+          debugPrint('  fatherKey: $fatherKey');
+        } else {
+          debugPrint('No beneficiary found for household_id: $householdId');
         }
       }
 
@@ -272,6 +326,8 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         debugPrint('📋 Tab: $currentTabName (Index: $currentTabIndex)');
         debugPrint('🏠 Household Ref Key: $householdRefKey');
         debugPrint('👤 Beneficiary Ref Key: $beneficiaryRefKey');
+        debugPrint('👨 Mother Key: $motherKey');
+        debugPrint('👴 Father Key: $fatherKey');
         debugPrint('📱 Form Type: $formType');
 
         if (mounted) {
@@ -284,7 +340,12 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           );
 
           // Pop with result to refresh the list
-          Navigator.pop(context, {'saved': true, 'formId': formId});
+          Navigator.pop(context, {
+            'saved': true,
+            'formId': formId,
+            'beneficiary_id': beneficiaryRefKey,
+            'household_id': householdRefKey,
+          });
         }
       } else {
         throw Exception('Failed to save form data');

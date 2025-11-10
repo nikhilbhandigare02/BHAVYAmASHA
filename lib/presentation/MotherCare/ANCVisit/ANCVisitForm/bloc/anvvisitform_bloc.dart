@@ -228,10 +228,13 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         
         if (state.beneficiaryId != null && state.beneficiaryId!.isNotEmpty) {
           try {
-            final newCount = await SecureStorageService.incrementSubmissionCount(state.beneficiaryId!);
-            print('Submission count for beneficiary ${state.beneficiaryId}: $newCount');
+            // Use the full unique key for the count
+            final uniqueKey = state.beneficiaryId!;
+            print('🔢 Incrementing count for full unique key: $uniqueKey');
+            final newCount = await SecureStorageService.incrementSubmissionCount(uniqueKey);
+            print('✅ New submission count for $uniqueKey: $newCount');
           } catch (e) {
-            print('Error updating submission count: $e');
+            print('❌ Error updating submission count: $e');
             // Don't fail the submission if counter update fails
           }
         }

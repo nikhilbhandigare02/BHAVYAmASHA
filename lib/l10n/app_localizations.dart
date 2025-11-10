@@ -2444,7 +2444,7 @@ abstract class AppLocalizations {
   /// No description provided for @fatherNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Father name'**
+  /// **'Father\'s Name'**
   String get fatherNameLabel;
 
   /// No description provided for @fatherSpouseHint.
@@ -3320,7 +3320,7 @@ abstract class AppLocalizations {
   /// No description provided for @mobileLabelSimple.
   ///
   /// In en, this message translates to:
-  /// **'Mobile No.'**
+  /// **'Mobile'**
   String get mobileLabelSimple;
 
   /// No description provided for @mobileTelephoneLabel.
@@ -3844,6 +3844,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'RCH number'**
   String get rchNumberLabel;
+
+  /// No description provided for @submissionCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Form Submissions'**
+  String get submissionCountLabel;
 
   /// No description provided for @readLess.
   ///
@@ -5819,24 +5825,6 @@ abstract class AppLocalizations {
   /// **'Please fill all required fields'**
   String get pleaseFillAllFields;
 
-  /// No description provided for @formSavedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Form has been saved successfully'**
-  String get formSavedTitle;
-
-  /// No description provided for @pregnancyAddedToAncMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Pregnant beneficiary has been added to antenatal care (ANC) list'**
-  String get pregnancyAddedToAncMessage;
-
-  /// No description provided for @okButton.
-  ///
-  /// In en, this message translates to:
-  /// **'OK'**
-  String get okButton;
-
   /// No description provided for @exclusiveBreastfeedingStartedLabel.
   ///
   /// In en, this message translates to:
@@ -6988,6 +6976,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'14 Week Doses'**
   String get fourteenWeekDoses;
+
+  /// No description provided for @reasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get reasonLabel;
+
+  /// No description provided for @placeOfDeathLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Place of Death'**
+  String get placeOfDeathLabel;
+
+  /// No description provided for @causeOfDeathLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cause of Death'**
+  String get causeOfDeathLabel;
+
+  /// No description provided for @dateOfDeathLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Death'**
+  String get dateOfDeathLabel;
+
+  /// No description provided for @deathDetailsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Death Details'**
+  String get deathDetailsLabel;
+
+  /// No description provided for @viewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get viewLabel;
+
+  /// No description provided for @editLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get editLabel;
+
+  /// No description provided for @deleteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteLabel;
+
+  /// No description provided for @closeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get closeLabel;
+
+  /// No description provided for @deceasedChildDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Deceased Child Details'**
+  String get deceasedChildDetails;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

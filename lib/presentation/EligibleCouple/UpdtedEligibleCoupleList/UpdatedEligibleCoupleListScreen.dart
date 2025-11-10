@@ -86,7 +86,7 @@ class _UpdatedEligibleCoupleListScreenState
         if (_isEligibleFemale(head)) {
           couples.add(_formatData(row, head, spouse, isHead: true, isFamilyPlanning: isFamilyPlanning));
         }
-        // Female eligible in spouse
+
         if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
           couples.add(_formatData(row, spouse, head, isHead: false, isFamilyPlanning: isFamilyPlanning));
         }

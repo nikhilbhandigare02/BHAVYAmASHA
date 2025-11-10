@@ -198,10 +198,21 @@ class SecureStorageService {
     }
   }
 
-  // Get all ANC visits
   static Future<List<dynamic>> getAncVisits() async {
     try {
       final data = await _storage.read(key: _keyAncVisits);
+      if (data == null) return [];
+      return jsonDecode(data);
+    } catch (e) {
+      print('Error getting ANC visits: $e');
+      return [];
+    }
+  }
+
+
+  static Future<List<dynamic>> getDeliveryOutcomes() async {
+    try {
+      final data = await _storage.read(key: _keydelivery_outcome);
       if (data == null) return [];
       return jsonDecode(data);
     } catch (e) {
@@ -315,31 +326,55 @@ class SecureStorageService {
   // Get submission count for a beneficiary
   static Future<int> getSubmissionCount(String beneficiaryId) async {
     try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiaryId provided to getSubmissionCount');
+        return 0;
+      }
+      
       final key = 'submission_count_$beneficiaryId';
       final countStr = await _storage.read(key: key);
+      
       if (countStr == null) {
-        // If no count exists yet, initialize it to 1
-        await _storage.write(key: key, value: '1');
-        return 1;
+        print('ℹ️ No submission count found for beneficiary: $beneficiaryId');
+        return 0;
       }
-      return int.tryParse(countStr) ?? 1; // Default to 1 if parsing fails
+      
+      final count = int.tryParse(countStr) ?? 0;
+      print('ℹ️ Found submission count for $beneficiaryId: $count');
+      return count;
     } catch (e) {
-      print('Error getting submission count: $e');
-      return 1; // Return 1 as default instead of 0
+      print('❌ Error getting submission count for $beneficiaryId: $e');
+      return 0;
     }
   }
 
   // Increment submission count for a beneficiary
   static Future<int> incrementSubmissionCount(String beneficiaryId) async {
     try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiaryId provided to incrementSubmissionCount');
+        return 0;
+      }
+      
       final key = 'submission_count_$beneficiaryId';
       final currentCount = await getSubmissionCount(beneficiaryId);
       final newCount = currentCount + 1;
+      
+      print('ℹ️ Incrementing count for $beneficiaryId from $currentCount to $newCount');
       await _storage.write(key: key, value: newCount.toString());
+      
+      // Verify the count was saved correctly
+      final savedCount = await _storage.read(key: key);
+      if (savedCount == newCount.toString()) {
+        print('✅ Successfully updated count for $beneficiaryId to $newCount');
+      } else {
+        print('⚠️ Failed to verify count update for $beneficiaryId');
+      }
+      
       return newCount;
     } catch (e) {
-      print('Error incrementing submission count: $e');
-      return 1; // Return 1 as default
+      print('❌ Error incrementing submission count for $beneficiaryId: $e');
+      return 0;
     }
   }
 }

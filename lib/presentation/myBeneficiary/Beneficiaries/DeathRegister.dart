@@ -110,7 +110,6 @@ class _DeathRegisterState extends State<DeathRegister> {
             ),
           ),
 
-          // 📋 Death Records List
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())

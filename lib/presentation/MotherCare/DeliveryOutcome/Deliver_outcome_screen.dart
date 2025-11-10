@@ -291,13 +291,41 @@ class _DeliveryOutcomeScreenState
           onTap: () {
             final beneficiaryData = <String, dynamic>{};
 
+            print('📋 Raw data: $data');
+            
+            // First try to get from _rawRow
             if (data['_rawRow'] is Map) {
               final rawRow = data['_rawRow'] as Map;
-              beneficiaryData['unique_key'] = rawRow['unique_key'];
-
+              final uniqueKey = rawRow['unique_key']?.toString() ?? '';
+              final beneficiaryId = uniqueKey.length > 11 
+                  ? uniqueKey.substring(uniqueKey.length - 11) 
+                  : uniqueKey;
+                  
+              beneficiaryData['unique_key'] = uniqueKey;
+              beneficiaryData['BeneficiaryID'] = beneficiaryId;
+              
               print('🔑 Passing to form:');
               print('   - unique_key: ${beneficiaryData['unique_key']}');
-              print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
+              print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']} (derived from unique_key)');
+            } 
+            // Fallback to data['BeneficiaryID'] if _rawRow is not available
+            else if (data['BeneficiaryID'] != null) {
+              beneficiaryData['BeneficiaryID'] = data['BeneficiaryID'].toString();
+              print('🔍 Using direct BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
+            } 
+            // Last resort - try to get from the data map
+            else {
+              final uniqueKey = data['_rawRow']?['unique_key']?.toString() ?? '';
+              final beneficiaryId = uniqueKey.isNotEmpty 
+                  ? (uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey)
+                  : '';
+                  
+              beneficiaryData['BeneficiaryID'] = beneficiaryId;
+              print('⚠️ Using fallback BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
+            }
+            
+            if ((beneficiaryData['BeneficiaryID'] as String?)?.isEmpty ?? true) {
+              print('❌ No BeneficiaryID could be determined!');
             }
 
             Navigator.push(

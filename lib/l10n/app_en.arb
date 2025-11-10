@@ -1180,7 +1180,7 @@
   "aesJeQuestion1": "Amount payable to ASHA as community catalyst in 1000 population during IRS spraying",
   "aesJeQuestion2": "Patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer",
   "aesJeDataSaved": "AES/JE data saved successfully!",
-<<<<<<< HEAD
+
   "ambProgram": "AMB Eradication Program",
   "ambScreenTitle": "AMB Eradication Program",
   "ambQuestion1": "ASHA women of reproductive age (20 to 49 years) in their area who are pregnant or traveling maintenance in their Line Listing Register and the amount due for distribution of 4 IFA red pills per month to those women.",
@@ -1198,8 +1198,8 @@
   "niddcpProgram": "NIDDCP Program",
   "niddcpScreenTitle": "NIDDCP Program",
   "niddcpQuestion1": "ASHA Incentive under NIDDCP",
-  "niddcpDataSaved": "NIDDCP data saved successfully!"
-=======
+  "niddcpDataSaved": "NIDDCP data saved successfully!",
+
   "trackingDueTitle": "Tracking Due",
   "birthDoses": "BIRTH DOSES",
   "sixWeek": "6 WEEK",
@@ -1221,6 +1221,21 @@
   "anyOtherSpecify": "Any other (specify)",
   "sixWeekDoses": "6 Week Doses",
   "tenWeekDoses": "10 Week Doses",
-  "fourteenWeekDoses": "14 Week Doses"
->>>>>>> 9f2a034e02f342ea81ecc20d1a6cbdc2939debdf
+  "fourteenWeekDoses": "14 Week Doses",
+   "reasonLabel": "Reason",
+    "placeOfDeathLabel": "Place of Death",
+    "causeOfDeathLabel": "Cause of Death",
+    "dateOfDeathLabel": "Date of Death",
+    "deathDetailsLabel": "Death Details",
+    "viewLabel": "View",
+    "editLabel": "Edit",
+    "deleteLabel": "Delete",
+    "closeLabel": "Close",
+    "deceasedChildDetails": "Deceased Child Details",
+    "nameLabelSimple": "Name",
+    "ageGenderLabel": "Age | Gender",
+    "mobileLabelSimple": "Mobile",
+    "fatherNameLabel": "Father's Name",
+    "beneficiaryIdLabel": "Beneficiary ID"
+
 }
