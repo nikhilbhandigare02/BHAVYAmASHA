@@ -9,6 +9,7 @@ import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
 import '../../../l10n/app_localizations.dart';
 import 'bloc/outcome_form_bloc.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 
 class OutcomeFormPage extends StatelessWidget {
   final Map<String, dynamic> beneficiaryData;
@@ -27,7 +28,9 @@ class OutcomeFormPage extends StatelessWidget {
 class _OutcomeFormView extends StatelessWidget {
   final Map<String, dynamic> beneficiaryData;
 
-  const _OutcomeFormView({required this.beneficiaryData});
+  _OutcomeFormView({required this.beneficiaryData}) {
+    print('OutcomeFormView created with beneficiaryData: $beneficiaryData');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +69,56 @@ class _OutcomeFormView extends StatelessWidget {
         child: Column(
           children: [
             _SectionHeader(title: l10n.deliveryOutcomeDetails),
+            
+            // Display submission count with debug info
+            FutureBuilder<int>(
+              future: () async {
+                try {
+                  final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString();
+                  print('🔍 Checking submission count for BeneficiaryID: $beneficiaryId');
+                  
+                  if (beneficiaryId == null || beneficiaryId.isEmpty) {
+                    print('⚠️ No valid BeneficiaryID found in beneficiaryData: $beneficiaryData');
+                    return 0;
+                  }
+                  
+                  final count = await SecureStorageService.getSubmissionCount(beneficiaryId);
+                  print('✅ Found $count submissions for BeneficiaryID: $beneficiaryId');
+                  return count;
+                } catch (e) {
+                  print('❌ Error getting submission count: $e');
+                  return 0;
+                }
+              }(),
+              builder: (context, snapshot) {
+                final count = snapshot.data ?? 0;
+                return Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  color: Colors.blue.shade50,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.history, size: 20, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${l10n.visitsLabel ?? 'Previous Submissions'}: $count',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
 
             // 🔹 Form Area
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(8),
-                child: const _OutcomeFormFields(),
+                child: _OutcomeFormFields(beneficiaryData: beneficiaryData),
               ),
             ),
           ],
@@ -82,7 +129,9 @@ class _OutcomeFormView extends StatelessWidget {
 }
 
 class _OutcomeFormFields extends StatelessWidget {
-  const _OutcomeFormFields();
+  final Map<String, dynamic> beneficiaryData;
+  
+  const _OutcomeFormFields({required this.beneficiaryData});
 
   @override
   Widget build(BuildContext context) {

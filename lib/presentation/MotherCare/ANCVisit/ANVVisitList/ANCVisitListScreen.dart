@@ -2,6 +2,7 @@ import 'dart:convert' show jsonDecode, jsonEncode;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 
@@ -252,6 +253,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       final uniqueKey = row['unique_key']?.toString() ?? '';
       final createdDate = row['created_date_time']?.toString() ?? '';
       final info = Map<String, dynamic>.from((row['beneficiary_info'] is Map ? row['beneficiary_info'] : const {}) as Map);
+      
+      // Use the full unique key as the BeneficiaryID
+      final beneficiaryId = uniqueKey;
 
       final name = (female['name'] ??
           female['memberName'] ??
@@ -304,6 +308,8 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           'youngestGender': childrenRaw['youngestGender'],
         }..removeWhere((k, v) => v == null);
       }
+      
+      print('🔑 Formatted BeneficiaryID: $beneficiaryId (from uniqueKey: $uniqueKey)');
       return {
         'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
         'RegistrationDate': _formatDate(createdDate),
@@ -361,6 +367,37 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
     } catch (_) {
       return '';
+    }
+  }
+  
+  Future<int> _getVisitCount(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiaryId provided to _getVisitCount');
+        return 0;
+      }
+      
+      print('🔍 Getting visit count for beneficiary: $beneficiaryId');
+      final count = await SecureStorageService.getSubmissionCount(beneficiaryId);
+      print('📊 Retrieved count for $beneficiaryId: $count');
+      
+      // Debug: List all keys in secure storage to verify
+      try {
+        final allKeys = await const FlutterSecureStorage().readAll();
+        print('🔑 All secure storage keys:');
+        allKeys.forEach((key, value) {
+          if (key.startsWith('submission_count_')) {
+            print('   - $key: $value');
+          }
+        });
+      } catch (e) {
+        print('⚠️ Error reading secure storage keys: $e');
+      }
+      
+      return count;
+    } catch (e) {
+      print('❌ Error in _getVisitCount for $beneficiaryId: $e');
+      return 0;
     }
   }
 
@@ -498,6 +535,15 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     final ageGender = data['age'] is String && data['age'].isNotEmpty
         ? data['age']
         : l10n?.notAvailable ?? 'N/A';
+        
+    // Get the full unique key for the beneficiary
+    final uniqueKey = data['_rawRow']?['unique_key']?.toString() ?? 
+                     data['BeneficiaryID']?.toString() ?? '';
+    
+    print('🔑 ANC Card - Full Unique Key for count: $uniqueKey');
+    
+    // Use the full unique key as the beneficiary ID for count
+    final beneficiaryId = uniqueKey;
 
     final husbandName = data['HusbandName'] is String && data['HusbandName'].isNotEmpty
         ? data['HusbandName']
@@ -565,9 +611,38 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    '${l10n?.visitsLabel ?? 'Visits :'} 0',
-                    style: TextStyle(color: primary, fontWeight: FontWeight.w500, fontSize: 14.sp),
+                  FutureBuilder<int>(
+                    future: beneficiaryId.isNotEmpty 
+                        ? _getVisitCount(beneficiaryId)
+                        : Future.value(0),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text(
+                          '${l10n?.visitsLabel ?? 'Visits :'} ...',
+                          style: TextStyle(color: primary, fontWeight: FontWeight.w500, fontSize: 14.sp),
+                        );
+                      }
+                      
+                      if (snapshot.hasError) {
+                        print('❌ Error fetching visit count: ${snapshot.error}');
+                        return Text(
+                          '${l10n?.visitsLabel ?? 'Visits :'} ?',
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500, fontSize: 14.sp),
+                        );
+                      }
+                      
+                      final count = snapshot.data ?? 0;
+                      print('✅ Fetched count $count for beneficiary: $beneficiaryId');
+                      
+                      return Text(
+                        '${l10n?.visitsLabel ?? 'Visits :'} $count',
+                        style: TextStyle(
+                          color: primary, 
+                          fontWeight: FontWeight.w500, 
+                          fontSize: 14.sp,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 6),
                   SizedBox(
