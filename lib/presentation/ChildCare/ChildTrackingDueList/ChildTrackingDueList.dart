@@ -332,21 +332,39 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     );
   }
 
-  // 🧱 Household Card UI
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
     return InkWell(
       onTap: () {
+        final formData = data['formData'] as Map<String, dynamic>?;
+        debugPrint('🔄 Navigating to ChildTrackingDueListForm');
+        debugPrint('   - Child Name: ${formData?['child_name']}');
+        debugPrint('   - Date of Birth: ${formData?['date_of_birth']}');
+        debugPrint('   - Weight (grams): ${formData?['weight_grams']}');
+        debugPrint('   - Gender: ${formData?['gender']}');
+        debugPrint('   - Father Name: ${formData?['father_name']}');
+        debugPrint('   - Mother Name: ${formData?['mother_name']}');
+        debugPrint('   - Mobile Number: ${formData?['mobile_number']}');
+        debugPrint('🔄 Navigating to ChildTrackingDueListForm with formData: $formData');
+        
+        if (formData == null) {
+          debugPrint('❌ formData is null, cannot navigate');
+          return;
+        }
+        
         Navigator.pushNamed(
           context,
           Route_Names.ChildTrackingDueListForm,
           arguments: {
-            'formData': data['formData'],
+            'formData': formData,
             'isEdit': true,
           },
-        );
+        )?.then((_) {
+          // Refresh the list when returning from the form
+          _loadChildTrackingData();
+        });
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),

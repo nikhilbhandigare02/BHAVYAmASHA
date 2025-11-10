@@ -194,6 +194,12 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const HbncVisitScreen(),);
       case Route_Names.CHildTrackingDueList:
         return MaterialPageRoute(builder: (context) => const CHildTrackingDueList(),);
+      case Route_Names.ChildTrackingDueListForm:
+        final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (context) => ChildTrackingDueListForm(),
+          settings: setting, // Pass the settings to access arguments
+        );
       case Route_Names.HBYCList:
         return MaterialPageRoute(builder: (context) => const HBYCList(),);
       case Route_Names.HBYCChildCareForm:

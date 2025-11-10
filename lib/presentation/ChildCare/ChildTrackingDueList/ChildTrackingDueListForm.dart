@@ -1,24 +1,74 @@
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+
+import '../../../core/utils/app_info_utils.dart';
+import '../../../core/utils/device_info_utils.dart';
 import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
+import '../../../core/widgets/TextField/TextField.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
+import '../../../data/Local_Storage/User_Info.dart';
+import '../../../data/Local_Storage/database_provider.dart';
+import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import 'bloc/child_tracking_form_bloc.dart';
 import 'case_closure_widget.dart';
 
-class ChildTrackingDueListForm extends StatefulWidget {
+class ChildTrackingDueListForm extends StatelessWidget {
   const ChildTrackingDueListForm({Key? key}) : super(key: key);
 
   @override
-  State<ChildTrackingDueListForm> createState() => _ChildTrackingDueState();
+  Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final formData = args?['formData'] as Map<String, dynamic>? ?? {};
+
+    return BlocProvider(
+      create: (context) => ChildTrackingFormBloc()..add(LoadFormData(formData)),
+      child: const _ChildTrackingDueListFormView(),
+    );
+  }
 }
 
-class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
+class _ChildTrackingDueListFormView extends StatefulWidget {
+  const _ChildTrackingDueListFormView({Key? key}) : super(key: key);
+
+  @override
+  State<_ChildTrackingDueListFormView> createState() => _ChildTrackingDueState();
+}
+
+class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  final Map<String, dynamic> _formData = {};
   final Map<int, Map<String, dynamic>> _tabCaseClosureState = {};
+  bool _isSaving = false;
+  late DateTime _birthDate = DateTime.now();
+  late TabController _tabController;
   final Map<int, TextEditingController> _otherCauseControllers = {};
   final Map<int, TextEditingController> _otherReasonControllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: tabs.length, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        context.read<ChildTrackingFormBloc>().add(TabChanged(_tabController.index));
+      }
+    });
+  }
+
+  // Calculate due date for each vaccination schedule
+  String _calculateDueDate(int weeksAfterBirth) {
+    final dueDate = _birthDate.add(Duration(days: weeksAfterBirth * 7));
+    return '${dueDate.day.toString().padLeft(2, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.year}';
+  }
+
+  String _getBirthDateFormatted() {
+    return '${_birthDate.day.toString().padLeft(2, '0')}-${_birthDate.month.toString().padLeft(2, '0')}-${_birthDate.year}';
+  }
 
   void _initializeTabState(int tabIndex) {
     _tabCaseClosureState[tabIndex] ??= {
@@ -59,6 +109,206 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
     });
   }
 
+  Future<void> _saveForm() async {
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final now = DateTime.now().toIso8601String();
+      final currentTabIndex = _tabController.index;
+      final currentTabName = tabs[currentTabIndex];
+
+      final formType = FollowupFormDataTable.childTrackingDue;
+      final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Child Tracking Due';
+      final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '30bycxe4gv7fqnt6';
+
+      // Prepare case closure data for the current tab
+      final caseClosureData = _getIsCaseClosureChecked(currentTabIndex)
+          ? {
+              'is_case_closure': true,
+              'closure_reason': _getSelectedClosureReason(currentTabIndex),
+              'migration_type': _getMigrationType(currentTabIndex),
+              'date_of_death': _getDateOfDeath(currentTabIndex)?.toIso8601String(),
+              'probable_cause_of_death': _getProbableCauseOfDeath(currentTabIndex),
+              'other_cause_of_death': _otherCauseControllers[currentTabIndex]?.text,
+              'death_place': _getDeathPlace(currentTabIndex),
+              'reason_of_death': _getReasonOfDeath(currentTabIndex),
+              'other_reason': _otherReasonControllers[currentTabIndex]?.text,
+            }
+          : {'is_case_closure': false};
+
+      final formData = {
+        'form_type': formType,
+        'form_name': formName,
+        'unique_key': formsRefKey,
+        'form_data': {
+          ..._formData,
+          'current_tab': currentTabName,
+          'current_tab_index': currentTabIndex,
+          'weight_grams': _formData['weight_grams'],
+          'case_closure': caseClosureData,
+          'visit_date': now,
+        },
+        'created_at': now,
+        'updated_at': now,
+      };
+
+      // Get beneficiary details from the existing form data
+      String householdRefKey = _formData['household_ref_key']?.toString() ?? '';
+      String motherKey = _formData['mother_key']?.toString() ?? '';
+      String fatherKey = _formData['father_key']?.toString() ?? '';
+      String beneficiaryRefKey = _formData['beneficiary_ref_key']?.toString() ?? '';
+
+      // If keys are not in form data, try to get them from the database
+      if (beneficiaryRefKey.isEmpty && _formData['beneficiary_id'] != null) {
+        beneficiaryRefKey = _formData['beneficiary_id'].toString();
+      }
+
+      if (householdRefKey.isEmpty && _formData['household_id'] != null) {
+        final householdId = _formData['household_id'].toString();
+        List<Map<String, dynamic>> beneficiaryMaps = await db.query(
+          'beneficiaries',
+          where: 'household_ref_key = ?',
+          whereArgs: [householdId],
+        );
+
+        if (beneficiaryMaps.isEmpty) {
+          beneficiaryMaps = await db.query(
+            'beneficiaries',
+            where: 'id = ?',
+            whereArgs: [int.tryParse(householdId) ?? 0],
+          );
+        }
+
+        if (beneficiaryMaps.isNotEmpty) {
+          final beneficiary = beneficiaryMaps.first;
+          householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
+          motherKey = beneficiary['mother_key'] as String? ?? '';
+          fatherKey = beneficiary['father_key'] as String? ?? '';
+          if (beneficiaryRefKey.isEmpty) {
+            beneficiaryRefKey = beneficiary['beneficiary_ref_key'] as String? ?? '';
+          }
+        }
+      }
+
+      final formJson = jsonEncode(formData);
+      debugPrint('💾 Child Tracking Form JSON to be saved: $formJson');
+
+      late DeviceInfo deviceInfo;
+      try {
+        deviceInfo = await DeviceInfo.getDeviceInfo();
+      } catch (e) {
+        debugPrint('Error getting device info: $e');
+        deviceInfo = DeviceInfo(
+          deviceId: 'unknown',
+          platform: 'unknown',
+          osVersion: 'unknown',
+          appInfo: AppInfo(
+            appVersion: '1.0.0',
+            appName: 'BHAVYA mASHA',
+            buildNumber: '1',
+            packageName: 'com.medixcel.bhavyamasha',
+          ),
+        );
+      }
+
+      // Get current user
+      final currentUser = await UserInfo.getCurrentUser();
+      Map<String, dynamic> userDetails = {};
+      if (currentUser != null) {
+        if (currentUser['details'] is String) {
+          try {
+            userDetails = jsonDecode(currentUser['details'] ?? '{}');
+          } catch (e) {
+            debugPrint('Error parsing user details: $e');
+          }
+        } else if (currentUser['details'] is Map) {
+          userDetails = Map<String, dynamic>.from(currentUser['details']);
+        }
+      }
+
+      final facilityId = userDetails['asha_associated_with_facility_id'] ??
+          userDetails['facility_id'] ??
+          userDetails['facilityId'] ??
+          0;
+
+      final formDataForDb = {
+        'server_id': '',
+        'forms_ref_key': formsRefKey,
+        'household_ref_key': householdRefKey,
+        'beneficiary_ref_key': beneficiaryRefKey,
+        'mother_key': motherKey,
+        'father_key': fatherKey,
+        'child_care_state': currentTabName,
+        'device_details': jsonEncode({
+          'id': deviceInfo.deviceId,
+          'platform': deviceInfo.platform,
+          'version': deviceInfo.osVersion,
+        }),
+        'app_details': jsonEncode({
+          'app_version': deviceInfo.appVersion.split('+').first,
+          'app_name': deviceInfo.appName,
+          'build_number': deviceInfo.buildNumber,
+          'package_name': deviceInfo.packageName,
+        }),
+        'parent_user': '',
+        'current_user_key': '',
+        'facility_id': facilityId,
+        'form_json': formJson,
+        'created_date_time': now,
+        'modified_date_time': now,
+        'is_synced': 0,
+        'is_deleted': 0,
+      };
+
+      final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
+
+      if (formId > 0) {
+        debugPrint('✅ Child Tracking Form saved successfully with ID: $formId');
+        debugPrint('📋 Tab: $currentTabName (Index: $currentTabIndex)');
+        debugPrint('🏠 Household Ref Key: $householdRefKey');
+        debugPrint('👤 Beneficiary Ref Key: $beneficiaryRefKey');
+        debugPrint('📱 Form Type: $formType');
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Form saved successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Pop with result to refresh the list
+          Navigator.pop(context, {'saved': true, 'formId': formId});
+        }
+      } else {
+        throw Exception('Failed to save form data');
+      }
+    } catch (e) {
+      debugPrint('❌ Error saving child tracking form: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving form: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     for (var c in _otherCauseControllers.values) {
@@ -82,12 +332,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
     '16 YEAR',
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: tabs.length, vsync: this);
-  }
-
   Widget _buildBirthDoseTab() {
     final tabIndex = 0; // Birth Dose tab
     _initializeTabState(tabIndex);
@@ -100,24 +344,27 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
+                  _infoRow('Date of Visits', _getBirthDateFormatted()),
                   const Divider(),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
+                  CustomTextField(
+                    labelText: 'Weight (1.2–90)kg',
+                    initialValue: _formData['weight_grams'] != null
+                        ? '${(int.tryParse(_formData['weight_grams'].toString()) ?? 0) / 1000}'
+                        : null,
                     keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      // Convert kg to grams and update form data
+                      final grams = (double.tryParse(value) ?? 0) * 1000;
+                      _formData['weight_grams'] = grams.round();
+                    },
                   ),
+                  const Divider(),
+                  const SizedBox(height: 8),
+
                   const SizedBox(height: 16),
                   _buildDoseTable(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 16),  
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -190,8 +437,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -204,13 +451,14 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildSixWeekDoseTable() {
+    final sixWeekDueDate = _calculateDueDate(6);
     final data = [
-      {'name': 'O.P.V. -1', 'due': '14-10-2022'},
-      {'name': 'D.P.T. -1', 'due': '14-10-2022'},
-      {'name': 'Pentavelent 1', 'due': '14-10-2022'},
-      {'name': 'Rota-1', 'due': '14-10-2022'},
-      {'name': 'I.P.V.-1', 'due': '14-10-2022'},
-      {'name': 'P.C.V.-1', 'due': '14-10-2022'},
+      {'name': 'O.P.V. -1', 'due': sixWeekDueDate},
+      {'name': 'D.P.T. -1', 'due': sixWeekDueDate},
+      {'name': 'Pentavelent 1', 'due': sixWeekDueDate},
+      {'name': 'Rota-1', 'due': sixWeekDueDate},
+      {'name': 'I.P.V.-1', 'due': sixWeekDueDate},
+      {'name': 'P.C.V.-1', 'due': sixWeekDueDate},
     ];
 
     return Table(
@@ -317,10 +565,11 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildTenWeekDoseTable() {
+    final tenWeekDueDate = _calculateDueDate(10);
     final data = [
-      {'name': 'O.P.V.-2', 'due': '23-12-2022'},
-      {'name': 'Pentavelent -2', 'due': '23-12-2022'},
-      {'name': 'Rota-2', 'due': '23-12-2022'},
+      {'name': 'O.P.V.-2', 'due': tenWeekDueDate},
+      {'name': 'Pentavelent -2', 'due': tenWeekDueDate},
+      {'name': 'Rota-2', 'due': tenWeekDueDate},
     ];
 
     return Table(
@@ -370,12 +619,13 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildFourteenWeekDoseTable() {
+    final fourteenWeekDueDate = _calculateDueDate(14);
     final data = [
-      {'name': 'O.P.V.-3', 'due': '20-1-2023'},
-      {'name': 'Pentavalent-3', 'due': '20-1-2023'},
-      {'name': 'Rota 3', 'due': '20-1-2023'},
-      {'name': 'IPV 2', 'due': '20-1-2023'},
-      {'name': 'P.V.C. -2', 'due': '20-1-2023'},
+      {'name': 'O.P.V.-3', 'due': fourteenWeekDueDate},
+      {'name': 'Pentavalent-3', 'due': fourteenWeekDueDate},
+      {'name': 'Rota 3', 'due': fourteenWeekDueDate},
+      {'name': 'IPV 2', 'due': fourteenWeekDueDate},
+      {'name': 'P.V.C. -2', 'due': fourteenWeekDueDate},
     ];
 
     return Table(
@@ -441,22 +691,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
                   child: ListView(
                     children: [
                       const SizedBox(height: 8),
-                      _infoRow('Date of visit', '30-10-2025'),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Weight (1.2–90)kg',
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          hintText: 'Enter weight',
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 16),
                       _buildFourteenWeekDoseTable(),
                       const SizedBox(height: 16),
                       Column(
@@ -586,22 +820,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildTenWeekDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -676,8 +894,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -701,22 +919,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildSixWeekDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -791,8 +993,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -974,8 +1176,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -988,12 +1190,13 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildSixteenToTwentyFourMonthDoseTable() {
+    final sixteenToTwentyFourMonthDueDate = _calculateDueDate(20);
     final data = [
-      {'name': 'O.P.V. Booster-1', 'due': '14-01-2024'},
-      {'name': 'D.P.T. Booster-1', 'due': '14-01-2024'},
+      {'name': 'O.P.V. Booster-1', 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': 'D.P.T. Booster-1', 'due': sixteenToTwentyFourMonthDueDate},
 
-      {'name': 'J.E Vaccine 2', 'due': '14-01-2024'},
-      {'name': 'M.R dose -2', 'due': '14-01-2024'},
+      {'name': 'J.E Vaccine 2', 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': 'M.R dose -2', 'due': sixteenToTwentyFourMonthDueDate},
 
     ];
 
@@ -1055,22 +1258,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildSixteenToTwentyFourMonthDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -1145,8 +1332,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -1159,8 +1346,9 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildFiveToSixYearDoseTable() {
+    final fiveToSixYearDueDate = _calculateDueDate(260);
     final data = [
-      {'name': 'D.P.T Booster-2', 'due': '14-01-2028'},
+      {'name': 'D.P.T Booster-2', 'due': fiveToSixYearDueDate},
     ];
 
     return Table(
@@ -1221,22 +1409,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildFiveToSixYearDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -1311,8 +1483,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -1325,8 +1497,9 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildTenYearDoseTable() {
+    final tenYearDueDate = _calculateDueDate(520);
     final data = [
-      {'name': 'Tetanus Diphtheria (Td)', 'due': '11-10-2032'},
+      {'name': 'Tetanus Diphtheria (Td)', 'due': tenYearDueDate},
     ];
 
     return Table(
@@ -1387,22 +1560,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildTenYearDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -1477,8 +1634,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -1491,8 +1648,9 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildSixteenYearDoseTable() {
+    final sixteenYearDueDate = _calculateDueDate(832);
     final data = [
-      {'name': 'Tetanus Diphtheria (Td)', 'due': '10-10-2038'},
+      {'name': 'Tetanus Diphtheria (Td)', 'due': sixteenYearDueDate},
     ];
 
     return Table(
@@ -1553,22 +1711,6 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   _buildSixteenYearDoseTable(),
                   const SizedBox(height: 16),
                   Column(
@@ -1643,8 +1785,8 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: RoundButton(
-              title: 'SAVE',
-              onPress: () {},
+              title: _isSaving ? 'SAVING...' : 'SAVE',
+              onPress: _isSaving ? () {} : _saveForm,
               height: 50,
               borderRadius: 8,
               fontSize: 16,
@@ -1657,11 +1799,12 @@ class _ChildTrackingDueState extends State<ChildTrackingDueListForm>
   }
 
   Widget _buildDoseTable() {
+    final birthDueDate = _getBirthDateFormatted();
     final data = [
-      {'name': 'BCG', 'due': '14-10-2022'},
-      {'name': 'Hepatitis B - 0', 'due': '14-10-2022'},
-      {'name': 'O. P. V. - 0', 'due': '14-10-2022'},
-      {'name': 'VIT - K', 'due': '14-10-2022'},
+      {'name': 'BCG', 'due': birthDueDate},
+      {'name': 'Hepatitis B - 0', 'due': birthDueDate},
+      {'name': 'O. P. V. - 0', 'due': birthDueDate},
+      {'name': 'VIT - K', 'due': birthDueDate},
     ];
 
     return Table(
