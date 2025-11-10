@@ -13,7 +13,9 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
 class HbncVisitScreen extends StatefulWidget {
-  const HbncVisitScreen({super.key});
+  final Map<String, dynamic>? beneficiaryData;
+  
+  const HbncVisitScreen({super.key, this.beneficiaryData});
 
   @override
   State<HbncVisitScreen> createState() => _HbncVisitScreenState();
@@ -40,39 +42,67 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
 
+    final beneficiaryData = (widget as dynamic).beneficiaryData;
+    
     return BlocProvider(
-      create: (context) => HbncVisitBloc(),
+      create: (context) => HbncVisitBloc()..add(SaveHbncVisit(beneficiaryData: beneficiaryData)),
       child: Builder(
         builder: (context) => Scaffold(
           body: BlocListener<HbncVisitBloc, HbncVisitState>(
-            listenWhen: (previous, current) =>
-            previous.validationTick != current.validationTick,
+            listenWhen: (previous, current) => 
+                (previous.validationTick != current.validationTick) ||
+                (previous.isSaving && !current.isSaving && current.saveSuccess),
             listener: (context, state) {
+              // Handle validation errors
               final idx = _tabController.index;
-              if (state.lastValidatedIndex == idx) {
-                if (state.validationErrors.isNotEmpty) {
-                  final t = AppLocalizations.of(context)!;
-                  final first = state.validationErrors.first;
-                  final localized = _mapErrorCodeToText(t, first);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(localized)),
-                  );
-                } else {
-                  if (state.lastValidationWasSave) {
-                    context.read<HbncVisitBloc>().add(SaveHbncVisit());
-                  } else {
-                    final newIndex = idx + 1;
-                    _tabController.animateTo(newIndex);
-                    context
-                        .read<HbncVisitBloc>()
-                        .add(TabChanged(newIndex));
-                  }
+              if (state.lastValidatedIndex == idx && state.validationErrors.isNotEmpty) {
+                final t = AppLocalizations.of(context)!;
+                final first = state.validationErrors.first;
+                final localized = _mapErrorCodeToText(t, first);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(localized)),
+                );
+              }
+              
+              // Handle successful save
+              if (state.saveSuccess && !state.isSaving) {
+                // Show success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.dataSavedSuccessfully),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                
+                // Navigate back to previous screen
+                if (mounted) {
+                  Navigator.of(context).pop(true);
                 }
+              }
+              
+              // Handle tab changes after validation
+              if (state.lastValidatedIndex == idx && 
+                  !state.lastValidationWasSave && 
+                  state.validationErrors.isEmpty) {
+                final newIndex = idx + 1;
+                if (newIndex < _tabController.length) {
+                  _tabController.animateTo(newIndex);
+                  context.read<HbncVisitBloc>().add(TabChanged(newIndex));
+                }
+              }
+              
+              // Handle save after validation
+              if (state.lastValidatedIndex == idx && 
+                  state.lastValidationWasSave && 
+                  state.validationErrors.isEmpty) {
+                final beneficiaryData = (widget as dynamic).beneficiaryData;
+                context.read<HbncVisitBloc>().add(
+                  SaveHbncVisit(beneficiaryData: beneficiaryData),
+                );
               }
             },
             child: Column(
               children: [
-                // 🔹 App Header
                 AppHeader(
                   screenTitle: t.visitHbnc,
                   showBack: true,
@@ -115,30 +145,25 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                       Tab(text: t.tabGeneralDetails),
                       Tab(text: t.tabMotherDetails),
                       Tab(text: t.tabNewbornDetails),
-                      // ✅ You can add more tabs later without them getting hidden
                     ],
                     onTap: (index) =>
                         context.read<HbncVisitBloc>().add(TabChanged(index)),
                   ),
                 ),
 
-
-                // 🔹 Tab content
                 Expanded(
                   child: Form(
                     key: _formKey,
                     child: TabBarView(
                       controller: _tabController,
-                      children: const [
-                        GeneralDetailsTab(),
-                        MotherDetailsTab(),
-                        ChildDetailsTab(),
+                      children: [
+                        GeneralDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
+                        const MotherDetailsTab(),
+                        const ChildDetailsTab(),
                       ],
                     ),
                   ),
                 ),
-
-                // 🔹 Navigation Buttons
                 Padding(
                   padding:
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -203,8 +228,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
             ),
           ),
         ),
-      ),
-    );
+      ));
   }
 
   String _mapErrorCodeToText(AppLocalizations t, String code) {

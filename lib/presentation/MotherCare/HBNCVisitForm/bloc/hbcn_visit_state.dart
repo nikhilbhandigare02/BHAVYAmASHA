@@ -6,71 +6,85 @@ class HbncVisitState extends Equatable {
   final Map<String, dynamic> newbornDetails;
   final Map<String, dynamic> visitDetails;
   final bool isSubmitting;
-  final bool isSuccess;
-  final String? errorMessage;
   final bool isSaving;
   final bool saveSuccess;
+  final String? errorMessage;
+  final List<String> validationErrors;
   final int? lastValidatedIndex;
   final bool lastValidationWasSave;
-  final List<String> validationErrors;
   final int validationTick;
 
   const HbncVisitState({
     this.currentTabIndex = 0,
-    this.motherDetails = const {
-      'name': '',
-      'age': '',
-      'registrationNo': '',
-      'lmpDate': null,
-      'deliveryDate': null,
-      'deliveryType': '',
-      'complications': '',
-      'bloodGroup': '',
-      'bloodPressure': '',
-      'hbLevel': '',
-      'temperature': '',
-      'pulse': '',
-      'respiration': '',
-      'weight': '',
-    },
-    this.newbornDetails = const {
-      'name': '',
-      'gender': '',
-      'weightAtBirth': '',
-      'birthCertificateNo': '',
-      'breastfeedingInitiated': false,
-      'bcgDone': false,
-      'opv0Done': false,
-      'hepatitisBDose1Done': false,
-      'temperature': '',
-      'respiratoryRate': '',
-      'heartRate': '',
-      'jaundice': false,
-      'umbilicalCord': '',
-      'feedingStatus': '',
-    },
-    this.visitDetails = const {
-      'visitDate': null,
-      'nextVisitDate': null,
-      'visitNumber': '',
-      'visitType': '',
-      'visitPlace': '',
-      'visitStatus': 'Pending',
-      'remarks': '',
-      'referredTo': '',
-      'referredDate': null,
-      'referredReason': '',
-    },
+    Map<String, dynamic>? motherDetails,
+    Map<String, dynamic>? newbornDetails,
+    Map<String, dynamic>? visitDetails,
     this.isSubmitting = false,
-    this.isSuccess = false,
-    this.errorMessage,
     this.isSaving = false,
     this.saveSuccess = false,
+    this.errorMessage,
+    List<String>? validationErrors,
     this.lastValidatedIndex,
     this.lastValidationWasSave = false,
-    this.validationErrors = const [],
     this.validationTick = 0,
-  });
+  })  : motherDetails = motherDetails ?? const {
+          'motherStatus': null,
+          'mcpCardAvailable': null,
+          'postDeliveryProblems': null,
+          'breastfeedingProblems': null,
+          'mealsPerDay': null,
+          'padsPerDay': null,
+          'temperature': '',
+          'foulDischargeHighFever': null,
+          'abnormalSpeechOrSeizure': null,
+          'counselingAdvice': null,
+          'milkNotProducingOrLess': null,
+          'nippleCracksPainOrEngorged': null,
+        },
+        newbornDetails = newbornDetails ?? const {
+          'babyCondition': null,
+          'babyName': '',
+          'gender': null,
+          'weightAtBirth': '',
+          'temperature': '',
+          'tempUnit': null,
+          'weightColorMatch': null,
+          'weighingScaleColor': null,
+          'motherReportsTempOrChestIndrawing': null,
+          'bleedingUmbilicalCord': null,
+          'pusInNavel': null,
+          'routineCareDone': null,
+          'breathingRapid': null,
+          'congenitalAbnormalities': null,
+          'eyesNormal': null,
+          'eyesSwollenOrPus': null,
+          'skinFoldRedness': null,
+          'jaundice': null,
+          'pusBumpsOrBoil': null,
+          'seizures': null,
+          'cryingConstantlyOrLessUrine': null,
+          'cryingSoftly': null,
+          'stoppedCrying': null,
+          'referredByASHA': null,
+          'birthRegistered': null,
+          'birthCertificateIssued': null,
+          'birthDoseVaccination': null,
+          'mcpCardAvailable': null,
+          'exclusiveBreastfeedingStarted': null,
+          'firstBreastfeedTiming': null,
+          'howWasBreastfed': null,
+          'firstFeedGivenAfterBirth': null,
+          'adequatelyFedSevenToEightTimes': null,
+          'babyDrinkingLessMilk': null,
+          'breastfeedingStopped': null,
+          'bloatedStomachOrFrequentVomiting': null,
+        },
+        visitDetails = visitDetails ?? const {
+          'visitDate': null,
+          'nextVisitDate': null,
+          'visitNumber': null,
+        },
+        validationErrors = validationErrors ?? const [];
 
   HbncVisitState copyWith({
     int? currentTabIndex,
@@ -78,13 +92,12 @@ class HbncVisitState extends Equatable {
     Map<String, dynamic>? newbornDetails,
     Map<String, dynamic>? visitDetails,
     bool? isSubmitting,
-    bool? isSuccess,
-    String? errorMessage,
     bool? isSaving,
     bool? saveSuccess,
+    String? errorMessage,
+    List<String>? validationErrors,
     int? lastValidatedIndex,
     bool? lastValidationWasSave,
-    List<String>? validationErrors,
     int? validationTick,
   }) {
     return HbncVisitState(
@@ -93,16 +106,18 @@ class HbncVisitState extends Equatable {
       newbornDetails: newbornDetails ?? this.newbornDetails,
       visitDetails: visitDetails ?? this.visitDetails,
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      isSuccess: isSuccess ?? this.isSuccess,
-      errorMessage: errorMessage ?? this.errorMessage,
       isSaving: isSaving ?? this.isSaving,
       saveSuccess: saveSuccess ?? this.saveSuccess,
+      errorMessage: errorMessage,
+      validationErrors: validationErrors ?? this.validationErrors,
       lastValidatedIndex: lastValidatedIndex ?? this.lastValidatedIndex,
       lastValidationWasSave: lastValidationWasSave ?? this.lastValidationWasSave,
-      validationErrors: validationErrors ?? this.validationErrors,
       validationTick: validationTick ?? this.validationTick,
     );
   }
+
+  // Static method to create an initial state
+  static HbncVisitState initial() => const HbncVisitState();
 
   @override
   List<Object?> get props => [
@@ -111,13 +126,12 @@ class HbncVisitState extends Equatable {
         newbornDetails,
         visitDetails,
         isSubmitting,
-        isSuccess,
-        errorMessage,
         isSaving,
         saveSuccess,
+        errorMessage,
+        validationErrors,
         lastValidatedIndex,
         lastValidationWasSave,
-        validationErrors,
         validationTick,
       ];
 }

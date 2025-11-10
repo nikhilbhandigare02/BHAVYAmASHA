@@ -253,7 +253,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       final uniqueKey = row['unique_key']?.toString() ?? '';
       final createdDate = row['created_date_time']?.toString() ?? '';
       final info = Map<String, dynamic>.from((row['beneficiary_info'] is Map ? row['beneficiary_info'] : const {}) as Map);
-      
+
       // Use the full unique key as the BeneficiaryID
       final beneficiaryId = uniqueKey;
 
@@ -308,7 +308,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           'youngestGender': childrenRaw['youngestGender'],
         }..removeWhere((k, v) => v == null);
       }
-      
+
       print('🔑 Formatted BeneficiaryID: $beneficiaryId (from uniqueKey: $uniqueKey)');
       return {
         'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
@@ -369,18 +369,18 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       return '';
     }
   }
-  
+
   Future<int> _getVisitCount(String beneficiaryId) async {
     try {
       if (beneficiaryId.isEmpty) {
         print('⚠️ Empty beneficiaryId provided to _getVisitCount');
         return 0;
       }
-      
+
       print('🔍 Getting visit count for beneficiary: $beneficiaryId');
       final count = await SecureStorageService.getSubmissionCount(beneficiaryId);
       print('📊 Retrieved count for $beneficiaryId: $count');
-      
+
       // Debug: List all keys in secure storage to verify
       try {
         final allKeys = await const FlutterSecureStorage().readAll();
@@ -393,7 +393,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       } catch (e) {
         print('⚠️ Error reading secure storage keys: $e');
       }
-      
+
       return count;
     } catch (e) {
       print('❌ Error in _getVisitCount for $beneficiaryId: $e');
@@ -535,13 +535,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     final ageGender = data['age'] is String && data['age'].isNotEmpty
         ? data['age']
         : l10n?.notAvailable ?? 'N/A';
-        
+
     // Get the full unique key for the beneficiary
-    final uniqueKey = data['_rawRow']?['unique_key']?.toString() ?? 
-                     data['BeneficiaryID']?.toString() ?? '';
-    
+    final uniqueKey = data['_rawRow']?['unique_key']?.toString() ??
+        data['BeneficiaryID']?.toString() ?? '';
+
     print('🔑 ANC Card - Full Unique Key for count: $uniqueKey');
-    
+
     // Use the full unique key as the beneficiary ID for count
     final beneficiaryId = uniqueKey;
 
@@ -553,17 +553,17 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       borderRadius: BorderRadius.circular(12),
       onTap: () {
         final beneficiaryData = <String, dynamic>{};
-        
+
         if (data['_rawRow'] is Map) {
           final rawRow = data['_rawRow'] as Map;
           beneficiaryData['unique_key'] = rawRow['unique_key'];
           beneficiaryData['BeneficiaryID'] = rawRow['BeneficiaryID'];
-          
+
           print('🔑 Passing to form:');
           print('   - unique_key: ${beneficiaryData['unique_key']}');
           print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
         }
-        
+
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -612,7 +612,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                   ),
                   const SizedBox(width: 8),
                   FutureBuilder<int>(
-                    future: beneficiaryId.isNotEmpty 
+                    future: beneficiaryId.isNotEmpty
                         ? _getVisitCount(beneficiaryId)
                         : Future.value(0),
                     builder: (context, snapshot) {
@@ -622,7 +622,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                           style: TextStyle(color: primary, fontWeight: FontWeight.w500, fontSize: 14.sp),
                         );
                       }
-                      
+
                       if (snapshot.hasError) {
                         print('❌ Error fetching visit count: ${snapshot.error}');
                         return Text(
@@ -630,15 +630,15 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                           style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500, fontSize: 14.sp),
                         );
                       }
-                      
+
                       final count = snapshot.data ?? 0;
                       print('✅ Fetched count $count for beneficiary: $beneficiaryId');
-                      
+
                       return Text(
                         '${l10n?.visitsLabel ?? 'Visits :'} $count',
                         style: TextStyle(
-                          color: primary, 
-                          fontWeight: FontWeight.w500, 
+                          color: primary,
+                          fontWeight: FontWeight.w500,
                           fontSize: 14.sp,
                         ),
                       );
