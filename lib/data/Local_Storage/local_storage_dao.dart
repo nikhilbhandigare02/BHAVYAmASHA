@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'database_provider.dart';
@@ -232,6 +233,61 @@ class LocalStorageDao {
       await db.rawQuery('SELECT COUNT(*) FROM households WHERE is_deleted = 0')
     );
     return count ?? 0;
+  }
+
+  /// Fetches followup forms of a specific type that have case closure data
+  Future<List<Map<String, dynamic>>> getFollowupFormsWithCaseClosure(String formType) async {
+    final db = await _db;
+    
+    // First, get all forms of the specified type
+    final forms = await db.query(
+      FollowupFormDataTable.table,
+      where: 'is_deleted = 0',
+    );
+
+    final List<Map<String, dynamic>> result = [];
+    
+    // Process each form to check for case closure data
+    for (final form in forms) {
+      try {
+        final formJson = form['form_json'] as String?;
+        if (formJson == null || formJson.isEmpty) continue;
+        
+        final formData = jsonDecode(formJson);
+        
+        // Check if this is the correct form type and has case closure data
+        if (formData is Map && 
+            formData['form_type'] == formType &&
+            formData['form_data'] is Map &&
+            formData['form_data']['case_closure'] is Map) {
+          
+          final caseClosure = formData['form_data']['case_closure'] as Map;
+          
+          // Only include if case closure is checked and has death details
+          if (caseClosure['is_case_closure'] == true && 
+              caseClosure['date_of_death'] != null) {
+            
+            // Get beneficiary details from form data
+            final beneficiary = formData['form_data'];
+            
+            result.add({
+              'id': form['id'],
+              'beneficiary_id': beneficiary['beneficiary_id'] ?? '',
+              'name': '${beneficiary['first_name'] ?? ''} ${beneficiary['last_name'] ?? ''}'.trim(),
+              'date_of_death': caseClosure['date_of_death'],
+              'cause_of_death': caseClosure['probable_cause_of_death'] ?? 'Not specified',
+              'death_place': caseClosure['death_place'] ?? 'Not specified',
+              'reason': caseClosure['reason_of_death'] ?? 'Not specified',
+              'form_data': formData,
+            });
+          }
+        }
+      } catch (e) {
+        print('Error processing form ${form['id']}: $e');
+      }
+    }
+    
+    return result;
   }
 
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {

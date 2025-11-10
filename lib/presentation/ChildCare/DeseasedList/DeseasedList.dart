@@ -1,12 +1,10 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
-import 'package:sizer/sizer.dart';
-import '../../../core/config/routes/Route_Name.dart';
-import '../../../core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import '../../../core/config/themes/CustomColors.dart';
 
 class DeseasedList extends StatefulWidget {
   const DeseasedList({super.key});
@@ -17,51 +15,79 @@ class DeseasedList extends StatefulWidget {
 
 class _DeseasedListState extends State<DeseasedList> {
   final TextEditingController _searchCtrl = TextEditingController();
-
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-
-      'RchID': 'RCH123456',
-      'Name': 'Rohit Sharma',
-      'Age|Gender': '27 Y | Male',
-      'Mobileno.': '9876543210',
-      'FatherName': 'Rajesh Sharma',
-      'causeOFDeath': 'Pneumonia',
-      'reason': 'other reason Apart from Maternal',
-      'place': 'Home',
-      'DateofDeath': '16-10-2025',
-
-    },
-    {
-      'hhId': '51016121847',
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-      'causeOFDeath': 'Pneumonia',
-
-      'RchID': 'RCH123456',
-      'Name': 'Rohit Sharma',
-      'Age|Gender': '27 Y | Male',
-      'Mobileno.': '9876543210',
-      'FatherName': 'Rajesh Sharma',
-      'DateofDeath': '16-10-2025',
-      'reason': 'other reason Apart from Maternal',
-      'place': 'Home',
-
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  final LocalStorageDao _storageDao = LocalStorageDao();
+  
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _deceasedList = [];
+  List<Map<String, dynamic>> _filtered = [];
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
     _searchCtrl.addListener(_onSearchChanged);
+    _loadDeceasedList();
+  }
+
+  Future<void> _loadDeceasedList() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Fetch deceased children from child tracking forms with case closure
+      final deceasedChildren = await _storageDao.getFollowupFormsWithCaseClosure(
+        FollowupFormDataTable.childTrackingDue,
+      );
+
+      // Transform to match the expected format
+      final transformed = deceasedChildren.map((child) {
+        final formData = child['form_data']['form_data'];
+        final caseClosure = formData['case_closure'];
+        
+        return {
+          'hhId': formData['household_id']?.toString() ?? 'N/A',
+          'RegitrationDate': formData['registration_date'] ?? 'N/A',
+          'RegitrationType': 'General',
+          'BeneficiaryID': formData['beneficiary_id']?.toString() ?? 'N/A',
+          'RchID': formData['rch_id']?.toString() ?? 'N/A',
+          'Name': child['name'] ?? 'Unknown',
+          'Age|Gender': '${formData['age'] ?? 'N/A'} Y | ${formData['gender'] ?? 'N/A'}',
+          'Mobileno.': formData['mobile_number']?.toString() ?? 'N/A',
+          'FatherName': formData['father_name'] ?? 'N/A',
+          'causeOFDeath': caseClosure['probable_cause_of_death'] ?? 'Not specified',
+          'reason': caseClosure['reason_of_death'] ?? 'Not specified',
+          'place': caseClosure['death_place'] ?? 'Not specified',
+          'DateofDeath': _formatDate(caseClosure['date_of_death']) ?? 'N/A',
+        };
+      }).toList();
+
+      setState(() {
+        _deceasedList = transformed;
+        _filtered = List<Map<String, dynamic>>.from(_deceasedList);
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading deceased list: $e');
+      setState(() {
+        _isLoading = false;
+      });
+      // Show error message to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load deceased list: $e')),
+        );
+      }
+    }
+  }
+
+  String? _formatDate(String? dateString) {
+    if (dateString == null) return null;
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (e) {
+      return dateString;
+    }
   }
 
   @override
@@ -75,15 +101,13 @@ class _DeseasedListState extends State<DeseasedList> {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _filtered = List<Map<String, dynamic>>.from(_deceasedList);
       } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['Name'] as String).toLowerCase().contains(q) ||
-              (e['Mobileno.'] as String).toLowerCase().contains(q) ||
-              (e['village'] as String).toLowerCase().contains(q) ||
-              (e['Tola/Mohalla'] as String).toLowerCase().contains(q) ||
-              (e['BeneficiaryID'] as String).toLowerCase().contains(q);
+        _filtered = _deceasedList.where((e) {
+          return (e['hhId']?.toString() ?? '').toLowerCase().contains(q) ||
+              (e['Name']?.toString() ?? '').toLowerCase().contains(q) ||
+              (e['Mobileno.']?.toString() ?? '').toLowerCase().contains(q) ||
+              (e['BeneficiaryID']?.toString() ?? '').toLowerCase().contains(q);
         }).toList();
       }
     });
@@ -94,187 +118,193 @@ class _DeseasedListState extends State<DeseasedList> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle:   'Deceased Child list',
+        screenTitle: 'Deceased Child List',
         showBack: true,
-
       ),
-      body: Column(
+      body: _isLoading 
+          ? const Center(child: CircularProgressIndicator())
+          : _filtered.isEmpty
+              ? const Center(child: Text('No deceased children found'))
+              : _buildMainContent(),
+    );
+  }
+
+  Widget _buildMainContent() {
+    return SingleChildScrollView(
+      child: Column(
         children: [
-          // 🔍 Search Field
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: 'Search Deceased child',
+                hintText: 'Search by name, ID, or mobile',
                 prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
               ),
             ),
           ),
-
-
-
-          // 📋 List of Households
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columns: const [
+                DataColumn(label: Text('S.No')),
+                DataColumn(label: Text('HH ID')),
+                DataColumn(label: Text('Beneficiary ID')),
+                DataColumn(label: Text('Name')),
+                DataColumn(label: Text('Age|Gender')),
+                DataColumn(label: Text('Mobile No.')),
+                DataColumn(label: Text('Father\'s Name')),
+                DataColumn(label: Text('Cause of Death')),
+                DataColumn(label: Text('Reason')),
+                DataColumn(label: Text('Place')),
+                DataColumn(label: Text('Date of Death')),
+                DataColumn(label: Text('Action')),
+              ],
+              rows: List<DataRow>.generate(
+                _filtered.length,
+                (index) {
+                  final item = _filtered[index];
+                  return DataRow(
+                    cells: [
+                      DataCell(Text('${index + 1}')),
+                      DataCell(Text(item['hhId']?.toString() ?? 'N/A')),
+                      DataCell(Text(item['BeneficiaryID']?.toString() ?? 'N/A')),
+                      DataCell(Text(item['Name']?.toString() ?? 'N/A')),
+                      DataCell(Text(item['Age|Gender']?.toString() ?? 'N/A')),
+                      DataCell(Text(item['Mobileno.']?.toString() ?? 'N/A')),
+                      DataCell(Text(item['FatherName']?.toString() ?? 'N/A')),
+                      DataCell(Text(item['causeOFDeath']?.toString() ?? 'N/A')),
+                      DataCell(Text(item['reason']?.toString() ?? 'N/A')),
+                      DataCell(Text(item['place']?.toString() ?? 'N/A')),
+                      DataCell(Text(item['DateofDeath']?.toString() ?? 'N/A')),
+                      DataCell(
+                        PopupMenuButton<String>(
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'view',
+                              child: Text('View'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Text('Edit'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Delete'),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            if (value == 'view') {
+                              _viewDetails(item);
+                            } else if (value == 'edit') {
+                              _editDetails(item);
+                            } else if (value == 'delete') {
+                              _confirmDelete(item);
+                            }
+                          },
+                          child: const Icon(Icons.more_vert),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
-
-
         ],
       ),
     );
   }
 
-
-  Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
-    final l10n = AppLocalizations.of(context);
-    final Color primary = Theme.of(context).primaryColor;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 2,
-                spreadRadius: 1,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+  void _viewDetails(Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Deceased Child Details'),
+        content: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Header Row
-              Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
-                ),
-                padding: const EdgeInsets.all(6),
-                child: Row(
-                  children: [
-                    const Icon(Icons.home, color: Colors.black54, size: 18),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        data['hhId'] ?? '',
-                        style: TextStyle(
-                          color: primary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14.sp,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image.asset(
-                        'assets/images/sync.png',
-                        width: 25,
-                        height: 25,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Card Body
-              Container(
-                decoration: BoxDecoration(
-                  color: primary.withOpacity(0.95),
-                  borderRadius:
-                  const BorderRadius.vertical(bottom: Radius.circular(6)),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildRow([
-                      _rowText('Registration Date', data['RegitrationDate']),
-                      _rowText('Registration Type', data['RegitrationType']),
-                      _rowText('Beneficiary ID', data['BeneficiaryID']),
-                    ]),
-                    const SizedBox(height: 8),
-                    _buildRow([
-                      _rowText('Name', data['Name']),
-                      _rowText('Age | Gender', data['Age|Gender']),
-                      _rowText('RCH ID', data['RchID']),
-                    ]),
-                    const SizedBox(height: 8),
-                    _buildRow([
-                      _rowText('Father Name', data['FatherName']),
-                      _rowText('Mobile No.', data['Mobileno.']),
-                      _rowText('Date of Death', data['DateofDeath']),
-                    ]),
-                    const SizedBox(height: 8),
-                    _buildRow([
-                      _rowText('Cause of Death', data['causeOFDeath']),
-                      _rowText('Reason', data['reason']),
-                      _rowText('Place', data['place']),
-                    ]),
-                  ],
-                ),
-              ),
+              _buildDetailRow('Name', item['Name']?.toString() ?? 'N/A'),
+              _buildDetailRow('HH ID', item['hhId']?.toString() ?? 'N/A'),
+              _buildDetailRow('Beneficiary ID', item['BeneficiaryID']?.toString() ?? 'N/A'),
+              _buildDetailRow('Age | Gender', item['Age|Gender']?.toString() ?? 'N/A'),
+              _buildDetailRow('Mobile', item['Mobileno.']?.toString() ?? 'N/A'),
+              _buildDetailRow('Father\'s Name', item['FatherName']?.toString() ?? 'N/A'),
+              const SizedBox(height: 16),
+              const Text('Death Details', style: TextStyle(fontWeight: FontWeight.bold)),
+              _buildDetailRow('Date of Death', item['DateofDeath']?.toString() ?? 'N/A'),
+              _buildDetailRow('Cause of Death', item['causeOFDeath']?.toString() ?? 'N/A'),
+              _buildDetailRow('Place of Death', item['place']?.toString() ?? 'N/A'),
+              _buildDetailRow('Reason', item['reason']?.toString() ?? 'N/A'),
             ],
           ),
         ),
-      ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildRow(List<Widget> children) {
-    return Row(
-      children: [
-        for (int i = 0; i < children.length; i++) ...[
-          Expanded(child: children[i]),
-          if (i < children.length - 1) const SizedBox(width: 10),
-        ]
-      ],
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Text(value)),
+        ],
+      ),
     );
   }
 
-  Widget _rowText(String title, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
-        ),
-      ],
+  void _editDetails(Map<String, dynamic> item) {
+    // TODO: Implement edit functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Edit functionality coming soon')),
+    );
+  }
+
+  void _confirmDelete(Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Delete'),
+        content: Text('Are you sure you want to delete the record for ${item['Name']}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              // TODO: Implement delete functionality
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Delete functionality coming soon')),
+              );
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
     );
   }
 
