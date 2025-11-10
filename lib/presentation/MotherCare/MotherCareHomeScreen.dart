@@ -5,6 +5,7 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
@@ -19,12 +20,14 @@ class Mothercarehomescreen extends StatefulWidget {
 
 class _MothercarehomescreenState extends State<Mothercarehomescreen> {
   int _ancVisitCount = 0;
+  int _hbcnMotherCount = 0;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadEligiblePregnantWomenCount();
+    _loadHBCNCount();
   }
 
   Future<void> _loadEligiblePregnantWomenCount() async {
@@ -137,6 +140,34 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
       return null;
     }
   }
+
+  Future<void> _loadHBCNCount() async {
+    try {
+      // Get all delivery outcomes
+      final deliveryOutcomes = await SecureStorageService.getDeliveryOutcomes();
+      
+      // Count only submitted outcomes
+      int count = 0;
+      for (var outcome in deliveryOutcomes) {
+        if (outcome['isSubmit'] == true) {
+          count++;
+        }
+      }
+      
+      if (mounted) {
+        setState(() {
+          _hbcnMotherCount = count;
+        });
+      }
+    } catch (e) {
+      print('Error loading HBCN count: $e');
+      if (mounted) {
+        setState(() {
+          _hbcnMotherCount = 0;
+        });
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -200,7 +231,7 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
                     width: cardWidth,
                     title:
                     (l10n?.hbncMotherTitle ?? 'HBNC Mother').toString(),
-                    count: 0,
+                    count: _hbcnMotherCount,
                     image: 'assets/images/pnc-mother.png',
                     onClick: () {
                       Navigator.pushNamed(context, Route_Names.HBNCScreen);

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
@@ -205,6 +206,37 @@ class _HBNCListScreenState
     });
   }
 
+  Future<int> _getVisitCount(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiaryId provided to _getVisitCount');
+        return 0;
+      }
+
+      print('🔍 Getting visit count for beneficiary: $beneficiaryId');
+      final count = await SecureStorageService.getVisitCount(beneficiaryId);
+      print('📊 Retrieved count for $beneficiaryId: $count');
+
+      try {
+        final allKeys = await const FlutterSecureStorage().readAll();
+        print('🔑 All secure storage keys:');
+        allKeys.forEach((key, value) {
+          if (key.startsWith('submission_count_')) {
+            print('   - $key: $value');
+          }
+        });
+      } catch (e) {
+        print('⚠️ Error reading secure storage keys: $e');
+      }
+
+      return count;
+    } catch (e) {
+      print('❌ Error in _getVisitCount for $beneficiaryId: $e');
+      return 0;
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -272,19 +304,17 @@ class _HBNCListScreenState
     final primary = Theme.of(context).primaryColor;
     final t = AppLocalizations.of(context);
 
-    // Extract the raw row data and beneficiary info
     final rowData = data['_rawRow'] ?? {};
     final beneficiaryInfo = rowData['beneficiary_info'] is String
         ? jsonDecode(rowData['beneficiary_info'])
         : (rowData['beneficiary_info'] ?? {});
 
-    final headDetails = (beneficiaryInfo['head_details'] ?? {}) as Map<String, dynamic>;
-    final spouseDetails = (beneficiaryInfo['spouse_details'] ?? {}) as Map<String, dynamic>;
 
-    final childrenDetails = (beneficiaryInfo['children_details'] ??
-        headDetails['childrendetails'] ??
-        headDetails['childrenDetails'] ??
-        {}) as Map<String, dynamic>;
+
+    final beneficiaryId = (data['_rawRow']?['unique_key'] ?? '').toString();
+    final formattedBeneficiaryId = beneficiaryId.length >= 11
+        ? beneficiaryId.substring(beneficiaryId.length - 11)
+        : beneficiaryId;
 
     return Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -353,6 +383,21 @@ class _HBNCListScreenState
                           data['hhId'] ?? '',
                           style: TextStyle(color: primary, fontWeight: FontWeight.w600),
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      FutureBuilder<int>(
+                        future: _getVisitCount(beneficiaryId),
+                        builder: (context, snapshot) {
+                          final count = snapshot.data ?? 0;
+                          return Text(
+                            '${t?.visitsLabel ?? 'Visits:'} $count',
+                            style: TextStyle(
+                              color: primary,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(width: 8),
                       SizedBox(

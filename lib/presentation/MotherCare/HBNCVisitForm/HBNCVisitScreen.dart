@@ -104,7 +104,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
             child: Column(
               children: [
                 AppHeader(
-                  screenTitle: t.visitHbnc,
+                  screenTitle: t.hbncListTitle,
                   showBack: true,
                   icon1Widget: Padding(
                     padding: const EdgeInsets.only(right: 16.0),

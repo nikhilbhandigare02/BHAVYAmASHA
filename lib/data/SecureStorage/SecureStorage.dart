@@ -395,7 +395,6 @@ class SecureStorageService {
     await _storage.write(key: _keyIsLoggedIn, value: '0');
   }
 
-  // Get submission count for a beneficiary
   static Future<int> getSubmissionCount(String beneficiaryId) async {
     try {
       if (beneficiaryId.isEmpty) {
@@ -423,18 +422,18 @@ class SecureStorageService {
     try {
       if (beneficiaryId.isEmpty) {
         print('⚠️ Empty beneficiaryId provided to getVisitCount');
-        return 0;
+        return 1;
       }
 
-      final key = 'submission_count_$beneficiaryId';
+      final key = 'visit_count_$beneficiaryId';
       final countStr = await _storage.read(key: key);
 
       if (countStr == null) {
         print('ℹ️ No submission count found for beneficiary: $beneficiaryId');
-        return 0;
+        return 1;
       }
 
-      final count = int.tryParse(countStr) ?? 0;
+      final count = int.tryParse(countStr) ?? 1;
       print('ℹ️ Found submission count for $beneficiaryId: $count');
       return count;
     } catch (e) {
@@ -481,7 +480,7 @@ class SecureStorageService {
       }
 
       final key = 'visit_count_$beneficiaryId';
-      final currentCount = await getSubmissionCount(beneficiaryId);
+      final currentCount = await getVisitCount(beneficiaryId);
       final newCount = currentCount + 2;
 
       print('ℹ️ Incrementing count for $beneficiaryId from $currentCount to $newCount');

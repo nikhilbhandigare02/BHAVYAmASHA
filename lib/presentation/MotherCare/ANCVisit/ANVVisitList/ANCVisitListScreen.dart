@@ -536,13 +536,11 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         ? data['age']
         : l10n?.notAvailable ?? 'N/A';
 
-    // Get the full unique key for the beneficiary
     final uniqueKey = data['_rawRow']?['unique_key']?.toString() ??
         data['BeneficiaryID']?.toString() ?? '';
 
     print('🔑 ANC Card - Full Unique Key for count: $uniqueKey');
 
-    // Use the full unique key as the beneficiary ID for count
     final beneficiaryId = uniqueKey;
 
     final husbandName = data['HusbandName'] is String && data['HusbandName'].isNotEmpty
@@ -564,12 +562,16 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
         }
 
-        Navigator.push(
+        // Use pushReplacement with a callback to refresh data when returning
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => Ancvisitform(beneficiaryData: beneficiaryData),
           ),
-        );
+        ).then((_) {
+          // This will be called when we return from ANCVisitForm
+          _loadEligibleCouples();
+        });
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),

@@ -253,7 +253,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           const SizedBox(height: 6),
                           FutureBuilder<int>(
                             future: state.beneficiaryId != null && state.beneficiaryId!.isNotEmpty
-                                ? SecureStorageService.getSubmissionCount(state.beneficiaryId!)
+                                ? SecureStorageService.getVisitCount(state.beneficiaryId!)
                                 : Future.value(0),
                             builder: (context, snapshot) {
                               final count = snapshot.data ?? 0;

@@ -193,10 +193,8 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
               'form_data': formDataForDb,
             };
 
-            // Save to secure storage for offline access
             await SecureStorageService.saveDeliveryOutcome(outcomeData);
 
-            // Update submission status and reset loading states
             emit(state.copyWith(
               isSubmitting: false,
               isSaving: false,

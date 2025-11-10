@@ -46,16 +46,23 @@ class GeneralDetailsTab extends StatelessWidget {
                   FutureBuilder<int>(
                     future: SecureStorageService.getVisitCount(beneficiaryId),
                     builder: (context, snapshot) {
-                      final visitCount = snapshot.data ?? 0;
+                      final baseCount = snapshot.data ?? 1;
+                      final visitCount = baseCount + 2; // ✅ increment by 2
+                      final int displayDay;
 
-                      if (selectedDay == null && visitCount <= 7) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          context.read<HbncVisitBloc>().add(
-                                VisitDetailsChanged(field: 'visitNumber', value: visitCount),
-                              );
-                        });
+                      if (selectedDay != null && selectedDay > 1) {
+                        displayDay = selectedDay;
+                      } else {
+                        displayDay = visitCount;
+                        if (visitCount > 0 && visitCount <= 7) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            context.read<HbncVisitBloc>().add(
+                              VisitDetailsChanged(field: 'visitNumber', value: visitCount),
+                            );
+                          });
+                        }
                       }
-                      
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -64,11 +71,13 @@ class GeneralDetailsTab extends StatelessWidget {
                             labelText: t.homeVisitDayLabel,
                             items: List.generate(7, (index) => index + 1),
                             getLabel: (v) => v.toString(),
-                            value: selectedDay ?? visitCount,
+                            value: displayDay,
                             onChanged: (val) {
-                              context.read<HbncVisitBloc>().add(
-                                    VisitDetailsChanged(field: 'visitNumber', value: val),
-                                  );
+                              if (val != null) {
+                                context.read<HbncVisitBloc>().add(
+                                  VisitDetailsChanged(field: 'visitNumber', value: val),
+                                );
+                              }
                             },
                           ),
                         ],
