@@ -46,12 +46,47 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
 
     try {
       final db = await DatabaseProvider.instance.database;
+      
+      // Get all deceased beneficiaries
+      print('🔍 Fetching deceased beneficiaries...');
+      final deceasedChildren = await db.rawQuery('''
+        SELECT DISTINCT beneficiary_ref_key, form_json 
+        FROM followup_form_data 
+        WHERE form_json LIKE '%"reason_of_death":%' 
+        AND is_deleted = 0
+      ''');
+
+      print('✅ Found ${deceasedChildren.length} potential deceased records');
+      
+      final deceasedIds = <String>{};
+      for (var child in deceasedChildren) {
+        try {
+          final jsonData = jsonDecode(child['form_json'] as String);
+          final formData = jsonData['form_data'] as Map<String, dynamic>?;
+          final caseClosure = formData?['case_closure'] as Map<String, dynamic>?;
+          
+          if (caseClosure?['is_case_closure'] == true && 
+              caseClosure?['reason_of_death']?.toString().toLowerCase() == 'death') {
+            final beneficiaryId = child['beneficiary_ref_key']?.toString();
+            if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
+              print('Found deceased beneficiary: $beneficiaryId');
+              deceasedIds.add(beneficiaryId);
+            }
+          }
+        } catch (e) {
+          print('⚠️ Error processing deceased record: $e');
+        }
+      }
+
+      print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
+      
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries',
         where: 'is_deleted = ?',
         whereArgs: [0],
       );
 
+      print('📊 Found ${rows.length} total beneficiaries');
       final childBeneficiaries = <Map<String, dynamic>>[];
 
       for (final row in rows) {
@@ -73,52 +108,59 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
           for (final member in members) {
             if (member is Map) {
               final memberType = member['memberType']?.toString() ?? '';
-              
+
               // Only process if memberType is "Child"
               if (memberType == 'Child') {
+                final beneficiaryId = row['unique_key']?.toString() ?? '';
                 final memberData = Map<String, dynamic>.from(member);
-                
+
                 // Get name from multiple possible fields
-                final name = memberData['memberName']?.toString() ?? 
+                final name = memberData['memberName']?.toString() ??
                             memberData['name']?.toString() ??
                             memberData['member_name']?.toString() ??
                             memberData['memberNameLocal']?.toString() ??
                             '';
-                
+
                 // Get father's name (from member data or head)
-                final fatherName = memberData['fatherName']?.toString() ?? 
+                final fatherName = memberData['fatherName']?.toString() ??
                                   memberData['father_name']?.toString() ??
-                                  head['headName']?.toString() ?? 
+                                  head['headName']?.toString() ??
                                   head['memberName']?.toString() ?? '';
-                
+
                 // Get mother's name (from member data or spouse)
-                final motherName = memberData['motherName']?.toString() ?? 
+                final motherName = memberData['motherName']?.toString() ??
                                   memberData['mother_name']?.toString() ??
-                                  spouse['memberName']?.toString() ?? 
+                                  spouse['memberName']?.toString() ??
                                   spouse['headName']?.toString() ?? '';
-                
+
                 // Get mobile number
-                final mobileNo = memberData['mobileNo']?.toString() ?? 
+                final mobileNo = memberData['mobileNo']?.toString() ??
                                 memberData['mobile']?.toString() ??
                                 memberData['mobile_number']?.toString() ??
                                 head['mobileNo']?.toString() ?? '';
-                
+
                 // Get RCH ID
-                final richId = memberData['RichIDChanged']?.toString() ?? 
-                              memberData['richIdChanged']?.toString() ?? 
+                final richId = memberData['RichIDChanged']?.toString() ??
+                              memberData['richIdChanged']?.toString() ??
                               memberData['richId']?.toString() ?? '';
+
+                final isDeceased = deceasedIds.contains(beneficiaryId);
+                if (isDeceased) {
+                  print('ℹ️ Marking as deceased - ID: $beneficiaryId, Name: $name');
+                }
                 
                 final card = <String, dynamic>{
                   'hhId': rowHhId,
                   'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
                   'RegitrationType': 'Child',
-                  'BeneficiaryID': memberData['unique_key']?.toString() ?? row['id']?.toString() ?? '',
+                  'BeneficiaryID': beneficiaryId,
                   'RchID': richId,
                   'Name': name,
                   'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
                   'Mobileno.': mobileNo,
                   'FatherName': fatherName,
                   'MotherName': motherName,
+                  'is_deceased': isDeceased,
                   '_raw': row,
                   '_memberData': memberData,
                 };
@@ -367,7 +409,40 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  if (data['is_deceased'] == true) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.red.shade200, width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withOpacity(0.1),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.circle, color: Colors.red.shade600, size: 10),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Deceased'.toUpperCase(),
+                            style: TextStyle(
+                              color: Colors.red.shade800,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10.sp,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: Image.asset(

@@ -4,7 +4,9 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
+import 'child_care_count_provider.dart';
 
 import '../HomeScreen/HomeScreen.dart';
 
@@ -16,6 +18,54 @@ class ChildCareHomeScreen extends StatefulWidget {
 }
 
 class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
+  final ChildCareCountProvider _countProvider = ChildCareCountProvider();
+  late Future<Map<String, int>> _countsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounts();
+  }
+
+  Future<void> _loadCounts() async {
+    setState(() {
+      _countsFuture = Future.wait([
+        _countProvider.getRegisteredChildCount(),
+        _countProvider.getRegistrationDueCount(),
+        _countProvider.getTrackingDueCount(),
+        _countProvider.getHBYCCount(),
+        _countProvider.getDeceasedCount(),
+      ]).then((results) {
+        return {
+          'registered': results[0],
+          'registrationDue': results[1],
+          'trackingDue': results[2],
+          'hbyc': results[3],
+          'deceased': results[4],
+        };
+      });
+    });
+  }
+
+  Widget _buildCard({
+    required BuildContext context,
+    required String title,
+    required String countKey,
+    required String image,
+    required String routeName,
+    required Map<String, int> counts,
+    double? width,
+  }) {
+    return _FeatureCard(
+      width: width ?? 100,
+      title: title,
+      count: counts[countKey] ?? 0,
+      image: image,
+      onClick: () {
+        Navigator.pushNamed(context, routeName).then((_) => _loadCounts());
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -29,111 +79,112 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
             spacingBetweenCards) /
         2.9;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppHeader(
-        screenTitle: (l10n?.gridChildCare ?? 'Child Care').toString(),
-        showBack: false,
-          icon1Image: 'assets/images/home.png',
+    return FutureBuilder<Map<String, int>>(
+      future: _countsFuture,
+      builder: (context, snapshot) {
 
-        onIcon1Tap: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(initialTabIndex: 1),
+        final counts = snapshot.data ?? {
+          'registered': 0,
+          'registrationDue': 0,
+          'trackingDue': 0,
+          'hbyc': 0,
+          'deceased': 0,
+        };
+
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppHeader(
+            screenTitle: (l10n?.gridChildCare ?? 'Child Care').toString(),
+            showBack: false,
+            icon1Image: 'assets/images/home.png',
+            onIcon1Tap: () => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(initialTabIndex: 1),
+              ),
+            ),
           ),
-        ),
-      ),
-      drawer: const CustomDrawer(),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          drawer: const CustomDrawer(),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+              child: Column(
                 children: [
-                  _FeatureCard(
-                    width: cardWidth,
-                    title:
-                        (l10n?.childRegisteredBeneficiaryListTitle ??
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCard(
+                        context: context,
+                        title: (l10n?.childRegisteredBeneficiaryListTitle ??
                                 'Registered Child\nBeneficiary List')
                             .toString(),
-                    count: 0,
-                    image: 'assets/images/toddler.png',
-                    onClick: () {
-                      Navigator.pushNamed(
-                        context,
-                        Route_Names.RegisterChildScreen,
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 4),
-                  _FeatureCard(
-                    width: cardWidth,
-                    title:
-                        (l10n?.childRegisteredDueListTitle ??
+                        countKey: 'registered',
+                        image: 'assets/images/toddler.png',
+                        routeName: Route_Names.RegisterChildScreen,
+                        counts: counts,
+                        width: cardWidth,
+                      ),
+                      const SizedBox(width: 4),
+                      _buildCard(
+                        context: context,
+                        title: (l10n?.childRegisteredDueListTitle ??
                                 'Child Registered\nDue List')
                             .toString(),
-                    count: 0,
-                    image: 'assets/images/family.png',
-                    onClick: () {
-                      Navigator.pushNamed(
-                        context,
-                        Route_Names.RegisterChildDueList,
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 4),
-                  _FeatureCard(
-                    width: cardWidth,
-                    title:
-                        (l10n?.childTrackingDueListTitle ??
+                        countKey: 'registrationDue',
+                        image: 'assets/images/family.png',
+                        routeName: Route_Names.RegisterChildDueList,
+                        counts: counts,
+                        width: cardWidth,
+                      ),
+                      const SizedBox(width: 4),
+                      _buildCard(
+                        context: context,
+                        title: (l10n?.childTrackingDueListTitle ??
                                 'Child Tracking\nDue List')
                             .toString(),
-                    count: 0,
-                    image: 'assets/images/notes.png',
-                    onClick: () {
-                      Navigator.pushNamed(
-                        context,
-                        Route_Names.CHildTrackingDueList,
-                      );
-                    },
+                        countKey: 'trackingDue',
+                        image: 'assets/images/notes.png',
+                        routeName: Route_Names.CHildTrackingDueList,
+                        counts: counts,
+                        width: cardWidth,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCard(
+                        context: context,
+                        title: (l10n?.hbycListTitle ?? 'HBYC List').toString(),
+                        countKey: 'hbyc',
+                        image: 'assets/images/pnc-mother.png',
+                        routeName: Route_Names.HBYCList,
+                        counts: counts,
+                        width: cardWidth,
+                      ),
+                      const SizedBox(width: 4),
+                      _buildCard(
+                        context: context,
+                        title: (l10n?.deceasedChildTitle ?? 'Deceased Child')
+                            .toString(),
+                        countKey: 'deceased',
+                        image: 'assets/images/death2.png',
+                        routeName: Route_Names.DeseasedList,
+                        counts: counts,
+                        width: cardWidth,
+                      ),
+                      const SizedBox(width: 4),
+                      // Empty placeholder for alignment
+                      SizedBox(width: cardWidth),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _FeatureCard(
-                    width: cardWidth,
-                    title: (l10n?.hbycListTitle ?? 'HBYC List').toString(),
-                    count: 0,
-                    image: 'assets/images/pnc-mother.png',
-                    onClick: () {
-                      Navigator.pushNamed(context, Route_Names.HBYCList);
-                    },
-                  ),
-                  const SizedBox(width: 4),
-                  _FeatureCard(
-                    width: cardWidth,
-                    title: (l10n?.deceasedChildTitle ?? 'Deceased Child')
-                        .toString(),
-                    count: 0,
-                    image: 'assets/images/death2.png',
-                    onClick: () {
-                      Navigator.pushNamed(context, Route_Names.DeseasedList);
-                    },
-                  ),
-                  const SizedBox(width: 4),
-                  // Empty placeholder for alignment
-                  SizedBox(width: cardWidth),
-                ],
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

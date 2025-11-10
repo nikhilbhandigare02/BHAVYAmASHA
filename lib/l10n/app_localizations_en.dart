@@ -1192,7 +1192,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fatherInLaw => 'Father in Law';
 
   @override
-  String get fatherNameLabel => 'Father name';
+  String get fatherNameLabel => 'Father\'s Name';
 
   @override
   String get fatherSpouseHint => 'Father/Spouse Name';
@@ -1632,7 +1632,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mobileLabel => 'Mobile no.';
 
   @override
-  String get mobileLabelSimple => 'Mobile No.';
+  String get mobileLabelSimple => 'Mobile';
 
   @override
   String get mobileTelephoneLabel => 'Mobile/Telephone Number';
@@ -1894,6 +1894,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rchNumberLabel => 'RCH number';
+
+  @override
+  String get submissionCountLabel => 'Form Submissions';
 
   @override
   String get readLess => 'Read less';
@@ -2885,15 +2888,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
-  String get formSavedTitle => 'Form has been saved successfully';
-
-  @override
-  String get pregnancyAddedToAncMessage => 'Pregnant beneficiary has been added to antenatal care (ANC) list';
-
-  @override
-  String get okButton => 'OK';
-
-  @override
   String get exclusiveBreastfeedingStartedLabel => 'Has exclusive breastfeeding started?*';
 
   @override
@@ -3468,4 +3462,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fourteenWeekDoses => '14 Week Doses';
+
+  @override
+  String get reasonLabel => 'Reason';
+
+  @override
+  String get placeOfDeathLabel => 'Place of Death';
+
+  @override
+  String get causeOfDeathLabel => 'Cause of Death';
+
+  @override
+  String get dateOfDeathLabel => 'Date of Death';
+
+  @override
+  String get deathDetailsLabel => 'Death Details';
+
+  @override
+  String get viewLabel => 'View';
+
+  @override
+  String get editLabel => 'Edit';
+
+  @override
+  String get deleteLabel => 'Delete';
+
+  @override
+  String get closeLabel => 'Close';
+
+  @override
+  String get deceasedChildDetails => 'Deceased Child Details';
 }

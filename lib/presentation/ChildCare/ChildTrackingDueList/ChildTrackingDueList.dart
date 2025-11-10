@@ -99,6 +99,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
           final formDataMap = formData['form_data'] as Map<String, dynamic>? ?? {};
           final childName = formDataMap['child_name']?.toString() ?? '';
+          final beneficiaryRefKey = row['beneficiary_ref_key']?.toString() ?? '';
 
           debugPrint('Child name found: $childName');
 
@@ -106,6 +107,41 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           if (childName.isEmpty) {
             debugPrint('Skipping record with empty child name');
             continue;
+          }
+
+          // Check if case closure exists for this beneficiary
+          if (beneficiaryRefKey.isNotEmpty) {
+            final caseClosureRecords = await db.query(
+              FollowupFormDataTable.table,
+              where: 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0',
+              whereArgs: [beneficiaryRefKey, '%case_closure%'],
+            );
+            
+            if (caseClosureRecords.isNotEmpty) {
+              // Check if any of these records have case_closure with is_case_closure = true
+              bool hasCaseClosure = false;
+              for (final ccRecord in caseClosureRecords) {
+                try {
+                  final ccFormJson = ccRecord['form_json'] as String?;
+                  if (ccFormJson != null) {
+                    final ccFormData = jsonDecode(ccFormJson);
+                    final ccFormDataMap = ccFormData['form_data'] as Map<String, dynamic>? ?? {};
+                    final caseClosure = ccFormDataMap['case_closure'] as Map<String, dynamic>? ?? {};
+                    if (caseClosure['is_case_closure'] == true) {
+                      hasCaseClosure = true;
+                      break;
+                    }
+                  }
+                } catch (e) {
+                  debugPrint('Error checking case closure: $e');
+                }
+              }
+              
+              if (hasCaseClosure) {
+                debugPrint('⏭️ Skipping child $childName - case closure already recorded');
+                continue;
+              }
+            }
           }
 
           // Format registration date
@@ -118,7 +154,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             'hhId': row['household_ref_key']?.toString() ?? 'N/A',
             'RegitrationDate': registrationDate,
             'RegitrationType': 'Child Registration',
-            'BeneficiaryID': row['beneficiary_ref_key']?.toString() ?? 'N/A',
+            'BeneficiaryID': beneficiaryRefKey,
             'RchID': formDataMap['rch_id_child']?.toString() ?? 'N/A',
             'Name': childName,
             'Age|Gender': _formatAgeGender(formDataMap['date_of_birth'], formDataMap['gender']),
@@ -354,16 +390,66 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           return;
         }
         
+        // Prepare complete form data with all user details
+        final completeFormData = {
+          ...formData,
+          // Add reference keys from the card data
+          'household_ref_key': data['hhId']?.toString() ?? '',
+          'household_id': data['hhId']?.toString() ?? '',
+          'beneficiary_ref_key': data['BeneficiaryID']?.toString() ?? '',
+          'beneficiary_id': data['BeneficiaryID']?.toString() ?? '',
+          // Add all user details from the card
+          'child_name': data['Name']?.toString() ?? formData['child_name'] ?? '',
+          'age': data['Age|Gender']?.toString() ?? '',
+          'gender': formData['gender'] ?? '',
+          'father_name': data['FatherName']?.toString() ?? formData['father_name'] ?? '',
+          'mother_name': data['MotherName']?.toString() ?? formData['mother_name'] ?? '',
+          'mobile_number': data['Mobileno.']?.toString() ?? formData['mobile_number'] ?? '',
+          'rch_id': data['RchID']?.toString() ?? formData['rch_id_child'] ?? '',
+          'registration_type': data['RegitrationType']?.toString() ?? 'Child Registration',
+          'registration_date': data['RegitrationDate']?.toString() ?? '',
+        };
+        
+        debugPrint('Complete form data to pass:');
+        debugPrint('  household_ref_key: ${completeFormData['household_ref_key']}');
+        debugPrint('  beneficiary_ref_key: ${completeFormData['beneficiary_ref_key']}');
+        debugPrint('  child_name: ${completeFormData['child_name']}');
+        debugPrint('  age: ${completeFormData['age']}');
+        debugPrint('  gender: ${completeFormData['gender']}');
+        
         Navigator.pushNamed(
           context,
           Route_Names.ChildTrackingDueListForm,
           arguments: {
-            'formData': formData,
+            'formData': completeFormData,
             'isEdit': true,
           },
-        )?.then((_) {
-          // Refresh the list when returning from the form
-          _loadChildTrackingData();
+        )?.then((result) {
+          // Check if form was saved successfully
+          if (result is Map && result['saved'] == true) {
+            debugPrint('✅ Form saved, removing card for beneficiary: ${completeFormData['beneficiary_id']}');
+            
+            // Remove the card from the list immediately
+            setState(() {
+              _childTrackingList.removeWhere((child) {
+                final childBeneficiaryId = child['BeneficiaryID']?.toString() ?? '';
+                final formBeneficiaryId = completeFormData['beneficiary_id']?.toString() ?? '';
+                return childBeneficiaryId == formBeneficiaryId && childBeneficiaryId.isNotEmpty;
+              });
+              _filtered = List<Map<String, dynamic>>.from(_childTrackingList);
+            });
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Case closure recorded. Child removed from tracking list.'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            // If result is null or not saved, refresh the list
+            _loadChildTrackingData();
+          }
         });
       },
       child: Container(

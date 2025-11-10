@@ -32,13 +32,13 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
   void _onLoadFormData(LoadFormData event, Emitter<ChildTrackingFormState> emit) {
     final formData = event.formData;
     final dobStr = formData['date_of_birth']?.toString() ?? '';
-    
+
     DateTime birthDate = DateTime.now();
     if (dobStr.isNotEmpty) {
       try {
         birthDate = DateTime.parse(dobStr);
       } catch (e) {
-        print('❌ Error parsing birth date: $e');
+        print(' Error parsing birth date: $e');
       }
     }
 
@@ -53,7 +53,7 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
     final grams = (double.tryParse(event.weightKg) ?? 0) * 1000;
     final updatedFormData = Map<String, dynamic>.from(state.formData);
     updatedFormData['weight_grams'] = grams.round();
-    
+
     emit(state.copyWith(formData: updatedFormData));
   }
 
@@ -64,89 +64,89 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
   void _onCaseClosureToggled(CaseClosureToggled event, Emitter<ChildTrackingFormState> emit) {
     final updatedData = Map<int, CaseClosureData>.from(state.tabCaseClosureData);
     final currentData = updatedData[event.tabIndex] ?? const CaseClosureData();
-    
+
     updatedData[event.tabIndex] = currentData.copyWith(
       isCaseClosureChecked: event.isChecked,
     );
-    
+
     emit(state.copyWith(tabCaseClosureData: updatedData));
   }
 
   void _onClosureReasonChanged(ClosureReasonChanged event, Emitter<ChildTrackingFormState> emit) {
     final updatedData = Map<int, CaseClosureData>.from(state.tabCaseClosureData);
     final currentData = updatedData[event.tabIndex] ?? const CaseClosureData();
-    
+
     updatedData[event.tabIndex] = currentData.copyWith(
       selectedClosureReason: event.reason,
       showOtherCauseField: event.reason == 'Any other (specify)',
     );
-    
+
     emit(state.copyWith(tabCaseClosureData: updatedData));
   }
 
   void _onMigrationTypeChanged(MigrationTypeChanged event, Emitter<ChildTrackingFormState> emit) {
     final updatedData = Map<int, CaseClosureData>.from(state.tabCaseClosureData);
     final currentData = updatedData[event.tabIndex] ?? const CaseClosureData();
-    
+
     updatedData[event.tabIndex] = currentData.copyWith(migrationType: event.migrationType);
-    
+
     emit(state.copyWith(tabCaseClosureData: updatedData));
   }
 
   void _onDateOfDeathChanged(DateOfDeathChanged event, Emitter<ChildTrackingFormState> emit) {
     final updatedData = Map<int, CaseClosureData>.from(state.tabCaseClosureData);
     final currentData = updatedData[event.tabIndex] ?? const CaseClosureData();
-    
+
     updatedData[event.tabIndex] = currentData.copyWith(dateOfDeath: event.date);
-    
+
     emit(state.copyWith(tabCaseClosureData: updatedData));
   }
 
   void _onProbableCauseOfDeathChanged(ProbableCauseOfDeathChanged event, Emitter<ChildTrackingFormState> emit) {
     final updatedData = Map<int, CaseClosureData>.from(state.tabCaseClosureData);
     final currentData = updatedData[event.tabIndex] ?? const CaseClosureData();
-    
+
     updatedData[event.tabIndex] = currentData.copyWith(
       probableCauseOfDeath: event.cause,
       showOtherCauseField: event.cause == 'Any other (specify)',
     );
-    
+
     emit(state.copyWith(tabCaseClosureData: updatedData));
   }
 
   void _onDeathPlaceChanged(DeathPlaceChanged event, Emitter<ChildTrackingFormState> emit) {
     final updatedData = Map<int, CaseClosureData>.from(state.tabCaseClosureData);
     final currentData = updatedData[event.tabIndex] ?? const CaseClosureData();
-    
+
     updatedData[event.tabIndex] = currentData.copyWith(deathPlace: event.place);
-    
+
     emit(state.copyWith(tabCaseClosureData: updatedData));
   }
 
   void _onReasonOfDeathChanged(ReasonOfDeathChanged event, Emitter<ChildTrackingFormState> emit) {
     final updatedData = Map<int, CaseClosureData>.from(state.tabCaseClosureData);
     final currentData = updatedData[event.tabIndex] ?? const CaseClosureData();
-    
+
     updatedData[event.tabIndex] = currentData.copyWith(reasonOfDeath: event.reason);
-    
+
     emit(state.copyWith(tabCaseClosureData: updatedData));
   }
 
   void _onOtherCauseChanged(OtherCauseChanged event, Emitter<ChildTrackingFormState> emit) {
     final updatedData = Map<int, CaseClosureData>.from(state.tabCaseClosureData);
     final currentData = updatedData[event.tabIndex] ?? const CaseClosureData();
-    
+
     updatedData[event.tabIndex] = currentData.copyWith(otherCause: event.otherCause);
-    
+
     emit(state.copyWith(tabCaseClosureData: updatedData));
   }
 
   void _onOtherReasonChanged(OtherReasonChanged event, Emitter<ChildTrackingFormState> emit) {
     final updatedData = Map<int, CaseClosureData>.from(state.tabCaseClosureData);
     final currentData = updatedData[event.tabIndex] ?? const CaseClosureData();
-    
+
     updatedData[event.tabIndex] = currentData.copyWith(otherReason: event.otherReason);
-    
+
     emit(state.copyWith(tabCaseClosureData: updatedData));
   }
 
@@ -157,7 +157,7 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
       final db = await DatabaseProvider.instance.database;
       final now = DateTime.now().toIso8601String();
       final currentTabIndex = event.currentTabIndex;
-      
+
       // Tab names mapping
       const tabs = [
         'BIRTH DOSE',
@@ -170,14 +170,14 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
         '10 YEAR',
         '16 YEAR',
       ];
-      
+
       final currentTabName = tabs[currentTabIndex];
 
       final formType = FollowupFormDataTable.childTrackingDue;
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Child Tracking Due';
       final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '30bycxe4gv7fqnt6';
 
-      // Get case closure data for the current tab
+
       final caseClosureData = state.tabCaseClosureData[currentTabIndex] ?? const CaseClosureData();
 
       final formData = {
@@ -196,13 +196,13 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
         'updated_at': now,
       };
 
-      // Get beneficiary details from the existing form data
+
       String householdRefKey = state.formData['household_ref_key']?.toString() ?? '';
       String motherKey = state.formData['mother_key']?.toString() ?? '';
       String fatherKey = state.formData['father_key']?.toString() ?? '';
       String beneficiaryRefKey = state.formData['beneficiary_ref_key']?.toString() ?? '';
 
-      // If keys are not in form data, try to get them from the database
+
       if (beneficiaryRefKey.isEmpty && state.formData['beneficiary_id'] != null) {
         beneficiaryRefKey = state.formData['beneficiary_id'].toString();
       }
@@ -321,7 +321,7 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
         throw Exception('Failed to save form data');
       }
     } catch (e) {
-      print('❌ Error saving child tracking form: $e');
+      print(' Error saving child tracking form: $e');
       emit(state.copyWith(
         status: FormStatus.failure,
         errorMessage: 'Error saving form: $e',

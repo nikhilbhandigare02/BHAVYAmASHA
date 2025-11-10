@@ -1896,6 +1896,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get rchNumberLabel => 'RCH number';
 
   @override
+  String get submissionCountLabel => 'Form Submissions';
+
+  @override
   String get readLess => 'कम पढ़ें';
 
   @override
@@ -2885,15 +2888,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
-  String get formSavedTitle => 'फॉर्म सफलतापूर्वक सहेजा गया';
-
-  @override
-  String get pregnancyAddedToAncMessage => 'गर्भवती लाभार्थी को प्रसव पूर्व देखभाल (एएनसी) सूची में जोड़ दिया गया है';
-
-  @override
-  String get okButton => 'ठीक है';
-
-  @override
   String get exclusiveBreastfeedingStartedLabel => 'क्या केवल स्तनपान की शुरुआत हो गई है? *';
 
   @override
@@ -3468,4 +3462,34 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get fourteenWeekDoses => '14 Week Doses';
+
+  @override
+  String get reasonLabel => 'कारण';
+
+  @override
+  String get placeOfDeathLabel => 'मृत्यु स्थान';
+
+  @override
+  String get causeOfDeathLabel => 'मृत्यु का कारण';
+
+  @override
+  String get dateOfDeathLabel => 'मृत्यु की तारीख';
+
+  @override
+  String get deathDetailsLabel => 'मृत्यु विवरण';
+
+  @override
+  String get viewLabel => 'देखें';
+
+  @override
+  String get editLabel => 'संपादित करें';
+
+  @override
+  String get deleteLabel => 'हटाएं';
+
+  @override
+  String get closeLabel => 'बंद करें';
+
+  @override
+  String get deceasedChildDetails => 'मृत बच्चे का विवरण';
 }

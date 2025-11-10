@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'database_provider.dart';
@@ -194,9 +195,9 @@ class LocalStorageDao {
   Future<int> insertFollowupFormData(Map<String, dynamic> data) async {
     final db = await _db;
     
-    print('💾 DAO: Inserting followup form data...');
-    print('💾 DAO: form_json value: ${data['form_json']}');
-    print('💾 DAO: form_json length: ${(data['form_json'] as String?)?.length ?? 0}');
+    print(' DAO: Inserting followup form data...');
+    print(' DAO: form_json value: ${data['form_json']}');
+    print(' DAO: form_json length: ${(data['form_json'] as String?)?.length ?? 0}');
     
     final row = <String, dynamic>{
       'server_id': data['server_id'],
@@ -218,10 +219,10 @@ class LocalStorageDao {
       'is_deleted': data['is_deleted'] ?? 0,
     };
     
-    print('💾 DAO: Row to insert has form_json: ${row['form_json'] != null}');
+    print(' DAO: Row to insert has form_json: ${row['form_json'] != null}');
     
     final id = await db.insert('followup_form_data', row);
-    print('💾 DAO: Inserted with ID: $id');
+    print(' DAO: Inserted with ID: $id');
     
     return id;
   }
@@ -232,6 +233,117 @@ class LocalStorageDao {
       await db.rawQuery('SELECT COUNT(*) FROM households WHERE is_deleted = 0')
     );
     return count ?? 0;
+  }
+
+
+  Future<List<Map<String, dynamic>>> getFollowupFormsWithCaseClosure(String formType) async {
+    final db = await _db;
+    
+    // First, get all forms that have case closure data
+    final forms = await db.query(
+      FollowupFormDataTable.table,
+      where: 'is_deleted = 0 AND form_json LIKE ?',
+      whereArgs: ['%case_closure%'],
+    );
+
+    final List<Map<String, dynamic>> result = [];
+    
+    // Process each form to check for case closure data
+    for (final form in forms) {
+      try {
+        final formJson = form['form_json'] as String?;
+        if (formJson == null || formJson.isEmpty) continue;
+        
+        final formData = jsonDecode(formJson);
+
+        if (formData is Map && formData['form_data'] is Map) {
+          final formDataMap = Map<String, dynamic>.from(formData['form_data'] as Map);
+          final caseClosure = formDataMap['case_closure'] is Map 
+            ? Map<String, dynamic>.from(formDataMap['case_closure'] as Map)
+            : null;
+
+          if (caseClosure != null && 
+              caseClosure['is_case_closure'] == true && 
+              caseClosure['date_of_death'] != null) {
+
+            final childDetails = formDataMap['child_details'] is Map
+              ? Map<String, dynamic>.from(formDataMap['child_details'] as Map)
+              : formDataMap;
+            final registrationData = formDataMap['registration_data'] is Map
+              ? Map<String, dynamic>.from(formDataMap['registration_data'] as Map)
+              : {};
+
+            String beneficiaryRefKey = form['beneficiary_ref_key']?.toString() ?? '';
+            Map<String, dynamic> beneficiaryData = {};
+            
+            if (beneficiaryRefKey.isNotEmpty) {
+              try {
+                final beneficiaryRows = await db.query(
+                  'beneficiaries',
+                  where: 'beneficiary_ref_key = ?',
+                  whereArgs: [beneficiaryRefKey],
+                  limit: 1,
+                );
+                
+                if (beneficiaryRows.isNotEmpty) {
+                  beneficiaryData = beneficiaryRows.first;
+
+                  if (beneficiaryData['registration_type_followup'] is String) {
+                    try {
+                      beneficiaryData['registration_type_followup'] = 
+                        jsonDecode(beneficiaryData['registration_type_followup']);
+                    } catch (e) {
+                      print('Error parsing registration_type_followup: $e');
+                    }
+                  }
+                  
+                  print('Found beneficiary data for key: $beneficiaryRefKey');
+                  print('Beneficiary data: $beneficiaryData');
+                }
+              } catch (e) {
+                print('Error fetching beneficiary data: $e');
+              }
+            }
+
+            final beneficiaryId = formDataMap['beneficiary_id'] ?? formDataMap['beneficiary_ref_key'] ?? '';
+            final householdId = formDataMap['household_id'] ?? formDataMap['household_ref_key'] ?? '';
+            
+            print(' Extracted from formDataMap:');
+            print('  beneficiary_id: $beneficiaryId');
+            print('  household_id: $householdId');
+            print('  All formDataMap keys: ${formDataMap.keys.toList()}');
+            
+            result.add({
+              'id': form['id'],
+              'form_data': formDataMap,
+              'registration_data': registrationData,
+              'child_details': childDetails,
+              'case_closure': caseClosure,
+              'beneficiary_data': beneficiaryData,
+              'name': childDetails['name'] ?? 
+                     '${childDetails['first_name'] ?? ''} ${childDetails['last_name'] ?? ''}'.trim(),
+              'date_of_death': caseClosure['date_of_death'],
+              'cause_of_death': caseClosure['probable_cause_of_death'] ?? 'Not specified',
+              'death_place': caseClosure['death_place'] ?? 'Not specified',
+              'reason': caseClosure['reason_of_death'] ?? 'Not specified',
+              'beneficiary_id': beneficiaryId,
+              'rch_id': formDataMap['rch_id'] ?? '',
+              'household_id': householdId,
+              'mobile_number': formDataMap['mobile_number'] ?? formDataMap['contact_number'] ?? '',
+              'father_name': childDetails['father_name'] ?? formDataMap['father_name'] ?? '',
+              'mother_name': childDetails['mother_name'] ?? formDataMap['mother_name'] ?? '',
+              'age': childDetails['age']?.toString() ?? formDataMap['age']?.toString() ?? '',
+              'gender': childDetails['gender'] ?? formDataMap['gender'] ?? '',
+              'registration_date': registrationData['registration_date'] ?? formDataMap['registration_date'] ?? '',
+            });
+          }
+        }
+      } catch (e) {
+        print('Error processing form ${form['id']}: $e');
+      }
+    }
+    
+    return result;
   }
 
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {

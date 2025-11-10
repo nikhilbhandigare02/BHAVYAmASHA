@@ -1,12 +1,11 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
-import 'package:sizer/sizer.dart';
-import '../../../core/config/routes/Route_Name.dart';
-import '../../../core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
+import '../../../core/config/themes/CustomColors.dart';
 
 class DeseasedList extends StatefulWidget {
   const DeseasedList({super.key});
@@ -17,51 +16,194 @@ class DeseasedList extends StatefulWidget {
 
 class _DeseasedListState extends State<DeseasedList> {
   final TextEditingController _searchCtrl = TextEditingController();
+  final LocalStorageDao _storageDao = LocalStorageDao();
 
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-
-      'RchID': 'RCH123456',
-      'Name': 'Rohit Sharma',
-      'Age|Gender': '27 Y | Male',
-      'Mobileno.': '9876543210',
-      'FatherName': 'Rajesh Sharma',
-      'causeOFDeath': 'Pneumonia',
-      'reason': 'other reason Apart from Maternal',
-      'place': 'Home',
-      'DateofDeath': '16-10-2025',
-
-    },
-    {
-      'hhId': '51016121847',
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-      'causeOFDeath': 'Pneumonia',
-
-      'RchID': 'RCH123456',
-      'Name': 'Rohit Sharma',
-      'Age|Gender': '27 Y | Male',
-      'Mobileno.': '9876543210',
-      'FatherName': 'Rajesh Sharma',
-      'DateofDeath': '16-10-2025',
-      'reason': 'other reason Apart from Maternal',
-      'place': 'Home',
-
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _deceasedList = [];
+  List<Map<String, dynamic>> _filtered = [];
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
     _searchCtrl.addListener(_onSearchChanged);
+    _loadDeceasedList();
+  }
+
+  Future<void> _loadDeceasedList() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Fetch deceased children from child tracking forms with case closure
+      final deceasedChildren = await _storageDao.getFollowupFormsWithCaseClosure(
+        FollowupFormDataTable.childTrackingDue,
+      );
+
+      // Transform to match the expected format
+      final transformed = deceasedChildren.map((child) {
+        // Safe casting helper
+        Map<String, dynamic> safeCastMap(dynamic map) {
+          if (map == null) return {};
+          if (map is Map<String, dynamic>) return map;
+          if (map is Map) return Map<String, dynamic>.from(map);
+          return {};
+        }
+
+        final formData = safeCastMap(child['form_data']);
+        final childDetails = safeCastMap(child['child_details']);
+        final caseClosure = safeCastMap(child['case_closure']);
+        final registrationData = safeCastMap(child['registration_data']);
+        final beneficiaryData = safeCastMap(child['beneficiary_data']);
+
+        // Get age in years if available, otherwise use the raw age
+        String formatAge(dynamic age) {
+          if (age == null) return 'N/A';
+          if (age is int || age is double) {
+            return '$age Y';
+          }
+          return age.toString();
+        }
+
+
+        Map<String, dynamic> registrationFollowup = {};
+        if (beneficiaryData['registration_type_followup'] is Map) {
+          registrationFollowup = beneficiaryData['registration_type_followup'] as Map<String, dynamic>;
+        }
+
+
+        String getName() {
+
+          if (registrationFollowup['name'] != null && registrationFollowup['name'].toString().isNotEmpty) {
+            return registrationFollowup['name'].toString();
+          }
+
+          if (registrationFollowup['child_name'] != null && registrationFollowup['child_name'].toString().isNotEmpty) {
+            return registrationFollowup['child_name'].toString();
+          }
+
+          if (beneficiaryData['name'] != null && beneficiaryData['name'].toString().isNotEmpty) {
+            return beneficiaryData['name'].toString();
+          }
+
+          return child['name']?.toString() ?? 'Unknown';
+        }
+
+        // Get age from registration data
+        String getAge() {
+          var age = registrationFollowup['age'] ?? beneficiaryData['age'] ?? child['age'];
+          if (age == null) return 'N/A';
+          return age.toString();
+        }
+
+        // Get gender from registration data
+        String getGender() {
+          return registrationFollowup['gender']?.toString() ?? 
+                 beneficiaryData['gender']?.toString() ?? 
+                 child['gender']?.toString() ?? 
+                 'N/A';
+        }
+
+        // Get RCH ID from registration data
+        String getRchId() {
+          return registrationFollowup['rch_id']?.toString() ?? 
+                 registrationFollowup['rchId']?.toString() ?? 
+                 beneficiaryData['rch_id']?.toString() ?? 
+                 formData['rch_id']?.toString() ?? 
+                 'N/A';
+        }
+
+        String getBeneficiaryId() {
+          return registrationFollowup['beneficiary_id']?.toString() ??
+                 beneficiaryData['beneficiary_id']?.toString() ?? 
+                 formData['beneficiary_id']?.toString() ?? 
+                 formData['beneficiary_ref_key']?.toString() ?? 
+                 'N/A';
+        }
+
+        // Get registration type from registration data
+        String getRegistrationType() {
+          return registrationFollowup['registration_type']?.toString() ?? 
+                 registrationData['registration_type']?.toString() ?? 
+                 'General';
+        }
+
+        // Get registration date from registration data
+        String getRegistrationDate() {
+          var date = registrationFollowup['registration_date'] ?? 
+                    registrationFollowup['date_of_registration'] ??
+                    registrationData['registration_date'] ?? 
+                    formData['registration_date'];
+          return _formatDate(date) ?? 'N/A';
+        }
+
+        return {
+          'hhId': formData['household_id']?.toString() ?? formData['household_ref_key']?.toString() ?? beneficiaryData['household_id']?.toString() ?? 'N/A',
+          'RegitrationDate': getRegistrationDate(),
+          'RegitrationType': getRegistrationType(),
+          'BeneficiaryID': getBeneficiaryId(),
+          'RchID': getRchId(),
+          'Name': getName(),
+          'Age|Gender': '${formatAge(getAge())} | ${getGender()}',
+          'Mobileno.': formData['mobile_number']?.toString() ?? formData['contact_number']?.toString() ?? beneficiaryData['mobile_number']?.toString() ?? 'N/A',
+          'FatherName': registrationFollowup['father_name']?.toString() ?? beneficiaryData['father_name']?.toString() ?? child['father_name']?.toString() ?? 'N/A',
+          'MotherName': registrationFollowup['mother_name']?.toString() ?? beneficiaryData['mother_name']?.toString() ?? child['mother_name']?.toString() ?? 'N/A',
+          'causeOFDeath': caseClosure['probable_cause_of_death'] ?? 'Not specified',
+          'reason': caseClosure['reason_of_death'] ?? 'Not specified',
+          'place': caseClosure['death_place'] ?? 'Not specified',
+          'DateofDeath': _formatDate(caseClosure['date_of_death']) ?? 'N/A',
+          // Include additional fields that might be needed
+          'age': getAge(),
+          'gender': getGender(),
+        };
+      }).toList();
+
+      // Print the transformed data for debugging
+      print('Loaded ${transformed.length} deceased records');
+      for (var record in transformed) {
+        print('Deceased Record:');
+        print('  Name: ${record['Name']}');
+        print('  HH ID: ${record['hhId']}');
+        print('  Beneficiary ID: ${record['BeneficiaryID']}');
+        print('  Date of Death: ${record['DateofDeath']}');
+      }
+      
+      // Print raw data from DAO for debugging
+      print('\n📋 Raw data from DAO:');
+      for (var child in deceasedChildren) {
+        print('Raw Record:');
+        print('  household_id: ${child['household_id']}');
+        print('  beneficiary_id: ${child['beneficiary_id']}');
+        print('  form_data keys: ${(child['form_data'] as Map?)?.keys.toList()}');
+      }
+
+      setState(() {
+        _deceasedList = transformed;
+        _filtered = List<Map<String, dynamic>>.from(_deceasedList);
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading deceased list: $e');
+      setState(() {
+        _isLoading = false;
+      });
+       
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load deceased list: $e')),
+        );
+      }
+    }
+  }
+
+  String? _formatDate(String? dateString) {
+    if (dateString == null) return null;
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (e) {
+      return dateString;
+    }
   }
 
   @override
@@ -75,15 +217,13 @@ class _DeseasedListState extends State<DeseasedList> {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _filtered = List<Map<String, dynamic>>.from(_deceasedList);
       } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['Name'] as String).toLowerCase().contains(q) ||
-              (e['Mobileno.'] as String).toLowerCase().contains(q) ||
-              (e['village'] as String).toLowerCase().contains(q) ||
-              (e['Tola/Mohalla'] as String).toLowerCase().contains(q) ||
-              (e['BeneficiaryID'] as String).toLowerCase().contains(q);
+        _filtered = _deceasedList.where((e) {
+          return (e['hhId']?.toString() ?? '').toLowerCase().contains(q) ||
+              (e['Name']?.toString() ?? '').toLowerCase().contains(q) ||
+              (e['Mobileno.']?.toString() ?? '').toLowerCase().contains(q) ||
+              (e['BeneficiaryID']?.toString() ?? '').toLowerCase().contains(q);
         }).toList();
       }
     });
@@ -94,60 +234,50 @@ class _DeseasedListState extends State<DeseasedList> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle:   'Deceased Child list',
+        screenTitle: 'Deceased Child List',
         showBack: true,
-
       ),
-      body: Column(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _filtered.isEmpty
+          ? const Center(child: Text('No deceased children found'))
+          : _buildMainContent(),
+    );
+  }
+
+  Widget _buildMainContent() {
+    return SingleChildScrollView(
+      child: Column(
         children: [
-          // 🔍 Search Field
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: 'Search Deceased child',
+                hintText: 'Search by name, ID, or mobile',
                 prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderRadius: BorderRadius.circular(4.0),
                 ),
               ),
             ),
           ),
-
-
-
-          // 📋 List of Households
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            itemCount: _filtered.length,
+            itemBuilder: (context, index) {
+              final data = _filtered[index];
+              return _deceasedCard(context, data);
+            },
           ),
-
-
         ],
       ),
     );
   }
 
-
-  Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
+  Widget _deceasedCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
@@ -179,11 +309,13 @@ class _DeseasedListState extends State<DeseasedList> {
                 padding: const EdgeInsets.all(6),
                 child: Row(
                   children: [
-                    const Icon(Icons.home, color: Colors.black54, size: 18),
+                    const Icon(Icons.home, color: AppColors.primary, size: 16),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        data['hhId'] ?? '',
+                        (data['hhId'] != null && data['hhId'].toString().length > 11)
+                            ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
+                            : (data['hhId']?.toString() ?? ''),
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
@@ -192,16 +324,7 @@ class _DeseasedListState extends State<DeseasedList> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image.asset(
-                        'assets/images/sync.png',
-                        width: 25,
-                        height: 25,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  
                   ],
                 ),
               ),
@@ -210,35 +333,38 @@ class _DeseasedListState extends State<DeseasedList> {
               Container(
                 decoration: BoxDecoration(
                   color: primary.withOpacity(0.95),
-                  borderRadius:
-                  const BorderRadius.vertical(bottom: Radius.circular(6)),
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(6)),
                 ),
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildRow([
-                      _rowText('Registration Date', data['RegitrationDate']),
-                      _rowText('Registration Type', data['RegitrationType']),
-                      _rowText('Beneficiary ID', data['BeneficiaryID']),
+                      _rowText('Registration Date', data['RegitrationDate'] ?? 'N/A'),
+                      _rowText('Registration Type', data['RegitrationType'] ?? 'N/A'),
+                      _rowText('Beneficiary ID',
+                          (data['BeneficiaryID']?.toString().length ?? 0) > 11
+                              ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
+                              : (data['BeneficiaryID']?.toString() ?? 'N/A')
+                      ),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText('Name', data['Name']),
-                      _rowText('Age | Gender', data['Age|Gender']),
-                      _rowText('RCH ID', data['RchID']),
+                      _rowText('Name', data['Name'] ?? 'N/A'),
+                      _rowText('Age | Gender', data['Age|Gender'] ?? 'N/A'),
+                      _rowText('RCH ID', data['RchID'] ?? 'N/A'),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText('Father Name', data['FatherName']),
-                      _rowText('Mobile No.', data['Mobileno.']),
-                      _rowText('Date of Death', data['DateofDeath']),
+                      _rowText('Father Name', data['FatherName'] ?? 'N/A'),
+                      _rowText('Mobile No.', data['Mobileno.'] ?? 'N/A'),
+                      _rowText('Date of Death', data['DateofDeath'] ?? 'N/A'),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText('Cause of Death', data['causeOFDeath']),
-                      _rowText('Reason', data['reason']),
-                      _rowText('Place', data['place']),
+                      _rowText('Cause of Death', data['causeOFDeath'] ?? 'Not specified'),
+                      _rowText('Reason', data['reason'] ?? 'Not specified'),
+                      _rowText('Place', data['place'] ?? 'Not specified'),
                     ]),
                   ],
                 ),
@@ -267,15 +393,97 @@ class _DeseasedListState extends State<DeseasedList> {
       children: [
         Text(
           title,
-          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.background,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w400,
+            fontSize: 13.sp,
+          ),
         ),
       ],
     );
   }
+
+  void _viewDetails(Map<String, dynamic> item) {
+    final l10n = AppLocalizations.of(context);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n?.deceasedChildDetails ?? 'Deceased Child Details'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _detailRow('Name', item['Name']?.toString() ?? 'N/A'),
+              const SizedBox(height: 8),
+              _detailRow('HH ID', item['hhId']?.toString() ?? 'N/A'),
+              const SizedBox(height: 8),
+              _detailRow('Beneficiary ID', item['BeneficiaryID']?.toString() ?? 'N/A'),
+              const SizedBox(height: 8),
+              _detailRow('Age | Gender', item['Age|Gender']?.toString() ?? 'N/A'),
+              const SizedBox(height: 8),
+              _detailRow('Mobile', item['Mobileno.']?.toString() ?? 'N/A'),
+              const SizedBox(height: 8),
+              _detailRow('Father\'s Name', item['FatherName']?.toString() ?? 'N/A'),
+              const SizedBox(height: 16),
+              Text(
+                l10n?.deathDetailsLabel ?? 'Death Details',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const Divider(),
+              const SizedBox(height: 8),
+              _detailRow('Date of Death', item['DateofDeath']?.toString() ?? 'N/A'),
+              const SizedBox(height: 8),
+              _detailRow('Cause of Death', item['causeOFDeath']?.toString() ?? 'Not specified'),
+              const SizedBox(height: 8),
+              _detailRow('Place of Death', item['place']?.toString() ?? 'Not specified'),
+              const SizedBox(height: 8),
+              _detailRow('Reason', item['reason']?.toString() ?? 'Not specified'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n?.closeLabel ?? 'Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailRow(String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.w400,
+            fontSize: 13,
+          ),
+        ),
+      ],
+    );
+  }
+
 
 }
