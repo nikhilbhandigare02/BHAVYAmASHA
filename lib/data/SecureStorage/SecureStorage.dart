@@ -10,6 +10,7 @@ class SecureStorageService {
   static const _keyCurrentUser = 'current_user_id';
   static const String _keyAncVisits = 'anc_visits';
   static const String _keydelivery_outcome = 'delivery_outcome';
+  static const String _keyHbncVisits = 'hbnc_visits';
 
 
   static Future<void> saveToken(String token) async {
@@ -46,12 +47,86 @@ class SecureStorageService {
     await _storage.deleteAll();
   }
 
+  /// Saves complete HBNC visit data to secure storage
+  static Future<void> saveHbncVisit(Map<String, dynamic> visitData) async {
+    try {
+      // Get existing visits
+      final existingData = await _storage.read(key: _keyHbncVisits);
+      List<dynamic> visits = [];
+
+      if (existingData != null) {
+        visits = jsonDecode(existingData);
+      }
+
+      final String? visitId = visitData['visit_id']?.toString();
+      final String? beneficiaryId = visitData['beneficiary_id']?.toString();
+      
+      // If we have both visitId and beneficiaryId, try to update existing visit
+      if (visitId != null && beneficiaryId != null) {
+        bool found = false;
+        for (int i = 0; i < visits.length; i++) {
+          if (visits[i]['visit_id'] == visitId && 
+              visits[i]['beneficiary_id'] == beneficiaryId) {
+            visits[i] = {
+              ...visits[i],
+              ...visitData,
+              'updated_at': DateTime.now().toIso8601String(),
+            };
+            found = true;
+            break;
+          }
+        }
+        
+        // If no existing visit found, add as new
+        if (!found) {
+          visits.add({
+            ...visitData,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+        }
+      } else {
+        // If no visit_id, always add as new visit
+        visits.add({
+          ...visitData,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+      }
+
+      // Save back to storage
+      await _storage.write(
+        key: _keyHbncVisits,
+        value: jsonEncode(visits),
+      );
+    } catch (e) {
+      print('Error saving HBNC visit: $e');
+      rethrow;
+    }
+  }
+
+  /// Retrieves all HBNC visits for a specific beneficiary
+  static Future<List<Map<String, dynamic>>> getHbncVisits(String beneficiaryId) async {
+    try {
+      final data = await _storage.read(key: _keyHbncVisits);
+      if (data == null) return [];
+      
+      final List<dynamic> visits = jsonDecode(data);
+      return visits
+          .where((visit) => visit['beneficiary_id'] == beneficiaryId)
+          .map((visit) => Map<String, dynamic>.from(visit))
+          .toList();
+    } catch (e) {
+      print('Error retrieving HBNC visits: $e');
+      return [];
+    }
+  }
+
   // Delete specific data
   static Future<void> delete(String key) async {
     await _storage.delete(key: key);
   }
 
-  // Save ANC visit data
 
   static Future<void> saveDeliveryOutcome(Map<String, dynamic> outcomeData) async {
     try {
@@ -63,15 +138,12 @@ class SecureStorageService {
         outcomes = jsonDecode(existingData);
       }
 
-      // Check if we have a beneficiaryId to look for
       final String? beneficiaryId = outcomeData['beneficiaryId']?.toString();
       bool found = false;
 
       if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
-        // Look for existing entry with the same beneficiaryId
         for (int i = 0; i < outcomes.length; i++) {
           if (outcomes[i]['beneficiaryId']?.toString() == beneficiaryId) {
-            // Update existing entry
             outcomes[i] = {
               ...outcomes[i], // Keep existing data
               ...outcomeData,  // Update with new data
@@ -347,6 +419,29 @@ class SecureStorageService {
       return 0;
     }
   }
+  static Future<int> getVisitCount(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiaryId provided to getVisitCount');
+        return 0;
+      }
+
+      final key = 'submission_count_$beneficiaryId';
+      final countStr = await _storage.read(key: key);
+
+      if (countStr == null) {
+        print('ℹ️ No submission count found for beneficiary: $beneficiaryId');
+        return 0;
+      }
+
+      final count = int.tryParse(countStr) ?? 0;
+      print('ℹ️ Found submission count for $beneficiaryId: $count');
+      return count;
+    } catch (e) {
+      print('❌ Error getting submission count for $beneficiaryId: $e');
+      return 0;
+    }
+  }
 
   // Increment submission count for a beneficiary
   static Future<int> incrementSubmissionCount(String beneficiaryId) async {
@@ -377,4 +472,33 @@ class SecureStorageService {
       return 0;
     }
   }
+
+  static Future<int> incrementVisitCount(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiaryId provided to incrementVisitCount');
+        return 0;
+      }
+
+      final key = 'visit_count_$beneficiaryId';
+      final currentCount = await getSubmissionCount(beneficiaryId);
+      final newCount = currentCount + 2;
+
+      print('ℹ️ Incrementing count for $beneficiaryId from $currentCount to $newCount');
+      await _storage.write(key: key, value: newCount.toString());
+
+      final savedCount = await _storage.read(key: key);
+      if (savedCount == newCount.toString()) {
+        print('✅ Successfully updated count for $beneficiaryId to $newCount');
+      } else {
+        print('⚠️ Failed to verify count update for $beneficiaryId');
+      }
+
+      return newCount;
+    } catch (e) {
+      print('❌ Error incrementing submission count for $beneficiaryId: $e');
+      return 0;
+    }
+  }
+
 }

@@ -46,11 +46,25 @@ class VisitDetailsChanged extends HbncVisitEvent {
   List<Object?> get props => [field, value];
 }
 
-class SubmitHbncVisit extends HbncVisitEvent {}
+class SubmitHbncVisit extends HbncVisitEvent {
+  final Map<String, dynamic>? beneficiaryData;
+  
+  const SubmitHbncVisit({this.beneficiaryData});
+  
+  @override
+  List<Object?> get props => [beneficiaryData];
+}
 
 class ResetHbncVisitForm extends HbncVisitEvent {}
 
-class SaveHbncVisit extends HbncVisitEvent {}
+class SaveHbncVisit extends HbncVisitEvent {
+  final Map<String, dynamic>? beneficiaryData;
+  
+  const SaveHbncVisit({this.beneficiaryData});
+  
+  @override
+  List<Object?> get props => [beneficiaryData];
+}
 
 class ValidateSection extends HbncVisitEvent {
   final int index;

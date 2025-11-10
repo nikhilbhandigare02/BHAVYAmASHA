@@ -3,13 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_bloc.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_state.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_event.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
 class GeneralDetailsTab extends StatelessWidget {
-  const GeneralDetailsTab({super.key});
+  final String beneficiaryId;
+  
+  const GeneralDetailsTab({super.key, required this.beneficiaryId});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +22,18 @@ class GeneralDetailsTab extends StatelessWidget {
         final visitMap = state.visitDetails;
         final dynamic dayRaw = visitMap['visitNumber'];
         final int? selectedDay = dayRaw is int ? dayRaw : int.tryParse('$dayRaw');
-        final DateTime? visitDate = visitMap['visitDate'] as DateTime?;
+        // Set default visit date to current date if not already set
+        final DateTime currentDate = DateTime.now();
+        final DateTime visitDate = visitMap['visitDate'] as DateTime? ?? currentDate;
+        
+        // If visitDate was null, update it with current date
+        if (visitMap['visitDate'] == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<HbncVisitBloc>().add(
+              VisitDetailsChanged(field: 'visitDate', value: currentDate),
+            );
+          });
+        }
 
         return ListView(
           padding: const EdgeInsets.all(8),
@@ -29,15 +43,36 @@ class GeneralDetailsTab extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ApiDropdown<int>(
-                    labelText: t.homeVisitDayLabel,
-                    items: const [1, 2, 3, 4, 5, 6, 7],
-                    getLabel: (v) => v.toString(),
-                    value: selectedDay,
-                    onChanged: (val) {
-                      context.read<HbncVisitBloc>().add(
-                            VisitDetailsChanged(field: 'visitNumber', value: val),
-                          );
+                  FutureBuilder<int>(
+                    future: SecureStorageService.getVisitCount(beneficiaryId),
+                    builder: (context, snapshot) {
+                      final visitCount = snapshot.data ?? 0;
+
+                      if (selectedDay == null && visitCount <= 7) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          context.read<HbncVisitBloc>().add(
+                                VisitDetailsChanged(field: 'visitNumber', value: visitCount),
+                              );
+                        });
+                      }
+                      
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          ApiDropdown<int>(
+                            labelText: t.homeVisitDayLabel,
+                            items: List.generate(7, (index) => index + 1),
+                            getLabel: (v) => v.toString(),
+                            value: selectedDay ?? visitCount,
+                            onChanged: (val) {
+                              context.read<HbncVisitBloc>().add(
+                                    VisitDetailsChanged(field: 'visitNumber', value: val),
+                                  );
+                            },
+                          ),
+                        ],
+                      );
                     },
                   ),
                   const Divider(),
@@ -45,6 +80,8 @@ class GeneralDetailsTab extends StatelessWidget {
                     labelText: t.dateOfHomeVisitLabel,
                     hintText: t.dateOfHomeVisitLabel,
                     initialDate: visitDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
                     onDateChanged: (date) {
                       context.read<HbncVisitBloc>().add(
                             VisitDetailsChanged(field: 'visitDate', value: date),

@@ -2,6 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../../../core/utils/device_info_utils.dart';
+import '../../../../data/Local_Storage/User_Info.dart';
+import '../../../../data/Local_Storage/database_provider.dart';
+import '../../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../../../data/SecureStorage/SecureStorage.dart';
 import 'hbcn_visit_event.dart';
 import 'hbcn_visit_state.dart';
 
@@ -22,12 +28,225 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
     emit(state.copyWith(isSaving: true, saveSuccess: false, errorMessage: null));
 
     try {
-      // Simulate a quick local save/draft
-      print('Saving HBNC visit (draft)');
-      await Future.delayed(const Duration(milliseconds: 800));
-      emit(state.copyWith(isSaving: false, saveSuccess: true));
+      // Validate required fields before saving
+      final validationErrors = <String>[];
+      final visitDetails = state.visitDetails;
+      
+      if (visitDetails['visitDate'] == null) {
+        validationErrors.add('Visit date is required');
+      }
+      if (visitDetails['visitNumber']?.toString().isEmpty ?? true) {
+        validationErrors.add('Visit number is required');
+      }
+      
+      if (validationErrors.isNotEmpty) {
+        emit(state.copyWith(
+          isSaving: false,
+          errorMessage: validationErrors.join('\n'),
+          validationErrors: validationErrors,
+        ));
+        return;
+      }
+
+      // Prepare data for saving
+      emit(state.copyWith(isSubmitting: true, errorMessage: null));
+
+      try {
+        final db = await DatabaseProvider.instance.database;
+        final now = DateTime.now().toIso8601String();
+        final beneficiaryId = event.beneficiaryData != null
+            ? (event.beneficiaryData!['unique_key']?.toString() ?? '')
+            : '';
+
+        final formType = FollowupFormDataTable.hbycForm;
+        final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Delivery Outcome';
+        final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
+
+        String? beneficiaryRefKey = beneficiaryId.isNotEmpty ? beneficiaryId : null;
+
+        // Helper function to convert DateTime objects to ISO strings
+        Map<String, dynamic> _convertDatesToStrings(Map<String, dynamic> data) {
+          return data.map((key, value) {
+            if (value is DateTime) {
+              return MapEntry(key, value.toIso8601String());
+            } else if (value is Map<String, dynamic>) {
+              return MapEntry(key, _convertDatesToStrings(value));
+            } else if (value is Map) {
+              return MapEntry(key, _convertDatesToStrings(Map<String, dynamic>.from(value)));
+            }
+            return MapEntry(key, value);
+          });
+        }
+
+        final processedMotherDetails = _convertDatesToStrings(Map<String, dynamic>.from(state.motherDetails));
+        final processedNewbornDetails = _convertDatesToStrings(Map<String, dynamic>.from(state.newbornDetails));
+        final processedVisitDetails = _convertDatesToStrings(Map<String, dynamic>.from(state.visitDetails));
+
+        final formData = {
+          'form_type': formType,
+          'form_name': formName,
+          'unique_key': formsRefKey,
+          'form_data': {
+            'beneficiaryId': beneficiaryId.length >= 11
+                ? beneficiaryId.substring(beneficiaryId.length - 11)
+                : beneficiaryId,
+            'motherDetails': processedMotherDetails,
+            'newbornDetails': processedNewbornDetails,
+            'visitDetails': processedVisitDetails,
+          },
+          'created_at': now,
+          'updated_at': now,
+        };
+
+        String householdRefKey = '';
+        String motherKey = '';
+        String fatherKey = '';
+
+        if (beneficiaryId.isNotEmpty) {
+          List<Map<String, dynamic>> beneficiaryMaps = await db.query(
+            'beneficiaries',
+            where: 'unique_key = ?',
+            whereArgs: [beneficiaryId],
+          );
+
+          if (beneficiaryMaps.isEmpty) {
+            beneficiaryMaps = await db.query(
+              'beneficiaries',
+              where: 'id = ?',
+              whereArgs: [int.tryParse(beneficiaryId) ?? 0],
+            );
+          }
+
+          if (beneficiaryMaps.isNotEmpty) {
+            final beneficiary = beneficiaryMaps.first;
+            householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
+            motherKey = beneficiary['mother_key'] as String? ?? '';
+            fatherKey = beneficiary['father_key'] as String? ?? '';
+          }
+        }
+
+        final formDataForDb = {
+          'server_id': '',
+          'forms_ref_key': formsRefKey,
+          'household_ref_key': householdRefKey,
+          'beneficiary_ref_key': beneficiaryId,
+          'mother_key': motherKey,
+          'father_key': fatherKey,
+          'child_care_state': '',
+          'device_details': jsonEncode({
+            'id': await DeviceInfo.getDeviceInfo().then((value) => value.deviceId),
+            'platform': await DeviceInfo.getDeviceInfo().then((value) => value.platform),
+            'version': await DeviceInfo.getDeviceInfo().then((value) => value.osVersion),
+          }),
+          'app_details': jsonEncode({
+            'app_version': await DeviceInfo.getDeviceInfo().then((value) => value.appVersion.split('+').first),
+            'app_name': await DeviceInfo.getDeviceInfo().then((value) => value.appName),
+            'build_number': await DeviceInfo.getDeviceInfo().then((value) => value.buildNumber),
+            'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
+          }),
+          'parent_user': '',
+          'current_user_key': '',
+          'facility_id': await UserInfo.getCurrentUser().then((value) {
+            if (value != null) {
+              if (value['details'] is String) {
+                try {
+                  final userDetails = jsonDecode(value['details'] ?? '{}');
+                  return userDetails['asha_associated_with_facility_id'] ??
+                      userDetails['facility_id'] ??
+                      userDetails['facilityId'] ??
+                      userDetails['facility'] ??
+                      0;
+                } catch (e) {
+                  return 0;
+                }
+              } else if (value['details'] is Map) {
+                final userDetails = Map<String, dynamic>.from(value['details']);
+                return userDetails['asha_associated_with_facility_id'] ??
+                    userDetails['facility_id'] ??
+                    userDetails['facilityId'] ??
+                    userDetails['facility'] ??
+                    0;
+              }
+            }
+            return 0;
+          }),
+          'form_json': jsonEncode(formData),
+          'created_date_time': now,
+          'modified_date_time': now,
+          'is_synced': 0,
+          'is_deleted': 0,
+        };
+
+        try {
+          final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
+
+          try {
+            final outcomeData = {
+              'id': formId,
+              'beneficiaryId': beneficiaryId.length >= 11
+                  ? beneficiaryId.substring(beneficiaryId.length - 11)
+                  : beneficiaryId,
+              'motherDetails': processedMotherDetails,
+              'newbornDetails': processedNewbornDetails,
+              'visitDetails': processedVisitDetails,
+              'isSubmit': true,
+              'form_data': formDataForDb,
+            };
+
+            // Save to secure storage for offline access
+            await SecureStorageService.saveDeliveryOutcome(outcomeData);
+
+            // Update submission status and reset loading states
+            emit(state.copyWith(
+              isSubmitting: false,
+              isSaving: false,
+              saveSuccess: true,
+              errorMessage: null,
+            ));
+
+            if (beneficiaryId.isNotEmpty) {
+              try {
+                final newCount = await SecureStorageService.incrementVisitCount(beneficiaryId);
+                print('Submission count for beneficiary $beneficiaryId: $newCount');
+              } catch (e) {
+                print('Error updating submission count: $e');
+              }
+            }
+          } catch (e) {
+            print('Error saving to secure storage: $e');
+            emit(state.copyWith(
+              isSubmitting: false,
+              isSaving: false,
+              saveSuccess: true,
+              errorMessage: 'Failed to save delivery outcome to secure storage.',
+            ));
+          }
+        } catch (e) {
+          print('Error saving delivery outcome to database: $e');
+          emit(state.copyWith(
+            isSubmitting: false,
+            isSaving: false,
+            saveSuccess: true,
+            errorMessage: 'Failed to save delivery outcome to database.',
+          ));
+        }
+      } catch (e, stackTrace) {
+        print('Error in delivery outcome submission: $e');
+        print('Stack trace: $stackTrace');
+        emit(state.copyWith(
+          isSubmitting: false,
+          isSaving: false,
+          saveSuccess: true,
+          errorMessage: 'An unexpected error occurred. Please try again.',
+        ));
+      }
     } catch (e) {
-      emit(state.copyWith(isSaving: false, errorMessage: 'Failed to save HBNC visit: $e'));
+      print('Error saving HBNC visit: $e');
+      emit(state.copyWith(
+        isSaving: false,
+        saveSuccess: true,
+        errorMessage: 'Failed to save HBNC visit: ${e.toString()}',
+      ));
     }
   }
 
@@ -69,7 +288,9 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
 
       emit(state.copyWith(
         isSubmitting: false,
-        isSuccess: true,
+        isSaving: false,
+        saveSuccess: true,
+
       ));
     } catch (e) {
       emit(state.copyWith(

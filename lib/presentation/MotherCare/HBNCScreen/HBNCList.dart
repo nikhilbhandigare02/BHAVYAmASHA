@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -80,10 +81,10 @@ class _HBNCListScreenState
 
         // Check if this beneficiary is in our birthBeneficiaryIds set
         // Check if this beneficiary is in our submitted outcomes
-        final beneficiaryId = uniqueKey.length >= 11 
+        final beneficiaryId = uniqueKey.length >= 11
             ? uniqueKey.substring(uniqueKey.length - 11)
             : uniqueKey;
-            
+
         if (submittedBeneficiaryIds.contains(beneficiaryId)) {
           final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
           final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
@@ -296,48 +297,23 @@ class _HBNCListScreenState
           onTap: () {
             final beneficiaryData = <String, dynamic>{};
 
-            print('📋 Raw data: $data');
-
             if (data['_rawRow'] is Map) {
               final rawRow = data['_rawRow'] as Map;
-              final uniqueKey = rawRow['unique_key']?.toString() ?? '';
-              final beneficiaryId = uniqueKey.length > 11
-                  ? uniqueKey.substring(uniqueKey.length - 11)
-                  : uniqueKey;
-
-              beneficiaryData['unique_key'] = uniqueKey;
-              beneficiaryData['BeneficiaryID'] = beneficiaryId;
+              beneficiaryData['unique_key'] = rawRow['unique_key'];
+              beneficiaryData['BeneficiaryID'] = rawRow['BeneficiaryID'];
 
               print('🔑 Passing to form:');
               print('   - unique_key: ${beneficiaryData['unique_key']}');
-              print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']} (derived from unique_key)');
-            }
-            else if (data['BeneficiaryID'] != null) {
-              beneficiaryData['BeneficiaryID'] = data['BeneficiaryID'].toString();
-              print('🔍 Using direct BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
-            }
-            // Last resort - try to get from the data map
-            else {
-              final uniqueKey = data['_rawRow']?['unique_key']?.toString() ?? '';
-              final beneficiaryId = uniqueKey.isNotEmpty
-                  ? (uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey)
-                  : '';
-
-              beneficiaryData['BeneficiaryID'] = beneficiaryId;
-              print('⚠️ Using fallback BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
-            }
-
-            if ((beneficiaryData['BeneficiaryID'] as String?)?.isEmpty ?? true) {
-              print('❌ No BeneficiaryID could be determined!');
+              print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
             }
 
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => OutcomeFormPage(beneficiaryData: beneficiaryData),
+                builder: (context) => HbncVisitScreen(beneficiaryData: beneficiaryData),
               ),
             );
-         },
+          },
 
           borderRadius: BorderRadius.circular(8),
           child: Container(
