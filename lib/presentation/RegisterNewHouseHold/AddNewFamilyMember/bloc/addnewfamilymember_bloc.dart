@@ -26,19 +26,23 @@ class AddnewfamilymemberBloc
     );
     on<AnmToggleUseDob>((e, emit) {
       final toggled = !(state.useDob);
-      emit(state.copyWith(
-        useDob: toggled,
-        // Preserve the existing date when toggling
-        dob: toggled ? state.dob : null,
-        approxAge: toggled ? null : state.approxAge,
-      ));
+      emit(
+        state.copyWith(
+          useDob: toggled,
+          // Preserve the existing date when toggling
+          dob: toggled ? state.dob : null,
+          approxAge: toggled ? null : state.approxAge,
+        ),
+      );
     });
     on<AnmUpdateDob>((e, emit) {
-      emit(state.copyWith(
-        dob: e.value,
+      emit(
+        state.copyWith(
+          dob: e.value,
 
-        approxAge: e.value != null ? null : state.approxAge,
-      ));
+          approxAge: e.value != null ? null : state.approxAge,
+        ),
+      );
     });
     on<AnmUpdateApproxAge>(
       (e, emit) => emit(state.copyWith(approxAge: e.value)),
@@ -95,7 +99,6 @@ class AddnewfamilymemberBloc
       (e, emit) => emit(state.copyWith(ageAtMarriage: e.value)),
     );
     on<AnmUpdateSpouseName>(
-
       (e, emit) => emit(state.copyWith(spouseName: e.value)),
     );
     on<AnmUpdateHasChildren>(
@@ -121,7 +124,6 @@ class AddnewfamilymemberBloc
       emit(newState);
       print('Updated deathPlace: ${newState.deathPlace}');
     });
-
 
     on<AnmSubmit>((event, emit) async {
       emit(
@@ -192,110 +194,6 @@ class AddnewfamilymemberBloc
           ),
         );
         return;
-      }
-
-      try {
-        // Prepare member data
-        final memberData = {
-          'memberType': state.memberType,
-          'name': state.name,
-          'relation': state.relation,
-          'fatherName': state.fatherName,
-          'motherName': state.motherName,
-          'gender': state.gender,
-          'dob': state.dob?.toIso8601String(),
-          'approxAge': state.approxAge,
-          'birthOrder': state.birthOrder,
-          'maritalStatus': state.maritalStatus,
-          'ageAtMarriage': state.ageAtMarriage,
-          'spouseName': state.spouseName,
-          'hasChildren': state.hasChildren,
-          'isPregnant': state.isPregnant,
-          'mobileNo': state.mobileNo,
-          'mobileOwner': state.mobileOwner,
-          'education': state.education,
-          'occupation': state.occupation,
-          'religion': state.religion,
-          'category': state.category,
-          'bankAcc': state.bankAcc,
-          'ifsc': state.ifsc,
-          'voterId': state.voterId,
-          'rationId': state.rationId,
-          'phId': state.phId,
-          'abhaAddress': state.abhaAddress,
-          'richId': state.RichIDChanged,
-          'birthCertificate': state.BirthCertificateChange,
-          'weight': state.WeightChange,
-          'school': state.ChildSchool,
-          'createdAt': DateTime.now().toIso8601String(),
-        };
-
-        // Get the HHID from the event
-        final hhid = event.hhid;
-        if (hhid.isEmpty) {
-          throw Exception('Household ID is required');
-        }
-
-        // Get existing beneficiaries for this household
-        final beneficiaries = await _localStorageDao.getBeneficiariesByHousehold(hhid);
-        
-        if (beneficiaries.isNotEmpty) {
-          // Find the head of household to update member_details
-          final headBeneficiary = beneficiaries.firstWhere(
-            (b) => b['beneficiary_info']?['head_details'] != null,
-            orElse: () => {},
-          );
-
-          if (headBeneficiary.isNotEmpty) {
-            // Update existing household with new member
-            final updatedBeneficiary = Map<String, dynamic>.from(headBeneficiary);
-            var beneficiaryInfo = Map<String, dynamic>.from(updatedBeneficiary['beneficiary_info'] ?? {});
-            
-            // Initialize member_details if it doesn't exist
-            if (beneficiaryInfo['member_details'] == null) {
-              beneficiaryInfo['member_details'] = [];
-            }
-            
-            // Add new member to member_details
-            (beneficiaryInfo['member_details'] as List).add(memberData);
-            
-            // Update the beneficiary in local storage
-            updatedBeneficiary['beneficiary_info'] = beneficiaryInfo;
-            await _localStorageDao.updateBeneficiary(updatedBeneficiary);
-          } else {
-            // This should not happen as every household should have a head
-            throw Exception('No head found for the household');
-          }
-        } else {
-          // This is a new household, create a new entry with this as head
-          final newBeneficiary = {
-            'household_ref_key': hhid,
-            'unique_key': '${DateTime.now().millisecondsSinceEpoch}_${DateTime.now().millisecond}',
-            'beneficiary_state': 'active',
-            'beneficiary_info': {
-              'head_details': memberData,
-              'member_details': [],
-              'spouse_details': null,
-              'children_details': null,
-            },
-            'is_adult': state.memberType == 'Adult' ? 1 : 0,
-            'created_date_time': DateTime.now().toIso8601String(),
-            'modified_date_time': DateTime.now().toIso8601String(),
-            'is_synced': 0,
-            'is_deleted': 0,
-          };
-          
-          await _localStorageDao.insertBeneficiary(newBeneficiary);
-        }
-
-        emit(state.copyWith(postApiStatus: PostApiStatus.success));
-      } catch (e) {
-        emit(
-          state.copyWith(
-            postApiStatus: PostApiStatus.error,
-            errorMessage: 'Failed to save member: ${e.toString()}',
-          ),
-        );
       }
     });
   }

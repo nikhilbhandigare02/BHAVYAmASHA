@@ -1,7 +1,18 @@
 part of 'add_family_head_bloc.dart';
 
+
 @immutable
 sealed class AddFamilyHeadEvent {}
+
+@immutable
+class AfhSubmit extends AddFamilyHeadEvent {
+  final BuildContext context;
+  
+   AfhSubmit({required this.context});
+  
+  @override
+  List<Object> get props => [context];
+}
 
 final class AfhToggleUseDob extends AddFamilyHeadEvent {}
 
@@ -169,7 +180,6 @@ final class AfhUpdateIsPregnant extends AddFamilyHeadEvent {
   AfhUpdateIsPregnant(this.value);
 }
 
-final class AfhSubmit extends AddFamilyHeadEvent {}
 
 final class AfhHydrate extends AddFamilyHeadEvent {
   final AddFamilyHeadState value;

@@ -1054,7 +1054,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                                         );
                                                         return;
                                                       }
-                                                      context.read<AddFamilyHeadBloc>().add(AfhSubmit());
+                                                      context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
                                                     },
                                                   ),
                                                 ),
@@ -1112,7 +1112,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                                           controller.animateTo(i + 1);
                                                         } else {
                                                           // last tab → submit
-                                                          context.read<AddFamilyHeadBloc>().add(AfhSubmit());
+context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
                                                         }
                                                       },
                                                       color: AppColors.primary,
