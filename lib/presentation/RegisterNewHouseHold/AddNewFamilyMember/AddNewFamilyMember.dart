@@ -15,6 +15,12 @@ import '../../../core/utils/Validations.dart' show Validations;
 import '../../../core/utils/enums.dart';
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'bloc/addnewfamilymember_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart' show MultiBlocProvider;
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/SpousDetails.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/bloc/spous_bloc.dart' hide RichIDChanged;
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/ChildrenDetaills.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/bloc/children_bloc.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart' hide ChildrenChanged;
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
 class AddNewFamilyMemberScreen extends StatefulWidget {
@@ -45,6 +51,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   bool _argsHandled = false;
   String _fatherOption = 'Select';
   String _motherOption = 'Select';
+  int _currentStep = 0; // 0: member, 1: spouse, 2: children
+  bool _tabListenerAttached = false;
+  bool _syncingGender = false;
 
   String? _headName;
   String? _headGender;
@@ -56,6 +65,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   Widget _section(Widget child) => Padding(padding: const EdgeInsets.only(bottom: 4), child: child);
 
   late final AddnewfamilymemberBloc _bloc;
+  late final SpousBloc _spousBloc;
+  late final ChildrenBloc _childrenBloc;
+  late final AddFamilyHeadBloc _dummyHeadBloc;
 
   String _formatGender(String? gender) {
     if (gender == null) return 'Other';
@@ -65,10 +77,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     return 'Other';
   }
 
+  String _oppositeGender(String? gender) {
+    final g = _formatGender(gender);
+    if (g == 'Male') return 'Female';
+    if (g == 'Female') return 'Male';
+    return 'Other';
+  }
+
   @override
   void initState() {
     super.initState();
     _bloc = AddnewfamilymemberBloc();
+    _spousBloc = SpousBloc();
+    _childrenBloc = ChildrenBloc();
+    // Dummy head bloc to satisfy reused spouse/children widgets' dependency
+    _dummyHeadBloc = AddFamilyHeadBloc();
     
 
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
@@ -133,6 +156,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   @override
   void dispose() {
     _bloc.close();
+    _spousBloc.close();
+    _childrenBloc.close();
+    _dummyHeadBloc.close();
     super.dispose();
   }
 
@@ -152,8 +178,16 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       _argsHandled = true;
     }
     _isEdit = _isEdit || widget.isEdit;
-   return BlocProvider.value(
-      value: _bloc,
+   return DefaultTabController(
+      length: 3,
+      initialIndex: _currentStep.clamp(0, 2),
+      child: MultiBlocProvider(
+      providers: [
+        BlocProvider<AddnewfamilymemberBloc>.value(value: _bloc),
+        BlocProvider<SpousBloc>.value(value: _spousBloc),
+        BlocProvider<ChildrenBloc>.value(value: _childrenBloc),
+        BlocProvider<AddFamilyHeadBloc>.value(value: _dummyHeadBloc),
+      ],
       child: WillPopScope(
           onWillPop: () async {
             final shouldExit = await showConfirmationDialog(
@@ -185,13 +219,84 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
 
             body: SafeArea(
-              child: Column(
+              child: BlocListener<SpousBloc, SpousState>(
+                listenWhen: (p, c) => p.gender != c.gender,
+                listener: (context, sp) {
+                  if (_syncingGender) return;
+                  _syncingGender = true;
+                  try {
+                    final desired = _oppositeGender(sp.gender);
+                    final mb = context.read<AddnewfamilymemberBloc>();
+                    if (mb.state.gender != desired) {
+                      mb.add(AnmUpdateGender(desired));
+                    }
+                  } finally {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _syncingGender = false;
+                    });
+                  }
+                },
+                child: Column(
                 children: [
+                  // Top Tabs
+                  SizedBox(
+                    height: 44,
+                    child: Builder(
+                      builder: (ctx) {
+                        final ctrl = DefaultTabController.of(ctx);
+                        if (!_tabListenerAttached && ctrl != null) {
+                          _tabListenerAttached = true;
+                          ctrl.addListener(() {
+                            if (!mounted) return;
+                            setState(() { _currentStep = ctrl.index; });
+                          });
+                        }
+                        return BlocBuilder<AddnewfamilymemberBloc, AddnewfamilymemberState>(
+                          builder: (ctx2, st) {
+                            final spouseAllowed = st.memberType != 'Child' && st.maritalStatus == 'Married';
+                            final childrenAllowed = spouseAllowed && st.hasChildren == 'Yes';
+                            return TabBar(
+                              isScrollable: true,
+                              labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+                              onTap: (i) {
+                                final ctrl = DefaultTabController.of(ctx);
+                                int target = i;
+                                if (i == 1 && !spouseAllowed) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Set Marital Status = Married to fill Spouse details.')),
+                                  );
+                                  target = 0;
+                                } else if (i == 2 && !childrenAllowed) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Select Have Children = Yes to fill Children details.')),
+                                  );
+                                  target = spouseAllowed ? 1 : 0;
+                                }
+                                setState(() { _currentStep = target; });
+                                ctrl?.animateTo(target);
+                              },
+                              tabs: [
+                                const Tab(text: 'Member Details'),
+                                Tab(child: Opacity(opacity: spouseAllowed ? 1.0 : 0.0, child: const Text('Spouse Details'))),
+                                Tab(child: Opacity(opacity: childrenAllowed ? 1.0 : 0.0, child: const Text('Children Details'))),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
                   Expanded(
                     child: Form(
                       key: _formKey,
                       child: BlocBuilder<AddnewfamilymemberBloc, AddnewfamilymemberState>(
                         builder: (context, state) {
+                          if (_currentStep == 1) {
+                            return SizedBox.expand(child: Spousdetails());
+                          }
+                          if (_currentStep == 2) {
+                            return SizedBox.expand(child: Childrendetaills());
+                          }
                           return ListView(
                             padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
                             children: [
@@ -438,7 +543,25 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     }
                                   },
                                   value: state.gender,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateGender(v!)),
+                                  onChanged: (v) {
+                                    if (v == null) return;
+                                    final memberGender = v;
+                                    context.read<AddnewfamilymemberBloc>().add(AnmUpdateGender(memberGender));
+                                    // Auto set spouse gender opposite
+                                    try {
+                                      if (_syncingGender) return;
+                                      _syncingGender = true;
+                                      final opposite = _oppositeGender(memberGender);
+                                      final spBloc = context.read<SpousBloc>();
+                                      if (spBloc.state.gender != opposite) {
+                                        spBloc.add(SpUpdateGender(opposite));
+                                      }
+                                    } finally {
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        _syncingGender = false;
+                                      });
+                                    }
+                                  },
                                   validator: (value) => Validations.validateGender(l, value),
 
                                 ),
@@ -945,7 +1068,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       }
                                     },
                                     value: state.maritalStatus,
-                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMaritalStatus(v!)),
+                                    onChanged: (v) {
+                                      context.read<AddnewfamilymemberBloc>().add(AnmUpdateMaritalStatus(v!));
+                                      // Reset step when marital status changes
+                                      setState(() { _currentStep = 0; });
+                                      final ctrl = DefaultTabController.of(context);
+                                      ctrl?.animateTo(0);
+                                    },
                                     validator: (value) => Validations.validateMaritalStatus(l, value),
 
                                   ),
@@ -954,7 +1083,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                              if (_isEdit == true)...[
+                              // Spouse/Children conditional sections
                               if (state.maritalStatus == 'Married') ...[
                                 _section(
                                   CustomTextField(
@@ -982,7 +1111,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     items: const ['Yes', 'No'],
                                     getLabel: (s) => s == 'Yes' ? l.yes : l.no,
                                     value: state.hasChildren,
-                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateHasChildren(v!)),
+                                    onChanged: (v) {
+                                      context.read<AddnewfamilymemberBloc>().add(AnmUpdateHasChildren(v!));
+                                      setState(() { _currentStep = 0; });
+                                      final ctrl = DefaultTabController.of(context);
+                                      ctrl?.animateTo(0);
+                                    },
                                   ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -1017,7 +1151,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   ),
                                 ),
                               ],]
-                            ],
+
                           );
                         },
                       ),
@@ -1036,6 +1170,19 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                       if (state.postApiStatus == PostApiStatus.success) {
                         final Map<String, dynamic> result = state.toJson();
+                        // Attach lightweight summary needed by the Register table
+                        try {
+                          // children: total number of children captured in ChildrenBloc
+                          final ch = context.read<ChildrenBloc>().state;
+                          result['children'] = ch.children.length;
+                        } catch (_) {}
+                        try {
+                          // spouseName as captured in member state already; keep for table
+                          if ((result['spouseName'] == null || (result['spouseName'] as String).isEmpty) &&
+                              _spouseName != null && _spouseName!.isNotEmpty) {
+                            result['spouseName'] = _spouseName;
+                          }
+                        } catch (_) {}
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (mounted) {
                             Navigator.of(context).pop<Map<String, dynamic>>(result);
@@ -1051,15 +1198,41 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                             final isLoading =
                                 state.postApiStatus == PostApiStatus.loading;
 
-                            return Align(
-                              alignment: Alignment.centerRight,
-                              child: SizedBox(
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                if (_currentStep > 0)
+                                  SizedBox(
+                                    width: 120,
+                                    height: 44,
+                                    child: RoundButton(
+                                      title: 'Previous',
+                                      color: AppColors.primary,
+                                      borderRadius: 8,
+                                      height: 44,
+                                      isLoading: false,
+                                      onPress: () {
+                                        if (_currentStep > 0) {
+                                          setState(() { _currentStep -= 1; });
+                                          final ctrl = DefaultTabController.of(context);
+                                          ctrl?.animateTo(_currentStep);
+                                        }
+                                      },
+                                    ),
+                                  )
+                                else
+                                  const SizedBox.shrink(),
+                                SizedBox(
                                   width: 120,
                                   height: 44,
                                   child: RoundButton(
-                                    title: isLoading
-                                        ? (_isEdit ? 'UPDATING...' : l.addingButton)
-                                        : (_isEdit ? 'UPDATE' : l.addButton),
+                                    title: () {
+                                      if (isLoading) return (_isEdit ? 'UPDATING...' : l.addingButton);
+                                      final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
+                                      final showChildren = showSpouse && state.hasChildren == 'Yes';
+                                      final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
+                                      return (_currentStep < lastStep) ? 'Next' : (_isEdit ? 'UPDATE' : l.addButton);
+                                    }(),
                                     color: AppColors.primary,
                                     borderRadius: 8,
                                     height: 44,
@@ -1123,70 +1296,24 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         print('Submitting member data: ${jsonEncode(memberData)}');
 
 
-                                        try {
-                                          final db = await DatabaseProvider.instance.database;
-                                          final householdRecords = await db.query(
-                                            'beneficiaries',
-                                            where: 'household_ref_key = ?',
-                                            whereArgs: [widget.hhId],
-                                          );
-                                          
-                                          if (householdRecords.isNotEmpty) {
-                                            print('\n=== COMPLETE HOUSEHOLD RECORD ===');
-                                            for (var record in householdRecords) {
-                                              print('Beneficiary ID: ${record['id']}');
-                                              print('Household Ref Key: ${record['household_ref_key']}');
-                                              print('Beneficiary State: ${record['beneficiary_state']}');
-                                              print('Is Adult: ${record['is_adult']}');
-                                              
+                                        
 
-                                              final beneficiaryInfo = record['beneficiary_info'];
-                                              if (beneficiaryInfo is String) {
-                                                try {
+                                        // Step logic: advance through spouse -> children -> submit
+                                        final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
+                                        final showChildren = showSpouse && state.hasChildren == 'Yes';
+                                        final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
 
-                                                  print('beneficiary_info: $beneficiaryInfo');
-                                                  
-
-                                                  try {
-                                                    final decoded = jsonDecode(beneficiaryInfo);
-                                                    print('=== FORMATTED beneficiary_info ===');
-                                                    print(const JsonEncoder.withIndent('  ').convert(decoded));
-                                                    print('=== END FORMATTED ===');
-                                                  } catch (e) {
-                                                    print('Could not format JSON: $e');
-                                                  }
-                                                } catch (e) {
-                                                  print('Error processing beneficiary_info: $e');
-                                                }
-                                              } else if (beneficiaryInfo != null) {
-
-                                                print('beneficiary_info: ${jsonEncode(beneficiaryInfo)}');
-                                              } else {
-                                                print('beneficiary_info: null');
-                                              }
-                                              
-                                              print('----------------------------------------');
-                                            }
-                                            print('=== END OF HOUSEHOLD RECORD ===\n');
-                                          } else {
-                                            print('No household records found for HHID: ${widget.hhId}');
-                                          }
-                                        } catch (e) {
-                                          print('Error fetching household record: $e');
+                                        if (_currentStep < lastStep) {
+                                          setState(() { _currentStep += 1; });
+                                          final ctrl = DefaultTabController.of(context);
+                                          ctrl?.animateTo(_currentStep);
+                                          return;
                                         }
 
-                                        if (_isEdit) {
-                                          if (widget.hhId != null) {
-                                            bloc.add(AnmUpdateSubmit(hhid: widget.hhId!));
-                                          } else {
-                                            throw Exception('Household ID is missing');
-                                          }
+                                        if (widget.hhId != null && widget.hhId!.isNotEmpty) {
+                                          bloc.add(AnmUpdateSubmit(hhid: widget.hhId!));
                                         } else {
-                                          if (widget.hhId != null) {
-                                            bloc.add(AnmUpdateSubmit(hhid: widget.hhId!));
-                                          } else {
-                                            throw Exception('Household ID is missing');
-                                          }
+                                          bloc.add(AnmSubmit(context));
                                         }
                                       } catch (e) {
                                         print('Error preparing member data: $e');
@@ -1198,9 +1325,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         );
                                       }
                                     },
-                                  )
-
-                              ),
+                                  ),
+                                ),
+                              ],
                             );
                           },
                         ),
@@ -1209,8 +1336,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                   ),
                 ],
               ),
-            ),)
-      ),
-    );
+            ),
+            )
+      ))));
   }
 }

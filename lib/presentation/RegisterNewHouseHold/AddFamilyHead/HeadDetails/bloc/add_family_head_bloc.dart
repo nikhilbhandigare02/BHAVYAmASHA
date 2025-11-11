@@ -205,7 +205,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         final now = DateTime.now();
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
 
-
         final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
         final headId = await IdGenerator.generateUniqueId(deviceInfo);
         final spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
@@ -309,7 +308,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
             'AfhRichIdChange': state.AfhRichIdChange,
             'createdAt': DateTime.now().toIso8601String(),
             'updatedAt': DateTime.now().toIso8601String(),
-         
+
             ...childrenData,
           }),
           'geo_location': geoLocationJson,

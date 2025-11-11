@@ -1,9 +1,19 @@
+import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
+import '../../../../core/utils/device_info_utils.dart';
 import '../../../../core/utils/enums.dart';
+import '../../../../core/utils/geolocation_utils.dart';
+import '../../../../core/utils/id_generator_utils.dart';
+import '../../../../data/Local_Storage/User_Info.dart';
 import '../../../../data/Local_Storage/local_storage_dao.dart';
+import '../../AddFamilyHead/Children_Details/bloc/children_bloc.dart' show ChildrenBloc;
+import '../../AddFamilyHead/SpousDetails/bloc/spous_bloc.dart';
 
 part 'addnewfamilymember_event.dart';
 part 'addnewfamilymember_state.dart';
@@ -132,11 +142,9 @@ class AddnewfamilymemberBloc
 
       final errors = <String>[];
       if (state.relation == null || state.relation!.trim().isEmpty)
-        errors.add('relation with family head is required');
+        errors.add('Relation with family head is required');
       if (state.name == null || state.name!.trim().isEmpty)
         errors.add('Member name is required');
-      if (state.mobileNo == null || state.mobileNo!.trim().length < 10)
-        errors.add('Valid mobile no is required');
       if (state.useDob) {
         if (state.dob == null) errors.add('DOB required');
       } else {
@@ -163,8 +171,255 @@ class AddnewfamilymemberBloc
         return;
       }
 
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-      emit(state.copyWith(postApiStatus: PostApiStatus.success));
+      try {
+        final now = DateTime.now();
+        final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+        final deviceInfo = await DeviceInfo.getDeviceInfo();
+
+        // Fetch the latest household from database
+        final households = await LocalStorageDao.instance.getAllHouseholds();
+        if (households.isEmpty) {
+          emit(
+            state.copyWith(
+              postApiStatus: PostApiStatus.error,
+              errorMessage: 'No household found. Please create a household first.',
+            ),
+          );
+          return;
+        }
+
+        final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
+        if (beneficiaries.isEmpty) {
+          throw Exception('No existing beneficiary found to derive keys. Add a member first.');
+        }
+        final latestBeneficiary = beneficiaries.first;
+        final uniqueKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
+        final memberId = await IdGenerator.generateUniqueId(deviceInfo);
+        final spousKey = await IdGenerator.generateUniqueId(deviceInfo);
+        // Get current user info
+        final currentUser = await UserInfo.getCurrentUser();
+        final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
+
+        final geoLocation = await GeoLocation.getCurrentLocation();
+        final locationData = Map<String, String>.from(geoLocation.toJson());
+        locationData['source'] = 'gps';
+        if (!geoLocation.hasCoordinates) {
+          locationData['status'] = 'unavailable';
+          locationData['reason'] = 'Could not determine location';
+        }
+        final geoLocationJson = jsonEncode(locationData);
+
+
+
+        int isAdult = 0;
+        if (state.memberType == 'Adult') {
+          isAdult = 1;
+        } else if (state.useDob && state.dob != null) {
+          final age = DateTime.now().difference(state.dob!).inDays ~/ 365;
+          isAdult = age >= 18 ? 1 : 0;
+        }
+
+        final isDeath = (state.memberStatus?.toLowerCase() == 'death') ? 1 : 0;
+
+        final deathDetails = isDeath == 1
+            ? {
+                'dateOfDeath': state.dateOfDeath?.toIso8601String(),
+                'deathReason': state.deathReason,
+                'otherDeathReason': state.otherDeathReason,
+                'deathPlace': state.deathPlace,
+              }
+            : {};
+
+        Map<String, dynamic> childrenData = {};
+        try {
+          final childrenBloc = BlocProvider.of<ChildrenBloc>(event.context);
+          final childrenState = childrenBloc.state;
+
+          childrenData = {
+            'totalBorn': childrenState.totalBorn,
+            'totalLive': childrenState.totalLive,
+            'totalMale': childrenState.totalMale,
+            'totalFemale': childrenState.totalFemale,
+            'youngestAge': childrenState.youngestAge,
+            'ageUnit': childrenState.ageUnit,
+            'youngestGender': childrenState.youngestGender,
+            'children': childrenState.children,
+          };
+        } catch (e) {
+          print('Error getting children data: $e');
+        }
+
+        final memberPayload = {
+          'server_id': null,
+          'household_ref_key': uniqueKey,
+          'unique_key': memberId,
+          'beneficiary_state': 'active',
+          'pregnancy_count': 0,
+          'beneficiary_info': jsonEncode({
+            'memberType': state.memberType,
+            'relation': state.relation,
+            'name': state.name,
+            'fatherName': state.fatherName,
+            'motherName': state.motherName,
+            'useDob': state.useDob,
+            'dob': state.dob?.toIso8601String(),
+            'approxAge': state.approxAge,
+            'updateDay': state.updateDay,
+            'updateMonth': state.updateMonth,
+            'updateYear': state.updateYear,
+            'children': state.children,
+            'birthOrder': state.birthOrder,
+            'gender': state.gender,
+            'bankAcc': state.bankAcc,
+            'ifsc': state.ifsc,
+            'occupation': state.occupation,
+            'education': state.education,
+            'religion': state.religion,
+            'category': state.category,
+            'weight': state.WeightChange,
+            'childSchool': state.ChildSchool,
+            'birthCertificate': state.BirthCertificateChange,
+            'abhaAddress': state.abhaAddress,
+            'mobileOwner': state.mobileOwner,
+            'mobileNo': state.mobileNo,
+            'voterId': state.voterId,
+            'rationId': state.rationId,
+            'phId': state.phId,
+            'beneficiaryType': state.beneficiaryType,
+            'maritalStatus': state.maritalStatus,
+            'ageAtMarriage': state.ageAtMarriage,
+            'spouseName': state.spouseName,
+            'hasChildren': state.hasChildren,
+            'isPregnant': state.isPregnant,
+            'memberStatus': state.memberStatus,
+            'relation_to_head': state.relation,
+            ...childrenData,
+          }),
+          'geo_location': geoLocationJson,
+          'spouse_key': null,
+          'mother_key': null,
+          'father_key': null,
+          'is_family_planning': 0,
+          'is_adult': isAdult,
+          'is_guest': 0,
+          'is_death': isDeath,
+          'death_details': jsonEncode(deathDetails),
+          'is_migrated': 0,
+          'is_separated': 0,
+          'device_details': jsonEncode({
+            'id': deviceInfo.deviceId,
+            'platform': deviceInfo.platform,
+            'version': deviceInfo.osVersion,
+          }),
+          'app_details': jsonEncode({
+            'app_version': deviceInfo.appVersion.split('+').first,
+            'app_name': deviceInfo.appName,
+            'build_number': deviceInfo.buildNumber,
+            'package_name': deviceInfo.packageName,
+          }),
+          'parent_user': jsonEncode({}),
+          'current_user_key': 'local_user',
+          'facility_id': facilityId,
+          'created_date_time': ts,
+          'modified_date_time': ts,
+          'is_synced': 0,
+          'is_deleted': 0,
+        };
+
+        print('Saving new family member with payload: ${jsonEncode(memberPayload)}');
+        await LocalStorageDao.instance.insertBeneficiary(memberPayload);
+
+
+
+        if (state.maritalStatus == 'Married' && state.spouseName != null) {
+          try {
+            final spousBloc = BlocProvider.of<SpousBloc>(event.context);
+            final spousState = spousBloc.state;
+
+
+            final spousePayload = {
+              'server_id': null,
+              'household_ref_key': uniqueKey,
+              'unique_key': spousKey,
+              'beneficiary_state': 'active',
+              'pregnancy_count': 0,
+              'beneficiary_info': jsonEncode({
+                'relation': spousState.relation ?? 'spouse',
+                'memberName': spousState.memberName ?? state.spouseName,
+                'ageAtMarriage': spousState.ageAtMarriage,
+                'RichIDChanged': spousState.RichIDChanged,
+                'spouseName': spousState.spouseName,
+                'fatherName': spousState.fatherName,
+                'useDob': spousState.useDob,
+                'dob': spousState.dob?.toIso8601String(),
+                'edd': spousState.edd?.toIso8601String(),
+                'lmp': spousState.lmp?.toIso8601String(),
+                'approxAge': spousState.approxAge,
+                'gender': spousState.gender ?? (state.gender == 'Male' ? 'Female' : 'Male'),
+                'occupation': spousState.occupation,
+                'education': spousState.education,
+                'religion': spousState.religion,
+                'category': spousState.category,
+                'abhaAddress': spousState.abhaAddress,
+                'mobileOwner': spousState.mobileOwner,
+                'mobileNo': spousState.mobileNo,
+                'bankAcc': spousState.bankAcc,
+                'ifsc': spousState.ifsc,
+                'voterId': spousState.voterId,
+                'rationId': spousState.rationId,
+                'phId': spousState.phId,
+                'beneficiaryType': spousState.beneficiaryType,
+                'isPregnant': spousState.isPregnant,
+                'relation_to_head': 'spouse',
+                ...childrenData,
+              }),
+              'geo_location': geoLocationJson,
+              'spouse_key': memberId,
+              'mother_key': null,
+              'father_key': null,
+              'is_family_planning': 0,
+              'is_adult': 1,
+              'is_guest': 0,
+              'is_death': 0,
+              'death_details': jsonEncode({}),
+              'is_migrated': 0,
+              'is_separated': 0,
+              'device_details': jsonEncode({
+                'id': deviceInfo.deviceId,
+                'platform': deviceInfo.platform,
+                'version': deviceInfo.osVersion,
+              }),
+              'app_details': jsonEncode({
+                'app_version': deviceInfo.appVersion.split('+').first,
+                'app_name': deviceInfo.appName,
+                'build_number': deviceInfo.buildNumber,
+                'package_name': deviceInfo.packageName,
+              }),
+              'parent_user': jsonEncode({}),
+              'current_user_key': 'local_user',
+              'facility_id': facilityId,
+              'created_date_time': ts,
+              'modified_date_time': ts,
+              'is_synced': 0,
+              'is_deleted': 0,
+            };
+
+            await LocalStorageDao.instance.insertBeneficiary(spousePayload);
+          } catch (e) {
+            print('Error saving spouse: $e');
+            // Continue even if spouse save fails
+          }
+        }
+        emit(state.copyWith(postApiStatus: PostApiStatus.success));
+      } catch (e) {
+        print('Error saving family member: $e');
+        emit(
+          state.copyWith(
+            postApiStatus: PostApiStatus.error,
+            errorMessage: 'Failed to save family member: ${e.toString()}',
+          ),
+        );
+      }
     });
 
     on<AnmUpdateSubmit>((event, emit) async {
@@ -194,6 +449,155 @@ class AddnewfamilymemberBloc
           ),
         );
         return;
+      }
+      try {
+        final now = DateTime.now();
+        final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+        final deviceInfo = await DeviceInfo.getDeviceInfo();
+
+        // Resolve household by the passed HHID
+        final households = await LocalStorageDao.instance.getAllHouseholds();
+        Map<String, dynamic>? matchedHousehold;
+        for (final h in households) {
+          if (h['unique_key'] == event.hhid) {
+            matchedHousehold = h;
+            break;
+          }
+        }
+        matchedHousehold ??= households.isNotEmpty ? households.first : null;
+        if (matchedHousehold == null) {
+          emit(
+            state.copyWith(
+              postApiStatus: PostApiStatus.error,
+              errorMessage: 'No household found. Please create a household first.',
+            ),
+          );
+          return;
+        }
+
+        final householdRefKey = event.hhid; // use the provided HHID
+        final headId = matchedHousehold['head_id'] as String;
+
+        // Get current user info
+        final currentUser = await UserInfo.getCurrentUser();
+        final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
+
+        final geoLocation = await GeoLocation.getCurrentLocation();
+        final locationData = Map<String, String>.from(geoLocation.toJson());
+        locationData['source'] = 'gps';
+        if (!geoLocation.hasCoordinates) {
+          locationData['status'] = 'unavailable';
+          locationData['reason'] = 'Could not determine location';
+        }
+        final geoLocationJson = jsonEncode(locationData);
+
+        int isAdult = 0;
+        if (state.memberType == 'Adult') {
+          isAdult = 1;
+        } else if (state.useDob && state.dob != null) {
+          final age = DateTime.now().difference(state.dob!).inDays ~/ 365;
+          isAdult = age >= 18 ? 1 : 0;
+        }
+
+        final isDeath = (state.memberStatus?.toLowerCase() == 'death') ? 1 : 0;
+
+        final deathDetails = isDeath == 1
+            ? {
+                'dateOfDeath': state.dateOfDeath?.toIso8601String(),
+                'deathReason': state.deathReason,
+                'otherDeathReason': state.otherDeathReason,
+                'deathPlace': state.deathPlace,
+              }
+            : {};
+
+        final memberPayload = {
+          'server_id': null,
+          'household_ref_key': householdRefKey,
+          'unique_key': headId,
+          'beneficiary_state': 'active',
+          'pregnancy_count': 0,
+          'beneficiary_info': jsonEncode({
+            'memberType': state.memberType,
+            'relation': state.relation,
+            'name': state.name,
+            'fatherName': state.fatherName,
+            'motherName': state.motherName,
+            'useDob': state.useDob,
+            'dob': state.dob?.toIso8601String(),
+            'approxAge': state.approxAge,
+            'updateDay': state.updateDay,
+            'updateMonth': state.updateMonth,
+            'updateYear': state.updateYear,
+            'children': state.children,
+            'birthOrder': state.birthOrder,
+            'gender': state.gender,
+            'bankAcc': state.bankAcc,
+            'ifsc': state.ifsc,
+            'occupation': state.occupation,
+            'education': state.education,
+            'religion': state.religion,
+            'category': state.category,
+            'weight': state.WeightChange,
+            'childSchool': state.ChildSchool,
+            'birthCertificate': state.BirthCertificateChange,
+            'abhaAddress': state.abhaAddress,
+            'mobileOwner': state.mobileOwner,
+            'mobileNo': state.mobileNo,
+            'voterId': state.voterId,
+            'rationId': state.rationId,
+            'phId': state.phId,
+            'beneficiaryType': state.beneficiaryType,
+            'maritalStatus': state.maritalStatus,
+            'ageAtMarriage': state.ageAtMarriage,
+            'spouseName': state.spouseName,
+            'hasChildren': state.hasChildren,
+            'isPregnant': state.isPregnant,
+            'memberStatus': state.memberStatus,
+            'relation_to_head': state.relation,
+          }),
+          'geo_location': geoLocationJson,
+          'spouse_key': null,
+          'mother_key': null,
+          'father_key': null,
+          'is_family_planning': 0,
+          'is_adult': isAdult,
+          'is_guest': 0,
+          'is_death': isDeath,
+          'death_details': jsonEncode(deathDetails),
+          'is_migrated': 0,
+          'is_separated': 0,
+          'device_details': jsonEncode({
+            'id': deviceInfo.deviceId,
+            'platform': deviceInfo.platform,
+            'version': deviceInfo.osVersion,
+          }),
+          'app_details': jsonEncode({
+            'app_version': deviceInfo.appVersion.split('+').first,
+            'app_name': deviceInfo.appName,
+            'build_number': deviceInfo.buildNumber,
+            'package_name': deviceInfo.packageName,
+          }),
+          'parent_user': jsonEncode({}),
+          'current_user_key': 'local_user',
+          'facility_id': facilityId,
+          'created_date_time': ts,
+          'modified_date_time': ts,
+          'is_synced': 0,
+          'is_deleted': 0,
+        };
+
+        print('Saving new family member (update submit) with payload: ${jsonEncode(memberPayload)}');
+        await LocalStorageDao.instance.insertBeneficiary(memberPayload);
+
+        emit(state.copyWith(postApiStatus: PostApiStatus.success));
+      } catch (e) {
+        print('Error saving family member (update submit): $e');
+        emit(
+          state.copyWith(
+            postApiStatus: PostApiStatus.error,
+            errorMessage: 'Failed to save family member: ${e.toString()}',
+          ),
+        );
       }
     });
   }

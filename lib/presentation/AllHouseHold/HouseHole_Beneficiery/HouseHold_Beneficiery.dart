@@ -568,13 +568,17 @@ class _HouseHold_BeneficiaryScreenState
                     children: [
                       Expanded(child: _rowText('Registration Date', data['RegitrationDate'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText('Registration Type', data['RegitrationType'] ?? '')),
+                      Expanded(child: _rowText('Registration Type', 
+                        (data['_memberData']?['memberType']?.toString().toLowerCase() == 'child') 
+                            ? 'Child' 
+                            : (data['RegitrationType'] ?? '')
+                      )),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('Beneficiary ID',
-  data['Relation'] == 'Head'
-    ? ((data['_raw']['unique_key']?.toString().length ?? 0) > 11 ? data['_raw']['unique_key'].toString().substring(data['_raw']['unique_key'].toString().length - 11) : (data['_raw']['unique_key']?.toString() ?? ''))
-    : ((data['_raw']['spouse_key']?.toString().length ?? 0) > 11 ? data['_raw']['spouse_key'].toString().substring(data['_raw']['spouse_key'].toString().length - 11) : (data['_raw']['spouse_key']?.toString() ?? ''))
-)),
+                        (data['_raw']?['unique_key']?.toString().length ?? 0) > 11 
+                            ? data['_raw']['unique_key'].toString().substring(data['_raw']['unique_key'].toString().length - 11) 
+                            : (data['_raw']?['unique_key']?.toString() ?? '')
+                      )),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -603,37 +607,53 @@ class _HouseHold_BeneficiaryScreenState
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // Show Father's name for children, otherwise show spouse name
+                  // Show Father's name for children
                   if (data['Relation'] == 'Child')
                     _rowText(
                       'Father\'s Name',
-                      data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+                      data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'Not Available',
                     ),
+                  
+                  // Show Mother's name for children if available
                   if (data['Relation'] == 'Child' && data['MotherName']?.isNotEmpty == true)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: _rowText(
                         'Mother\'s Name',
-                        data['MotherName'] ?? 'N/A',
+                        data['MotherName'] ?? 'Not Available',
                       ),
                     ),
-                  // Show spouse/husband name for Head and Spouse
+                  
+                  // For Head cards, show spouse name with appropriate label based on gender
                   if (data['Relation'] == 'Head' && spouse['Name']?.isNotEmpty == true)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: _rowText(
                         isHeadMale ? 'Wife\'s Name' : 'Husband\'s Name',
-                        spouse['Name']?.toString() ?? 'N/A'
+                        spouse['Name']?.toString() ?? 'Not Available'
                       ),
                     ),
+                  
+                  // For Spouse cards, show head's name with appropriate label based on gender
                   if (data['Relation'] == 'Spouse' && head['Name']?.isNotEmpty == true)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: _rowText(
                         isHeadMale ? 'Husband\'s Name' : 'Wife\'s Name',
-                        head['Name']?.toString() ?? 'N/A'
+                        head['Name']?.toString() ?? 'Not Available'
                       ),
                     ),
+                  
+                  // For other members who are not head or spouse, show father's name if available
+                  if (data['Relation'] != 'Head' && data['Relation'] != 'Spouse' && data['Relation'] != 'Child')
+                    if (data['FatherName']?.isNotEmpty == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: _rowText(
+                          'Father\'s Name',
+                          data['FatherName'] ?? 'Not Available',
+                        ),
+                      ),
                 ],
               ),
             ),
