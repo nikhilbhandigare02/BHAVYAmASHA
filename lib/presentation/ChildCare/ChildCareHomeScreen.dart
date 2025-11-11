@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
+import 'dart:developer' as developer;
 import 'child_care_count_provider.dart';
 
 import '../HomeScreen/HomeScreen.dart';
@@ -24,27 +25,78 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadCounts();
+    developer.log('Initializing ChildCareHomeScreen', name: 'ChildCareHomeScreen');
+    _countsFuture = Future.value({
+      'registered': 0,
+      'registrationDue': 0,
+      'trackingDue': 0,
+      'hbyc': 0,
+      'deceased': 0,
+    });
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCounts();
+    });
   }
 
   Future<void> _loadCounts() async {
-    setState(() {
-      _countsFuture = Future.wait([
-        _countProvider.getRegisteredChildCount(),
-        _countProvider.getRegistrationDueCount(),
-        _countProvider.getTrackingDueCount(),
-        _countProvider.getHBYCCount(),
-        _countProvider.getDeceasedCount(),
-      ]).then((results) {
-        return {
-          'registered': results[0],
-          'registrationDue': results[1],
-          'trackingDue': results[2],
-          'hbyc': results[3],
-          'deceased': results[4],
-        };
+    try {
+      developer.log('Loading counts...', name: 'ChildCareHomeScreen');
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _countsFuture = Future.wait([
+          _countProvider.getRegisteredChildCount(),
+          _countProvider.getRegistrationDueCount(),
+          _countProvider.getTrackingDueCount(),
+          _countProvider.getHBYCCount(),
+          _countProvider.getDeceasedCount(),
+        ]).then((counts) {
+          final result = {
+            'registered': counts[0],
+            'registrationDue': counts[1],
+            'trackingDue': counts[2],
+            'hbyc': counts[3],
+            'deceased': counts[4],
+          };
+          
+          developer.log('Counts loaded: $result', name: 'ChildCareHomeScreen');
+          return result;
+        }).catchError((error, stackTrace) {
+          developer.log('Error in loading counts: $error', 
+                       name: 'ChildCareHomeScreen',
+                       error: error,
+                       stackTrace: stackTrace);
+          // Return default values in case of error
+          return {
+            'registered': 0,
+            'registrationDue': 0,
+            'trackingDue': 0,
+            'hbyc': 0,
+            'deceased': 0,
+          };
+        });
       });
-    });
+      
+    } catch (e, stackTrace) {
+      developer.log('Error in _loadCounts: $e', 
+                   name: 'ChildCareHomeScreen',
+                   error: e,
+                   stackTrace: stackTrace);
+      
+      if (mounted) {
+        setState(() {
+          _countsFuture = Future.value({
+            'registered': 0,
+            'registrationDue': 0,
+            'trackingDue': 0,
+            'hbyc': 0,
+            'deceased': 0,
+          });
+        });
+      }
+    }
   }
 
   Widget _buildCard({

@@ -33,6 +33,7 @@ import '../../../presentation/ChildCare/ChildTrackingDueList/ChildTrackingDueLis
 import '../../../presentation/ChildCare/DeseasedList/DeseasedList.dart';
 import '../../../presentation/ChildCare/HBYCList/HBYCList.dart' show HBYCList;
 import '../../../presentation/ChildCare/HBYC_Child_Care_Form/HBYCChildCareForm.dart';
+import '../../../presentation/ChildCare/HBYC_Child_Care_Form/PreviouseVisitHBYC.dart';
 import '../../../presentation/ChildCare/RegisterChildBeneficieryList/RegisterChildListScreen.dart' show RegisterChildScreen;
 import '../../../presentation/ChildCare/RegisterChildDueList/RegisterChildDueList.dart' show RegisterChildDueList;
 import '../../../presentation/ChildCare/RegisterChildDueListForm/RegisterChildDueListForm.dart';
@@ -152,6 +153,12 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const Ancvisitform(),);
       case Route_Names.Previousvisit:
         return MaterialPageRoute(builder: (context) => const Previousvisit(),);
+      case Route_Names.PreviousVisitsScreenHBYC:
+        final args = setting.arguments as Map<String, dynamic>?;
+        final beneficiaryId = args?['beneficiaryId'] as String? ?? '';
+        return MaterialPageRoute(
+          builder: (context) => PreviousVisitsScreenHBYC(beneficiaryId: beneficiaryId),
+        );
       case Route_Names.ChildCareHomeScreen:
         return MaterialPageRoute(builder: (context) => const ChildCareHomeScreen(),);
       case Route_Names.TrainingHomeScreen:
@@ -203,7 +210,15 @@ class Routes{
       case Route_Names.HBYCList:
         return MaterialPageRoute(builder: (context) => const HBYCList(),);
       case Route_Names.HBYCChildCareForm:
-        return MaterialPageRoute(builder: (context) => const HBYCChildCareFormScreen(),);
+        final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (context) => HBYCChildCareFormScreen(
+            hhid: args?['hhid'] ?? '',
+            name: args?['name'] ?? '',
+            beneficiaryId: args?['beneficiaryId'] ?? '',
+          ),
+          settings: setting,
+        );
       case Route_Names.RegisterChildDueListFormScreen:
         return MaterialPageRoute(builder: (context) => const RegisterChildDueListFormScreen(),);
       case Route_Names.previousVisit:

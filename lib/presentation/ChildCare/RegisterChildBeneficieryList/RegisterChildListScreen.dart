@@ -103,43 +103,36 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
         final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
         final members = info['member_details'] is List ? info['member_details'] : [];
 
-        // Extract children from member_details where memberType is "Child"
         if (members.isNotEmpty && members is List) {
           for (final member in members) {
             if (member is Map) {
               final memberType = member['memberType']?.toString() ?? '';
 
-              // Only process if memberType is "Child"
               if (memberType == 'Child') {
                 final beneficiaryId = row['unique_key']?.toString() ?? '';
                 final memberData = Map<String, dynamic>.from(member);
 
-                // Get name from multiple possible fields
-                final name = memberData['memberName']?.toString() ??
+                 final name = memberData['memberName']?.toString() ??
                             memberData['name']?.toString() ??
                             memberData['member_name']?.toString() ??
                             memberData['memberNameLocal']?.toString() ??
                             '';
 
-                // Get father's name (from member data or head)
                 final fatherName = memberData['fatherName']?.toString() ??
                                   memberData['father_name']?.toString() ??
                                   head['headName']?.toString() ??
                                   head['memberName']?.toString() ?? '';
 
-                // Get mother's name (from member data or spouse)
                 final motherName = memberData['motherName']?.toString() ??
                                   memberData['mother_name']?.toString() ??
                                   spouse['memberName']?.toString() ??
                                   spouse['headName']?.toString() ?? '';
 
-                // Get mobile number
                 final mobileNo = memberData['mobileNo']?.toString() ??
                                 memberData['mobile']?.toString() ??
                                 memberData['mobile_number']?.toString() ??
                                 head['mobileNo']?.toString() ?? '';
 
-                // Get RCH ID
                 final richId = memberData['RichIDChanged']?.toString() ??
                               memberData['richIdChanged']?.toString() ??
                               memberData['richId']?.toString() ?? '';
@@ -221,12 +214,29 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
         if (dob != null) {
           final now = DateTime.now();
           int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
           
-          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+            days += daysInLastMonth;
+            months--;
+          }
+          
+          if (months < 0) {
+            months += 12;
             years--;
           }
           
-          age = years >= 0 ? years.toString() : '0';
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
         }
       } catch (e) {
         debugPrint('Error parsing date of birth: $e');
@@ -247,7 +257,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
         displayGender = 'Other';
     }
     
-    return '$age Y | $displayGender';
+    return '$age | $displayGender';
   }
 
   void _onSearchChanged() {

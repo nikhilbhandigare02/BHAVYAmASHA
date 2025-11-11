@@ -26,83 +26,83 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
     });
 
     on<AfhUpdateHouseNo>(
-      (event, emit) => emit(state.copyWith(houseNo: event.value)),
+          (event, emit) => emit(state.copyWith(houseNo: event.value)),
     );
     on<AfhUpdateHeadName>(
-      (event, emit) => emit(state.copyWith(headName: event.value)),
+          (event, emit) => emit(state.copyWith(headName: event.value)),
     );
     on<AfhUpdateFatherName>(
-      (event, emit) => emit(state.copyWith(fatherName: event.value)),
+          (event, emit) => emit(state.copyWith(fatherName: event.value)),
     );
     on<AfhUpdateDob>((event, emit) => emit(state.copyWith(dob: event.value)));
     on<AfhUpdateApproxAge>(
-      (event, emit) => emit(state.copyWith(approxAge: event.value)),
+          (event, emit) => emit(state.copyWith(approxAge: event.value)),
     );
     on<AfhUpdateGender>(
-      (event, emit) => emit(state.copyWith(gender: event.value)),
+          (event, emit) => emit(state.copyWith(gender: event.value)),
     );
     on<AfhABHAChange>(
-      (event, emit) => emit(state.copyWith(AfhABHAChange: event.value)),
+          (event, emit) => emit(state.copyWith(AfhABHAChange: event.value)),
     );
     on<AfhUpdateOccupation>(
-      (event, emit) => emit(state.copyWith(occupation: event.value)),
+          (event, emit) => emit(state.copyWith(occupation: event.value)),
     );
     on<AfhRichIdChange>(
-      (event, emit) => emit(state.copyWith(AfhRichIdChange: event.value)),
+          (event, emit) => emit(state.copyWith(AfhRichIdChange: event.value)),
     );
     on<AfhUpdateEducation>(
-      (event, emit) => emit(state.copyWith(education: event.value)),
+          (event, emit) => emit(state.copyWith(education: event.value)),
     );
     on<AfhUpdateReligion>(
-      (event, emit) => emit(state.copyWith(religion: event.value)),
+          (event, emit) => emit(state.copyWith(religion: event.value)),
     );
     on<AfhUpdateCategory>(
-      (event, emit) => emit(state.copyWith(category: event.value)),
+          (event, emit) => emit(state.copyWith(category: event.value)),
     );
     on<AfhUpdateMobileOwner>(
-      (event, emit) => emit(state.copyWith(mobileOwner: event.value)),
+          (event, emit) => emit(state.copyWith(mobileOwner: event.value)),
     );
     on<AfhUpdateMobileNo>(
-      (event, emit) => emit(state.copyWith(mobileNo: event.value)),
+          (event, emit) => emit(state.copyWith(mobileNo: event.value)),
     );
     on<AfhUpdateVillage>(
-      (event, emit) => emit(state.copyWith(village: event.value)),
+          (event, emit) => emit(state.copyWith(village: event.value)),
     );
     on<AfhUpdateWard>((event, emit) => emit(state.copyWith(ward: event.value)));
     on<AfhUpdateMohalla>(
-      (event, emit) => emit(state.copyWith(mohalla: event.value)),
+          (event, emit) => emit(state.copyWith(mohalla: event.value)),
     );
     on<AfhUpdateBankAcc>(
-      (event, emit) => emit(state.copyWith(bankAcc: event.value)),
+          (event, emit) => emit(state.copyWith(bankAcc: event.value)),
     );
     on<AfhUpdateIfsc>((event, emit) => emit(state.copyWith(ifsc: event.value)));
     on<AfhUpdateVoterId>(
-      (event, emit) => emit(state.copyWith(voterId: event.value)),
+          (event, emit) => emit(state.copyWith(voterId: event.value)),
     );
     on<AfhUpdateRationId>(
-      (event, emit) => emit(state.copyWith(rationId: event.value)),
+          (event, emit) => emit(state.copyWith(rationId: event.value)),
     );
     on<AfhUpdatePhId>((event, emit) => emit(state.copyWith(phId: event.value)));
     on<AfhUpdateBeneficiaryType>(
-      (event, emit) => emit(state.copyWith(beneficiaryType: event.value)),
+          (event, emit) => emit(state.copyWith(beneficiaryType: event.value)),
     );
     on<AfhUpdateMaritalStatus>(
-      (event, emit) => emit(state.copyWith(maritalStatus: event.value)),
+          (event, emit) => emit(state.copyWith(maritalStatus: event.value)),
     );
     on<ChildrenChanged>(
-      (event, emit) => emit(state.copyWith(children: event.value)),
+          (event, emit) => emit(state.copyWith(children: event.value)),
     );
     on<AfhUpdateAgeAtMarriage>(
-      (event, emit) => emit(state.copyWith(ageAtMarriage: event.value)),
+          (event, emit) => emit(state.copyWith(ageAtMarriage: event.value)),
     );
     on<AfhUpdateSpouseName>(
-      (event, emit) => emit(state.copyWith(spouseName: event.value)),
+          (event, emit) => emit(state.copyWith(spouseName: event.value)),
     );
     on<AfhUpdateHasChildren>(
-      (event, emit) => emit(state.copyWith(hasChildren: event.value)),
+          (event, emit) => emit(state.copyWith(hasChildren: event.value)),
     );
     on<AfhUpdateIsPregnant>(
-      (event, emit) => emit(state.copyWith(isPregnant: event.value)),
+          (event, emit) => emit(state.copyWith(isPregnant: event.value)),
     );
 
     on<LMPChange>((event, emit) {
@@ -113,7 +113,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
     on<UpdateYears>((event, emit) {
       emit(state.copyWith(years: event.value));
-      // Update approxAge when any of the fields change
+
       final years = event.value;
       final months = state.months ?? '0';
       final days = state.days ?? '0';
@@ -204,14 +204,14 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         final deviceInfo = await DeviceInfo.getDeviceInfo();
         final now = DateTime.now();
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-        
+
         final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
         final headId = await IdGenerator.generateUniqueId(deviceInfo);
         final spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
-        
+
         final currentUser = await UserInfo.getCurrentUser();
         final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
-        
+
         final geoLocation = await GeoLocation.getCurrentLocation();
         final locationData = Map<String, String>.from(geoLocation.toJson());
         locationData['source'] = 'gps';
@@ -247,23 +247,68 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
           'beneficiary_state': 'active',
           'pregnancy_count': 0,
           'beneficiary_info': jsonEncode({
-            'name': state.headName,
+            'houseNo': state.houseNo,
+            'headName': state.headName,
             'fatherName': state.fatherName,
             'gender': state.gender,
             'dob': state.dob?.toIso8601String(),
+            'years': state.years,
+            'months': state.months,
+            'days': state.days,
             'approxAge': state.approxAge,
             'mobileNo': state.mobileNo,
+            'mobileOwner': state.mobileOwner,
             'maritalStatus': state.maritalStatus,
+            'ageAtMarriage': state.ageAtMarriage,
             'spouseName': state.spouseName,
             'education': state.education,
             'occupation': state.occupation,
             'religion': state.religion,
             'category': state.category,
+            'hasChildren': state.hasChildren,
             'isPregnant': state.isPregnant,
             'lmp': state.lmp?.toIso8601String(),
             'edd': state.edd?.toIso8601String(),
+
+            'village': state.village,
+            'ward': state.ward,
+            'wardNo': state.wardNo,
+            'mohalla': state.mohalla,
+            'mohallaTola': state.mohallaTola,
+
+            'abhaAddress': state.abhaAddress,
+            'abhaNumber': state.abhaNumber,
+            'voterId': state.voterId,
+            'rationId': state.rationId,
+            'rationCardId': state.rationCardId,
+            'phId': state.phId,
+            'personalHealthId': state.personalHealthId,
+            'bankAcc': state.bankAcc,
+            'bankAccountNumber': state.bankAccountNumber,
+            'ifsc': state.ifsc,
+            'ifscCode': state.ifscCode,
+
+            'beneficiaryType': state.beneficiaryType,
+            'isMigrantWorker': state.isMigrantWorker,
+
+            'migrantState': state.migrantState,
+            'migrantDistrict': state.migrantDistrict,
+            'migrantBlock': state.migrantBlock,
+            'migrantPanchayat': state.migrantPanchayat,
+            'migrantVillage': state.migrantVillage,
+            'migrantContactNo': state.migrantContactNo,
+            'migrantDuration': state.migrantDuration,
+            'migrantWorkType': state.migrantWorkType,
+            'migrantWorkPlace': state.migrantWorkPlace,
+            'migrantRemarks': state.migrantRemarks,
+
             'relation': 'head',
             'relation_to_head': 'self',
+            'AfhABHAChange': state.AfhABHAChange,
+            'AfhRichIdChange': state.AfhRichIdChange,
+            'createdAt': DateTime.now().toIso8601String(),
+            'updatedAt': DateTime.now().toIso8601String(),
+
             ...childrenData,
           }),
           'geo_location': geoLocationJson,
@@ -275,8 +320,8 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
           'is_guest': 0,
           'is_death': 0,
           'death_details': jsonEncode({}),
-          'is_migrated': 0,
-          'is_separated': 0,
+          'is_migrated': state.beneficiaryType == 'SeasonalMigrant' ? 1 : 0,
+          'is_separated': state.maritalStatus == 'Separated' || state.maritalStatus == 'Divorced' ? 1 : 0,
           'device_details': jsonEncode({
             'id': deviceInfo.deviceId,
             'platform': deviceInfo.platform,
@@ -295,6 +340,12 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
           'modified_date_time': ts,
           'is_synced': 0,
           'is_deleted': 0,
+          'additional_info': jsonEncode({
+            'abha_verified': state.abhaVerified,
+            'voter_id_verified': state.voterIdVerified,
+            'ration_card_verified': state.rationCardVerified,
+            'bank_account_verified': state.bankAccountVerified,
+          }),
         };
 
         await LocalStorageDao.instance.insertBeneficiary(headPayload);

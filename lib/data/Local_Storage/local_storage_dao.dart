@@ -9,7 +9,6 @@ class LocalStorageDao {
   LocalStorageDao._();
   static final LocalStorageDao instance = LocalStorageDao._();
 
-  // Factory constructor to return the same instance
   factory LocalStorageDao() => instance;
 
   Future<Database> get _db async => DatabaseProvider.instance.database;
@@ -238,8 +237,7 @@ class LocalStorageDao {
 
   Future<List<Map<String, dynamic>>> getFollowupFormsWithCaseClosure(String formType) async {
     final db = await _db;
-    
-    // First, get all forms that have case closure data
+
     final forms = await db.query(
       FollowupFormDataTable.table,
       where: 'is_deleted = 0 AND form_json LIKE ?',
@@ -247,8 +245,7 @@ class LocalStorageDao {
     );
 
     final List<Map<String, dynamic>> result = [];
-    
-    // Process each form to check for case closure data
+
     for (final form in forms) {
       try {
         final formJson = form['form_json'] as String?;
@@ -371,9 +368,7 @@ class LocalStorageDao {
             return {};
           }
         }
-        
-
-        mapped['address'] = safeJsonDecode(mapped['address']);
+ mapped['address'] = safeJsonDecode(mapped['address']);
         mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
         mapped['household_info'] = safeJsonDecode(mapped['household_info']);
         mapped['device_details'] = safeJsonDecode(mapped['device_details']);
@@ -509,8 +504,7 @@ class LocalStorageDao {
     try {
       final db = await _db;
       print('Fetching death records from database...');
-      
-      // Query beneficiaries where is_death = 1 and is_deleted = 0
+
       final rows = await db.query(
         'beneficiaries',
         where: 'is_death = ? AND is_deleted = ?',
@@ -519,8 +513,7 @@ class LocalStorageDao {
       );
       
       print('Found ${rows.length} death records');
-      
-      // Process and format the death records
+
       final result = <Map<String, dynamic>>[];
       
       for (final row in rows) {
@@ -537,12 +530,10 @@ class LocalStorageDao {
               return {};
             }
           }
-          
-          // Decode JSON fields
+
           final beneficiaryInfo = safeJsonDecode(mapped['beneficiary_info']);
           final deathDetails = safeJsonDecode(mapped['death_details']);
-          
-          // Extract head details or use beneficiary_info directly
+
           final headDetails = beneficiaryInfo is Map 
               ? (beneficiaryInfo['head_details'] ?? {}) 
               : {};

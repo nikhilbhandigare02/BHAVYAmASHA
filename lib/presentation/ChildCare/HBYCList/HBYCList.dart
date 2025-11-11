@@ -1,12 +1,15 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
+import 'package:intl/intl.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import '../../../data/Local_Storage/database_provider.dart';
 
 class HBYCList extends StatefulWidget {
   const HBYCList({super.key});
@@ -17,40 +20,15 @@ class HBYCList extends StatefulWidget {
 
 class _HBYCListState extends State<HBYCList> {
   final TextEditingController _searchCtrl = TextEditingController();
-
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-
-      'RchID': 'RCH123456',
-      'Name': 'Rohit Sharma',
-      'Age|Gender': '27 Y | Male',
-
-
-    },
-    {
-      'hhId': '51016121847',
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-
-      'RchID': 'RCH123456',
-      'Name': 'Rohit Sharma',
-      'Age|Gender': '27 Y | Male',
-
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  late List<Map<String, dynamic>> _hbycChildren = [];
+  late List<Map<String, dynamic>> _filtered = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
     _searchCtrl.addListener(_onSearchChanged);
+    _loadHBYCChildren();
   }
 
   @override
@@ -60,16 +38,191 @@ class _HBYCListState extends State<HBYCList> {
     super.dispose();
   }
 
+  // Calculate age in months from date of birth
+  int _calculateAgeInMonths(String? dobStr) {
+    if (dobStr == null || dobStr.isEmpty) return 0;
+    
+    try {
+      final dob = DateTime.parse(dobStr);
+      final now = DateTime.now();
+      final months = (now.year - dob.year) * 12 + now.month - dob.month;
+      return months;
+    } catch (e) {
+      print('Error calculating age for DOB: $dobStr - $e');
+      return 0;
+    }
+  }
+
+  // Check if age is between 3 and 15 months
+  bool _isAgeInRange(String? dobStr) {
+    final months = _calculateAgeInMonths(dobStr);
+    return months >= 3 && months <= 15;
+  }
+
+  // Format date to 'dd-MM-yyyy'
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'N/A';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  // Format age and gender string
+  String _formatAgeGender(String? dob, String? gender) {
+    final months = _calculateAgeInMonths(dob);
+    final years = months ~/ 12;
+    final remainingMonths = months % 12;
+    
+    String ageText = years > 0 
+        ? '$years Y${remainingMonths > 0 ? ' $remainingMonths M' : ''}'
+        : '$months M';
+        
+    return '$ageText | ${gender ?? 'N/A'}';
+  }
+
+  // Check if case is closed for a beneficiary
+  Future<bool> _isCaseClosed(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final caseClosureRecords = await db.query(
+        'followup_form_data',
+        where: 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey, '%case_closure%'],
+      );
+      
+      for (final record in caseClosureRecords) {
+        try {
+          final formJson = record['form_json'] as String?;
+          if (formJson != null) {
+            final formData = jsonDecode(formJson);
+            final formDataMap = formData['form_data'] as Map<String, dynamic>? ?? {};
+            final caseClosure = formDataMap['case_closure'] as Map<String, dynamic>? ?? {};
+            if (caseClosure['is_case_closure'] == true) {
+              return true;
+            }
+          }
+        } catch (e) {
+          debugPrint('Error checking case closure: $e');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error querying case closure: $e');
+    }
+    return false;
+  }
+
+  // Load HBYC children from database
+  Future<void> _loadHBYCChildren() async {
+    if (!mounted) return;
+    
+    setState(() => _isLoading = true);
+
+    try {
+      final db = await DatabaseProvider.instance.database;
+      
+      // First, get all child beneficiaries with their details
+      final List<Map<String, dynamic>> rows = await db.query(
+        'beneficiaries',
+        where: 'is_deleted = ?',
+        whereArgs: [0],
+      );
+
+      final hbycChildren = <Map<String, dynamic>>[];
+
+      for (final row in rows) {
+        final rowHhId = row['household_ref_key']?.toString();
+        if (rowHhId == null) continue;
+
+        final info = row['beneficiary_info'] is String
+            ? jsonDecode(row['beneficiary_info'] as String)
+            : row['beneficiary_info'];
+
+        if (info is! Map) continue;
+
+        final head = info['head_details'] is Map ? info['head_details'] : {};
+        final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
+        final members = info['member_details'] is List ? info['member_details'] : [];
+
+        if (members.isNotEmpty && members is List) {
+          for (final member in members) {
+            if (member is Map) {
+              final memberType = member['memberType']?.toString() ?? '';
+              final dob = member['dob']?.toString();
+              
+              // Only process child members with age between 3-15 months and not case closed
+              if (memberType == 'Child' && _isAgeInRange(dob)) {
+                final beneficiaryId = row['unique_key']?.toString() ?? '';
+                
+                // Skip if case is closed for this beneficiary
+                if (beneficiaryId.isNotEmpty && await _isCaseClosed(beneficiaryId)) {
+                  continue;
+                }
+                
+                final memberData = Map<String, dynamic>.from(member);
+
+
+                final name = memberData['memberName']?.toString() ??
+                            memberData['name']?.toString() ??
+                            memberData['member_name']?.toString() ??
+                            memberData['memberNameLocal']?.toString() ??
+                            '';
+
+                final gender = memberData['gender']?.toString() ?? '';
+                final ageGender = _formatAgeGender(dob, gender);
+
+                final richId = memberData['RichIDChanged']?.toString() ??
+                              memberData['richIdChanged']?.toString() ??
+                              memberData['richId']?.toString() ?? '';
+
+                final card = <String, dynamic>{
+                  'hhId': rowHhId,
+                  'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+                  'RegitrationType': 'HBYC',
+                  'BeneficiaryID': beneficiaryId,
+                  'RchID': richId,
+                  'Name': name,
+                  'Age|Gender': ageGender,
+                  '_raw': row,
+                  '_memberData': memberData,
+                };
+                
+                hbycChildren.add(card);
+              }
+            }
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _hbycChildren = List<Map<String, dynamic>>.from(hbycChildren);
+          _filtered = List<Map<String, dynamic>>.from(hbycChildren);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading HBYC children: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // Handle search functionality
   void _onSearchChanged() {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _filtered = List<Map<String, dynamic>>.from(_hbycChildren);
       } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['Name'] as String).toLowerCase().contains(q) ||
-              (e['BeneficiaryID'] as String).toLowerCase().contains(q);
+        _filtered = _hbycChildren.where((e) {
+          return (e['hhId']?.toString().toLowerCase().contains(q) ?? false) ||
+                 (e['Name']?.toString().toLowerCase().contains(q) ?? false) ||
+                 (e['BeneficiaryID']?.toString().toLowerCase().contains(q) ?? false) ||
+                 (e['RchID']?.toString().toLowerCase().contains(q) ?? false);
         }).toList();
       }
     });
@@ -115,16 +268,25 @@ class _HBYCListState extends State<HBYCList> {
 
 
 
-          // 📋 List of Households
+          // 📋 List of HBYC Children
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _filtered.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No HBYC children found',
+                          style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                        itemCount: _filtered.length,
+                        itemBuilder: (context, index) {
+                          final data = _filtered[index];
+                          return _householdCard(context, data);
+                        },
+                      ),
           ),
 
 
@@ -146,7 +308,12 @@ class _HBYCListState extends State<HBYCList> {
             Navigator.pushNamed(
               context,
               Route_Names.HBYCChildCareForm,
-              arguments: {'isBeneficiary': true},
+              arguments: {
+                'isBeneficiary': true,
+                'hhid': data['hhId']?.toString() ?? '',
+                'name': data['Name']?.toString() ?? '',
+                'beneficiaryId': data['BeneficiaryID']?.toString() ?? '',
+              },
             );
           },
           child: Container(
@@ -178,7 +345,9 @@ class _HBYCListState extends State<HBYCList> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          data['hhId'] ?? '',
+                          data['hhId']!.toString().length > 11
+                              ? '${data['hhId']?.toString().substring(data['hhId'].toString().length - 11)}'
+                              : data['hhId']?.toString() ?? '',
                           style: TextStyle(
                             color: primary,
                             fontWeight: FontWeight.w600,
@@ -213,7 +382,12 @@ class _HBYCListState extends State<HBYCList> {
                       _buildRow([
                         _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate']),
                         _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType']),
-                        _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID']),
+                        _rowText(
+                          l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', 
+                          data['BeneficiaryID']!.toString().length > 11
+                              ? '${data['BeneficiaryID']?.toString().substring(data['BeneficiaryID'].toString().length - 11)}'
+                              : data['BeneficiaryID']?.toString() ?? ''
+                        ),
                       ]),
                       const SizedBox(height: 8),
                       _buildRow([

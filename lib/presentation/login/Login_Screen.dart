@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   bool _isKeyboardVisible = false;
   final FocusNode _usernameFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
-  String _appVersion = ''; // Default version
+  String _appVersion = '';
 
   @override
   void initState() {

@@ -68,6 +68,7 @@ class Route_Names{
   static const String AshaKiDuniyaScreen = 'AshaKiDuniyaScreen';
   static const String DeseasedList = 'DeseasedList';
   static const String ChildTrackingDueListForm = 'ChildTrackingDueListForm';
+  static const String PreviousVisitsScreenHBYC = 'PreviousVisitsScreenHBYC';
 
 
 }

@@ -102,7 +102,7 @@ class ApiDropdown<T> extends StatelessWidget {
                         maxLines: labelMaxLines ?? 3,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
                       value != null
                           ? getLabel(value!)

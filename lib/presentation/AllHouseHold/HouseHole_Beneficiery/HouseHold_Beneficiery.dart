@@ -59,16 +59,77 @@ class _HouseHold_BeneficiaryScreenState
 
     try {
       final db = await DatabaseProvider.instance.database;
+      
+      // First, get all records with the same household_ref_key
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries',
         where: widget.hhId != null ? 'household_ref_key = ?' : null,
         whereArgs: widget.hhId != null ? [widget.hhId] : null,
       );
+      
+      // Log all records with the same household_ref_key
+      if (widget.hhId != null) {
+        print('=== ALL RECORDS FOR HOUSEHOLD ${widget.hhId} ===');
+        for (var row in rows) {
+          try {
+            final info = row['beneficiary_info'] is String
+                ? jsonDecode(row['beneficiary_info'] as String)
+                : row['beneficiary_info'];
+                
+            print('--- Record ---');
+            print('ID: ${row['id']}');
+            print('Unique Key: ${row['unique_key']}');
+            print('Spouse Key: ${row['spouse_key']}');
+            print('Household Ref Key: ${row['household_ref_key']}');
+            print('Name: ${info['name'] ?? info['memberName'] ?? info['headName']}');
+            print('Relation: ${info['relation'] ?? info['relation_to_head']}');
+            print('Gender: ${info['gender']}');
+            print('DOB: ${info['dob']}');
+            print('Mobile: ${info['mobileNo'] ?? info['mobile']}');
+            print('Is Death: ${row['is_death']}');
+            print('Is Migrated: ${row['is_migrated']}');
+            print('-------------');
+          } catch (e) {
+            print('Error parsing record: $e');
+            print('Raw row data: $row');
+          }
+        }
+        print('=== TOTAL RECORDS: ${rows.length} ===');
+      }
+
+      // Log all records for this household
+      if (widget.hhId != null) {
+        print('=== HOUSEHOLD RECORDS FOR HH_ID: ${widget.hhId} ===');
+        for (var row in rows) {
+          try {
+            final info = row['beneficiary_info'] is String
+                ? jsonDecode(row['beneficiary_info'] as String)
+                : row['beneficiary_info'];
+                
+            print('--- Record ---');
+            print('ID: ${row['id']}');
+            print('Unique Key: ${row['unique_key']}');
+            print('Spouse Key: ${row['spouse_key']}');
+            print('Household Ref Key: ${row['household_ref_key']}');
+            print('Name: ${info['name'] ?? info['memberName'] ?? info['headName']}');
+            print('Relation: ${info['relation'] ?? info['relation_to_head']}');
+            print('Gender: ${info['gender']}');
+            print('DOB: ${info['dob']}');
+            print('Mobile: ${info['mobileNo'] ?? info['mobile']}');
+            print('-------------');
+          } catch (e) {
+            print('Error parsing record: $e');
+            print('Raw row data: $row');
+          }
+        }
+    
+      }
 
       final beneficiaries = <Map<String, dynamic>>[];
       String? headerVillage;
       String? headerMohalla;
 
+      // Process all records and add them to beneficiaries list
       for (final row in rows) {
         final rowHhId = row['household_ref_key']?.toString();
         if (rowHhId == null) continue;
@@ -79,133 +140,62 @@ class _HouseHold_BeneficiaryScreenState
 
         if (info is! Map) continue;
 
-        final head = info['head_details'] is Map ? info['head_details'] : {};
-        final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
-        final children = info['children_details'] is Map ? info['children_details'] : {};
-        final members = info['member_details'] is List ? info['member_details'] : [];
+        // Get basic info from record
+        final gender = (info['gender']?.toString().toLowerCase() ?? '');
+        final isFemale = gender == 'female' || gender == 'f';
+        final richId = info['RichIDChanged']?.toString() ?? 
+                       info['richIdChanged']?.toString() ?? 
+                       info['richId']?.toString() ?? 
+                       info['Rich_id']?.toString() ?? '';
+        
+        // Get name from multiple possible fields
+        final name = info['memberName']?.toString() ?? 
+                    info['name']?.toString() ??
+                    info['headName']?.toString() ?? 
+                    info['member_name']?.toString() ??
+                    info['memberNameLocal']?.toString() ??
+                    '';
+        
+        // Get relation
+        final relation = info['relation']?.toString() ?? 
+                        info['relation_to_head']?.toString() ?? 
+                        'Member';
+        
+        // Create card for this record
+        final card = <String, dynamic>{
+          'hhId': rowHhId,
+          'RegitrationDate': row['created_date_time']?.toString() ?? '',
+          'RegitrationType': 'General',
+          'BeneficiaryID': row['id']?.toString() ?? '',
+          'Name': name,
+          'Age|Gender': _formatAgeGender(info['dob'], info['gender']),
+          'Mobileno.': info['mobileNo']?.toString() ?? 
+                      info['mobile']?.toString() ??
+                      info['mobile_number']?.toString() ??
+                      '',
+          'Relation': relation,
+          'MaritalStatus': info['maritalStatus']?.toString() ?? 
+                         info['marital_status']?.toString() ??
+                         '',
+          'FatherName': info['fatherName']?.toString() ?? 
+                       info['father_name']?.toString() ??
+                       '',
+          'MotherName': info['motherName']?.toString() ?? 
+                       info['mother_name']?.toString() ??
+                       '',
+          '_raw': row,  // Keep the raw row data for reference
+          '_memberData': info,  // Store the full member data
+        };
+
+        // Add RICH ID for females
+        if (isFemale) {
+          card['Rich_id'] = richId;
+        }
+        
+        beneficiaries.add(card);
 
         headerVillage ??= info['village']?.toString();
         headerMohalla ??= info['mohalla']?.toString();
-
-        // Helper function to create a card
-        void addCard(Map<String, dynamic> person, String relation, {bool isChild = false}) {
-          if (person.isEmpty) return;
-          
-          final gender = (person['gender']?.toString().toLowerCase() ?? '');
-          final isFemale = gender == 'female' || gender == 'f';
-          final richId = person['RichIDChanged']?.toString() ?? 
-                         person['richIdChanged']?.toString() ?? 
-                         person['richId']?.toString() ?? '';
-          
-          // Format the card data to match the existing format
-          // Get name from multiple possible fields
-          final name = person['memberName']?.toString() ?? 
-                      person['name']?.toString() ??
-                      person['headName']?.toString() ?? // For head
-                      person['member_name']?.toString() ??
-                      person['memberNameLocal']?.toString() ??
-                      '';
-          
-          final card = <String, dynamic>{
-            'hhId': rowHhId,
-            'RegitrationDate': row['created_date_time']?.toString() ?? '',
-            'RegitrationType': isChild ? 'Child' : 'General',
-            'BeneficiaryID': row['id']?.toString() ?? '',
-            'Name': name,
-            'Age|Gender': _formatAgeGender(person['dob'], person['gender']),
-            'Mobileno.': person['mobileNo']?.toString() ?? 
-                        person['mobile']?.toString() ??
-                        person['mobile_number']?.toString() ??
-                        '',
-            'Relation': relation,
-            'MaritalStatus': person['maritalStatus']?.toString() ?? 
-                           person['marital_status']?.toString() ??
-                           '',
-            'FatherName': person['fatherName']?.toString() ?? 
-                         person['father_name']?.toString() ??
-                         (relation == 'Head' ? '' : head['headName']?.toString() ?? ''),
-            'MotherName': person['motherName']?.toString() ?? 
-                         person['mother_name']?.toString() ??
-                         (relation == 'Spouse' ? '' : spouse['memberName']?.toString() ?? ''),
-            '_raw': row,  // Keep the raw row data for reference
-            '_memberData': person,  // Store the full member data
-          };
-
-          // For children, show father's name from head if not available
-          if (isChild && person['fatherName'] == null) {
-            card['FatherName'] = head['headName']?.toString() ?? '';
-          }
-
-          // For children, show mother's name from spouse if not available
-          if (isChild && person['motherName'] == null) {
-            card['MotherName'] = spouse['memberName']?.toString() ?? '';
-          }
-
-          // Add RICH ID for females and children
-          if (isFemale || isChild) {
-            card['Rich_id'] = richId;
-          }
-          
-          // Set relation name for spouse display
-          if (relation == 'Head' && spouse.isNotEmpty) {
-            card['RelationName'] = spouse['memberName']?.toString() ?? spouse['name']?.toString() ?? '';
-          } else if (relation == 'Spouse' && head.isNotEmpty) {
-            card['RelationName'] = head['headName']?.toString() ?? head['name']?.toString() ?? '';
-          }
-          
-          beneficiaries.add(card);
-        }
-
-        // Add head of household
-        if (head.isNotEmpty) {
-          addCard(head, 'Head');
-        }
-        
-        // Add spouse
-        if (spouse.isNotEmpty) {
-          addCard(spouse, 'Spouse');
-        }
-        
-        // Children are now only added from member_details with memberType 'Child'
-        
-        // Add family members from member_details
-        if (members.isNotEmpty && members is List) {
-          for (final member in members) {
-            if (member is Map) {
-              final memberData = Map<String, dynamic>.from(member);
-              // Only process members with memberType 'Child' for children
-              if (memberData['memberType'] == 'Child') {
-                // Ensure all required fields exist
-                memberData['memberName'] = memberData['memberName'] ?? memberData['name'] ?? '';
-                memberData['gender'] = memberData['gender'] ?? '';
-                memberData['dob'] = memberData['dob'] ?? '';
-                memberData['mobileNo'] = memberData['mobileNo'] ?? '';
-                memberData['maritalStatus'] = memberData['maritalStatus'] ?? '';
-                
-                // Add father's name from head if not available
-                if (memberData['fatherName'] == null) {
-                  memberData['fatherName'] = head['headName']?.toString() ?? '';
-                }
-                
-                // Add mother's name from spouse if not available
-                if (memberData['motherName'] == null) {
-                  memberData['motherName'] = spouse['memberName']?.toString() ?? '';
-                }
-                
-                addCard(memberData, 'Child', isChild: true);
-              } else {
-                // Handle other member types (non-children)
-                memberData['memberName'] = memberData['memberName'] ?? memberData['name'] ?? '';
-                memberData['gender'] = memberData['gender'] ?? '';
-                memberData['dob'] = memberData['dob'] ?? '';
-                memberData['mobileNo'] = memberData['mobileNo'] ?? '';
-                memberData['maritalStatus'] = memberData['maritalStatus'] ?? '';
-                
-                addCard(memberData, 'Member', isChild: false);
-              }
-            }
-          }
-        }
       }
 
       if (mounted) {
@@ -235,11 +225,9 @@ class _HouseHold_BeneficiaryScreenState
         // Handle different date formats
         String dateStr = dobRaw.toString();
         DateTime? dob;
-        
-        // Try parsing as DateTime first (for ISO format)
+
         dob = DateTime.tryParse(dateStr);
-        
-        // If that fails, try parsing as timestamp (milliseconds since epoch)
+
         if (dob == null) {
           final timestamp = int.tryParse(dateStr);
           if (timestamp != null && timestamp > 0) {
@@ -250,26 +238,21 @@ class _HouseHold_BeneficiaryScreenState
             );
           }
         }
-        
-        // If we have a valid date, calculate age
+
         if (dob != null) {
           final now = DateTime.now();
           int years = now.year - dob.year;
-          
-          // Adjust for month and day to handle cases where birthday hasn't occurred yet this year
-          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+       if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
             years--;
           }
-          
-          // Don't show negative ages
+
           age = years >= 0 ? years.toString() : '0';
         }
       } catch (e) {
         debugPrint('Error parsing date of birth: $e');
       }
     }
-    
-    // Format gender
+
     String displayGender;
     switch (gender) {
       case 'm':
@@ -469,17 +452,22 @@ class _HouseHold_BeneficiaryScreenState
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
+    // Get head and spouse info
+    final head = _beneficiaries.firstWhere(
+      (b) => b['Relation'] == 'Head',
+      orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': '', 'Age|Gender': ''},
+    );
+    final spouse = _beneficiaries.firstWhere(
+      (b) => b['Relation'] == 'Spouse',
+      orElse: () => {'Name': '', 'Gender': '', 'Age|Gender': ''},
+    );
+
+    // Determine head's gender
+    final headGenderStr = head['Age|Gender']?.toString().toLowerCase() ?? '';
+    final isHeadMale = headGenderStr.contains('male');
+
     return InkWell(
       onTap: () {
-        final head = _beneficiaries.firstWhere(
-          (b) => b['Relation'] == 'Head',
-          orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': ''},
-        );
-        final spouse = _beneficiaries.firstWhere(
-          (b) => b['Relation'] == 'Spouse',
-          orElse: () => {'Name': '', 'Gender': ''},
-        );
-
         // Format gender to standard format (Male/Female/Other)
         String formatGender(dynamic gender) {
           if (gender == null) return 'Other';
@@ -580,49 +568,92 @@ class _HouseHold_BeneficiaryScreenState
                     children: [
                       Expanded(child: _rowText('Registration Date', data['RegitrationDate'] ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText('Registration Type', data['RegitrationType'] ?? '')),
+                      Expanded(child: _rowText('Registration Type', 
+                        (data['_memberData']?['memberType']?.toString().toLowerCase() == 'child') 
+                            ? 'Child' 
+                            : (data['RegitrationType'] ?? '')
+                      )),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('Beneficiary ID',
-  data['Relation'] == 'Head'
-    ? ((data['_raw']['unique_key']?.toString().length ?? 0) > 11 ? data['_raw']['unique_key'].toString().substring(data['_raw']['unique_key'].toString().length - 11) : (data['_raw']['unique_key']?.toString() ?? ''))
-    : ((data['_raw']['spouse_key']?.toString().length ?? 0) > 11 ? data['_raw']['spouse_key'].toString().substring(data['_raw']['spouse_key'].toString().length - 11) : (data['_raw']['spouse_key']?.toString() ?? ''))
-)),
+                        (data['_raw']?['unique_key']?.toString().length ?? 0) > 11 
+                            ? data['_raw']['unique_key'].toString().substring(data['_raw']['unique_key'].toString().length - 11) 
+                            : (data['_raw']?['unique_key']?.toString() ?? '')
+                      )),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText('Name', data['Name'] ?? '')),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _rowText('Name', data['Name'] ?? ''),
+                            // Show RICH ID in same row for female children
+                            if ((data['Age|Gender']?.toString().toLowerCase().contains('female') ?? false) && 
+                                (data['Relation'] == 'Child') && 
+                                (data['Rich_id']?.toString().isNotEmpty ?? false))
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: _rowText('RICH ID', data['Rich_id'] ?? ''),
+                              ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('Age | Gender', data['Age|Gender'] ?? '')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('Mobile no.', data['Mobileno.'] ?? '')),
                     ],
                   ),
-                  if (((data['Relation'] == 'Head' || data['Relation'] == 'Spouse') && ((data['Age|Gender']?.toString().toLowerCase().contains('female') ?? false) || (data['RegitrationType']?.toString().toLowerCase() == 'child'))))
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: _rowText('Rich_id', data['Rich_id'] ?? ''),
-                    ),
                   const SizedBox(height: 10),
-                  // Show Father's name for children, otherwise show spouse name
+                  // Show Father's name for children
                   if (data['Relation'] == 'Child')
                     _rowText(
                       'Father\'s Name',
-                      data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+                      data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'Not Available',
                     ),
+                  
+                  // Show Mother's name for children if available
                   if (data['Relation'] == 'Child' && data['MotherName']?.isNotEmpty == true)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: _rowText(
                         'Mother\'s Name',
-                        data['MotherName'] ?? 'N/A',
+                        data['MotherName'] ?? 'Not Available',
                       ),
                     ),
-                  if (data['Relation'] == 'Head' && data['RelationName']?.isNotEmpty == true)
-                    _rowText('Wife\'s Name', data['RelationName'] ?? 'N/A'),
-                  if (data['Relation'] == 'Spouse' && data['RelationName']?.isNotEmpty == true)
-                    _rowText('Husband\'s Name', data['RelationName'] ?? 'N/A'),
+                  
+                  // For Head cards, show spouse name with appropriate label based on gender
+                  if (data['Relation'] == 'Head' && spouse['Name']?.isNotEmpty == true)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _rowText(
+                        isHeadMale ? 'Wife\'s Name' : 'Husband\'s Name',
+                        spouse['Name']?.toString() ?? 'Not Available'
+                      ),
+                    ),
+                  
+                  // For Spouse cards, show head's name with appropriate label based on gender
+                  if (data['Relation'] == 'Spouse' && head['Name']?.isNotEmpty == true)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _rowText(
+                        isHeadMale ? 'Husband\'s Name' : 'Wife\'s Name',
+                        head['Name']?.toString() ?? 'Not Available'
+                      ),
+                    ),
+                  
+                  // For other members who are not head or spouse, show father's name if available
+                  if (data['Relation'] != 'Head' && data['Relation'] != 'Spouse' && data['Relation'] != 'Child')
+                    if (data['FatherName']?.isNotEmpty == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: _rowText(
+                          'Father\'s Name',
+                          data['FatherName'] ?? 'Not Available',
+                        ),
+                      ),
                 ],
               ),
             ),
