@@ -70,18 +70,50 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       int count = 0;
+      
+      // Create a set to track unique beneficiaries by their unique_key
+      final Set<String> uniqueBeneficiaries = {};
+      
       for (final row in rows) {
-        final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-        // Head card
-        if (head.isNotEmpty) count += 1;
-        // Spouse card
-        if (spouse.isNotEmpty) count += 1;
-        // Children cards (+ father card per child)
-        final children = (head['childrenDetails'] as List?) ?? const [];
-        count += (children.length * 2);
+        try {
+          // Skip if no unique key
+          final uniqueKey = row['unique_key']?.toString();
+          if (uniqueKey == null || uniqueKey.isEmpty) continue;
+          
+          // Skip if we've already counted this beneficiary
+          if (uniqueBeneficiaries.contains(uniqueKey)) continue;
+          
+          // Parse the beneficiary info
+          final dynamic rawInfo = row['beneficiary_info'];
+          if (rawInfo == null) continue;
+          
+          Map<String, dynamic> info;
+          try {
+            info = rawInfo is String 
+                ? jsonDecode(rawInfo) as Map<String, dynamic>
+                : Map<String, dynamic>.from(rawInfo as Map);
+          } catch (e) {
+            print('Error parsing beneficiary info: $e');
+            continue;
+          }
+          
+          // Get relation type
+          final relation = (info['relation']?.toString().toLowerCase().trim() ??
+              info['relation_to_head']?.toString().toLowerCase().trim() ??
+              '');
+          
+          // Count all valid beneficiaries regardless of relation type
+          // as long as they have a name and a valid unique key
+          final name = info['headName'] ?? info['memberName'] ?? info['name'];
+          if (name != null && name.toString().trim().isNotEmpty) {
+            count++;
+            uniqueBeneficiaries.add(uniqueKey);
+          }
+        } catch (e) {
+          print('Error processing beneficiary row: $e');
+        }
       }
+      
       if (mounted) {
         setState(() {
           beneficiariesCount = count;
@@ -89,6 +121,12 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       print('Error loading beneficiaries count: $e');
+      // In case of error, show the count of rows as fallback
+      if (mounted) {
+        setState(() {
+          beneficiariesCount = 0; // Reset to 0 to avoid showing incorrect count
+        });
+      }
     }
   }
 

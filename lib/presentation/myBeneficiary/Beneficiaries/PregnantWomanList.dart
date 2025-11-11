@@ -6,7 +6,8 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-
+import 'dart:convert';
+import '../../../data/Local_Storage/database_provider.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
 
 class PregnantWomenList extends StatefulWidget {
@@ -38,32 +39,36 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
 
   Future<void> _loadPregnantWomen() async {
     setState(() { _isLoading = true; });
-    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-    final pregnantList = <Map<String, dynamic>>[];
-    for (final row in rows) {
-      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-      final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-      // Head
-      if (_isPregnant(head)) {
-        pregnantList.add(_formatCardData(row, head));
-      }
-      // Spouse
-      if (spouse.isNotEmpty && _isPregnant(spouse)) {
-        pregnantList.add(_formatCardData(row, spouse));
-      }
-      // Family members
-      final familyMembers = List<Map<String, dynamic>>.from((info['family_details'] as List?) ?? []);
-      for (final member in familyMembers) {
-        if (_isPregnant(member)) {
-          pregnantList.add(_formatCardData(row, member));
+    
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final allBeneficiaries = await db.query('beneficiaries');
+      final pregnantList = <Map<String, dynamic>>[];
+      
+      for (final row in allBeneficiaries) {
+        try {
+          final info = row['beneficiary_info'] is String 
+              ? jsonDecode(row['beneficiary_info'] as String) 
+              : (row['beneficiary_info'] as Map?) ?? {};
+              
+          if (_isPregnant(Map<String, dynamic>.from(info))) {
+            pregnantList.add(_formatCardData(row, info));
+          }
+        } catch (e) {
+          print('Error processing beneficiary: $e');
         }
       }
+      
+      setState(() {
+        _filtered = pregnantList;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading pregnant women: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
-    setState(() {
-      _filtered = pregnantList;
-      _isLoading = false;
-    });
   }
 
   bool _isPregnant(Map<String, dynamic> person) {
@@ -73,16 +78,44 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
     return flag == 'yes' || typoFlag == 'yes' || statusFlag == 'pregnant';
   }
   Map<String, dynamic> _formatCardData(Map<String, dynamic> row, Map<String, dynamic> person) {
-    final name = person['memberName']?.toString() ?? person['headName']?.toString() ?? '';
-    final gender = person['gender']?.toString().toLowerCase();
-    final displayGender = gender == 'm' ? 'Male' : gender == 'f' ? 'Female' : 'Other';
-    final age = _calculateAge(person['dob']);
-    return {
-      'hhId': row['household_ref_key']?.toString() ?? '',
-      'name': name,
-      'age/gender': '${age > 0 ? '$age Y' : 'N/A'} / $displayGender',
-      'status': 'ANC DUE', // Static for now, can be dynamic if needed
-    };
+    try {
+      final name = person['memberName']?.toString() ?? person['headName']?.toString() ?? '';
+
+      final gender = person['gender']?.toString().trim().toLowerCase() ?? '';
+      
+      // Map gender to display format
+      String displayGender;
+      switch (gender) {
+        case 'm':
+        case 'male':
+          displayGender = 'Male';
+          break;
+        case 'f':
+        case 'female':
+          displayGender = 'Female';
+          break;
+        default:
+          displayGender = 'Other';
+      }
+      
+      // Calculate age
+      final age = _calculateAge(person['dob']);
+      
+      return {
+        'hhId': row['household_ref_key']?.toString() ?? '',
+        'name': name,
+        'age_gender': '${age > 0 ? '$age Y' : 'N/A'} | $displayGender',
+        'status': 'ANC DUE',
+      };
+    } catch (e) {
+      print('Error formatting card data: $e');
+      return {
+        'hhId': row['household_ref_key']?.toString() ?? '',
+        'name': 'Error loading data',
+        'age_gender': 'N/A | N/A',
+        'status': 'ERROR',
+      };
+    }
   }
 
   int _calculateAge(dynamic dobRaw) {
@@ -188,13 +221,13 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.15), // ✅ Background color
+                      color: Colors.green.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       data['status'] ?? '',
                       style: const TextStyle(
-                        color: Colors.green, // ✅ Text color
+                        color: Colors.green,
                         fontWeight: FontWeight.bold,
                         fontSize: 12.5,
                       ),
@@ -206,22 +239,29 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
               ),
             ),
 
-            // 🔸 Body
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
                 borderRadius:
                 const BorderRadius.vertical(bottom: Radius.circular(8)),
               ),
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow('', data['name']),
-                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      data['name'] ?? 'N/A',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
                   _infoRow(
                     '',
-                    data['age/gender'] ?? '',
+                    data['age_gender'] ?? 'N/A | N/A',
                     isWrappable: true,
                   ),
                 ],
