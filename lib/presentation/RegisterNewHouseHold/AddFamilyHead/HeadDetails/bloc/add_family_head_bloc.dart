@@ -1,197 +1,108 @@
 import 'dart:convert';
-import 'dart:math';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
-import 'package:medixcel_new/core/utils/device_info_utils.dart';
-import 'package:medixcel_new/core/utils/enums.dart';
-import 'package:medixcel_new/core/utils/id_generator_utils.dart';
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/beneficiaries_table.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import '../../../../../core/utils/device_info_utils.dart';
+import '../../../../../core/utils/enums.dart';
+import '../../../../../core/utils/geolocation_utils.dart';
+import '../../../../../core/utils/id_generator_utils.dart';
+import '../../../../../data/Local_Storage/User_Info.dart';
+import '../../../../../data/Local_Storage/local_storage_dao.dart';
+import '../../Children_Details/bloc/children_bloc.dart';
 import '../../SpousDetails/bloc/spous_bloc.dart';
 
 part 'add_family_head_event.dart';
 part 'add_family_head_state.dart';
 
 class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
-  AddFamilyHeadBloc() : super(AddFamilyHeadState(headUniqueKey: null, spouseUniqueKey: null)) {
+  AddFamilyHeadBloc() : super(AddFamilyHeadState()) {
     on<AfhHydrate>((event, emit) => emit(event.value));
-    
-    on<SaveHeadDetails>((event, emit) async {
-      // Validate required fields
-      final errors = <String>[];
-      if (state.houseNo == null || state.houseNo!.trim().isEmpty) {
-        errors.add('House No is required');
-      }
-      if (state.headName == null || state.headName!.trim().isEmpty) {
-        errors.add('Head Name is required');
-      }
-      
-      if (errors.isNotEmpty) {
-        emit(
-          state.copyWith(
-            postApiStatus: PostApiStatus.error,
-            errorMessage: errors.join('\n'),
-          ),
-        );
-        return;
-      }
-      
-      try {
-        emit(state.copyWith(postApiStatus: PostApiStatus.loading));
-        
-        // Get database instance from DatabaseProvider
-        final database = await DatabaseProvider.instance.database;
-        
-        // Get device info for ID generation
-        final deviceInfo = await DeviceInfo.getDeviceInfo();
-        
-        // Generate unique key for head if not already generated
-        String headKey = state.headUniqueKey ?? await IdGenerator.generateUniqueId(deviceInfo);
-        
-        // Create head record
-        final headRecord = {
-          'household_ref_key': state.houseNo,
-          'unique_key': headKey,
-          'beneficiary_state': 'active',
-          'is_adult': 1,
-          'is_guest': 0,
-          'is_death': 0,
-          'is_migrated': 0,
-          'is_separated': 0,
-          'is_family_planning': 0,
-          'beneficiary_info': jsonEncode({
-            'head_details': {
-              'houseNo': state.houseNo,
-              'headName': state.headName,
-              'fatherName': state.fatherName,
-              'useDob': state.useDob,
-              'dob': state.dob?.toIso8601String(),
-              'gender': state.gender,
-              'maritalStatus': state.maritalStatus,
-              'mobileNo': state.mobileNo,
-              'mobileOwner': state.mobileOwner,
-              'spouseName': state.spouseName,
-              'hasChildren': state.hasChildren,
-              'isPregnant': state.isPregnant,
-              'lmp': state.lmp?.toIso8601String(),
-              'edd': state.edd?.toIso8601String(),
-            },
-          }),
-          'created_date_time': DateTime.now().toIso8601String(),
-          'modified_date_time': DateTime.now().toIso8601String(),
-          'is_synced': 0,
-          'is_deleted': 0,
-        };
-        
-        // Save or update head record
-        if (state.headUniqueKey == null) {
-          await database.insert('beneficiaries', headRecord);
-        } else {
-          await database.update(
-            'beneficiaries',
-            headRecord,
-            where: 'unique_key = ?',
-            whereArgs: [headKey],
-          );
-        }
-        
-        emit(state.copyWith(
-          postApiStatus: PostApiStatus.success,
-          headUniqueKey: headKey,
-        ));
-        
-      } catch (e) {
-        emit(state.copyWith(
-          postApiStatus: PostApiStatus.error,
-          errorMessage: 'Failed to save head details: $e',
-        ));
-      }
-    });
     on<AfhToggleUseDob>((event, emit) {
       emit(state.copyWith(useDob: !state.useDob));
     });
 
     on<AfhUpdateHouseNo>(
-      (event, emit) => emit(state.copyWith(houseNo: event.value)),
+          (event, emit) => emit(state.copyWith(houseNo: event.value)),
     );
     on<AfhUpdateHeadName>(
-      (event, emit) => emit(state.copyWith(headName: event.value)),
+          (event, emit) => emit(state.copyWith(headName: event.value)),
     );
     on<AfhUpdateFatherName>(
-      (event, emit) => emit(state.copyWith(fatherName: event.value)),
+          (event, emit) => emit(state.copyWith(fatherName: event.value)),
     );
     on<AfhUpdateDob>((event, emit) => emit(state.copyWith(dob: event.value)));
     on<AfhUpdateApproxAge>(
-      (event, emit) => emit(state.copyWith(approxAge: event.value)),
+          (event, emit) => emit(state.copyWith(approxAge: event.value)),
     );
     on<AfhUpdateGender>(
-      (event, emit) => emit(state.copyWith(gender: event.value)),
+          (event, emit) => emit(state.copyWith(gender: event.value)),
     );
     on<AfhABHAChange>(
-      (event, emit) => emit(state.copyWith(AfhABHAChange: event.value)),
+          (event, emit) => emit(state.copyWith(AfhABHAChange: event.value)),
     );
     on<AfhUpdateOccupation>(
-      (event, emit) => emit(state.copyWith(occupation: event.value)),
+          (event, emit) => emit(state.copyWith(occupation: event.value)),
     );
     on<AfhRichIdChange>(
-      (event, emit) => emit(state.copyWith(AfhRichIdChange: event.value)),
+          (event, emit) => emit(state.copyWith(AfhRichIdChange: event.value)),
     );
     on<AfhUpdateEducation>(
-      (event, emit) => emit(state.copyWith(education: event.value)),
+          (event, emit) => emit(state.copyWith(education: event.value)),
     );
     on<AfhUpdateReligion>(
-      (event, emit) => emit(state.copyWith(religion: event.value)),
+          (event, emit) => emit(state.copyWith(religion: event.value)),
     );
     on<AfhUpdateCategory>(
-      (event, emit) => emit(state.copyWith(category: event.value)),
+          (event, emit) => emit(state.copyWith(category: event.value)),
     );
     on<AfhUpdateMobileOwner>(
-      (event, emit) => emit(state.copyWith(mobileOwner: event.value)),
+          (event, emit) => emit(state.copyWith(mobileOwner: event.value)),
     );
     on<AfhUpdateMobileNo>(
-      (event, emit) => emit(state.copyWith(mobileNo: event.value)),
+          (event, emit) => emit(state.copyWith(mobileNo: event.value)),
     );
     on<AfhUpdateVillage>(
-      (event, emit) => emit(state.copyWith(village: event.value)),
+          (event, emit) => emit(state.copyWith(village: event.value)),
     );
     on<AfhUpdateWard>((event, emit) => emit(state.copyWith(ward: event.value)));
     on<AfhUpdateMohalla>(
-      (event, emit) => emit(state.copyWith(mohalla: event.value)),
+          (event, emit) => emit(state.copyWith(mohalla: event.value)),
     );
     on<AfhUpdateBankAcc>(
-      (event, emit) => emit(state.copyWith(bankAcc: event.value)),
+          (event, emit) => emit(state.copyWith(bankAcc: event.value)),
     );
     on<AfhUpdateIfsc>((event, emit) => emit(state.copyWith(ifsc: event.value)));
     on<AfhUpdateVoterId>(
-      (event, emit) => emit(state.copyWith(voterId: event.value)),
+          (event, emit) => emit(state.copyWith(voterId: event.value)),
     );
     on<AfhUpdateRationId>(
-      (event, emit) => emit(state.copyWith(rationId: event.value)),
+          (event, emit) => emit(state.copyWith(rationId: event.value)),
     );
     on<AfhUpdatePhId>((event, emit) => emit(state.copyWith(phId: event.value)));
     on<AfhUpdateBeneficiaryType>(
-      (event, emit) => emit(state.copyWith(beneficiaryType: event.value)),
+          (event, emit) => emit(state.copyWith(beneficiaryType: event.value)),
     );
     on<AfhUpdateMaritalStatus>(
-      (event, emit) => emit(state.copyWith(maritalStatus: event.value)),
+          (event, emit) => emit(state.copyWith(maritalStatus: event.value)),
     );
     on<ChildrenChanged>(
-      (event, emit) => emit(state.copyWith(children: event.value)),
+          (event, emit) => emit(state.copyWith(children: event.value)),
     );
     on<AfhUpdateAgeAtMarriage>(
-      (event, emit) => emit(state.copyWith(ageAtMarriage: event.value)),
+          (event, emit) => emit(state.copyWith(ageAtMarriage: event.value)),
     );
     on<AfhUpdateSpouseName>(
-      (event, emit) => emit(state.copyWith(spouseName: event.value)),
+          (event, emit) => emit(state.copyWith(spouseName: event.value)),
     );
     on<AfhUpdateHasChildren>(
-      (event, emit) => emit(state.copyWith(hasChildren: event.value)),
+          (event, emit) => emit(state.copyWith(hasChildren: event.value)),
     );
     on<AfhUpdateIsPregnant>(
-      (event, emit) => emit(state.copyWith(isPregnant: event.value)),
+          (event, emit) => emit(state.copyWith(isPregnant: event.value)),
     );
 
     on<LMPChange>((event, emit) {
@@ -202,7 +113,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
     on<UpdateYears>((event, emit) {
       emit(state.copyWith(years: event.value));
-      // Update approxAge when any of the fields change
+
       final years = event.value;
       final months = state.months ?? '0';
       final days = state.days ?? '0';
@@ -260,6 +171,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         errors.add('Marital status required');
       }
 
+      // Pregnancy validations: only when Female + Married
       final isFemale = state.gender == 'Female';
       final isMarried = state.maritalStatus == 'Married';
       if (isFemale && isMarried) {
@@ -288,117 +200,248 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       }
 
       try {
-
-        final databasesPath = await getDatabasesPath();
-        final path = join(databasesPath, 'medixcel.db');
-        final database = await openDatabase(path);
-
-
+        // Get device info
         final deviceInfo = await DeviceInfo.getDeviceInfo();
-        final idGenerator = IdGenerator();
+        final now = DateTime.now();
+        final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
 
 
-        final headKey = await IdGenerator.generateUniqueId(deviceInfo);
-        String? spouseKey;
+        final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
+        final headId = await IdGenerator.generateUniqueId(deviceInfo);
+        final spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
 
+        final currentUser = await UserInfo.getCurrentUser();
+        final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
 
-        final headRecord = {
-          'household_ref_key': state.houseNo,
-          'unique_key': headKey,
+        final geoLocation = await GeoLocation.getCurrentLocation();
+        final locationData = Map<String, String>.from(geoLocation.toJson());
+        locationData['source'] = 'gps';
+        if (!geoLocation.hasCoordinates) {
+          locationData['status'] = 'unavailable';
+          locationData['reason'] = 'Could not determine location';
+        }
+        final geoLocationJson = jsonEncode(locationData);
+
+        Map<String, dynamic> childrenData = {};
+        try {
+          final childrenBloc = BlocProvider.of<ChildrenBloc>(event.context);
+          final childrenState = childrenBloc.state;
+
+          childrenData = {
+            'totalBorn': childrenState.totalBorn,
+            'totalLive': childrenState.totalLive,
+            'totalMale': childrenState.totalMale,
+            'totalFemale': childrenState.totalFemale,
+            'youngestAge': childrenState.youngestAge,
+            'ageUnit': childrenState.ageUnit,
+            'youngestGender': childrenState.youngestGender,
+            'children': childrenState.children,
+          };
+        } catch (e) {
+          print('Error getting children data: $e');
+        }
+
+        final headPayload = {
+          'server_id': null,
+          'household_ref_key': uniqueKey,
+          'unique_key': headId,
           'beneficiary_state': 'active',
+          'pregnancy_count': 0,
+          'beneficiary_info': jsonEncode({
+            'houseNo': state.houseNo,
+            'headName': state.headName,
+            'fatherName': state.fatherName,
+            'gender': state.gender,
+            'dob': state.dob?.toIso8601String(),
+            'years': state.years,
+            'months': state.months,
+            'days': state.days,
+            'approxAge': state.approxAge,
+            'mobileNo': state.mobileNo,
+            'mobileOwner': state.mobileOwner,
+            'maritalStatus': state.maritalStatus,
+            'ageAtMarriage': state.ageAtMarriage,
+            'spouseName': state.spouseName,
+            'education': state.education,
+            'occupation': state.occupation,
+            'religion': state.religion,
+            'category': state.category,
+            'hasChildren': state.hasChildren,
+            'isPregnant': state.isPregnant,
+            'lmp': state.lmp?.toIso8601String(),
+            'edd': state.edd?.toIso8601String(),
+
+            'village': state.village,
+            'ward': state.ward,
+            'wardNo': state.wardNo,
+            'mohalla': state.mohalla,
+            'mohallaTola': state.mohallaTola,
+
+            'abhaAddress': state.abhaAddress,
+            'abhaNumber': state.abhaNumber,
+            'voterId': state.voterId,
+            'rationId': state.rationId,
+            'rationCardId': state.rationCardId,
+            'phId': state.phId,
+            'personalHealthId': state.personalHealthId,
+            'bankAcc': state.bankAcc,
+            'bankAccountNumber': state.bankAccountNumber,
+            'ifsc': state.ifsc,
+            'ifscCode': state.ifscCode,
+            
+            // Beneficiary Type
+            'beneficiaryType': state.beneficiaryType,
+            'isMigrantWorker': state.isMigrantWorker,
+            
+            // Migrant Worker Details
+            'migrantState': state.migrantState,
+            'migrantDistrict': state.migrantDistrict,
+            'migrantBlock': state.migrantBlock,
+            'migrantPanchayat': state.migrantPanchayat,
+            'migrantVillage': state.migrantVillage,
+            'migrantContactNo': state.migrantContactNo,
+            'migrantDuration': state.migrantDuration,
+            'migrantWorkType': state.migrantWorkType,
+            'migrantWorkPlace': state.migrantWorkPlace,
+            'migrantRemarks': state.migrantRemarks,
+
+            'relation': 'head',
+            'relation_to_head': 'self',
+            'AfhABHAChange': state.AfhABHAChange,
+            'AfhRichIdChange': state.AfhRichIdChange,
+            'createdAt': DateTime.now().toIso8601String(),
+            'updatedAt': DateTime.now().toIso8601String(),
+         
+            ...childrenData,
+          }),
+          'geo_location': geoLocationJson,
+          'spouse_key': state.maritalStatus == 'Married' ? spouseKey : null,
+          'mother_key': null,
+          'father_key': null,
+          'is_family_planning': 0,
           'is_adult': 1,
           'is_guest': 0,
           'is_death': 0,
-          'is_migrated': 0,
-          'is_separated': 0,
-          'is_family_planning': 0,
-          'beneficiary_info': jsonEncode({
-            'head_details': {
-              'houseNo': state.houseNo,
-              'headName': state.headName,
-              'fatherName': state.fatherName,
-              'useDob': state.useDob,
-              'dob': state.dob?.toIso8601String(),
-              'gender': state.gender,
-              'maritalStatus': state.maritalStatus,
-              'mobileNo': state.mobileNo,
-              'mobileOwner': state.mobileOwner,
-              'spouseName': state.spouseName,
-              'hasChildren': state.hasChildren,
-              'isPregnant': state.isPregnant,
-              'lmp': state.lmp?.toIso8601String(),
-              'edd': state.edd?.toIso8601String(),
-            },
+          'death_details': jsonEncode({}),
+          'is_migrated': state.beneficiaryType == 'SeasonalMigrant' ? 1 : 0,
+          'is_separated': state.maritalStatus == 'Separated' || state.maritalStatus == 'Divorced' ? 1 : 0,
+          'device_details': jsonEncode({
+            'id': deviceInfo.deviceId,
+            'platform': deviceInfo.platform,
+            'version': deviceInfo.osVersion,
           }),
-          'created_date_time': DateTime.now().toIso8601String(),
-          'modified_date_time': DateTime.now().toIso8601String(),
+          'app_details': jsonEncode({
+            'app_version': deviceInfo.appVersion.split('+').first,
+            'app_name': deviceInfo.appName,
+            'build_number': deviceInfo.buildNumber,
+            'package_name': deviceInfo.packageName,
+          }),
+          'parent_user': jsonEncode({}),
+          'current_user_key': 'local_user',
+          'facility_id': facilityId,
+          'created_date_time': ts,
+          'modified_date_time': ts,
           'is_synced': 0,
           'is_deleted': 0,
+          'additional_info': jsonEncode({
+            'abha_verified': state.abhaVerified,
+            'voter_id_verified': state.voterIdVerified,
+            'ration_card_verified': state.rationCardVerified,
+            'bank_account_verified': state.bankAccountVerified,
+          }),
         };
 
-        // Save head record
-        await database.insert('beneficiaries', headRecord);
+        await LocalStorageDao.instance.insertBeneficiary(headPayload);
 
-        if (isMarried && state.spouseName != null && state.spouseName!.isNotEmpty) {
-          final spBloc = event.spousBloc;
-          if (spBloc != null) {
-            final spouseState = spBloc.state;
-            spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
-            
-            final spouseRecord = {
-              'household_ref_key': state.houseNo,
+        if (state.maritalStatus == 'Married' && state.spouseName != null) {
+          try {
+            final spousBloc = BlocProvider.of<SpousBloc>(event.context);
+            final spousState = spousBloc.state;
+
+            final spousePayload = {
+              'server_id': null,
+              'household_ref_key': uniqueKey,
               'unique_key': spouseKey,
               'beneficiary_state': 'active',
+              'pregnancy_count': 0,
+              'beneficiary_info': jsonEncode({
+                'relation': spousState.relation ?? 'spouse',
+                'memberName': spousState.memberName ?? state.spouseName,
+                'ageAtMarriage': spousState.ageAtMarriage,
+                'RichIDChanged': spousState.RichIDChanged,
+                'spouseName': spousState.spouseName,
+                'fatherName': spousState.fatherName,
+                'useDob': spousState.useDob,
+                'dob': spousState.dob?.toIso8601String(),
+                'edd': spousState.edd?.toIso8601String(),
+                'lmp': spousState.lmp?.toIso8601String(),
+                'approxAge': spousState.approxAge,
+                'gender': spousState.gender ?? (state.gender == 'Male' ? 'Female' : 'Male'),
+                'occupation': spousState.occupation,
+                'education': spousState.education,
+                'religion': spousState.religion,
+                'category': spousState.category,
+                'abhaAddress': spousState.abhaAddress,
+                'mobileOwner': spousState.mobileOwner,
+                'mobileNo': spousState.mobileNo,
+                'bankAcc': spousState.bankAcc,
+                'ifsc': spousState.ifsc,
+                'voterId': spousState.voterId,
+                'rationId': spousState.rationId,
+                'phId': spousState.phId,
+                'beneficiaryType': spousState.beneficiaryType,
+                'isPregnant': spousState.isPregnant,
+                'relation_to_head': 'spouse',
+                ...childrenData,
+              }),
+              'geo_location': geoLocationJson,
+              'spouse_key': headId,
+              'mother_key': null,
+              'father_key': null,
+              'is_family_planning': 0,
               'is_adult': 1,
               'is_guest': 0,
               'is_death': 0,
+              'death_details': jsonEncode({}),
               'is_migrated': 0,
               'is_separated': 0,
-              'is_family_planning': 0,
-              'spouse_key': headKey,
-              'beneficiary_info': jsonEncode({
-                'spouse_details': {
-                  'relation': 'Spouse',
-                  'memberName': spouseState.memberName,
-                  'spouseName': state.headName,
-                  'gender': spouseState.gender,
-                  'dob': spouseState.dob?.toIso8601String(),
-                  'mobileNo': spouseState.mobileNo,
-                  'mobileOwner': spouseState.mobileOwner,
-                  'education': spouseState.education,
-                  'occupation': spouseState.occupation,
-                },
+              'device_details': jsonEncode({
+                'id': deviceInfo.deviceId,
+                'platform': deviceInfo.platform,
+                'version': deviceInfo.osVersion,
               }),
-              'created_date_time': DateTime.now().toIso8601String(),
-              'modified_date_time': DateTime.now().toIso8601String(),
+              'app_details': jsonEncode({
+                'app_version': deviceInfo.appVersion.split('+').first,
+                'app_name': deviceInfo.appName,
+                'build_number': deviceInfo.buildNumber,
+                'package_name': deviceInfo.packageName,
+              }),
+              'parent_user': jsonEncode({}),
+              'current_user_key': 'local_user',
+              'facility_id': facilityId,
+              'created_date_time': ts,
+              'modified_date_time': ts,
               'is_synced': 0,
               'is_deleted': 0,
             };
 
-            // Save spouse record
-            await database.insert('beneficiaries', spouseRecord);
-
-            await database.update(
-              'beneficiaries',
-              {'spouse_key': spouseKey},
-              where: 'unique_key = ?',
-              whereArgs: [headKey],
-            );
+            await LocalStorageDao.instance.insertBeneficiary(spousePayload);
+          } catch (e) {
+            print('Error saving spouse: $e');
+            // Continue even if spouse save fails
           }
         }
 
-        await database.close();
 
-        emit(state.copyWith(
-          postApiStatus: PostApiStatus.success,
-          headUniqueKey: headKey,
-          spouseUniqueKey: spouseKey,
-        ));
+        emit(state.copyWith(postApiStatus: PostApiStatus.success));
       } catch (e) {
-        emit(state.copyWith(
-          postApiStatus: PostApiStatus.error,
-          errorMessage: 'Failed to save records: $e',
-        ));
+        print('Error saving family head: $e');
+        emit(
+          state.copyWith(
+            postApiStatus: PostApiStatus.error,
+            errorMessage: 'Failed to save family data: ${e.toString()}',
+          ),
+        );
       }
     });
   }

@@ -128,14 +128,21 @@ class RegisterNewHouseholdBloc
           print('   - $key: $value');
         });
 
-        final householdInfoJson = jsonEncode(householdInfo);
+        // Convert all values to string before encoding to JSON
+        final householdInfoString = Map<String, String>.fromIterable(
+          householdInfo.entries,
+          key: (entry) => entry.key,
+          value: (entry) => entry.value?.toString() ?? 'Not Specified',
+        );
+
+        final householdInfoJson = jsonEncode(householdInfoString);
         print(' Household Info JSON: $householdInfoJson');
 
         final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
         await Future.delayed(const Duration(seconds: 1));
         final headId = await IdGenerator.generateUniqueId(deviceInfo);
 
-        final locationData = geoLocation.toJson();
+        final locationData = Map<String, String>.from(geoLocation.toJson());
         locationData['source'] = 'gps';
         if (!geoLocation.hasCoordinates) {
           locationData['status'] = 'unavailable';
@@ -227,46 +234,37 @@ class RegisterNewHouseholdBloc
           return member;
         }).toList();
         
-        //  Beneficiary Info
-        final beneficiaryInfo = jsonEncode({
-          'head_details': headDetails,
-          'spouse_details': spouseDetails,
-          'children_details': _toJsonSafe(event.headForm?['childrendetails']) ?? {},
-          'member_details': memberDetails,
-        });
-        print('Beneficiary Info JSON: $beneficiaryInfo');
-
-        //  Beneficiary Payload
-        final beneficiaryPayload = {
+        // Save Head Details
+        final headPayload = {
           'server_id': null,
           'household_ref_key': uniqueKey,
           'unique_key': headId,
           'beneficiary_state': 'active',
           'pregnancy_count': 0,
-          'beneficiary_info': beneficiaryInfo,
+          'beneficiary_info': jsonEncode(headDetails),
           'geo_location': geoLocationJson,
           'spouse_key': spouseKey,
-          'mother_key': spouseKey,
-          'father_key': headId,
+          'mother_key': null,  // Head's mother key would be null as it's the first generation
+          'father_key': null,  // Head's father key would be null as it's the first generation
           'is_family_planning': 0,
           'is_adult': 1,
           'is_guest': 0,
           'is_death': 0,
-          'death_details': {},
+          'death_details': jsonEncode({}),
           'is_migrated': 0,
           'is_separated': 0,
-          'device_details': {
+          'device_details': jsonEncode({
             'id': deviceInfo.deviceId,
             'platform': deviceInfo.platform,
             'version': deviceInfo.osVersion,
-          },
+          }),
           'app_details': jsonEncode({
             'app_version': deviceInfo.appVersion.split('+').first,
             'app_name': deviceInfo.appName,
             'build_number': deviceInfo.buildNumber,
             'package_name': deviceInfo.packageName,
           }),
-          'parent_user': {},
+          'parent_user': jsonEncode({}),
           'current_user_key': 'local_user',
           'facility_id': facilityId,
           'created_date_time': ts,
@@ -274,8 +272,105 @@ class RegisterNewHouseholdBloc
           'is_synced': 0,
           'is_deleted': 0,
         };
+        await LocalStorageDao.instance.insertBeneficiary(headPayload);
 
-        await LocalStorageDao.instance.insertBeneficiary(beneficiaryPayload);
+        // Save Spouse Details if exists
+        if (spouseDetails.isNotEmpty) {
+          final spousePayload = {
+            'server_id': null,
+            'household_ref_key': uniqueKey,
+            'unique_key': spouseKey,
+            'beneficiary_state': 'active',
+            'pregnancy_count': 0,
+            'beneficiary_info': jsonEncode({
+              ...spouseDetails,
+              'relation': 'spouse',
+              'relation_to_head': 'spouse',
+            }),
+            'geo_location': geoLocationJson,
+            'spouse_key': headId,  // Link back to head
+            'mother_key': null,    // Spouse's mother key
+            'father_key': null,    // Spouse's father key
+            'is_family_planning': 0,
+            'is_adult': 1,
+            'is_guest': 0,
+            'is_death': 0,
+            'death_details': jsonEncode({}),
+            'is_migrated': 0,
+            'is_separated': 0,
+            'device_details': jsonEncode({
+              'id': deviceInfo.deviceId,
+              'platform': deviceInfo.platform,
+              'version': deviceInfo.osVersion,
+            }),
+            'app_details': jsonEncode({
+              'app_version': deviceInfo.appVersion.split('+').first,
+              'app_name': deviceInfo.appName,
+              'build_number': deviceInfo.buildNumber,
+              'package_name': deviceInfo.packageName,
+            }),
+            'parent_user': jsonEncode({}),
+            'current_user_key': 'local_user',
+            'facility_id': facilityId,
+            'created_date_time': ts,
+            'modified_date_time': ts,
+            'is_synced': 0,
+            'is_deleted': 0,
+          };
+          await LocalStorageDao.instance.insertBeneficiary(spousePayload);
+        }
+
+        // Save Children Details if exists
+        final childrenDetails = _toJsonSafe(event.headForm?['childrendetails']) ?? [];
+        if (childrenDetails is List && childrenDetails.isNotEmpty) {
+          for (var child in childrenDetails) {
+            if (child is Map) {
+              final childKey = await IdGenerator.generateUniqueId(deviceInfo);
+              final childPayload = {
+                'server_id': null,
+                'household_ref_key': uniqueKey,
+                'unique_key': childKey,
+                'beneficiary_state': 'active',
+                'pregnancy_count': 0,
+                'beneficiary_info': jsonEncode({
+                  ...child,
+                  'relation': 'child',
+                  'relation_to_head': 'child',
+                }),
+                'geo_location': geoLocationJson,
+                'spouse_key': null,  // Children won't have spouse
+                'mother_key': spouseKey,  // Link to mother (spouse)
+                'father_key': headId,    // Link to father (head)
+                'is_family_planning': 0,
+                'is_adult': 0,  // Assuming children are not adults
+                'is_guest': 0,
+                'is_death': 0,
+                'death_details': jsonEncode({}),
+                'is_migrated': 0,
+                'is_separated': 0,
+                'device_details': jsonEncode({
+                  'id': deviceInfo.deviceId,
+                  'platform': deviceInfo.platform,
+                  'version': deviceInfo.osVersion,
+                }),
+                'app_details': jsonEncode({
+                  'app_version': deviceInfo.appVersion.split('+').first,
+                  'app_name': deviceInfo.appName,
+                  'build_number': deviceInfo.buildNumber,
+                  'package_name': deviceInfo.packageName,
+                }),
+                'parent_user': jsonEncode({}),
+                'current_user_key': 'local_user',
+                'facility_id': facilityId,
+                'created_date_time': ts,
+                'modified_date_time': ts,
+                'is_synced': 0,
+                'is_deleted': 0,
+              };
+              await LocalStorageDao.instance.insertBeneficiary(childPayload);
+            }
+          }
+        }
 
         //  Members
         for (var member in event.memberForms) {

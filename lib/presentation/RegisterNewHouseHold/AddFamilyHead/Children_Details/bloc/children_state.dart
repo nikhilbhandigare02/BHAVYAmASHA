@@ -9,6 +9,7 @@ class ChildrenState extends Equatable {
     this.youngestAge,
     this.ageUnit,
     this.youngestGender,
+    this.children = const [],
   });
 
   final int totalBorn;
@@ -18,6 +19,7 @@ class ChildrenState extends Equatable {
   final String? youngestAge;
   final String? ageUnit; // Days/Months/Years
   final String? youngestGender; // Male/Female
+  final List<Map<String, dynamic>> children;
 
   ChildrenState copyWith({
     int? totalBorn,
@@ -27,6 +29,7 @@ class ChildrenState extends Equatable {
     String? youngestAge,
     String? ageUnit,
     String? youngestGender,
+    List<Map<String, dynamic>>? children,
   }) {
     return ChildrenState(
       totalBorn: totalBorn ?? this.totalBorn,
@@ -36,6 +39,7 @@ class ChildrenState extends Equatable {
       youngestAge: youngestAge ?? this.youngestAge,
       ageUnit: ageUnit ?? this.ageUnit,
       youngestGender: youngestGender ?? this.youngestGender,
+      children: children ?? this.children,
     );
   }
 

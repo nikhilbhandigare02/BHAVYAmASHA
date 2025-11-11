@@ -24,12 +24,20 @@ class AddFamilyHeadState extends Equatable {
   final String? mobileNo;
   final String? village;
   final String? ward;
+  final String? wardNo; // Added for consistency with payload
   final String? mohalla;
+  final String? mohallaTola; // Added for consistency with payload
   final String? bankAcc;
+  final String? bankAccountNumber; // Added for consistency with payload
   final String? ifsc;
+  final String? ifscCode; // Added for consistency with payload
   final String? voterId;
   final String? rationId;
+  final String? rationCardId; // Added for consistency with payload
   final String? phId;
+  final String? personalHealthId; // Added for consistency with payload
+  final String? abhaNumber; // Added for ABHA number
+  final String? abhaAddress; // Added for ABHA address
   final String? beneficiaryType;
   final String? maritalStatus; // e.g., Married/Unmarried/Widowed/Separated
   final String? ageAtMarriage;
@@ -37,14 +45,28 @@ class AddFamilyHeadState extends Equatable {
   final String? AfhRichIdChange;
   final String? hasChildren; // Yes/No
   final String? isPregnant; // Yes/No
+  // Verification status fields
+  final bool? abhaVerified;
+  final bool? voterIdVerified;
+  final bool? rationCardVerified;
+  final bool? bankAccountVerified;
+  // Migrant worker fields
+  final bool? isMigrantWorker;
+  final String? migrantState;
+  final String? migrantDistrict;
+  final String? migrantBlock;
+  final String? migrantPanchayat;
+  final String? migrantVillage;
+  final String? migrantContactNo;
+  final String? migrantDuration;
+  final String? migrantWorkType;
+  final String? migrantWorkPlace;
+  final String? migrantRemarks;
+  
   final PostApiStatus postApiStatus;
   final String? errorMessage;
-  final String? headUniqueKey;
-  final String? spouseUniqueKey;
 
   const AddFamilyHeadState({
-    required this.headUniqueKey,
-    required this.spouseUniqueKey,
     this.houseNo,
     this.headName,
     this.fatherName,
@@ -67,12 +89,20 @@ class AddFamilyHeadState extends Equatable {
     this.mobileNo,
     this.village,
     this.ward,
+    this.wardNo,
     this.mohalla,
+    this.mohallaTola,
     this.bankAcc,
+    this.bankAccountNumber,
     this.ifsc,
+    this.ifscCode,
     this.voterId,
     this.rationId,
+    this.rationCardId,
     this.phId,
+    this.personalHealthId,
+    this.abhaNumber,
+    this.abhaAddress,
     this.beneficiaryType,
     this.maritalStatus,
     this.ageAtMarriage,
@@ -80,9 +110,24 @@ class AddFamilyHeadState extends Equatable {
     this.AfhRichIdChange,
     this.hasChildren,
     this.isPregnant,
+    this.abhaVerified = false,
+    this.voterIdVerified = false,
+    this.rationCardVerified = false,
+    this.bankAccountVerified = false,
+    this.isMigrantWorker = false,
+    this.migrantState,
+    this.migrantDistrict,
+    this.migrantBlock,
+    this.migrantPanchayat,
+    this.migrantVillage,
+    this.migrantContactNo,
+    this.migrantDuration,
+    this.migrantWorkType,
+    this.migrantWorkPlace,
+    this.migrantRemarks,
     this.postApiStatus = PostApiStatus.initial,
     this.errorMessage,
-  }) : super();
+  });
 
   AddFamilyHeadState copyWith({
     String? houseNo,
@@ -107,12 +152,20 @@ class AddFamilyHeadState extends Equatable {
     String? mobileNo,
     String? village,
     String? ward,
+    String? wardNo,
     String? mohalla,
+    String? mohallaTola,
     String? bankAcc,
+    String? bankAccountNumber,
     String? ifsc,
+    String? ifscCode,
     String? voterId,
     String? rationId,
+    String? rationCardId,
     String? phId,
+    String? personalHealthId,
+    String? abhaNumber,
+    String? abhaAddress,
     String? beneficiaryType,
     String? maritalStatus,
     String? ageAtMarriage,
@@ -120,18 +173,31 @@ class AddFamilyHeadState extends Equatable {
     String? hasChildren,
     String? AfhRichIdChange,
     String? isPregnant,
+    bool? abhaVerified,
+    bool? voterIdVerified,
+    bool? rationCardVerified,
+    bool? bankAccountVerified,
+    bool? isMigrantWorker,
+    String? migrantState,
+    String? migrantDistrict,
+    String? migrantBlock,
+    String? migrantPanchayat,
+    String? migrantVillage,
+    String? migrantContactNo,
+    String? migrantDuration,
+    String? migrantWorkType,
+    String? migrantWorkPlace,
+    String? migrantRemarks,
     PostApiStatus? postApiStatus,
     String? errorMessage,
-    String? headUniqueKey,
-    String? spouseUniqueKey,
     bool clearError = false,
   }) {
     return AddFamilyHeadState(
       houseNo: houseNo ?? this.houseNo,
       headName: headName ?? this.headName,
-      fatherName: fatherName ?? this.fatherName,
       AfhABHAChange: AfhABHAChange ?? this.AfhABHAChange,
       children: children ?? this.children,
+      fatherName: fatherName ?? this.fatherName,
       useDob: useDob ?? this.useDob,
       dob: dob ?? this.dob,
       edd: edd ?? this.edd,
@@ -149,12 +215,20 @@ class AddFamilyHeadState extends Equatable {
       mobileNo: mobileNo ?? this.mobileNo,
       village: village ?? this.village,
       ward: ward ?? this.ward,
+      wardNo: wardNo ?? this.wardNo,
       mohalla: mohalla ?? this.mohalla,
+      mohallaTola: mohallaTola ?? this.mohallaTola,
       bankAcc: bankAcc ?? this.bankAcc,
+      bankAccountNumber: bankAccountNumber ?? this.bankAccountNumber,
       ifsc: ifsc ?? this.ifsc,
+      ifscCode: ifscCode ?? this.ifscCode,
       voterId: voterId ?? this.voterId,
       rationId: rationId ?? this.rationId,
+      rationCardId: rationCardId ?? this.rationCardId,
       phId: phId ?? this.phId,
+      personalHealthId: personalHealthId ?? this.personalHealthId,
+      abhaNumber: abhaNumber ?? this.abhaNumber,
+      abhaAddress: abhaAddress ?? this.abhaAddress,
       beneficiaryType: beneficiaryType ?? this.beneficiaryType,
       maritalStatus: maritalStatus ?? this.maritalStatus,
       ageAtMarriage: ageAtMarriage ?? this.ageAtMarriage,
@@ -162,10 +236,23 @@ class AddFamilyHeadState extends Equatable {
       hasChildren: hasChildren ?? this.hasChildren,
       AfhRichIdChange: AfhRichIdChange ?? this.AfhRichIdChange,
       isPregnant: isPregnant ?? this.isPregnant,
+      abhaVerified: abhaVerified ?? this.abhaVerified,
+      voterIdVerified: voterIdVerified ?? this.voterIdVerified,
+      rationCardVerified: rationCardVerified ?? this.rationCardVerified,
+      bankAccountVerified: bankAccountVerified ?? this.bankAccountVerified,
+      isMigrantWorker: isMigrantWorker ?? this.isMigrantWorker,
+      migrantState: migrantState ?? this.migrantState,
+      migrantDistrict: migrantDistrict ?? this.migrantDistrict,
+      migrantBlock: migrantBlock ?? this.migrantBlock,
+      migrantPanchayat: migrantPanchayat ?? this.migrantPanchayat,
+      migrantVillage: migrantVillage ?? this.migrantVillage,
+      migrantContactNo: migrantContactNo ?? this.migrantContactNo,
+      migrantDuration: migrantDuration ?? this.migrantDuration,
+      migrantWorkType: migrantWorkType ?? this.migrantWorkType,
+      migrantWorkPlace: migrantWorkPlace ?? this.migrantWorkPlace,
+      migrantRemarks: migrantRemarks ?? this.migrantRemarks,
       postApiStatus: postApiStatus ?? this.postApiStatus,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      headUniqueKey: headUniqueKey ?? this.headUniqueKey,
-      spouseUniqueKey: spouseUniqueKey ?? this.spouseUniqueKey,
     );
   }
 
@@ -176,8 +263,6 @@ class AddFamilyHeadState extends Equatable {
     AfhRichIdChange,
     lmp,
     edd,
-    headUniqueKey,
-    spouseUniqueKey,
     headName,
     fatherName,
     useDob,
@@ -196,18 +281,41 @@ class AddFamilyHeadState extends Equatable {
     mobileNo,
     village,
     ward,
+    wardNo,
     mohalla,
+    mohallaTola,
     bankAcc,
+    bankAccountNumber,
     ifsc,
+    ifscCode,
     voterId,
     rationId,
+    rationCardId,
     phId,
+    personalHealthId,
+    abhaNumber,
+    abhaAddress,
     beneficiaryType,
     maritalStatus,
     ageAtMarriage,
     spouseName,
     hasChildren,
     isPregnant,
+    abhaVerified,
+    voterIdVerified,
+    rationCardVerified,
+    bankAccountVerified,
+    isMigrantWorker,
+    migrantState,
+    migrantDistrict,
+    migrantBlock,
+    migrantPanchayat,
+    migrantVillage,
+    migrantContactNo,
+    migrantDuration,
+    migrantWorkType,
+    migrantWorkPlace,
+    migrantRemarks,
     postApiStatus,
     errorMessage,
   ];

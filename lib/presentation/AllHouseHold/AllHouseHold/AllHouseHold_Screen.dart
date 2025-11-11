@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -72,56 +74,128 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final mapped = rows.map<Map<String, dynamic>>((r) {
-        final info = Map<String, dynamic>.from((r['beneficiary_info'] as Map?) ?? const {});
-        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-        // spouse may be stored either under head_details.spousedetails or at top-level spouse_details
-        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? (info['spouse_details'] as Map?) ?? const {});
-        // children may be stored at top-level children_details (preferred) or under head_details.childrenDetails/childrendetails
-        final dynamic childrenRaw = info['children_details'] ?? head['childrenDetails'] ?? head['childrendetails'];
-        final List childrenList = childrenRaw is List
-            ? childrenRaw
-            : childrenRaw is Map
-                ? childrenRaw.values.whereType<Map>().toList()
-                : const [];
-        final String name = (head['headName'] ?? '').toString();
-        final String mobile = (head['mobileNo'] ?? '').toString();
-        int totalMembers = 1;
-        if ((head['maritalStatus'] ?? '').toString() == 'Married' && spouse.isNotEmpty) totalMembers++;
-        // Count children from stored children details, fallback to head.children numeric if details absent
-        int childrenCount = childrenList.length;
-        if (childrenCount == 0) {
-          childrenCount = int.tryParse((head['children'] ?? '0').toString()) ?? 0;
-        }
-        totalMembers += childrenCount;
-        final int eligibleCouples = (head['maritalStatus'] ?? '') == 'Married' ? 1 : 0;
-        // Calculate elderly count (head and spouse, age 65+)
-        int elderly = 0;
-        DateTime? parseDob(String? dobStr) {
-          if (dobStr == null || dobStr.isEmpty) return null;
-          try {
-            return DateTime.parse(dobStr);
-          } catch (_) {
-            return null;
+      
+      // Create maps to store counts per household
+      final pregnantCountMap = <String, int>{};
+      final elderlyCountMap = <String, int>{};
+      
+      // First pass: Count pregnant women and elderly in all households
+      for (final row in rows) {
+        try {
+          final info = Map<String, dynamic>.from((row['beneficiary_info'] is String 
+              ? Map<String, dynamic>.from(jsonDecode(row['beneficiary_info'])) 
+              : (row['beneficiary_info'] as Map?) ?? const {}));
+              
+          final householdRefKey = (row['household_ref_key'] ?? '').toString();
+          
+          // Count pregnant women
+          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes' || 
+                           info['isPregnant'] == true;
+          if (isPregnant) {
+            pregnantCountMap[householdRefKey] = (pregnantCountMap[householdRefKey] ?? 0) + 1;
           }
+          
+          // Count elderly (65+ years old)
+          final dob = info['dob']?.toString();
+          if (dob != null && dob.isNotEmpty) {
+            try {
+              final birthDate = DateTime.parse(dob);
+              final now = DateTime.now();
+              int age = now.year - birthDate.year;
+              if (now.month < birthDate.month || 
+                  (now.month == birthDate.month && now.day < birthDate.day)) {
+                age--;
+              }
+              if (age >= 65) {
+                elderlyCountMap[householdRefKey] = (elderlyCountMap[householdRefKey] ?? 0) + 1;
+              }
+            } catch (e) {
+              print('Error parsing DOB: $dob, error: $e');
+            }
+          }
+        } catch (e) {
+          print('Error processing beneficiary: $e');
         }
-        int calcAge(DateTime? dob) {
-          if (dob == null) return 0;
-          final now = DateTime.now();
-          int age = now.year - dob.year;
-          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) age--;
-          return age;
+      }
+      
+      // Filter for family heads (relation_to_head = 'self' and is_death = 0 and is_migrated = 0)
+      final familyHeads = rows.where((r) {
+        try {
+          final info = Map<String, dynamic>.from((r['beneficiary_info'] is String 
+              ? Map<String, dynamic>.from(jsonDecode(r['beneficiary_info'])) 
+              : (r['beneficiary_info'] as Map?) ?? const {}));
+          
+          final relationToHead = info['relation_to_head']?.toString() ?? '';
+          final isDeath = r['is_death'] == 1;
+          final isMigrated = r['is_migrated'] == 1;
+          
+          return relationToHead == 'self' && !isDeath && !isMigrated;
+        } catch (e) {
+          return false;
         }
-        final headDob = parseDob(head['dob']?.toString());
-        final spouseDob = parseDob(spouse['dob']?.toString());
-        if (calcAge(headDob) >= 65) elderly++;
-        if (calcAge(spouseDob) >= 65) elderly++;
+      }).toList();
+
+      final mapped = familyHeads.map<Map<String, dynamic>>((r) {
+        // Parse beneficiary info
+        final info = r['beneficiary_info'] is String 
+            ? Map<String, dynamic>.from(jsonDecode(r['beneficiary_info'])) 
+            : Map<String, dynamic>.from((r['beneficiary_info'] as Map?) ?? const {});
+        
+        // Get head details
+        final name = (info['headName'] ?? info['name'] ?? '').toString();
+        final mobile = (info['mobileNo'] ?? '').toString();
+        final maritalStatus = (info['maritalStatus'] ?? '').toString();
+        final spouseName = (info['spouseName'] ?? '').toString();
+        
+        // Extract house number, checking both top-level and nested in beneficiary_info
+        String houseNo = '';
+        if (info['houseNo'] != null) {
+          houseNo = info['houseNo'].toString();
+        } else if (r['beneficiary_info'] is Map && r['beneficiary_info']?['houseNo'] != null) {
+          houseNo = r['beneficiary_info']['houseNo'].toString();
+        }
+        
+        // Get household ref key (last 11 digits)
+        final householdRefKey = (r['household_ref_key'] ?? '').toString();
+        final hhId = householdRefKey.length > 11 
+            ? householdRefKey.substring(householdRefKey.length - 11) 
+            : householdRefKey;
+            
+        // Get head ID (last 11 digits of unique_key)
+        final uniqueKey = (r['unique_key'] ?? '').toString();
+        final headId = uniqueKey.length > 11 
+            ? uniqueKey.substring(uniqueKey.length - 11) 
+            : uniqueKey;
+        
+        // Count family members (spouse + children if any)
+        int totalMembers = 1; // head
+        if (maritalStatus == 'Married' && spouseName.isNotEmpty) {
+          totalMembers++; // spouse
+        }
+        
+        // Count children if available
+        final children = info['children'];
+        if (children is Map) {
+          totalMembers += children.length;
+        } else if (children is int) {
+          totalMembers += children;
+        }
+        
+        // Calculate eligible couples (1 if married)
+        final eligibleCouples = maritalStatus == 'Married' ? 1 : 0;
+        
+        // Get elderly count from our pre-calculated map
+        int elderly = elderlyCountMap[householdRefKey] ?? 0;
+        
         return {
           'name': name,
           'mobile': mobile,
+          'hhId': headId,
+          'houseNo': houseNo.isNotEmpty ? houseNo : hhId, // Use houseNo if available, otherwise fallback to hhId
           'totalMembers': totalMembers,
           'eligibleCouples': eligibleCouples,
           'elderly': elderly,
+          'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
           '_raw': r,
         };
       }).toList();
@@ -320,7 +394,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                     ),
                   ),
                   Text(
-                    '${l10n?.houseNoLabel ?? 'House No.'} : ${data['_raw']['beneficiary_info']?['head_details']?['houseNo'] ?? ''}',
+                    '${l10n?.houseNoLabel ?? 'House No.'} : ${data['houseNo'] ?? data['_raw']['beneficiary_info']?['houseNo'] ?? ''}',
                     style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w700,

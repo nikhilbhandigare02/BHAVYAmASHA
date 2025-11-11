@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
@@ -32,110 +33,210 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     _loadData();
     _searchCtrl.addListener(_onSearchChanged);
   }
-  
+
   Future<void> _loadData() async {
     setState(() { _isLoading = true; });
     final beneficiaries = <Map<String, dynamic>>[];
     // Fetch all rows from the beneficiaries table
     final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+
+    // Create a map to store head and spouse info by household_ref_key for linking
+    final householdMap = <String, Map<String, dynamic>>{};
+
+    // Create a map for quick lookup of beneficiaries by unique_key
+    final beneficiaryMap = <String, Map<String, dynamic>>{};
+
+    // First pass: collect all records and organize by household
     for (final row in rows) {
       final hhId = row['household_ref_key']?.toString() ?? '';
-      final createdDate = row['created_date_time']?.toString() ?? '';
-      final regType = 'General';
-      final beneficiaryId = row['id']?.toString() ?? '';
-      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-      final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-      // Head
-      if (head.isNotEmpty) {
-        final gender = (head['gender']?.toString().toLowerCase() ?? '');
+      if (hhId.isEmpty) continue;
+
+      final info = row['beneficiary_info'] is String
+          ? jsonDecode(row['beneficiary_info'] as String)
+          : (row['beneficiary_info'] as Map?) ?? {};
+
+      if (info is! Map) continue;
+
+      final relation = (info['relation']?.toString().toLowerCase() ??
+          info['relation_to_head']?.toString().toLowerCase() ?? '');
+
+      // Store in beneficiary map for quick lookup
+      final uniqueKey = row['unique_key']?.toString() ?? '';
+      if (uniqueKey.isNotEmpty) {
+        beneficiaryMap[uniqueKey] = {
+          'row': row,
+          'info': info,
+          'relation': relation,
+          'spouse_key': row['spouse_key']?.toString(),
+          'name': info['headName'] ?? info['memberName'] ?? info['name'] ?? ''
+        };
+      }
+
+      if (!householdMap.containsKey(hhId)) {
+        householdMap[hhId] = {
+          'head': null,
+          'spouse': null,
+          'children': [],
+          'rows': [],
+        };
+      }
+
+      householdMap[hhId]!['rows'].add({'row': row, 'info': info, 'relation': relation});
+
+      if (relation == 'head' || relation == 'self') {
+        householdMap[hhId]!['head'] = {'row': row, 'info': info};
+      } else if (relation == 'spouse') {
+        householdMap[hhId]!['spouse'] = {'row': row, 'info': info};
+      } else if (relation == 'child') {
+        householdMap[hhId]!['children'].add({'row': row, 'info': info});
+      }
+    }
+
+    // Second pass: build beneficiary cards
+    for (final hhId in householdMap.keys) {
+      final household = householdMap[hhId]!;
+      final headData = household['head'] as Map?;
+      final spouseData = household['spouse'] as Map?;
+      final childrenList = household['children'] as List;
+
+      // Add head card
+      if (headData != null) {
+        final row = headData['row'] as Map<String, dynamic>;
+        final info = headData['info'] as Map<String, dynamic>;
+        final createdDate = row['created_date_time']?.toString() ?? '';
+        final gender = (info['gender']?.toString().toLowerCase() ?? '');
         final isFemale = gender == 'female' || gender == 'f';
-        final isChild = regType.toLowerCase() == 'child';
-        final richId = head['RichIDChanged']?.toString() ?? head['richIdChanged']?.toString() ?? '';
+        final richId = info['RichIDChanged']?.toString() ?? info['richIdChanged']?.toString() ?? '';
+
+        // Find spouse name if exists
+        String spouseName = '';
+        String spouseGender = '';
+        final spouseKey = row['spouse_key']?.toString();
+        if (spouseKey?.isNotEmpty == true && beneficiaryMap.containsKey(spouseKey)) {
+          final spouse = beneficiaryMap[spouseKey]!;
+          spouseName = spouse['name']?.toString() ?? '';
+          spouseGender = spouse['info']?['gender']?.toString().toLowerCase() ?? '';
+        }
+
         beneficiaries.add({
           'hhId': hhId,
           'RegitrationDate': createdDate,
-          'RegitrationType': regType,
-          'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11 ? row['unique_key'].toString().substring(row['unique_key'].toString().length - 11) : (row['unique_key']?.toString() ?? ''),
-          'Tola/Mohalla': head['mohalla']?.toString() ?? '',
-          'village': head['village']?.toString() ?? '',
-          'RichID': (isFemale || isChild) ? richId : '',
-          'Name': head['headName']?.toString() ?? '',
-          'Age|Gender': _formatAgeGender(head['dob'], head['gender']),
-          'Mobileno.': head['mobileNo']?.toString() ?? '',
-          'FatherName': (head['fatherName']?.toString()?.isNotEmpty ?? false) ? head['fatherName'] : 'Not Available',
-          'HusbandName': '',
-          'WifeName': (spouse['memberName']?.toString()?.isNotEmpty ?? false) ? spouse['memberName'] : 'Not Available',
+          'RegitrationType': 'General',
+          'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11
+              ? row['unique_key'].toString().substring(row['unique_key'].toString().length - 11)
+              : (row['unique_key']?.toString() ?? ''),
+          'Tola/Mohalla': info['mohalla']?.toString() ?? '',
+          'village': info['village']?.toString() ?? '',
+          'RichID': richId,
+          'Gender': gender,
+          'Name': info['headName']?.toString() ?? '',
+          'Age|Gender': _formatAgeGender(info['dob'], info['gender']),
+          'Mobileno.': info['mobileNo']?.toString() ?? '',
+          'WifeName': isFemale ? '' : spouseName, // Only show if head is male
+          'HusbandName': isFemale ? spouseName : '', // Only show if head is female
+          'SpouseName': spouseName, // Store raw spouse name for reference
+          'SpouseGender': spouseGender, // Store spouse gender for reference
+          'FatherName': info['fatherName']?.toString() ?? '',
           'Relation': 'Head',
         });
       }
-      // Spouse
-      if (spouse.isNotEmpty) {
-        final gender = (spouse['gender']?.toString().toLowerCase() ?? '');
+
+      // Add spouse card
+      if (spouseData != null) {
+        final row = spouseData['row'] as Map<String, dynamic>;
+        final info = spouseData['info'] as Map<String, dynamic>;
+        final createdDate = row['created_date_time']?.toString() ?? '';
+        final gender = (info['gender']?.toString().toLowerCase() ?? '');
         final isFemale = gender == 'female' || gender == 'f';
-        final isChild = regType.toLowerCase() == 'child';
-        final richId = spouse['RichIDChanged']?.toString() ?? spouse['richIdChanged']?.toString() ?? '';
+        final richId = info['RichIDChanged']?.toString() ?? info['richIdChanged']?.toString() ?? '';
+        
+        // Find spouse (head) info if exists
+        String spouseName = '';
+        String spouseGender = '';
+        String headVillage = '';
+        String headMohalla = '';
+        final spouseKey = row['spouse_key']?.toString();
+        
+        if (spouseKey?.isNotEmpty == true && beneficiaryMap.containsKey(spouseKey)) {
+          final spouse = beneficiaryMap[spouseKey]!;
+          spouseName = spouse['name']?.toString() ?? '';
+          spouseGender = spouse['info']?['gender']?.toString().toLowerCase() ?? '';
+          
+          // Get village and mohalla from head's data if available
+          if (headData != null) {
+            final headInfo = headData['info'] as Map<String, dynamic>;
+            headVillage = headInfo['village']?.toString() ?? info['village']?.toString() ?? '';
+            headMohalla = headInfo['mohalla']?.toString() ?? info['mohalla']?.toString() ?? '';
+          }
+        }
+
         beneficiaries.add({
           'hhId': hhId,
           'RegitrationDate': createdDate,
-          'RegitrationType': regType,
-          'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11 ? row['unique_key'].toString().substring(row['unique_key'].toString().length - 11) : (row['unique_key']?.toString() ?? ''),
-          'Tola/Mohalla': spouse['mohalla']?.toString() ?? '',
-          'village': spouse['village']?.toString() ?? '',
-          'RichID': (isFemale || isChild) ? richId : '',
-          'Name': spouse['memberName']?.toString() ?? '',
-          'Age|Gender': _formatAgeGender(spouse['dob'], spouse['gender']),
-          'Mobileno.': spouse['mobileNo']?.toString() ?? '',
-          'FatherName': (spouse['fatherName']?.toString()?.isNotEmpty ?? false) ? spouse['fatherName'] : 'Not Available',
-          'HusbandName': (spouse['spouseName']?.toString()?.isNotEmpty ?? false) ? spouse['spouseName'] : (head['headName']?.toString()?.isNotEmpty ?? false) ? head['headName'] : 'Not Available',
-          'WifeName': '',
+          'RegitrationType': 'General',
+          'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11
+              ? row['unique_key'].toString().substring(row['unique_key'].toString().length - 11)
+              : (row['unique_key']?.toString() ?? ''),
+          'Tola/Mohalla': headMohalla.isNotEmpty ? headMohalla : (info['mohalla']?.toString() ?? ''),
+          'village': headVillage.isNotEmpty ? headVillage : (info['village']?.toString() ?? ''),
+          'RichID': richId,
+          'Gender': gender,
+          'Name': info['memberName']?.toString() ?? '',
+          'Age|Gender': _formatAgeGender(info['dob'], info['gender']),
+          'Mobileno.': info['mobileNo']?.toString() ?? '',
+          'FatherName': info['fatherName']?.toString() ?? 'Not Available',
+          'HusbandName': isFemale ? spouseName : '', // Only show if spouse is female
+          'WifeName': isFemale ? '' : spouseName,    // Only show if spouse is male
+          'SpouseName': spouseName, // Store raw spouse name for reference
+          'SpouseGender': spouseGender, // Store spouse gender for reference
           'Relation': 'Spouse',
         });
       }
 
-      final children = (head['childrenDetails'] as List?) ?? [];
-      for (final child in children) {
-        if (child is Map) {
-          final gender = (child['gender']?.toString().toLowerCase() ?? '');
-          final isFemale = gender == 'female' || gender == 'f';
-          final isChild = true;
-          final richId = child['RichIDChanged']?.toString() ?? child['richIdChanged']?.toString() ?? '';
-          beneficiaries.add({
-            'hhId': hhId,
-            'RegitrationDate': createdDate,
-            'RegitrationType': regType,
-            'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11 ? row['unique_key'].toString().substring(row['unique_key'].toString().length - 11) : (row['unique_key']?.toString() ?? ''),
-            'Tola/Mohalla': child['mohalla']?.toString() ?? '',
-            'village': child['village']?.toString() ?? '',
-            'RichID': (isFemale || isChild) ? richId : '',
-            'Name': child['name']?.toString() ?? '',
-            'Age|Gender': _formatAgeGender(child['dob'], child['gender']),
-            'Mobileno.': child['mobileNo']?.toString() ?? '',
-            'FatherName': (child['fatherName']?.toString()?.isNotEmpty ?? false) ? child['fatherName'] : (head['headName']?.toString()?.isNotEmpty ?? false) ? head['headName'] : 'Not Available',
-            'ChildName': child['name']?.toString() ?? 'Not Available',
-            'HusbandName': '',
-            'WifeName': '',
-            'Relation': 'Child',
-          });
-          // Add a father card for each child if needed
-          beneficiaries.add({
-            'hhId': hhId,
-            'RegitrationDate': createdDate,
-            'RegitrationType': regType,
-            'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11 ? row['unique_key'].toString().substring(row['unique_key'].toString().length - 11) : (row['unique_key']?.toString() ?? ''),
-            'Tola/Mohalla': head['mohalla']?.toString() ?? '',
-            'village': head['village']?.toString() ?? '',
-            'RichID': '',
-            'Name': head['headName']?.toString() ?? '',
-            'Age|Gender': _formatAgeGender(head['dob'], head['gender']),
-            'Mobileno.': head['mobileNo']?.toString() ?? '',
-            'FatherName': (head['fatherName']?.toString()?.isNotEmpty ?? false) ? head['fatherName'] : 'Not Available',
-            'ChildName': child['name']?.toString() ?? 'Not Available',
-            'HusbandName': '',
-            'WifeName': '',
-            'Relation': 'Father',
-          });
+      // Add children cards
+      for (final childData in childrenList) {
+        final row = childData['row'] as Map<String, dynamic>;
+        final info = childData['info'] as Map<String, dynamic>;
+        final createdDate = row['created_date_time']?.toString() ?? '';
+        final gender = (info['gender']?.toString().toLowerCase() ?? '');
+        final isFemale = gender == 'female' || gender == 'f';
+        final richId = info['RichIDChanged']?.toString() ?? info['richIdChanged']?.toString() ?? '';
+
+        // Find father's name for child
+        String fatherName = info['fatherName']?.toString() ?? '';
+
+        // If father's name is not directly available, try to find from head of household
+        if (fatherName.isEmpty) {
+          // Get head of household
+          final head = householdMap[hhId]?['head'];
+          if (head != null && head['info'] is Map) {
+            final headInfo = head['info'] as Map;
+            // Only set father's name if head is male
+            if (headInfo['gender']?.toString().toLowerCase() == 'male') {
+              fatherName = headInfo['headName']?.toString() ?? '';
+            }
+          }
         }
+
+        beneficiaries.add({
+          'hhId': hhId,
+          'RegitrationDate': createdDate,
+          'RegitrationType': 'Child',
+          'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11
+              ? row['unique_key'].toString().substring(row['unique_key'].toString().length - 11)
+              : (row['unique_key']?.toString() ?? ''),
+          'Tola/Mohalla': info['mohalla']?.toString() ?? '',
+          'village': info['village']?.toString() ?? '',
+          'RichID': richId,
+          'Gender': gender,
+          'Name': info['name']?.toString() ?? '',
+          'Age|Gender': _formatAgeGender(info['dob'], info['gender']),
+          'Mobileno.': info['mobileNo']?.toString() ?? '',
+          'WifeName': '',
+          'HusbandName': '',
+          'FatherName': fatherName,
+          'Relation': 'Child',
+        });
       }
     }
     if (mounted) {
@@ -147,7 +248,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     }
   }
 
-  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) { 
+  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
     String age = 'N/A';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
@@ -162,8 +263,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     String displayGender = gender == 'm' || gender == 'male'
         ? 'Male'
         : gender == 'f' || gender == 'female'
-            ? 'Female'
-            : 'Other';
+        ? 'Female'
+        : 'Other';
     return '$age Y | $displayGender';
   }
 
@@ -208,15 +309,12 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         ),
       ),
       drawer: const CustomDrawer(),
-// Pass the count to AshaDashboardSection
-// Example usage:
-// AshaDashboardSection(allBeneficiaryCount: _allBeneficiaries.length,allBeneficiaryCount: _allBeneficiaries.length)
 
       body: _isLoading
           ? const CenterBoxLoader()
           : Column(
-              children: [
-                Padding(
+        children: [
+          Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               controller: _searchCtrl,
@@ -270,15 +368,20 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 ),
               ),
             ),
-              ),
-            ],
           ),
+        ],
+      ),
     );
   }
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
+
+    // Get gender and registration type
+    final gender = (data['Gender']?.toString().toLowerCase() ?? '');
+    final isFemale = gender == 'female' || gender == 'f';
+    final isChild = data['RegitrationType']?.toString().toLowerCase() == 'child';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -322,9 +425,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         child: Text(
                           (data['hhId']?.toString().length ?? 0) > 11 ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
                           style: TextStyle(
-                            color: primary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.sp
+                              color: primary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14.sp
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -362,7 +465,10 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       _buildRow([
                         _rowText(l10n?.villageLabel ?? 'Village', data['village']),
                         _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla', data['Tola/Mohalla']),
-                        _rowText('RCH ID', (data['Age|Gender']?.toString().toLowerCase().contains('male') ?? false) ? 'Not Available' : (data['RichID']?.isNotEmpty == true ? data['RichID'] : 'Not Available')),
+                        // Show RCH ID only if Female AND Child registration type
+                        _rowText('RCH ID', (isFemale && isChild)
+                            ? (data['RichID']?.isNotEmpty == true ? data['RichID'] : 'Not Available')
+                            : 'N/A'),
                       ]),
                       const SizedBox(height: 8),
                       _buildRow([
@@ -372,25 +478,25 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       ]),
                       const SizedBox(height: 8),
                       _buildRow([
-                        // Wife name on head's card if spouse is wife
-                        if (data['Relation']?.toString().toLowerCase() == 'head')
-                          _rowText('Wife Name', data['WifeName']?.isNotEmpty == true ? data['WifeName'] : 'Not Available'),
-                        // Husband name on spouse card if spouse is husband
-                        if (data['Relation']?.toString().toLowerCase() == 'spouse')
-                          _rowText('Husband Name', data['HusbandName']?.isNotEmpty == true ? data['HusbandName'] : 'Not Available'),
-                        // Father name on child card (only if available)
-                        if (data['Relation']?.toString().toLowerCase() == 'child' && data['FatherName']?.isNotEmpty == true && data['FatherName'] != 'Not Available')
-                          _rowText('Father Name', data['FatherName']),
-                        // Child name on father card (if available)
-                        if (data['Relation']?.toString().toLowerCase() == 'father')
-                          _rowText('Child Name', data['ChildName']?.isNotEmpty == true ? data['ChildName'] : 'Not Available'),
-                        // Always fill to 3 columns for layout
-                        for (int i = 0; i < 3 - [
-                          if (data['Relation']?.toString().toLowerCase() == 'head') 1,
-                          if (data['Relation']?.toString().toLowerCase() == 'spouse') 1,
-                          if (data['Relation']?.toString().toLowerCase() == 'child' && data['FatherName']?.isNotEmpty == true && data['FatherName'] != 'Not Available') 1,
-                          if (data['Relation']?.toString().toLowerCase() == 'father') 1,
-                        ].length; i++) _rowText('', ''),
+                        // For Child registration type - show Father Name instead of Husband/Wife
+                        if (isChild)
+                          _rowText('Father Name', data['FatherName']?.isNotEmpty == true && data['FatherName'] != 'Not Available' ? data['FatherName'] : 'Not Available')
+                        else ...[
+                          // Show appropriate spouse/head name based on relationship and gender
+                          if (data['SpouseName']?.isNotEmpty == true)
+                            _rowText(
+                              data['SpouseGender'] == 'female' ? 'Wife Name' : 'Husband Name',
+                              data['SpouseName']
+                            )
+                          else
+                            _rowText(data['Relation'] == 'Head' 
+                              ? (data['Gender']?.toString().toLowerCase() == 'male' ? 'Wife Name' : 'Husband Name')
+                              : (data['Gender']?.toString().toLowerCase() == 'female' ? 'Husband Name' : 'Wife Name'),
+                              'Not Available'
+                            ),
+                        ],
+                        // Always fill remaining columns for layout
+                        for (int i = 0; i < 2; i++) _rowText('', ''),
                       ]),
                     ],
                   ),
@@ -435,7 +541,6 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
   bool _isEligibleForCBAC(String ageGender) {
     try {
-
       final ageStr = ageGender.split(' ').first;
       final age = int.tryParse(ageStr) ?? 0;
       return age >= 30;
@@ -461,5 +566,4 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       ],
     );
   }
-
 }
