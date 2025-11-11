@@ -1,12 +1,17 @@
+import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 
 part 'hbyc_child_care_event.dart';
 part 'hbyc_child_care_state.dart';
 
 class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
   HbycChildCareBloc() : super(const HbycChildCareInitial()) {
+    on<BeneficiaryAbsentChanged>((event, emit) => emit(state.copyWith(beneficiaryAbsent: event.value)));
     on<HbycBhramanChanged>((event, emit) => emit(state.copyWith(hbycBhraman: event.value)));
     on<IsChildSickChanged>((event, emit) => emit(state.copyWith(isChildSick: event.value)));
     on<BreastfeedingContinuingChanged>((event, emit) => emit(state.copyWith(breastfeedingContinuing: event.value)));
@@ -39,8 +44,79 @@ class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
         emit(state.copyWith(status: HbycFormStatus.failure, error: errors.join('\n')));
         return;
       }
-      await Future.delayed(const Duration(milliseconds: 200));
-      emit(state.copyWith(status: HbycFormStatus.success));
+
+      try {
+        final db = await DatabaseProvider.instance.database;
+        final now = DateTime.now().toIso8601String();
+        
+        
+        final formData = {
+          'form_name': 'Home Based Young Child',
+          'unique_key': '999',
+          'form_data': {
+            'beneficiary_absent': state.beneficiaryAbsent,
+            'hbyc_bhraman': state.hbycBhraman,
+            'is_child_sick': state.isChildSick,
+            if (state.isChildSick == 'Yes' && event.sicknessDetails != null) 'sickness_details': event.sicknessDetails,
+            'breastfeeding_continuing': state.breastfeedingContinuing,
+            'complete_diet_provided': state.completeDietProvided,
+            'weighed_by_aww': state.weighedByAww,
+            'length_height_recorded': state.lengthHeightRecorded,
+            'weight_less_than_3sd_referred': state.weightLessThan3sdReferred,
+            if (state.weightLessThan3sdReferred == 'Yes' && event.referralDetails != null) 'referral_details': event.referralDetails,
+            'development_delays_observed': state.developmentDelaysObserved,
+            if (state.developmentDelaysObserved == 'Yes' && event.developmentDelaysDetails != null) 'development_delays_details': event.developmentDelaysDetails,
+            'fully_vaccinated_as_per_mcp': state.fullyVaccinatedAsPerMcp,
+            'measles_vaccine_given': state.measlesVaccineGiven,
+            'vitamin_a_dosage_given': state.vitaminADosageGiven,
+            'ors_packet_available': state.orsPacketAvailable,
+            'iron_folic_syrup_available': state.ironFolicSyrupAvailable,
+            'counseling_exclusive_bf_6m': state.counselingExclusiveBf6m,
+            'advice_complementary_foods': state.adviceComplementaryFoods,
+            'advice_hand_washing_hygiene': state.adviceHandWashingHygiene,
+            'advice_parenting_support': state.adviceParentingSupport,
+            'counseling_family_planning': state.counselingFamilyPlanning,
+            'advice_preparing_administering_ors': state.advicePreparingAdministeringOrs,
+            'advice_administering_ifa_syrup': state.adviceAdministeringIfaSyrup,
+            'completion_date': state.completionDate,
+          },
+          'created_at': now,
+          'updated_at': now,
+        };
+
+        final beneficiaryRefKey = event.beneficiaryRefKey;
+        final householdRefKey = event.householdRefKey;
+
+        await db.insert(
+          FollowupFormDataTable.table,
+          {
+            'forms_ref_key': '999',
+            'household_ref_key': householdRefKey,
+            'beneficiary_ref_key': beneficiaryRefKey,
+            'form_json': jsonEncode(formData),
+            'created_date_time': now,
+            'modified_date_time': now,
+            'is_synced': 0,
+            'is_deleted': 0,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+ 
+        print('✅ HBYC Form Submitted Successfully');
+        print('📋 Form Data:');
+        print('   - Household ID: $householdRefKey');
+        print('   - Beneficiary ID: $beneficiaryRefKey');
+        print('   - Form Data: ${jsonEncode(formData, toEncodable: (item) => item.toString())}');
+        print('   - Submitted at: $now');
+
+        emit(state.copyWith(status: HbycFormStatus.success));
+      } catch (e) {
+        print('❌ Error saving HBYC form: $e');
+        emit(state.copyWith(
+          status: HbycFormStatus.failure, 
+          error: 'Failed to save form data: $e',
+        ));
+      }
     });
   }
 }

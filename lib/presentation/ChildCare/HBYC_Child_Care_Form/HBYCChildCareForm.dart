@@ -6,25 +6,46 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:sizer/sizer.dart';
-
+import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../l10n/app_localizations.dart';
 import 'bloc/hbyc_child_care_bloc.dart';
 
 class HBYCChildCareFormScreen extends StatelessWidget {
-  const HBYCChildCareFormScreen({super.key});
+  final String hhid;
+  final String name;
+  final String beneficiaryId;
+
+  const HBYCChildCareFormScreen({
+    super.key,
+    required this.hhid,
+    required this.name,
+    required this.beneficiaryId,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HbycChildCareBloc(),
-      child: const _HbycFormView(),
+      create: (context) => HbycChildCareBloc(),
+      child: _HbycFormView(
+        hhid: hhid,
+        name: name,
+        beneficiaryId: beneficiaryId,
+      ),
     );
   }
 }
 
 class _HbycFormView extends StatefulWidget {
-  const _HbycFormView();
+  final String hhid;
+  final String name;
+  final String beneficiaryId;
+
+  const _HbycFormView({
+    required this.hhid,
+    required this.name,
+    required this.beneficiaryId,
+  });
 
   @override
   State<_HbycFormView> createState() => _HbycFormViewState();
@@ -34,16 +55,31 @@ class _HbycFormViewState extends State<_HbycFormView> {
   final _formKey = GlobalKey<FormState>();
 
  final _yesNoOptions = const [
-    'हाँ',
-    'नहीं',
+    'Yes',
+    'No',
   ];
 
+
+  // Controllers for additional input fields
+  final _additionalInfoController = TextEditingController();
+  final _sicknessDetailsController = TextEditingController();
+  final _referralDetailsController = TextEditingController();
+  final _developmentDelaysDetailsController = TextEditingController();
+
+  @override
+  void dispose() {
+    _additionalInfoController.dispose();
+    _sicknessDetailsController.dispose();
+    _referralDetailsController.dispose();
+    _developmentDelaysDetailsController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppHeader(screenTitle: l10n.registrationDue, showBack: true,),
+      appBar: AppHeader(screenTitle: 'Home Based Care For Young Child', showBack: true,),
       body: BlocListener<HbycChildCareBloc, HbycChildCareState>(
         listener: (context, state) {
           if (state.status == HbycFormStatus.failure && state.error != null) {
@@ -60,8 +96,9 @@ class _HbycFormViewState extends State<_HbycFormView> {
           }
         },
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(4),
+          child: Stack(
+            children: [
+              SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Form(
@@ -69,180 +106,420 @@ class _HbycFormViewState extends State<_HbycFormView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+
                     const SizedBox(height: 8),
-                    Center(child: Text(l10n.hbycTitleDetails, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),)),
-                    Divider(color: AppColors.primary, thickness: 1, height: 0),
-
-                    const SizedBox(height: 12),
-                    Text(AppLocalizations.of(context)!.hbycBhramanLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(HbycBhramanChanged(v ?? '')),
-                      validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('is Beneficiary absent', style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.beneficiaryAbsent.isNotEmpty ? state.beneficiaryAbsent : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(BeneficiaryAbsentChanged(v ?? '')),
+                              validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                    const SizedBox(height: 1),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycBhramanLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.hbycBhraman.isNotEmpty ? state.hbycBhraman : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(HbycBhramanChanged(v ?? '')),
+                              validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycIsChildSickLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(IsChildSickChanged(v ?? '')),
+                    // Is Child Sick Section with conditional input
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycIsChildSickLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.isChildSick.isNotEmpty ? state.isChildSick : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(IsChildSickChanged(v ?? '')),
+                            ),
+                            if (state.isChildSick == 'Yes')
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: CustomTextField(
+                                  controller: _sicknessDetailsController,
+                                  hintText: 'Please provide details of sickness',
+                                  maxLines: 3,
+                                ),
+                              ),
+                            const SizedBox(height: 8),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycBreastfeedingContinuingLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(BreastfeedingContinuingChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycBreastfeedingContinuingLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.breastfeedingContinuing.isNotEmpty ? state.breastfeedingContinuing : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(BreastfeedingContinuingChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycCompleteDietProvidedLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(CompleteDietProvidedChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycCompleteDietProvidedLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.completeDietProvided.isNotEmpty ? state.completeDietProvided : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(CompleteDietProvidedChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycWeighedByAwwLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(WeighedByAwwChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycWeighedByAwwLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.weighedByAww.isNotEmpty ? state.weighedByAww : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(WeighedByAwwChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycLengthHeightRecordedLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(LengthHeightRecordedChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycLengthHeightRecordedLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.lengthHeightRecorded.isNotEmpty ? state.lengthHeightRecorded : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(LengthHeightRecordedChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycWeightLessThan3sdLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(WeightLessThan3sdReferredChanged(v ?? '')),
+                    // Weight Less Than 3SD Section with conditional input
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycWeightLessThan3sdLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.weightLessThan3sdReferred.isNotEmpty ? state.weightLessThan3sdReferred : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(WeightLessThan3sdReferredChanged(v ?? '')),
+                            ),
+                            if (state.weightLessThan3sdReferred == 'Yes')
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: CustomTextField(
+                                  controller: _referralDetailsController,
+                                  hintText: 'Please provide referral details',
+                                  maxLines: 3,
+                                ),
+                              ),
+                            const SizedBox(height: 8),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycDevelopmentDelaysObservedLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(DevelopmentDelaysObservedChanged(v ?? '')),
+                    // Development Delays Observed Section with conditional input
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycDevelopmentDelaysObservedLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.developmentDelaysObserved.isNotEmpty ? state.developmentDelaysObserved : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(DevelopmentDelaysObservedChanged(v ?? '')),
+                            ),
+                            if (state.developmentDelaysObserved == 'Yes')
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: CustomTextField(
+                                  controller: _developmentDelaysDetailsController,
+                                  hintText: 'Please provide details of development delays',
+                                  maxLines: 3,
+                                ),
+                              ),
+                            const SizedBox(height: 8),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycFullyVaccinatedLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(FullyVaccinatedAsPerMcpChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycFullyVaccinatedLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.fullyVaccinatedAsPerMcp.isNotEmpty ? state.fullyVaccinatedAsPerMcp : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(FullyVaccinatedAsPerMcpChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycMeaslesVaccineGivenLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(MeaslesVaccineGivenChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycMeaslesVaccineGivenLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.measlesVaccineGiven.isNotEmpty ? state.measlesVaccineGiven : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(MeaslesVaccineGivenChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycVitaminADosageGivenLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(VitaminADosageGivenChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycVitaminADosageGivenLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.vitaminADosageGiven.isNotEmpty ? state.vitaminADosageGiven : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(VitaminADosageGivenChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycOrsPacketAvailableLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(OrsPacketAvailableChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycOrsPacketAvailableLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.orsPacketAvailable.isNotEmpty ? state.orsPacketAvailable : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(OrsPacketAvailableChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycIronFolicSyrupAvailableLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(IronFolicSyrupAvailableChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycIronFolicSyrupAvailableLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.ironFolicSyrupAvailable.isNotEmpty ? state.ironFolicSyrupAvailable : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(IronFolicSyrupAvailableChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycCounselingExclusiveBf6mLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(CounselingExclusiveBf6mChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycCounselingExclusiveBf6mLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.counselingExclusiveBf6m.isNotEmpty ? state.counselingExclusiveBf6m : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(CounselingExclusiveBf6mChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdviceComplementaryFoodsLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceComplementaryFoodsChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycAdviceComplementaryFoodsLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.adviceComplementaryFoods.isNotEmpty ? state.adviceComplementaryFoods : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceComplementaryFoodsChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdviceHandWashingHygieneLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceHandWashingHygieneChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycAdviceHandWashingHygieneLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.adviceHandWashingHygiene.isNotEmpty ? state.adviceHandWashingHygiene : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceHandWashingHygieneChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdviceParentingSupportLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceParentingSupportChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycAdviceParentingSupportLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.adviceParentingSupport.isNotEmpty ? state.adviceParentingSupport : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceParentingSupportChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycCounselingFamilyPlanningLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(CounselingFamilyPlanningChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycCounselingFamilyPlanningLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.counselingFamilyPlanning.isNotEmpty ? state.counselingFamilyPlanning : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(CounselingFamilyPlanningChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdvicePreparingAdministeringOrsLabel, style: TextStyle(fontSize: 14.sp),),
-                    ApiDropdown<String>(
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(AdvicePreparingAdministeringOrsChanged(v ?? '')),
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.hbycAdvicePreparingAdministeringOrsLabel, style: TextStyle(fontSize: 14.sp),),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.advicePreparingAdministeringOrs.isNotEmpty ? state.advicePreparingAdministeringOrs : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context.read<HbycChildCareBloc>().add(AdvicePreparingAdministeringOrsChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -266,29 +543,63 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    const SizedBox(height: 16),
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        final busy = state.status == HbycFormStatus.submitting;
-                        return RoundButton(
-                          title: 'Save Form',
-                          isLoading: busy, // show loader if busy
-                          disabled: busy,  // disable when busy
-                          onPress: () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              context.read<HbycChildCareBloc>().add(const SubmitForm());
-                            }
-                          },
-                        );
-
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                    const SizedBox(height: 80), // Space for the fixed buttons at the bottom
 
                   ],
                 ),
               ),
             ),
+          ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                    builder: (context, state) {
+                      final busy = state.status == HbycFormStatus.submitting;
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: RoundButton(
+                              title: 'Previous',
+                              onPress: () {
+                                Navigator.of(context).pushNamed(
+                                    Route_Names.PreviousVisitsScreenHBYC,
+                                    arguments: {
+                                      'beneficiaryId': widget.beneficiaryId
+                                    });
+                              },
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: RoundButton(
+                              title: 'Save Form',
+                              isLoading: busy,
+                              disabled: busy,
+                              onPress: () {
+                                if (_formKey.currentState?.validate() ?? false) {
+                                  final state = context.read<HbycChildCareBloc>().state;
+                                  context.read<HbycChildCareBloc>().add(SubmitForm(
+                                    beneficiaryRefKey: widget.beneficiaryId,
+                                    householdRefKey: widget.hhid,
+                                    sicknessDetails: state.isChildSick == 'Yes' ? _sicknessDetailsController.text : null,
+                                    referralDetails: state.weightLessThan3sdReferred == 'Yes' ? _referralDetailsController.text : null,
+                                    developmentDelaysDetails: state.developmentDelaysObserved == 'Yes' ? _developmentDelaysDetailsController.text : null,
+                                  ));
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -276,7 +276,6 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     );
   }
 
-  // 🧱 Household Card UI
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
@@ -402,21 +401,23 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         ),
 
 
-        Padding(
-          padding: const EdgeInsets.only(right: 8, top: 6, bottom: 8),
-          child: SizedBox(
-            height: 32,
-            child: RoundButton(
-              title: l10n!.cbac,
-              color: AppColors.primary,
-              borderRadius: 6,
-              width: 100,
-              onPress: () {
-                Navigator.pushNamed(context, Route_Names.cbacScreen);
-              },
+        // Show CBAC button only for age 30 or older
+        if (_isEligibleForCBAC(data['Age|Gender'] as String))
+          Padding(
+            padding: const EdgeInsets.only(right: 8, top: 6, bottom: 8),
+            child: SizedBox(
+              height: 32,
+              child: RoundButton(
+                title: l10n!.cbac,
+                color: AppColors.primary,
+                borderRadius: 6,
+                width: 100,
+                onPress: () {
+                  Navigator.pushNamed(context, Route_Names.cbacScreen);
+                },
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -430,6 +431,18 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         ]
       ],
     );
+  }
+
+  bool _isEligibleForCBAC(String ageGender) {
+    try {
+
+      final ageStr = ageGender.split(' ').first;
+      final age = int.tryParse(ageStr) ?? 0;
+      return age >= 30;
+    } catch (e) {
+      debugPrint('Error checking CBAC eligibility: $e');
+      return false;
+    }
   }
 
   Widget _rowText(String title, String value) {

@@ -1,5 +1,12 @@
 part of 'hbyc_child_care_bloc.dart';
 
+class BeneficiaryAbsentChanged extends HbycChildCareEvent {
+  final String value;
+  const BeneficiaryAbsentChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
 abstract class HbycChildCareEvent extends Equatable {
   const HbycChildCareEvent();
 
@@ -155,5 +162,26 @@ class CompletionDateChanged extends HbycChildCareEvent {
 }
 
 class SubmitForm extends HbycChildCareEvent {
-  const SubmitForm();
+  final String beneficiaryRefKey;
+  final String householdRefKey;
+  final String? sicknessDetails;
+  final String? referralDetails;
+  final String? developmentDelaysDetails;
+  
+  const SubmitForm({
+    required this.beneficiaryRefKey,
+    required this.householdRefKey,
+    this.sicknessDetails,
+    this.referralDetails,
+    this.developmentDelaysDetails,
+  });
+  
+  @override
+  List<Object?> get props => [
+    beneficiaryRefKey, 
+    householdRefKey,
+    sicknessDetails,
+    referralDetails,
+    developmentDelaysDetails,
+  ];
 }

@@ -6,8 +6,7 @@ part 'cbac_form_event.dart';
 part 'cbac_form_state.dart';
 
 class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
-  static const int totalTabs = 6; // General, Personal, Part A, Part B, Part C, Part D
-
+  static const int totalTabs = 6;
   CbacFormBloc() : super(const CbacFormInitial()) {
     on<CbacOpened>((event, emit) {
       if (!state.consentDialogShown) {
@@ -20,8 +19,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
     on<CbacConsentDisagreed>((event, emit) => emit(state.copyWith(consentAgreed: false)));
 
     on<CbacNextTab>((event, emit) {
-      if (!state.consentAgreed) return; // block navigation until consent
-      // Per-part required validation before moving forward
+      if (!state.consentAgreed) return;  
       bool has(String key) {
         final v = state.data[key];
         if (v == null) return false;
@@ -47,7 +45,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
             }
           }
           break;
-        case 3: // Part B
+        case 3:
           {
             final req = [
               'partB.b1.cough2w',
@@ -69,7 +67,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       }
 
       if (missing.isNotEmpty) {
-        // Emit a unique token in errorMessage to guarantee state change each time
+
         final token = DateTime.now().microsecondsSinceEpoch.toString();
         emit(state.copyWith(missingKeys: missing, errorMessage: token, clearError: false));
         return;

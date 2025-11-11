@@ -169,9 +169,21 @@ final class AfhUpdateIsPregnant extends AddFamilyHeadEvent {
   AfhUpdateIsPregnant(this.value);
 }
 
-final class AfhSubmit extends AddFamilyHeadEvent {}
+final class AfhSubmit extends AddFamilyHeadEvent {
+  final SpousBloc? spousBloc;
+  AfhSubmit({this.spousBloc});
+}
 
 final class AfhHydrate extends AddFamilyHeadEvent {
   final AddFamilyHeadState value;
   AfhHydrate(this.value);
+}
+
+final class SaveHeadDetails extends AddFamilyHeadEvent {
+  final bool isNextButton;
+  
+    SaveHeadDetails({this.isNextButton = false});
+  
+  @override
+  List<Object?> get props => [isNextButton];
 }

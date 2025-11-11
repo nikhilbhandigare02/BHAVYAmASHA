@@ -3,6 +3,7 @@ part of 'hbyc_child_care_bloc.dart';
 enum HbycFormStatus { initial, submitting, success, failure }
 
 class HbycChildCareState extends Equatable {
+  final String beneficiaryAbsent;
   final String hbycBhraman; // required
   final String isChildSick;
   final String breastfeedingContinuing;
@@ -28,6 +29,7 @@ class HbycChildCareState extends Equatable {
   final String? error;
 
   const HbycChildCareState({
+    this.beneficiaryAbsent = '',
     this.hbycBhraman = '',
     this.isChildSick = '',
     this.breastfeedingContinuing = '',
@@ -54,6 +56,7 @@ class HbycChildCareState extends Equatable {
   });
 
   HbycChildCareState copyWith({
+    String? beneficiaryAbsent,
     String? hbycBhraman,
     String? isChildSick,
     String? breastfeedingContinuing,
@@ -79,6 +82,7 @@ class HbycChildCareState extends Equatable {
     String? error,
   }) {
     return HbycChildCareState(
+      beneficiaryAbsent: beneficiaryAbsent ?? this.beneficiaryAbsent,
       hbycBhraman: hbycBhraman ?? this.hbycBhraman,
       isChildSick: isChildSick ?? this.isChildSick,
       breastfeedingContinuing: breastfeedingContinuing ?? this.breastfeedingContinuing,
@@ -107,6 +111,7 @@ class HbycChildCareState extends Equatable {
 
   @override
   List<Object?> get props => [
+        beneficiaryAbsent,
         hbycBhraman,
         isChildSick,
         breastfeedingContinuing,

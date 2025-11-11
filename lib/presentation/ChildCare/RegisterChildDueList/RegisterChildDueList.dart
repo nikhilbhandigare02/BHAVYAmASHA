@@ -128,11 +128,14 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                               memberData['richIdChanged']?.toString() ?? 
                               memberData['richId']?.toString() ?? '';
                 
+                // Get beneficiary ID - use the same logic as in RegisterChildListScreen
+                final beneficiaryId = row['unique_key']?.toString() ?? '';
+                
                 final card = <String, dynamic>{
                   'hhId': rowHhId,
                   'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
                   'RegitrationType': 'Child',
-                  'BeneficiaryID': memberData['unique_key']?.toString() ?? row['id']?.toString() ?? '',
+                  'BeneficiaryID': beneficiaryId,
                   'RchID': richId,
                   'Name': name,
                   'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
@@ -283,12 +286,29 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         if (dob != null) {
           final now = DateTime.now();
           int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
           
-          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+            days += daysInLastMonth;
+            months--;
+          }
+          
+          if (months < 0) {
+            months += 12;
             years--;
           }
           
-          age = years >= 0 ? years.toString() : '0';
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
         }
       } catch (e) {
         debugPrint('Error parsing date of birth: $e');
@@ -309,7 +329,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         displayGender = 'Other';
     }
     
-    return '$age Y | $displayGender';
+    return '$age | $displayGender';
   }
 
   void _onSearchChanged() {
@@ -478,7 +498,8 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      (data['hhId'] != null && data['hhId'].toString().length > 11)
+                      (data['hhId'] != 
+                      null && data['hhId'].toString().length > 11)
                           ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
                           : (data['hhId']?.toString() ?? ''),
                       style: TextStyle(

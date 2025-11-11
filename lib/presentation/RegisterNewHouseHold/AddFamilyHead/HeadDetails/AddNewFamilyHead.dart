@@ -132,7 +132,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                 ),
                 Row(
                   children: [
-                    // --- Years ---
+
                     Expanded(
                       child: CustomTextField(
                         labelText: l.years,
@@ -143,7 +143,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                       ),
                     ),
 
-                    // --- Divider between Years & Months ---
                     Container(
                       width: 1,
                       height: 4.h,
@@ -151,7 +150,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                       margin: EdgeInsets.symmetric(horizontal: 1.w),
                     ),
 
-                    // --- Months ---
                     Expanded(
                       child: CustomTextField(
                         labelText: l.months,
@@ -776,6 +774,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   religion: m['religion'],
                   category: m['category'],
                   mobileOwner: m['mobileOwner'],
+                  headUniqueKey: m['headUniqueKey'],
+                  spouseUniqueKey: m['spouseUniqueKey'],
                   mobileNo: m['mobileNo'],
                   village: m['village'],
                   ward: m['ward'],
@@ -1021,7 +1021,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                     return AnimatedBuilder(
                                       animation: controller.animation!,
                                       builder: (context, _) {
-                                        final showNav = tabs.length > 1; // show when spouse or children tabs present
+                                        final showNav = tabs.length > 1;  
                                         return BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
                                           builder: (context, state) {
                                             final isLoading = state.postApiStatus == PostApiStatus.loading;
@@ -1107,9 +1107,35 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                                           : (isLoading
                                                           ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
                                                           : (widget.isEdit ? 'UPDATE' : l.addButton)),
-                                                      onPress: () {
+                                                      onPress: () async {
                                                         if (i < last) {
-                                                          controller.animateTo(i + 1);
+                                                          // Save head details before navigating to next tab
+                                                          final formState = _formKey.currentState;
+                                                          if (formState == null) return;
+                                                          
+                                                          final isValid = formState.validate();
+                                                          if (!isValid) {
+                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                              const SnackBar(
+                                                                content: Text('Please correct the highlighted errors before continuing.'),
+                                                                backgroundColor: Colors.redAccent,
+                                                                behavior: SnackBarBehavior.floating,
+                                                                duration: Duration(seconds: 2),
+                                                              ),
+                                                            );
+                                                            return;
+                                                          }
+                                                          
+                                                          // Save head details
+                                                          context.read<AddFamilyHeadBloc>().add(SaveHeadDetails(isNextButton: true));
+                                                          
+                                                          // Wait for the save operation to complete
+                                                          await Future.delayed(const Duration(milliseconds: 500));
+                                                          
+                                                          // Only navigate if there are no errors
+                                                          if (state.postApiStatus != PostApiStatus.error) {
+                                                            controller.animateTo(i + 1);
+                                                          }
                                                         } else {
                                                           // last tab → submit
                                                           context.read<AddFamilyHeadBloc>().add(AfhSubmit());

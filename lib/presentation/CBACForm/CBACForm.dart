@@ -1,7 +1,13 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
@@ -201,7 +207,7 @@ class _CbacformState extends State<Cbacform> {
                               ),
                             )
                           else
-                            const SizedBox(width: 120), // ✅ placeholder to keep NEXT aligned right
+                            const SizedBox(width: 120),
 
                           SizedBox(
                             height: 44,
@@ -237,55 +243,241 @@ class _CbacformState extends State<Cbacform> {
 }
 
 
-class _GeneralInfoTab extends StatelessWidget {
+class _GeneralInfoTab extends StatefulWidget {
+  @override
+  _GeneralInfoTabState createState() => _GeneralInfoTabState();
+}
+
+class _GeneralInfoTabState extends State<_GeneralInfoTab> {
+  late Map<String, dynamic> _userData = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  // Helper method to print all users from the local database
+  Future<Map<String, dynamic>?> _printAllUsers() async {
+    try {
+      debugPrint('🔍 Querying users from local database...');
+      
+      // Get the database path
+      final databasePath = await getDatabasesPath();
+      final path = join(databasePath, 'bhavya_masha.db');
+
+      final db = await openDatabase(path);
+
+      final List<Map<String, dynamic>> users = await db.query(
+        'users',
+        where: 'is_deleted = ?',
+        whereArgs: [0],
+        orderBy: 'modified_date_time DESC',
+      );
+      
+      debugPrint('👥 Found ${users.length} users in the database:');
+      
+      for (final user in users) {
+        debugPrint('   User ID: ${user['id']}');
+        debugPrint('   Username: ${user['user_name']}');
+        debugPrint('   Role ID: ${user['role_id']}');
+        
+        // Try to parse and print details if they exist
+        if (user['details'] != null) {
+          try {
+            final details = jsonDecode(user['details']);
+            debugPrint('   Details:');
+            details.forEach((key, value) {
+              debugPrint('     $key: $value');
+            });
+          } catch (e) {
+            debugPrint('   Could not parse details: ${user['details']}');
+          }
+        }
+        debugPrint('   --------------------');
+      }
+      
+      // Close the database
+      await db.close();
+      
+      return users.isNotEmpty ? users.first : null;
+    } catch (e) {
+      debugPrint('❌ Error querying users: $e');
+      return null;
+    }
+  }
+
+  // Helper function to get nested value from map using dot notation
+  dynamic _getNestedValue(Map<String, dynamic> map, String key) {
+    try {
+      var keys = key.split('.');
+      dynamic value = map;
+      for (var k in keys) {
+        if (value is Map && value.containsKey(k)) {
+          value = value[k];
+        } else {
+          return null;
+        }
+      }
+      return value?.toString().trim();
+    } catch (e) {
+      debugPrint('Error getting nested value for key $key: $e');
+      return null;
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      setState(() => _isLoading = true);
+      
+      // First, print all users for debugging
+      await _printAllUsers();
+      
+      // Get the current user using UserInfo
+      final user = await UserInfo.getCurrentUser();
+      
+      if (user != null && mounted) {
+        debugPrint('✅ Found current user: ${user['user_name']}');
+        
+        Map<String, dynamic> userData = {};
+        userData.addAll(user);
+        
+        // Parse details if it's a JSON string
+        if (user['details'] is String) {
+          try {
+            final details = jsonDecode(user['details']);
+            if (details is Map) {
+              userData.addAll(Map<String, dynamic>.from(details));
+            }
+          } catch (e) {
+            debugPrint('Error parsing user details: $e');
+          }
+        }
+        
+        setState(() {
+          _userData = userData;
+          _isLoading = false;
+        });
+        
+        final bloc = BlocProvider.of<CbacFormBloc>(context as BuildContext);
+
+        final fieldMappings = {
+
+          'name.first_name': 'general.ashaName',
+          
+          // Working location mappings
+          'working_location.hsc_name': 'general.hsc',
+          'working_location.district': 'general.phc',
+          'working_location.block': 'general.village',
+          
+          // ANM name (if available)
+          'anm_name': 'general.anmName',
+        };
+        
+        // Debug print all available keys
+        debugPrint('Available user data keys: ${userData.keys.join(', ')}');
+
+        fieldMappings.forEach((dataKey, formField) {
+          final value = _getNestedValue(userData, dataKey);
+          if (value != null && value.isNotEmpty) {
+            debugPrint('Setting $formField from $dataKey: $value');
+            bloc.add(CbacFieldChanged(formField, value));
+          } else {
+            debugPrint('No value found for key: $dataKey');
+          }
+        });
+
+        final firstName = _getNestedValue(userData, 'name.first_name') ?? '';
+        final lastName = _getNestedValue(userData, 'name.last_name') ?? '';
+        final fullName = '$firstName $lastName'.trim();
+        if (fullName.isNotEmpty) {
+          debugPrint('Setting ASHA name to: $fullName');
+          bloc.add(CbacFieldChanged('general.ashaName', fullName));
+        }
+      } else {
+        debugPrint(' No active user found in local database');
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading user data: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<CbacFormBloc>();
     final l10n = AppLocalizations.of(context)!;
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-      children: [
-        CustomTextField(
-          hintText: l10n.ashaNameLabel,
-          labelText: l10n.ashaNameLabel,
-          onChanged: (v) => bloc.add(CbacFieldChanged('general.ashaName', v.trim())),
-        ),
-        const Divider(height: 0.5),
-        CustomTextField(
-          hintText: l10n.anmNameLabel,
-          labelText: l10n.anmNameLabel,
-          onChanged: (v) => bloc.add(CbacFieldChanged('general.anmName', v.trim())),
-        ),
-        const Divider(height: 0.5),
-        CustomTextField(
-          hintText: l10n.phcNameLabel,
-          labelText: l10n.phcNameLabel,
-          onChanged: (v) => bloc.add(CbacFieldChanged('general.phc', v.trim())),
-        ),
-        const Divider(height: 0.5),
-        CustomTextField(
-          hintText: l10n.villageLabel,
-          labelText: l10n.villageLabel,
-          onChanged: (v) => bloc.add(CbacFieldChanged('general.village', v.trim())),
-        ),
-        const Divider(height: 0.5),
-        CustomTextField(
-          hintText: l10n.hscNameLabel,
-          labelText: l10n.hscNameLabel,
-          onChanged: (v) => bloc.add(CbacFieldChanged('general.hsc', v.trim())),
-        ),
-        const Divider(height: 0.5),
-        CustomDatePicker(
-          hintText: l10n.dateLabel,
-          labelText: l10n.dateLabel,
-          initialDate: DateTime.now(),
-          isEditable: false,
-          onDateChanged: null,
-        ),
-        const Divider(height: 0.5),
+    
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return BlocBuilder<CbacFormBloc, CbacFormState>(
+      builder: (context, state)
+    {
+      // Helper function to safely get form field value
+      String getFieldValue(String key) => state.data[key]?.toString() ?? '';
 
-      ],
-    );
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+        children: [
+          CustomTextField(
+            hintText: l10n.ashaNameLabel,
+            labelText: l10n.ashaNameLabel,
+            initialValue: getFieldValue('general.ashaName'),
+            onChanged: (v) =>
+                bloc.add(CbacFieldChanged('general.ashaName', v.trim())),
+          ),
+          const Divider(height: 0.5),
+          CustomTextField(
+            hintText: l10n.anmNameLabel,
+            labelText: l10n.anmNameLabel,
+            initialValue: getFieldValue('general.anmName'),
+            onChanged: (v) =>
+                bloc.add(CbacFieldChanged('general.anmName', v.trim())),
+          ),
+          const Divider(height: 0.5),
+          CustomTextField(
+            hintText: l10n.phcNameLabel,
+            labelText: l10n.phcNameLabel,
+            initialValue: getFieldValue('general.phc'),
+            onChanged: (v) =>
+                bloc.add(CbacFieldChanged('general.phc', v.trim())),
+          ),
+          const Divider(height: 0.5),
+          CustomTextField(
+            hintText: l10n.villageLabel,
+            labelText: l10n.villageLabel,
+            initialValue: getFieldValue('general.village'),
+            onChanged: (v) =>
+                bloc.add(CbacFieldChanged('general.village', v.trim())),
+          ),
+          const Divider(height: 0.5),
+          CustomTextField(
+            hintText: l10n.hscNameLabel,
+            labelText: l10n.hscNameLabel,
+            initialValue: getFieldValue('general.hsc'),
+            onChanged: (v) =>
+                bloc.add(CbacFieldChanged('general.hsc', v.trim())),
+          ),
+          const Divider(height: 0.5),
+          CustomDatePicker(
+            hintText: l10n.dateLabel,
+            labelText: l10n.dateLabel,
+            initialDate: DateTime.now(),
+            isEditable: false,
+            onDateChanged: null,
+          ),
+          const Divider(height: 0.5),
+
+        ],
+      );
+    });
   }
 }
 
@@ -394,7 +586,7 @@ class _PartATab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CbacFormBloc, CbacFormState>(
       builder: (context, state) {
-        final bloc = context.read<CbacFormBloc>();
+        final bloc = BlocProvider.of<CbacFormBloc>(context);
 
         final age = state.data['partA.age'] as String?;
         final tobacco = state.data['partA.tobacco'] as String?;
@@ -513,8 +705,7 @@ class _PartATab extends StatelessWidget {
               onChanged: (v) => bloc.add(CbacFieldChanged('partA.tobacco', v)),
               score: scoreTobacco,
             ),
-
-            // Alcohol row
+ 
             qRow(
               question: l10n.cbacA_alcoholQ,
               items: itemsYesNo,
@@ -538,10 +729,7 @@ class _PartATab extends StatelessWidget {
               onChanged: (v) => bloc.add(CbacFieldChanged('partA.activity', v)),
               score: scoreActivity,
             ),
-            // Waist measurement row
-
-
-            // Family history row
+           
             qRow(
               question: l10n.cbacA_familyQ,
               items: itemsYesNo,
@@ -766,7 +954,7 @@ class _PartDTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CbacFormBloc, CbacFormState>(
       builder: (context, state) {
-        final bloc = context.read<CbacFormBloc>();
+        final bloc = BlocProvider.of<CbacFormBloc>(context);
         final q1 = state.data['partD.q1'] as String?;
         final q2 = state.data['partD.q2'] as String?;
 

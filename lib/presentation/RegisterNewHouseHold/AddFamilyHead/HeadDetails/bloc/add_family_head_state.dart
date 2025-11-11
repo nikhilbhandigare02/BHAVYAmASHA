@@ -39,8 +39,12 @@ class AddFamilyHeadState extends Equatable {
   final String? isPregnant; // Yes/No
   final PostApiStatus postApiStatus;
   final String? errorMessage;
+  final String? headUniqueKey;
+  final String? spouseUniqueKey;
 
   const AddFamilyHeadState({
+    required this.headUniqueKey,
+    required this.spouseUniqueKey,
     this.houseNo,
     this.headName,
     this.fatherName,
@@ -78,7 +82,7 @@ class AddFamilyHeadState extends Equatable {
     this.isPregnant,
     this.postApiStatus = PostApiStatus.initial,
     this.errorMessage,
-  });
+  }) : super();
 
   AddFamilyHeadState copyWith({
     String? houseNo,
@@ -118,14 +122,16 @@ class AddFamilyHeadState extends Equatable {
     String? isPregnant,
     PostApiStatus? postApiStatus,
     String? errorMessage,
+    String? headUniqueKey,
+    String? spouseUniqueKey,
     bool clearError = false,
   }) {
     return AddFamilyHeadState(
       houseNo: houseNo ?? this.houseNo,
       headName: headName ?? this.headName,
+      fatherName: fatherName ?? this.fatherName,
       AfhABHAChange: AfhABHAChange ?? this.AfhABHAChange,
       children: children ?? this.children,
-      fatherName: fatherName ?? this.fatherName,
       useDob: useDob ?? this.useDob,
       dob: dob ?? this.dob,
       edd: edd ?? this.edd,
@@ -158,6 +164,8 @@ class AddFamilyHeadState extends Equatable {
       isPregnant: isPregnant ?? this.isPregnant,
       postApiStatus: postApiStatus ?? this.postApiStatus,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      headUniqueKey: headUniqueKey ?? this.headUniqueKey,
+      spouseUniqueKey: spouseUniqueKey ?? this.spouseUniqueKey,
     );
   }
 
@@ -168,6 +176,8 @@ class AddFamilyHeadState extends Equatable {
     AfhRichIdChange,
     lmp,
     edd,
+    headUniqueKey,
+    spouseUniqueKey,
     headName,
     fatherName,
     useDob,

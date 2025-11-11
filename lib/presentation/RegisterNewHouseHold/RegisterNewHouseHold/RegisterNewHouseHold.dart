@@ -741,7 +741,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         style: TextStyle(
           color: isDisabled
               ? Colors.white.withOpacity(0.4) // 👈 faded color for disabled tabs
-              : Colors.white,                 // normal tab color
+              : Colors.white,
           fontWeight: FontWeight.w600,
         ),
       ),
