@@ -438,6 +438,28 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           'Spouse': spouse,
           'Total Children': totalChildren,
         });
+
+        // Add spouse row similar to head flow when married
+        final String maritalStatus = (result['maritalStatus'] ?? '').toString();
+        if (maritalStatus == 'Married' && spouse.isNotEmpty) {
+          final String spouseGender = (gender == 'Male')
+              ? 'Female'
+              : (gender == 'Female')
+                  ? 'Male'
+                  : '';
+          _members.add({
+            '#': '${_members.length + 1}',
+            'Type': 'Adult',
+            'Name': spouse,
+            'Age': '',
+            'Gender': spouseGender,
+            'Relation': 'Spouse',
+            'Father': '',
+            'Spouse': name,
+            'Total Children': totalChildren,
+          });
+          totalMembers = totalMembers + 1;
+        }
       });
     }
   }

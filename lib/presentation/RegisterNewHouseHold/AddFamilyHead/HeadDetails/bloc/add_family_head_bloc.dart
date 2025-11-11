@@ -205,7 +205,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         final now = DateTime.now();
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
         
-        // Generate unique keys
         final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
         final headId = await IdGenerator.generateUniqueId(deviceInfo);
         final spouseKey = await IdGenerator.generateUniqueId(deviceInfo);

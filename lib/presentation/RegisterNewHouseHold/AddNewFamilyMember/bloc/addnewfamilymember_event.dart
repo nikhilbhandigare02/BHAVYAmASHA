@@ -199,7 +199,11 @@ final class AnmUpdateMaritalStatus extends AddnewfamilymemberEvent {
 }
 
 final class AnmSubmit extends AddnewfamilymemberEvent {
-  const AnmSubmit();
+  final BuildContext context;
+  const AnmSubmit(this.context);
+
+  @override
+  List<Object> get props => [context];
 }
 
 // Marital status dependent fields
