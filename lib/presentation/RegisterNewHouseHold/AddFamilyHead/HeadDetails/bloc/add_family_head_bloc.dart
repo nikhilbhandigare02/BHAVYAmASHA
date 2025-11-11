@@ -288,12 +288,10 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
             'bankAccountNumber': state.bankAccountNumber,
             'ifsc': state.ifsc,
             'ifscCode': state.ifscCode,
-            
-            // Beneficiary Type
+
             'beneficiaryType': state.beneficiaryType,
             'isMigrantWorker': state.isMigrantWorker,
-            
-            // Migrant Worker Details
+
             'migrantState': state.migrantState,
             'migrantDistrict': state.migrantDistrict,
             'migrantBlock': state.migrantBlock,
