@@ -138,9 +138,14 @@ class RegisterNewHouseholdBloc
         final householdInfoJson = jsonEncode(householdInfoString);
         print(' Household Info JSON: $householdInfoJson');
 
-        final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
-        await Future.delayed(const Duration(seconds: 1));
-        final headId = await IdGenerator.generateUniqueId(deviceInfo);
+        // Fetch keys from beneficiaries (saved via AddNewFamilyMember flow)
+        final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
+        if (beneficiaries.isEmpty) {
+          throw Exception('No existing beneficiary found to derive keys. Add a member first.');
+        }
+        final latestBeneficiary = beneficiaries.first;
+        final uniqueKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
+        final headId = (latestBeneficiary['unique_key'] ?? '').toString();
 
         final locationData = Map<String, String>.from(geoLocation.toJson());
         locationData['source'] = 'gps';
