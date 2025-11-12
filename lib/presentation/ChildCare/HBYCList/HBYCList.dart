@@ -123,11 +123,11 @@ class _HBYCListState extends State<HBYCList> {
     try {
       final db = await DatabaseProvider.instance.database;
       
-      // First, get all child beneficiaries with their details
+      // Query for child beneficiaries: is_adult = 0 and not deleted
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries',
-        where: 'is_deleted = ?',
-        whereArgs: [0],
+        where: 'is_deleted = ? AND is_adult = ?',
+        whereArgs: [0, 0],
       );
 
       final hbycChildren = <Map<String, dynamic>>[];
@@ -142,57 +142,44 @@ class _HBYCListState extends State<HBYCList> {
 
         if (info is! Map) continue;
 
-        final head = info['head_details'] is Map ? info['head_details'] : {};
-        final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
-        final members = info['member_details'] is List ? info['member_details'] : [];
-
-        if (members.isNotEmpty && members is List) {
-          for (final member in members) {
-            if (member is Map) {
-              final memberType = member['memberType']?.toString() ?? '';
-              final dob = member['dob']?.toString();
-              
-              // Only process child members with age between 3-15 months and not case closed
-              if (memberType == 'Child' && _isAgeInRange(dob)) {
-                final beneficiaryId = row['unique_key']?.toString() ?? '';
-                
-                // Skip if case is closed for this beneficiary
-                if (beneficiaryId.isNotEmpty && await _isCaseClosed(beneficiaryId)) {
-                  continue;
-                }
-                
-                final memberData = Map<String, dynamic>.from(member);
-
-
-                final name = memberData['memberName']?.toString() ??
-                            memberData['name']?.toString() ??
-                            memberData['member_name']?.toString() ??
-                            memberData['memberNameLocal']?.toString() ??
-                            '';
-
-                final gender = memberData['gender']?.toString() ?? '';
-                final ageGender = _formatAgeGender(dob, gender);
-
-                final richId = memberData['RichIDChanged']?.toString() ??
-                              memberData['richIdChanged']?.toString() ??
-                              memberData['richId']?.toString() ?? '';
-
-                final card = <String, dynamic>{
-                  'hhId': rowHhId,
-                  'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
-                  'RegitrationType': 'HBYC',
-                  'BeneficiaryID': beneficiaryId,
-                  'RchID': richId,
-                  'Name': name,
-                  'Age|Gender': ageGender,
-                  '_raw': row,
-                  '_memberData': memberData,
-                };
-                
-                hbycChildren.add(card);
-              }
-            }
+        final memberType = info['memberType']?.toString() ?? '';
+        final dob = info['dob']?.toString();
+        
+        // Only process child members with age between 3-15 months and not case closed
+        if (memberType == 'Child' && _isAgeInRange(dob)) {
+          final beneficiaryId = row['unique_key']?.toString() ?? '';
+          
+          // Skip if case is closed for this beneficiary
+          if (beneficiaryId.isNotEmpty && await _isCaseClosed(beneficiaryId)) {
+            continue;
           }
+          
+          final name = info['name']?.toString() ??
+                      info['memberName']?.toString() ??
+                      info['member_name']?.toString() ??
+                      info['memberNameLocal']?.toString() ??
+                      '';
+
+          final gender = info['gender']?.toString() ?? '';
+          final ageGender = _formatAgeGender(dob, gender);
+
+          final richId = info['RichIDChanged']?.toString() ??
+                        info['richIdChanged']?.toString() ??
+                        info['richId']?.toString() ?? '';
+
+          final card = <String, dynamic>{
+            'hhId': rowHhId,
+            'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+            'RegitrationType': 'HBYC',
+            'BeneficiaryID': beneficiaryId,
+            'RchID': richId,
+            'Name': name,
+            'Age|Gender': ageGender,
+            '_raw': row,
+            '_info': info,
+          };
+          
+          hbycChildren.add(card);
         }
       }
 

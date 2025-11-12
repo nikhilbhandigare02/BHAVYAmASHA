@@ -180,11 +180,15 @@ class AddnewfamilymemberBloc
       }
       if (state.gender == null || state.gender!.isEmpty)
         errors.add('Gender required');
-      if (state.maritalStatus == null || state.maritalStatus!.isEmpty) {
-        errors.add('Marital status required');
-      } else if (state.maritalStatus == 'Married') {
-        if (state.spouseName == null || state.spouseName!.trim().isEmpty) {
-          errors.add('Spouse Name is required for married status');
+      
+      // Marital status is only required for Adults, not for Children
+      if (state.memberType != 'Child') {
+        if (state.maritalStatus == null || state.maritalStatus!.isEmpty) {
+          errors.add('Marital status required');
+        } else if (state.maritalStatus == 'Married') {
+          if (state.spouseName == null || state.spouseName!.trim().isEmpty) {
+            errors.add('Spouse Name is required for married status');
+          }
         }
       }
 
@@ -594,7 +598,7 @@ class AddnewfamilymemberBloc
           return;
         }
 
-        final householdRefKey = event.hhid; // use the provided HHID
+        final householdRefKey = event.hhid;
         String? headId = matchedHousehold['head_id'] as String?;
 
         // Get current user info
@@ -610,7 +614,6 @@ class AddnewfamilymemberBloc
         }
         final geoLocationJson = jsonEncode(locationData);
 
-        // Use helper method to determine beneficiary_state for update as well
         final beneficiaryState = _getBeneficiaryState(state.memberType);
         final isAdult = _getIsAdultValue(state.memberType, state.useDob, state.dob);
 
@@ -625,13 +628,11 @@ class AddnewfamilymemberBloc
         }
             : {};
 
-        // Resolve parent keys when relation is 'Mother', 'Father' or 'Child'
         String? resolvedMotherKey2;
         String? resolvedFatherKey2;
         try {
           if (state.relation == 'Mother' || state.relation == 'Father' || state.relation == 'Child') {
-            // If headId is null, try to resolve from beneficiaries using householdRefKey
-            final hhBeneficiaries2 = await LocalStorageDao.instance
+             final hhBeneficiaries2 = await LocalStorageDao.instance
                 .getBeneficiariesByHousehold(householdRefKey.toString());
 
             if (headId == null || headId.isEmpty) {
@@ -729,8 +730,7 @@ class AddnewfamilymemberBloc
                 resolvedFatherKey2 = spouseKeyLocal;
               }
             }
-
-            // Sanitize empty strings to null
+ 
             if (resolvedMotherKey2 != null && resolvedMotherKey2.trim().isEmpty) {
               resolvedMotherKey2 = null;
             }
