@@ -219,23 +219,38 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
 
             body: SafeArea(
-              child: BlocListener<SpousBloc, SpousState>(
-                listenWhen: (p, c) => p.gender != c.gender,
-                listener: (context, sp) {
-                  if (_syncingGender) return;
-                  _syncingGender = true;
-                  try {
-                    final desired = _oppositeGender(sp.gender);
-                    final mb = context.read<AddnewfamilymemberBloc>();
-                    if (mb.state.gender != desired) {
-                      mb.add(AnmUpdateGender(desired));
-                    }
-                  } finally {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _syncingGender = false;
-                    });
-                  }
-                },
+              child: MultiBlocListener(
+                listeners: [
+                  BlocListener<SpousBloc, SpousState>(
+                    listenWhen: (p, c) => p.gender != c.gender,
+                    listener: (context, sp) {
+                      if (_syncingGender) return;
+                      _syncingGender = true;
+                      try {
+                        final desired = _oppositeGender(sp.gender);
+                        final mb = context.read<AddnewfamilymemberBloc>();
+                        if (mb.state.gender != desired) {
+                          mb.add(AnmUpdateGender(desired));
+                        }
+                      } finally {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _syncingGender = false;
+                        });
+                      }
+                    },
+                  ),
+                  BlocListener<AddnewfamilymemberBloc, AddnewfamilymemberState>(
+                    listenWhen: (p, c) => p.spouseName != c.spouseName,
+                    listener: (context, st) {
+                      final name = (st.spouseName ?? '').trim();
+                      if (name.isEmpty) return;
+                      final spBloc = context.read<SpousBloc>();
+                      if ((spBloc.state.memberName ?? '') != name) {
+                        spBloc.add(SpUpdateMemberName(name));
+                      }
+                    },
+                  ),
+                ],
                 child: Column(
                 children: [
                   // Top Tabs
@@ -418,8 +433,19 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 CustomTextField(
                                   labelText: '${l.nameOfMemberLabel} *',
                                   hintText: l.nameOfMemberHint,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateName(v.trim())),
+                                  onChanged: (v) {
+                                    final name = v.trim();
+                                    context.read<AddnewfamilymemberBloc>().add(AnmUpdateName(name));
+                                    // Auto-fill spouse details' spouseName with member name
+                                    try {
+                                      final spBloc = context.read<SpousBloc>();
+                                      if ((spBloc.state.spouseName ?? '') != name) {
+                                        spBloc.add(SpUpdateSpouseName(name));
+                                      }
+                                    } catch (_) {}
+                                  },
                                   validator: (value) => Validations.validateNameofMember(l, value),
+
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
