@@ -351,18 +351,17 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
             // Get child name for additional verification
             final childName = _formData['child_name']?.toString() ?? '';
             
-            // Query beneficiary by beneficiary_ref_key, unique_key, or name match
+            // Query beneficiary by unique_key or name match
             List<Map<String, dynamic>> beneficiaryRecords = await db.query(
               'beneficiaries',
-              where: 'unique_key = ? OR beneficiary_ref_key = ? OR (beneficiary_info LIKE ?)',
-              whereArgs: [beneficiaryRefKey, beneficiaryRefKey, '%"$childName"%'],
+              where: 'unique_key = ? OR (beneficiary_info LIKE ?)',
+              whereArgs: [beneficiaryRefKey, '%"$childName"%'],
             );
 
             if (beneficiaryRecords.isNotEmpty) {
               final beneficiary = beneficiaryRecords.first;
               final beneficiaryId = beneficiary['id'];
-
-              // Update the beneficiary record
+ 
               await db.update(
                 'beneficiaries',
                 {

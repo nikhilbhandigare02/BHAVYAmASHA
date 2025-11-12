@@ -82,8 +82,9 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
 
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries',
+        columns: ['*', 'is_death'],
         where: 'is_deleted = ? AND is_adult = ?',
-        whereArgs: [0, 0],
+        whereArgs: [0, 0], // 0 for false, 1 for true
       );
 
       print('📊 Found ${rows.length} total beneficiaries');
@@ -151,6 +152,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
               'FatherName': fatherName,
               'MotherName': motherName,
               'is_deceased': isDeceased,
+              'is_death': row['is_death'] ?? 0,
               '_raw': row,
             };
 
@@ -444,6 +446,25 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                       ),
                     ),
                   ],
+                  if (data['is_death'] == 1) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'Deceased',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: Image.asset(
@@ -495,7 +516,6 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                       Expanded(child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.'] ?? 'N/A')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText(l10n?.fatherNameLabel ?? 'Father\'s Name', data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A')),
-                      const SizedBox(width: 12),
                       const Expanded(child: SizedBox()),
                     ],
                   ),
