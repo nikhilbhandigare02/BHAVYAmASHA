@@ -12,6 +12,7 @@ import '../../../../core/utils/geolocation_utils.dart';
 import '../../../../core/utils/id_generator_utils.dart';
 import '../../../../data/Local_Storage/User_Info.dart';
 import '../../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../../data/repositories/AddBeneficiaryRepository.dart';
 import '../../AddFamilyHead/Children_Details/bloc/children_bloc.dart' show ChildrenBloc;
 import '../../AddFamilyHead/SpousDetails/bloc/spous_bloc.dart';
 
@@ -176,7 +177,6 @@ class AddnewfamilymemberBloc
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
         final deviceInfo = await DeviceInfo.getDeviceInfo();
 
-        // Determine household_ref_key preference: use provided hhid if available, otherwise derive from latest beneficiary
         String householdRefKey;
         if (event.hhid != null && event.hhid!.isNotEmpty) {
           householdRefKey = event.hhid!.toString();
@@ -199,7 +199,6 @@ class AddnewfamilymemberBloc
           householdRefKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
         }
 
-        // Generate keys and fetch user/facility
         final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
         final latestBeneficiary = beneficiaries.isNotEmpty ? beneficiaries.first : null;
         final uniqueKeyForSpouseFallback = (latestBeneficiary?['household_ref_key'] ?? householdRefKey).toString();
@@ -256,12 +255,10 @@ class AddnewfamilymemberBloc
           print('Error getting children data: $e');
         }
 
-        // Resolve parent keys when relation is 'Mother' or 'Father' or 'Child'
         String? resolvedMotherKey;
         String? resolvedFatherKey;
         try {
           if (state.relation == 'Mother' || state.relation == 'Father' || state.relation == 'Child') {
-            // Prefer filtered DAO call to avoid type mismatches and get pre-decoded JSON
             final hhBeneficiaries = await LocalStorageDao.instance
                 .getBeneficiariesByHousehold(householdRefKey.toString());
 
@@ -284,7 +281,6 @@ class AddnewfamilymemberBloc
               final headUnique = (headRecord['unique_key'] ?? '').toString();
               String? spouseKeyLocal = headRecord['spouse_key']?.toString();
               if (spouseKeyLocal == null || spouseKeyLocal.isEmpty) {
-                // Fallback: find spouse where spouse_key matches head unique_key
                 try {
                   for (final b in hhBeneficiaries) {
                     if ((b['spouse_key'] ?? '').toString() == headUnique) {
@@ -295,7 +291,6 @@ class AddnewfamilymemberBloc
                   }
                 } catch (_) {}
               } else {
-                // Find spouse record by unique key
                 try {
                   for (final b in hhBeneficiaries) {
                     if ((b['unique_key'] ?? '').toString() == spouseKeyLocal) {
@@ -503,6 +498,170 @@ class AddnewfamilymemberBloc
             print('Error saving spouse: $e');
           }
         }
+        try {
+          final savedMember = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(memberId);
+          if (savedMember != null) {
+            final info = (savedMember['beneficiary_info'] is Map)
+                ? Map<String, dynamic>.from(savedMember['beneficiary_info'])
+                : (savedMember['beneficiary_info'] is String && (savedMember['beneficiary_info'] as String).isNotEmpty)
+                    ? Map<String, dynamic>.from(jsonDecode(savedMember['beneficiary_info']))
+                    : <String, dynamic>{};
+
+            final currentUser2 = await UserInfo.getCurrentUser();
+            final userDetails = currentUser2?['details'] is String
+                ? jsonDecode(currentUser2?['details'] ?? '{}')
+                : currentUser2?['details'] ?? {};
+            final working = userDetails['working_location'] ?? {};
+
+            String? genderCode(String? g) {
+              if (g == null) return null;
+              final s = g.toLowerCase();
+              if (s.startsWith('m')) return 'M';
+              if (s.startsWith('f')) return 'F';
+              if (s.startsWith('o')) return 'O';
+              return null;
+            }
+
+            String? yyyyMMdd(String? iso) {
+              if (iso == null || iso.isEmpty) return null;
+              try {
+                final d = DateTime.tryParse(iso);
+                if (d == null) return null;
+                return DateFormat('yyyy-MM-dd').format(d);
+              } catch (_) {
+                return null;
+              }
+            }
+
+            Map<String, dynamic> apiGeo(dynamic g) {
+              try {
+                if (g is String && g.isNotEmpty) g = jsonDecode(g);
+                if (g is Map) {
+                  final m = Map<String, dynamic>.from(g);
+                  final lat = m['lat'] ?? m['latitude'] ?? m['Lat'] ?? m['Latitude'];
+                  final lng = m['lng'] ?? m['long'] ?? m['longitude'] ?? m['Lng'];
+                  final acc = m['accuracy_m'] ?? m['accuracy'] ?? m['Accuracy'];
+                  final tsCap = m['captured_at'] ?? m['captured_datetime'] ?? m['timestamp'];
+                  return {
+                    'lat': (lat is num) ? lat : double.tryParse('${lat ?? ''}'),
+                    'lng': (lng is num) ? lng : double.tryParse('${lng ?? ''}'),
+                    'accuracy_m': (acc is num) ? acc : double.tryParse('${acc ?? ''}'),
+                    'captured_at': tsCap?.toString() ?? DateTime.now().toUtc().toIso8601String(),
+                  }..removeWhere((k, v) => v == null || (v is String && v.isEmpty));
+                }
+              } catch (_) {}
+              return {
+                'lat': null,
+                'lng': null,
+                'accuracy_m': null,
+                'captured_at': DateTime.now().toUtc().toIso8601String(),
+              }..removeWhere((k, v) => v == null || (v is String && v.isEmpty));
+            }
+
+            final nameStr = (info['name'] ?? '').toString();
+            final beneficiaryInfoApi = {
+              'name': {
+                'first_name': nameStr,
+                'middle_name': '',
+                'last_name': '',
+              },
+              'gender': genderCode((info['gender'] ?? state.gender)?.toString()),
+              'dob': yyyyMMdd(info['dob']?.toString()),
+              'marital_status': (info['maritalStatus'] ?? state.maritalStatus)?.toString().toLowerCase(),
+              'aadhaar': (info['aadhaar'] ?? info['aadhar'])?.toString(),
+              'phone': (info['mobileNo'] ?? state.mobileNo)?.toString(),
+              'address': {
+                'state': working['state'] ?? userDetails['stateName'],
+                'district': working['district'] ?? userDetails['districtName'],
+                'block': working['block'] ?? userDetails['blockName'],
+                'village': working['village'] ?? userDetails['villageName'],
+                'pincode': working['pincode'] ?? userDetails['pincode'],
+              }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
+            }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
+
+            final apiPayload = {
+              'unique_key': savedMember['unique_key'],
+              'id': null,
+              'household_ref_key': savedMember['household_ref_key'],
+              'beneficiary_state': [
+                {
+                  'state': 'registered',
+                  'at': DateTime.now().toUtc().toIso8601String(),
+                },
+                {
+                  'state': (savedMember['beneficiary_state'] ?? 'active').toString(),
+                  'at': DateTime.now().toUtc().toIso8601String(),
+                },
+              ],
+              'pregnancy_count': savedMember['pregnancy_count'] ?? 0,
+              'beneficiary_info': beneficiaryInfoApi,
+              'geo_location': apiGeo(savedMember['geo_location']),
+              'spouse_key': savedMember['spouse_key'],
+              'mother_key': savedMember['mother_key'],
+              'father_key': savedMember['father_key'],
+              'is_family_planning': savedMember['is_family_planning'] ?? 0,
+              'is_adult': savedMember['is_adult'] ?? 0,
+              'is_guest': savedMember['is_guest'] ?? 0,
+              'is_death': savedMember['is_death'] ?? 0,
+              'death_details': savedMember['death_details'] is Map ? savedMember['death_details'] : {},
+              'is_migrated': savedMember['is_migrated'] ?? 0,
+              'is_separated': savedMember['is_separated'] ?? 0,
+              'device_details': {
+                'device_id': deviceInfo.deviceId,
+                'model': deviceInfo.model,
+                'os': deviceInfo.platform + ' ' + (deviceInfo.osVersion ?? ''),
+                'app_version': deviceInfo.appVersion.split('+').first,
+              },
+              'app_details': {
+                'captured_by_user': userDetails['user_identifier'] ?? '',
+                'captured_role_id': userDetails['role_id'] ?? userDetails['role'] ?? 0,
+                'source': 'mobile',
+              },
+              'parent_user': {
+                'user_key': userDetails['supervisor_user_key'] ?? '',
+                'name': userDetails['supervisor_name'] ?? '',
+              }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
+              'current_user_key': 'local_user',
+              'facility_id': savedMember['facility_id'] ?? facilityId,
+              'created_date_time': savedMember['created_date_time'] ?? ts,
+              'modified_date_time': savedMember['modified_date_time'] ?? ts,
+            };
+
+            try {
+              final repo = AddBeneficiaryRepository();
+              final reqUniqueKey = (savedMember['unique_key'] ?? '').toString();
+              final resp = await repo.addBeneficiary(apiPayload);
+              try {
+                if (resp is Map && (resp['success'] == true)) {
+                  if (resp['data'] is List && (resp['data'] as List).isNotEmpty) {
+                    final first = resp['data'][0];
+                    if (first is Map) {
+                      final sid = (first['_id'] ?? first['id'] ?? '').toString();
+                      if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
+                        final updated = await LocalStorageDao.instance.updateBeneficiaryServerIdByUniqueKey(uniqueKey: reqUniqueKey, serverId: sid);
+                        print('Updated member with server_id='+sid+' rows='+updated.toString());
+                      }
+                    }
+                  } else if (resp['data'] is Map) {
+                    final map = Map<String, dynamic>.from(resp['data']);
+                    final sid = (map['_id'] ?? map['id'] ?? '').toString();
+                    if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
+                      final updated = await LocalStorageDao.instance.updateBeneficiaryServerIdByUniqueKey(uniqueKey: reqUniqueKey, serverId: sid);
+                      print('Updated member with server_id='+sid+' rows='+updated.toString());
+                    }
+                  }
+                }
+              } catch (e) {
+                print('Error updating local member after API: $e');
+              }
+            } catch (apiErr) {
+              print('add_beneficiary API failed for member, will sync later: $apiErr');
+            }
+          }
+        } catch (e) {
+          print('Error preparing or posting add_beneficiary for member: $e');
+        }
+
         emit(state.copyWith(postApiStatus: PostApiStatus.success));
       } catch (e) {
         print('Error saving family member: $e');

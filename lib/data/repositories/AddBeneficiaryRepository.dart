@@ -6,10 +6,10 @@ import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
 import '../Local_Storage/User_Info.dart';
 
-class HouseholdRepository {
+class AddBeneficiaryRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
-  Future<dynamic> addHousehold(Map<String, dynamic> payload) async {
+  Future<dynamic> addBeneficiary(Map<String, dynamic> payload) async {
     final currentUser = await UserInfo.getCurrentUser();
     final userDetails = currentUser?['details'] is String
         ? jsonDecode(currentUser?['details'] ?? '{}')
@@ -30,7 +30,7 @@ class HouseholdRepository {
     };
 
     final response = await _api.postApi(
-      Endpoints.addHousehold,
+      Endpoints.addBeneficiary,
       payload,
       headers: headers,
     );

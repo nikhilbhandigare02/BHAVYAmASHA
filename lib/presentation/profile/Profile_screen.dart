@@ -293,6 +293,7 @@
                 bloc.add(DojChanged(doj));
               }
             } catch (e) {
+
             }
           }
 

@@ -24,6 +24,50 @@ class LocalStorageDao {
     }
   }
 
+  Future<Map<String, dynamic>?> getBeneficiaryByUniqueKey(String uniqueKey) async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'beneficiaries',
+        where: 'unique_key = ? AND is_deleted = 0',
+        whereArgs: [uniqueKey],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      final mapped = Map<String, dynamic>.from(rows.first);
+      mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+      mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+      mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+      return mapped;
+    } catch (e) {
+      print('Error getting beneficiary by unique_key: $e');
+      rethrow;
+    }
+  }
+
+  Future<int> updateBeneficiaryServerIdByUniqueKey({required String uniqueKey, required String serverId}) async {
+    try {
+      final db = await _db;
+      final changes = await db.update(
+        'beneficiaries',
+        {
+          'server_id': serverId,
+          'is_synced': 1,
+          'modified_date_time': DateTime.now().toIso8601String(),
+        },
+        where: 'unique_key = ?',
+        whereArgs: [uniqueKey],
+      );
+      return changes;
+    } catch (e) {
+      print('Error updating beneficiary server_id by unique_key: $e');
+      rethrow;
+    }
+  }
+
   dynamic _encodeIfObject(dynamic v) {
     if (v == null) return null;
     if (v is Map || v is List) return jsonEncode(v);
@@ -35,22 +79,7 @@ class LocalStorageDao {
   Future<int> insertHousehold(Map<String, dynamic> data) async {
     try {
       final db = await _db;
-      
-
-      
       final householdInfo = data['household_info'];
-      if (householdInfo is String) {
-        try {
-          final parsed = jsonDecode(householdInfo);
-          print('   (JSON String) $parsed');
-        } catch (e) {
-          print('   (Invalid JSON String) $householdInfo');
-        }
-      } else if (householdInfo is Map) {
-        print('   (Map) $householdInfo');
-      } else {
-        print('   (${householdInfo.runtimeType}) $householdInfo');
-      }
       
       final row = <String, dynamic>{
         'server_id': data['server_id'],
@@ -77,19 +106,33 @@ class LocalStorageDao {
         'is_synced': data['is_synced'] ?? 0,
         'is_deleted': data['is_deleted'] ?? 0,
       };
-      
-      print('\n Database Row to Insert:');
-      row.forEach((key, value) {
-        print('   $key: ${value.toString().substring(0, value.toString().length > 100 ? 100 : value.toString().length)}...');
-      });
-      
+
       final id = await db.insert('households', row);
-      print(' Household inserted with ID: $id\n');
       return id;
     } catch (e, stackTrace) {
       print('Error inserting household:');
       print('   Error: $e');
       print('   Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<int> updateHouseholdServerIdByUniqueKey({required String uniqueKey, required String serverId}) async {
+    try {
+      final db = await _db;
+      final changes = await db.update(
+        'households',
+        {
+          'server_id': serverId,
+          'is_synced': 1,
+          'modified_date_time': DateTime.now().toIso8601String(),
+        },
+        where: 'unique_key = ?',
+        whereArgs: [uniqueKey],
+      );
+      return changes;
+    } catch (e) {
+      print('Error updating household server_id by unique_key: $e');
       rethrow;
     }
   }
@@ -193,11 +236,7 @@ class LocalStorageDao {
 
   Future<int> insertFollowupFormData(Map<String, dynamic> data) async {
     final db = await _db;
-    
-    print(' DAO: Inserting followup form data...');
-    print(' DAO: form_json value: ${data['form_json']}');
-    print(' DAO: form_json length: ${(data['form_json'] as String?)?.length ?? 0}');
-    
+
     final row = <String, dynamic>{
       'server_id': data['server_id'],
       'forms_ref_key': data['forms_ref_key'],
@@ -217,12 +256,8 @@ class LocalStorageDao {
       'is_synced': data['is_synced'] ?? 0,
       'is_deleted': data['is_deleted'] ?? 0,
     };
-    
-    print(' DAO: Row to insert has form_json: ${row['form_json'] != null}');
-    
+
     final id = await db.insert('followup_form_data', row);
-    print(' DAO: Inserted with ID: $id');
-    
     return id;
   }
 
@@ -346,28 +381,15 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {
     try {
       final db = await _db;
-      print('Fetching all households from database...');
       
       final rows = await db.query('households', 
         where: 'is_deleted = ?',
         whereArgs: [0],
         orderBy: 'created_date_time DESC');
-      
-      print('Found ${rows.length} households');
-      
+
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
         
-        // Helper function to safely decode JSON strings
-        dynamic safeJsonDecode(String? jsonString) {
-          if (jsonString == null || jsonString.isEmpty) return {};
-          try {
-            return jsonDecode(jsonString);
-          } catch (e) {
-            print('Error decoding JSON: $e');
-            return {};
-          }
-        }
  mapped['address'] = safeJsonDecode(mapped['address']);
         mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
         mapped['household_info'] = safeJsonDecode(mapped['household_info']);
@@ -377,8 +399,6 @@ class LocalStorageDao {
         
         return mapped;
       }).toList();
-      
-      print('Successfully decoded ${result.length} households');
       return result;
       
     } catch (e, stackTrace) {
@@ -459,23 +479,12 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAllBeneficiaries() async {
     try {
       final db = await _db;
-      print('Fetching all beneficiaries from database...');
       final rows = await db.query('beneficiaries',
         where: 'is_deleted = ?',
         whereArgs: [0],
         orderBy: 'created_date_time DESC');
-      print('Found ${rows.length} beneficiaries');
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
-        dynamic safeJsonDecode(String? jsonString) {
-          if (jsonString == null || jsonString.isEmpty) return {};
-          try {
-            return jsonDecode(jsonString);
-          } catch (e) {
-            print('Error decoding JSON: $e');
-            return {};
-          }
-        }
         mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
         mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
         mapped['death_details'] = safeJsonDecode(mapped['death_details']);
@@ -484,14 +493,6 @@ class LocalStorageDao {
         mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
         return mapped;
       }).toList();
-      print('Successfully decoded ${result.length} beneficiaries');
-      for (final beneficiary in result) {
-        print('Beneficiary:');
-        beneficiary.forEach((key, value) {
-          print('  $key: $value');
-        });
-        print('---');
-      }
       return result;
     } catch (e, stackTrace) {
       print('Error getting beneficiaries: $e');
@@ -503,33 +504,17 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getDeathRecords() async {
     try {
       final db = await _db;
-      print('Fetching death records from database...');
-
       final rows = await db.query(
         'beneficiaries',
         where: 'is_death = ? AND is_deleted = ?',
         whereArgs: [1, 0],
         orderBy: 'created_date_time DESC',
       );
-      
-      print('Found ${rows.length} death records');
-
       final result = <Map<String, dynamic>>[];
       
       for (final row in rows) {
         try {
           final mapped = Map<String, dynamic>.from(row);
-          
-          // Helper function to safely decode JSON strings
-          dynamic safeJsonDecode(String? jsonString) {
-            if (jsonString == null || jsonString.isEmpty) return {};
-            try {
-              return jsonDecode(jsonString);
-            } catch (e) {
-              print('Error decoding JSON: $e');
-              return {};
-            }
-          }
 
           final beneficiaryInfo = safeJsonDecode(mapped['beneficiary_info']);
           final deathDetails = safeJsonDecode(mapped['death_details']);
@@ -557,8 +542,6 @@ class LocalStorageDao {
           print('Error processing death record: $e');
         }
       }
-      
-      print('Successfully processed ${result.length} death records');
       return result;
       
     } catch (e, stackTrace) {
