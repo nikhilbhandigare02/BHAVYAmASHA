@@ -694,7 +694,8 @@ class AddnewfamilymemberBloc
       } catch (e) {
         print('Error saving family member (update submit): $e');
         emit(
-          state.copyWith(
+          state.
+          copyWith(
             postApiStatus: PostApiStatus.error,
             errorMessage: 'Failed to save family member: ${e.toString()}',
           ),
