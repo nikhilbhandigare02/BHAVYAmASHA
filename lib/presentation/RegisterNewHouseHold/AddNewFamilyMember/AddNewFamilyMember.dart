@@ -90,8 +90,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     _bloc = AddnewfamilymemberBloc();
     _spousBloc = SpousBloc();
     _childrenBloc = ChildrenBloc();
-    // Dummy head bloc to satisfy reused spouse/children widgets' dependency
-    _dummyHeadBloc = AddFamilyHeadBloc();
+     _dummyHeadBloc = AddFamilyHeadBloc();
     
 
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
@@ -1101,7 +1100,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       final ctrl = DefaultTabController.of(context);
                                       ctrl?.animateTo(0);
                                     },
-                                    validator: (value) => Validations.validateMaritalStatus(l, value),
+                                    validator: (value) {
+                                      // Skip validation for children
+                                      if (state.memberType == 'Child') return null;
+                                      return Validations.validateMaritalStatus(l, value);
+                                    },
 
                                   ),
                                 ),

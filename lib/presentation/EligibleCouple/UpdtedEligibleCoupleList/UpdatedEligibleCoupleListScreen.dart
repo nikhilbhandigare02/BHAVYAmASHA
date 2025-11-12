@@ -25,6 +25,7 @@ class _UpdatedEligibleCoupleListScreenState
   int _tab = 0; // 0 = All, 1 = Protected, 2 = Unprotected
   List<Map<String, dynamic>> _households = [];
   Map<String, dynamic>? _initialData;
+  bool _isLoading = false;
 
   @override
   void didChangeDependencies() {
@@ -58,45 +59,109 @@ class _UpdatedEligibleCoupleListScreenState
   }
 
   Future<void> _loadCouples() async {
-    final db = await DatabaseProvider.instance.database;
-    // Query beneficiaries and order by created_date_time in descending order (newest first)
-    final rows = await db.query(
-      'beneficiaries',
-      orderBy: 'created_date_time DESC',
-    );
-    
-    final List<Map<String, dynamic>> couples = [];
-    
-    for (final row in rows) {
-      try {
-        final info = jsonDecode(row['beneficiary_info'] as String? ?? '{}');
-        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-        
-        // Check if the beneficiary is on family planning
-        final isFamilyPlanning = (row['is_family_planning']?.toString().toLowerCase() == 'yes' ||
-                               row['is_family_planning']?.toString() == '1' ||
-                               row['is_family_planning'] == true);
-        
-        // Skip this record if the beneficiary is on family planning
-        if (isFamilyPlanning) {
-          continue;
-        }
-        
-        if (_isEligibleFemale(head)) {
-          couples.add(_formatData(row, head, spouse, isHead: true, isFamilyPlanning: isFamilyPlanning));
-        }
+    setState(() { _isLoading = true; });
+    print('🔍 Starting to load couples...');
+    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    print('📊 Total beneficiaries: ${rows.length}');
+    final couples = <Map<String, dynamic>>[];
 
-        if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-          couples.add(_formatData(row, spouse, head, isHead: false, isFamilyPlanning: isFamilyPlanning));
+    // Group by household
+    final households = <String, List<Map<String, dynamic>>>{};
+    for (final row in rows) {
+      final hhKey = row['household_ref_key']?.toString() ?? '';
+      households.putIfAbsent(hhKey, () => []).add(row);
+    }
+    print('🏠 Households found: ${households.length}');
+
+    // Process each household
+    int eligibleCount = 0;
+    for (final household in households.values) {
+      // Find head and spouse
+      Map<String, dynamic>? head;
+      Map<String, dynamic>? spouse;
+
+      for (final member in household) {
+        try {
+          // Handle both String and Map types for beneficiary_info
+          final dynamic infoRaw = member['beneficiary_info'];
+          final Map<String, dynamic> info = infoRaw is String 
+              ? jsonDecode(infoRaw) 
+              : Map<String, dynamic>.from(infoRaw ?? {});
+              
+          final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+          print('👥 Processing member: ${info['memberName'] ?? info['headName']} (Relation: $relation)');
+
+          if (relation == 'self') {
+            head = info;
+            head!['_row'] = Map<String, dynamic>.from(member);
+            print('  👤 Found head: ${head['memberName'] ?? head['headName']}');
+          } else if (relation == 'spouse') {
+            spouse = info;
+            spouse!['_row'] = Map<String, dynamic>.from(member);
+            print('  👥 Found spouse: ${spouse['memberName'] ?? spouse['headName']}');
+          }
+        } catch (e) {
+          print('❌ Error processing household member: $e');
+          if (e is Error) {
+            print('Stack trace: ${e.stackTrace}');
+          }
         }
-      } catch (e) {
-        print('Error processing beneficiary ${row['id']}: $e');
+      }
+
+      // Check if head is eligible female
+      if (head != null && _isEligibleFemale(head)) {
+        final isFp = head['_row']?['is_family_planning'] == true ||
+                   head['_row']?['is_family_planning'] == 1 ||
+                   head['_row']?['is_family_planning']?.toString().toLowerCase() == 'yes';
+        print('  ✅ Eligible head: ${head['memberName'] ?? head['headName']} (FP: $isFp)');
+        final coupleData = _formatData(
+          head['_row'] ?? {},
+          head,
+          spouse ?? {},
+          isHead: true,
+          isFamilyPlanning: isFp,
+        );
+        print('  📝 Added couple data: ${coupleData['Name']} (Protected: ${coupleData['is_family_planning']})');
+        couples.add(coupleData);
+        eligibleCount++;
+      } else if (head != null) {
+        print('  ❌ Ineligible head: ${head['memberName'] ?? head['headName']}');
+        print('     Gender: ${head['gender']}, Marital: ${head['maritalStatus']}');
+      }
+
+      // Check if spouse is eligible female
+      if (spouse != null && _isEligibleFemale(spouse)) {
+        final isFp = spouse['_row']?['is_family_planning'] == true ||
+                   spouse['_row']?['is_family_planning'] == 1 ||
+                   spouse['_row']?['is_family_planning']?.toString().toLowerCase() == 'yes';
+        print('  ✅ Eligible spouse: ${spouse['memberName'] ?? spouse['headName']} (FP: $isFp)');
+        final coupleData = _formatData(
+          spouse['_row'] ?? {},
+          spouse,
+          head ?? {},
+          isHead: false,
+          isFamilyPlanning: isFp,
+        );
+        print('  📝 Added couple data: ${coupleData['Name']} (Protected: ${coupleData['is_family_planning']})');
+        couples.add(coupleData);
+        eligibleCount++;
+      } else if (spouse != null) {
+        print('  ❌ Ineligible spouse: ${spouse['memberName'] ?? spouse['headName']}');
+        print('     Gender: ${spouse['gender']}, Marital: ${spouse['maritalStatus']}');
       }
     }
+    print('🏁 Finished processing. Found $eligibleCount eligible couples out of ${rows.length} beneficiaries');
+    print('📋 Total couples: ${couples.length}');
+    print('🔒 Protected: ${couples.where((c) => c['is_family_planning'] == true).length}');
+    print('🔓 Unprotected: ${couples.where((c) => c['is_family_planning'] != true).length}');
+    
     if (mounted) {
       setState(() {
         _households = couples;
+        _isLoading = false;
+        print('🔄 UI Updated with ${_households.length} couples');
+        print('🔍 Current tab: ${_tab == 0 ? 'All' : _tab == 1 ? 'Protected' : 'Unprotected'}');
+        print('🔍 Filtered count: ${_filtered.length}');
       });
     }
   }
@@ -172,10 +237,14 @@ class _UpdatedEligibleCoupleListScreenState
   }
 
   bool _isProtected(Map<String, dynamic> data) {
-    // First check is_family_planning flag (1 = true, 0 = false)
-    if (data['is_family_planning'] == 1) return true;
+    // Check is_family_planning flag (1 = true, 0 = false)
+    if (data['is_family_planning'] == true || 
+        data['is_family_planning'] == 1 || 
+        data['is_family_planning']?.toString().toLowerCase() == 'yes') {
+      return true;
+    }
     
-    // Then check status field
+    // Check status field
     final status = data['status']?.toString().toLowerCase();
     if (status == 'protected') return true;
     
@@ -200,16 +269,20 @@ class _UpdatedEligibleCoupleListScreenState
       _households.where((e) => !_isProtected(e)).toList();
 
   List<Map<String, dynamic>> get _filtered {
+    print('🔄 Filtering couples (tab: $_tab)');
     List<Map<String, dynamic>> base;
     switch (_tab) {
       case 1:
         base = _protectedList;
+        print('🔒 Showing protected list: ${base.length} items');
         break;
       case 2:
         base = _unprotectedList;
+        print('🔓 Showing unprotected list: ${base.length} items');
         break;
       default:
         base = _households;
+        print('📋 Showing all couples: ${base.length} items');
     }
     if (_search.text.isEmpty) return base;
     final q = _search.text.toLowerCase();

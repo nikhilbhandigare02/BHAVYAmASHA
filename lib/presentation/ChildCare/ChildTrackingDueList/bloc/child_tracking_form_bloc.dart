@@ -313,6 +313,9 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
         print('👤 Beneficiary Ref Key: $beneficiaryRefKey');
         print('📱 Form Type: $formType');
 
+        // Handle Death Case Closure
+        await _handleDeathCaseClosure(db, caseClosureData, beneficiaryRefKey, now);
+
         emit(state.copyWith(
           status: FormStatus.success,
           savedFormId: formId,
@@ -326,6 +329,68 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
         status: FormStatus.failure,
         errorMessage: 'Error saving form: $e',
       ));
+    }
+  }
+
+  Future<void> _handleDeathCaseClosure(
+    dynamic db,
+    CaseClosureData caseClosureData,
+    String beneficiaryRefKey,
+    String now,
+  ) async {
+    try {
+      // Check if case closure reason is Death
+      if (caseClosureData.selectedClosureReason != 'Death') {
+        return;
+      }
+
+      print('🔴 Death case closure detected. Updating beneficiary record...');
+
+      // Prepare death details JSON
+      final deathDetails = {
+        'date_of_death': caseClosureData.dateOfDeath?.toIso8601String(),
+        'probable_cause_of_death': caseClosureData.probableCauseOfDeath,
+        'other_cause_of_death': caseClosureData.otherCause,
+        'death_place': caseClosureData.deathPlace,
+        'reason_of_death': caseClosureData.reasonOfDeath,
+        'other_reason': caseClosureData.otherReason,
+        'recorded_date': now,
+      };
+
+      // Query beneficiary by unique_key
+      List<Map<String, dynamic>> beneficiaryRecords = await db.query(
+        'beneficiaries',
+        where: 'unique_key = ?',
+        whereArgs: [beneficiaryRefKey],
+      );
+
+      if (beneficiaryRecords.isEmpty) {
+        print('⚠️  Beneficiary not found with ref_key: $beneficiaryRefKey');
+        return;
+      }
+
+      final beneficiary = beneficiaryRecords.first;
+      final beneficiaryId = beneficiary['id'];
+
+      // Update the beneficiary record with death information
+      await db.update(
+        'beneficiaries',
+        {
+          'is_death': 1,
+          'death_details': jsonEncode(deathDetails),
+          'modified_date_time': now,
+        },
+        where: 'id = ?',
+        whereArgs: [beneficiaryId],
+      );
+
+      print('✅ Beneficiary record updated with death information');
+      print('   Beneficiary ID: $beneficiaryId');
+      print('   is_death: 1');
+      print('   death_details: ${jsonEncode(deathDetails)}');
+    } catch (e) {
+      print('❌ Error updating beneficiary death record: $e');
+      // Non-blocking error - don't fail form submission
     }
   }
 }

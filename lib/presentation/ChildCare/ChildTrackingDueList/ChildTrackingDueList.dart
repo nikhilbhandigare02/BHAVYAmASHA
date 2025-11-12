@@ -64,15 +64,15 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         debugPrint('form_json length: ${(record['form_json'] as String?)?.length ?? 0}');
       }
 
-      // Query followup_form_data for child registration entries
+      // Query followup_form_data for child registration entries OR child tracking due forms
       final results = await db.query(
         FollowupFormDataTable.table,
-        where: 'form_json LIKE ?',
-        whereArgs: ['%child_registration_due%'],
+        where: 'form_json LIKE ? OR forms_ref_key = ?',
+        whereArgs: ['%child_registration_due%', '30bycxe4gv7fqnt6'],
         orderBy: 'id DESC',
       );
 
-      debugPrint('\n🔍 Found ${results.length} child registration records after filtering');
+      debugPrint('\n🔍 Found ${results.length} child registration/tracking records after filtering');
 
       final List<Map<String, dynamic>> childTrackingList = [];
 
@@ -88,12 +88,17 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
           final formData = jsonDecode(formJson);
           final formType = formData['form_type']?.toString() ?? '';
+          final formsRefKey = row['forms_ref_key']?.toString() ?? '';
 
           debugPrint('Form type found: $formType');
+          debugPrint('Forms ref key: $formsRefKey');
 
-          // Skip if not a child registration form
-          if (formType != FollowupFormDataTable.childRegistrationDue) {
-            debugPrint('Skipping form with type: $formType');
+          // Skip if not a child registration or child tracking due form
+          final isChildRegistration = formType == FollowupFormDataTable.childRegistrationDue;
+          final isChildTracking = formsRefKey == '30bycxe4gv7fqnt6' || formType == FollowupFormDataTable.childTrackingDue;
+          
+          if (!isChildRegistration && !isChildTracking) {
+            debugPrint('Skipping form with type: $formType and ref key: $formsRefKey');
             continue;
           }
 

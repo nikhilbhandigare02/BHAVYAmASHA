@@ -330,6 +330,60 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         debugPrint('👴 Father Key: $fatherKey');
         debugPrint('📱 Form Type: $formType');
 
+        // Check if case closure reason is Death and update beneficiary record
+        final closureReason = _getSelectedClosureReason(currentTabIndex);
+        if (closureReason == 'Death') {
+          debugPrint('🔴 Death case closure detected. Updating beneficiary record...');
+          
+          // Prepare death details JSON
+          final deathDetails = {
+            'date_of_death': _getDateOfDeath(currentTabIndex)?.toIso8601String(),
+            'probable_cause_of_death': _getProbableCauseOfDeath(currentTabIndex),
+            'other_cause_of_death': _otherCauseControllers[currentTabIndex]?.text,
+            'death_place': _getDeathPlace(currentTabIndex),
+            'reason_of_death': _getReasonOfDeath(currentTabIndex),
+            'other_reason': _otherReasonControllers[currentTabIndex]?.text,
+            'recorded_date': now,
+          };
+
+          // Update beneficiary record with death information
+          try {
+            // Get child name for additional verification
+            final childName = _formData['child_name']?.toString() ?? '';
+            
+            // Query beneficiary by unique_key or name match
+            List<Map<String, dynamic>> beneficiaryRecords = await db.query(
+              'beneficiaries',
+              where: 'unique_key = ? OR (beneficiary_info LIKE ?)',
+              whereArgs: [beneficiaryRefKey, '%"$childName"%'],
+            );
+
+            if (beneficiaryRecords.isNotEmpty) {
+              final beneficiary = beneficiaryRecords.first;
+              final beneficiaryId = beneficiary['id'];
+ 
+              await db.update(
+                'beneficiaries',
+                {
+                  'is_death': 1,
+                  'death_details': jsonEncode(deathDetails),
+                  'modified_date_time': now,
+                },
+                where: 'id = ?',
+                whereArgs: [beneficiaryId],
+              );
+
+              debugPrint('✅ Beneficiary record updated with death information');
+              debugPrint('   is_death: 1');
+              debugPrint('   death_details: ${jsonEncode(deathDetails)}');
+            } else {
+              debugPrint('⚠️ Beneficiary record not found for update. Ref Key: $beneficiaryRefKey');
+            }
+          } catch (e) {
+            debugPrint('❌ Error updating beneficiary death record: $e');
+          }
+        }
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
