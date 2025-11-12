@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
@@ -7,7 +9,9 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
+import '../../../data/Local_Storage/database_provider.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
 
 class FamliyUpdate extends StatefulWidget {
   const FamliyUpdate({super.key});
@@ -28,23 +32,41 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
   }
 
   Future<void> _loadHeads() async {
-    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    final db = await DatabaseProvider.instance.database;
+    final rows = await db.query(
+      'beneficiaries',
+      where: 'beneficiary_info LIKE ?',
+      whereArgs: ['%"relation":"Head"%'],
+    );
+
     final heads = <Map<String, dynamic>>[];
     for (final row in rows) {
-      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-      if (head.isNotEmpty) {
+      try {
+        final info = row['beneficiary_info'] is String
+            ? jsonDecode(row['beneficiary_info'] as String)
+            : row['beneficiary_info'];
+            
+        if (info is! Map) continue;
+        
         heads.add({
           'hhId': row['household_ref_key']?.toString() ?? '',
-          'name': head['headName']?.toString() ?? '',
-          'mobile': head['mobileNo']?.toString() ?? '',
-          'mohalla': head['mohalla']?.toString() ?? '',
+          'name': info['headName']?.toString() ?? info['memberName']?.toString() ?? '',
+          'mobile': info['mobileNo']?.toString() ?? '',
+          'mohalla': info['mohalla']?.toString() ?? '',
+          'village': info['village']?.toString() ?? '',
+          'unique_key': row['unique_key']?.toString() ?? '',
+          '_raw': row,  // Store the raw row data
         });
+      } catch (e) {
+        print('Error parsing beneficiary: $e');
       }
     }
-    setState(() {
-      _filtered = heads;
-    });
+    
+    if (mounted) {
+      setState(() {
+        _filtered = heads;
+      });
+    }
   }
 
   @override
@@ -87,10 +109,16 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(
+        Navigator.push(
           context,
-          Route_Names.FamliyUpdate,
-          arguments: {'isBeneficiary': true},
+          MaterialPageRoute(
+            builder: (context) => HouseHold_BeneficiaryScreen(
+              houseNo: data['hhId']!.toString().length > 11
+                  ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
+                  : data['hhId']?.toString(),
+              hhId: data['hhId'],
+            ),
+          ),
         );
       },
       child: Container(
@@ -143,20 +171,27 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow('', data['name'], isBold: true),
+                  Text(
+                    data['name'] ?? 'Not Available',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: _infoRow('Mobile :', data['mobile']),
+                        child: _infoRow('Mobile No:', data['mobile']?.isNotEmpty == true ? data['mobile'] : 'Not Available'),
                       ),
                       const SizedBox(width: 13),
                       Expanded(
                         child: _infoRow(
-                          'Mohalla :',
-                          data['mohalla'] ?? '',
-                          isWrappable: true, // ✅ Optional flag to handle wrapping
+                          'Mohalla',
+                          data['mohalla']?.isNotEmpty == true ? data['mohalla'] : 'Not Available',
+                          isWrappable: true,
                         ),
                       ),
                     ],

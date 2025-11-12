@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
@@ -6,6 +8,7 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import '../../../data/Local_Storage/database_provider.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
 
 class EligibleCoupleList extends StatefulWidget {
@@ -27,21 +30,76 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
   }
 
   Future<void> _loadEligibleCouples() async {
-    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    final db = await DatabaseProvider.instance.database;
+    
+    // First, get all households
+    final households = <String, List<Map<String, dynamic>>>{};
+    
+    // Get all beneficiaries and group by household
+    final allBeneficiaries = await db.query('beneficiaries');
+    
+    for (final row in allBeneficiaries) {
+      try {
+        final hhId = row['household_ref_key']?.toString() ?? '';
+        if (hhId.isEmpty) continue;
+        
+        final info = row['beneficiary_info'] is String 
+            ? jsonDecode(row['beneficiary_info'] as String) 
+            : (row['beneficiary_info'] as Map?) ?? {};
+            
+        if (info is! Map) continue;
+        
+        // Add to household group
+        if (!households.containsKey(hhId)) {
+          households[hhId] = [];
+        }
+        
+        households[hhId]!.add({
+          ...row,
+          'info': info,
+        });
+      } catch (e) {
+        print('Error processing beneficiary: $e');
+      }
+    }
+    
     final couples = <Map<String, dynamic>>[];
-    for (final row in rows) {
-      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-      final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-      if ((head['maritalStatus']?.toString().toLowerCase() == 'married') && (spouse['gender']?.toString().toLowerCase() == 'female') && (spouse['memberName']?.toString()?.isNotEmpty ?? false)) {
-        int age = _calculateAge(spouse['dob']);
-        if (age >= 15 && age <= 49) {
+    
+    // Process each household
+    for (final hhId in households.keys) {
+      final members = households[hhId]!;
+      
+      // Check each member in the household
+      for (final member in members) {
+        try {
+          final info = member['info'] as Map;
+          
+          // Check gender
+          final gender = info['gender']?.toString().toLowerCase() ?? '';
+          if (gender != 'female' && gender != 'f') continue;
+          
+          // Check marital status
+          final maritalStatus = info['maritalStatus']?.toString().toLowerCase() ?? '';
+          if (maritalStatus != 'married') continue;
+          
+          // Check age
+          final dob = info['dob'];
+          final age = _calculateAge(dob);
+          if (age < 15 || age > 49) continue;
+          
+          // If we get here, we have an eligible woman
           couples.add({
-            'hhId': row['household_ref_key']?.toString() ?? '',
-            'name': spouse['memberName']?.toString() ?? '',
-            'age/gender': _formatAgeGender(spouse['dob'], spouse['gender']),
+            'hhId': hhId,
+            'name': info['memberName']?.toString() ?? info['headName']?.toString() ?? 'Unknown',
+            'age': age,
+            'age_gender': _formatAgeGender(dob, gender),
+            'mobile': info['mobileNo']?.toString() ?? '',
             'status': 'Eligible Couple',
+            '_raw': member,
           });
+          
+        } catch (e) {
+          print('Error processing household member: $e');
         }
       }
     }
@@ -79,7 +137,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
         : gender == 'f' || gender == 'female'
             ? 'Female'
             : 'Other';
-    return '$age Y / $displayGender';
+    return '$age Y | $displayGender';
   }
 
   @override
@@ -217,7 +275,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
                   const SizedBox(height: 4),
                   _infoRow(
                     '',
-                    data['age/gender'] ?? '',
+                    data['age_gender'] ?? '',
                     isWrappable: true,
                   ),
                 ],

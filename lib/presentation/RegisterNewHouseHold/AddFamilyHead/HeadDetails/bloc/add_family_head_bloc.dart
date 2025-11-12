@@ -200,7 +200,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       }
 
       try {
-        // Get device info
+
         final deviceInfo = await DeviceInfo.getDeviceInfo();
         final now = DateTime.now();
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
@@ -372,7 +372,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
                 'dob': spousState.dob?.toIso8601String(),
                 'edd': spousState.edd?.toIso8601String(),
                 'lmp': spousState.lmp?.toIso8601String(),
-                'approxAge': spousState.approxAge,
+                'approxAge': spousState.approxAge, 
                 'gender': spousState.gender ?? (state.gender == 'Male' ? 'Female' : 'Male'),
                 'occupation': spousState.occupation,
                 'education': spousState.education,
@@ -388,6 +388,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
                 'phId': spousState.phId,
                 'beneficiaryType': spousState.beneficiaryType,
                 'isPregnant': spousState.isPregnant,
+                'maritalStatus': 'Married',
                 'relation_to_head': 'spouse',
                 ...childrenData,
               }),

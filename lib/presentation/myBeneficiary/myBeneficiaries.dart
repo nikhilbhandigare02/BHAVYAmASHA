@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 import 'package:sizer/sizer.dart';
+import 'dart:convert';
 import '../../l10n/app_localizations.dart';
 
 import '../../core/config/routes/Route_Name.dart';
@@ -29,52 +31,73 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
 
   Future<void> _loadCounts() async {
     try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      int familyCount = 0;
+      final db = await DatabaseProvider.instance.database;
+      final allBeneficiaries = await db.query('beneficiaries');
+
+      final households = <String, List<Map<String, dynamic>>>{};
+      for (final row in allBeneficiaries) {
+        try {
+          final hhId = row['household_ref_key']?.toString() ?? '';
+          if (hhId.isEmpty) continue;
+          
+          final info = row['beneficiary_info'] is String 
+              ? jsonDecode(row['beneficiary_info'] as String) 
+              : (row['beneficiary_info'] as Map?) ?? {};
+              
+          if (!households.containsKey(hhId)) {
+            households[hhId] = [];
+          }
+          
+          households[hhId]!.add({
+            ...row,
+            'info': info,
+          });
+        } catch (e) {
+          print('Error processing beneficiary: $e');
+        }
+      }
+      
+      int familyCount = households.length;
       int coupleCount = 0;
       int pregnantCount = 0;
 
-      for (final row in rows) {
-        final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+      for (final members in households.values) {
+        for (final member in members) {
+          try {
+            final info = member['info'] as Map;
 
-        // Count family updates (all heads of household)
-        if (head.isNotEmpty) {
-          familyCount++;
-        }
+            final gender = info['gender']?.toString().toLowerCase() ?? '';
+            if (gender != 'female' && gender != 'f') continue;
 
-        // Count eligible couples (married females 15-49)
-        if ((head['maritalStatus']?.toString().toLowerCase() == 'married') &&
-            (spouse['gender']?.toString().toLowerCase() == 'female') &&
-            (spouse['memberName']?.toString().isNotEmpty ?? false)) {
-          final age = _calculateAge(spouse['dob']?.toString() ?? '');
-          if (age >= 15 && age <= 49) {
-            coupleCount++;
-          }
-        }
+            final maritalStatus = info['maritalStatus']?.toString().toLowerCase() ?? '';
+            if (maritalStatus != 'married') continue;
 
-        // Count pregnant women (check head, spouse, and family members)
-        // Check if head is pregnant
-        if (_isPregnant(head)) {
-          pregnantCount++;
-        }
-        
-        // Check if spouse is pregnant
-        if (spouse.isNotEmpty && _isPregnant(spouse)) {
-          pregnantCount++;
-        }
-        
-        // Check family members
-        final familyMembers = (info['family_details'] as List?) ?? [];
-        for (final member in familyMembers) {
-          final memberData = Map<String, dynamic>.from(member as Map? ?? const {});
-          if (_isPregnant(memberData)) {
-            pregnantCount++;
+            final dob = info['dob'];
+            final age = _calculateAge(dob);
+            if (age >= 15 && age <= 49) {
+              coupleCount++;
+            }
+          } catch (e) {
+            print('Error counting eligible couple: $e');
           }
         }
       }
 
+      // Count pregnant women
+      for (final members in households.values) {
+        for (final member in members) {
+          try {
+            final info = Map<String, dynamic>.from(member['info'] as Map);
+            if (_isPregnant(info)) {
+              pregnantCount++;
+            }
+          } catch (e) {
+            print('Error counting pregnant women: $e');
+          }
+        }
+      }
+
+      // Update state
       if (mounted) {
         setState(() {
           familyUpdateCount = familyCount;
