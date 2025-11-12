@@ -395,72 +395,93 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   }
 
   Future<void> _openAddMember() async {
-    final result = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(
-        builder: (_) => AddNewFamilyMemberScreen(
+    try {
+      final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
+      if (beneficiaries.isEmpty) {
+        throw Exception('No existing beneficiary found to derive keys. Add a member first.');
+      }
+      final latestBeneficiary = beneficiaries.first;
+      final uniqueKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
 
+      final result = await Navigator.of(context).push<Map<String, dynamic>>(
+        MaterialPageRoute(
+          builder: (_) => AddNewFamilyMemberScreen(
+            hhId: uniqueKey,
+          ),
         ),
-      ),
-    );
-    if (result != null) {
-      setState(() {
-        _memberForms.add(Map<String, dynamic>.from(result));
-        totalMembers = totalMembers + 1;
-        final String type = (result['memberType'] ?? 'Adult').toString();
-        final String name = (result['name'] ?? '').toString();
-        final bool useDob = (result['useDob'] == true);
-        final String? dobIso = result['dob'] as String?;
-        String age = '';
-        if (useDob && dobIso != null && dobIso.isNotEmpty) {
-          final dob = DateTime.tryParse(dobIso);
-          age = dob != null ? (DateTime.now().year - dob.year).toString() : (result['approxAge'] ?? '').toString();
-        } else {
-          age = (result['approxAge'] ?? '').toString();
-        }
-        final String gender = (result['gender'] ?? '').toString();
-        final String relation = (result['relation'] ?? '').toString();
-        final String father = (result['fatherName'] ?? '').toString();
-        final String spouse = (result['spouseName'] ?? '').toString();
-        final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
-            ? (int.tryParse(result['children'].toString()) ?? 0) > 0 
-                ? result['children'].toString() 
-                : '0'
-            : '0';
+      );
+      if (result != null) {
+        setState(() {
+          _memberForms.add(Map<String, dynamic>.from(result));
+          totalMembers = totalMembers + 1;
+          final String type = (result['memberType'] ?? 'Adult').toString();
+          final String name = (result['name'] ?? '').toString();
+          final bool useDob = (result['useDob'] == true);
+          final String? dobIso = result['dob'] as String?;
+          String age = '';
+          if (useDob && dobIso != null && dobIso.isNotEmpty) {
+            final dob = DateTime.tryParse(dobIso);
+            age = dob != null ? (DateTime.now().year - dob.year).toString() : (result['approxAge'] ?? '').toString();
+          } else {
+            age = (result['approxAge'] ?? '').toString();
+          }
+          final String gender = (result['gender'] ?? '').toString();
+          final String relation = (result['relation'] ?? '').toString();
+          final String father = (result['fatherName'] ?? '').toString();
+          final String spouse = (result['spouseName'] ?? '').toString();
+          final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
+              ? (int.tryParse(result['children'].toString()) ?? 0) > 0 
+                  ? result['children'].toString() 
+                  : '0'
+              : '0';
 
-        _members.add({
-          '#': '${_members.length + 1}',
-          'Type': type,
-          'Name': name,
-          'Age': age,
-          'Gender': gender,
-          'Relation': relation,
-          'Father': father,
-          'Spouse': spouse,
-          'Total Children': totalChildren,
-        });
-
-        // Add spouse row similar to head flow when married
-        final String maritalStatus = (result['maritalStatus'] ?? '').toString();
-        if (maritalStatus == 'Married' && spouse.isNotEmpty) {
-          final String spouseGender = (gender == 'Male')
-              ? 'Female'
-              : (gender == 'Female')
-                  ? 'Male'
-                  : '';
           _members.add({
             '#': '${_members.length + 1}',
-            'Type': 'Adult',
-            'Name': spouse,
-            'Age': '',
-            'Gender': spouseGender,
-            'Relation': 'Spouse',
-            'Father': '',
-            'Spouse': name,
+            'Type': type,
+            'Name': name,
+            'Age': age,
+            'Gender': gender,
+            'Relation': relation,
+            'Father': father,
+            'Spouse': spouse,
             'Total Children': totalChildren,
           });
-          totalMembers = totalMembers + 1;
-        }
-      });
+
+          // Add spouse row similar to head flow when married
+          final String maritalStatus = (result['maritalStatus'] ?? '').toString();
+          if (maritalStatus == 'Married' && spouse.isNotEmpty) {
+            final String spouseGender = (gender == 'Male')
+                ? 'Female'
+                : (gender == 'Female')
+                    ? 'Male'
+                    : '';
+            _members.add({
+              '#': '${_members.length + 1}',
+              'Type': 'Adult',
+              'Name': spouse,
+              'Age': '',
+              'Gender': spouseGender,
+              'Relation': 'Spouse',
+              'Father': '',
+              'Spouse': name,
+              'Total Children': totalChildren,
+            });
+            totalMembers = totalMembers + 1;
+          }
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
