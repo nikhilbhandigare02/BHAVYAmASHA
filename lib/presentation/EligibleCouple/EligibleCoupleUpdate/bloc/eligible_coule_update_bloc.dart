@@ -41,7 +41,6 @@ class EligibleCouleUpdateBloc
     print('📋 Received data: $data');
 
     try {
-      // Get the hhId (last 11 digits) and name to query the database
       final hhId = data['hhId']?.toString() ?? '';
       final name = data['name']?.toString() ?? '';
       
