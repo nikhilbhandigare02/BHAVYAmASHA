@@ -312,7 +312,7 @@ class AddnewfamilymemberBloc
           'server_id': null,
           'household_ref_key': uniqueKey,
           'unique_key': memberId,
-          'beneficiary_state': beneficiaryState, // FIXED: Use the properly determined state
+          'beneficiary_state': beneficiaryState,
           'pregnancy_count': 0,
           'beneficiary_info': jsonEncode({
             'memberType': state.memberType,
@@ -397,7 +397,7 @@ class AddnewfamilymemberBloc
               'server_id': null,
               'household_ref_key': uniqueKey,
               'unique_key': spousKey,
-              'beneficiary_state': 'active', // Spouse should always be active
+              'beneficiary_state': 'active',
               'pregnancy_count': 0,
               'beneficiary_info': jsonEncode({
                 'relation': spousState.relation ?? 'spouse',

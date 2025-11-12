@@ -47,6 +47,8 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
 
     try {
       final db = await DatabaseProvider.instance.database;
+
+      // Query beneficiaries table for children with registration_due status
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries',
         where: 'is_deleted = ? AND beneficiary_state = ?',
@@ -88,11 +90,10 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         final memberType = memberData['memberType']?.toString() ?? '';
 
         debugPrint('📝 Member Type: "$memberType"');
-        debugPrint('📝 Full member data: $memberData');
 
         // Only process if memberType is "Child"
         if (memberType.toLowerCase() == 'child') {
-          debugPrint('✅ Found Child member: $memberData');
+          debugPrint('✅ Found Child member');
 
           // Get name from multiple possible fields
           final name = memberData['memberName']?.toString() ??
@@ -148,7 +149,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             '_memberData': memberData,
           };
 
-          debugPrint('📋 Created card: $card');
+          debugPrint('📋 Created card: ${card['Name']}');
           childBeneficiaries.add(card);
         } else {
           debugPrint('⏭️ Skipping non-child member type: $memberType');
