@@ -41,12 +41,12 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
 
   Future<void> _loadChildBeneficiaries() async {
     if (!mounted) return;
-    
+
     setState(() => _isLoading = true);
 
     try {
       final db = await DatabaseProvider.instance.database;
-      
+
       // Get all deceased beneficiaries
       print('🔍 Fetching deceased beneficiaries...');
       final deceasedChildren = await db.rawQuery('''
@@ -57,15 +57,15 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       ''');
 
       print('✅ Found ${deceasedChildren.length} potential deceased records');
-      
+
       final deceasedIds = <String>{};
       for (var child in deceasedChildren) {
         try {
           final jsonData = jsonDecode(child['form_json'] as String);
           final formData = jsonData['form_data'] as Map<String, dynamic>?;
           final caseClosure = formData?['case_closure'] as Map<String, dynamic>?;
-          
-          if (caseClosure?['is_case_closure'] == true && 
+
+          if (caseClosure?['is_case_closure'] == true &&
               caseClosure?['reason_of_death']?.toString().toLowerCase() == 'death') {
             final beneficiaryId = child['beneficiary_ref_key']?.toString();
             if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
@@ -79,89 +79,85 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       }
 
       print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
-      
+
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries',
-        where: 'is_deleted = ?',
-        whereArgs: [0],
+        where: 'is_deleted = ? AND is_adult = ?',
+        whereArgs: [0, 0],
       );
 
       print('📊 Found ${rows.length} total beneficiaries');
       final childBeneficiaries = <Map<String, dynamic>>[];
 
       for (final row in rows) {
-        final rowHhId = row['household_ref_key']?.toString();
-        if (rowHhId == null) continue;
+        try {
+          final rowHhId = row['household_ref_key']?.toString();
+          if (rowHhId == null) continue;
 
-        final info = row['beneficiary_info'] is String
-            ? jsonDecode(row['beneficiary_info'] as String)
-            : row['beneficiary_info'];
+          // Parse beneficiary info
+          final info = row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : row['beneficiary_info'];
 
-        if (info is! Map) continue;
+          if (info is! Map) continue;
 
-        final head = info['head_details'] is Map ? info['head_details'] : {};
-        final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
-        final members = info['member_details'] is List ? info['member_details'] : [];
+          // Check if this is a direct child record (new format)
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          final relation = info['relation']?.toString().toLowerCase() ?? '';
 
-        if (members.isNotEmpty && members is List) {
-          for (final member in members) {
-            if (member is Map) {
-              final memberType = member['memberType']?.toString() ?? '';
+          if (memberType == 'child' || relation == 'child' ||
+              relation == 'son' || relation == 'daughter') {
 
-              if (memberType == 'Child') {
-                final beneficiaryId = row['unique_key']?.toString() ?? '';
-                final memberData = Map<String, dynamic>.from(member);
+            final name = info['name']?.toString() ??
+                info['memberName']?.toString() ??
+                info['member_name']?.toString() ??
+                '';
 
-                 final name = memberData['memberName']?.toString() ??
-                            memberData['name']?.toString() ??
-                            memberData['member_name']?.toString() ??
-                            memberData['memberNameLocal']?.toString() ??
-                            '';
+            if (name.isEmpty) continue; // Skip if no name
 
-                final fatherName = memberData['fatherName']?.toString() ??
-                                  memberData['father_name']?.toString() ??
-                                  head['headName']?.toString() ??
-                                  head['memberName']?.toString() ?? '';
+            final fatherName = info['fatherName']?.toString() ??
+                info['father_name']?.toString() ?? '';
 
-                final motherName = memberData['motherName']?.toString() ??
-                                  memberData['mother_name']?.toString() ??
-                                  spouse['memberName']?.toString() ??
-                                  spouse['headName']?.toString() ?? '';
+            final motherName = info['motherName']?.toString() ??
+                info['mother_name']?.toString() ?? '';
 
-                final mobileNo = memberData['mobileNo']?.toString() ??
-                                memberData['mobile']?.toString() ??
-                                memberData['mobile_number']?.toString() ??
-                                head['mobileNo']?.toString() ?? '';
+            final mobileNo = info['mobileNo']?.toString() ??
+                info['mobile']?.toString() ??
+                info['mobile_number']?.toString() ?? '';
 
-                final richId = memberData['RichIDChanged']?.toString() ??
-                              memberData['richIdChanged']?.toString() ??
-                              memberData['richId']?.toString() ?? '';
+            final richId = info['RichIDChanged']?.toString() ??
+                info['richIdChanged']?.toString() ??
+                info['richId']?.toString() ?? '';
 
-                final isDeceased = deceasedIds.contains(beneficiaryId);
-                if (isDeceased) {
-                  print('ℹ️ Marking as deceased - ID: $beneficiaryId, Name: $name');
-                }
-                
-                final card = <String, dynamic>{
-                  'hhId': rowHhId,
-                  'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
-                  'RegitrationType': 'Child',
-                  'BeneficiaryID': beneficiaryId,
-                  'RchID': richId,
-                  'Name': name,
-                  'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
-                  'Mobileno.': mobileNo,
-                  'FatherName': fatherName,
-                  'MotherName': motherName,
-                  'is_deceased': isDeceased,
-                  '_raw': row,
-                  '_memberData': memberData,
-                };
-                
-                childBeneficiaries.add(card);
-              }
+            final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
+            final gender = info['gender'] ?? info['sex'];
+
+            final beneficiaryId = row['unique_key']?.toString() ?? '';
+            final isDeceased = deceasedIds.contains(beneficiaryId);
+
+            if (isDeceased) {
+              print('ℹ️ Marking as deceased - ID: $beneficiaryId, Name: $name');
             }
+
+            final card = <String, dynamic>{
+              'hhId': rowHhId,
+              'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+              'RegitrationType': 'Child',
+              'BeneficiaryID': beneficiaryId,
+              'RchID': richId,
+              'Name': name,
+              'Age|Gender': _formatAgeGender(dob, gender),
+              'Mobileno.': mobileNo,
+              'FatherName': fatherName,
+              'MotherName': motherName,
+              'is_deceased': isDeceased,
+              '_raw': row,
+            };
+
+            childBeneficiaries.add(card);
           }
+        } catch (e) {
+          print('⚠️ Error processing beneficiary record: $e');
         }
       }
 
@@ -193,14 +189,14 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
     String age = 'N/A';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
-    
+
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
       try {
         String dateStr = dobRaw.toString();
         DateTime? dob;
-        
+
         dob = DateTime.tryParse(dateStr);
-        
+
         if (dob == null) {
           final timestamp = int.tryParse(dateStr);
           if (timestamp != null && timestamp > 0) {
@@ -210,13 +206,13 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
             );
           }
         }
-        
+
         if (dob != null) {
           final now = DateTime.now();
           int years = now.year - dob.year;
           int months = now.month - dob.month;
           int days = now.day - dob.day;
-          
+
           if (days < 0) {
             final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
             final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
@@ -224,12 +220,12 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
             days += daysInLastMonth;
             months--;
           }
-          
+
           if (months < 0) {
             months += 12;
             years--;
           }
-          
+
           if (years > 0) {
             age = '$years Y';
           } else if (months > 0) {
@@ -242,7 +238,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
         debugPrint('Error parsing date of birth: $e');
       }
     }
-    
+
     String displayGender;
     switch (gender) {
       case 'm':
@@ -256,13 +252,13 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       default:
         displayGender = 'Other';
     }
-    
+
     return '$age | $displayGender';
   }
 
   void _onSearchChanged() {
     if (!mounted) return;
-    
+
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
@@ -285,9 +281,8 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle:  l10n?.childRegisteredBeneficiaryListTitle ?? 'Register child beneficiary list',
+        screenTitle: l10n?.childRegisteredBeneficiaryListTitle ?? 'Register child beneficiary list',
         showBack: true,
-
       ),
       body: Column(
         children: [
@@ -297,7 +292,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  l10n?.searchHint ?? 'Search All Beneficiary',
+                hintText: l10n?.searchHint ?? 'Search All Beneficiary',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -317,43 +312,39 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
             ),
           ),
 
-
-
           // 📋 List of Child Beneficiaries
           _isLoading
               ? const Expanded(
-                  child: Center(child: CircularProgressIndicator()))
+              child: Center(child: CircularProgressIndicator()))
               : _filtered.isEmpty
-                  ? Expanded(
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            _childBeneficiaries.isEmpty
-                                ? 'No child beneficiaries found. Add a new child to get started.'
-                                : 'No matching child beneficiaries found.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 16, color: Colors.grey[600]),
-                          ),
-                        ),
-                      ),
-                    )
-                  : Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: _loadChildBeneficiaries,
-                        child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                          itemCount: _filtered.length,
-                          itemBuilder: (context, index) {
-                            final data = _filtered[index];
-                            return _householdCard(context, data);
-                          },
-                        ),
-                      ),
-                    ),
-
-
+              ? Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  _childBeneficiaries.isEmpty
+                      ? 'No child beneficiaries found. Add a new child to get started.'
+                      : 'No matching child beneficiaries found.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 16, color: Colors.grey[600]),
+                ),
+              ),
+            ),
+          )
+              : Expanded(
+            child: RefreshIndicator(
+              onRefresh: _loadChildBeneficiaries,
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                itemCount: _filtered.length,
+                itemBuilder: (context, index) {
+                  final data = _filtered[index];
+                  return _householdCard(context, data);
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -374,7 +365,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
         // );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8), 
+        margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4),
           boxShadow: [
@@ -482,10 +473,10 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                       const SizedBox(width: 12),
                       Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType'] ?? 'Child')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', 
-                        (data['BeneficiaryID']?.toString().length ?? 0) > 11 
-                          ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11) 
-                          : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
+                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                          (data['BeneficiaryID']?.toString().length ?? 0) > 11
+                              ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
+                              : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -495,27 +486,19 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                       const SizedBox(width: 12),
                       Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.'] ?? 'N/A')),
+                      Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID']?.isNotEmpty == true ? data['RchID'] : 'N/A')),
                     ],
                   ),
-                  if (data['RchID']?.isNotEmpty == true)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID'] ?? 'N/A'),
-                    ),
                   const SizedBox(height: 10),
-                  _rowText(
-                    l10n?.fatherNameLabel ?? 'Father\'s Name',
-                    data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+                  Row(
+                    children: [
+                      Expanded(child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.'] ?? 'N/A')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _rowText(l10n?.fatherNameLabel ?? 'Father\'s Name', data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A')),
+                      const SizedBox(width: 12),
+                      const Expanded(child: SizedBox()),
+                    ],
                   ),
-                  if (data['MotherName']?.isNotEmpty == true)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: _rowText(
-                        l10n?.motherNameLabel ?? 'Mother\'s Name',
-                        data['MotherName'] ?? 'N/A',
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -549,5 +532,4 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       ],
     );
   }
-
 }

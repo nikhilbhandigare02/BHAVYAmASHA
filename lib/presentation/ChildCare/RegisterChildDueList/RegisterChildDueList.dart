@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -43,114 +42,123 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
 
   Future<void> _loadChildBeneficiaries() async {
     if (!mounted) return;
-    
+
     setState(() => _isLoading = true);
 
     try {
       final db = await DatabaseProvider.instance.database;
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries',
-        where: 'is_deleted = ?',
-        whereArgs: [0],
+        where: 'is_deleted = ? AND beneficiary_state = ?',
+        whereArgs: [0, 'registration_due'],
       );
+
+      debugPrint('🎯 Found ${rows.length} beneficiaries with registration_due status');
 
       final childBeneficiaries = <Map<String, dynamic>>[];
 
       for (final row in rows) {
         final rowHhId = row['household_ref_key']?.toString();
-        if (rowHhId == null) continue;
-
-        final info = row['beneficiary_info'] is String
-            ? jsonDecode(row['beneficiary_info'] as String)
-            : row['beneficiary_info'];
-
-        if (info is! Map) continue;
-
-        final head = info['head_details'] is Map ? info['head_details'] : {};
-        final spouse = info['spouse_details'] is Map ? info['spouse_details'] : {};
-        final children = info['children_details'] is Map ? info['children_details'] : {};
-        final members = info['member_details'] is List ? info['member_details'] : [];
-
-        // Process children from member_details where memberType is "Child"
-        if (members.isNotEmpty && members is List) {
-          for (final member in members) {
-            if (member is Map) {
-              final memberType = member['memberType']?.toString() ?? '';
-              
-              // Only process if memberType is "Child"
-              if (memberType == 'Child') {
-                final memberData = Map<String, dynamic>.from(member);
-                
-                // Get name from multiple possible fields
-                final name = memberData['memberName']?.toString() ?? 
-                            memberData['name']?.toString() ??
-                            memberData['member_name']?.toString() ??
-                            memberData['memberNameLocal']?.toString() ??
-                            '';
-                
-                if (name.isEmpty) {
-                  debugPrint('⚠️ Skipping member with empty name');
-                  continue;
-                }
-                
-                debugPrint('\n🔎 Processing child: $name in household: $rowHhId');
-                
-                // Check if this child is already registered
-                final isAlreadyRegistered = await _isChildRegistered(db, rowHhId, name);
-                
-                if (isAlreadyRegistered) {
-                  debugPrint('⏭️ Child already registered: $name in household: $rowHhId - SKIPPING');
-                  continue; // Skip this child, don't add to list
-                }
-                
-                debugPrint('✅ Child NOT registered yet: $name - ADDING TO LIST');
-                
-                // Get father's name (from member data or head)
-                final fatherName = memberData['fatherName']?.toString() ?? 
-                                  memberData['father_name']?.toString() ??
-                                  head['headName']?.toString() ?? 
-                                  head['memberName']?.toString() ?? '';
-                
-                // Get mother's name (from member data or spouse)
-                final motherName = memberData['motherName']?.toString() ?? 
-                                  memberData['mother_name']?.toString() ??
-                                  spouse['memberName']?.toString() ?? 
-                                  spouse['headName']?.toString() ?? '';
-                
-                // Get mobile number
-                final mobileNo = memberData['mobileNo']?.toString() ?? 
-                                memberData['mobile']?.toString() ??
-                                memberData['mobile_number']?.toString() ??
-                                head['mobileNo']?.toString() ?? '';
-                
-                // Get RCH ID
-                final richId = memberData['RichIDChanged']?.toString() ?? 
-                              memberData['richIdChanged']?.toString() ?? 
-                              memberData['richId']?.toString() ?? '';
-                
-                // Get beneficiary ID - use the same logic as in RegisterChildListScreen
-                final beneficiaryId = row['unique_key']?.toString() ?? '';
-                
-                final card = <String, dynamic>{
-                  'hhId': rowHhId,
-                  'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
-                  'RegitrationType': 'Child',
-                  'BeneficiaryID': beneficiaryId,
-                  'RchID': richId,
-                  'Name': name,
-                  'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
-                  'Mobileno.': mobileNo,
-                  'FatherName': fatherName,
-                  'MotherName': motherName,
-                  '_raw': row,
-                  '_memberData': memberData,
-                };
-                
-                childBeneficiaries.add(card);
-              }
-            }
-          }
+        if (rowHhId == null) {
+          debugPrint('⚠️ Skipping row with null household_ref_key');
+          continue;
         }
+
+        debugPrint('\n🔍 Processing beneficiary with household_ref_key: $rowHhId');
+
+        // Parse beneficiary_info
+        dynamic info;
+        try {
+          if (row['beneficiary_info'] is String) {
+            info = jsonDecode(row['beneficiary_info'] as String);
+          } else {
+            info = row['beneficiary_info'];
+          }
+        } catch (e) {
+          debugPrint('❌ Error parsing beneficiary_info: $e');
+          continue;
+        }
+
+        if (info is! Map) {
+          debugPrint('⚠️ beneficiary_info is not a Map, skipping');
+          continue;
+        }
+
+        final memberData = Map<String, dynamic>.from(info);
+        final memberType = memberData['memberType']?.toString() ?? '';
+
+        debugPrint('📝 Member Type: "$memberType"');
+        debugPrint('📝 Full member data: $memberData');
+
+        // Only process if memberType is "Child"
+        if (memberType.toLowerCase() == 'child') {
+          debugPrint('✅ Found Child member: $memberData');
+
+          // Get name from multiple possible fields
+          final name = memberData['memberName']?.toString() ??
+              memberData['name']?.toString() ??
+              memberData['member_name']?.toString() ??
+              memberData['memberNameLocal']?.toString() ??
+              memberData['Name']?.toString() ?? '';
+
+          debugPrint('👶 Child Name: "$name"');
+
+          if (name.isEmpty) {
+            debugPrint('⚠️ Skipping child with empty name');
+            continue;
+          }
+
+          // Check if this child is already registered
+          final isAlreadyRegistered = await _isChildRegistered(db, rowHhId, name);
+
+          if (isAlreadyRegistered) {
+            debugPrint('⏭️ Child already registered: $name in household: $rowHhId - SKIPPING');
+            continue;
+          }
+
+          debugPrint('✅ Child NOT registered yet: $name - ADDING TO LIST');
+
+          // Get father's name
+          final fatherName = memberData['fatherName']?.toString() ?? '';
+
+          // Get mother's name
+          final motherName = memberData['motherName']?.toString() ?? '';
+
+          // Get mobile number
+          final mobileNo = memberData['mobileNo']?.toString() ?? '';
+
+          // Get RCH ID
+          final richId = memberData['RichIDChanged']?.toString() ?? '';
+
+          // Get beneficiary ID
+          final beneficiaryId = row['unique_key']?.toString() ?? '';
+
+          final card = <String, dynamic>{
+            'hhId': rowHhId,
+            'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+            'RegitrationType': 'Child',
+            'BeneficiaryID': beneficiaryId,
+            'RchID': richId,
+            'Name': name,
+            'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
+            'Mobileno.': mobileNo,
+            'FatherName': fatherName,
+            'MotherName': motherName,
+            '_raw': row,
+            '_memberData': memberData,
+          };
+
+          debugPrint('📋 Created card: $card');
+          childBeneficiaries.add(card);
+        } else {
+          debugPrint('⏭️ Skipping non-child member type: $memberType');
+        }
+      }
+
+      debugPrint('\n📊 FINAL RESULTS:');
+      debugPrint('Total children found: ${childBeneficiaries.length}');
+      for (final child in childBeneficiaries) {
+        debugPrint('  - ${child['Name']} (HH: ${child['hhId']})');
       }
 
       if (mounted) {
@@ -161,7 +169,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         });
       }
     } catch (e) {
-      debugPrint('Error loading child beneficiaries: $e');
+      debugPrint('❌ Error loading child beneficiaries: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -170,11 +178,9 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
 
   Future<bool> _isChildRegistered(Database db, String hhId, String childName) async {
     try {
-      // Normalize the search name by trimming and converting to lowercase
       final normalizedSearchName = childName.trim().toLowerCase();
-      debugPrint('\n🔍 Checking registration for: "$childName" (normalized: "$normalizedSearchName") in household: "$hhId"');
-      
-      // Query all followup_form_data records for this household
+      debugPrint('\n🔍 Checking registration for: "$childName" in household: "$hhId"');
+
       final results = await db.query(
         'followup_form_data',
         where: 'household_ref_key = ?',
@@ -184,7 +190,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       debugPrint('📊 Found ${results.length} form records for household: $hhId');
 
       if (results.isEmpty) {
-        debugPrint('⚠️ No records found in followup_form_data for household: $hhId');
+        debugPrint('✅ No existing registration forms found');
         return false;
       }
 
@@ -193,61 +199,43 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         try {
           final formJson = row['form_json'] as String?;
           if (formJson == null || formJson.isEmpty) {
-            debugPrint('⚠️ Record $i: Empty form_json');
             continue;
           }
-
-          debugPrint('\n📄 Record $i form_json: $formJson');
 
           final formData = jsonDecode(formJson);
           final formType = (formData['form_type']?.toString() ?? '').toLowerCase();
-          
-          // Skip if this isn't a child registration form
+
           if (formType != 'child_registration_due') {
-            debugPrint('⏭️ Record $i: Not a child registration form (type: $formType)');
             continue;
           }
-          
-          // Validate form_data structure
+
           if (formData['form_data'] == null || formData['form_data'] is! Map) {
-            debugPrint('⚠️ Record $i: Missing or invalid form_data');
             continue;
           }
-          
+
           final formDataMap = formData['form_data'] as Map<String, dynamic>;
           final childNameInForm = formDataMap['child_name']?.toString() ?? '';
-          
+
           if (childNameInForm.isEmpty) {
-            debugPrint('⚠️ Record $i: Empty child_name in form data');
             continue;
           }
-          
-          // Normalize the stored name
+
           final normalizedStoredName = childNameInForm.trim().toLowerCase();
 
-          debugPrint('📋 Record $i - Form Type: "$formType"');
-          debugPrint('📋 Record $i - Child Name in DB: "$childNameInForm" (normalized: "$normalizedStoredName")');
-          debugPrint('📋 Record $i - Comparing: "$normalizedStoredName" (DB) vs "$normalizedSearchName" (searching)');
-          debugPrint('📋 Record $i - Match: ${normalizedStoredName == normalizedSearchName}');
-
-          // Check for name match
           if (normalizedStoredName == normalizedSearchName) {
-            debugPrint('✅ MATCH FOUND! Existing registration: "$childName" in $hhId');
-            debugPrint('   - Original names - DB: "$childNameInForm" vs Search: "$childName"');
-            debugPrint('   - Normalized match: "$normalizedStoredName" == "$normalizedSearchName"');
+            debugPrint('✅ MATCH FOUND! Child already registered');
             return true;
           }
         } catch (e) {
-          debugPrint('❌ Error parsing form data in record $i: $e');
-          debugPrint('Form JSON: ${row['form_json']}');
+          debugPrint('❌ Error parsing form data: $e');
           continue;
         }
       }
-      
-      debugPrint('❌ No registration found for: "$childName" in "$hhId"');
+
+      debugPrint('✅ No existing registration found');
       return false;
     } catch (e) {
-      debugPrint('❌ Error checking if child is registered: $e');
+      debugPrint('❌ Error checking registration: $e');
       return false;
     }
   }
@@ -258,21 +246,21 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       final date = DateTime.parse(dateStr);
       return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
     } catch (e) {
-      return dateStr!;
+      return dateStr;
     }
   }
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
     String age = 'N/A';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
-    
+
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
       try {
         String dateStr = dobRaw.toString();
         DateTime? dob;
-        
+
         dob = DateTime.tryParse(dateStr);
-        
+
         if (dob == null) {
           final timestamp = int.tryParse(dateStr);
           if (timestamp != null && timestamp > 0) {
@@ -282,13 +270,13 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             );
           }
         }
-        
+
         if (dob != null) {
           final now = DateTime.now();
           int years = now.year - dob.year;
           int months = now.month - dob.month;
           int days = now.day - dob.day;
-          
+
           if (days < 0) {
             final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
             final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
@@ -296,12 +284,12 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             days += daysInLastMonth;
             months--;
           }
-          
+
           if (months < 0) {
             months += 12;
             years--;
           }
-          
+
           if (years > 0) {
             age = '$years Y';
           } else if (months > 0) {
@@ -314,7 +302,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         debugPrint('Error parsing date of birth: $e');
       }
     }
-    
+
     String displayGender;
     switch (gender) {
       case 'm':
@@ -328,7 +316,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       default:
         displayGender = 'Other';
     }
-    
+
     return '$age | $displayGender';
   }
 
@@ -355,20 +343,18 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle:  l10n?.childRegisteredDueListTitle ?? 'Register Child Due List',
+        screenTitle: l10n?.childRegisteredDueListTitle ?? 'Register Child Due List',
         showBack: true,
-
       ),
       drawer: const CustomDrawer(),
       body: Column(
         children: [
-
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  l10n?.searchHintRegisterChildDueList ?? ' ',
+                hintText: l10n?.searchHintRegisterChildDueList ?? 'Search...',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -387,42 +373,49 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
               ),
             ),
           ),
-
-
-
-                    Expanded(
-                    child: _isLoading
+          Expanded(
+            child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filtered.isEmpty
-                    ? Center(
-                        child: Text(
-                             'No children found',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(5, 0, 5, 12),
-                        itemCount: _filtered.length,
-                        itemBuilder: (context, index) {
-                          final data = _filtered[index];
-                          return _householdCard(context, data);
-                        },
-                      ),
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.child_care, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No children found for registration',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Children with "registration_due" status will appear here',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(5, 0, 5, 12),
+              itemCount: _filtered.length,
+              itemBuilder: (context, index) {
+                final data = _filtered[index];
+                return _householdCard(context, data);
+              },
+            ),
           ),
-
-
         ],
       ),
     );
   }
 
-   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
+  Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
     return InkWell(
       onTap: () {
-        // Extract the required data from the card
         final name = data['Name'] ?? '';
         final ageGender = data['Age|Gender']?.toString().split(' | ') ?? [];
         final gender = ageGender.length > 1 ? ageGender[1] : '';
@@ -431,15 +424,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         final rchId = data['RchID'] ?? '';
         final fatherName = data['FatherName'] ?? '';
         final beneficiaryId = data['BeneficiaryID']?.toString() ?? '';
-        
-        debugPrint('Navigating with data:');
-        debugPrint('- Name: $name');
-        debugPrint('- Gender: $gender');
-        debugPrint('- Mobile: $mobile');
-        debugPrint('- HHID: $hhId');
-        debugPrint('- RCH ID: $rchId');
 
-        debugPrint('Sending navigation data:');
         final args = <String, dynamic>{
           'hhId': hhId,
           'name': name,
@@ -449,9 +434,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           'fatherName': fatherName,
           'beneficiaryId': beneficiaryId,
         };
-        debugPrint(args.toString());
-        
-        // Navigate using the route method
+
         final route = RegisterChildDueListFormScreen.route(
           RouteSettings(
             name: Route_Names.RegisterChildDueListFormScreen,
@@ -461,8 +444,6 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         Navigator.push(context, route).then((result) {
           if (result != null && result is Map<String, dynamic>) {
             if (result['saved'] == true) {
-              debugPrint('✅ Form saved successfully! Reloading list...');
-              // Reload the list to reflect the saved registration
               _loadChildBeneficiaries();
             }
           }
@@ -470,7 +451,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-        height: 180, // Increased height
+        height: 180,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
@@ -485,7 +466,6 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header Row
             Container(
               decoration: const BoxDecoration(
                 color: AppColors.background,
@@ -498,8 +478,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      (data['hhId'] != 
-                      null && data['hhId'].toString().length > 11)
+                      (data['hhId'] != null && data['hhId'].toString().length > 11)
                           ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
                           : (data['hhId']?.toString() ?? ''),
                       style: TextStyle(
@@ -514,19 +493,17 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: Image.asset(
-                      'assets/images/sync.png', // Make sure this asset exists
+                      'assets/images/sync.png',
                       width: 24,
                       height: 24,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => 
-                          const Icon(Icons.sync, size: 24, color: Colors.grey),
+                      errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.sync, size: 24, color: Colors.grey),
                     ),
                   ),
                 ],
               ),
             ),
-
-            // Card Body
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
@@ -542,10 +519,10 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                       const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType'] ?? 'Child')),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', 
-                        (data['BeneficiaryID']?.toString().length ?? 0) > 11 
-                          ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11) 
-                          : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
+                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                          (data['BeneficiaryID']?.toString().length ?? 0) > 11
+                              ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
+                              : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -556,7 +533,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                       Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
                       const SizedBox(width: 8),
                       Expanded(child: _rowText(
-                        l10n?.rchIdLabel ?? 'RCH ID', 
+                        l10n?.rchIdLabel ?? 'RCH ID',
                         data['RchID']?.isNotEmpty == true ? data['RchID'] : 'N/A',
                       )),
                     ],
@@ -579,7 +556,6 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                       ),
                     ],
                   ),
-
                 ],
               ),
             ),
@@ -589,12 +565,11 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     );
   }
 
-
   Widget _rowText(String title, String value) {
     final Color primary = Theme.of(context).primaryColor;
     final bool isLight = primary.computeLuminance() > 0.5;
     final textColor = isLight ? Colors.black87 : Colors.white;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -22,24 +22,52 @@ class AddnewfamilymemberBloc
     extends Bloc<AddnewfamilymemberEvent, AddnewfamilymemberState> {
   final LocalStorageDao _localStorageDao = LocalStorageDao();
 
+  // Helper method to determine if a member is an adult based on memberType and DOB
+  int _getIsAdultValue(String? memberType, bool useDob, DateTime? dob) {
+    // If member type is explicitly 'child', return 0
+    if (memberType == 'child') {
+      return 0;
+    }
+
+    // If member type is explicitly 'Adult', return 1
+    if (memberType == 'Adult') {
+      return 1;
+    }
+
+    // If DOB is available, calculate age
+    if (useDob && dob != null) {
+      final age = DateTime.now().difference(dob).inDays ~/ 365;
+      return age > 18 ? 1 : 0;
+    }
+
+    return 1;
+  }
+
+  String _getBeneficiaryState(String? memberType) {
+    if (memberType?.toLowerCase() == 'child') {
+      return 'registration_due';
+    } else {
+      return 'active';
+    }
+  }
+
   AddnewfamilymemberBloc() : super(AddnewfamilymemberState()) {
     on<AnmUpdateMemberType>(
-      (e, emit) => emit(state.copyWith(memberType: e.value)),
+          (e, emit) => emit(state.copyWith(memberType: e.value)),
     );
     on<AnmUpdateRelation>((e, emit) => emit(state.copyWith(relation: e.value)));
     on<AnmUpdateName>((e, emit) => emit(state.copyWith(name: e.value)));
     on<AnmUpdateFatherName>(
-      (e, emit) => emit(state.copyWith(fatherName: e.value)),
+          (e, emit) => emit(state.copyWith(fatherName: e.value)),
     );
     on<AnmUpdateMotherName>(
-      (e, emit) => emit(state.copyWith(motherName: e.value)),
+          (e, emit) => emit(state.copyWith(motherName: e.value)),
     );
     on<AnmToggleUseDob>((e, emit) {
       final toggled = !(state.useDob);
       emit(
         state.copyWith(
           useDob: toggled,
-          // Preserve the existing date when toggling
           dob: toggled ? state.dob : null,
           approxAge: toggled ? null : state.approxAge,
         ),
@@ -49,85 +77,84 @@ class AddnewfamilymemberBloc
       emit(
         state.copyWith(
           dob: e.value,
-
           approxAge: e.value != null ? null : state.approxAge,
         ),
       );
     });
     on<AnmUpdateApproxAge>(
-      (e, emit) => emit(state.copyWith(approxAge: e.value)),
+          (e, emit) => emit(state.copyWith(approxAge: e.value)),
     );
     on<UpdateDayChanged>((e, emit) => emit(state.copyWith(updateDay: e.value)));
     on<UpdateMonthChanged>(
-      (e, emit) => emit(state.copyWith(updateMonth: e.value)),
+          (e, emit) => emit(state.copyWith(updateMonth: e.value)),
     );
     on<UpdateYearChanged>(
-      (e, emit) => emit(state.copyWith(updateYear: e.value)),
+          (e, emit) => emit(state.copyWith(updateYear: e.value)),
     );
     on<ChildrenChanged>((e, emit) => emit(state.copyWith(children: e.value)));
     on<AnmUpdateBirthOrder>(
-      (e, emit) => emit(state.copyWith(birthOrder: e.value)),
+          (e, emit) => emit(state.copyWith(birthOrder: e.value)),
     );
     on<AnmUpdateGender>((e, emit) => emit(state.copyWith(gender: e.value)));
     on<AnmUpdateBankAcc>((e, emit) => emit(state.copyWith(bankAcc: e.value)));
     on<RichIDChanged>(
-      (e, emit) => emit(state.copyWith(RichIDChanged: e.value)),
+          (e, emit) => emit(state.copyWith(RichIDChanged: e.value)),
     );
     on<AnmUpdateIfsc>((e, emit) => emit(state.copyWith(ifsc: e.value)));
     on<AnmUpdateOccupation>(
-      (e, emit) => emit(state.copyWith(occupation: e.value)),
+          (e, emit) => emit(state.copyWith(occupation: e.value)),
     );
     on<AnmUpdateEducation>(
-      (e, emit) => emit(state.copyWith(education: e.value)),
+          (e, emit) => emit(state.copyWith(education: e.value)),
     );
     on<AnmUpdateReligion>((e, emit) => emit(state.copyWith(religion: e.value)));
     on<AnmUpdateCategory>((e, emit) => emit(state.copyWith(category: e.value)));
     on<WeightChange>((e, emit) => emit(state.copyWith(WeightChange: e.value)));
     on<ChildSchoolChange>(
-      (e, emit) => emit(state.copyWith(ChildSchool: e.value)),
+          (e, emit) => emit(state.copyWith(ChildSchool: e.value)),
     );
     on<BirthCertificateChange>(
-      (e, emit) => emit(state.copyWith(BirthCertificateChange: e.value)),
+          (e, emit) => emit(state.copyWith(BirthCertificateChange: e.value)),
     );
     on<AnmUpdateAbhaAddress>(
-      (e, emit) => emit(state.copyWith(abhaAddress: e.value)),
+          (e, emit) => emit(state.copyWith(abhaAddress: e.value)),
     );
     on<AnmUpdateMobileOwner>(
-      (e, emit) => emit(state.copyWith(mobileOwner: e.value)),
+          (e, emit) => emit(state.copyWith(mobileOwner: e.value)),
     );
     on<AnmUpdateMobileNo>((e, emit) => emit(state.copyWith(mobileNo: e.value)));
     on<AnmUpdateVoterId>((e, emit) => emit(state.copyWith(voterId: e.value)));
     on<AnmUpdateRationId>((e, emit) => emit(state.copyWith(rationId: e.value)));
     on<AnmUpdatePhId>((e, emit) => emit(state.copyWith(phId: e.value)));
     on<AnmUpdateBeneficiaryType>(
-      (e, emit) => emit(state.copyWith(beneficiaryType: e.value)),
+          (e, emit) => emit(state.copyWith(beneficiaryType: e.value)),
     );
     on<AnmUpdateMaritalStatus>(
-      (e, emit) => emit(state.copyWith(maritalStatus: e.value)),
+          (e, emit) => emit(state.copyWith(maritalStatus: e.value)),
     );
     on<AnmUpdateAgeAtMarriage>(
-      (e, emit) => emit(state.copyWith(ageAtMarriage: e.value)),
+          (e, emit) => emit(state.copyWith(ageAtMarriage: e.value)),
     );
     on<AnmUpdateSpouseName>(
-      (e, emit) => emit(state.copyWith(spouseName: e.value)),
+          (e, emit) => emit(state.copyWith(spouseName: e.value)),
     );
     on<AnmUpdateHasChildren>(
-      (e, emit) => emit(state.copyWith(hasChildren: e.value)),
+          (e, emit) => emit(state.copyWith(hasChildren: e.value)),
     );
     on<AnmUpdateIsPregnant>(
-      (e, emit) => emit(state.copyWith(isPregnant: e.value)),
+          (e, emit) => emit(state.copyWith(isPregnant: e.value)),
     );
     on<UpdateIsMemberStatus>(
-      (e, emit) => emit(state.copyWith(memberStatus: e.value)),
+          (e, emit) => emit(state.copyWith(memberStatus: e.value)),
     );
     on<UpdateDateOfDeath>(
-      (e, emit) => emit(state.copyWith(dateOfDeath: e.value)),
+          (e, emit) => emit(state.copyWith(dateOfDeath: e.value)),
     );
     on<UpdateReasonOfDeath>(
-      (e, emit) => emit(state.copyWith(deathReason: e.value)),
+          (e, emit) => emit(state.copyWith(deathReason: e.value)),
     );
     on<UpdateOtherReasonOfDeath>(
-      (e, emit) => emit(state.copyWith(otherDeathReason: e.value)),
+          (e, emit) => emit(state.copyWith(otherDeathReason: e.value)),
     );
     on<UpdateDatePlace>((e, emit) {
       final newState = state.copyWith(deathPlace: e.value);
@@ -196,6 +223,7 @@ class AddnewfamilymemberBloc
         final uniqueKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
         final memberId = await IdGenerator.generateUniqueId(deviceInfo);
         final spousKey = await IdGenerator.generateUniqueId(deviceInfo);
+
         // Get current user info
         final currentUser = await UserInfo.getCurrentUser();
         final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
@@ -209,25 +237,19 @@ class AddnewfamilymemberBloc
         }
         final geoLocationJson = jsonEncode(locationData);
 
-
-
-        int isAdult = 0;
-        if (state.memberType == 'Adult') {
-          isAdult = 1;
-        } else if (state.useDob && state.dob != null) {
-          final age = DateTime.now().difference(state.dob!).inDays ~/ 365;
-          isAdult = age >= 18 ? 1 : 0;
-        }
+        // FIXED: Use helper method to determine beneficiary_state
+        final beneficiaryState = _getBeneficiaryState(state.memberType);
+        final isAdult = _getIsAdultValue(state.memberType, state.useDob, state.dob);
 
         final isDeath = (state.memberStatus?.toLowerCase() == 'death') ? 1 : 0;
 
         final deathDetails = isDeath == 1
             ? {
-                'dateOfDeath': state.dateOfDeath?.toIso8601String(),
-                'deathReason': state.deathReason,
-                'otherDeathReason': state.otherDeathReason,
-                'deathPlace': state.deathPlace,
-              }
+          'dateOfDeath': state.dateOfDeath?.toIso8601String(),
+          'deathReason': state.deathReason,
+          'otherDeathReason': state.otherDeathReason,
+          'deathPlace': state.deathPlace,
+        }
             : {};
 
         Map<String, dynamic> childrenData = {};
@@ -290,7 +312,7 @@ class AddnewfamilymemberBloc
           'server_id': null,
           'household_ref_key': uniqueKey,
           'unique_key': memberId,
-          'beneficiary_state': 'active',
+          'beneficiary_state': beneficiaryState, // FIXED: Use the properly determined state
           'pregnancy_count': 0,
           'beneficiary_info': jsonEncode({
             'memberType': state.memberType,
@@ -366,19 +388,16 @@ class AddnewfamilymemberBloc
         print('Saving new family member with payload: ${jsonEncode(memberPayload)}');
         await LocalStorageDao.instance.insertBeneficiary(memberPayload);
 
-
-
         if (state.maritalStatus == 'Married' && state.spouseName != null) {
           try {
             final spousBloc = BlocProvider.of<SpousBloc>(event.context);
             final spousState = spousBloc.state;
 
-
             final spousePayload = {
               'server_id': null,
               'household_ref_key': uniqueKey,
               'unique_key': spousKey,
-              'beneficiary_state': 'active',
+              'beneficiary_state': 'active', // Spouse should always be active
               'pregnancy_count': 0,
               'beneficiary_info': jsonEncode({
                 'relation': spousState.relation ?? 'spouse',
@@ -528,23 +547,19 @@ class AddnewfamilymemberBloc
         }
         final geoLocationJson = jsonEncode(locationData);
 
-        int isAdult = 0;
-        if (state.memberType == 'Adult') {
-          isAdult = 1;
-        } else if (state.useDob && state.dob != null) {
-          final age = DateTime.now().difference(state.dob!).inDays ~/ 365;
-          isAdult = age >= 18 ? 1 : 0;
-        }
+        // FIXED: Use helper method to determine beneficiary_state for update as well
+        final beneficiaryState = _getBeneficiaryState(state.memberType);
+        final isAdult = _getIsAdultValue(state.memberType, state.useDob, state.dob);
 
         final isDeath = (state.memberStatus?.toLowerCase() == 'death') ? 1 : 0;
 
         final deathDetails = isDeath == 1
             ? {
-                'dateOfDeath': state.dateOfDeath?.toIso8601String(),
-                'deathReason': state.deathReason,
-                'otherDeathReason': state.otherDeathReason,
-                'deathPlace': state.deathPlace,
-              }
+          'dateOfDeath': state.dateOfDeath?.toIso8601String(),
+          'deathReason': state.deathReason,
+          'otherDeathReason': state.otherDeathReason,
+          'deathPlace': state.deathPlace,
+        }
             : {};
 
         // Resolve parent keys when relation is 'Mother' for a known head
@@ -600,7 +615,7 @@ class AddnewfamilymemberBloc
           'server_id': null,
           'household_ref_key': householdRefKey,
           'unique_key': headId,
-          'beneficiary_state': 'active',
+          'beneficiary_state': beneficiaryState, // FIXED: Use the properly determined state
           'pregnancy_count': 0,
           'beneficiary_info': jsonEncode({
             'memberType': state.memberType,
