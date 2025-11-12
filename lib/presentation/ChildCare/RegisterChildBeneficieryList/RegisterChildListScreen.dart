@@ -374,7 +374,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
         // );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: 8), 
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4),
           boxShadow: [

@@ -193,7 +193,6 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             spouseName = spouse['name']?.toString() ?? '';
             spouseGender = spouse['info']?['gender']?.toString().toLowerCase() ?? '';
 
-            // Get village and mohalla from head's data if available
             if (headData != null) {
               final headInfo = headData['info'] as Map<String, dynamic>;
               headVillage = headInfo['village']?.toString() ?? info['village']?.toString() ?? '';
