@@ -22,7 +22,6 @@ class HouseholdRepository {
       headers: headers,
     );
 
-    // Return parsed JSON/dynamic as-is; caller decides success criteria
     return response is String ? jsonDecode(response) : response;
   }
 }

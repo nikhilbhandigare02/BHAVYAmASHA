@@ -203,24 +203,34 @@ class AddnewfamilymemberBloc
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
         final deviceInfo = await DeviceInfo.getDeviceInfo();
 
-        // Fetch the latest household from database
-        final households = await LocalStorageDao.instance.getAllHouseholds();
-        if (households.isEmpty) {
-          emit(
-            state.copyWith(
-              postApiStatus: PostApiStatus.error,
-              errorMessage: 'No household found. Please create a household first.',
-            ),
-          );
-          return;
+        // Determine household_ref_key preference: use provided hhid if available, otherwise derive from latest beneficiary
+        String householdRefKey;
+        if (event.hhid != null && event.hhid!.isNotEmpty) {
+          householdRefKey = event.hhid!.toString();
+        } else {
+          final households = await LocalStorageDao.instance.getAllHouseholds();
+          if (households.isEmpty) {
+            emit(
+              state.copyWith(
+                postApiStatus: PostApiStatus.error,
+                errorMessage: 'No household found. Please create a household first.',
+              ),
+            );
+            return;
+          }
+          final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
+          if (beneficiaries.isEmpty) {
+            throw Exception('No existing beneficiary found to derive keys. Add a member first.');
+          }
+          final latestBeneficiary = beneficiaries.first;
+          householdRefKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
         }
 
+        // Generate keys and fetch user/facility
         final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
-        if (beneficiaries.isEmpty) {
-          throw Exception('No existing beneficiary found to derive keys. Add a member first.');
-        }
-        final latestBeneficiary = beneficiaries.first;
-        final uniqueKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
+        final latestBeneficiary = beneficiaries.isNotEmpty ? beneficiaries.first : null;
+        final uniqueKeyForSpouseFallback = (latestBeneficiary?['household_ref_key'] ?? householdRefKey).toString();
+
         final memberId = await IdGenerator.generateUniqueId(deviceInfo);
         final spousKey = await IdGenerator.generateUniqueId(deviceInfo);
 
@@ -237,7 +247,7 @@ class AddnewfamilymemberBloc
         }
         final geoLocationJson = jsonEncode(locationData);
 
-        // FIXED: Use helper method to determine beneficiary_state
+        // Use helper method to determine beneficiary_state and isAdult
         final beneficiaryState = _getBeneficiaryState(state.memberType);
         final isAdult = _getIsAdultValue(state.memberType, state.useDob, state.dob);
 
@@ -271,38 +281,91 @@ class AddnewfamilymemberBloc
           print('Error getting children data: $e');
         }
 
-        // Resolve parent keys when relation is 'Mother'
+        // Resolve parent keys when relation is 'Mother' or 'Father' or 'Child'
         String? resolvedMotherKey;
         String? resolvedFatherKey;
         try {
-          if (state.relation == 'Mother') {
+          if (state.relation == 'Mother' || state.relation == 'Father' || state.relation == 'Child') {
+            // Prefer filtered DAO call to avoid type mismatches and get pre-decoded JSON
+            final hhBeneficiaries = await LocalStorageDao.instance
+                .getBeneficiariesByHousehold(householdRefKey.toString());
+
             Map<String, dynamic>? headRecord;
-            for (final b in beneficiaries) {
-              if ((b['household_ref_key'] ?? '') == uniqueKey) {
-                try {
-                  final info = jsonDecode(b['beneficiary_info'] ?? '{}') as Map<String, dynamic>;
-                  if (info['relation_to_head'] == 'self') {
-                    headRecord = b as Map<String, dynamic>;
-                    break;
-                  }
-                } catch (_) {}
-              }
+            Map<String, dynamic>? spouseRecord;
+            for (final b in hhBeneficiaries) {
+              try {
+                final info = b['beneficiary_info'] is Map
+                    ? Map<String, dynamic>.from(b['beneficiary_info'])
+                    : <String, dynamic>{};
+                final relToHead = (info['relation_to_head'] ?? '').toString().toLowerCase();
+                final rel = (info['relation'] ?? '').toString().toLowerCase();
+                if (relToHead == 'self' || rel == 'head') {
+                  headRecord = b as Map<String, dynamic>;
+                  break;
+                }
+              } catch (_) {}
             }
             if (headRecord != null) {
-              resolvedMotherKey = (headRecord['unique_key'] ?? '').toString();
-              final headSpouseKey = headRecord['spouse_key'];
-              if (headSpouseKey != null && headSpouseKey.toString().isNotEmpty) {
-                resolvedFatherKey = headSpouseKey.toString();
-              } else {
+              final headUnique = (headRecord['unique_key'] ?? '').toString();
+              String? spouseKeyLocal = headRecord['spouse_key']?.toString();
+              if (spouseKeyLocal == null || spouseKeyLocal.isEmpty) {
                 // Fallback: find spouse where spouse_key matches head unique_key
                 try {
-                  for (final b in beneficiaries) {
-                    if ((b['spouse_key'] ?? '').toString() == resolvedMotherKey) {
-                      resolvedFatherKey = (b['unique_key'] ?? '').toString();
+                  for (final b in hhBeneficiaries) {
+                    if ((b['spouse_key'] ?? '').toString() == headUnique) {
+                      spouseKeyLocal = (b['unique_key'] ?? '').toString();
+                      spouseRecord = b as Map<String, dynamic>;
                       break;
                     }
                   }
                 } catch (_) {}
+              } else {
+                // Find spouse record by unique key
+                try {
+                  for (final b in hhBeneficiaries) {
+                    if ((b['unique_key'] ?? '').toString() == spouseKeyLocal) {
+                      spouseRecord = b as Map<String, dynamic>;
+                      break;
+                    }
+                  }
+                } catch (_) {}
+              }
+
+              if (state.relation == 'Mother') {
+                resolvedMotherKey = headUnique;
+                resolvedFatherKey = spouseKeyLocal;
+              } else if (state.relation == 'Father') {
+                resolvedFatherKey = headUnique;
+                resolvedMotherKey = spouseKeyLocal;
+              } else if (state.relation == 'Child') {
+                // Infer parent keys based on genders of head and spouse
+                final headInfo = headRecord['beneficiary_info'] is Map
+                    ? Map<String, dynamic>.from(headRecord['beneficiary_info'])
+                    : <String, dynamic>{};
+                final spouseInfo = spouseRecord != null && spouseRecord['beneficiary_info'] is Map
+                    ? Map<String, dynamic>.from(spouseRecord['beneficiary_info'])
+                    : <String, dynamic>{};
+                final headGender = (headInfo['gender'] ?? '').toString().toLowerCase();
+                final spouseGender = (spouseInfo['gender'] ?? '').toString().toLowerCase();
+                // Assign based on gender where possible
+                if (headGender == 'female') {
+                  resolvedMotherKey = headUnique;
+                  resolvedFatherKey = spouseKeyLocal;
+                } else if (headGender == 'male') {
+                  resolvedFatherKey = headUnique;
+                  resolvedMotherKey = spouseKeyLocal;
+                } else if (spouseGender.isNotEmpty) {
+                  if (spouseGender == 'female') {
+                    resolvedMotherKey = spouseKeyLocal;
+                    resolvedFatherKey = headUnique;
+                  } else if (spouseGender == 'male') {
+                    resolvedFatherKey = spouseKeyLocal;
+                    resolvedMotherKey = headUnique;
+                  }
+                } else {
+                  resolvedMotherKey = headUnique;
+                  resolvedFatherKey = spouseKeyLocal;
+                }
               }
             }
           }
@@ -310,7 +373,7 @@ class AddnewfamilymemberBloc
 
         final memberPayload = {
           'server_id': null,
-          'household_ref_key': uniqueKey,
+          'household_ref_key': householdRefKey,
           'unique_key': memberId,
           'beneficiary_state': beneficiaryState,
           'pregnancy_count': 0,
@@ -355,7 +418,7 @@ class AddnewfamilymemberBloc
             ...childrenData,
           }),
           'geo_location': geoLocationJson,
-          'spouse_key': null,
+          'spouse_key': state.maritalStatus == 'Married' ? spousKey : null,
           'mother_key': resolvedMotherKey,
           'father_key': resolvedFatherKey,
           'is_family_planning': 0,
@@ -395,7 +458,7 @@ class AddnewfamilymemberBloc
 
             final spousePayload = {
               'server_id': null,
-              'household_ref_key': uniqueKey,
+              'household_ref_key': householdRefKey,
               'unique_key': spousKey,
               'beneficiary_state': 'active',
               'pregnancy_count': 0,
@@ -547,7 +610,7 @@ class AddnewfamilymemberBloc
         }
         final geoLocationJson = jsonEncode(locationData);
 
-        // FIXED: Use helper method to determine beneficiary_state for update as well
+        // Use helper method to determine beneficiary_state for update as well
         final beneficiaryState = _getBeneficiaryState(state.memberType);
         final isAdult = _getIsAdultValue(state.memberType, state.useDob, state.dob);
 
@@ -562,32 +625,35 @@ class AddnewfamilymemberBloc
         }
             : {};
 
-        // Resolve parent keys when relation is 'Mother' for a known head
+        // Resolve parent keys when relation is 'Mother', 'Father' or 'Child'
         String? resolvedMotherKey2;
         String? resolvedFatherKey2;
         try {
-          if (state.relation == 'Mother') {
+          if (state.relation == 'Mother' || state.relation == 'Father' || state.relation == 'Child') {
             // If headId is null, try to resolve from beneficiaries using householdRefKey
-            final allBeneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
+            final hhBeneficiaries2 = await LocalStorageDao.instance
+                .getBeneficiariesByHousehold(householdRefKey.toString());
+
             if (headId == null || headId.isEmpty) {
-              for (final b in allBeneficiaries) {
-                if ((b['household_ref_key'] ?? '') == householdRefKey) {
-                  try {
-                    final info = jsonDecode(b['beneficiary_info'] ?? '{}') as Map<String, dynamic>;
-                    if (info['relation_to_head'] == 'self') {
-                      headId = (b['unique_key'] ?? '').toString();
-                      break;
-                    }
-                  } catch (_) {}
-                }
+              for (final b in hhBeneficiaries2) {
+                try {
+                  final info = b['beneficiary_info'] is Map
+                      ? Map<String, dynamic>.from(b['beneficiary_info'])
+                      : <String, dynamic>{};
+                  final relToHead = (info['relation_to_head'] ?? '').toString().toLowerCase();
+                  final rel = (info['relation'] ?? '').toString().toLowerCase();
+                  if (relToHead == 'self' || rel == 'head') {
+                    headId = (b['unique_key'] ?? '').toString();
+                    break;
+                  }
+                } catch (_) {}
               }
             }
 
-            resolvedMotherKey2 = headId;
-
             // Try to get spouse from head row first
             String? spouseKeyLocal;
-            for (final b in allBeneficiaries) {
+            Map<String, dynamic>? spouseRecord;
+            for (final b in hhBeneficiaries2) {
               if ((b['unique_key'] ?? '') == headId) {
                 final headSpouseKey = b['spouse_key'];
                 if (headSpouseKey != null && headSpouseKey.toString().isNotEmpty) {
@@ -599,15 +665,79 @@ class AddnewfamilymemberBloc
 
             // Fallback: find any beneficiary whose spouse_key equals headId
             if ((spouseKeyLocal == null || spouseKeyLocal.isEmpty) && headId != null && headId.isNotEmpty) {
-              for (final b in allBeneficiaries) {
+              for (final b in hhBeneficiaries2) {
                 if ((b['spouse_key'] ?? '').toString() == headId) {
                   spouseKeyLocal = (b['unique_key'] ?? '').toString();
+                  spouseRecord = b as Map<String, dynamic>;
                   break;
                 }
               }
+            } else if (spouseKeyLocal != null && spouseKeyLocal.isNotEmpty) {
+              // Find spouse record by unique key
+              try {
+                for (final b in hhBeneficiaries2) {
+                  if ((b['unique_key'] ?? '').toString() == spouseKeyLocal) {
+                    spouseRecord = b as Map<String, dynamic>;
+                    break;
+                  }
+                }
+              } catch (_) {}
             }
 
-            resolvedFatherKey2 = spouseKeyLocal;
+            if (state.relation == 'Mother') {
+              resolvedMotherKey2 = headId;
+              resolvedFatherKey2 = spouseKeyLocal;
+            } else if (state.relation == 'Father') {
+              resolvedFatherKey2 = headId;
+              resolvedMotherKey2 = spouseKeyLocal;
+            } else if (state.relation == 'Child') {
+              // Infer parent keys based on genders of head and spouse
+              Map<String, dynamic>? headRecord;
+              for (final b in hhBeneficiaries2) {
+                if ((b['unique_key'] ?? '') == headId) {
+                  headRecord = b as Map<String, dynamic>;
+                  break;
+                }
+              }
+
+              final headInfo = headRecord != null && headRecord['beneficiary_info'] is Map
+                  ? Map<String, dynamic>.from(headRecord['beneficiary_info'])
+                  : <String, dynamic>{};
+              final spouseInfo = spouseRecord != null && spouseRecord['beneficiary_info'] is Map
+                  ? Map<String, dynamic>.from(spouseRecord['beneficiary_info'])
+                  : <String, dynamic>{};
+              final headGender = (headInfo['gender'] ?? '').toString().toLowerCase();
+              final spouseGender = (spouseInfo['gender'] ?? '').toString().toLowerCase();
+
+              // Assign based on gender where possible
+              if (headGender == 'female') {
+                resolvedMotherKey2 = headId;
+                resolvedFatherKey2 = spouseKeyLocal;
+              } else if (headGender == 'male') {
+                resolvedFatherKey2 = headId;
+                resolvedMotherKey2 = spouseKeyLocal;
+              } else if (spouseGender.isNotEmpty) {
+                if (spouseGender == 'female') {
+                  resolvedMotherKey2 = spouseKeyLocal;
+                  resolvedFatherKey2 = headId;
+                } else if (spouseGender == 'male') {
+                  resolvedFatherKey2 = spouseKeyLocal;
+                  resolvedMotherKey2 = headId;
+                }
+              } else {
+                resolvedMotherKey2 = headId;
+                resolvedFatherKey2 = spouseKeyLocal;
+              }
+            }
+
+            // Sanitize empty strings to null
+            if (resolvedMotherKey2 != null && resolvedMotherKey2.trim().isEmpty) {
+              resolvedMotherKey2 = null;
+            }
+            if (resolvedFatherKey2 != null && resolvedFatherKey2.trim().isEmpty) {
+              resolvedFatherKey2 = null;
+            }
+            print('Resolved parent keys (UpdateSubmit): headId=$headId spouse=$spouseKeyLocal -> mother_key=$resolvedMotherKey2 father_key=$resolvedFatherKey2');
           }
         } catch (_) {}
 
@@ -615,7 +745,7 @@ class AddnewfamilymemberBloc
           'server_id': null,
           'household_ref_key': householdRefKey,
           'unique_key': headId,
-          'beneficiary_state': beneficiaryState, // FIXED: Use the properly determined state
+          'beneficiary_state': beneficiaryState,
           'pregnancy_count': 0,
           'beneficiary_info': jsonEncode({
             'memberType': state.memberType,
@@ -694,8 +824,7 @@ class AddnewfamilymemberBloc
       } catch (e) {
         print('Error saving family member (update submit): $e');
         emit(
-          state.
-          copyWith(
+          state.copyWith(
             postApiStatus: PostApiStatus.error,
             errorMessage: 'Failed to save family member: ${e.toString()}',
           ),
