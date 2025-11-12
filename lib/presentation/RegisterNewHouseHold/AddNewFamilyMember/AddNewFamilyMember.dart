@@ -1320,11 +1320,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
 
                                         print('Submitting member data: ${jsonEncode(memberData)}');
-
-
-                                        
-
-                                        // Step logic: advance through spouse -> children -> submit
                                         final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
                                         final showChildren = showSpouse && state.hasChildren == 'Yes';
                                         final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
@@ -1336,11 +1331,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           return;
                                         }
 
-                                        if (widget.hhId != null && widget.hhId!.isNotEmpty) {
-                                          bloc.add(AnmUpdateSubmit(hhid: widget.hhId!));
-                                        } else {
-                                          bloc.add(AnmSubmit(context));
-                                        }
+                                        bloc.add(AnmSubmit(context, hhid: widget.hhId));
                                       } catch (e) {
                                         print('Error preparing member data: $e');
                                         ScaffoldMessenger.of(context).showSnackBar(
