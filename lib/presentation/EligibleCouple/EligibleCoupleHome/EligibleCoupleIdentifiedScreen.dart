@@ -42,46 +42,98 @@ class _EligibleCoupleIdentifiedScreenState
     super.dispose();
   }
 
+  // Helper function to safely convert dynamic Map to Map<String, dynamic>
+  Map<String, dynamic> _toStringMap(dynamic map) {
+    if (map == null) return {};
+    if (map is Map<String, dynamic>) return map;
+    if (map is Map) {
+      return Map<String, dynamic>.from(map);
+    }
+    return {};
+  }
+
   Future<void> _loadEligibleCouples() async {
     setState(() { _isLoading = true; });
     final rows = await LocalStorageDao.instance.getAllBeneficiaries();
     final couples = <Map<String, dynamic>>[];
-    for (final row in rows) {
-      final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-      final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-      final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
 
-      if (_isEligibleFemale(head)) {
-        couples.add(_formatCoupleData(row, head, spouse, isHead: true));
+    // Group by household
+    final households = <String, List<Map<String, dynamic>>>{};
+    for (final row in rows) {
+      final hhKey = row['household_ref_key']?.toString() ?? '';
+      households.putIfAbsent(hhKey, () => []).add(row);
+    }
+
+    // Process each household
+    for (final household in households.values) {
+      // Find head and spouse
+      Map<String, dynamic>? head;
+      Map<String, dynamic>? spouse;
+
+      for (final member in household) {
+        final info = _toStringMap(member['beneficiary_info']);
+        final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+
+        if (relation == 'self') {
+          head = info;
+          head['_row'] = _toStringMap(member);
+        } else if (relation == 'spouse') {
+          spouse = info;
+          spouse['_row'] = _toStringMap(member);
+        }
       }
 
-      if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-        couples.add(_formatCoupleData(row, spouse, head, isHead: false));
+      // Check if head is eligible female
+      if (head != null && _isEligibleFemale(head)) {
+        couples.add(_formatCoupleData(
+            head['_row'] ?? {},
+            head,
+            spouse ?? {},
+            isHead: true
+        ));
+      }
+
+      // Check if spouse is eligible female
+      if (spouse != null && _isEligibleFemale(spouse)) {
+        couples.add(_formatCoupleData(
+            spouse['_row'] ?? {},
+            spouse,
+            head ?? {},
+            isHead: false
+        ));
       }
     }
+
     setState(() {
       _filtered = couples;
       _isLoading = false;
     });
   }
 
-  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
+  bool _isEligibleFemale(Map<String, dynamic> person) {
     if (person.isEmpty) return false;
-    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
-    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? head?['maritalStatus']?.toString().toLowerCase() ?? '';
-    final gender = genderRaw == 'f' || genderRaw == 'female';
-    final maritalStatus = maritalStatusRaw == 'married';
+
+    // Check gender (case-insensitive)
+    final gender = person['gender']?.toString().toLowerCase();
+    final isFemale = gender == 'f' || gender == 'female';
+    if (!isFemale) return false;
+
+    // Check marital status (case-insensitive)
+    final maritalStatus = person['maritalStatus']?.toString().toLowerCase();
+    if (maritalStatus != 'married') return false;
+
+    // Check age between 15-49
     final dob = person['dob'];
     final age = _calculateAge(dob);
-    return gender && maritalStatus && age >= 15 && age <= 49;
+    return age >= 15 && age <= 49;
   }
 
   Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
     final hhId = row['household_ref_key']?.toString() ?? '';
     final uniqueKey = row['unique_key']?.toString() ?? '';
     final createdDate = row['created_date_time']?.toString() ?? '';
-    final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-    final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
+    final info = _toStringMap(row['beneficiary_info']);
+    final head = _toStringMap(info['head_details']);
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
     final gender = female['gender']?.toString().toLowerCase();
     final displayGender = gender == 'f' ? 'Female' : gender == 'm' ? 'Male' : 'Other';
@@ -89,21 +141,22 @@ class _EligibleCoupleIdentifiedScreenState
     final richId = female['RichID']?.toString() ?? '';
     final mobile = female['mobileNo']?.toString() ?? '';
     final husbandName = isHead
-      ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
-      : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
+        ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
+        : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
 
     // children summary can live at top-level children_details or under head childrendetails/childrenDetails
     final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
     Map<String, dynamic>? childrenSummary;
-    if (childrenRaw is Map) {
+    if (childrenRaw != null) {
+      final childrenMap = _toStringMap(childrenRaw);
       childrenSummary = {
-        'totalBorn': childrenRaw['totalBorn'],
-        'totalLive': childrenRaw['totalLive'],
-        'totalMale': childrenRaw['totalMale'],
-        'totalFemale': childrenRaw['totalFemale'],
-        'youngestAge': childrenRaw['youngestAge'],
-        'ageUnit': childrenRaw['ageUnit'],
-        'youngestGender': childrenRaw['youngestGender'],
+        'totalBorn': childrenMap['totalBorn'],
+        'totalLive': childrenMap['totalLive'],
+        'totalMale': childrenMap['totalMale'],
+        'totalFemale': childrenMap['totalFemale'],
+        'youngestAge': childrenMap['youngestAge'],
+        'ageUnit': childrenMap['ageUnit'],
+        'youngestGender': childrenMap['youngestGender'],
       }..removeWhere((k, v) => v == null);
     }
     return {
@@ -224,150 +277,151 @@ class _EligibleCoupleIdentifiedScreenState
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final primary = Theme.of(context).primaryColor;
     final t = AppLocalizations.of(context);
-    
+
     // Extract the raw row data and beneficiary info
     final rowData = data['_rawRow'] ?? {};
-    final beneficiaryInfo = rowData['beneficiary_info'] is String 
-        ? jsonDecode(rowData['beneficiary_info']) 
+    final beneficiaryInfo = rowData['beneficiary_info'] is String
+        ? jsonDecode(rowData['beneficiary_info'])
         : (rowData['beneficiary_info'] ?? {});
-    
-    // Extract head and spouse details with proper fallbacks
-    final headDetails = (beneficiaryInfo['head_details'] ?? {}) as Map<String, dynamic>;
-    final spouseDetails = (beneficiaryInfo['spouse_details'] ?? {}) as Map<String, dynamic>;
-    
-    // Get children details with fallbacks
-    final childrenDetails = (beneficiaryInfo['children_details'] ?? 
-                           headDetails['childrendetails'] ?? 
-                           headDetails['childrenDetails'] ?? 
-                           {}) as Map<String, dynamic>;
-    
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: InkWell(
-        onTap: () async {
 
-          final fullHhId = rowData['household_ref_key']?.toString() ?? '';
-          final hhIdLast11 = fullHhId.length > 11 ? fullHhId.substring(fullHhId.length - 11) : fullHhId;
-          final name = data['Name']?.toString() ?? '';
-          
-          print('🚀 Navigating to update screen with:');
-          print('   Household ID (last 11): $hhIdLast11');
-          print('   Name: $name');
-          
-          final result = await Navigator.pushNamed(
-            context,
-            Route_Names.UpdatedEligibleCoupleList,
-            arguments: {
-              'hhId': hhIdLast11,
-              'name': name,
-            },
-          );
-          
-          
-          if (result == true) {
-            _loadEligibleCouples();
-          }
-        },
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 2,
-              spreadRadius: 1,
-              offset: const Offset(0, 2),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 2,
-              spreadRadius: 1,
-              offset: const Offset(0, -2),
-            ),
-          ],
+    // Extract head and spouse details with proper fallbacks
+    final headDetails = _toStringMap(beneficiaryInfo['head_details']);
+    final spouseDetails = _toStringMap(beneficiaryInfo['spouse_details']);
+
+    // Get children details with fallbacks
+    final childrenDetails = _toStringMap(
+        beneficiaryInfo['children_details'] ??
+            headDetails['childrendetails'] ??
+            headDetails['childrenDetails']
+    );
+
+    return Card(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: Colors.grey.shade200),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header
-            Container(
-              decoration: const BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
-              ),
-              padding: const EdgeInsets.all(4),
-              child: Row(
-                children: [
-                  const Icon(Icons.home, color: Colors.black54, size: 18),
-                  Expanded(
-                    child: Text(
-                      data['hhId'] ?? '',
-                      style: TextStyle(color: primary, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  SizedBox(
-                    width: 60,
-                    height: 24,
-                    child: Image.asset('assets/images/sync.png'),
-                  ),
-                ],
-              ),
+        child: InkWell(
+          onTap: () async {
+
+            final fullHhId = rowData['household_ref_key']?.toString() ?? '';
+            final hhIdLast11 = fullHhId.length > 11 ? fullHhId.substring(fullHhId.length - 11) : fullHhId;
+            final name = data['Name']?.toString() ?? '';
+
+            print('🚀 Navigating to update screen with:');
+            print('   Household ID (last 11): $hhIdLast11');
+            print('   Name: $name');
+
+            final result = await Navigator.pushNamed(
+              context,
+              Route_Names.UpdatedEligibleCoupleList,
+              arguments: {
+                'hhId': hhIdLast11,
+                'name': name,
+              },
+            );
+
+
+            if (result == true) {
+              _loadEligibleCouples();
+            }
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 2,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 2),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.12),
+                  blurRadius: 2,
+                  spreadRadius: 1,
+                  offset: const Offset(0, -2),
+                ),
+              ],
             ),
-            // Body
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius:
-                const BorderRadius.vertical(bottom: Radius.circular(8)),
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(child: _rowText('Registration Date', data['RegistrationDate'] ?? '')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _rowText('Registration Type', data['RegistrationType'] ?? '')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryID'] ?? '')),
-                    ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header
+                Container(
+                  decoration: const BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
+                  padding: const EdgeInsets.all(4),
+                  child: Row(
                     children: [
-                      Expanded(child: _rowText(  'Name', data['Name'] ?? '')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _rowText( 'Age', data['age']?.toString() ?? '')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _rowText('Rich ID', data['RichID']?.toString() ?? '')),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
+                      const Icon(Icons.home, color: Colors.black54, size: 18),
                       Expanded(
-                          child: _rowText( 'Mobile No.', data['mobileno']?.toString() ?? '')),
-                      const SizedBox(width: 12),
-                      Expanded(
-                          child: _rowText('Husband Name', data['HusbandName'] ?? '')),
+                        child: Text(
+                          data['hhId'] ?? '',
+                          style: TextStyle(color: primary, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 60,
+                        height: 24,
+                        child: Image.asset('assets/images/sync.png'),
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                // Body
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(8)),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: _rowText('Registration Date', data['RegistrationDate'] ?? '')),
+                          const SizedBox(width: 12),
+                          Expanded(child: _rowText('Registration Type', data['RegistrationType'] ?? '')),
+                          const SizedBox(width: 12),
+                          Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryID'] ?? '')),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(child: _rowText(  'Name', data['Name'] ?? '')),
+                          const SizedBox(width: 12),
+                          Expanded(child: _rowText( 'Age', data['age']?.toString() ?? '')),
+                          const SizedBox(width: 12),
+                          Expanded(child: _rowText('Rich ID', data['RichID']?.toString() ?? '')),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                              child: _rowText( 'Mobile No.', data['mobileno']?.toString() ?? '')),
+                          const SizedBox(width: 12),
+                          Expanded(
+                              child: _rowText('Husband Name', data['HusbandName'] ?? '')),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      )
+          ),
+        )
     );
   }
 
