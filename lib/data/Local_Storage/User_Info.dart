@@ -41,17 +41,14 @@ class UserInfo {
   static Future<Map<String, dynamic>?> getCurrentUser() async {
     Database? db;
     try {
-      // Get a new database instance to ensure it's not closed
       db = await openDatabase(
         join(await getDatabasesPath(), 'bhavya_masha.db'),
         onCreate: (db, version) async {
-          // Use the schema from users_table.dart
           await db.execute(UsersTable.create);
         },
         version: 1,
       );
       
-      // Check if users table exists
       final tables = await db.rawQuery(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
       );

@@ -7,11 +7,11 @@ import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/utils/device_info_utils.dart';
 import '../../../../core/utils/enums.dart' show FormStatus;
 import '../../../../data/Local_Storage/User_Info.dart';
-import '../../../../data/Local_Storage/tables/followup_form_data_table.dart';
-import '../../../../data/SecureStorage/SecureStorage.dart';
+import '../../../../data/repositories/EligibleCoupleRepository.dart';
 
 part 'track_eligible_couple_event.dart';
 part 'track_eligible_couple_state.dart';
@@ -112,20 +112,12 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
     });
 
     on<LoadPreviousFormData>((event, emit) {
-      print('Handling LoadPreviousFormData event with data: ${event.formData}');
       try {
         final formData = event.formData;
-        print('Processing form data: $formData');
-
         DateTime? parseDate(dynamic dateValue) {
           if (dateValue == null) return null;
           if (dateValue is String) {
-            try {
-              return DateTime.parse(dateValue);
-            } catch (e) {
-              print('Error parsing date string $dateValue: $e');
-              return null;
-            }
+            return DateTime.parse(dateValue);
           }
           if (dateValue is int) {
             return DateTime.fromMillisecondsSinceEpoch(dateValue);
@@ -147,14 +139,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         final fpAdoptionDate = parseDate(formData['fp_adoption_date']);
         final antraInjectionDate = parseDate(formData['antra_injection_date']);
 
-        print('Updating state with form data:');
-        print('- financialYear: $financialYear');
-        print('- isPregnant: $isPregnant');
-        print('- lmpDate: $lmpDate');
-        print('- eddDate: $eddDate');
-        print('- fpAdopting: $fpAdopting');
-        print('- fpMethod: $fpMethod');
-
         emit(state.copyWith(
           financialYear: financialYear,
           isPregnant: isPregnant,
@@ -170,8 +154,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           fpAdoptionDate: fpAdoptionDate,
           antraInjectionDateChanged: antraInjectionDate,
         ));
-
-        print('Successfully updated state with previous form data');
       } catch (e, stackTrace) {
         print('Error in LoadPreviousFormData handler: $e');
         print('Stack trace: $stackTrace');
@@ -188,7 +170,8 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
 
       try {
         final db = await DatabaseProvider.instance.database;
-        final now = DateTime.now().toIso8601String();
+        final nowIso = DateTime.now().toIso8601String();
+        final nowTs = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
         final formType = FollowupFormDataTable.eligibleCoupleTrackingDue;
         final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Track Eligible Couple';
@@ -217,8 +200,8 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
             'antra_injection_date': state.antraInjectionDateChanged?.toIso8601String(),
             'removal_date': state.removalDAteChange?.toIso8601String(),
           },
-          'created_at': now,
-          'updated_at': now,
+          'created_at': nowIso,
+          'updated_at': nowIso,
         };
 
         List<Map<String, dynamic>> beneficiaryMaps = await db.query(
@@ -244,35 +227,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         final motherKey = beneficiary['mother_key'] as String? ?? '';
         final fatherKey = beneficiary['father_key'] as String? ?? '';
 
-        // final now = DateTime.now().toIso8601String();
-        //
-        // final formType = FollowupFormDataTable.eligibleCoupleTrackingDue;
-        // final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Track Eligible Couple';
-        // final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
-
-        // final formData = {
-        //   'form_type': formType,
-        //   'form_name': formName,
-        //   'unique_key': formsRefKey,
-        //   'form_data': {
-        //     'visit_date': state.visitDate?.toIso8601String(),
-        //     'financial_year': state.financialYear,
-        //     'is_pregnant': state.isPregnant,
-        //     'lmp_date': state.lmpDate?.toIso8601String(),
-        //     'edd_date': state.eddDate?.toIso8601String(),
-        //     'fp_adopting': state.fpAdopting,
-        //     'fp_method': state.fpMethod,
-        //     'fp_adoption_date': state.fpAdoptionDate?.toIso8601String(),
-        //     'protection_status': state.fpAdopting == true ? 'Protected' : 'Unprotected',
-        //
-        //   },
-        //   'created_at': now,
-        //   'updated_at': now,
-        // };
-
         final formJson = jsonEncode(formData);
-
-
 
         late DeviceInfo deviceInfo;
         try {
@@ -282,7 +237,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         }
 
         final currentUser = await UserInfo.getCurrentUser();
-        print('Current User: $currentUser');
 
         Map<String, dynamic> userDetails = {};
         if (currentUser != null) {
@@ -296,17 +250,13 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           } else if (currentUser['details'] is Map) {
             userDetails = Map<String, dynamic>.from(currentUser['details']);
           }
-          print('User Details: $userDetails');
         }
 
-        // Try different possible keys for facility ID
         final facilityId = userDetails['asha_associated_with_facility_id'] ??
             userDetails['facility_id'] ??
             userDetails['facilityId'] ??
             userDetails['facility'] ??
             0;
-
-        print('Using Facility ID: $facilityId');
 
         final formDataForDb = {
           'server_id': '',
@@ -327,12 +277,12 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
             'build_number': deviceInfo.buildNumber,
             'package_name': deviceInfo.packageName,
           }),
-          'parent_user':  '',
-          'current_user_key':  '',
+          'parent_user': '',
+          'current_user_key': '',
           'facility_id': facilityId,
           'form_json': formJson,
-          'created_date_time': now,
-          'modified_date_time': now,
+          'created_date_time': nowIso,
+          'modified_date_time': nowIso,
           'is_synced': 0,
           'is_deleted': 0,
         };
@@ -341,6 +291,116 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
 
           if (formId > 0) {
+            try {
+              final rows = await db.query(
+                FollowupFormDataTable.table,
+                where: 'id = ?',
+                whereArgs: [formId],
+                limit: 1,
+              );
+              if (rows.isNotEmpty) {
+                final saved = Map<String, dynamic>.from(rows.first);
+                Map<String, dynamic> deviceJson = {};
+                Map<String, dynamic> appJson = {};
+                Map<String, dynamic> geoJson = {};
+                try {
+                  if (saved['device_details'] is String && (saved['device_details'] as String).isNotEmpty) {
+                    deviceJson = Map<String, dynamic>.from(jsonDecode(saved['device_details']));
+                  }
+                } catch (_) {}
+                try {
+                  if (saved['app_details'] is String && (saved['app_details'] as String).isNotEmpty) {
+                    appJson = Map<String, dynamic>.from(jsonDecode(saved['app_details']));
+                  }
+                } catch (_) {}
+                try {
+                  if (saved['form_json'] is String && (saved['form_json'] as String).isNotEmpty) {
+                    final fj = jsonDecode(saved['form_json']);
+                    if (fj is Map) {
+                      if (fj['geolocation_details'] is Map) {
+                        geoJson = Map<String, dynamic>.from(fj['geolocation_details']);
+                      } else if (fj['form_data'] is Map && (fj['form_data']['geolocation_details'] is Map)) {
+                        geoJson = Map<String, dynamic>.from(fj['form_data']['geolocation_details']);
+                      }
+                    }
+                  }
+                } catch (_) {}
+
+                final working = userDetails['working_location'] ?? {};
+                final userId = (working['asha_id'] ?? userDetails['unique_key'] ?? '').toString();
+                final facility = (working['asha_associated_with_facility_id'] ?? working['hsc_id'] ?? userDetails['facility_id'] ?? userDetails['hsc_id'] ?? '').toString();
+                final appRoleId = (userDetails['app_role_id'] ?? '').toString();
+                String _uniq(String suffix) => '${deviceInfo.deviceId}_${suffix}${DateFormat('yyyyMMddHHmmss').format(DateTime.now())}';
+                final householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
+                final motherKey = beneficiary['mother_key'] as String? ?? '';
+                final fatherKey = beneficiary['father_key'] as String? ?? '';
+                final ecPayloadList = [
+                  {
+                    'unique_key': householdRefKey,
+                    'beneficiaries_registration_ref_key': state.beneficiaryRefKey ?? state.beneficiaryId,
+                    'eligible_couple_type': 'tracking_due',
+                    'user_id': userId,
+                    'facility_id': facility,
+                    'is_deleted': 0,
+                    'created_by': userId,
+                    'created_date_time': nowTs,
+                    'modified_by': userId,
+                    'modified_date_time': nowTs,
+                    'parent_added_by': userId,
+                    'parent_facility_id': int.tryParse(facility) ?? facility,
+                    'app_role_id': appRoleId,
+                    'is_guest': 0,
+                    'device_details': {
+                      'device_id': deviceJson['id'] ?? deviceJson['device_id'] ?? deviceInfo.deviceId,
+                      'device_plateform': deviceJson['platform'] ?? deviceJson['device_plateform'] ?? deviceInfo.platform,
+                      'device_plateform_version': deviceJson['version'] ?? deviceJson['device_plateform_version'] ?? deviceInfo.osVersion,
+                    },
+                    'app_details': {
+                      'app_version': appJson['app_version'] ?? deviceInfo.appVersion.split('+').first,
+                      'app_name': appJson['app_name'] ?? deviceInfo.appName,
+                    },
+                    'geolocation_details': {
+                      'latitude': geoJson['lat']?.toString() ?? '',
+                      'longitude': geoJson['long']?.toString() ?? '',
+                    },
+                  },
+                ];
+
+                try {
+                  final repo = EligibleCoupleRepository();
+                  final apiResp = await repo.trackEligibleCouple(ecPayloadList);
+                  try {
+                    if (apiResp is Map && apiResp['success'] == true && apiResp['data'] is List) {
+                      final List data = apiResp['data'];
+                      Map? tracking = data.cast<Map>().firstWhere(
+                        (e) => (e['eligible_couple_type']?.toString() ?? '') == 'tracking_due',
+                        orElse: () => {},
+                      );
+                      final serverId = (tracking?['_id'] ?? '').toString();
+                      if (serverId.isNotEmpty) {
+                        final reqUniqueKey = beneficiaryRefKey;
+                        final updated = await db.update(
+                          FollowupFormDataTable.table,
+                          {
+                            'server_id': serverId,
+                            'modified_date_time': nowIso,
+                          },
+                          where: 'beneficiary_ref_key = ? AND forms_ref_key = ?',
+                          whereArgs: [reqUniqueKey, formsRefKey],
+                        );
+                        print('Updated followup_form_data (by req unique_key) server_id=$serverId rows=$updated');
+                      }
+                    }
+                  } catch (e) {
+                    print('Error updating followup_form_data with EC server_id: $e');
+                  }
+                } catch (e) {
+                  print('EC API call failed: $e');
+                }
+              }
+            } catch (e) {
+              print('Error reading saved followup_form_data to build EC payload: $e');
+            }
             try {
               await db.update(
                 'beneficiaries',
@@ -351,7 +411,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               print('Updated beneficiary is_family_planning to ${state.fpAdopting == true ? 1 : 0}');
             } catch (e) {
               print('Error updating beneficiary is_family_planning: $e');
-              // Don't fail the form submission if update fails
             }
 
             try {
@@ -379,8 +438,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         emit(state.copyWith(
           status: FormStatus.failure,
           error: 'Failed to save form data. Please try again.',
-        )
-        );
+        ));
       }
     });
   }
@@ -392,29 +450,20 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
 
   Future<void> _loadPreviousFormData() async {
     try {
-      print('Loading previous form data for beneficiary: ${state.beneficiaryId}');
-      // Get all keys from secure storage
       final allKeys = await _secureStorage.readAll();
-      print('Found ${allKeys.length} keys in secure storage');
 
       if (allKeys.isEmpty) {
-        print('No keys found in secure storage');
         return;
       }
 
-      // Find all form data keys for this beneficiary
       final formDataKeys = allKeys.entries
           .where((entry) => entry.key.startsWith('ec_tracking_${state.beneficiaryId}_'))
           .toList();
 
-      print('Found ${formDataKeys.length} form data entries for beneficiary');
-
       if (formDataKeys.isEmpty) {
-        print('No form data found for beneficiary: ${state.beneficiaryId}');
         return;
       }
 
-      // Sort by timestamp (newest first)
       formDataKeys.sort((a, b) {
         final aParts = a.key.split('_');
         final bParts = b.key.split('_');
@@ -423,41 +472,28 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         return bTime.compareTo(aTime); // Sort in descending order
       });
 
-      // Get the most recent form data
       final latestKey = formDataKeys.first.key;
-      print('Loading most recent form data with key: $latestKey');
 
       final formData = await _secureStorage.read(key: latestKey);
       if (formData != null) {
         try {
-          print('Raw form data from storage: $formData');
           final jsonData = jsonDecode(formData);
 
           if (jsonData is! Map<String, dynamic>) {
-            print('Error: Expected JSON object but got ${jsonData.runtimeType}');
             return;
           }
 
-          print('Parsed JSON data: $jsonData');
-
-          // Check if we have nested form_data
           Map<String, dynamic> formDataToUse = jsonData;
           if (jsonData.containsKey('form_data') && jsonData['form_data'] is Map) {
             formDataToUse = jsonData['form_data'] as Map<String, dynamic>;
-            print('Using nested form_data: $formDataToUse');
           }
 
-          // Update state with previous form data
           add(LoadPreviousFormData(formDataToUse));
-
         } catch (e, stackTrace) {
           print('Error parsing form data: $e');
           print('Stack trace: $stackTrace');
         }
-      } else {
-        print('No form data found for key: $latestKey');
       }
-
     } catch (e, stackTrace) {
       print('Error loading previous form data: $e');
       print('Stack trace: $stackTrace');

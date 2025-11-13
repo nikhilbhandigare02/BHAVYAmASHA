@@ -23,6 +23,7 @@ class EligibleCouleUpdateState extends Equatable {
   final int? dbRowId;
   final String? householdRefKey;
   final String? beneficiaryName;
+  final String? uniqueKey;
 
   final bool isSubmitting;
   final bool isSuccess;
@@ -49,6 +50,7 @@ class EligibleCouleUpdateState extends Equatable {
     this.dbRowId,
     this.householdRefKey,
     this.beneficiaryName,
+    this.uniqueKey,
     this.isSubmitting = false,
     this.isSuccess = false,
     this.error,
@@ -77,6 +79,7 @@ class EligibleCouleUpdateState extends Equatable {
     int? dbRowId,
     String? householdRefKey,
     String? beneficiaryName,
+    String? uniqueKey,
     bool? isSubmitting,
     bool? isSuccess,
     String? error,
@@ -103,6 +106,7 @@ class EligibleCouleUpdateState extends Equatable {
       dbRowId: dbRowId ?? this.dbRowId,
       householdRefKey: householdRefKey ?? this.householdRefKey,
       beneficiaryName: beneficiaryName ?? this.beneficiaryName,
+      uniqueKey: uniqueKey ?? this.uniqueKey,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isSuccess: isSuccess ?? this.isSuccess,
       error: clearError ? null : (error ?? this.error),
@@ -133,6 +137,7 @@ class EligibleCouleUpdateState extends Equatable {
         dbRowId,
         householdRefKey,
         beneficiaryName,
+        uniqueKey,
         isSubmitting,
         isSuccess,
         error,

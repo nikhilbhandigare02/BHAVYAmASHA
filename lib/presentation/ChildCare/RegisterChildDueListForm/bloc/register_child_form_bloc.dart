@@ -11,6 +11,7 @@ import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 import 'package:meta/meta.dart';
+import 'package:medixcel_new/data/repositories/ChildCareRepository.dart';
 
 part 'register_child_form_event.dart';
 part 'register_child_form_state.dart';
@@ -177,7 +178,7 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
 
       print('Using Facility ID: $facilityId');
 
-      final formDataForDb = {
+      final formDataForDb     = {
         'server_id': '',
         'forms_ref_key': formsRefKey,
         'household_ref_key': householdRefKey,
@@ -186,7 +187,7 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
         'father_key': fatherKey,
         'child_care_state': '',
         'device_details': jsonEncode({
-          'id': deviceInfo.deviceId,
+          'id': deviceInfo. deviceId,
           'platform': deviceInfo.platform,
           'version': deviceInfo.osVersion,
         }),
@@ -235,7 +236,6 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
             print('⚠️ Error storing form data in secure storage: $e');
           }
 
-          // Print the saved data from database
           try {
             final savedData = await db.query(
               'followup_form_data',
@@ -248,6 +248,131 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
             }
           } catch (e) {
             print('⚠️ Error reading saved data: $e');
+          }
+
+          // Build Child Care API payload (mirror EligibleCouple payload build)
+          try {
+            final rows = await db.query(
+              FollowupFormDataTable.table,
+              where: 'id = ?',
+              whereArgs: [formId],
+              limit: 1,
+            );
+            if (rows.isNotEmpty) {
+              final saved = Map<String, dynamic>.from(rows.first);
+              Map<String, dynamic> deviceJson = {};
+              Map<String, dynamic> appJson = {};
+              Map<String, dynamic> geoJson = {};
+              try {
+                if (saved['device_details'] is String && (saved['device_details'] as String).isNotEmpty) {
+                  deviceJson = Map<String, dynamic>.from(jsonDecode(saved['device_details']));
+                }
+              } catch (_) {}
+              try {
+                if (saved['app_details'] is String && (saved['app_details'] as String).isNotEmpty) {
+                  appJson = Map<String, dynamic>.from(jsonDecode(saved['app_details']));
+                }
+              } catch (_) {}
+              try {
+                if (saved['form_json'] is String && (saved['form_json'] as String).isNotEmpty) {
+                  final fj = jsonDecode(saved['form_json']);
+                  if (fj is Map) {
+                    if (fj['geolocation_details'] is Map) {
+                      geoJson = Map<String, dynamic>.from(fj['geolocation_details']);
+                    } else if (fj['form_data'] is Map && (fj['form_data']['geolocation_details'] is Map)) {
+                      geoJson = Map<String, dynamic>.from(fj['form_data']['geolocation_details']);
+                    }
+                  }
+                }
+              } catch (_) {}
+
+              final working = userDetails['working_location'] ?? {};
+              final userId = (working['asha_id'] ?? userDetails['unique_key'] ?? '').toString();
+              final facility = (working['asha_associated_with_facility_id'] ?? working['hsc_id'] ?? userDetails['facility_id'] ?? userDetails['hsc_id'] ?? '').toString();
+              final appRoleId = (userDetails['app_role_id'] ?? '').toString();
+
+              final nowTs = DateTime.now();
+              String fmt(DateTime d) => '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')} ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}';
+
+              final payload = [
+                {
+                  'unique_key': householdRefKey,
+                  'beneficiaries_registration_ref_key': beneficiaryRefKey,
+                  'child_care_type': 'registration_due',
+                  'user_id': userId,
+                  'facility_id': facility,
+                  'is_deleted': 0,
+                  'created_by': userId,
+                  'created_date_time': fmt(nowTs),
+                  'modified_by': userId,
+                  'modified_date_time': fmt(nowTs),
+                  'parent_added_by': userId,
+                  'parent_facility_id': int.tryParse(facility) ?? facility,
+                  'app_role_id': appRoleId,
+                  'is_guest': 0,
+                  'device_details': {
+                    'device_id': deviceJson['id'] ?? deviceJson['device_id'] ?? deviceInfo.deviceId,
+                    'device_plateform': deviceJson['platform'] ?? deviceJson['device_plateform'] ?? deviceInfo.platform,
+                    'device_plateform_version': deviceJson['version'] ?? deviceJson['device_plateform_version'] ?? deviceInfo.osVersion,
+                  },
+                  'app_details': {
+                    'app_version': appJson['app_version'] ?? deviceInfo.appVersion.split('+').first,
+                    'app_name': appJson['app_name'] ?? deviceInfo.appName,
+                  },
+                  'geolocation_details': {
+                    'latitude': geoJson['lat']?.toString() ?? '',
+                    'longitude': geoJson['long']?.toString() ?? '',
+                  },
+                },
+              ];
+
+              print('Child Care API payload: '+jsonEncode(payload));
+              try {
+                final repo = ChildCareRepository();
+                final apiResp = await repo.submitChildCareActivities(payload);
+                print('Child Care API response: '+apiResp.toString());
+
+                try {
+                  if (apiResp is Map && apiResp['success'] == true && apiResp['data'] is List) {
+                    final List data = apiResp['data'];
+                    Map? item = data.cast<Map>().firstWhere(
+                      (e) => (e['child_care_type']?.toString() ?? '') == 'registration_due',
+                      orElse: () => {},
+                    );
+                    final serverId = (item?['_id'] ?? '').toString();
+                    if (serverId.isNotEmpty) {
+                      int updated = await db.update(
+                        FollowupFormDataTable.table,
+                        {
+                          'server_id': serverId,
+                          'modified_date_time': now,
+                        },
+                        where: 'beneficiary_ref_key = ? AND forms_ref_key = ?',
+                        whereArgs: [beneficiaryRefKey, formsRefKey],
+                      );
+                      if (updated == 0) {
+                        updated = await db.update(
+                          FollowupFormDataTable.table,
+                          {
+                            'server_id': serverId,
+                            'modified_date_time': now,
+                          },
+                          where: 'household_ref_key = ? AND forms_ref_key = ?',
+                          whereArgs: [householdRefKey, formsRefKey],
+                        );
+                      }
+                      print('Updated followup_form_data server_id=$serverId rows=$updated');
+                    }
+                  }
+                } catch (e) {
+                  print('Error updating followup_form_data with Child Care server_id: $e');
+                }
+              } catch (e) {
+                print('Child Care API call failed: $e');
+              }
+            }
+          } catch (e) {
+            print('Error building Child Care API payload: $e');
           }
 
           emit(state.copyWith(isSubmitting: false, isSuccess: true));

@@ -8,21 +8,34 @@ import '../../../core/error/Exception/app_exception.dart';
 import 'base_api_services.dart';
 class NetworkServiceApi extends BaseApiServices{
   @override
-  Future getApi(String url) async{
-    dynamic jsonResponse;
-    try{
-      final response = await http.get(Uri.parse(url)).timeout(Duration(seconds: 50));
-      jsonResponse = returnResponse(response);
-      if(response.statusCode == 200){}
-    }on SocketException{
-      throw NoInternetException('No Internet Exception');
-    }on TimeoutException{
-      throw NoInternetException('Request Timed out');
-    } on FetchDataException {
-      throw NoInternetException('Data fetch error');
+  Future<dynamic> getApi(String url,
+      {Map<String, String>? headers, Map<String, dynamic>? queryParams}) async {
+    try {
+      final uri = Uri.parse(url).replace(queryParameters: queryParams);
+      print('🌍 GET Request → $uri');
+      print('📦 Headers → $headers');
+
+      final response = await http.get(uri, headers: headers);
+      print('📥 Response Code: ${response.statusCode}');
+      print('📥 Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } on SocketException catch (e) {
+      print('🚫 SocketException: $e');
+      throw Exception('No Internet Connection: ${e.message}');
+    } on HandshakeException catch (e) {
+      print('🔒 SSL Handshake failed: $e');
+      throw Exception('SSL Error: $e');
+    } catch (e) {
+      print('❌ Unexpected error: $e');
+      rethrow;
     }
-    return jsonResponse;
   }
+
 
   @override
   Future<dynamic> postApi(String url, dynamic data, {Map<String, String>? headers}) async {
@@ -69,7 +82,7 @@ dynamic returnResponse(http.Response response) {
       default:
         throw FetchDataException(
           responseJson['message'] ??
-              'Error occurred while communication with server. Status code: ${response.statusCode}',
+              'Error occurred while communicating with server. Status code: ${response.statusCode}',
         );
     }
   } catch (e) {

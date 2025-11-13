@@ -51,7 +51,7 @@ class FollowupFormDataTable {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     server_id TEXT,
     forms_ref_key TEXT,
-    household_ref_key TEXT,
+    household_ref_key TEXT, 
     beneficiary_ref_key TEXT,
     mother_key TEXT,
     father_key TEXT,

@@ -17,7 +17,6 @@ class SecureStorageService {
     await _storage.write(key: _keyToken, value: token);
   }
 
-  // Get token
   static Future<String?> getToken() async {
     return await _storage.read(key: _keyToken);
   }
@@ -442,7 +441,6 @@ class SecureStorageService {
     }
   }
 
-  // Increment submission count for a beneficiary
   static Future<int> incrementSubmissionCount(String beneficiaryId) async {
     try {
       if (beneficiaryId.isEmpty) {

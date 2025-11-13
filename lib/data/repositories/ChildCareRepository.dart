@@ -3,13 +3,12 @@ import 'dart:convert';
 import 'package:medixcel_new/data/NetworkAPIServices/APIs_Urls/Endpoints.dart';
 import 'package:medixcel_new/data/NetworkAPIServices/api_services/network_services_API.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
+import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
 
-import '../Local_Storage/User_Info.dart';
-
-class HouseholdRepository {
+class ChildCareRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
-  Future<dynamic> addHousehold(Map<String, dynamic> payload) async {
+  Future<dynamic> submitChildCareActivities(List<dynamic> payload) async {
     final currentUser = await UserInfo.getCurrentUser();
     final userDetails = currentUser?['details'] is String
         ? jsonDecode(currentUser?['details'] ?? '{}')
@@ -21,7 +20,6 @@ class HouseholdRepository {
         token = userDetails['token']?.toString();
       } catch (_) {}
     }
-    print('User token present: ${token != null && token.isNotEmpty}');
 
     final headers = <String, String>{
       'Content-Type': 'application/json',
@@ -30,7 +28,7 @@ class HouseholdRepository {
     };
 
     final response = await _api.postApi(
-      Endpoints.addHousehold,
+      Endpoints.addChildCareActivity,
       payload,
       headers: headers,
     );
