@@ -313,10 +313,8 @@ class EligibleCouleUpdateBloc
         'youngestGender': state.youngestChildGender.toLowerCase(),
       };
       
-      // Update the children_details in the beneficiary_info
       beneficiaryInfo['children_details'] = updatedChildrenDetails;
       
-      // Also check if children_details is nested under head_details
       if (beneficiaryInfo.containsKey('head_details')) {
         final headDetails = Map<String, dynamic>.from(beneficiaryInfo['head_details'] as Map? ?? {});
         if (headDetails.containsKey('childrendetails')) {
@@ -327,10 +325,8 @@ class EligibleCouleUpdateBloc
       
       print('✅ Updated children details: $updatedChildrenDetails');
       
-      // Convert back to JSON string
       final updatedBeneficiaryInfoJson = jsonEncode(beneficiaryInfo);
       
-      // Update the database (prefer unique_key if available)
       final bool useUnique = (state.uniqueKey ?? '').isNotEmpty;
       final updateCount = await db.update(
         'beneficiaries',

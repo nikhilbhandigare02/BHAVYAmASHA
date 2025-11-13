@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
@@ -10,6 +11,14 @@ import '../../core/widgets/AppDrawer/Drawer.dart';
 import '../../core/widgets/AppHeader/AppHeader.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../data/Local_Storage/local_storage_dao.dart';
+import '../../data/SecureStorage/SecureStorage.dart';
+
+import '../../data/models/AbhaCreated/AbhaCreated.dart';
+import '../../data/models/ExistingAbhaCreated/ExistingAbhaCreated.dart';
+import '../../data/models/TimeStamp/Timestamp_Response.dart';
+import '../../data/repositories/AbhaCreated/AbhaCreated.dart';
+import '../../data/repositories/ExistingAbha/ExistingAbha.dart';
+import '../../data/repositories/TimeStamp/time_stamp.dart';
 import '../../l10n/app_localizations.dart';
 import '../GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import 'TodaysProgramm.dart';
@@ -51,6 +60,161 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadBeneficiariesCount();
     _loadEligibleCouplesCount();
     _loadPregnantWomenCount();
+    _fetchTimeStamp();
+    _fetchAbhaCreated();
+    _fetchExistingAbhaCreated();
+  }
+  final ExistingAbhaCreatedRepository _repositoryABHA = ExistingAbhaCreatedRepository();
+  ExistingAbhaCreated? _existingAbhaData;
+  Future<void> _fetchExistingAbhaCreated() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    print('📤 Fetching Existing ABHA Created data from HomeScreen...');
+
+    try {
+      if (_userUniqueKey == null || _userUniqueKey.isEmpty) {
+        throw Exception('User unique key is missing!');
+      }
+      final response = await _repositoryABHA.existingAbhaCreated(_userUniqueKey);
+
+      print('✅ Raw API Response (HomeScreen): ${response.toJson()}');
+      print('📊 ABHA Created Count: ${response.data?.abhaCreated}');
+
+      setState(() {
+        _existingAbhaData = response;
+      });
+    } catch (e, stackTrace) {
+      print('❌ Error fetching Existing ABHA Created data: $e');
+      print('🧩 Stack trace: $stackTrace');
+
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  final AbhaCreatedRepository _abhaRepository = AbhaCreatedRepository();
+  AbhaCreated? _abhaData;
+  bool _isLoading = false;
+  String? _error;
+  final String _userUniqueKey = '8X0FR8NZSU7';
+
+  Future<void> _fetchAbhaCreated() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    print('📤 Fetching ABHA Created count from HomeScreen...');
+
+    try {
+      final response = await _abhaRepository.getAbhaCreated(_userUniqueKey);
+      print('✅ Raw API Response (HomeScreen): ${response.toJson()}');
+
+      setState(() {
+        _abhaData = response;
+      });
+    } catch (e) {
+      print('❌ Error fetching ABHA Created data: $e');
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+  final TimeStampRepository _repository = TimeStampRepository();
+  TimeStampResponce? _timeStamp;
+  Future<void> _fetchTimeStamp() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    print('📤 Fetching timestamp from HomeScreen...');
+
+    try {
+      final response = await _repository.getTimeStamp();
+      print('✅ Raw API Response (HomeScreen): $response');
+
+      final parsed = TimeStampResponce.fromJson(response);
+      print('🕒 Server Time: ${parsed.time}');
+
+      if (parsed.time != null) {
+        // Parse server time string
+        final serverTime = DateTime.parse(parsed.time!);
+        final formattedServerTime = DateFormat('dd MMM yyyy, hh:mm a').format(serverTime);
+
+        final systemTime = DateTime.now();
+        final formattedSystemTime = DateFormat('dd MMM yyyy, hh:mm a').format(systemTime);
+
+        print(' Server Time: $formattedServerTime');
+        print(' System Time: $formattedSystemTime');
+        final difference = systemTime.difference(serverTime).inSeconds.abs();
+        print('Time difference: $difference seconds');
+        if (difference > 60) {
+          _showTimeMismatchDialog(formattedServerTime, formattedSystemTime);
+        }
+        setState(() {
+          _timeStamp = parsed;
+        });
+      }
+      setState(() {
+        _timeStamp = parsed;
+      });
+    } catch (e) {
+      print('Error fetching timestamp: $e');
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+  void _showTimeMismatchDialog(String serverTime, String systemTime) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Time Mismatch Detected'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Your device time does not match the server time.'),
+              const SizedBox(height: 8),
+              Text('Server Time: $serverTime'),
+              Text('System Time: $systemTime'),
+              const SizedBox(height: 12),
+              const Text(
+                'Please correct your device time to match the server time.',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _loadHouseholdCount() async {
@@ -70,38 +234,38 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       int count = 0;
-      
+
       // Create a set to track unique beneficiaries by their unique_key
       final Set<String> uniqueBeneficiaries = {};
-      
+
       for (final row in rows) {
         try {
           // Skip if no unique key
           final uniqueKey = row['unique_key']?.toString();
           if (uniqueKey == null || uniqueKey.isEmpty) continue;
-          
+
           // Skip if we've already counted this beneficiary
           if (uniqueBeneficiaries.contains(uniqueKey)) continue;
-          
+
           // Parse the beneficiary info
           final dynamic rawInfo = row['beneficiary_info'];
           if (rawInfo == null) continue;
-          
+
           Map<String, dynamic> info;
           try {
-            info = rawInfo is String 
+            info = rawInfo is String
                 ? jsonDecode(rawInfo) as Map<String, dynamic>
                 : Map<String, dynamic>.from(rawInfo as Map);
           } catch (e) {
             print('Error parsing beneficiary info: $e');
             continue;
           }
-          
+
           // Get relation type
           final relation = (info['relation']?.toString().toLowerCase().trim() ??
               info['relation_to_head']?.toString().toLowerCase().trim() ??
               '');
-          
+
           // Count all valid beneficiaries regardless of relation type
           // as long as they have a name and a valid unique key
           final name = info['headName'] ?? info['memberName'] ?? info['name'];
@@ -113,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
           print('Error processing beneficiary row: $e');
         }
       }
-      
+
       if (mounted) {
         setState(() {
           beneficiariesCount = count;
@@ -134,23 +298,23 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       int count = 0;
-      
+
       for (final row in rows) {
         final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
         final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
         final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-        
+
         // Check if head is eligible female
         if (_isEligibleFemale(head)) {
           count++;
         }
-        
+
         // Check if spouse is eligible female
         if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
           count++;
         }
       }
-      
+
       if (mounted) {
         setState(() {
           eligibleCouplesCount = count;
@@ -160,29 +324,29 @@ class _HomeScreenState extends State<HomeScreen> {
       print('Error loading eligible couples count: $e');
     }
   }
-  
+
   bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     if (person.isEmpty) return false;
-    
+
     // Check gender
     final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
     if (genderRaw != 'f' && genderRaw != 'female') return false;
-    
+
     // Check marital status (use head's marital status if person is spouse)
-    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? 
-                           person['marital_status']?.toString().toLowerCase() ??
-                           head?['maritalStatus']?.toString().toLowerCase() ??
-                           head?['marital_status']?.toString().toLowerCase() ??
-                           '';
+    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ??
+        person['marital_status']?.toString().toLowerCase() ??
+        head?['maritalStatus']?.toString().toLowerCase() ??
+        head?['marital_status']?.toString().toLowerCase() ??
+        '';
     if (maritalStatusRaw != 'married' && maritalStatusRaw != 'm') return false;
-    
+
     // Check if pregnant
     final isPregnant = person['isPregnant']?.toString().toLowerCase() == 'true' ||
         person['isPregnant']?.toString().toLowerCase() == 'yes' ||
         person['pregnancyStatus']?.toString().toLowerCase() == 'pregnant';
-    
+
     if (!isPregnant) return false;
-    
+
     // Check age (15-49 years)
     final dob = person['dob']?.toString() ?? person['dateOfBirth']?.toString();
     if (dob != null && dob.isNotEmpty) {
@@ -205,23 +369,23 @@ class _HomeScreenState extends State<HomeScreen> {
         return false;
       }
     }
-    
+
     // If we can't determine age, assume eligible
     return true;
   }
-  
+
   Future<void> _loadPregnantWomenCount() async {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       int count = 0;
-      
+
       for (final row in rows) {
         try {
           // Check if is_family_planning is set
-          final isFamilyPlanning = row['is_family_planning'] == 1 || 
-                                 row['is_family_planning'] == '1' ||
-                                 (row['is_family_planning']?.toString().toLowerCase() == 'true');
-          
+          final isFamilyPlanning = row['is_family_planning'] == 1 ||
+              row['is_family_planning'] == '1' ||
+              (row['is_family_planning']?.toString().toLowerCase() == 'true');
+
           if (!isFamilyPlanning) continue;
 
           // Parse the beneficiary info
@@ -230,8 +394,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
           Map<String, dynamic> info = {};
           try {
-            info = rawInfo is String 
-                ? Map<String, dynamic>.from(jsonDecode(rawInfo) as Map) 
+            info = rawInfo is String
+                ? Map<String, dynamic>.from(jsonDecode(rawInfo) as Map)
                 : Map<String, dynamic>.from(rawInfo as Map);
           } catch (e) {
             continue;
@@ -301,145 +465,145 @@ class _HomeScreenState extends State<HomeScreen> {
           );
           return shouldExit ?? false;
         },
-      child: Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppHeader(
-        screenTitle: l10n.homeTitle,
-        showBack: false,
-        icon1Image: 'assets/images/search.png',
-        onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.GuestBeneficiarySearch),
-        icon2Image: 'assets/images/img_1.png',
-        onIcon2Tap: () => print("Notifications tapped"),
-        icon3Image: 'assets/images/home.png',
-        onIcon3Tap: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(initialTabIndex: 1),
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppHeader(
+            screenTitle: l10n.homeTitle,
+            showBack: false,
+            icon1Image: 'assets/images/search.png',
+            onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.GuestBeneficiarySearch),
+            icon2Image: 'assets/images/img_1.png',
+            onIcon2Tap: () => print("Notifications tapped"),
+            icon3Image: 'assets/images/home.png',
+            onIcon3Tap: () => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(initialTabIndex: 1),
+              ),
+            ),
           ),
-        ),
-      ),
-      drawer: CustomDrawer(),
-      body: Column(
-        children: [
-          // Tabs
-          Material(
-            color: AppColors.background,
-            elevation: 2,
-            borderRadius: BorderRadius.circular(8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () => setState(() => selectedIndex = 0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.today,
-                                color:AppColors.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                l10n.tabTodaysProgram,
-                                style: TextStyle(
+          drawer: CustomDrawer(),
+          body: Column(
+            children: [
+              // Tabs
+              Material(
+                color: AppColors.background,
+                elevation: 2,
+                borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => setState(() => selectedIndex = 0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.today,
+                                    color:AppColors.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    l10n.tabTodaysProgram,
+                                    style: TextStyle(
                                       fontSize: 15.sp,
-                                  color: selectedIndex == 0
-                                      ? AppColors.primary
-                                      : AppColors.outline,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                      color: selectedIndex == 0
+                                          ? AppColors.primary
+                                          : AppColors.outline,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                            Container(
+                              height: 3,
+                              color: selectedIndex == 0
+                                  ? AppColors.primary
+                                  : Colors.transparent,
+                            ),
+                          ],
                         ),
-                        Container(
-                          height: 3,
-                          color: selectedIndex == 0
-                              ? AppColors.primary
-                              : Colors.transparent,
-                        ),
-                      ],
+                      ),
                     ),
+                    Container(width: 1, height: 50, color: AppColors.divider),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => setState(() => selectedIndex = 1),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                      Icons.apps_sharp,
+                                      color: AppColors.primary
+
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    l10n.tabAshaDashboard,
+                                    style: TextStyle(
+                                      fontSize: 15.sp,
+                                      color: selectedIndex == 1
+                                          ? AppColors.primary
+                                          : AppColors.outline,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              height: 3,
+                              color: selectedIndex == 1
+                                  ? AppColors.primary
+                                  : Colors.transparent,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Expanded(
+                child: selectedIndex == 0
+                    ? isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : SingleChildScrollView(
+                  child: TodayProgramSection(
+                    selectedGridIndex: selectedGridIndex,
+                    onGridTap: (index) =>
+                        setState(() => selectedGridIndex = index),
+                    apiData: apiData,
+                  ),
+                )
+                    : SingleChildScrollView(
+                  child: AshaDashboardSection(
+                    householdCount: householdCount,
+                    beneficiariesCount: beneficiariesCount,
+                    eligibleCouplesCount: eligibleCouplesCount,
+                    pregnantWomenCount: pregnantWomenCount,
+                    selectedGridIndex: selectedGridIndex,
+                    onGridTap: (index) =>
+                        setState(() => selectedGridIndex = index),
                   ),
                 ),
-                Container(width: 1, height: 50, color: AppColors.divider),
-                Expanded(
-                  child: InkWell(
-                    onTap: () => setState(() => selectedIndex = 1),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.apps_sharp,
-                                color: AppColors.primary
-
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                l10n.tabAshaDashboard,
-                                style: TextStyle(
-                                  fontSize: 15.sp,
-                                  color: selectedIndex == 1
-                                      ? AppColors.primary
-                                      : AppColors.outline,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 3,
-                          color: selectedIndex == 1
-                              ? AppColors.primary
-                              : Colors.transparent,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          Expanded(
-            child: selectedIndex == 0
-                ? isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-              child: TodayProgramSection(
-                selectedGridIndex: selectedGridIndex,
-                onGridTap: (index) =>
-                    setState(() => selectedGridIndex = index),
-                apiData: apiData,
               ),
-            )
-                : SingleChildScrollView(
-              child: AshaDashboardSection(
-                householdCount: householdCount,
-                beneficiariesCount: beneficiariesCount,
-                eligibleCouplesCount: eligibleCouplesCount,
-                pregnantWomenCount: pregnantWomenCount,
-                selectedGridIndex: selectedGridIndex,
-                onGridTap: (index) =>
-                    setState(() => selectedGridIndex = index),
-              ),
-            ),
-          ),
 
-        ],
-      ),
-    ));
+            ],
+          ),
+        ));
   }
 }
