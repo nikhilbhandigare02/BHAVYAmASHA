@@ -160,10 +160,12 @@ class _EligibleCoupleIdentifiedScreenState
       }..removeWhere((k, v) => v == null);
     }
     return {
-      'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
+      'hhId': hhId,
+      'hhIdShort': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
       'RegistrationDate': _formatDate(createdDate),
       'RegistrationType': 'General',
-      'BeneficiaryID': uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey,
+      'BeneficiaryID': uniqueKey,
+      'BeneficiaryIDShort': uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey,
       'Name': name,
       'age': age > 0 ? '$age Y / $displayGender' : 'N/A',
       'RichID': richId,
@@ -171,6 +173,8 @@ class _EligibleCoupleIdentifiedScreenState
       'HusbandName': husbandName,
       'childrenSummary': childrenSummary,
       '_rawRow': row,
+      'fullHhId': hhId,
+      'fullBeneficiaryId': uniqueKey,
     };
   }
 
@@ -306,19 +310,32 @@ class _EligibleCoupleIdentifiedScreenState
           onTap: () async {
 
             final fullHhId = rowData['household_ref_key']?.toString() ?? '';
-            final hhIdLast11 = fullHhId.length > 11 ? fullHhId.substring(fullHhId.length - 11) : fullHhId;
+            final fullBeneficiaryId = data['fullBeneficiaryId']?.toString() ?? data['BeneficiaryID']?.toString() ?? '';
             final name = data['Name']?.toString() ?? '';
+            final richId = data['RichID']?.toString() ?? '';
+            final mobile = data['mobileno']?.toString() ?? '';
+            final husbandName = data['HusbandName']?.toString() ?? '';
+            final ageGender = data['age']?.toString() ?? '';
+            final registrationDate = data['RegistrationDate']?.toString() ?? '';
 
             print('🚀 Navigating to update screen with:');
-            print('   Household ID (last 11): $hhIdLast11');
+            print('   Household ID (full): $fullHhId');
+            print('   Beneficiary ID (full): $fullBeneficiaryId');
             print('   Name: $name');
 
             final result = await Navigator.pushNamed(
               context,
               Route_Names.UpdatedEligibleCoupleList,
               arguments: {
-                'hhId': hhIdLast11,
+                'hhId': fullHhId,
                 'name': name,
+                'BeneficiaryID': fullBeneficiaryId,
+                'RichID': richId,
+                'mobile': mobile,
+                'husbandName': husbandName,
+                'ageGender': ageGender,
+                'registrationDate': registrationDate,
+                'formData': data,
               },
             );
 

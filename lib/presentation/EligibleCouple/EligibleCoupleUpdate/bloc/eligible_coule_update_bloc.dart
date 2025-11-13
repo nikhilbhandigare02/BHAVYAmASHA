@@ -41,49 +41,71 @@ class EligibleCouleUpdateBloc
     print('📋 Received data: $data');
 
     try {
-      // Get the hhId (last 11 digits) and name to query the database
-      final hhId = data['hhId']?.toString() ?? '';
+      // Extract data directly from the passed arguments
       final name = data['name']?.toString() ?? '';
-      
-      if (hhId.isEmpty || name.isEmpty) {
-        print('❌ ERROR: Missing hhId or name');
-        emit(state.copyWith(error: 'Missing household ID or name'));
-        return;
+      final mobile = data['mobile']?.toString() ?? data['mobileno']?.toString() ?? '';
+      final rchId = data['RichID']?.toString() ?? '';
+      final ageGender = data['ageGender']?.toString() ?? '';
+      final hhId = data['hhId']?.toString() ?? '';
+      final beneficiaryId = data['BeneficiaryID']?.toString() ?? '';
+
+      // Parse age from ageGender (format: "31 Y / Other")
+      String currentAge = '';
+      if (ageGender.isNotEmpty) {
+        final parts = ageGender.split('/');
+        if (parts.isNotEmpty) {
+          final agePart = parts[0].trim(); // "31 Y"
+          final ageMatch = RegExp(r'(\d+)').firstMatch(agePart);
+          if (ageMatch != null) {
+            currentAge = ageMatch.group(1) ?? '';
+          }
+        }
       }
-      
-      print('🔍 Loading data from database for:');
-      print('   HH ID (last 11): $hhId');
-      print('   Name: $name');
-      
-      // Query the database - match household_ref_key ending with hhId
+
+      print('✅ Parsed values:');
+      print('   👤 Name: $name');
+      print('   🆔 RCH ID: $rchId');
+      print('   📅 Age: $currentAge (from: $ageGender)');
+      print('   📱 Mobile: $mobile');
+      print('   🏠 HH ID: $hhId');
+
+      // Now query the database to get full beneficiary details
       final db = await DatabaseProvider.instance.database;
       final rows = await db.query(
         'beneficiaries',
         where: 'household_ref_key LIKE ?',
         whereArgs: ['%$hhId'],
       );
-      
+
       if (rows.isEmpty) {
-        print('❌ ERROR: No beneficiary found with household_ref_key ending in: $hhId');
-        emit(state.copyWith(error: 'Beneficiary not found'));
+        print('⚠️ No beneficiary found in database, using only passed data');
+        // Use only the data passed from previous screen
+        emit(state.copyWith(
+          rchId: rchId,
+          womanName: name,
+          currentAge: currentAge,
+          mobileNo: mobile,
+          beneficiaryName: name,
+          clearError: true,
+        ));
         return;
       }
-      
+
       print('✅ Found ${rows.length} potential household(s)');
-      
-      // If multiple households found, we need to find the right one by matching the name
+
+      // Find the matching row by name
       Map<String, dynamic>? matchedRow;
       for (final row in rows) {
         try {
           final beneficiaryInfoJson = row['beneficiary_info'] as String? ?? '{}';
           final beneficiaryInfo = jsonDecode(beneficiaryInfoJson) as Map<String, dynamic>;
           final headDetails = Map<String, dynamic>.from(beneficiaryInfo['head_details'] as Map? ?? {});
-          final spouseDetails = Map<String, dynamic>.from(beneficiaryInfo['spouse_details'] as Map? ?? 
-                                                          headDetails['spousedetails'] as Map? ?? {});
-          
+          final spouseDetails = Map<String, dynamic>.from(beneficiaryInfo['spouse_details'] as Map? ??
+              headDetails['spousedetails'] as Map? ?? {});
+
           final headName = headDetails['headName']?.toString() ?? headDetails['memberName']?.toString() ?? '';
           final spouseName = spouseDetails['memberName']?.toString() ?? spouseDetails['spouseName']?.toString() ?? '';
-          
+
           // Check if name matches head or spouse
           if (name.toLowerCase() == headName.toLowerCase() || name.toLowerCase() == spouseName.toLowerCase()) {
             matchedRow = row;
@@ -95,93 +117,82 @@ class EligibleCouleUpdateBloc
           continue;
         }
       }
-      
+
       if (matchedRow == null) {
-        print('❌ ERROR: No beneficiary found with name: $name in household: $hhId');
-        emit(state.copyWith(error: 'Beneficiary not found with the given name'));
+        print('⚠️ No matching beneficiary found in database, using only passed data');
+        // Use only the data passed from previous screen
+        emit(state.copyWith(
+          rchId: rchId,
+          womanName: name,
+          currentAge: currentAge,
+          mobileNo: mobile,
+          beneficiaryName: name,
+          clearError: true,
+        ));
         return;
       }
-      
+
       final row = matchedRow;
-      print('✅ Found beneficiary record');
-      
+      print('✅ Found beneficiary record in database');
+
       // Store the database row ID and household_ref_key for later update
       final dbRowId = row['id'] as int?;
       final householdRefKey = row['household_ref_key'] as String?;
-      
-      // Parse the beneficiary_info JSON (already parsed above, but get it again for consistency)
+
       final beneficiaryInfoJson = row['beneficiary_info'] as String? ?? '{}';
       final beneficiaryInfo = jsonDecode(beneficiaryInfoJson) as Map<String, dynamic>;
-      
+
       print('📦 Beneficiary info keys: ${beneficiaryInfo.keys.join(', ')}');
-      
+
       // Extract nested data
       final headDetails = Map<String, dynamic>.from(beneficiaryInfo['head_details'] as Map? ?? {});
-      final spouseDetails = Map<String, dynamic>.from(beneficiaryInfo['spouse_details'] as Map? ?? 
-                                                      headDetails['spousedetails'] as Map? ?? {});
-      final childrenDetails = Map<String, dynamic>.from(beneficiaryInfo['children_details'] as Map? ?? 
-                                                        headDetails['childrendetails'] as Map? ?? {});
-      
+      final spouseDetails = Map<String, dynamic>.from(beneficiaryInfo['spouse_details'] as Map? ??
+          headDetails['spousedetails'] as Map? ?? {});
+      final childrenDetails = Map<String, dynamic>.from(beneficiaryInfo['children_details'] as Map? ??
+          headDetails['childrendetails'] as Map? ?? {});
+
       print('👤 Head details keys: ${headDetails.keys.join(', ')}');
       print('👥 Spouse details keys: ${spouseDetails.keys.join(', ')}');
       print('👶 Children details keys: ${childrenDetails.keys.join(', ')}');
-      
+
       // Determine if we're dealing with head or spouse based on the name
       final headName = headDetails['headName']?.toString() ?? headDetails['memberName']?.toString() ?? '';
       final spouseName = spouseDetails['memberName']?.toString() ?? spouseDetails['spouseName']?.toString() ?? '';
-      
+
       final isHead = name.toLowerCase() == headName.toLowerCase();
       print('🎯 Is Head: $isHead (name: $name, headName: $headName, spouseName: $spouseName)');
-      
+
       // Extract woman's details (the eligible couple member)
       final womanDetails = isHead ? headDetails : spouseDetails;
-      
-      // Calculate current age from DOB
-      String currentAge = '';
-      try {
-        final dob = womanDetails['dob']?.toString();
-        if (dob != null && dob.isNotEmpty) {
-          final birthDate = DateTime.tryParse(dob);
-          if (birthDate != null) {
-            final age = (DateTime.now().difference(birthDate).inDays / 365).floor();
-            currentAge = age.toString();
-          }
-        }
-      } catch (e) {
-        print('⚠️ Error calculating age: $e');
-      }
-      
+
       // Get address components
       final village = headDetails['village']?.toString() ?? '';
       final mohalla = headDetails['mohalla']?.toString() ?? headDetails['tola']?.toString() ?? '';
       final ward = headDetails['ward']?.toString() ?? '';
       final address = [village, mohalla, ward].where((e) => e.isNotEmpty).join(', ');
-      
-      // Prepare the state update
+
+      // Prepare the state update with database values, but prioritize passed values for basic fields
       final newState = state.copyWith(
-        // Basic info
-        rchId: womanDetails['RichIDChanged']?.toString() ?? 
-               womanDetails['richIdChanged']?.toString() ?? 
-               womanDetails['RichID']?.toString() ?? '',
-        womanName: name.isNotEmpty ? name : (womanDetails['memberName']?.toString() ?? 
-                  womanDetails['headName']?.toString() ?? ''),
-        currentAge: currentAge,
+        // Use passed data for basic fields (this is what user expects to see)
+        rchId: rchId.isNotEmpty ? rchId : (womanDetails['RichIDChanged']?.toString() ??
+            womanDetails['richIdChanged']?.toString() ??
+            womanDetails['RichID']?.toString() ?? ''),
+        womanName: name, // Always use the passed name
+        currentAge: currentAge, // Always use the parsed age
+        mobileNo: mobile, // Always use the passed mobile
+
+        // Use database values for other fields
         ageAtMarriage: womanDetails['ageAtMarriage']?.toString() ?? '',
-        
-        // Address and contact
         address: address,
         whoseMobile: womanDetails['mobileOwner']?.toString() ?? 'Self',
-        mobileNo: womanDetails['mobileNo']?.toString() ?? '',
-        
-        // Personal details
-        religion: womanDetails['religion']?.toString() ?? 
-                 headDetails['religion']?.toString() ?? '',
-        category: womanDetails['category']?.toString() ?? 
-                 headDetails['category']?.toString() ??
-                 womanDetails['caste']?.toString() ?? 
-                 headDetails['caste']?.toString() ?? '',
-        
-        // Children details
+        religion: womanDetails['religion']?.toString() ??
+            headDetails['religion']?.toString() ?? '',
+        category: womanDetails['category']?.toString() ??
+            headDetails['category']?.toString() ??
+            womanDetails['caste']?.toString() ??
+            headDetails['caste']?.toString() ?? '',
+
+        // Children details from database
         totalChildrenBorn: childrenDetails['totalBorn']?.toString() ?? '0',
         totalLiveChildren: childrenDetails['totalLive']?.toString() ?? '0',
         totalMaleChildren: childrenDetails['totalMale']?.toString() ?? '0',
@@ -189,7 +200,7 @@ class EligibleCouleUpdateBloc
         youngestChildAge: childrenDetails['youngestAge']?.toString() ?? '0',
         youngestChildAgeUnit: _capitalizeFirst(childrenDetails['ageUnit']?.toString() ?? 'Years'),
         youngestChildGender: _capitalizeFirst(childrenDetails['youngestGender']?.toString() ?? ''),
-        
+
         // Set registration date and database tracking fields
         registrationDate: DateTime.tryParse(row['created_date_time']?.toString() ?? '') ?? DateTime.now(),
         dbRowId: dbRowId,
@@ -197,47 +208,77 @@ class EligibleCouleUpdateBloc
         beneficiaryName: name,
         clearError: true,
       );
-      
+
       print('✅ Form initialized successfully');
       print('   👤 Woman Name: ${newState.womanName}');
       print('   🆔 RCH ID: ${newState.rchId}');
       print('   📅 Age: ${newState.currentAge}');
       print('   📱 Mobile: ${newState.mobileNo}');
       print('   🏠 Address: ${newState.address}');
-      
+
       emit(newState);
-      
+
     } catch (e, stackTrace) {
       print('❌ ERROR initializing form: $e');
       print('Stack trace: $stackTrace');
-      emit(state.copyWith(
-        error: 'Failed to load beneficiary data: ${e.toString()}',
-      ));
+
+      // Even if there's an error, try to use the basic data passed from previous screen
+      try {
+        final name = data['name']?.toString() ?? '';
+        final mobile = data['mobile']?.toString() ?? data['mobileno']?.toString() ?? '';
+        final rchId = data['RichID']?.toString() ?? '';
+        final ageGender = data['ageGender']?.toString() ?? '';
+
+        String currentAge = '';
+        if (ageGender.isNotEmpty) {
+          final parts = ageGender.split('/');
+          if (parts.isNotEmpty) {
+            final agePart = parts[0].trim();
+            final ageMatch = RegExp(r'(\d+)').firstMatch(agePart);
+            if (ageMatch != null) {
+              currentAge = ageMatch.group(1) ?? '';
+            }
+          }
+        }
+
+        emit(state.copyWith(
+          rchId: rchId,
+          womanName: name,
+          currentAge: currentAge,
+          mobileNo: mobile,
+          beneficiaryName: name,
+          error: 'Using basic data only. Full details unavailable.',
+        ));
+      } catch (fallbackError) {
+        emit(state.copyWith(
+          error: 'Failed to load beneficiary data: ${e.toString()}',
+        ));
+      }
     }
   }
-  
+
   String _capitalizeFirst(String text) {
     if (text.isEmpty) return '';
     return '${text[0].toUpperCase()}${text.substring(1).toLowerCase()}';
   }
 
   Future<void> _onSubmit(
-    SubmitPressed event,
-    Emitter<EligibleCouleUpdateState> emit,
-  ) async {
+      SubmitPressed event,
+      Emitter<EligibleCouleUpdateState> emit,
+      ) async {
     if (!state.isValid) {
       emit(state.copyWith(error: 'Please fill required fields', isSubmitting: false));
       return;
     }
 
     emit(state.copyWith(isSubmitting: true, clearError: true));
-    
+
     try {
       print('\n🚀 ====== UPDATING BENEFICIARY ======');
       print('📋 DB Row ID: ${state.dbRowId}');
       print('📋 Household Ref Key: ${state.householdRefKey}');
       print('📋 Beneficiary Name: ${state.beneficiaryName}');
-      
+
       if (state.dbRowId == null || state.householdRefKey == null) {
         emit(state.copyWith(
           error: 'Missing database reference. Cannot update.',
@@ -245,10 +286,10 @@ class EligibleCouleUpdateBloc
         ));
         return;
       }
-      
+
       // Get the database
       final db = await DatabaseProvider.instance.database;
-      
+
       // Fetch the current beneficiary record
       final rows = await db.query(
         'beneficiaries',
@@ -256,7 +297,7 @@ class EligibleCouleUpdateBloc
         whereArgs: [state.dbRowId],
         limit: 1,
       );
-      
+
       if (rows.isEmpty) {
         emit(state.copyWith(
           error: 'Beneficiary record not found',
@@ -264,14 +305,13 @@ class EligibleCouleUpdateBloc
         ));
         return;
       }
-      
+
       final currentRow = rows.first;
       final beneficiaryInfoJson = currentRow['beneficiary_info'] as String? ?? '{}';
       final beneficiaryInfo = jsonDecode(beneficiaryInfoJson) as Map<String, dynamic>;
-      
+
       print('📦 Current beneficiary info: ${beneficiaryInfo.keys.join(', ')}');
-      
-      // Update only the children_details section
+
       final updatedChildrenDetails = {
         'totalBorn': state.totalChildrenBorn,
         'totalLive': state.totalLiveChildren,
@@ -281,11 +321,9 @@ class EligibleCouleUpdateBloc
         'ageUnit': state.youngestChildAgeUnit.toLowerCase(),
         'youngestGender': state.youngestChildGender.toLowerCase(),
       };
-      
-      // Update the children_details in the beneficiary_info
+
       beneficiaryInfo['children_details'] = updatedChildrenDetails;
-      
-      // Also check if children_details is nested under head_details
+
       if (beneficiaryInfo.containsKey('head_details')) {
         final headDetails = Map<String, dynamic>.from(beneficiaryInfo['head_details'] as Map? ?? {});
         if (headDetails.containsKey('childrendetails')) {
@@ -293,13 +331,11 @@ class EligibleCouleUpdateBloc
           beneficiaryInfo['head_details'] = headDetails;
         }
       }
-      
+
       print('✅ Updated children details: $updatedChildrenDetails');
-      
-      // Convert back to JSON string
+
       final updatedBeneficiaryInfoJson = jsonEncode(beneficiaryInfo);
-      
-      // Update the database
+
       final updateCount = await db.update(
         'beneficiaries',
         {
@@ -310,9 +346,9 @@ class EligibleCouleUpdateBloc
         where: 'id = ?',
         whereArgs: [state.dbRowId],
       );
-      
+
       print('✅ Updated $updateCount row(s) in database');
-      
+
       if (updateCount > 0) {
         emit(state.copyWith(isSubmitting: false, isSuccess: true));
       } else {
@@ -321,7 +357,7 @@ class EligibleCouleUpdateBloc
           isSubmitting: false,
         ));
       }
-      
+
     } catch (e, stackTrace) {
       print('❌ ERROR updating beneficiary: $e');
       print('Stack trace: $stackTrace');

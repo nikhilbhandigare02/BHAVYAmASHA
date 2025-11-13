@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:developer' as developer;
@@ -12,55 +14,58 @@ class ChildCareCountProvider {
     try {
       developer.log('Getting registered child count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
-      
+
       // Check if beneficiaries table exists
       final tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
       developer.log('Available tables: ${tables.map((e) => e['name']).toList()}', name: 'ChildCareCountProvider');
-      
+
       final beneficiariesTable = tables.any((t) => t['name'] == 'beneficiaries');
       if (!beneficiariesTable) {
         developer.log('Beneficiaries table does not exist', name: 'ChildCareCountProvider');
         return 0;
       }
-      
-      // First, get the total count of non-deleted records
-      final totalCount = await db.rawQuery('''
-        SELECT COUNT(*) as count FROM beneficiaries WHERE is_deleted = 0
-      ''');
-      developer.log('Total non-deleted beneficiaries: ${totalCount.first['count']}', 
-                   name: 'ChildCareCountProvider');
-      
-      // Get count of child beneficiaries
-      final query = '''
-        SELECT COUNT(*) as count, 
-               SUM(CASE WHEN beneficiary_info LIKE '%"is_child":true%' OR 
-                           beneficiary_info LIKE '%"is_child": true%' THEN 1 ELSE 0 END) as is_child_count,
-               SUM(CASE WHEN beneficiary_info LIKE '%"date_of_birth":%' AND 
-                           beneficiary_info NOT LIKE '%"date_of_birth":null%' THEN 1 ELSE 0 END) as has_dob_count
-        FROM beneficiaries 
-        WHERE is_deleted = 0
-      ''';
-      
-      developer.log('Executing query: $query', name: 'ChildCareCountProvider');
-      final count = await db.rawQuery(query);
-      
-      final result = count.first['count'] as int? ?? 0;
-      final isChildCount = count.first['is_child_count'] as int? ?? 0;
-      final hasDobCount = count.first['has_dob_count'] as int? ?? 0;
-      
-      developer.log('''
-      Count results:
-      - Total: $result
-      - Has is_child: $isChildCount
-      - Has date_of_birth: $hasDobCount
-      ''', name: 'ChildCareCountProvider');
-      
-      // Return the count of records that match either condition
-      final finalCount = isChildCount > 0 ? isChildCount : hasDobCount;
-      developer.log('Final registered children count: $finalCount', name: 'ChildCareCountProvider');
-      
-      return finalCount;
-      
+
+      // First, get all child beneficiaries
+      final List<Map<String, dynamic>> rows = await db.query(
+        'beneficiaries',
+        where: 'is_deleted = ? AND is_adult = ?',
+        whereArgs: [0, 0], // 0 for false, 1 for true
+      );
+
+      int childCount = 0;
+
+      for (final row in rows) {
+        try {
+          final info = row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : row['beneficiary_info'];
+
+          if (info is! Map) continue;
+
+          // Match the exact same criteria as RegisterChildListScreen
+          final memberType = (info['memberType']?.toString() ?? '').toLowerCase();
+          final relation = (info['relation']?.toString() ?? '').toLowerCase();
+          final name = info['name']?.toString() ??
+                      info['memberName']?.toString() ??
+                      info['member_name']?.toString() ?? '';
+
+          // Only count if it's a child and has a name
+          if ((memberType == 'child' ||
+               relation == 'child' ||
+               relation == 'son' ||
+               relation == 'daughter') &&
+              name.isNotEmpty) {
+            childCount++;
+          }
+        } catch (e) {
+          developer.log('Error processing beneficiary: $e', name: 'ChildCareCountProvider');
+          continue;
+        }
+      }
+
+      developer.log('Found $childCount registered child beneficiaries', name: 'ChildCareCountProvider');
+      return childCount;
+
     } catch (e, stackTrace) {
       developer.log('Error in getRegisteredChildCount: $e', 
                   name: 'ChildCareCountProvider',
@@ -70,51 +75,42 @@ class ChildCareCountProvider {
     }
   }
 
-  // Get count of child registration due
   Future<int> getRegistrationDueCount() async {
     try {
       developer.log('Getting registration due count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
       
-      // Check if child_care_activities table exists
-      final tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
-      final childCareTable = tables.any((t) => t['name'] == 'child_care_activities');
-      
-      if (!childCareTable) {
-        developer.log('child_care_activities table does not exist', name: 'ChildCareCountProvider');
-        return 0;
+       final rows = await db.query(
+        'beneficiaries',
+        where: 'is_deleted = ? AND beneficiary_state = ?',
+        whereArgs: [0, 'registration_due'],
+      );
+
+      int count = 0;
+      for (final row in rows) {
+        try {
+          // Parse beneficiary_info to check if it's a child
+          dynamic info;
+          if (row['beneficiary_info'] is String) {
+            info = jsonDecode(row['beneficiary_info'] as String);
+          } else {
+            info = row['beneficiary_info'];
+          }
+
+          if (info is! Map) continue;
+
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType == 'child') {
+            count++;
+          }
+        } catch (e) {
+          developer.log('Error processing beneficiary: $e', name: 'ChildCareCountProvider');
+          continue;
+        }
       }
       
-      // First, check what states exist in the child_care_activities table
-      final states = await db.rawQuery('''
-        SELECT DISTINCT child_care_state, COUNT(*) as count 
-        FROM child_care_activities 
-        WHERE is_deleted = 0 OR is_deleted IS NULL
-        GROUP BY child_care_state
-      ''');
-      
-      developer.log('Available child care states:', name: 'ChildCareCountProvider');
-      for (var state in states) {
-        developer.log('- ${state['child_care_state']}: ${state['count']}', name: 'ChildCareCountProvider');
-      }
-      
-      // Get count of children due for registration
-      final query = '''
-        SELECT COUNT(DISTINCT b.id) as count
-        FROM beneficiaries b
-        INNER JOIN child_care_activities c ON b.unique_key = c.beneficiary_ref_key
-        WHERE b.is_deleted = 0 
-        AND (c.is_deleted = 0 OR c.is_deleted IS NULL)
-        AND (c.child_care_state = 'REGISTRATION_DUE' OR c.child_care_state = 'registration_due' OR c.child_care_state LIKE '%registration%')
-      ''';
-      
-      developer.log('Executing query: $query', name: 'ChildCareCountProvider');
-      final count = await db.rawQuery(query);
-      
-      final result = count.first['count'] as int? ?? 0;
-      developer.log('Found $result children due for registration', name: 'ChildCareCountProvider');
-      
-      return result;
+      developer.log('Found $count children due for registration', name: 'ChildCareCountProvider');
+      return count;
       
     } catch (e, stackTrace) {
       developer.log('Error in getRegistrationDueCount: $e', 
@@ -131,47 +127,46 @@ class ChildCareCountProvider {
       developer.log('Getting tracking due count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
       
-      // Check if child_care_activities table exists
-      final tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
-      final childCareTable = tables.any((t) => t['name'] == 'child_care_activities');
-      
-      if (!childCareTable) {
-        developer.log('child_care_activities table does not exist', name: 'ChildCareCountProvider');
+      // Check if followup_form_data table exists
+      final tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='followup_form_data'");
+      if (tables.isEmpty) {
+        developer.log('followup_form_data table does not exist', name: 'ChildCareCountProvider');
         return 0;
       }
       
-      // First, check if next_visit_date column exists
-      final columns = await db.rawQuery("PRAGMA table_info(child_care_activities)");
-      final hasNextVisitDate = columns.any((col) => col['name'] == 'next_visit_date');
+      // Query followup_form_data for child tracking due forms
+      final results = await db.query(
+        'followup_form_data',
+        where: 'form_json LIKE ? OR forms_ref_key = ?',
+        whereArgs: ['%child_registration_due%', '30bycxe4gv7fqnt6'],
+      );
       
-      String query;
-      if (hasNextVisitDate) {
-        query = '''
-          SELECT COUNT(DISTINCT b.id) as count
-          FROM beneficiaries b
-          INNER JOIN child_care_activities c ON b.unique_key = c.beneficiary_ref_key
-          WHERE b.is_deleted = 0 
-          AND (c.is_deleted = 0 OR c.is_deleted IS NULL)
-          AND c.next_visit_date < DATE('now')
-        ''';
-      } else {
-        // Fallback to using created_date_time if next_visit_date doesn't exist
-        query = '''
-          SELECT COUNT(DISTINCT b.id) as count
-          FROM beneficiaries b
-          INNER JOIN child_care_activities c ON b.unique_key = c.beneficiary_ref_key
-          WHERE b.is_deleted = 0 
-          AND (c.is_deleted = 0 OR c.is_deleted IS NULL)
-          AND c.created_date_time < DATE('now', '-7 day')  -- Default to 7 days after creation
-        ''';
+      int count = 0;
+      for (final row in results) {
+        try {
+          final formJson = row['form_json'] as String?;
+          if (formJson == null || formJson.isEmpty) continue;
+          
+          final formData = jsonDecode(formJson);
+          final formType = formData['form_type']?.toString() ?? '';
+          final formsRefKey = row['forms_ref_key']?.toString() ?? '';
+          
+          // Count if it's a child registration or child tracking due form
+          final isChildRegistration = formType.toLowerCase().contains('child_registration_due');
+          final isChildTracking = formsRefKey == '30bycxe4gv7fqnt6' || 
+                                formType.toLowerCase().contains('child_tracking_due');
+          
+          if (isChildRegistration || isChildTracking) {
+            count++;
+          }
+        } catch (e) {
+          developer.log('Error processing form data: $e', name: 'ChildCareCountProvider');
+          continue;
+        }
       }
       
-      developer.log('Executing query: $query', name: 'ChildCareCountProvider');
-      final count = await db.rawQuery(query);
-      
-      final result = count.first['count'] as int? ?? 0;
-      developer.log('Found $result children with tracking due', name: 'ChildCareCountProvider');
-      return result;
+      developer.log('Found $count child tracking due records', name: 'ChildCareCountProvider');
+      return count;
       
     } catch (e, stackTrace) {
       developer.log('Error in getTrackingDueCount: $e', 
@@ -182,37 +177,65 @@ class ChildCareCountProvider {
     }
   }
 
+  // Calculate age in months from date of birth
+  int _calculateAgeInMonths(String? dobStr) {
+    if (dobStr == null || dobStr.isEmpty) return 0;
+    
+    try {
+      final dob = DateTime.parse(dobStr);
+      final now = DateTime.now();
+      final months = (now.year - dob.year) * 12 + now.month - dob.month;
+      return months;
+    } catch (e) {
+      developer.log('Error calculating age for DOB: $dobStr - $e', name: 'ChildCareCountProvider');
+      return 0;
+    }
+  }
+
+  // Check if age is between 3 and 15 months
+  bool _isAgeInRange(String? dobStr) {
+    final months = _calculateAgeInMonths(dobStr);
+    return months >= 3 && months <= 15;
+  }
+
   // Get count of HBYC (Home Based Young Child) list
   Future<int> getHBYCCount() async {
     try {
       developer.log('Getting HBYC count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
       
-      // Check if child_care_activities table exists
-      final tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
-      final childCareTable = tables.any((t) => t['name'] == 'child_care_activities');
-      
-      if (!childCareTable) {
-        developer.log('child_care_activities table does not exist', name: 'ChildCareCountProvider');
-        return 0;
+      // First, get all child beneficiaries
+      final List<Map<String, dynamic>> rows = await db.query(
+        'beneficiaries',
+        where: 'is_deleted = ? AND is_adult = ?',
+        whereArgs: [0, 0],
+      );
+
+      int hbycCount = 0;
+
+      for (final row in rows) {
+        try {
+          final info = row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : row['beneficiary_info'];
+
+          if (info is! Map) continue;
+
+          final memberType = info['memberType']?.toString() ?? '';
+          final dob = info['dob']?.toString();
+          
+          // Count only child members with age between 3-15 months
+          if (memberType == 'Child' && _isAgeInRange(dob)) {
+            hbycCount++;
+          }
+        } catch (e) {
+          developer.log('Error processing beneficiary: $e', name: 'ChildCareCountProvider');
+          continue;
+        }
       }
       
-      // Get count of HBYC children
-      final query = '''
-        SELECT COUNT(DISTINCT b.id) as count
-        FROM beneficiaries b
-        INNER JOIN child_care_activities c ON b.unique_key = c.beneficiary_ref_key
-        WHERE b.is_deleted = 0 
-        AND (c.is_deleted = 0 OR c.is_deleted IS NULL)
-        AND (c.child_care_state = 'HBYC' OR LOWER(c.child_care_state) = 'hbyc')
-      ''';
-      
-      developer.log('Executing query: $query', name: 'ChildCareCountProvider');
-      final count = await db.rawQuery(query);
-      
-      final result = count.first['count'] as int? ?? 0;
-      developer.log('Found $result HBYC children', name: 'ChildCareCountProvider');
-      return result;
+      developer.log('Found $hbycCount HBYC children', name: 'ChildCareCountProvider');
+      return hbycCount;
       
     } catch (e, stackTrace) {
       developer.log('Error in getHBYCCount: $e', 

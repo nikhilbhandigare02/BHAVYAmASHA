@@ -78,6 +78,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       // Create maps to store counts per household
       final pregnantCountMap = <String, int>{};
       final elderlyCountMap = <String, int>{};
+      final child0to1Map = <String, int>{};
+      final child1to2Map = <String, int>{};
+      final child2to5Map = <String, int>{};
       
       // First pass: Count pregnant women and elderly in all households
       for (final row in rows) {
@@ -95,18 +98,29 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             pregnantCountMap[householdRefKey] = (pregnantCountMap[householdRefKey] ?? 0) + 1;
           }
           
-          // Count elderly (65+ years old)
+          // Count children by age group and elderly (65+ years old)
           final dob = info['dob']?.toString();
           if (dob != null && dob.isNotEmpty) {
             try {
               final birthDate = DateTime.parse(dob);
               final now = DateTime.now();
-              int age = now.year - birthDate.year;
-              if (now.month < birthDate.month || 
-                  (now.month == birthDate.month && now.day < birthDate.day)) {
-                age--;
-              }
-              if (age >= 65) {
+              
+              // Calculate age in months for more precise child age grouping
+              int ageInMonths = (now.year - birthDate.year) * 12 + now.month - birthDate.month;
+              if (now.day < birthDate.day) ageInMonths--;
+              
+              // Categorize children by age group
+              if (ageInMonths >= 0 && ageInMonths < 12) {
+                // 0-1 year old
+                child0to1Map[householdRefKey] = (child0to1Map[householdRefKey] ?? 0) + 1;
+              } else if (ageInMonths >= 12 && ageInMonths < 24) {
+                // 1-2 years old
+                child1to2Map[householdRefKey] = (child1to2Map[householdRefKey] ?? 0) + 1;
+              } else if (ageInMonths >= 24 && ageInMonths < 60) {
+                // 2-5 years old
+                child2to5Map[householdRefKey] = (child2to5Map[householdRefKey] ?? 0) + 1;
+              } else if (ageInMonths >= 65 * 12) {
+                // Elderly (65+ years old)
                 elderlyCountMap[householdRefKey] = (elderlyCountMap[householdRefKey] ?? 0) + 1;
               }
             } catch (e) {
@@ -196,6 +210,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           'eligibleCouples': eligibleCouples,
           'elderly': elderly,
           'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
+          'child0to1': child0to1Map[householdRefKey] ?? 0,
+          'child1to2': child1to2Map[householdRefKey] ?? 0,
+          'child2to5': child2to5Map[householdRefKey] ?? 0,
           '_raw': r,
         };
       }).toList();
