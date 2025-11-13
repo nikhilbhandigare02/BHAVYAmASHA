@@ -7,7 +7,25 @@ abstract class CBACFormEvent extends Equatable {
 }
 
 class CbacOpened extends CBACFormEvent {
-  const CbacOpened();
+  final String? beneficiaryId;
+  final String? hhid;
+  
+  const CbacOpened({
+    this.beneficiaryId,
+    this.hhid,
+  });
+  
+  @override
+  List<Object?> get props => [beneficiaryId, hhid];
+}
+
+class CbacBeneficiaryLoaded extends CBACFormEvent {
+  final Map<String, dynamic> beneficiaryData;
+  
+  const CbacBeneficiaryLoaded(this.beneficiaryData);
+  
+  @override
+  List<Object?> get props => [beneficiaryData];
 }
 
 class CbacConsentDialogShown extends CBACFormEvent {
@@ -36,4 +54,8 @@ class CbacFieldChanged extends CBACFormEvent {
   const CbacFieldChanged(this.keyPath, this.value);
   @override
   List<Object?> get props => [keyPath, value];
+}
+
+class CbacSubmitted extends CBACFormEvent {
+  const CbacSubmitted();
 }

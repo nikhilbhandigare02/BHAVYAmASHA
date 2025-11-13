@@ -122,7 +122,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         }
       }
 
-      // Second pass: build beneficiary cards
+
       for (final hhId in householdMap.keys) {
         final household = householdMap[hhId]!;
         final headData = household['head'] as Map?;
@@ -151,6 +151,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
           beneficiaries.add({
             'hhId': hhId,
+            'unique_key': row['unique_key']?.toString() ?? '', // ADD THIS LINE
             'RegitrationDate': createdDate,
             'RegitrationType': 'General',
             'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11
@@ -202,6 +203,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
           beneficiaries.add({
             'hhId': hhId,
+            'unique_key': row['unique_key']?.toString() ?? '', // ADD THIS LINE
             'RegitrationDate': createdDate,
             'RegitrationType': 'General',
             'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11
@@ -270,6 +272,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
           beneficiaries.add({
             'hhId': hhId,
+            'unique_key': row['unique_key']?.toString() ?? '', // ADD THIS LINE
             'RegitrationDate': createdDate,
             'RegitrationType': 'Child',
             'BeneficiaryID': (row['unique_key']?.toString().length ?? 0) > 11
@@ -621,7 +624,31 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 borderRadius: 6,
                 width: 100,
                 onPress: () {
-                  Navigator.pushNamed(context, Route_Names.cbacScreen);
+                  // Use the original unique_key instead of the truncated BeneficiaryID
+                  final beneficiaryId = data['unique_key']?.toString() ?? data['BeneficiaryID']?.toString() ?? '';
+                  final hhid = data['hhId']?.toString() ?? '';
+
+                  if (beneficiaryId.isEmpty || hhid.isEmpty) {
+                    debugPrint('Warning: Missing required data for CBAC - BeneficiaryID: $beneficiaryId, hhId: $hhid');
+                    debugPrint('Available data keys: ${data.keys.join(', ')}');
+                  }
+
+                  Navigator.pushNamed(
+                    context,
+                    Route_Names.cbacScreen,
+                    arguments: {
+                      'beneficiaryId': data['unique_key']?.toString() ?? '', // This will now have value
+                      'hhid': data['hhId']?.toString() ?? '',
+                    },
+                  );
+                  if (beneficiaryId.isNotEmpty && hhid.isNotEmpty) {
+                    debugPrint('✅ CBAC Navigation Data:');
+                    debugPrint('   Beneficiary ID: $beneficiaryId');
+                    debugPrint('   Household ID: $hhid');
+                    debugPrint('   Name: ${data['Name']}');
+                  } else {
+                    debugPrint('❌ Missing data - BeneficiaryID: $beneficiaryId, hhId: $hhid');
+                  }
                 },
               ),
             ),

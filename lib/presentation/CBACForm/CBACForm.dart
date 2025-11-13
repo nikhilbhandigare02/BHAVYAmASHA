@@ -17,7 +17,14 @@ import 'package:sizer/sizer.dart';
 import 'bloc/cbac_form_bloc.dart';
 
 class Cbacform extends StatefulWidget {
-  const Cbacform({super.key});
+  final String? beneficiaryId;
+  final String? hhid;
+
+  const Cbacform({
+    super.key,
+    this.beneficiaryId,
+    this.hhid,
+  });
 
   @override
   State<Cbacform> createState() => _CbacformState();
@@ -27,9 +34,15 @@ class _CbacformState extends State<Cbacform> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final beneficiaryId = widget.beneficiaryId ?? args?['beneficiaryId']?.toString();
+    final hhid = widget.hhid ?? args?['hhid']?.toString();
 
     return BlocProvider(
-      create: (_) => CbacFormBloc()..add(const CbacOpened()),
+      create: (_) => CbacFormBloc()..add(CbacOpened(
+        beneficiaryId: beneficiaryId,
+        hhid: hhid,
+      )),
       child: Scaffold(
         appBar: AppHeader(
           screenTitle: l10n.cbacFormTitle,
@@ -41,9 +54,28 @@ class _CbacformState extends State<Cbacform> {
                 p.consentDialogShown != c.consentDialogShown ||
                 p.consentAgreed != c.consentAgreed ||
                 p.errorMessage != c.errorMessage ||
-                p.missingKeys != c.missingKeys,
+                p.missingKeys != c.missingKeys ||
+                p.isSuccess != c.isSuccess,
             listener: (context, state) async {
               final l10n = AppLocalizations.of(context);
+              
+              // Handle form submission success
+              if (state.isSuccess) {
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    SnackBar(
+                      content: Text( 'Form saved successfully'),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                // Navigate back after a short delay
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  Navigator.of(context).pop();
+                });
+              }
+              
               if (state.consentDialogShown && !state.consentAgreed) {
                 await showDialog(
                   context: context,
@@ -220,7 +252,7 @@ class _CbacformState extends State<Cbacform> {
                               isLoading: state.submitting,
                               onPress: () {
                                 if (state.activeTab == tabs.length - 1) {
-                                  // TODO: submit handling
+                                  context.read<CbacFormBloc>().add(const CbacSubmitted());
                                 } else {
                                   context.read<CbacFormBloc>().add(const CbacNextTab());
                                 }
@@ -283,7 +315,7 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
         debugPrint('   Username: ${user['user_name']}');
         debugPrint('   Role ID: ${user['role_id']}');
         
-        // Try to parse and print details if they exist
+
         if (user['details'] != null) {
           try {
             final details = jsonDecode(user['details']);
@@ -297,7 +329,7 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
         }
         debugPrint('   --------------------');
       }
-      
+
       // Close the database
       await db.close();
       
@@ -958,7 +990,7 @@ class _PartDTab extends StatelessWidget {
         final q1 = state.data['partD.q1'] as String?;
         final q2 = state.data['partD.q2'] as String?;
 
-        // Dropdown labels and their implicit indices used as scores
+
         final l10n = AppLocalizations.of(context)!;
         final options = [
           l10n.cbacD_opt0,

@@ -24,6 +24,24 @@ class LocalStorageDao {
     }
   }
 
+  /// Returns the count of ANC visits for a specific beneficiary
+  Future<int> getANCVisitCount(String beneficiaryId) async {
+    try {
+      final db = await _db;
+      final result = await db.rawQuery('''
+        SELECT COUNT(*) as count 
+        FROM ${FollowupFormDataTable.table} 
+        WHERE beneficiary_ref_key = ? 
+        AND forms_ref_key = ?
+      ''', [beneficiaryId, FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration]]);
+      
+      return result.first['count'] as int? ?? 0;
+    } catch (e) {
+      print('Error getting ANC visit count: $e');
+      return 0;
+    }
+  }
+
   Future<Map<String, dynamic>?> getBeneficiaryByUniqueKey(String uniqueKey) async {
     try {
       final db = await _db;

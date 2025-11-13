@@ -30,8 +30,7 @@ class _UpdatedEligibleCoupleListScreenState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Get the arguments passed from the previous screen
-    final args = ModalRoute.of(context)?.settings.arguments;
+     final args = ModalRoute.of(context)?.settings.arguments;
     if (args != null && args is Map<String, dynamic>) {
       _initialData = args;
       print('📋 Received initial data: ${_initialData?.keys}');

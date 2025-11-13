@@ -9,6 +9,7 @@ class CbacFormState extends Equatable {
   final bool submitting;
   final String? errorMessage;
   final List<String> missingKeys;
+  final bool isSuccess;
 
   const CbacFormState({
     this.consentDialogShown = false,
@@ -18,6 +19,7 @@ class CbacFormState extends Equatable {
     this.submitting = false,
     this.errorMessage,
     this.missingKeys = const [],
+    this.isSuccess = false,
   });
 
   CbacFormState copyWith({
@@ -29,6 +31,7 @@ class CbacFormState extends Equatable {
     String? errorMessage,
     bool clearError = false,
     List<String>? missingKeys,
+    bool? isSuccess,
   }) {
     return CbacFormState(
       consentDialogShown: consentDialogShown ?? this.consentDialogShown,
@@ -38,11 +41,12 @@ class CbacFormState extends Equatable {
       submitting: submitting ?? this.submitting,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       missingKeys: clearError ? const [] : (missingKeys ?? this.missingKeys),
+      isSuccess: isSuccess ?? this.isSuccess,
     );
   }
 
   @override
-  List<Object?> get props => [consentDialogShown, consentAgreed, activeTab, data, submitting, errorMessage, missingKeys];
+  List<Object?> get props => [consentDialogShown, consentAgreed, activeTab, data, submitting, errorMessage, missingKeys, isSuccess];
 }
 
 class CbacFormInitial extends CbacFormState {
