@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart' as ffd;
 import 'package:sizer/sizer.dart';
 
 import 'NCDList.dart';
@@ -19,6 +22,59 @@ class NCDHome extends StatefulWidget {
 }
 
 class _NCDHomeState extends State<NCDHome> {
+  int _cbacFormsCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCBACFormsCount();
+    _loadCBACFormsData();
+  }
+
+  Future<void> _loadCBACFormsCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final List<Map<String, dynamic>> result = await db.query(
+        ffd.FollowupFormDataTable.table,
+        where: 'forms_ref_key = ?',
+        whereArgs: [ffd.FollowupFormDataTable.formUniqueKeys[ffd.FollowupFormDataTable.cbac]],
+      );
+
+      if (mounted) {
+        setState(() {
+          _cbacFormsCount = result.length;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading CBAC forms count: $e');
+    }
+  }
+
+  Future<void> _loadCBACFormsData() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final List<Map<String, dynamic>> result = await db.query(
+        ffd.FollowupFormDataTable.table,
+        where: 'forms_ref_key = ?',
+        whereArgs: ['vl7o6r9b6v3fbesk'],
+      );
+
+      // Log the raw query results
+      debugPrint('CBAC Forms Data (${result.length} records):');
+      for (var form in result) {
+        debugPrint('Form ID: ${form['id']}');
+        try {
+          final formJson = jsonDecode(form['form_json']);
+          debugPrint('Form Data: $formJson');
+        } catch (e) {
+          debugPrint('Error parsing form JSON: $e');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading CBAC forms data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -51,7 +107,7 @@ class _NCDHomeState extends State<NCDHome> {
                   _FeatureCard(
                     width: cardWidth,
                     title: l10n?.ncdListTitle ?? 'NCD List',
-                    count: 0,
+                    count: _cbacFormsCount,
                     image: 'assets/images/home.png',
                     onClick: () {
                       Navigator.push(
