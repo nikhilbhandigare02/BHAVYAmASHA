@@ -265,7 +265,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           'beneficiary_ref_key': state.beneficiaryRefKey ?? state.beneficiaryId,
           'mother_key': motherKey,
           'father_key': fatherKey,
-          'child_care_state': '',
+          'child_care_state': 'tracking_due',
           'device_details': jsonEncode({
             'id': deviceInfo.deviceId,
             'platform': deviceInfo.platform,

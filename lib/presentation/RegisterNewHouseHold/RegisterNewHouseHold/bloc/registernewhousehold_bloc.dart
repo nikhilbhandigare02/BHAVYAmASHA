@@ -227,6 +227,9 @@ class RegisterNewHouseholdBloc
             userDetails['asha_associated_with_facility_id'] ?? 0;
 
 
+        final ashaId = working['asha_id'] ?? userDetails['asha_id'];
+
+
         final householdPayload = {
           'server_id': null,
           'unique_key': uniqueKey,
@@ -248,7 +251,7 @@ class RegisterNewHouseholdBloc
             "instance": "prod"
           }),
           'parent_user': jsonEncode({}),
-          'current_user_key': 'local_user',
+          'current_user_key': ashaId,
           'facility_id': facilityId,
           'created_date_time': ts,
           'modified_date_time': ts,
@@ -416,7 +419,7 @@ class RegisterNewHouseholdBloc
             // 'name': userDetails['supervisor_name'] ?? '',
             // 'facility_id': userDetails['supervisor_facility_id'] ?? facilityId,
           },
-          'current_user_key':  'local_user',
+          'current_user_key':  _asInt(matchedHousehold?['current_user_key']),
           'facility_id': _asInt(matchedHousehold?['facility_id']),
           'division_id': _asInt(apiAddress['division_id']),
           'division_name': apiAddress['division_name'],
@@ -508,19 +511,6 @@ class RegisterNewHouseholdBloc
     return out;
   }
 
-  //  JSON Safe Conversion
-  dynamic _toJsonSafe(dynamic value) {
-    if (value == null) return null;
-    if (value is String || value is num || value is bool) return value;
-    if (value is DateTime) return value.toIso8601String();
-    if (value is Map) {
-      return Map.fromEntries(
-        value.entries.map((e) => MapEntry(e.key, _toJsonSafe(e.value))),
-      );
-    }
-    if (value is Iterable) return value.map(_toJsonSafe).toList();
-    return value.toString();
-  }
 
   int? _asInt(dynamic v) {
     if (v == null) return null;

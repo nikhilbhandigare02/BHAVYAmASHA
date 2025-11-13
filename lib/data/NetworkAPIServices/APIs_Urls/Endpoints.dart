@@ -9,5 +9,6 @@ class Endpoints {
   static const String getTimeStamp = '${BaseUrls.baseUrl}/app/v3/timestamp';
   static const String abhaCreated = '${BaseUrls.baseUrl}/app/v3/user_info/abha_created';
   static const String existingAbhaCreated = '${BaseUrls.baseUrl}/app/v3/user_info/existing_abha_created';
+  static const String getEligibleCoupleActivityDataByFal3 = '${BaseUrls.baseUrl}/get_eligible_couple_activity_data_by_fal3';
 
 }

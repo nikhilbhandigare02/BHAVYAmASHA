@@ -41,23 +41,33 @@ class NetworkServiceApi extends BaseApiServices{
   Future<dynamic> postApi(String url, dynamic data, {Map<String, String>? headers}) async {
     try {
       final body = data is String ? data : jsonEncode(data);
-      final response = await http.post(
-        Uri.parse(url),
-        body: body,
-        headers: {
-          ...?headers,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 50));
+      final reqHeaders = {
+        ...?headers,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      print('🌍 POST Request → $url');
+      print('📦 Headers → $reqHeaders');
+      print('📝 Body → $body');
+
+      final response = await http
+          .post(
+            Uri.parse(url),
+            body: body,
+            headers: reqHeaders,
+          )
+          .timeout(const Duration(seconds: 50));
+
+      print('📥 Response Code: ${response.statusCode}');
+      print('📥 Response Body: ${response.body}');
 
       return returnResponse(response);
     } on SocketException {
       throw NoInternetException('No Internet Connection');
     } on TimeoutException {
       throw NoInternetException('Request Timed Out');
-    } on FetchDataException {
-      throw FetchDataException('Error fetching data');
+    } on FetchDataException catch (e) {
+      throw e;
     }
   }
 }

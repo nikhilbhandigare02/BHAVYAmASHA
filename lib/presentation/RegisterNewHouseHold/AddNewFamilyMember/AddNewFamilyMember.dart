@@ -699,6 +699,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               if (state.useDob)
                                 _section(
                                   CustomDatePicker(
+                                    initialDate: state.dob,
                                     labelText: '${l.dobLabel} *',
                                     hintText: l.dateHint,
                                     onDateChanged: (d) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateDob(d!)),

@@ -55,7 +55,7 @@ class LocalStorageDao {
         'beneficiaries',
         {
           'server_id': serverId,
-          'is_synced': 1,
+          // 'is_synced': 1,
           'modified_date_time': DateTime.now().toIso8601String(),
         },
         where: 'unique_key = ?',
@@ -124,7 +124,7 @@ class LocalStorageDao {
         'households',
         {
           'server_id': serverId,
-          'is_synced': 1,
+          // 'is_synced': 1,
           'modified_date_time': DateTime.now().toIso8601String(),
         },
         where: 'unique_key = ?',

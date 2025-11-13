@@ -213,6 +213,16 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         final currentUser = await UserInfo.getCurrentUser();
         final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
 
+        final userDetails = currentUser?['details'] is String
+            ? jsonDecode(currentUser?['details'] ?? '{}')
+            : currentUser?['details'] ?? {};
+
+
+        final working = userDetails['working_location'] ?? {};
+
+        final ashaId = working['asha_id'] ?? userDetails['asha_id'];
+
+
         final geoLocation = await GeoLocation.getCurrentLocation();
         final geoLocationJson = _geoLocationJson(geoLocation);
 
@@ -303,7 +313,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
           'device_details': jsonEncode(_deviceDetails(deviceInfo)),
           'app_details': jsonEncode(_appDetails(deviceInfo)),
           'parent_user': jsonEncode({}),
-          'current_user_key': 'local_user',
+          'current_user_key': ashaId,
           'facility_id': facilityId,
           'created_date_time': ts,
           'modified_date_time': ts,
@@ -375,7 +385,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
               'device_details': jsonEncode(_deviceDetails(deviceInfo)),
               'app_details': jsonEncode(_appDetails(deviceInfo)),
               'parent_user': jsonEncode({}),
-              'current_user_key': 'local_user',
+              'current_user_key': ashaId,
               'facility_id': facilityId,
               'created_date_time': ts,
               'modified_date_time': ts,
@@ -470,7 +480,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
             final apiPayload = {
               'unique_key': savedHead['unique_key'],
-              'id': null,
+              'id': savedHead['id'],
               'household_ref_key': savedHead['household_ref_key'],
               'beneficiary_state': [
                 {
@@ -512,7 +522,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
                 'user_key': userDetails['supervisor_user_key'] ?? '',
                 'name': userDetails['supervisor_name'] ?? '',
               }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
-              'current_user_key': 'local_user',
+              'current_user_key': savedHead['current_user_key'] ?? ashaId,
               'facility_id': savedHead['facility_id'] ?? facilityId,
               'created_date_time': savedHead['created_date_time'] ?? ts,
               'modified_date_time': savedHead['modified_date_time'] ?? ts,

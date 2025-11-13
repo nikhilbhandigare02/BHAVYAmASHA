@@ -590,24 +590,17 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     },
                     value: state.mobileOwner,
                     onChanged: (v) {
-                      final bloc = context.read<SpousBloc>();
-                      bloc.add(SpUpdateMobileOwner(v));
-                      final headOwner = widget.headMobileOwner;
-                      final headNo = widget.headMobileNo?.trim();
+                      final spBloc = context.read<SpousBloc>();
+                      spBloc.add(SpUpdateMobileOwner(v));
 
-                      bool matchesHeadOwner = false;
-                      if (v != null) {
-                        if (v == 'Family Head' && headOwner == 'Self') {
-                          matchesHeadOwner = true;
-                        } else if (headOwner != null && v == headOwner) {
-                          matchesHeadOwner = true;
+                      if (v == 'Family Head') {
+                        final headNo = (widget.headMobileNo?.trim() ??
+                            context.read<AddFamilyHeadBloc>().state.mobileNo?.trim());
+                        if (headNo != null && headNo.isNotEmpty) {
+                          spBloc.add(SpUpdateMobileNo(headNo));
                         }
-                      }
-
-                      if (matchesHeadOwner && headNo != null && headNo.isNotEmpty) {
-                        bloc.add(SpUpdateMobileNo(headNo));
                       } else {
-                        bloc.add(const SpUpdateMobileNo(''));
+                        spBloc.add(const SpUpdateMobileNo(''));
                       }
                     },
                     validator: (value) => Validations.validateWhoMobileNo(l, value),
@@ -619,13 +612,13 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 _section(
                   CustomTextField(
-                    key: ValueKey('spouse_mobile_${state.mobileNo ?? ''}')
-,
+                    key: ValueKey('spouse_mobile'),
                     labelText: '${l.mobileLabel} *',
                     hintText: '${l.mobileLabel} *',
                     keyboardType: TextInputType.number,
                     maxLength: 10,
                     initialValue: state.mobileNo,
+                    readOnly: state.mobileOwner == 'Family Head',
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMobileNo(v.trim())),
                     validator: (value) {
                       final owner = state.mobileOwner;

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/repositories/EligibleCoupleRepository.dart';
 import 'package:sizer/sizer.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -22,10 +23,12 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
   int eligibleCouplesCount = 0;
   int updatedEligibleCouplesCount = 0;
   bool isLoading = true;
+  final EligibleCoupleRepository _ecRepo = EligibleCoupleRepository();
 
   @override
   void initState() {
     super.initState();
+    _startEcScheduler();
     _loadCounts();
   }
 
@@ -33,18 +36,15 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     try {
       final db = await DatabaseProvider.instance.database;
       
-      // Get total eligible couples
       final eligibleCouples = await db.query('beneficiaries');
       int totalEligible = 0;
       
-      // Count eligible females in the household
       for (final row in eligibleCouples) {
         try {
           final info = jsonDecode(row['beneficiary_info'] as String? ?? '{}');
           final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
           final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
           
-          // Check if head is eligible female
           if (_isEligibleFemale(head)) {
             totalEligible++;
           }
@@ -58,8 +58,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         }
       }
       
-      // Count all eligible couples (both protected and unprotected)
-      // We'll use the same logic as in _loadCouples to count eligible females
+
       int totalUpdatedEligible = 0;
       
       for (final row in eligibleCouples) {
@@ -68,7 +67,6 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
           final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
           final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
           
-          // Check if head is eligible female
           if (_isEligibleFemale(head)) {
             totalUpdatedEligible++;
           }
@@ -99,8 +97,14 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     }
   }
 
+  Future<void> _startEcScheduler() async {
+    await _ecRepo.startAutoSyncEligibleCoupleActivitiesFromCurrentUser(
+      lastId: '691560a5dd20eb7fbb883e83',
+      limit: 20,
+    );
+  }
+
   bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
-    // Check if person is female and within childbearing age (15-49)
     final gender = person['gender']?.toString().toLowerCase() ?? '';
     if (gender != 'f' && gender != 'female') return false;
     
@@ -118,8 +122,13 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       }
     }
     
-    // If we can't determine age, assume eligible if female
     return true;
+  }
+
+  @override
+  void dispose() {
+    _ecRepo.stopAutoSyncEligibleCoupleActivities();
+    super.dispose();
   }
 
   @override

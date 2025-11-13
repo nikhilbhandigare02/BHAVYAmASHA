@@ -240,6 +240,7 @@ class AddnewfamilymemberBloc
         // Get current user info
         final currentUser = await UserInfo.getCurrentUser();
         final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
+        final ashaId = currentUser?['asha_id'] ?? 0;
 
         final geoLocation = await GeoLocation.getCurrentLocation();
         final locationData = Map<String, String>.from(geoLocation.toJson());
@@ -439,7 +440,7 @@ class AddnewfamilymemberBloc
             'package_name': deviceInfo.packageName,
           }),
           'parent_user': jsonEncode({}),
-          'current_user_key': 'local_user',
+          'current_user_key': ashaId,
           'facility_id': facilityId,
           'created_date_time': ts,
           'modified_date_time': ts,
@@ -514,7 +515,7 @@ class AddnewfamilymemberBloc
                 'package_name': deviceInfo.packageName,
               }),
               'parent_user': jsonEncode({}),
-              'current_user_key': 'local_user',
+              'current_user_key': ashaId,
               'facility_id': facilityId,
               'created_date_time': ts,
               'modified_date_time': ts,
@@ -651,7 +652,7 @@ class AddnewfamilymemberBloc
                 'user_key': userDetails['supervisor_user_key'] ?? '',
                 'name': userDetails['supervisor_name'] ?? '',
               }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
-              'current_user_key': 'local_user',
+              'current_user_key': savedMember['current_user_key'] ?? facilityId,
               'facility_id': savedMember['facility_id'] ?? facilityId,
               'created_date_time': savedMember['created_date_time'] ?? ts,
               'modified_date_time': savedMember['modified_date_time'] ?? ts,
@@ -763,6 +764,14 @@ class AddnewfamilymemberBloc
         // Get current user info
         final currentUser = await UserInfo.getCurrentUser();
         final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
+
+
+        final userDetails = currentUser?['details'] is String
+            ? jsonDecode(currentUser?['details'] ?? '{}')
+            : currentUser?['details'] ?? {};
+        final working = userDetails['working_location'] ?? {};
+        final ashaId = working['asha_id'] ?? userDetails['asha_id'];
+
 
         final geoLocation = await GeoLocation.getCurrentLocation();
         final locationData = Map<String, String>.from(geoLocation.toJson());
@@ -968,7 +977,7 @@ class AddnewfamilymemberBloc
             'package_name': deviceInfo.packageName,
           }),
           'parent_user': jsonEncode({}),
-          'current_user_key': 'local_user',
+          'current_user_key': ashaId,
           'facility_id': facilityId,
           'created_date_time': ts,
           'modified_date_time': ts,
