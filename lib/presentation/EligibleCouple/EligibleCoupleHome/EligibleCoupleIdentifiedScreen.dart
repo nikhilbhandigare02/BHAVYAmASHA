@@ -319,6 +319,7 @@ class _EligibleCoupleIdentifiedScreenState
               arguments: {
                 'hhId': hhIdLast11,
                 'name': name,
+                'unique_key': rowData['unique_key']?.toString() ?? '',
               },
             );
 

@@ -163,7 +163,7 @@ class AddnewfamilymemberBloc
       print('Updated deathPlace: ${newState.deathPlace}');
     });
 
-    on<AnmSubmit>((event, emit) async {
+    on<AnmSubmit>((event,      emit) async {
       emit(
         state.copyWith(postApiStatus: PostApiStatus.loading, clearError: true),
       );

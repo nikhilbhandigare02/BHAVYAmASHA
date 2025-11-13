@@ -356,9 +356,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
     final hhId = args['hhId']?.toString();
     final name = args['name']?.toString();
 
-    // Initialize BLoC with beneficiaryId and householdId
+    // Initialize BLoC with beneficiary_ref_key and householdId
     final bloc = RegisterChildFormBloc(
-      beneficiaryId: name,
+      beneficiaryId: (args['beneficiary_ref_key']?.toString() ?? args['beneficiaryId']?.toString()),
       householdId: hhId,
     );
 

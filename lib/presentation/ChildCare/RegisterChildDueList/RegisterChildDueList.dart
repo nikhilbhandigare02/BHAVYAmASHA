@@ -416,15 +416,17 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     final Color primary = Theme.of(context).primaryColor;
 
     return InkWell(
-      onTap: () {
+      onTap:  () {
         final name = data['Name'] ?? '';
         final ageGender = data['Age|Gender']?.toString().split(' | ') ?? [];
         final gender = ageGender.length > 1 ? ageGender[1] : '';
         final mobile = data['Mobileno.'] ?? '';
         final hhId = data['hhId']?.toString() ?? '';
-        final rchId = data['RchID'] ?? '';
+        final rchId = data['R chID'] ?? '';
         final fatherName = data['FatherName'] ?? '';
-        final beneficiaryId = data['BeneficiaryID']?.toString() ?? '';
+        final beneficiaryId = (data['_raw'] is Map && (data['_raw']['unique_key'] != null))
+            ? data['_raw']['unique_key'].toString()
+            : (data['BeneficiaryID']?.toString() ?? '');
 
         final args = <String, dynamic>{
           'hhId': hhId,
@@ -434,6 +436,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           'rchId': rchId,
           'fatherName': fatherName,
           'beneficiaryId': beneficiaryId,
+          'beneficiary_ref_key': beneficiaryId,
         };
 
         final route = RegisterChildDueListFormScreen.route(

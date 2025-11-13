@@ -43,36 +43,40 @@ class NetworkServiceApi extends BaseApiServices{
       throw NoInternetException('No Internet Connection');
     } on TimeoutException {
       throw NoInternetException('Request Timed Out');
-    } on FetchDataException {
-      throw FetchDataException('Error fetching data');
+    } on FetchDataException catch (e) {
+      // Re-throw original message instead of masking it
+      throw e;
     }
   }
 }
 
 dynamic returnResponse(http.Response response) {
-  try {
-    final responseJson = jsonDecode(response.body);
+  final status = response.statusCode;
+  final text = response.body ?? '';
 
-    switch (response.statusCode) {
-      case 200:
-      case 201:
-        return responseJson;
-      case 400:
-        throw BadRequestException(responseJson['message'] ?? 'Invalid request');
-      case 401:
-        throw UnAuthorizedException(responseJson['message'] ?? 'Unauthorized');
-      case 403:
-        throw UnAuthorizedException(responseJson['message'] ?? 'Forbidden');
-      case 404:
-        throw NotFoundException(responseJson['message'] ?? 'Resource not found');
-      case 500:
-      default:
-        throw FetchDataException(
-          responseJson['message'] ??
-              'Error occurred while communication with server. Status code: ${response.statusCode}',
-        );
-    }
-  } catch (e) {
-    throw FetchDataException('Invalid response from server');
+  Map<String, dynamic>? asJson;
+  try {
+    if (text.isNotEmpty) asJson = jsonDecode(text) as Map<String, dynamic>;
+  } catch (_) {
+    asJson = null;
+  }
+
+  if (status == 200 || status == 201) {
+    return asJson ?? text;
+  }
+
+  final message = asJson?['message'] ??
+      'HTTP $status: ' + (text.length > 300 ? text.substring(0, 300) : text);
+
+  switch (status) {
+    case 400:
+      throw BadRequestException(message);
+    case 401:
+    case 403:
+      throw UnAuthorizedException(message);
+    case 404:
+      throw NotFoundException(message);
+    default:
+      throw FetchDataException(message);
   }
 }

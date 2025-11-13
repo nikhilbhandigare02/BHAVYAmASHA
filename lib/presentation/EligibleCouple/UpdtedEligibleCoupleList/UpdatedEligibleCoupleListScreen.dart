@@ -423,7 +423,6 @@ class _UpdatedEligibleCoupleListScreenState
           ),
         );
         
-        // If the form was submitted successfully (returned true), refresh the data
         if (result == true && mounted) {
           await _loadCouples();
         }

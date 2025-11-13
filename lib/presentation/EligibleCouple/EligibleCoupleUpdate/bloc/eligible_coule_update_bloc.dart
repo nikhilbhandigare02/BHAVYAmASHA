@@ -43,67 +43,89 @@ class EligibleCouleUpdateBloc
     try {
       final hhId = data['hhId']?.toString() ?? '';
       final name = data['name']?.toString() ?? '';
-      
-      if (hhId.isEmpty || name.isEmpty) {
+      final uniqueKey = data['unique_key']?.toString() ?? '';
+
+      if ((hhId.isEmpty || name.isEmpty) && uniqueKey.isEmpty) {
         print('❌ ERROR: Missing hhId or name');
         emit(state.copyWith(error: 'Missing household ID or name'));
         return;
       }
-      
+
       print('🔍 Loading data from database for:');
       print('   HH ID (last 11): $hhId');
       print('   Name: $name');
-      
-      // Query the database - match household_ref_key ending with hhId
-      final db = await DatabaseProvider.instance.database;
-      final rows = await db.query(
-        'beneficiaries',
-        where: 'household_ref_key LIKE ?',
-        whereArgs: ['%$hhId'],
-      );
-      
-      if (rows.isEmpty) {
-        print('❌ ERROR: No beneficiary found with household_ref_key ending in: $hhId');
-        emit(state.copyWith(error: 'Beneficiary not found'));
-        return;
+      if (uniqueKey.isNotEmpty) {
+        print('   Unique Key: $uniqueKey');
       }
-      
-      print('✅ Found ${rows.length} potential household(s)');
-      
-      // If multiple households found, we need to find the right one by matching the name
+
+      // Get database reference
+      final db = await DatabaseProvider.instance.database;
       Map<String, dynamic>? matchedRow;
-      for (final row in rows) {
-        try {
-          final beneficiaryInfoJson = row['beneficiary_info'] as String? ?? '{}';
-          final beneficiaryInfo = jsonDecode(beneficiaryInfoJson) as Map<String, dynamic>;
-          final headDetails = Map<String, dynamic>.from(beneficiaryInfo['head_details'] as Map? ?? {});
-          final spouseDetails = Map<String, dynamic>.from(beneficiaryInfo['spouse_details'] as Map? ?? 
-                                                          headDetails['spousedetails'] as Map? ?? {});
-          
-          final headName = headDetails['headName']?.toString() ?? headDetails['memberName']?.toString() ?? '';
-          final spouseName = spouseDetails['memberName']?.toString() ?? spouseDetails['spouseName']?.toString() ?? '';
-          
-          // Check if name matches head or spouse
-          if (name.toLowerCase() == headName.toLowerCase() || name.toLowerCase() == spouseName.toLowerCase()) {
-            matchedRow = row;
-            print('✅ Found matching record for name: $name');
-            break;
-          }
-        } catch (e) {
-          print('⚠️ Error parsing row: $e');
-          continue;
+
+      // Prefer exact match by unique_key when provided
+      if (uniqueKey.isNotEmpty) {
+        final byUniqueRows = await db.query(
+          'beneficiaries',
+          where: 'unique_key = ?',
+          whereArgs: [uniqueKey],
+          limit: 1,
+        );
+        if (byUniqueRows.isNotEmpty) {
+          matchedRow = byUniqueRows.first;
+          print('✅ Found beneficiary by unique_key');
+        } else {
+          print('⚠️ No record found by unique_key. Falling back to hhId + name matching.');
         }
       }
-      
+
+      // Fallback: Query by household_ref_key and match by name
+      if (matchedRow == null) {
+        final rows = await db.query(
+          'beneficiaries',
+          where: 'household_ref_key LIKE ?',
+          whereArgs: ['%$hhId'],
+        );
+
+        if (rows.isEmpty) {
+          print('❌ ERROR: No beneficiary found with household_ref_key ending in: $hhId');
+          emit(state.copyWith(error: 'Beneficiary not found'));
+          return;
+        }
+
+        print('✅ Found ${rows.length} potential household(s)');
+
+        for (final row in rows) {
+          try {
+            final beneficiaryInfoJson = row['beneficiary_info'] as String? ?? '{}';
+            final beneficiaryInfo = jsonDecode(beneficiaryInfoJson) as Map<String, dynamic>;
+            final headDetails = Map<String, dynamic>.from(beneficiaryInfo['head_details'] as Map? ?? {});
+            final spouseDetails = Map<String, dynamic>.from(beneficiaryInfo['spouse_details'] as Map? ?? 
+                                                            headDetails['spousedetails'] as Map? ?? {});
+
+            final headName = headDetails['headName']?.toString() ?? headDetails['memberName']?.toString() ?? '';
+            final spouseName = spouseDetails['memberName']?.toString() ?? spouseDetails['spouseName']?.toString() ?? '';
+
+            if (name.toLowerCase() == headName.toLowerCase() || name.toLowerCase() == spouseName.toLowerCase()) {
+              matchedRow = row;
+              print('✅ Found matching record for name: $name');
+              break;
+            }
+          } catch (e) {
+            print('⚠️ Error parsing row: $e');
+            continue;
+          }
+        }
+      }
+
       if (matchedRow == null) {
         print('❌ ERROR: No beneficiary found with name: $name in household: $hhId');
         emit(state.copyWith(error: 'Beneficiary not found with the given name'));
         return;
       }
-      
+
       final row = matchedRow;
       print('✅ Found beneficiary record');
-      
+
       // Store the database row ID and household_ref_key for later update
       final dbRowId = row['id'] as int?;
       final householdRefKey = row['household_ref_key'] as String?;
@@ -194,6 +216,7 @@ class EligibleCouleUpdateBloc
         dbRowId: dbRowId,
         householdRefKey: householdRefKey,
         beneficiaryName: name,
+        uniqueKey: uniqueKey.isNotEmpty ? uniqueKey : (row['unique_key']?.toString() ?? ''),
         clearError: true,
       );
       
@@ -236,8 +259,7 @@ class EligibleCouleUpdateBloc
       print('📋 DB Row ID: ${state.dbRowId}');
       print('📋 Household Ref Key: ${state.householdRefKey}');
       print('📋 Beneficiary Name: ${state.beneficiaryName}');
-      
-      if (state.dbRowId == null || state.householdRefKey == null) {
+      if ((state.uniqueKey == null || state.uniqueKey!.isEmpty) && (state.dbRowId == null || state.householdRefKey == null)) {
         emit(state.copyWith(
           error: 'Missing database reference. Cannot update.',
           isSubmitting: false,
@@ -248,13 +270,23 @@ class EligibleCouleUpdateBloc
       // Get the database
       final db = await DatabaseProvider.instance.database;
       
-      // Fetch the current beneficiary record
-      final rows = await db.query(
-        'beneficiaries',
-        where: 'id = ?',
-        whereArgs: [state.dbRowId],
-        limit: 1,
-      );
+      // Fetch the current beneficiary record (prefer unique_key if available)
+      List<Map<String, Object?>> rows;
+      if ((state.uniqueKey ?? '').isNotEmpty) {
+        rows = await db.query(
+          'beneficiaries',
+          where: 'unique_key = ?',
+          whereArgs: [state.uniqueKey],
+          limit: 1,
+        );
+      } else {
+        rows = await db.query(
+          'beneficiaries',
+          where: 'id = ?',
+          whereArgs: [state.dbRowId],
+          limit: 1,
+        );
+      }
       
       if (rows.isEmpty) {
         emit(state.copyWith(
@@ -298,7 +330,8 @@ class EligibleCouleUpdateBloc
       // Convert back to JSON string
       final updatedBeneficiaryInfoJson = jsonEncode(beneficiaryInfo);
       
-      // Update the database
+      // Update the database (prefer unique_key if available)
+      final bool useUnique = (state.uniqueKey ?? '').isNotEmpty;
       final updateCount = await db.update(
         'beneficiaries',
         {
@@ -306,8 +339,8 @@ class EligibleCouleUpdateBloc
           'modified_date_time': DateTime.now().toIso8601String(),
           'is_synced': 0, // Mark as not synced since we updated locally
         },
-        where: 'id = ?',
-        whereArgs: [state.dbRowId],
+        where: useUnique ? 'unique_key = ?' : 'id = ?',
+        whereArgs: useUnique ? [state.uniqueKey] : [state.dbRowId],
       );
       
       print('✅ Updated $updateCount row(s) in database');

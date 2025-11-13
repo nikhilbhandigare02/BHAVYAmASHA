@@ -4,4 +4,6 @@ class Endpoints {
   static const String login = '${BaseUrls.baseUrl}/login';
   static const String addHousehold = '${BaseUrls.baseUrl}/hsc/v4/add_household';
   static const String addBeneficiary = '${BaseUrls.baseUrl}/hsc/v4/add_beneficiary';
+  static const String trackEligibleCouple = '${BaseUrls.baseUrl}/add_eligible_couple_activity';
+  static const String addChildCareActivity = '${BaseUrls.baseUrl}/add_child_care_activity';
 }

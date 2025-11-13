@@ -645,7 +645,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     if (v == null) return;
                                     final bloc = context.read<AddnewfamilymemberBloc>();
                                     bloc.add(AnmUpdateMobileOwner(v));
-                                    if (v == 'Family Head') {
+                                    if (v      == 'Family Head') {
                                       // final headNo = widget. ?? '';
                                       // if (headNo.isNotEmpty) {
                                       //   bloc.add(AnmUpdateMobileNo(headNo));
