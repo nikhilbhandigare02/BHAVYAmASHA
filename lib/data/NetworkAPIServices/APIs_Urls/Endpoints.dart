@@ -10,5 +10,7 @@ class Endpoints {
   static const String abhaCreated = '${BaseUrls.baseUrl}/app/v3/user_info/abha_created';
   static const String existingAbhaCreated = '${BaseUrls.baseUrl}/app/v3/user_info/existing_abha_created';
   static const String getEligibleCoupleActivityDataByFal3 = '${BaseUrls.baseUrl}/get_eligible_couple_activity_data_by_fal3';
+  static const String getChildCareActivityDataByFal3 = '${BaseUrls.baseUrl}/get_child_care_activity_data_by_fal3';
+  static const String getBeneficiary = '${BaseUrls.baseUrl}/hsc/v4/get_beneficiary';
 
 }

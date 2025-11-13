@@ -239,8 +239,15 @@ class AddnewfamilymemberBloc
 
         // Get current user info
         final currentUser = await UserInfo.getCurrentUser();
-        final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
-        final ashaId = currentUser?['asha_id'] ?? 0;
+        final userDetails = currentUser?['details'] is String
+            ? jsonDecode(currentUser?['details'] ?? '{}')
+            : currentUser?['details'] ?? {};
+
+        final working = userDetails['working_location'] ?? {};
+        final facilityId = working['asha_associated_with_facility_id'] ??
+            userDetails['asha_associated_with_facility_id'] ?? 0;
+        final ashaUniqueKey = userDetails['unique_key'] ?? {};
+
 
         final geoLocation = await GeoLocation.getCurrentLocation();
         final locationData = Map<String, String>.from(geoLocation.toJson());
@@ -440,7 +447,7 @@ class AddnewfamilymemberBloc
             'package_name': deviceInfo.packageName,
           }),
           'parent_user': jsonEncode({}),
-          'current_user_key': ashaId,
+          'current_user_key': ashaUniqueKey,
           'facility_id': facilityId,
           'created_date_time': ts,
           'modified_date_time': ts,
@@ -515,7 +522,7 @@ class AddnewfamilymemberBloc
                 'package_name': deviceInfo.packageName,
               }),
               'parent_user': jsonEncode({}),
-              'current_user_key': ashaId,
+              'current_user_key': ashaUniqueKey,
               'facility_id': facilityId,
               'created_date_time': ts,
               'modified_date_time': ts,
@@ -761,16 +768,16 @@ class AddnewfamilymemberBloc
         final householdRefKey = event.hhid;
         String? headId = matchedHousehold['head_id'] as String?;
 
-        // Get current user info
         final currentUser = await UserInfo.getCurrentUser();
-        final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
-
-
         final userDetails = currentUser?['details'] is String
             ? jsonDecode(currentUser?['details'] ?? '{}')
             : currentUser?['details'] ?? {};
+
         final working = userDetails['working_location'] ?? {};
-        final ashaId = working['asha_id'] ?? userDetails['asha_id'];
+        final facilityId = working['asha_associated_with_facility_id'] ??
+            userDetails['asha_associated_with_facility_id'] ?? 0;
+        final ashaUniqueKey = userDetails['unique_key'] ?? {};
+
 
 
         final geoLocation = await GeoLocation.getCurrentLocation();
@@ -977,7 +984,7 @@ class AddnewfamilymemberBloc
             'package_name': deviceInfo.packageName,
           }),
           'parent_user': jsonEncode({}),
-          'current_user_key': ashaId,
+          'current_user_key': ashaUniqueKey,
           'facility_id': facilityId,
           'created_date_time': ts,
           'modified_date_time': ts,

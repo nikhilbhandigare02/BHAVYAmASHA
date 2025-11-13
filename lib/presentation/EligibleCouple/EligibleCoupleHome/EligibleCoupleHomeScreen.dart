@@ -30,6 +30,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     super.initState();
     _startEcScheduler();
     _loadCounts();
+    _printEligibleCoupleActivities();
   }
 
   Future<void> _loadCounts() async {
@@ -123,6 +124,26 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     }
     
     return true;
+  }
+
+  Future<void> _printEligibleCoupleActivities() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        'eligible_couple_activities',
+        orderBy: 'created_date_time DESC',
+      );
+      print('eligible_couple_activities rows: ${rows.length}');
+      for (final row in rows) {
+        try {
+          print(jsonEncode(row));
+        } catch (_) {
+          print(row.toString());
+        }
+      }
+    } catch (e) {
+      print('Error reading eligible_couple_activities: $e');
+    }
   }
 
   @override
