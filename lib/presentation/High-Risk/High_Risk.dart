@@ -37,7 +37,6 @@ class _EligibleCoupleListState extends State<HighRisk> {
         _error = '';
       });
 
-      // Get high-risk beneficiary IDs from getAncVisits
       Map<String, dynamic> highRiskBeneficiaries = {};
       try {
         final storageVisits = await SecureStorageService.getAncVisits();
@@ -69,7 +68,6 @@ class _EligibleCoupleListState extends State<HighRisk> {
         print('Error getting high-risk visits: $e');
       }
 
-      // If no high-risk beneficiaries found, show message
       if (highRiskBeneficiaries.isEmpty) {
         setState(() {
           _error = 'No high-risk ANC visits found';

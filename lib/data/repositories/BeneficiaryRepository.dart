@@ -13,7 +13,7 @@ class BeneficiaryRepository {
     final currentUser = await UserInfo.getCurrentUser();
     final userDetails = currentUser?['details'] is String
         ? jsonDecode(currentUser?['details'] ?? '{}')
-        : currentUser?['details'] ?? {};
+        :  currentUser?['details'] ?? {};
 
     String? token = await SecureStorageService.getToken();
     if ((token == null || token.isEmpty) && userDetails is Map) {
@@ -107,7 +107,6 @@ class BeneficiaryRepository {
         if (uniqueKey != null && uniqueKey.isNotEmpty) {
           final existing = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
           if (existing != null && existing.isNotEmpty) {
-            // If already synced, definitely skip
             final existingSynced = (existing['is_synced'] == 1) || (existing['is_synced']?.toString() == '1');
             if (existingSynced) {
               skipped++;

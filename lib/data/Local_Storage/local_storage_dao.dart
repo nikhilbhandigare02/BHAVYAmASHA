@@ -155,6 +155,53 @@ class LocalStorageDao {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getUnsyncedHouseholds() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'households',
+        where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 0)',
+        orderBy: 'created_date_time ASC',
+      );
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['address'] = safeJsonDecode(mapped['address']);
+        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+        mapped['household_info'] = safeJsonDecode(mapped['household_info']);
+        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error getting unsynced households: $e');
+      rethrow;
+    }
+  }
+
+  Future<int> markHouseholdSyncedByUniqueKey({required String uniqueKey, String? serverId}) async {
+    try {
+      final db = await _db;
+      final values = <String, Object?>{
+        'is_synced': 1,
+        'modified_date_time': DateTime.now().toIso8601String(),
+      };
+      if (serverId != null && serverId.isNotEmpty) {
+        values['server_id'] = serverId;
+      }
+      final changes = await db.update(
+        'households',
+        values,
+        where: 'unique_key = ?',
+        whereArgs: [uniqueKey],
+      );
+      return changes;
+    } catch (e) {
+      print('Error marking household as synced: $e');
+      rethrow;
+    }
+  }
+
   Future<int> insertBeneficiary(Map<String, dynamic> data) async {
     final db = await _db;
     final row = <String, dynamic>{
@@ -519,6 +566,53 @@ class LocalStorageDao {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getUnsyncedBeneficiaries() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'beneficiaries',
+        where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 0)',
+        orderBy: 'created_date_time ASC',
+      );
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error getting unsynced beneficiaries: $e');
+      rethrow;
+    }
+  }
+
+  Future<int> markBeneficiarySyncedByUniqueKey({required String uniqueKey, String? serverId}) async {
+    try {
+      final db = await _db;
+      final values = <String, Object?>{
+        'is_synced': 1,
+        'modified_date_time': DateTime.now().toIso8601String(),
+      };
+      if (serverId != null && serverId.isNotEmpty) {
+        values['server_id'] = serverId;
+      }
+      final changes = await db.update(
+        'beneficiaries',
+        values,
+        where: 'unique_key = ?',
+        whereArgs: [uniqueKey],
+      );
+      return changes;
+    } catch (e) {
+      print('Error marking beneficiary as synced: $e');
+      rethrow;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getDeathRecords() async {
     try {
       final db = await _db;
@@ -605,6 +699,27 @@ class LocalStorageDao {
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     } catch (e) {
       return dateStr; // Return original string if any error occurs
+    }
+  }
+}
+
+extension LocalStorageDaoReads on LocalStorageDao {
+  Future<String> getLatestBeneficiaryServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'beneficiaries',
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest beneficiary server_id: $e');
+      return '';
     }
   }
 }

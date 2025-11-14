@@ -288,9 +288,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
             'migrantWorkType': state.migrantWorkType,
             'migrantWorkPlace': state.migrantWorkPlace,
             'migrantRemarks': state.migrantRemarks,
-
-            'relation': 'head',
-            'relation_to_head': 'self',
             'AfhABHAChange': state.AfhABHAChange,
             'AfhRichIdChange': state.AfhRichIdChange,
             'createdAt': DateTime.now().toIso8601String(),

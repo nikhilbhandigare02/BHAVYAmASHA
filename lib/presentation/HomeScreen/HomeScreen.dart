@@ -20,6 +20,7 @@ import '../../data/repositories/AbhaCreated/AbhaCreated.dart';
 import '../../data/repositories/ExistingAbha/ExistingAbha.dart';
 import '../../data/repositories/TimeStamp/time_stamp.dart';
 import '../../data/repositories/BeneficiaryRepository.dart';
+import '../../data/sync/sync_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import 'TodaysProgramm.dart';
@@ -64,7 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchTimeStamp();
     _fetchAbhaCreated();
     _fetchExistingAbhaCreated();
-    _syncBeneficiariesOnOpen();
+
+
   }
   final ExistingAbhaCreatedRepository _repositoryABHA = ExistingAbhaCreatedRepository();
   ExistingAbhaCreated? _existingAbhaData;
@@ -109,20 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final String _userUniqueKey = '8X0FR8NZSU7';
   final BeneficiaryRepository _benefRepo = BeneficiaryRepository();
 
-  Future<void> _syncBeneficiariesOnOpen() async {
-    try {
-      final res = await _benefRepo.fetchAndStoreBeneficiaries(
-        lastId: '6915a9593c24b18c2b68dc3e',
-      );
-      await _loadBeneficiariesCount();
-      await _loadEligibleCouplesCount();
-      await _loadPregnantWomenCount();
 
-      print('Beneficiaries sync result: $res');
-    } catch (e) {
-      print('Error syncing beneficiaries: $e');
-    }
-  }
 
   Future<void> _fetchAbhaCreated() async {
     setState(() {
