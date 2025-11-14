@@ -30,7 +30,6 @@ class FollowupFormDataTable {
     cbac: 'Community Based Assessment Checklist',
   };
 
-  // Form unique keys - these should be unique for each form type
   static const Map<String, String> formUniqueKeys = {
     eligibleCoupleRegistration: '5i8jv97xtnuz3fwq',
     eligibleCoupleTrackingDue: '0g5au2h46icwjlvr',

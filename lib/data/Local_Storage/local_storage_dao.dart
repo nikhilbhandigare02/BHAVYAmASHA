@@ -594,9 +594,8 @@ class LocalStorageDao {
     }
   }
   
-  String _formatDeathDate(Map<String, dynamic> deathDetails) {
-    final dateStr = deathDetails['dateOfDeath'];
-    if (dateStr == null) return 'Date not available';
+  String _formatDeathDate(String dateStr) {
+    if (dateStr.isEmpty) return dateStr;
     
     try {
       final date = DateTime.tryParse(dateStr);
@@ -605,6 +604,64 @@ class LocalStorageDao {
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     } catch (e) {
       return dateStr; // Return original string if any error occurs
+    }
+  }
+
+  /// Get followup form data by form type, household ID, and beneficiary ID
+  Future<List<Map<String, dynamic>>> getFollowupFormsByHouseholdAndBeneficiary({
+    required String formType,
+    required String householdId,
+    required String beneficiaryId,
+  }) async {
+    try {
+      final db = await _db;
+      final result = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND household_ref_key = ? AND beneficiary_ref_key = ?',
+        whereArgs: [
+          FollowupFormDataTable.formUniqueKeys[formType],
+          householdId,
+          beneficiaryId,
+        ],
+        orderBy: 'created_date_time DESC',
+      );
+      
+      return result;
+    } catch (e) {
+      print('Error getting followup forms: $e');
+      return [];
+    }
+  }
+
+  /// Get PNC Mother forms by beneficiary ID
+  Future<List<Map<String, dynamic>>> getPncMotherFormsByBeneficiaryId(String beneficiaryId) async {
+    try {
+      final db = await _db;
+      final result = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND beneficiary_ref_key = ?',
+        whereArgs: [
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother],
+          beneficiaryId,
+        ],
+        orderBy: 'created_date_time DESC',
+      );
+
+      // Parse form_json for each result
+      return result.map((form) {
+        final formData = Map<String, dynamic>.from(form);
+        try {
+          if (formData['form_json'] != null) {
+            formData['form_data'] = jsonDecode(formData['form_json']);
+          }
+        } catch (e) {
+          print('Error parsing form_json: $e');
+        }
+        return formData;
+      }).toList();
+    } catch (e) {
+      print('Error getting PNC Mother forms: $e');
+      return [];
     }
   }
 }

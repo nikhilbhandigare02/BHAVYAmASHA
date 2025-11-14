@@ -304,7 +304,7 @@ class _FeatureCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                // 🔹 Title below the icon & count
+
                 SizedBox(height: 1.5.h,),
                 Text(
                   title,

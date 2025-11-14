@@ -9,6 +9,9 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
+import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../../data/Local_Storage/tables/beneficiaries_table.dart';
+import '../../../data/Local_Storage/database_provider.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../HomeScreen/HomeScreen.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
@@ -47,20 +50,21 @@ class _DeliveryOutcomeScreenState
     setState(() { _isLoading = true; });
 
     try {
-      final storageVisits = await SecureStorageService.getAncVisits();
 
-      final birthBeneficiaryIds = <String>{};
+      final db = await DatabaseProvider.instance.database;
+      final ancForms = await db.rawQuery('''
+        SELECT 
+          f.beneficiary_ref_key,
+          f.form_json,
+          f.household_ref_key
+        FROM ${FollowupFormDataTable.table} f
+        WHERE 
+          f.forms_ref_key = '${FollowupFormDataTable.formUniqueKeys['ancDueRegistration']}'
+          AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+          AND f.is_deleted = 0
+      ''');
 
-      for (var visit in storageVisits) {
-        final givesBirth = visit['gives_birth_to_baby']?.toString() == 'Yes';
-        final beneficiaryId = visit['beneficiaryId']?.toString();
-
-        if (givesBirth && beneficiaryId != null) {
-          birthBeneficiaryIds.add(beneficiaryId);
-        }
-      }
-
-      if (birthBeneficiaryIds.isEmpty) {
+      if (ancForms.isEmpty) {
         setState(() {
           _isLoading = false;
           _filtered = [];
@@ -68,26 +72,51 @@ class _DeliveryOutcomeScreenState
         return;
       }
 
-      // Get all beneficiaries and filter them
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      // Get unique beneficiary keys
+      final beneficiaryKeys = ancForms
+          .map((f) => f['beneficiary_ref_key']?.toString())
+          .where((key) => key != null && key.isNotEmpty)
+          .toSet()
+          .toList();
+
+      if (beneficiaryKeys.isEmpty) {
+        setState(() {
+          _isLoading = false;
+          _filtered = [];
+        });
+        return;
+      }
+
+      // Get beneficiary details
+      final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
+      final beneficiaries = await db.rawQuery('''
+        SELECT 
+          b.unique_key,
+          b.household_ref_key,
+          b.beneficiary_info,
+          b.created_date_time
+        FROM ${BeneficiariesTable.table} b
+        WHERE b.unique_key IN ($placeholders)
+          AND b.is_deleted = 0
+      ''', beneficiaryKeys);
+
       final couples = <Map<String, dynamic>>[];
 
-      for (final row in rows) {
-        final uniqueKey = row['unique_key']?.toString() ?? '';
-
-        // Check if this beneficiary is in our birthBeneficiaryIds set
-        if (birthBeneficiaryIds.any((id) => uniqueKey.endsWith(id))) {
-          final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
+      for (final beneficiary in beneficiaries) {
+        try {
+          final info = jsonDecode(beneficiary['beneficiary_info'] as String? ?? '{}') as Map<String, dynamic>;
           final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-          final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-
-          if (_isEligibleFemale(head)) {
-            couples.add(_formatCoupleData(row, head, spouse, isHead: true));
+          final spouse = Map<String, dynamic>.from((info['spousedetails'] as Map?) ?? const {});
+          
+          if (head.isNotEmpty && _isEligibleFemale(head)) {
+            couples.add(_formatCoupleData(beneficiary, head, spouse, isHead: true));
           }
-
+          
           if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-            couples.add(_formatCoupleData(row, spouse, head, isHead: false));
+            couples.add(_formatCoupleData(beneficiary, spouse, head, isHead: false));
           }
+        } catch (e) {
+          print('Error processing beneficiary ${beneficiary['unique_key']}: $e');
         }
       }
 
@@ -95,7 +124,6 @@ class _DeliveryOutcomeScreenState
         _filtered = couples;
         _isLoading = false;
       });
-
     } catch (e) {
       print('Error loading pregnancy outcome couples: $e');
       setState(() {

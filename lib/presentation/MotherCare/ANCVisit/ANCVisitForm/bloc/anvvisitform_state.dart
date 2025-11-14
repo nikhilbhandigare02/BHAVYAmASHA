@@ -27,6 +27,7 @@ class AnvvisitformState extends Equatable {
   final String highRisk;
   final String beneficiaryAbsent;
   final String beneficiaryId;
+  final String? householdRefKey;
 
   final bool isSubmitting;
   final bool isSuccess;
@@ -59,6 +60,7 @@ class AnvvisitformState extends Equatable {
     this.highRisk = '',
     this.beneficiaryAbsent = '',
     this.beneficiaryId = '',
+    this.householdRefKey,
     this.isSubmitting = false,
     this.isSuccess = false,
     this.error,
@@ -91,6 +93,7 @@ class AnvvisitformState extends Equatable {
     String? highRisk,
     String? beneficiaryAbsent,
     String? beneficiaryId,
+    String? householdRefKey,
     bool? isSubmitting,
     bool? isSuccess,
     String? error,
@@ -101,19 +104,19 @@ class AnvvisitformState extends Equatable {
       visitType: visitType ?? this.visitType,
       placeOfAnc: placeOfAnc ?? this.placeOfAnc,
       givesBirthToBaby: givesBirthToBaby ?? this.givesBirthToBaby,
-      dateOfInspection: dateOfInspection ?? this.dateOfInspection,
+      dateOfInspection: dateOfInspection,
       houseNumber: houseNumber ?? this.houseNumber,
       womanName: womanName ?? this.womanName,
       husbandName: husbandName ?? this.husbandName,
       rchNumber: rchNumber ?? this.rchNumber,
-      lmpDate: lmpDate ?? this.lmpDate,
-      eddDate: eddDate ?? this.eddDate,
+      lmpDate: lmpDate,
+      eddDate: eddDate,
       weeksOfPregnancy: weeksOfPregnancy ?? this.weeksOfPregnancy,
       gravida: gravida ?? this.gravida,
       isBreastFeeding: isBreastFeeding ?? this.isBreastFeeding,
-      td1Date: td1Date ?? this.td1Date,
-      td2Date: td2Date ?? this.td2Date,
-      tdBoosterDate: tdBoosterDate ?? this.tdBoosterDate,
+      td1Date: td1Date,
+      td2Date: td2Date,
+      tdBoosterDate: tdBoosterDate,
       folicAcidTablets: folicAcidTablets ?? this.folicAcidTablets,
       preExistingDisease: preExistingDisease ?? this.preExistingDisease,
       weight: weight ?? this.weight,
@@ -123,6 +126,7 @@ class AnvvisitformState extends Equatable {
       highRisk: highRisk ?? this.highRisk,
       beneficiaryAbsent: beneficiaryAbsent ?? this.beneficiaryAbsent,
       beneficiaryId: beneficiaryId ?? this.beneficiaryId,
+      householdRefKey: householdRefKey ?? this.householdRefKey,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isSuccess: isSuccess ?? this.isSuccess,
       error: clearError ? null : (error ?? this.error),
@@ -156,9 +160,10 @@ class AnvvisitformState extends Equatable {
         highRisk,
         beneficiaryAbsent,
         beneficiaryId,
+        householdRefKey,
         isSubmitting,
         isSuccess,
-    givesBirthToBaby,
+        givesBirthToBaby,
         error,
       ];
 }

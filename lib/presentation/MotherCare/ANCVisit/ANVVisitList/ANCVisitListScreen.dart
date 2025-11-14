@@ -2,7 +2,7 @@ import 'dart:convert' show jsonDecode, jsonEncode;
 
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
@@ -95,6 +95,63 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     }
   }
 
+  // Get last 11 characters of a string, or return empty string if null/empty
+  String _getLast11Chars(String? input) {
+    if (input == null || input.isEmpty) return '';
+    return input.length <= 11 ? input : input.substring(input.length - 11);
+  }
+
+  // Calculate date range for ANC visit
+  Map<String, DateTime> _calculateAncDateRanges(DateTime registrationDate) {
+    final ranges = <String, DateTime>{};
+
+    // 1st ANC: 1 month before registration to 3 months after registration
+    ranges['1st_anc_start'] = DateTime(
+      registrationDate.year,
+      registrationDate.month - 1,
+      registrationDate.day,
+    );
+    ranges['1st_anc_end'] = DateTime(
+      registrationDate.year,
+      registrationDate.month + 3,
+      registrationDate.day,
+    );
+
+    // 2nd ANC: 15 days after 1st ANC end to 3 months after that
+    final secondStart = ranges['1st_anc_end']!.add(const Duration(days: 15));
+    ranges['2nd_anc_start'] = secondStart;
+    ranges['2nd_anc_end'] = DateTime(
+      secondStart.year,
+      secondStart.month + 3,
+      secondStart.day,
+    );
+
+    // 3rd ANC: 15 days after 2nd ANC end to 3 months after that
+    final thirdStart = ranges['2nd_anc_end']!.add(const Duration(days: 15));
+    ranges['3rd_anc_start'] = thirdStart;
+    ranges['3rd_anc_end'] = DateTime(
+      thirdStart.year,
+      thirdStart.month + 3,
+      thirdStart.day,
+    );
+
+    // 4th ANC: 15 days after 3rd ANC end to 3 months after that
+    final fourthStart = ranges['3rd_anc_end']!.add(const Duration(days: 15));
+    ranges['4th_anc_start'] = fourthStart;
+    ranges['4th_anc_end'] = DateTime(
+      fourthStart.year,
+      fourthStart.month + 3,
+      fourthStart.day,
+    );
+
+    return ranges;
+  }
+
+  // Format date to dd/MM/yyyy format
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
   Map<String, dynamic>? _processPerson(
       Map<String, dynamic> row,
       Map<String, dynamic> person, {
@@ -107,23 +164,48 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       final age = _calculateAge(dob);
       final spouseName = person['spouseName'] ?? person['headName'] ?? '';
 
+      // Store COMPLETE IDs
+      final householdRefKey = row['household_ref_key']?.toString() ?? '';
+      final uniqueKey = row['unique_key']?.toString() ?? '';
+
+      // Get TRIMMED versions for display only
+      final householdRefKeyDisplay = _getLast11Chars(householdRefKey);
+      final uniqueKeyDisplay = _getLast11Chars(uniqueKey);
+
+      final registrationDate = row['created_date_time']?.toString() ?? '';
+
       // Only include if pregnant
       if (!isPregnant) return null;
 
+      // Format registration date if available
+      String formattedDate = 'N/A';
+      if (registrationDate.isNotEmpty) {
+        try {
+          final dateTime = DateTime.parse(registrationDate);
+          formattedDate = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+        } catch (e) {
+          print('⚠️ Error parsing date: $e');
+        }
+      }
+
       return {
         'id': row['id']?.toString() ?? '',
-        'unique_key': row['unique_key']?.toString() ?? '',
-        'BeneficiaryID': row['id']?.toString() ?? '',
-        'hhId': person['hhId'] ?? 'N/A',
+        // COMPLETE IDs for passing to next screen
+        'unique_key': uniqueKey,
+        'BeneficiaryID': uniqueKey,
+        'hhId': householdRefKey,
+        // DISPLAY versions (trimmed) for UI only
+        'unique_key_display': uniqueKeyDisplay,
+        'BeneficiaryID_display': uniqueKeyDisplay,
+        'hhId_display': householdRefKeyDisplay,
+        // Other fields
         'Name': name,
         'Age': age?.toString() ?? 'N/A',
         'Gender': 'Female',
         'RCH ID': person['RCH_ID'] ?? person['RichID'] ?? 'N/A',
         'Mobile No': person['mobileNo'] ?? '',
         'Husband': spouseName,
-        'LMP': person['lmp'] ?? 'N/A',
-        'EDD': person['edd'] ?? 'N/A',
-        'RegistrationDate': person['registrationDate'] ?? 'N/A',
+        'RegistrationDate': formattedDate,
         'beneficiary_info': jsonEncode(person),
         '_rawRow': row,
       };
@@ -161,7 +243,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   Future<int> _getVisitCount(String beneficiaryId) async {
     try {
       if (beneficiaryId.isEmpty) return 0;
-
 
       final count = await LocalStorageDao.instance.getANCVisitCount(beneficiaryId);
       print('✅ Visit count for $beneficiaryId: $count');
@@ -265,8 +346,14 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
     final ageGender = '${data['Age']}/F';
 
-    final uniqueKey = data['unique_key']?.toString() ?? data['BeneficiaryID']?.toString() ?? '';
-    final beneficiaryId = uniqueKey;
+    // Use COMPLETE IDs for functionality
+    final uniqueKey = data['unique_key']?.toString() ?? '';
+    final beneficiaryId = data['BeneficiaryID']?.toString() ?? '';
+    final hhId = data['hhId']?.toString() ?? '';
+
+    // Use DISPLAY versions for UI
+    final uniqueKeyDisplay = data['unique_key_display']?.toString() ?? data['BeneficiaryID_display']?.toString() ?? '';
+    final hhIdDisplay = data['hhId_display']?.toString() ?? '';
 
     final husbandName = data['Husband'] is String && data['Husband'].isNotEmpty
         ? data['Husband']
@@ -275,10 +362,23 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () {
+        // Create a new map with the COMPLETE data
+        final formData = Map<String, dynamic>.from(data);
+
+        // Ensure we pass the COMPLETE IDs (not trimmed)
+        formData['hhId'] = hhId;
+        formData['BeneficiaryID'] = beneficiaryId;
+        formData['unique_key'] = uniqueKey;
+
+        print('📤 Passing to next screen:');
+        print('   hhId (complete): $hhId');
+        print('   BeneficiaryID (complete): $beneficiaryId');
+        print('   unique_key (complete): $uniqueKey');
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Ancvisitform(beneficiaryData: data),
+            builder: (context) => Ancvisitform(beneficiaryData: formData),
           ),
         ).then((_) => _onRefresh());
       },
@@ -297,7 +397,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         ),
         child: Column(
           children: [
-            // Header strip
+            // Header strip - use DISPLAY version (trimmed)
             Container(
               decoration: BoxDecoration(
                 color: AppColors.background,
@@ -316,7 +416,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       child: Text(
-                        data['hhId'] ?? 'N/A',
+                        hhIdDisplay.isNotEmpty ? hhIdDisplay : 'N/A',
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w500,
@@ -385,7 +485,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // First Row: 6 items
+                  // First Row: 6 items - use DISPLAY version (trimmed)
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -394,7 +494,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         width: MediaQuery.of(context).size.width / 4 - 25,
                         child: _rowText(
                           l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
-                          data['BeneficiaryID'] ?? 'N/A',
+                          uniqueKeyDisplay.isNotEmpty ? uniqueKeyDisplay : 'N/A',
                         ),
                       ),
                       SizedBox(
@@ -437,41 +537,71 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
                   const SizedBox(height: 12),
 
-                  // Second Row: 5 items (LMP, EDD, and ANC visits)
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 30,
-                        child: _rowText('LMP', data['LMP'] ?? 'N/A'),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 35,
-                        child: _rowText('EDD', data['EDD'] ?? 'N/A'),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 35,
-                        child: _rowText(
-                          l10n?.firstAncLabel ?? 'First ANC',
-                          l10n?.notAvailable ?? 'N/A',
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 35,
-                        child: _rowText(
-                          l10n?.secondAncLabel ?? 'Second ANC',
-                          l10n?.notAvailable ?? 'N/A',
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 30,
-                        child: _rowText(
-                          l10n?.thirdAncLabel ?? 'Third ANC',
-                          l10n?.notAvailable ?? 'N/A',
-                        ),
-                      ),
-                    ],
+                  // ANC Visit Date Ranges
+                  FutureBuilder<int>(
+                    future: beneficiaryId.isNotEmpty
+                        ? _getVisitCount(beneficiaryId)
+                        : Future.value(0),
+                    builder: (context, snapshot) {
+                      final visitCount = snapshot.data ?? 0;
+
+                      // Parse registration date
+                      DateTime regDate;
+                      try {
+                        // Try to parse from dd/MM/yyyy format
+                        final parts = registrationDate.split('/');
+                        if (parts.length == 3) {
+                          regDate = DateTime(
+                            int.parse(parts[2]), // year
+                            int.parse(parts[1]), // month
+                            int.parse(parts[0]), // day
+                          );
+                        } else {
+                          regDate = DateTime.now();
+                        }
+                      } catch (e) {
+                        print('⚠️ Error parsing registration date: $e');
+                        regDate = DateTime.now();
+                      }
+
+                      final ancRanges = _calculateAncDateRanges(regDate);
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 1st ANC
+                          _ancDateRow(
+                            '1st ANC',
+                            ancRanges['1st_anc_start']!,
+                            ancRanges['1st_anc_end']!,
+                          ),
+                          const SizedBox(height: 6),
+
+                          // 2nd ANC
+                          _ancDateRow(
+                            '2nd ANC',
+                            ancRanges['2nd_anc_start']!,
+                            ancRanges['2nd_anc_end']!,
+                          ),
+                          const SizedBox(height: 6),
+
+                          // 3rd ANC
+                          _ancDateRow(
+                            '3rd ANC',
+                            ancRanges['3rd_anc_start']!,
+                            ancRanges['3rd_anc_end']!,
+                          ),
+                          const SizedBox(height: 6),
+
+                          // 4th ANC
+                          _ancDateRow(
+                            '4th ANC',
+                            ancRanges['4th_anc_start']!,
+                            ancRanges['4th_anc_end']!,
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -479,6 +609,35 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _ancDateRow(String label, DateTime startDate, DateTime endDate) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 70,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: AppColors.background,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            '${_formatDate(startDate)} - ${_formatDate(endDate)}',
+            style: TextStyle(
+              color: AppColors.background,
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
