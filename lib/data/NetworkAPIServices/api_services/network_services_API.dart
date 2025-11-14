@@ -36,6 +36,37 @@ class NetworkServiceApi extends BaseApiServices{
     }
   }
 
+  @override
+  Future<dynamic> getApiWithBody(String url, dynamic data, {Map<String, String>? headers}) async {
+    try {
+      final req = http.Request('GET', Uri.parse(url));
+      final body = data is String ? data : jsonEncode(data);
+      req.body = body;
+      req.headers.addAll({
+        ...?headers,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      });
+
+      print('🌍 GET (with body) Request → $url');
+      print('📦 Headers → ${req.headers}');
+      print('📝 Body → $body');
+
+      final streamed = await req.send().timeout(const Duration(seconds: 50));
+      final response = await http.Response.fromStream(streamed);
+
+      print('📥 Response Code: ${response.statusCode}');
+      print('📥 Response Body: ${response.body}');
+
+      return returnResponse(response);
+    } on SocketException {
+      throw NoInternetException('No Internet Connection');
+    } on TimeoutException {
+      throw NoInternetException('Request Timed Out');
+    } on FetchDataException catch (e) {
+      throw e;
+    }
+  }
 
   @override
   Future<dynamic> postApi(String url, dynamic data, {Map<String, String>? headers}) async {

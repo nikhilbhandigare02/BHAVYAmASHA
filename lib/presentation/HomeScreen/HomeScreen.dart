@@ -19,6 +19,8 @@ import '../../data/models/TimeStamp/Timestamp_Response.dart';
 import '../../data/repositories/AbhaCreated/AbhaCreated.dart';
 import '../../data/repositories/ExistingAbha/ExistingAbha.dart';
 import '../../data/repositories/TimeStamp/time_stamp.dart';
+import '../../data/repositories/BeneficiaryRepository.dart';
+import '../../data/sync/sync_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import 'TodaysProgramm.dart';
@@ -63,6 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchTimeStamp();
     _fetchAbhaCreated();
     _fetchExistingAbhaCreated();
+
+
   }
   final ExistingAbhaCreatedRepository _repositoryABHA = ExistingAbhaCreatedRepository();
   ExistingAbhaCreated? _existingAbhaData;
@@ -105,6 +109,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
   String? _error;
   final String _userUniqueKey = '8X0FR8NZSU7';
+  final BeneficiaryRepository _benefRepo = BeneficiaryRepository();
+
+
 
   Future<void> _fetchAbhaCreated() async {
     setState(() {

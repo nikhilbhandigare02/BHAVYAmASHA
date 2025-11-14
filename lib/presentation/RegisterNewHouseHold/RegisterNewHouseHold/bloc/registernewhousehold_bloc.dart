@@ -227,7 +227,7 @@ class RegisterNewHouseholdBloc
             userDetails['asha_associated_with_facility_id'] ?? 0;
 
 
-        final ashaId = working['asha_id'] ?? userDetails['asha_id'];
+        final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
 
         final householdPayload = {
@@ -251,7 +251,7 @@ class RegisterNewHouseholdBloc
             "instance": "prod"
           }),
           'parent_user': jsonEncode({}),
-          'current_user_key': ashaId,
+          'current_user_key': ashaUniqueKey,
           'facility_id': facilityId,
           'created_date_time': ts,
           'modified_date_time': ts,

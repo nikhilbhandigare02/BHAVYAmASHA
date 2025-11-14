@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
@@ -8,6 +9,8 @@ import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:developer' as developer;
 import 'child_care_count_provider.dart';
+import 'package:medixcel_new/data/repositories/ChildCareRepository.dart';
+import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 
 import '../HomeScreen/HomeScreen.dart';
 
@@ -21,6 +24,7 @@ class ChildCareHomeScreen extends StatefulWidget {
 class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
   final ChildCareCountProvider _countProvider = ChildCareCountProvider();
   late Future<Map<String, int>> _countsFuture;
+  final ChildCareRepository _ccRepo = ChildCareRepository();
 
   @override
   void initState() {
@@ -36,6 +40,8 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCounts();
+      _startCcScheduler();
+      _printChildCareActivities();
     });
   }
 
@@ -97,6 +103,27 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
         });
       }
     }
+  }
+
+  Future<void> _startCcScheduler() async {
+    await _ccRepo.startAutoSyncChildCareActivitiesFromCurrentUser(
+      lastId: '68ef7de137950f6821205f81',
+      limit: 20,
+    );
+  }
+
+  Future<void> _printChildCareActivities() async {
+    final db = await DatabaseProvider.instance.database;
+    final rows = await db.query('child_care_activities', orderBy: 'created_date_time DESC');
+    developer.log('child_care_activities rows: ${rows.length}', name: 'ChildCareHomeScreen');
+    for (final row in rows) {
+      developer.log(jsonEncode(row), name: 'ChildCareHomeScreen');
+    }
+  }
+  @override
+  void dispose() {
+    _ccRepo.stopAutoSyncChildCareActivities();
+    super.dispose();
   }
 
   Widget _buildCard({

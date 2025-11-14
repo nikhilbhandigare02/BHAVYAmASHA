@@ -350,6 +350,11 @@
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n.profileUpdated)),
                   );
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    Route_Names.homeScreen,
+                        (Route<dynamic> route) => false,
+                  );
                 }
                 if (state.error != null) {
                   ScaffoldMessenger.of(context).showSnackBar(

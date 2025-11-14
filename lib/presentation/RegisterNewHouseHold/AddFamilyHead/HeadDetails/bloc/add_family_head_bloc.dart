@@ -211,16 +211,15 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         final spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
 
         final currentUser = await UserInfo.getCurrentUser();
-        final facilityId = currentUser?['asha_associated_with_facility_id'] ?? 0;
-
         final userDetails = currentUser?['details'] is String
             ? jsonDecode(currentUser?['details'] ?? '{}')
             : currentUser?['details'] ?? {};
 
-
         final working = userDetails['working_location'] ?? {};
+        final facilityId = working['asha_associated_with_facility_id'] ??
+            userDetails['asha_associated_with_facility_id'] ?? 0;
+        final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
-        final ashaId = working['asha_id'] ?? userDetails['asha_id'];
 
 
         final geoLocation = await GeoLocation.getCurrentLocation();
@@ -289,9 +288,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
             'migrantWorkType': state.migrantWorkType,
             'migrantWorkPlace': state.migrantWorkPlace,
             'migrantRemarks': state.migrantRemarks,
-
-            'relation': 'head',
-            'relation_to_head': 'self',
             'AfhABHAChange': state.AfhABHAChange,
             'AfhRichIdChange': state.AfhRichIdChange,
             'createdAt': DateTime.now().toIso8601String(),
@@ -313,7 +309,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
           'device_details': jsonEncode(_deviceDetails(deviceInfo)),
           'app_details': jsonEncode(_appDetails(deviceInfo)),
           'parent_user': jsonEncode({}),
-          'current_user_key': ashaId,
+          'current_user_key': ashaUniqueKey,
           'facility_id': facilityId,
           'created_date_time': ts,
           'modified_date_time': ts,
@@ -385,7 +381,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
               'device_details': jsonEncode(_deviceDetails(deviceInfo)),
               'app_details': jsonEncode(_appDetails(deviceInfo)),
               'parent_user': jsonEncode({}),
-              'current_user_key': ashaId,
+              'current_user_key': ashaUniqueKey,
               'facility_id': facilityId,
               'created_date_time': ts,
               'modified_date_time': ts,
@@ -522,7 +518,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
                 'user_key': userDetails['supervisor_user_key'] ?? '',
                 'name': userDetails['supervisor_name'] ?? '',
               }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
-              'current_user_key': savedHead['current_user_key'] ?? ashaId,
+              'current_user_key': savedHead['current_user_key'] ?? ashaUniqueKey,
               'facility_id': savedHead['facility_id'] ?? facilityId,
               'created_date_time': savedHead['created_date_time'] ?? ts,
               'modified_date_time': savedHead['modified_date_time'] ?? ts,
