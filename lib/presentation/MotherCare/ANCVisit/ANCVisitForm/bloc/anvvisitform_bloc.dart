@@ -16,7 +16,13 @@ part 'anvvisitform_event.dart';
 part 'anvvisitform_state.dart';
 
 class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
-  AnvvisitformBloc() : super(const AnvvisitformInitial()) {
+  final String beneficiaryId;
+  final String householdRefKey;
+
+  AnvvisitformBloc({
+    required this.beneficiaryId,
+    required this.householdRefKey,
+  }) : super(const AnvvisitformInitial()) {
     on<VisitTypeChanged>((e, emit) => emit(state.copyWith(visitType: e.value)));
     on<PlaceOfAncChanged>((e, emit) => emit(state.copyWith(placeOfAnc: e.value)));
     on<DateOfInspectionChanged>((e, emit) => emit(state.copyWith(dateOfInspection: e.value)));
@@ -48,6 +54,10 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<BeneficiaryAbsentChanged>((e, emit) => emit(state.copyWith(beneficiaryAbsent: e.value)));
     on<BeneficiaryIdSet>((e, emit) => emit(state.copyWith(beneficiaryId: e.beneficiaryId)));
     on<GivesBirthToBaby>((e, emit) => emit(state.copyWith(givesBirthToBaby: e.value)));
+    on<VisitNumberChanged>((e, emit) {
+      final visitNo = int.tryParse(e.visitNumber) ?? 1;
+      emit(state.copyWith(ancVisitNo: visitNo));
+    });
 
     on<SubmitPressed>(_onSubmit);
   }
@@ -58,24 +68,22 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       final db = await DatabaseProvider.instance.database;
       final now = DateTime.now().toIso8601String();
 
+      // Form type and keys
       final formType = FollowupFormDataTable.ancDueRegistration;
-      final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'anc Due Registration';
-      final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
+      final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'ANC Due Registration';
+      final formsRefKey = 'bt7gs9rl1a5d26mz';
 
-      String? beneficiaryRefKey;
-      if (state.beneficiaryId != null && state.beneficiaryId!.contains('_')) {
-        beneficiaryRefKey = state.beneficiaryId;
-      }
-
-      final formData  = {
+      
+      final formData = {
         'form_type': formType,
         'form_name': formName,
         'unique_key': formsRefKey,
         'form_data': {
           'anc_visit_no': state.ancVisitNo,
           'visit_type': state.visitType,
-          'beneficiaryId': state.beneficiaryId,
-          'beneficiary_ref_key': beneficiaryRefKey,
+          'beneficiaryId': beneficiaryId,
+          'beneficiary_ref_key': beneficiaryId,
+          'household_ref_key': householdRefKey,
           'place_of_anc': state.placeOfAnc,
           'date_of_inspection': state.dateOfInspection?.toIso8601String(),
           'house_number': state.houseNumber,
@@ -100,45 +108,20 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'high_risk': state.highRisk,
           'gives_birth_to_baby': state.givesBirthToBaby,
           'beneficiary_absent': state.beneficiaryAbsent,
+          'created_at': now,
+          'updated_at': now,
         },
         'created_at': now,
         'updated_at': now,
       };
 
-      String householdRefKey = '';
-      String motherKey = '';
-      String fatherKey = '';
-
-      if (state.beneficiaryId != null && state.beneficiaryId!.isNotEmpty) {
-        List<Map<String, dynamic>> beneficiaryMaps = await db.query(
-          'beneficiaries',
-          where: 'unique_key = ?',
-          whereArgs: [state.beneficiaryId],
-        );
-
-        if (beneficiaryMaps.isEmpty) {
-          beneficiaryMaps = await db.query(
-            'beneficiaries',
-            where: 'id = ?',
-            whereArgs: [int.tryParse(state.beneficiaryId) ?? 0],
-          );
-        }
-
-        if (beneficiaryMaps.isNotEmpty) {
-          final beneficiary = beneficiaryMaps.first;
-          householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
-          motherKey = beneficiary['mother_key'] as String? ?? '';
-          fatherKey = beneficiary['father_key'] as String? ?? '';
-        }
-      }
-
       final formDataForDb = {
         'server_id': '',
         'forms_ref_key': formsRefKey,
         'household_ref_key': householdRefKey,
-        'beneficiary_ref_key': state.beneficiaryId,
-        'mother_key': motherKey,
-        'father_key': fatherKey,
+        'beneficiary_ref_key': beneficiaryId,
+        'mother_key': '',
+        'father_key': '',
         'child_care_state': '',
         'device_details': jsonEncode({
           'id': await DeviceInfo.getDeviceInfo().then((value) => value.deviceId),
@@ -186,13 +169,12 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
 
       try {
         final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
+        print('✅ ANC visit form saved successfully with ID: $formId');
 
         try {
           final visitData = {
             'id': formId,
-            'beneficiaryId': state.beneficiaryId.length >= 11
-                ? state.beneficiaryId.substring(state.beneficiaryId.length - 11)
-                : state.beneficiaryId,
+            'beneficiaryId': beneficiaryId,
             'house_number': state.houseNumber,
             'woman_name': state.womanName,
             'husband_name': state.husbandName,
@@ -219,26 +201,22 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'beneficiary_absent': state.beneficiaryAbsent,
             'form_data': formDataForDb,
           };
-          
+
           await SecureStorageService.saveAncVisit(visitData);
           print('ANC visit data saved to secure storage');
         } catch (e) {
           print('Error saving to secure storage: $e');
         }
-        
-        if (state.beneficiaryId != null && state.beneficiaryId!.isNotEmpty) {
-          try {
-            // Use the full unique key for the count
-            final uniqueKey = state.beneficiaryId!;
-            print('🔢 Incrementing count for full unique key: $uniqueKey');
-            final newCount = await SecureStorageService.incrementSubmissionCount(uniqueKey);
-            print('✅ New submission count for $uniqueKey: $newCount');
-          } catch (e) {
-            print('❌ Error updating submission count: $e');
-            // Don't fail the submission if counter update fails
-          }
+
+        // Update submission count
+        try {
+          print('🔢 Incrementing count for beneficiary: $beneficiaryId');
+          final newCount = await SecureStorageService.incrementSubmissionCount(beneficiaryId);
+          print('✅ New submission count: $newCount');
+        } catch (e) {
+          print('❌ Error updating submission count: $e');
         }
-        
+
         emit(state.copyWith(isSubmitting: false, isSuccess: true, error: null));
       } catch (e) {
         emit(state.copyWith(isSubmitting: false, error: 'Error saving form: $e'));

@@ -484,9 +484,9 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
               key: secureStorageKey,
               value: formJson,
             );
-            print('🔒 CBAC Form data stored in secure storage with key: $secureStorageKey');
+            print(' CBAC Form data stored in secure storage with key: $secureStorageKey');
           } catch (e) {
-            print('⚠️ Error storing CBAC form data in secure storage: $e');
+            print(' Error storing CBAC form data in secure storage: $e');
           }
 
           // Print the saved data from database
