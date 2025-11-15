@@ -57,16 +57,13 @@ class _EligibleCoupleIdentifiedScreenState
     final rows = await LocalStorageDao.instance.getAllBeneficiaries();
     final couples = <Map<String, dynamic>>[];
 
-    // Group by household
     final households = <String, List<Map<String, dynamic>>>{};
     for (final row in rows) {
       final hhKey = row['household_ref_key']?.toString() ?? '';
       households.putIfAbsent(hhKey, () => []).add(row);
     }
 
-    // Process each household
     for (final household in households.values) {
-      // Find head and spouse
       Map<String, dynamic>? head;
       Map<String, dynamic>? spouse;
 
@@ -144,8 +141,9 @@ class _EligibleCoupleIdentifiedScreenState
         ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
         : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
 
-    // children summary can live at top-level children_details or under head childrendetails/childrenDetails
     final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
+    String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
+
     Map<String, dynamic>? childrenSummary;
     if (childrenRaw != null) {
       final childrenMap = _toStringMap(childrenRaw);
@@ -161,11 +159,11 @@ class _EligibleCoupleIdentifiedScreenState
     }
     return {
       'hhId': hhId,
-      'hhIdShort': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
+      'hhIdShort': last11(hhId),
       'RegistrationDate': _formatDate(createdDate),
       'RegistrationType': 'General',
       'BeneficiaryID': uniqueKey,
-      'BeneficiaryIDShort': uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey,
+      'BeneficiaryIDShort': last11(uniqueKey) ,
       'Name': name,
       'age': age > 0 ? '$age Y / $displayGender' : 'N/A',
       'RichID': richId,
@@ -282,17 +280,14 @@ class _EligibleCoupleIdentifiedScreenState
     final primary = Theme.of(context).primaryColor;
     final t = AppLocalizations.of(context);
 
-    // Extract the raw row data and beneficiary info
     final rowData = data['_rawRow'] ?? {};
     final beneficiaryInfo = rowData['beneficiary_info'] is String
         ? jsonDecode(rowData['beneficiary_info'])
         : (rowData['beneficiary_info'] ?? {});
 
-    // Extract head and spouse details with proper fallbacks
     final headDetails = _toStringMap(beneficiaryInfo['head_details']);
     final spouseDetails = _toStringMap(beneficiaryInfo['spouse_details']);
 
-    // Get children details with fallbacks
     final childrenDetails = _toStringMap(
         beneficiaryInfo['children_details'] ??
             headDetails['childrendetails'] ??
@@ -310,7 +305,9 @@ class _EligibleCoupleIdentifiedScreenState
           onTap: () async {
 
             final fullHhId = rowData['household_ref_key']?.toString() ?? '';
-            final fullBeneficiaryId = data['fullBeneficiaryId']?.toString() ?? data['BeneficiaryID']?.toString() ?? '';
+            final fullBeneficiaryId = rowData['unique_key']?.toString() ??
+                data['fullBeneficiaryId']?.toString() ??
+                data['BeneficiaryID']?.toString() ?? '';
             final name = data['Name']?.toString() ?? '';
             final richId = data['RichID']?.toString() ?? '';
             final mobile = data['mobileno']?.toString() ?? '';
@@ -329,7 +326,8 @@ class _EligibleCoupleIdentifiedScreenState
               arguments: {
                 'hhId': fullHhId,
                 'name': name,
-                'BeneficiaryID': fullBeneficiaryId,
+
+                'unique_key': fullBeneficiaryId,
                 'RichID': richId,
                 'mobile': mobile,
                 'husbandName': husbandName,
@@ -346,7 +344,7 @@ class _EligibleCoupleIdentifiedScreenState
           },
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
+            margin: const EdgeInsets.symmetric(vertical: 0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),
               boxShadow: [
@@ -379,7 +377,7 @@ class _EligibleCoupleIdentifiedScreenState
                       const Icon(Icons.home, color: Colors.black54, size: 18),
                       Expanded(
                         child: Text(
-                          data['hhId'] ?? '',
+                          data['hhIdShort'] ?? data['hhId'] ?? '',
                           style: TextStyle(color: primary, fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -409,7 +407,7 @@ class _EligibleCoupleIdentifiedScreenState
                           const SizedBox(width: 12),
                           Expanded(child: _rowText('Registration Type', data['RegistrationType'] ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryID'] ?? '')),
+                          Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryIDShort'] ?? data['BeneficiaryID'] ?? '')),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -427,6 +425,8 @@ class _EligibleCoupleIdentifiedScreenState
                         children: [
                           Expanded(
                               child: _rowText( 'Mobile No.', data['mobileno']?.toString() ?? '')),
+                          const SizedBox(width: 12),
+                          Expanded(child: SizedBox.shrink()),
                           const SizedBox(width: 12),
                           Expanded(
                               child: _rowText('Husband Name', data['HusbandName'] ?? '')),

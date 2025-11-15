@@ -5,7 +5,7 @@ import '../../config/themes/CustomColors.dart';
 Future<bool?> showConfirmationDialog({
   required BuildContext context,
   required String title,
-  required String message,
+   String? message,
   required String yesText,
   String? noText, // ✅ Optional for single-button case
   VoidCallback? onYes,
@@ -56,7 +56,7 @@ Future<bool?> showConfirmationDialog({
         content: Padding(
           padding: const EdgeInsets.only(top: 16.0),
           child: Text(
-            message,
+            message ?? '',
             style: TextStyle(
               color: messageTextColor ?? AppColors.warning,
               fontSize: 14.sp,

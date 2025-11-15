@@ -155,6 +155,8 @@ class RegisterNewHouseholdBloc
               .toList();
 
           Map<String, dynamic>? picked;
+
+          // Prefer explicit head/self markers
           for (final b in related) {
             final infoRaw = b['beneficiary_info'];
             final Map<String, dynamic> info = infoRaw is String
@@ -168,6 +170,33 @@ class RegisterNewHouseholdBloc
               break;
             }
           }
+
+          // If no explicit head, and we have Wife/Husband, pick the opposite spouse as head
+          if (picked == null) {
+            final byKey = {
+              for (final b in related)
+                (b['unique_key'] ?? '').toString(): b,
+            };
+
+            for (final b in related) {
+              final infoRaw = b['beneficiary_info'];
+              final Map<String, dynamic> info = infoRaw is String
+                  ? (jsonDecode(infoRaw) as Map<String, dynamic>)
+                  : (infoRaw as Map<String, dynamic>? ?? {});
+              final rel = (info['relation'] ?? info['relation_to_head'] ?? info['Relation'] ?? '')
+                  .toString()
+                  .toLowerCase();
+
+              if (rel == 'wife' || rel == 'husband') {
+                final spouseKey = (b['spouse_key'] ?? '').toString();
+                if (spouseKey.isNotEmpty && byKey.containsKey(spouseKey)) {
+                  picked = Map<String, dynamic>.from(byKey[spouseKey] as Map);
+                  break;
+                }
+              }
+            }
+          }
+
           if (picked == null && related.isNotEmpty) {
             picked = related.first as Map<String, dynamic>;
           }
@@ -235,7 +264,8 @@ class RegisterNewHouseholdBloc
           'unique_key': uniqueKey,
           'address': jsonEncode(address),
           'geo_location': geoLocationJson,
-          'head_id': headId,
+          // Store the true family head beneficiary unique_key in head_id
+          'head_id': familyHeadUniqueKey,
           'household_info': householdInfoJson,
           'device_details': jsonEncode({
             'id': deviceInfo.deviceId,
@@ -286,6 +316,8 @@ class RegisterNewHouseholdBloc
               .toList();
 
           Map<String, dynamic>? picked;
+
+          // Prefer explicit head/self markers
           for (final b in related) {
             final infoRaw = b['beneficiary_info'];
             final Map<String, dynamic> info = infoRaw is String
@@ -299,6 +331,33 @@ class RegisterNewHouseholdBloc
               break;
             }
           }
+
+          // If no explicit head, and we have Wife/Husband, pick the opposite spouse as head
+          if (picked == null) {
+            final byKey = {
+              for (final b in related)
+                (b['unique_key'] ?? '').toString(): b,
+            };
+
+            for (final b in related) {
+              final infoRaw = b['beneficiary_info'];
+              final Map<String, dynamic> info = infoRaw is String
+                  ? (jsonDecode(infoRaw) as Map<String, dynamic>)
+                  : (infoRaw as Map<String, dynamic>? ?? {});
+              final rel = (info['relation'] ?? info['relation_to_head'] ?? info['Relation'] ?? '')
+                  .toString()
+                  .toLowerCase();
+
+              if (rel == 'wife' || rel == 'husband') {
+                final spouseKey = (b['spouse_key'] ?? '').toString();
+                if (spouseKey.isNotEmpty && byKey.containsKey(spouseKey)) {
+                  picked = Map<String, dynamic>.from(byKey[spouseKey] as Map);
+                  break;
+                }
+              }
+            }
+          }
+
           picked ??= related.isNotEmpty ? related.first as Map<String, dynamic> : null;
           if (picked != null) {
             familyHeadUniqueKey = (picked['unique_key'] ?? familyHeadUniqueKey).toString();

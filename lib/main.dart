@@ -16,8 +16,6 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
 
-  // Start background sync scheduler at app launch
-  SyncService.instance.start(interval: const Duration(minutes: 5));
 
   runApp(
     Sizer(

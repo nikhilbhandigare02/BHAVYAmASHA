@@ -5,6 +5,9 @@ import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 import 'package:medixcel_new/data/repositories/AddBeneficiaryRepository.dart';
 import 'package:medixcel_new/data/repositories/household_repository.dart';
 import 'package:medixcel_new/data/repositories/BeneficiaryRepository.dart';
+import 'package:medixcel_new/data/repositories/EligibleCoupleRepository.dart';
+import 'package:medixcel_new/data/repositories/ChildCareRepository.dart';
+import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
 
 class SyncService {
   SyncService._();
@@ -14,6 +17,8 @@ class SyncService {
   final _householdRepo = HouseholdRepository();
   final _beneficiaryRepo = AddBeneficiaryRepository();
   final _beneficiaryPullRepo = BeneficiaryRepository();
+  final _ecRepo = EligibleCoupleRepository();
+  final _ccRepo = ChildCareRepository();
 
   Timer? _timer;
   bool _running = false;
@@ -24,6 +29,135 @@ class SyncService {
     print('SyncService: starting with interval ${interval.inMinutes} minute(s)');
     _triggerOnce();
     _timer = Timer.periodic(interval, (_) => _triggerOnce());
+  }
+
+  Future<Map<String, String>> _getUserWorkingIds() async {
+    final currentUser = await UserInfo.getCurrentUser();
+    final userDetails = currentUser?['details'] is String
+        ? jsonDecode(currentUser?['details'] ?? '{}')
+        : currentUser?['details'] ?? {};
+    final working = userDetails['working_location'] ?? {};
+    final facilityId = (working['asha_associated_with_facility_id'] ?? working['hsc_id'] ?? userDetails['facility_id'] ?? userDetails['hsc_id'] ?? '').toString();
+    final ashaId = (working['asha_id'] ?? userDetails['unique_key'] ?? userDetails['user_id'] ?? '').toString();
+    return {
+      'facilityId': facilityId,
+      'ashaId': ashaId,
+    };
+  }
+
+  Future<void> fetchEligibleCoupleActivitiesFromServer() async {
+    try {
+      final ids = await _getUserWorkingIds();
+      if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
+      final lastId = await _dao.getLatestEligibleCoupleActivityServerId();
+      final useLast = lastId.isEmpty ? '0' : lastId;
+      print('EC Pull: Fetching with last_id=$useLast limit=20');
+      final result = await _ecRepo.fetchAndStoreEligibleCoupleActivities(
+        facilityId: ids['facilityId']!,
+        ashaId: ids['ashaId']!,
+        lastId: useLast,
+        limit: 20,
+      );
+      print('EC Pull: fetched=${result['fetched']}, inserted=${result['inserted']}, updated=${result['updated']}');
+    } catch (e) {
+      print('EC Pull: error -> $e');
+    }
+  }
+
+  Future<void> fetchChildCareActivitiesFromServer() async {
+    try {
+      final ids = await _getUserWorkingIds();
+      if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
+      final lastId = await _dao.getLatestChildCareActivityServerId();
+      final useLast = lastId.isEmpty ? '0' : lastId;
+      print('ChildCare Pull: Fetching with last_id=$useLast limit=20');
+      final result = await _ccRepo.fetchAndStoreChildCareActivities(
+        facilityId: ids['facilityId']!,
+        ashaId: ids['ashaId']!,
+        lastId: useLast,
+        limit: 20,
+      );
+      print('ChildCare Pull: fetched=${result['fetched']}, inserted=${result['inserted']}, updated=${result['updated']}');
+    } catch (e) {
+      print('ChildCare Pull: error -> $e');
+    }
+  }
+
+  Future<void> syncUnsyncedEligibleCoupleActivities() async {
+    try {
+      final ids = await _getUserWorkingIds();
+      if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
+      final list = await _dao.getUnsyncedEligibleCoupleActivities();
+      if (list.isEmpty) {
+        print('EC Push: No unsynced activities');
+        return;
+      }
+      print('EC Push: Found ${list.length} unsynced activity(ies)');
+      // Build payload for API
+      final payload = list.map((r) => {
+            'facility_id': r['facility_id'],
+            'asha_id': ids['ashaId'],
+            'unique_key': r['household_ref_key'],
+            'beneficiaries_registration_ref_key': r['beneficiary_ref_key'],
+            'eligible_couple_type': r['eligible_couple_state'],
+            'device_details': r['device_details'] ?? {},
+            'app_details': r['app_details'] ?? {},
+            'parent_user': r['parent_user'] ?? {},
+            'created_date_time': r['created_date_time'],
+            'modified_date_time': r['modified_date_time'],
+          }).toList();
+      final resp = await _ecRepo.trackEligibleCouple(payload);
+      final success = resp is Map && resp['success'] == true;
+      if (success) {
+        for (final r in list) {
+          await _dao.markEligibleCoupleActivitySyncedById(r['id'] as int? ?? 0);
+        }
+        print('EC Push: Marked ${list.length} activity(ies) as synced');
+      } else {
+        print('EC Push: API not successful, will retry later');
+      }
+    } catch (e) {
+      print('EC Push: error -> $e');
+    }
+  }
+
+  Future<void> syncUnsyncedChildCareActivities() async {
+    try {
+      final ids = await _getUserWorkingIds();
+      if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
+      final list = await _dao.getUnsyncedChildCareActivities();
+      if (list.isEmpty) {
+        print('ChildCare Push: No unsynced activities');
+        return;
+      }
+      print('ChildCare Push: Found ${list.length} unsynced activity(ies)');
+      final payload = list.map((r) => {
+            'facility_id': r['facility_id'],
+            'asha_id': ids['ashaId'],
+            'unique_key': r['household_ref_key'],
+            'beneficiaries_registration_ref_key': r['beneficiary_ref_key'],
+            'mother_key': r['mother_key'],
+            'father_key': r['father_key'],
+            'child_care_type': r['child_care_state'],
+            'device_details': r['device_details'] ?? {},
+            'app_details': r['app_details'] ?? {},
+            'parent_user': r['parent_user'] ?? {},
+            'created_date_time': r['created_date_time'],
+            'modified_date_time': r['modified_date_time'],
+          }).toList();
+      final resp = await _ccRepo.submitChildCareActivities(payload);
+      final success = resp is Map && resp['success'] == true;
+      if (success) {
+        for (final r in list) {
+          await _dao.markChildCareActivitySyncedById(r['id'] as int? ?? 0);
+        }
+        print('ChildCare Push: Marked ${list.length} activity(ies) as synced');
+      } else {
+        print('ChildCare Push: API not successful, will retry later');
+      }
+    } catch (e) {
+      print('ChildCare Push: error -> $e');
+    }
   }
 
   void stop() {
@@ -41,8 +175,12 @@ class SyncService {
       await syncUnsyncedHouseholds();
       await syncUnsyncedBeneficiaries();
       await fetchBeneficiariesFromServer();
+      await fetchHouseholdsFromServer();
+      await syncUnsyncedEligibleCoupleActivities();
+      await syncUnsyncedChildCareActivities();
+      await fetchEligibleCoupleActivitiesFromServer();
+      await fetchChildCareActivitiesFromServer();
     } catch (e) {
-      // ignore but log
       print('SyncService periodic error: $e');
     } finally {
       _running = false;
@@ -218,6 +356,20 @@ class SyncService {
       print('Beneficiary Pull: fetched=$fetched, inserted=$inserted, skipped=${result['skipped']}');
     } catch (e) {
       print('Beneficiary Pull: error -> $e');
+    }
+  }
+
+  Future<void> fetchHouseholdsFromServer() async {
+    try {
+      final lastId = await _dao.getLatestHouseholdServerId();
+      final useLast = (lastId.isEmpty) ? '0' : lastId;
+      print('Household Pull: Fetching from server with last_id=$useLast, limit=20');
+      final result = await _householdRepo.fetchAndStoreHouseholds(lastId: useLast, limit: 20);
+      final inserted = result['inserted'];
+      final fetched = result['fetched'];
+      print('Household Pull: fetched=$fetched, inserted=$inserted, skipped=${result['skipped']}');
+    } catch (e) {
+      print('Household Pull: error -> $e');
     }
   }
 }

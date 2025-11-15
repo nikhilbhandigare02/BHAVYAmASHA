@@ -9,11 +9,11 @@ import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 class BeneficiaryRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
-  Future<Map<String, dynamic>> fetchAndStoreBeneficiaries({required String lastId, int pageSize = 50}) async {
+  Future<Map<String, dynamic>> fetchAndStoreBeneficiaries({required String lastId, int pageSize = 20}) async {
     final currentUser = await UserInfo.getCurrentUser();
     final userDetails = currentUser?['details'] is String
         ? jsonDecode(currentUser?['details'] ?? '{}')
-        :  currentUser?['details'] ?? {};
+        : currentUser?['details'] ?? {};
 
     String? token = await SecureStorageService.getToken();
     if ((token == null || token.isEmpty) && userDetails is Map) {
@@ -65,7 +65,7 @@ class BeneficiaryRepository {
         : <Map<String, dynamic>>[];
 
     int inserted = 0;
-    int updated = 0; // kept for compatibility, but we won't perform updates per request
+    int updated = 0;
     int skipped = 0;
     for (final rec in dataList) {
       try {
@@ -144,61 +144,153 @@ class BeneficiaryRepository {
   }
 
   Map<String, dynamic> _mapBeneficiaryInfo(Map<String, dynamic> rec) {
-    final info = rec['beneficiary_info'] is Map
-        ? Map<String, dynamic>.from(rec['beneficiary_info'] as Map)
-        : <String, dynamic>{};
 
-    final nameMap = info['name'] is Map ? Map<String, dynamic>.from(info['name']) : <String, dynamic>{};
+
+    dynamic rawInfo = rec['beneficiary_info'];
+    Map<String, dynamic> info;
+
+    if (rawInfo is String && rawInfo.isNotEmpty) {
+      try {
+        info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+      } catch (_) {
+        info = <String, dynamic>{};
+      }
+    } else if (rawInfo is Map) {
+      info = Map<String, dynamic>.from(rawInfo as Map);
+    } else {
+      info = <String, dynamic>{};
+    }
+
+    final looksLikeAppFormat =
+        info.containsKey('houseNo') ||
+        info.containsKey('headName') ||
+        info.containsKey('memberType') ||
+        info.containsKey('memberName') ||
+        info.containsKey('relation_to_head');
+    if (looksLikeAppFormat) {
+      return info;
+    }
+
+    // Otherwise, treat it as the canonical API format and map it
+    // into the local app structure.
+
+    final nameMap = info['name'] is Map
+        ? Map<String, dynamic>.from(info['name'] as Map)
+        : <String, dynamic>{};
     final first = (nameMap['first_name'] ?? info['first_name'] ?? '').toString().trim();
     final middle = (nameMap['middle_name'] ?? info['middle_name'] ?? '').toString().trim();
     final last = (nameMap['last_name'] ?? info['last_name'] ?? '').toString().trim();
     final fullNameParts = <String>[first, middle, last].where((s) => s.isNotEmpty).toList();
     String fullName = fullNameParts.join(' ').trim();
     if (fullName.isEmpty) {
-      // Fallback to any provided single name string
       final rawName = info['name'];
       if (rawName is String) fullName = rawName.trim();
     }
 
-    return {
-      'memberType': '',
-      'relation': '',
+    String? _genderText(String? g) {
+      if (g == null) return null;
+      final s = g.toUpperCase();
+      if (s == 'M') return 'Male';
+      if (s == 'F') return 'Female';
+      if (s == 'O') return 'Other';
+      return g;
+    }
+
+    String? _titleCase(String? v) {
+      if (v == null) return null;
+      final s = v.toString().trim();
+      if (s.isEmpty) return s;
+      return s[0].toUpperCase() + s.substring(1).toLowerCase();
+    }
+
+    final addr = info['address'] is Map
+        ? Map<String, dynamic>.from(info['address'] as Map)
+        : <String, dynamic>{};
+
+    final mapped = <String, dynamic>{
+      // Common identification fields
+      'memberType': 'Adult',
+      'relation': info['relation'] ?? info['relation_to_head'] ?? '',
       'name': fullName,
-      'fatherName': info['father_name'] ?? '',
-      'motherName': info['mother_name'] ?? '',
-      'useDob': true,
+
+      // Head-style fields (for compatibility with AddFamilyHead)
+      'houseNo': info['houseNo'],
+      'headName': fullName,
+      'fatherName': info['father_name'] ?? info['fatherName'],
+      'motherName': info['mother_name'] ?? info['motherName'],
+
+      // DOB / age
+      'useDob': info['useDob'] ?? true,
       'dob': info['dob']?.toString(),
-      'approxAge': null,
-      'updateDay': null,
-      'updateMonth': null,
-      'updateYear': null,
-      'children': null,
-      'birthOrder': null,
-      'gender': info['gender']?.toString(),
-      'bankAcc': null,
-      'ifsc': null,
-      'occupation': null,
-      'education': null,
-      'religion': info['religion'] ?? '',
-      'category': info['category'] ?? '',
-      'weight': null,
-      'childSchool': null,
-      'birthCertificate': null,
-      'abhaAddress': null,
-      'mobileOwner': null,
-      'mobileNo': info['phone']?.toString(),
-      'voterId': null,
-      'rationId': null,
-      'phId': null,
-      'beneficiaryType': null,
-      'maritalStatus': info['marital_status'] ?? '',
-      'ageAtMarriage': null,
-      'spouseName': null,
-      'hasChildren': null,
-      'isPregnant': null,
-      'memberStatus': null,
-      'relation_to_head': '',
-      'address': info['address'] ?? {},
+      'approxAge': info['approxAge'],
+      'years': info['years'],
+      'months': info['months'],
+      'days': info['days'],
+      'updateDay': info['updateDay'],
+      'updateMonth': info['updateMonth'],
+      'updateYear': info['updateYear'],
+
+      // Children summary (for compatibility with children bloc)
+      'children': info['children'] ?? [],
+      'birthOrder': info['birthOrder'],
+      'totalBorn': info['totalBorn'],
+      'totalLive': info['totalLive'],
+      'totalMale': info['totalMale'],
+      'totalFemale': info['totalFemale'],
+      'youngestAge': info['youngestAge'],
+      'ageUnit': info['ageUnit'],
+      'youngestGender': info['youngestGender'],
+
+      // Demographics
+      'gender': _genderText(info['gender']?.toString()),
+      'occupation': info['occupation'],
+      'education': info['education'],
+      'religion': info['religion'],
+      'category': info['category'],
+
+      // Health / pregnancy
+      'hasChildren': info['hasChildren'],
+      'isPregnant': info['isPregnant'],
+      'lmp': info['lmp']?.toString(),
+      'edd': info['edd']?.toString(),
+      'beneficiaryType': info['beneficiaryType'],
+
+      // Contact & IDs
+      'mobileOwner': info['mobileOwner'],
+      'mobileNo': (info['mobileNo'] ?? info['phone'])?.toString(),
+      'abhaAddress': info['abhaAddress'],
+      'abhaNumber': info['abhaNumber'],
+      'voterId': info['voterId'],
+      'rationId': info['rationId'],
+      'rationCardId': info['rationCardId'],
+      'phId': info['phId'],
+      'personalHealthId': info['personalHealthId'],
+      'bankAcc': info['bankAcc'],
+      'bankAccountNumber': info['bankAccountNumber'],
+      'ifsc': info['ifsc'],
+      'ifscCode': info['ifscCode'],
+
+      // Marital
+      'maritalStatus': _titleCase((info['marital_status'] ?? info['maritalStatus'])?.toString()),
+      'ageAtMarriage': info['ageAtMarriage'],
+      'spouseName': info['spouseName'],
+
+      // Address fields flattened to match local structure
+      'village': addr['village'],
+      'ward': info['ward'],
+      'wardNo': info['wardNo'],
+      'mohalla': info['mohalla'],
+      'mohallaTola': info['mohallaTola'],
+
+      // Misc fields that may be used in local flows
+      'weight': info['weight'],
+      'childSchool': info['childSchool'],
+      'birthCertificate': info['birthCertificate'],
+      'memberStatus': info['memberStatus'],
+      'relation_to_head': info['relation_to_head'] ?? info['relationToHead'] ?? '',
     };
+
+    mapped.removeWhere((key, value) => value == null);
+    return mapped;
   }
 }
