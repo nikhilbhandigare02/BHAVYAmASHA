@@ -2,11 +2,16 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../data/Local_Storage/local_storage_dao.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../l10n/app_localizations.dart';
+import '../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
+import '../EligibleCouple/TrackEligibleCouple/TrackEligibleCoupleScreen.dart';
+import '../MotherCare/ANCVisit/ANCVisitForm/ANCVisitForm.dart';
+import '../MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
 
 class TodayProgramSection extends StatefulWidget {
   final int? selectedGridIndex;
@@ -179,13 +184,21 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 '${currentAncLastDueDate.year.toString().padLeft(4, '0')}-${currentAncLastDueDate.month.toString().padLeft(2, '0')}-${currentAncLastDueDate.day.toString().padLeft(2, '0')}';
           }
 
+          final householdRefKey = row['household_ref_key']?.toString() ?? '';
+
           String rawId = row['unique_key']?.toString() ?? '';
           if (rawId.length > 11) {
             rawId = rawId.substring(rawId.length - 11);
           }
 
+          final uniqueKey = row['unique_key']?.toString() ?? '';
+
           items.add({
-            'id': rawId,
+            'id': rawId, // trimmed for display
+            'household_ref_key': householdRefKey, // full household key
+            'hhId': householdRefKey, // explicit for ANCVisitForm
+            'unique_key': uniqueKey, // full beneficiary key
+            'BeneficiaryID': uniqueKey,
             'name': name,
             'age': ageText,
             'gender': 'Female',
@@ -193,6 +206,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'Current ANC last due date': currentAncLastDueDateText,
             'mobile': mobile ?? '-',
             'badge': 'ANC',
+            // Keep raw data for forms that expect it
+            'beneficiary_info': jsonEncode(info),
+            '_rawRow': row,
           });
         } catch (_) {
           continue;
@@ -485,6 +501,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   }) {
     try {
       final uniqueKey = row['unique_key']?.toString() ?? '';
+      final householdRefKey = row['household_ref_key']?.toString() ?? '';
       final createdDate = row['created_date_time']?.toString() ?? '';
       final modifiedDate = row['modified_date_time']?.toString() ?? '';
 
@@ -540,7 +557,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       }
 
       return {
-        'id': rawId,
+        'id': rawId, // trimmed for display
+        'beneficiaryId': uniqueKey, // full beneficiary ID for tracking
+        'household_ref_key': householdRefKey,
         'name': name,
         'age': ageText,
         'gender': genderDisplay,
@@ -565,12 +584,162 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
     return InkWell(
       onTap: () async {
-        await showConfirmationDialog(
+        final confirmed = await showConfirmationDialog(
           context: context,
           message: 'Move forward?',
           yesText: 'Yes',
           noText: 'No',
         );
+
+        if (confirmed != true) {
+          return;
+        }
+
+        if (badge == 'Family') {
+          final hhKey = item['household_ref_key']?.toString() ?? '';
+          if (hhKey.isEmpty) return;
+
+          Map<String, String> initial = {};
+          try {
+            // Load household to find configured head_id
+            final households = await LocalStorageDao.instance.getAllHouseholds();
+            String? headId;
+            for (final hh in households) {
+              final key = (hh['unique_key'] ?? '').toString();
+              if (key == hhKey) {
+                headId = (hh['head_id'] ?? '').toString();
+                break;
+              }
+            }
+
+            // Load all beneficiaries for this household
+            final members = await LocalStorageDao.instance.getBeneficiariesByHousehold(hhKey);
+
+            Map<String, dynamic>? headRow;
+            if (headId != null && headId.isNotEmpty) {
+              for (final m in members) {
+                if ((m['unique_key'] ?? '').toString() == headId) {
+                  headRow = m;
+                  break;
+                }
+              }
+            }
+
+            headRow ??= members.isNotEmpty ? members.first : null;
+
+            if (headRow != null) {
+              final rawInfo = headRow['beneficiary_info'];
+              Map<String, dynamic> info;
+              if (rawInfo is Map<String, dynamic>) {
+                info = rawInfo;
+              } else if (rawInfo is String && rawInfo.isNotEmpty) {
+                info = jsonDecode(rawInfo) as Map<String, dynamic>;
+              } else {
+                info = <String, dynamic>{};
+              }
+
+              // Convert all primitive fields to String for AddNewFamilyHeadScreen.initial
+              final map = <String, String>{};
+              info.forEach((key, value) {
+                if (value != null) {
+                  map[key] = value.toString();
+                }
+              });
+
+              // Try to attach spouse info (separate beneficiary where spouse_key == head unique_key)
+              try {
+                Map<String, dynamic>? spouseRow;
+                final headUnique = (headRow['unique_key'] ?? '').toString();
+                for (final m in members) {
+                  if ((m['spouse_key'] ?? '').toString() == headUnique) {
+                    spouseRow = m;
+                    break;
+                  }
+                }
+
+                if (spouseRow != null) {
+                  final rawSpInfo = spouseRow['beneficiary_info'];
+                  Map<String, dynamic> spInfo;
+                  if (rawSpInfo is Map<String, dynamic>) {
+                    spInfo = rawSpInfo;
+                  } else if (rawSpInfo is String && rawSpInfo.isNotEmpty) {
+                    spInfo = jsonDecode(rawSpInfo) as Map<String, dynamic>;
+                  } else {
+                    spInfo = <String, dynamic>{};
+                  }
+
+                  spInfo.forEach((key, value) {
+                    if (value != null) {
+                      map['sp_$key'] = value.toString();
+                    }
+                  });
+                }
+              } catch (_) {}
+
+              // Ensure some core fields are present/fallbacks from card item
+              map['headName'] ??= item['name']?.toString() ?? '';
+              map['mobileNo'] ??= item['mobile']?.toString() ?? '';
+              initial = map;
+            }
+          } catch (_) {
+            // If anything fails, fall back to minimal initial data
+            initial = {
+              'headName': item['name']?.toString() ?? '',
+              'mobileNo': item['mobile']?.toString() ?? '',
+            };
+          }
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddNewFamilyHeadScreen(
+                isEdit: true,
+                initial: initial,
+              ),
+            ),
+          );
+        } else if (badge == 'EligibleCouple') {
+          final beneficiaryId = item['beneficiaryId']?.toString() ?? '';
+          if (beneficiaryId.isEmpty) return;
+
+          Navigator.push(
+            context,
+            TrackEligibleCoupleScreen.route(
+              beneficiaryId: beneficiaryId,
+            ),
+          );
+        } else if (badge == 'ANC') {
+          // Navigate to ANC Visit Form with full beneficiary data
+          final hhId = item['hhId']?.toString() ??
+              item['household_ref_key']?.toString() ?? '';
+          final beneficiaryId = item['BeneficiaryID']?.toString() ??
+              item['unique_key']?.toString() ?? '';
+          if (hhId.isEmpty || beneficiaryId.isEmpty) return;
+
+          final formData = Map<String, dynamic>.from(item);
+          formData['hhId'] = hhId;
+          formData['BeneficiaryID'] = beneficiaryId;
+          formData['unique_key'] = item['unique_key']?.toString() ?? beneficiaryId;
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Ancvisitform(beneficiaryData: formData),
+            ),
+          );
+        } else if (badge == 'HBNC') {
+          // Navigate to HBNC Visit Form; pass the item as beneficiaryData
+          final beneficiaryData = Map<String, dynamic>.from(item);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HbncVisitScreen(
+                beneficiaryData: beneficiaryData,
+              ),
+            ),
+          );
+        }
       },
       borderRadius: BorderRadius.circular(4),
       child: Container(

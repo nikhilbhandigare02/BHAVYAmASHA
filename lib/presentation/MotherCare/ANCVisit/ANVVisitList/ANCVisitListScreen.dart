@@ -355,29 +355,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () async {
-        final confirmed = await showConfirmationDialog(
-          context: context,
-          message: 'Move forward?',
-          yesText: 'Yes',
-          noText: 'No',
-        );
 
-        if (confirmed != true) {
-          return;
-        }
 
-        // Create a new map with the COMPLETE data
         final formData = Map<String, dynamic>.from(data);
 
-        // Ensure we pass the COMPLETE IDs (not trimmed)
         formData['hhId'] = hhId;
         formData['BeneficiaryID'] = beneficiaryId;
         formData['unique_key'] = uniqueKey;
-
-        print('📤 Passing to next screen:');
-        print('   hhId (complete): $hhId');
-        print('   BeneficiaryID (complete): $beneficiaryId');
-        print('   unique_key (complete): $uniqueKey');
 
         Navigator.push(
           context,
@@ -401,7 +385,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         ),
         child: Column(
           children: [
-            // Header strip - use DISPLAY version (trimmed)
             Container(
               decoration: BoxDecoration(
                 color: AppColors.background,

@@ -20,12 +20,23 @@ class ANCVisitModel {
   final String? age;
   final String? dateOfBirth;
 
-  // Getter to extract age from the pre-formatted string (e.g., '23 Y / Female')
+  // Getter: compute age only from DOB
   String get formattedAge {
-    if (age != null && age!.isNotEmpty) {
-      // Extract just the age part (e.g., '23 Y' from '23 Y / Female')
-      final agePart = age!.split(' / ').first.trim();
-      return agePart;
+    if (dateOfBirth != null && dateOfBirth!.isNotEmpty) {
+      try {
+        final dob = DateTime.tryParse(dateOfBirth!);
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          if (now.month < dob.month ||
+              (now.month == dob.month && now.day < dob.day)) {
+            years--;
+          }
+          if (years >= 0) {
+            return '$years Y';
+          }
+        }
+      } catch (_) {}
     }
     return '';
   }

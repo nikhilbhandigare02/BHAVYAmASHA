@@ -244,6 +244,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     CustomDatePicker(
                       labelText: '${l.dobLabel} *',
                       hintText: l.dateHint,
+                      initialDate: state.dob,
                       onDateChanged: (d) => context.read<SpousBloc>().add(SpUpdateDob(d)),
                       validator: (date) => Validations.validateDOB(l, date),
                     ),
