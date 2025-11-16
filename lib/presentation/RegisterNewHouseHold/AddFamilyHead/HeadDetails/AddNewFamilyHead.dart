@@ -110,6 +110,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               child: CustomDatePicker(
                 labelText: '${l.dobLabel} *',
                 hintText: l.dateHint,
+                initialDate: state.dob,
                 onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(d)),
                 validator: (date) => Validations.validateDOB(l, date),
               ),
@@ -798,8 +799,62 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
           }
           return b;
         }),
-        BlocProvider<SpousBloc>(create: (_) => SpousBloc()),
-        BlocProvider<ChildrenBloc>(create: (_) => ChildrenBloc()),
+        BlocProvider<SpousBloc>(create: (_) {
+          final m = widget.initial;
+          if (m == null || m.isEmpty) return SpousBloc();
+
+          DateTime? _parseDate(String? iso) =>
+              (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
+
+          final spState = SpousState(
+            relation: m['sp_relation'],
+            memberName: m['sp_memberName'],
+            ageAtMarriage: m['sp_ageAtMarriage'],
+            RichIDChanged: m['sp_RichIDChanged'],
+            spouseName: m['sp_spouseName'],
+            fatherName: m['sp_fatherName'],
+            useDob: m['sp_useDob'] == 'true' || m['sp_useDob'] == true,
+            dob: _parseDate(m['sp_dob']),
+            edd: _parseDate(m['sp_edd']),
+            lmp: _parseDate(m['sp_lmp']),
+            approxAge: m['sp_approxAge'],
+            gender: m['sp_gender'],
+            occupation: m['sp_occupation'],
+            education: m['sp_education'],
+            religion: m['sp_religion'],
+            category: m['sp_category'],
+            abhaAddress: m['sp_abhaAddress'],
+            mobileOwner: m['sp_mobileOwner'],
+            mobileNo: m['sp_mobileNo'],
+            bankAcc: m['sp_bankAcc'],
+            ifsc: m['sp_ifsc'],
+            voterId: m['sp_voterId'],
+            rationId: m['sp_rationId'],
+            phId: m['sp_phId'],
+            beneficiaryType: m['sp_beneficiaryType'],
+            isPregnant: m['sp_isPregnant'],
+          );
+
+          return SpousBloc(initial: spState);
+        }),
+        BlocProvider<ChildrenBloc>(create: (_) {
+          final m = widget.initial;
+          if (m == null || m.isEmpty) return ChildrenBloc();
+
+          int _parseInt(String? v) => int.tryParse(v ?? '') ?? 0;
+
+          final chState = ChildrenState(
+            totalBorn: _parseInt(m['totalBorn']),
+            totalLive: _parseInt(m['totalLive']),
+            totalMale: _parseInt(m['totalMale']),
+            totalFemale: _parseInt(m['totalFemale']),
+            youngestAge: m['youngestAge'],
+            ageUnit: m['ageUnit'],
+            youngestGender: m['youngestGender'],
+          );
+
+          return ChildrenBloc()..emit(chState);
+        }),
       ],
       child: WillPopScope(
         onWillPop: () async {
