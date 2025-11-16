@@ -1,20 +1,16 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
-import 'package:sizer/sizer.dart';
-import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
+import '../../../data/Local_Storage/database_provider.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../HomeScreen/HomeScreen.dart';
-import '../../../data/Local_Storage/local_storage_dao.dart';
-import '../OutcomeForm/OutcomeForm.dart';
+
 
 class HBNCListScreen extends StatefulWidget {
   const HBNCListScreen({super.key});
@@ -45,137 +41,214 @@ class _HBNCListScreenState
     super.dispose();
   }
 
+  // Method to fetch delivery outcome data from followup_form_data table
+  Future<List<Map<String, dynamic>>> _getDeliveryOutcomeData() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final deliveryOutcomeKey = '4r7twnycml3ej1vg';
+
+      final results = await db.query(
+        'followup_form_data',
+        where: 'forms_ref_key = ?',
+        whereArgs: [deliveryOutcomeKey],
+      );
+
+      print('Fetched ${results.length} delivery outcome records');
+      return results;
+    } catch (e) {
+      print('Error fetching delivery outcome data: $e');
+      return [];
+    }
+  }
+
   Future<void> _loadPregnancyOutcomeeCouples() async {
-    setState(() { _isLoading = true; });
+    setState(() => _isLoading = true);
+    _filtered = [];
 
     try {
-      final deliveryOutcomes = await SecureStorageService.getDeliveryOutcomes();
+      final dbOutcomes = await _getDeliveryOutcomeData();
+      print('Found ${dbOutcomes.length} delivery outcomes');
 
-      final submittedBeneficiaryIds = <String>{};
-
-      for (var outcome in deliveryOutcomes) {
-        final isSubmitted = outcome['isSubmit'] == true;
-        final beneficiaryId = outcome['beneficiaryId']?.toString();
-
-        if (isSubmitted && beneficiaryId != null) {
-          final id = beneficiaryId.length >= 11
-              ? beneficiaryId.substring(beneficiaryId.length - 11)
-              : beneficiaryId;
-          submittedBeneficiaryIds.add(id);
-        }
-      }
-
-      if (submittedBeneficiaryIds.isEmpty) {
-        setState(() {
-          _isLoading = false;
-          _filtered = [];
-        });
+      if (dbOutcomes.isEmpty) {
+        setState(() => _isLoading = false);
         return;
       }
 
-      // Get all beneficiaries and filter them
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final couples = <Map<String, dynamic>>[];
+      for (final outcome in dbOutcomes) {
+        try {
+          final formJson = jsonDecode(outcome['form_json'] as String);
+          final formData = formJson['form_data'] ?? {};
+          final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
 
-      for (final row in rows) {
-        final uniqueKey = row['unique_key']?.toString() ?? '';
+          print('\nProcessing outcome ID: ${outcome['id']}');
+          print('Beneficiary Ref Key: $beneficiaryRefKey');
 
-        // Check if this beneficiary is in our birthBeneficiaryIds set
-        // Check if this beneficiary is in our submitted outcomes
-        final beneficiaryId = uniqueKey.length >= 11
-            ? uniqueKey.substring(uniqueKey.length - 11)
-            : uniqueKey;
-
-        if (submittedBeneficiaryIds.contains(beneficiaryId)) {
-          final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-          final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-          final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-
-          if (_isEligibleFemale(head)) {
-            couples.add(_formatCoupleData(row, head, spouse, isHead: true));
+          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
+            print('⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}');
+            continue;
           }
 
-          if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-            couples.add(_formatCoupleData(row, spouse, head, isHead: false));
+          final db = await DatabaseProvider.instance.database;
+          final beneficiaryResults = await db.query(
+            'beneficiaries',
+            where: 'unique_key = ? AND is_deleted = 0',
+            whereArgs: [beneficiaryRefKey],
+          );
+
+          if (beneficiaryResults.isEmpty) {
+            print('⚠️ No beneficiary found for key: $beneficiaryRefKey');
+            continue;
+          }
+
+          final beneficiary = beneficiaryResults.first;
+          print('Found beneficiary: ${beneficiary['id']}');
+
+          final beneficiaryInfoRaw = beneficiary['beneficiary_info'] as String? ?? '{}';
+          print('Raw beneficiary info: $beneficiaryInfoRaw');
+
+          Map<String, dynamic> beneficiaryInfo;
+          try {
+            beneficiaryInfo = jsonDecode(beneficiaryInfoRaw);
+            print('Parsed beneficiary info: $beneficiaryInfo');
+          } catch (e) {
+            print('Error parsing beneficiary info: $e');
+            continue;
+          }
+
+          // Extract data based on the structure
+          final name = beneficiaryInfo['memberName']?.toString() ??
+              beneficiaryInfo['headName']?.toString() ?? 'N/A';
+          final dob = beneficiaryInfo['dob']?.toString();
+          final age = _calculateAge(dob);
+          final gender = beneficiaryInfo['gender']?.toString() ?? 'N/A';
+          final mobile = beneficiaryInfo['mobileNo']?.toString() ?? 'N/A';
+          final rchId = beneficiaryInfo['RichID']?.toString() ??
+              beneficiaryInfo['rchId']?.toString() ?? 'N/A';
+          final husbandName = beneficiaryInfo['spouseName']?.toString() ??
+              beneficiaryInfo['fatherName']?.toString() ?? 'N/A';
+
+          final householdRefKey = beneficiary['household_ref_key']?.toString() ?? 'N/A';
+          final createdDateTime = beneficiary['created_date_time']?.toString() ?? '';
+
+          // Get HBNC visit dates
+          final previousHBNCDate = await _getLastVisitDate(beneficiaryRefKey);
+          final nextHBNCDate = await _getNextVisitDate(beneficiaryRefKey, formData['delivery_date']?.toString());
+
+          final formattedData = {
+            // Display values (last 11 digits)
+            'hhId': _getLastDigits(householdRefKey, 11),
+            'beneficiaryId': _getLastDigits(beneficiaryRefKey, 11),
+
+            // Full values for passing to next screen
+            'fullHhId': householdRefKey,
+            'fullBeneficiaryId': beneficiaryRefKey,
+
+            // Other display data
+            'registrationDate': _formatDate(createdDateTime),
+            'name': name,
+            'age': age,
+            'gender': gender,
+            'mobile': mobile,
+            'rchId': rchId,
+            'husbandName': husbandName,
+            'deliveryDate': formData['delivery_date']?.toString() ?? 'N/A',
+            'deliveryType': formData['delivery_type']?.toString() ?? 'N/A',
+            'placeOfDelivery': formData['place_of_delivery']?.toString() ?? 'N/A',
+            'outcomeCount': formData['outcome_count']?.toString() ?? '1',
+            'previousHBNCDate': previousHBNCDate ?? 'Unavailable',
+            'nextHBNCDate': nextHBNCDate ?? 'Unavailable',
+
+            // Raw data for next screen
+            '_rawData': beneficiary,
+            '_formData': formData,
+          };
+
+          print('Adding formatted data: $formattedData');
+          setState(() {
+            _filtered.add(formattedData);
+          });
+
+        } catch (e) {
+          print('❌ Error processing outcome ${outcome['id']}: $e');
+          if (e is Error) {
+            print('Stack trace: ${e.stackTrace}');
           }
         }
       }
-
-      setState(() {
-        _filtered = couples;
-        _isLoading = false;
-      });
-
     } catch (e) {
-      print('Error loading pregnancy outcome couples: $e');
+      print('❌ Error in _loadPregnancyOutcomeeCouples: $e');
+      if (e is Error) {
+        print('Stack trace: ${e.stackTrace}');
+      }
+    } finally {
       setState(() {
         _isLoading = false;
-        _filtered = [];
+        print('Finished loading. Found ${_filtered.length} records.');
       });
     }
   }
-  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
-    if (person.isEmpty) return false;
-    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
-    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? head?['maritalStatus']?.toString().toLowerCase() ?? '';
-    final gender = genderRaw == 'f' || genderRaw == 'female';
-    final maritalStatus = maritalStatusRaw == 'married';
-    final dob = person['dob'];
-    final age = _calculateAge(dob);
-    return gender && maritalStatus && age >= 15 && age <= 49;
+
+  // Helper to get last N digits
+  String _getLastDigits(String value, int count) {
+    if (value.isEmpty || value == 'N/A') return value;
+    return value.length > count ? value.substring(value.length - count) : value;
   }
 
-  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
-    final hhId = row['household_ref_key']?.toString() ?? '';
-    final uniqueKey = row['unique_key']?.toString() ?? '';
-    final createdDate = row['created_date_time']?.toString() ?? '';
-    final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-    final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
-    final gender = female['gender']?.toString().toLowerCase();
-    final displayGender = gender == 'f' ? 'Female' : gender == 'm' ? 'Male' : 'Other';
-    final age = _calculateAge(female['dob']);
-    final richId = female['RichID']?.toString() ?? '';
-    final mobile = female['mobileNo']?.toString() ?? '';
-    final husbandName = isHead
-        ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
-        : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
-
-    final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
-    Map<String, dynamic>? childrenSummary;
-    if (childrenRaw is Map) {
-      childrenSummary = {
-        'totalBorn': childrenRaw['totalBorn'],
-        'totalLive': childrenRaw['totalLive'],
-        'totalMale': childrenRaw['totalMale'],
-        'totalFemale': childrenRaw['totalFemale'],
-        'youngestAge': childrenRaw['youngestAge'],
-        'ageUnit': childrenRaw['ageUnit'],
-        'youngestGender': childrenRaw['youngestGender'],
-      }..removeWhere((k, v) => v == null);
-    }
-    return {
-      'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
-      'RegistrationDate': _formatDate(createdDate),
-      'RegistrationType': 'General',
-      'BeneficiaryID': uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey,
-      'Name': name,
-      'age': age > 0 ? '$age Y / $displayGender' : 'N/A',
-      'RichID': richId,
-      'mobileno': mobile,
-      'HusbandName': husbandName,
-      'childrenSummary': childrenSummary,
-      '_rawRow': row,
-    };
-  }
-
-  int _calculateAge(dynamic dobRaw) {
-    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+  // Helper to get last visit date
+  Future<String?> _getLastVisitDate(String beneficiaryId) async {
     try {
-      final dob = DateTime.tryParse(dobRaw.toString());
-      if (dob == null) return 0;
-      return DateTime.now().difference(dob).inDays ~/ 365;
-    } catch (_) {
+      final db = await DatabaseProvider.instance.database;
+      // Replace 'hbnc_visit_form_key' with your actual HBNC form key
+      final results = await db.query(
+        'followup_form_data',
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ?',
+        whereArgs: [beneficiaryId, 'hbnc_visit_form_key'],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (results.isNotEmpty) {
+        final formJson = jsonDecode(results.first['form_json'] as String);
+        final visitDate = formJson['form_data']?['visit_date'];
+        return visitDate != null ? _formatDate(visitDate.toString()) : null;
+      }
+    } catch (e) {
+      print('Error getting last visit date: $e');
+    }
+    return null;
+  }
+
+  // Helper to calculate next visit date
+  Future<String?> _getNextVisitDate(String beneficiaryId, String? deliveryDate) async {
+    if (deliveryDate == null) return null;
+
+    try {
+      final lastVisit = await _getLastVisitDate(beneficiaryId);
+      if (lastVisit == null) {
+        final delivery = DateTime.parse(deliveryDate);
+        final nextVisit = delivery.add(const Duration(days: 1));
+        return _formatDate(nextVisit.toString());
+      }
+    } catch (e) {
+      print('Error calculating next visit date: $e');
+    }
+    return null;
+  }
+
+  // Helper method to calculate age from DOB
+  int _calculateAge(dynamic dob) {
+    if (dob == null) return 0;
+    try {
+      final birthDate = DateTime.tryParse(dob.toString());
+      if (birthDate == null) return 0;
+      final now = DateTime.now();
+      int age = now.year - birthDate.year;
+      if (now.month < birthDate.month ||
+          (now.month == birthDate.month && now.day < birthDate.day)) {
+        age--;
+      }
+      return age;
+    } catch (e) {
       return 0;
     }
   }
@@ -199,8 +272,8 @@ class _HBNCListScreenState
       } else {
         _filtered = _filtered.where((e) {
           return ((e['hhId'] ?? '') as String).toLowerCase().contains(q) ||
-              ((e['Name'] ?? '') as String).toLowerCase().contains(q) ||
-              ((e['mobileno'] ?? '') as String).toLowerCase().contains(q);
+              ((e['name'] ?? '') as String).toLowerCase().contains(q) ||
+              ((e['mobile'] ?? '') as String).toLowerCase().contains(q);
         }).toList();
       }
     });
@@ -299,179 +372,251 @@ class _HBNCListScreenState
       ),
     );
   }
-
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final primary = Theme.of(context).primaryColor;
     final t = AppLocalizations.of(context);
 
-    final rowData = data['_rawRow'] ?? {};
-    final beneficiaryInfo = rowData['beneficiary_info'] is String
-        ? jsonDecode(rowData['beneficiary_info'])
-        : (rowData['beneficiary_info'] ?? {});
-
-
-
-    final beneficiaryId = (data['_rawRow']?['unique_key'] ?? '').toString();
-    final formattedBeneficiaryId = beneficiaryId.length >= 11
-        ? beneficiaryId.substring(beneficiaryId.length - 11)
-        : beneficiaryId;
-
     return Card(
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: Colors.grey.shade200),
-        ),
-        child: InkWell(
-          onTap: () {
-            final beneficiaryData = <String, dynamic>{};
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: () {
+          // Print the complete IDs before navigation
+          print('🔵 Navigating to HbncVisitScreen');
+          print('🆔 Complete Household ID: ${data['fullHhId']}');
+          print('🆔 Complete Beneficiary ID: ${data['fullBeneficiaryId']}');
+          print('👤 Name: ${data['name']}');
 
-            if (data['_rawRow'] is Map) {
-              final rawRow = data['_rawRow'] as Map;
-              beneficiaryData['unique_key'] = rawRow['unique_key'];
-              beneficiaryData['BeneficiaryID'] = rawRow['BeneficiaryID'];
-
-              print('🔑 Passing to form:');
-              print('   - unique_key: ${beneficiaryData['unique_key']}');
-              print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
-            }
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HbncVisitScreen(beneficiaryData: beneficiaryData),
+          // Pass only beneficiary ID, household ID, and name
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HbncVisitScreen(
+                beneficiaryData: {
+                  'unique_key': data['fullBeneficiaryId'],
+                  'household_ref_key': data['fullHhId'],
+                  'name': data['name'],
+                },
               ),
-            );
-          },
-
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  blurRadius: 2,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 2),
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
-                  blurRadius: 2,
-                  spreadRadius: 1,
-                  offset: const Offset(0, -2),
-                ),
-              ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header
-                Container(
-                  decoration: const BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
-                  ),
-                  padding: const EdgeInsets.all(4),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.home, color: Colors.black54, size: 18),
-                      Expanded(
-                        child: Text(
-                          data['hhId'] ?? '',
-                          style: TextStyle(color: primary, fontWeight: FontWeight.w600),
+          );
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 2,
+                spreadRadius: 1,
+                offset: const Offset(0, 2),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 2,
+                spreadRadius: 1,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header with HH ID and Visits count
+              Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+                ),
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.home, color: Colors.black54, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        data['hhId']?.toString() ?? 'N/A',
+                        style: TextStyle(
+                          color: primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      FutureBuilder<int>(
-                        future: _getVisitCount(beneficiaryId),
-                        builder: (context, snapshot) {
-                          final count = snapshot.data ?? 0;
-                          return Text(
-                            '${t?.visitsLabel ?? 'Visits:'} $count',
-                            style: TextStyle(
-                              color: primary,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.sp,
+                    ),
+                    const SizedBox(width: 8),
+                    FutureBuilder<int>(
+                      future: _getVisitCount(data['fullBeneficiaryId']?.toString() ?? ''),
+                      builder: (context, snapshot) {
+                        final visitCount = snapshot.data ?? 0;
+                        return Row(
+                          children: [
+                            Text(
+                              'Visits : ',
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          );
-                        },
+                            Text(
+                              '$visitCount',
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade400,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.cloud_done,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 60,
-                        height: 24,
-                        child: Image.asset('assets/images/sync.png'),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                // Body
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius:
-                    const BorderRadius.vertical(bottom: Radius.circular(8)),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(child: _rowText('Registration Date', data['RegistrationDate'] ?? '')),
-                          const SizedBox(width: 12),
-                          Expanded(child: _rowText('Registration Type', data['RegistrationType'] ?? '')),
-                          const SizedBox(width: 12),
-                          Expanded(child: _rowText('Rich ID', data['RichID']?.toString() ?? '')),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(child: _rowText(  'Name', data['Name'] ?? '')),
-                          const SizedBox(width: 12),
-                          Expanded(child: _rowText( 'Age', data['age']?.toString() ?? '')),
-                          const SizedBox(width: 12),
-                          Expanded(
-                              child: _rowText('Husband Name', data['HusbandName'] ?? '')),                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                              child: _rowText( 'Mobile No.', data['mobileno']?.toString() ?? '')),
-                          const SizedBox(width: 12),
-                          Expanded(
-                              child: _rowText('Previous Pnc Date', data['RegistrationDate'] ?? '')),
-                          Expanded(
-                              child: _rowText('Next Pnc Date', data['RegistrationDate'] ?? '')),
-                        ],
-                      ),
-                    ],
-                  ),
+              ),
+
+              // Body with all information
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
                 ),
-              ],
-            ),
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // First Row: Registration Date, Beneficiary ID, RCH ID
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _rowText(
+                            'Registration Date',
+                            data['registrationDate']?.toString() ?? 'N/A',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _rowText(
+                            'Beneficiary ID',
+                            data['beneficiaryId']?.toString() ?? 'N/A',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _rowText(
+                            'RCH ID',
+                            data['rchId']?.toString() ?? 'N/A',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Second Row: Name, Age | Gender, Husband Name
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _rowText(
+                            'Name',
+                            data['name']?.toString() ?? 'N/A',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _rowText(
+                            'Age | Gender',
+                            '${data['age']?.toString() ?? '0'} Y | ${data['gender']?.toString() ?? 'N/A'}',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _rowText(
+                            'Husband Name',
+                            data['husbandName']?.toString() ?? 'N/A',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Third Row: Mobile no., Previous HBNC Date, Next HBNC Date
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _rowText(
+                            'Mobile no.',
+                            data['mobile']?.toString() ?? 'N/A',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _rowText(
+                            'Previous HBNC Date',
+                            data['previousHBNCDate']?.toString() ?? 'Not Available',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _rowText(
+                            'Next HBNC Date',
+                            data['nextHBNCDate']?.toString() ?? 'Not Available',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        )
+        ),
+      ),
     );
   }
 
+// Helper method for row text styling
   Widget _rowText(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.background,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w400,
+            fontSize: 13,
+          ),
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

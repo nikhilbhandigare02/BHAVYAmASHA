@@ -45,7 +45,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     final beneficiaryData = (widget as dynamic).beneficiaryData;
     
     return BlocProvider(
-      create: (context) => HbncVisitBloc()..add(SaveHbncVisit(beneficiaryData: beneficiaryData)),
+      create: (context) => HbncVisitBloc(),
       child: Builder(
         builder: (context) => Scaffold(
           body: BlocListener<HbncVisitBloc, HbncVisitState>(
@@ -71,12 +71,17 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                   SnackBar(
                     content: Text(AppLocalizations.of(context)!.dataSavedSuccessfully),
                     backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 2),
                   ),
                 );
                 
-                // Navigate back to previous screen
+                // Navigate back to previous screen after a short delay
                 if (mounted) {
-                  Navigator.of(context).pop(true);
+                  Future.delayed(const Duration(milliseconds: 2200), () {
+                    if (mounted) {
+                      Navigator.of(context).pop(true);
+                    }
+                  });
                 }
               }
               
@@ -198,13 +203,15 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                                   title: t.saveButton,
                                   isLoading: state.isSaving,
                                   onPress: () {
-                                    if (_formKey.currentState
-                                        ?.validate() ??
-                                        true) {
-                                      context
-                                          .read<HbncVisitBloc>()
-                                          .add(ValidateSection(2,
-                                          isSave: true));
+                                    // Only trigger validation, the BlocListener will handle the save
+                                    // when validation is successful
+                                    if (_formKey.currentState?.validate() ?? true) {
+                                      context.read<HbncVisitBloc>().add(
+                                        ValidateSection(
+                                          _tabController.index,
+                                          isSave: true,
+                                        ),
+                                      );
                                     }
                                   },
                                 );

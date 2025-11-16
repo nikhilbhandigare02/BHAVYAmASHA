@@ -8,6 +8,16 @@ abstract class OutcomeFormEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class OutcomeFormInitialized extends OutcomeFormEvent {
+  final String? householdId;
+  final String? beneficiaryId;
+
+  const OutcomeFormInitialized({this.householdId, this.beneficiaryId});
+
+  @override
+  List<Object?> get props => [householdId, beneficiaryId];
+}
+
 class DeliveryDateChanged extends OutcomeFormEvent {
   final DateTime? date;
 
