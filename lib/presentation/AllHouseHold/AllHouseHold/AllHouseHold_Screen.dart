@@ -161,8 +161,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       }).toList();
 
       final mapped = familyHeads.map<Map<String, dynamic>>((r) {
-        // Parse beneficiary info of the head
-        final info = r['beneficiary_info'] is String 
+        final info = r['beneficiary_info'] is String
             ? Map<String, dynamic>.from(jsonDecode(r['beneficiary_info'])) 
             : Map<String, dynamic>.from((r['beneficiary_info'] as Map?) ?? const {});
 
@@ -217,6 +216,29 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           '_raw': r,
         };
       }).toList();
+
+      // Sort so that latest records (by created_date_time, then modified_date_time) appear first
+      mapped.sort((a, b) {
+        final ra = a['_raw'] as Map<String, dynamic>? ?? const {};
+        final rb = b['_raw'] as Map<String, dynamic>? ?? const {};
+
+        final createdA = DateTime.tryParse((ra['created_date_time'] ?? '').toString());
+        final createdB = DateTime.tryParse((rb['created_date_time'] ?? '').toString());
+
+        if (createdA != null && createdB != null) {
+          return createdB.compareTo(createdA); // newest first
+        }
+
+        // Fallback to modified_date_time if created_date_time is missing
+        final modifiedA = DateTime.tryParse((ra['modified_date_time'] ?? '').toString());
+        final modifiedB = DateTime.tryParse((rb['modified_date_time'] ?? '').toString());
+
+        if (modifiedA != null && modifiedB != null) {
+          return modifiedB.compareTo(modifiedA);
+        }
+
+        return 0;
+      });
 
       if (mounted) {
         setState(() {

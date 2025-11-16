@@ -74,6 +74,42 @@ class BeneficiaryRepository {
 
         final info = _mapBeneficiaryInfo(rec);
 
+        // Ensure corresponding household row exists using household_ref_key as households.unique_key
+        // and beneficiary unique_key as households.head_id.
+        final hhRefKey = rec['household_ref_key']?.toString();
+        final benUniqueKey = rec['unique_key']?.toString();
+        if (hhRefKey != null && hhRefKey.isNotEmpty) {
+          final existingHh = await LocalStorageDao.instance.getHouseholdByUniqueKey(hhRefKey);
+          if (existingHh == null || existingHh.isEmpty) {
+            final householdInfo = <String, dynamic>{};
+            final beneficiaryInfo = info;
+
+            // Try to put some minimal head/house info if available
+            householdInfo['houseNo'] = beneficiaryInfo['houseNo'];
+            householdInfo['headName'] = beneficiaryInfo['headName'] ?? beneficiaryInfo['name'];
+
+            final toInsertHh = <String, dynamic>{
+              'server_id': null,
+              'unique_key': hhRefKey,
+              'address': beneficiaryInfo['address'] ?? {},
+              'geo_location': rec['geo_location'] ?? {},
+              'head_id': benUniqueKey,
+              'household_info': householdInfo,
+              'device_details': rec['device_details'] ?? {},
+              'app_details': rec['app_details'] ?? {},
+              'parent_user': rec['parent_user'] ?? {},
+              'current_user_key': rec['current_user_key']?.toString(),
+              'facility_id': _toInt(rec['facility_id']),
+              'created_date_time': rec['created_date_time']?.toString(),
+              'modified_date_time': rec['modified_date_time']?.toString(),
+              'is_synced': 1,
+              'is_deleted': _toInt(rec['is_deleted']),
+            };
+
+            await LocalStorageDao.instance.insertHousehold(toInsertHh);
+          }
+        }
+
         final row = <String, dynamic>{
           'server_id': serverId,
           'household_ref_key': rec['household_ref_key']?.toString(),
