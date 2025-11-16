@@ -65,6 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchTimeStamp();
     _fetchAbhaCreated();
     _fetchExistingAbhaCreated();
+    // Start background sync scheduler at app launch
+    SyncService.instance.start(interval: const Duration(minutes: 5));
+
 
 
   }

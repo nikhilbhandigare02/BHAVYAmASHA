@@ -22,6 +22,70 @@ class LocalStorageDao {
       print('Error decoding JSON: $e');
       return null;
     }
+
+  Future<List<Map<String, dynamic>>> getUnsyncedEligibleCoupleActivities() async {
+    final db = await _db;
+    final rows = await db.query(
+      'eligible_couple_activities',
+      where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 0)',
+      orderBy: 'created_date_time ASC',
+    );
+    return rows.map((row) {
+      final mapped = Map<String, dynamic>.from(row);
+      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+      return mapped;
+    }).toList();
+  }
+
+  Future<int> markEligibleCoupleActivitySyncedById(int id, {String? serverId}) async {
+    final db = await _db;
+    final values = <String, Object?>{
+      'is_synced': 1,
+      'modified_date_time': DateTime.now().toIso8601String(),
+    };
+    if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
+    return db.update('eligible_couple_activities', values, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<String> getLatestEligibleCoupleActivityServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'eligible_couple_activities',
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest EC activity server_id: $e');
+      return '';
+    }
+  }
+
+  Future<String> getLatestChildCareActivityServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'child_care_activities',
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest child care activity server_id: $e');
+      return '';
+    }
+  }
   }
 
   /// Returns the count of ANC visits for a specific beneficiary
@@ -688,8 +752,9 @@ class LocalStorageDao {
     }
   }
   
-  String _formatDeathDate(String dateStr) {
-    if (dateStr.isEmpty) return dateStr;
+  String _formatDeathDate(Map<String, dynamic> deathDetails) {
+    final dateStr = deathDetails['dateOfDeath'];
+    if (dateStr == null) return 'Date not available';
     
     try {
       final date = DateTime.tryParse(dateStr);
@@ -701,7 +766,163 @@ class LocalStorageDao {
     }
   }
 
-  /// Get followup form data by form type, household ID, and beneficiary ID
+  Future<String> getLatestHouseholdServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'households',
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest household server_id: $e');
+      return '';
+    }
+  }
+
+  Future<Map<String, dynamic>?> getHouseholdByUniqueKey(String uniqueKey) async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'households',
+        where: 'unique_key = ? AND is_deleted = 0',
+        whereArgs: [uniqueKey],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      final mapped = Map<String, dynamic>.from(rows.first);
+      mapped['address'] = safeJsonDecode(mapped['address']);
+      mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+      mapped['household_info'] = safeJsonDecode(mapped['household_info']);
+      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+      return mapped;
+    } catch (e) {
+      print('Error getting household by unique_key: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getHouseholdByServerId(String serverId) async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'households',
+        where: 'server_id = ? AND is_deleted = 0',
+        whereArgs: [serverId],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      final mapped = Map<String, dynamic>.from(rows.first);
+      mapped['address'] = safeJsonDecode(mapped['address']);
+      mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+      mapped['household_info'] = safeJsonDecode(mapped['household_info']);
+      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+      return mapped;
+    } catch (e) {
+      print('Error getting household by server_id: $e');
+      return null;
+    }
+  }
+
+  Future<String> getLatestEligibleCoupleActivityServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'eligible_couple_activities',
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest EC activity server_id: $e');
+      return '';
+    }
+  }
+
+  Future<String> getLatestChildCareActivityServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'child_care_activities',
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest child care activity server_id: $e');
+      return '';
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUnsyncedEligibleCoupleActivities() async {
+    final db = await _db;
+    final rows = await db.query(
+      'eligible_couple_activities',
+      where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 0)',
+      orderBy: 'created_date_time ASC',
+    );
+    return rows.map((row) {
+      final mapped = Map<String, dynamic>.from(row);
+      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+      return mapped;
+    }).toList();
+  }
+
+  Future<int> markEligibleCoupleActivitySyncedById(int id, {String? serverId}) async {
+    final db = await _db;
+    final values = <String, Object?>{
+      'is_synced': 1,
+      'modified_date_time': DateTime.now().toIso8601String(),
+    };
+    if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
+    return db.update('eligible_couple_activities', values, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<Map<String, dynamic>>> getUnsyncedChildCareActivities() async {
+    final db = await _db;
+    final rows = await db.query(
+      'child_care_activities',
+      where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 0)',
+      orderBy: 'created_date_time ASC',
+    );
+    return rows.map((row) {
+      final mapped = Map<String, dynamic>.from(row);
+      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+      return mapped;
+    }).toList();
+  }
+
+  Future<int> markChildCareActivitySyncedById(int id, {String? serverId}) async {
+    final db = await _db;
+    final values = <String, Object?>{
+      'is_synced': 1,
+      'modified_date_time': DateTime.now().toIso8601String(),
+    };
+    if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
+    return db.update('child_care_activities', values, where: 'id = ?', whereArgs: [id]);
+  }
+
   Future<List<Map<String, dynamic>>> getFollowupFormsByHouseholdAndBeneficiary({
     required String formType,
     required String householdId,
@@ -719,7 +940,7 @@ class LocalStorageDao {
         ],
         orderBy: 'created_date_time DESC',
       );
-      
+
       return result;
     } catch (e) {
       print('Error getting followup forms: $e');

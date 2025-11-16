@@ -9,6 +9,7 @@ import 'package:sizer/sizer.dart';
 import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/widgets/AppDrawer/Drawer.dart';
+import '../../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../../../data/Local_Storage/local_storage_dao.dart';
 import '../ANCVisitForm/ANCVisitForm.dart';
 
@@ -101,48 +102,40 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return input.length <= 11 ? input : input.substring(input.length - 11);
   }
 
-  // Calculate date range for ANC visit
-  Map<String, DateTime> _calculateAncDateRanges(DateTime registrationDate) {
+  // Helper: add N weeks to a date
+  DateTime _dateAfterWeeks(DateTime startDate, int noOfWeeks) {
+    final days = noOfWeeks * 7;
+    return startDate.add(Duration(days: days));
+  }
+
+  // Helper: calculate EDD from LMP (approx. 40 weeks)
+  DateTime _calculateEdd(DateTime lmp) {
+    return _dateAfterWeeks(lmp, 40);
+  }
+
+  // Calculate date range for ANC visits based on LMP
+  Map<String, DateTime> _calculateAncDateRanges(DateTime lmp) {
     final ranges = <String, DateTime>{};
 
-    // 1st ANC: 1 month before registration to 3 months after registration
-    ranges['1st_anc_start'] = DateTime(
-      registrationDate.year,
-      registrationDate.month - 1,
-      registrationDate.day,
-    );
-    ranges['1st_anc_end'] = DateTime(
-      registrationDate.year,
-      registrationDate.month + 3,
-      registrationDate.day,
-    );
+    // 1st ANC: from LMP to 12 weeks
+    ranges['1st_anc_start'] = lmp;
+    ranges['1st_anc_end'] = _dateAfterWeeks(lmp, 12);
 
-    // 2nd ANC: 15 days after 1st ANC end to 3 months after that
-    final secondStart = ranges['1st_anc_end']!.add(const Duration(days: 15));
-    ranges['2nd_anc_start'] = secondStart;
-    ranges['2nd_anc_end'] = DateTime(
-      secondStart.year,
-      secondStart.month + 3,
-      secondStart.day,
-    );
+    // 2nd ANC: 14 to 24 weeks from LMP
+    ranges['2nd_anc_start'] = _dateAfterWeeks(lmp, 14);
+    ranges['2nd_anc_end'] = _dateAfterWeeks(lmp, 24);
 
-    // 3rd ANC: 15 days after 2nd ANC end to 3 months after that
-    final thirdStart = ranges['2nd_anc_end']!.add(const Duration(days: 15));
-    ranges['3rd_anc_start'] = thirdStart;
-    ranges['3rd_anc_end'] = DateTime(
-      thirdStart.year,
-      thirdStart.month + 3,
-      thirdStart.day,
-    );
+    // 3rd ANC: 26 to 34 weeks from LMP
+    ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
+    ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
 
-    // 4th ANC: 15 days after 3rd ANC end to 3 months after that
-    final fourthStart = ranges['3rd_anc_end']!.add(const Duration(days: 15));
-    ranges['4th_anc_start'] = fourthStart;
-    ranges['4th_anc_end'] = DateTime(
-      fourthStart.year,
-      fourthStart.month + 3,
-      fourthStart.day,
-    );
+    // 4th ANC: 36 weeks from LMP to EDD
+    ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
+    ranges['4th_anc_end'] = _calculateEdd(lmp);
+
+    // PMSMA: 4-week window immediately AFTER 4th ANC (40–44 weeks from LMP)
+    ranges['pmsma_start'] = _dateAfterWeeks(lmp, 40);
+    ranges['pmsma_end'] = _dateAfterWeeks(lmp, 44);
 
     return ranges;
   }
@@ -361,7 +354,18 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () {
+      onTap: () async {
+        final confirmed = await showConfirmationDialog(
+          context: context,
+          message: 'Move forward?',
+          yesText: 'Yes',
+          noText: 'No',
+        );
+
+        if (confirmed != true) {
+          return;
+        }
+
         // Create a new map with the COMPLETE data
         final formData = Map<String, dynamic>.from(data);
 
@@ -545,59 +549,86 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     builder: (context, snapshot) {
                       final visitCount = snapshot.data ?? 0;
 
-                      // Parse registration date
-                      DateTime regDate;
+                      // Derive LMP date for this beneficiary
+                      DateTime? lmpDate;
                       try {
-                        // Try to parse from dd/MM/yyyy format
-                        final parts = registrationDate.split('/');
-                        if (parts.length == 3) {
-                          regDate = DateTime(
-                            int.parse(parts[2]), // year
-                            int.parse(parts[1]), // month
-                            int.parse(parts[0]), // day
-                          );
+                        final rawRow = data['_rawRow'] as Map<String, dynamic>?;
+                        dynamic rawInfo = rawRow?['beneficiary_info'];
+                        Map<String, dynamic> info;
+
+                        if (rawInfo is String && rawInfo.isNotEmpty) {
+                          info = jsonDecode(rawInfo) as Map<String, dynamic>;
+                        } else if (rawInfo is Map) {
+                          info = Map<String, dynamic>.from(rawInfo as Map);
                         } else {
-                          regDate = DateTime.now();
+                          info = <String, dynamic>{};
+                        }
+
+                        final lmpRaw = info['lmp']?.toString();
+                        if (lmpRaw != null && lmpRaw.isNotEmpty) {
+                          // Handle possible ISO-like strings (e.g., 2025-11-14T00:00:00.000)
+                          String dateStr = lmpRaw;
+                          if (dateStr.contains('T')) {
+                            dateStr = dateStr.split('T')[0];
+                          }
+                          lmpDate = DateTime.tryParse(dateStr);
                         }
                       } catch (e) {
-                        print('⚠️ Error parsing registration date: $e');
-                        regDate = DateTime.now();
+                        print('⚠️ Error deriving LMP date: $e');
                       }
 
-                      final ancRanges = _calculateAncDateRanges(regDate);
+                      // Fallback: use registration date if LMP is unavailable
+                      if (lmpDate == null) {
+                        try {
+                          final parts = registrationDate.split('/');
+                          if (parts.length == 3) {
+                            lmpDate = DateTime(
+                              int.parse(parts[2]),
+                              int.parse(parts[1]),
+                              int.parse(parts[0]),
+                            );
+                          } else {
+                            lmpDate = DateTime.now();
+                          }
+                        } catch (e) {
+                          print('⚠️ Error parsing fallback registration date: $e');
+                          lmpDate = DateTime.now();
+                        }
+                      }
 
-                      return Column(
+                      final ancRanges = _calculateAncDateRanges(lmpDate!);
+
+                      return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 1st ANC
-                          _ancDateRow(
-                            '1st ANC',
+                          _ancDateBox(
+                            'First ANC',
                             ancRanges['1st_anc_start']!,
                             ancRanges['1st_anc_end']!,
                           ),
-                          const SizedBox(height: 6),
-
-                          // 2nd ANC
-                          _ancDateRow(
-                            '2nd ANC',
+                          const SizedBox(width: 4),
+                          _ancDateBox(
+                            'Second ANC',
                             ancRanges['2nd_anc_start']!,
                             ancRanges['2nd_anc_end']!,
                           ),
-                          const SizedBox(height: 6),
-
-                          // 3rd ANC
-                          _ancDateRow(
-                            '3rd ANC',
+                          const SizedBox(width: 4),
+                          _ancDateBox(
+                            'Third ANC',
                             ancRanges['3rd_anc_start']!,
                             ancRanges['3rd_anc_end']!,
                           ),
-                          const SizedBox(height: 6),
-
-                          // 4th ANC
-                          _ancDateRow(
-                            '4th ANC',
+                          const SizedBox(width: 4),
+                          _ancDateBox(
+                            'Fourth ANC',
                             ancRanges['4th_anc_start']!,
                             ancRanges['4th_anc_end']!,
+                          ),
+                          const SizedBox(width: 4),
+                          _ancDateBox(
+                            'PMAMA',
+                            ancRanges['pmsma_start']!,
+                            ancRanges['pmsma_end']!,
                           ),
                         ],
                       );
@@ -638,6 +669,35 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _ancDateBox(String label, DateTime startDate, DateTime endDate) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.background,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${_formatDate(startDate)}\n${_formatDate(endDate)}',
+            style: TextStyle(
+              color: AppColors.background,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

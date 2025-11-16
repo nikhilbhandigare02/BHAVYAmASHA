@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../data/Local_Storage/local_storage_dao.dart';
+import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../l10n/app_localizations.dart';
 
 class TodayProgramSection extends StatefulWidget {
@@ -21,6 +26,9 @@ class TodayProgramSection extends StatefulWidget {
 
 class _TodayProgramSectionState extends State<TodayProgramSection> {
   String? _expandedKey;
+  List<Map<String, dynamic>> _familySurveyItems = [];
+  List<Map<String, dynamic>> _eligibleCoupleItems = [];
+  List<Map<String, dynamic>> _ancItems = [];
 
   @override
   void initState() {
@@ -29,150 +37,736 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onGridTap(0);
     });
+
+    _loadFamilySurveyItems();
+    _loadEligibleCoupleItems();
+    _loadAncItems();
+  }
+
+  String _last11(String? input) {
+    if (input == null || input.isEmpty) return '-';
+    return input.length <= 11 ? input : input.substring(input.length - 11);
+  }
+
+  Future<void> _launchPhoneDialer(String? mobile) async {
+    if (mobile == null || mobile.trim().isEmpty || mobile == '-') return;
+    final uri = Uri(scheme: 'tel', path: mobile.trim());
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
   }
 
   bool _isExpanded(String key) {
     return _expandedKey == key;
   }
 
+  Future<void> _loadAncItems() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+
+      final List<Map<String, dynamic>> items = [];
+
+      for (final row in rows) {
+        try {
+          final isDeath = row['is_death'] == 1;
+          final isMigrated = row['is_migrated'] == 1;
+          if (isDeath || isMigrated) continue;
+
+          final infoRaw = row['beneficiary_info'];
+          if (infoRaw == null) continue;
+
+          final Map<String, dynamic> info = infoRaw is Map<String, dynamic>
+              ? infoRaw
+              : Map<String, dynamic>.from(infoRaw as Map);
+
+          final isPregnant =
+              info['isPregnant']?.toString().toLowerCase() == 'yes';
+          if (!isPregnant) continue;
+
+          final genderRaw = info['gender']?.toString().toLowerCase();
+          if (genderRaw != 'f' && genderRaw != 'female') continue;
+
+          final name = (info['memberName'] ?? info['headName'] ?? info['name'])
+              ?.toString()
+              .trim();
+          if (name == null || name.isEmpty) continue;
+
+          String ageText = '-';
+          final dobRaw =
+              info['dob']?.toString() ?? info['dateOfBirth']?.toString();
+          if (dobRaw != null && dobRaw.isNotEmpty) {
+            try {
+              String dateStr = dobRaw;
+              if (dateStr.contains('T')) {
+                dateStr = dateStr.split('T')[0];
+              }
+              final birthDate = DateTime.tryParse(dateStr);
+              if (birthDate != null) {
+                final now = DateTime.now();
+                int ageYears = now.year - birthDate.year;
+                if (now.month < birthDate.month ||
+                    (now.month == birthDate.month &&
+                        now.day < birthDate.day)) {
+                  ageYears--;
+                }
+                if (ageYears >= 0) {
+                  ageText = '${ageYears}y';
+                }
+              }
+            } catch (_) {}
+          }
+
+          if (ageText == '-') {
+            final years = info['years']?.toString();
+            final approxAge = info['approxAge']?.toString();
+            ageText = (years != null && years.isNotEmpty)
+                ? '${years}Y'
+                : (approxAge != null && approxAge.isNotEmpty)
+                    ? '${approxAge}y'
+                    : '-';
+          }
+
+          final mobile = (info['mobileNo'] ?? info['phone'])?.toString();
+
+          String lastVisitDate = '-';
+          DateTime? lastVisitDt;
+
+          String? modifiedRaw = row['modified_date_time']?.toString();
+          String? createdRaw = row['created_date_time']?.toString();
+
+          String? pickDateStr(String? raw) {
+            if (raw == null || raw.isEmpty) return null;
+            String s = raw;
+            if (s.contains('T')) {
+              s = s.split('T')[0];
+            }
+            return s;
+          }
+
+          String? modifiedStr = pickDateStr(modifiedRaw);
+          String? createdStr = pickDateStr(createdRaw);
+
+          if (modifiedStr != null) {
+            lastVisitDt = DateTime.tryParse(modifiedStr);
+            lastVisitDate = modifiedStr;
+          } else if (createdStr != null) {
+            lastVisitDt = DateTime.tryParse(createdStr);
+            lastVisitDate = createdStr;
+          }
+
+          DateTime? lmpDate;
+          try {
+            final lmpRaw = info['lmp']?.toString();
+            if (lmpRaw != null && lmpRaw.isNotEmpty) {
+              String dateStr = lmpRaw;
+              if (dateStr.contains('T')) {
+                dateStr = dateStr.split('T')[0];
+              }
+              lmpDate = DateTime.tryParse(dateStr);
+            }
+          } catch (_) {}
+
+          if (lmpDate == null) {
+            lmpDate = lastVisitDt ?? DateTime.now();
+          }
+
+          final ancRanges = _calculateAncDateRangesForToday(lmpDate);
+          final currentAncLastDueDate = ancRanges['4th_anc_end'];
+
+          String currentAncLastDueDateText = '-';
+          if (currentAncLastDueDate != null) {
+            currentAncLastDueDateText =
+                '${currentAncLastDueDate.year.toString().padLeft(4, '0')}-${currentAncLastDueDate.month.toString().padLeft(2, '0')}-${currentAncLastDueDate.day.toString().padLeft(2, '0')}';
+          }
+
+          String rawId = row['unique_key']?.toString() ?? '';
+          if (rawId.length > 11) {
+            rawId = rawId.substring(rawId.length - 11);
+          }
+
+          items.add({
+            'id': rawId,
+            'name': name,
+            'age': ageText,
+            'gender': 'Female',
+            'last Visit date': lastVisitDate,
+            'Current ANC last due date': currentAncLastDueDateText,
+            'mobile': mobile ?? '-',
+            'badge': 'ANC',
+          });
+        } catch (_) {
+          continue;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _ancItems = items;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Map<String, DateTime> _calculateAncDateRangesForToday(DateTime lmp) {
+    final ranges = <String, DateTime>{};
+
+    ranges['1st_anc_start'] = lmp;
+    ranges['1st_anc_end'] = lmp.add(const Duration(days: 12 * 7));
+
+    ranges['2nd_anc_start'] = lmp.add(const Duration(days: 14 * 7));
+    ranges['2nd_anc_end'] = lmp.add(const Duration(days: 24 * 7));
+
+    ranges['3rd_anc_start'] = lmp.add(const Duration(days: 26 * 7));
+    ranges['3rd_anc_end'] = lmp.add(const Duration(days: 34 * 7));
+
+    ranges['4th_anc_start'] = lmp.add(const Duration(days: 36 * 7));
+    ranges['4th_anc_end'] = lmp.add(const Duration(days: 40 * 7));
+
+    ranges['pmsma_start'] = lmp.add(const Duration(days: 40 * 7));
+    ranges['pmsma_end'] = lmp.add(const Duration(days: 44 * 7));
+
+    return ranges;
+  }
+
+  Future<void> _loadFamilySurveyItems() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final households = await LocalStorageDao.instance.getAllHouseholds();
+
+      final List<Map<String, dynamic>> items = [];
+
+      // Build map of household_ref_key -> configured head unique_key (head_id)
+      final headKeyByHousehold = <String, String>{};
+      for (final hh in households) {
+        try {
+          final hhRefKey = (hh['unique_key'] ?? '').toString();
+          final headId = (hh['head_id'] ?? '').toString();
+          if (hhRefKey.isEmpty || headId.isEmpty) continue;
+          headKeyByHousehold[hhRefKey] = headId;
+        } catch (_) {}
+      }
+
+      for (final row in rows) {
+        try {
+          final isDeath = row['is_death'] == 1;
+          final isMigrated = row['is_migrated'] == 1;
+          if (isDeath || isMigrated) continue;
+
+          // Only include household head records similar to AllHouseHold_Screen
+          final householdRefKey = (row['household_ref_key'] ?? '').toString();
+          final uniqueKey = (row['unique_key'] ?? '').toString();
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) continue;
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+          if (configuredHeadKey == null || configuredHeadKey.isEmpty) continue;
+          if (configuredHeadKey != uniqueKey) continue;
+
+          final infoRaw = row['beneficiary_info'];
+          if (infoRaw == null) continue;
+
+          final Map<String, dynamic> info = infoRaw is Map<String, dynamic>
+              ? infoRaw
+              : Map<String, dynamic>.from(infoRaw as Map);
+
+          final name = (info['headName'] ?? info['memberName'] ?? info['name'])
+              ?.toString()
+              .trim();
+          if (name == null || name.isEmpty) continue;
+
+          final gender = info['gender']?.toString();
+
+          // Prefer calculating age from DOB if available
+          String ageText = '-';
+          final dobRaw =
+              info['dob']?.toString() ?? info['dateOfBirth']?.toString();
+          if (dobRaw != null && dobRaw.isNotEmpty) {
+            try {
+              String dateStr = dobRaw;
+              if (dateStr.contains('T')) {
+                dateStr = dateStr.split('T')[0];
+              }
+              final birthDate = DateTime.tryParse(dateStr);
+              if (birthDate != null) {
+                final now = DateTime.now();
+                int ageYears = now.year - birthDate.year;
+                if (now.month < birthDate.month ||
+                    (now.month == birthDate.month && now.day < birthDate.day)) {
+                  ageYears--;
+                }
+                if (ageYears >= 0) {
+                  ageText = '${ageYears}y';
+                }
+              }
+            } catch (_) {
+              // Fallback below if DOB parsing fails
+            }
+          }
+
+          if (ageText == '-') {
+            final years = info['years']?.toString();
+            final approxAge = info['approxAge']?.toString();
+            ageText = (years != null && years.isNotEmpty)
+                ? '${years}Y'
+                : (approxAge != null && approxAge.isNotEmpty)
+                ? '${approxAge}y'
+                : '-';
+          }
+
+          final mobile = (info['mobileNo'] ?? info['phone'])?.toString();
+
+          String lastSurveyDate = '-';
+          DateTime? lastSurveyDt;
+
+          String? modifiedRaw = row['modified_date_time']?.toString();
+          String? createdRaw = row['created_date_time']?.toString();
+
+          String? pickDateStr(String? raw) {
+            if (raw == null || raw.isEmpty) return null;
+            String s = raw;
+            if (s.contains('T')) {
+              s = s.split('T')[0];
+            }
+            return s;
+          }
+
+          // Derive lastSurveyDate from modified_date_time if available, otherwise created_date_time
+          String? modifiedStr = pickDateStr(modifiedRaw);
+          String? createdStr = pickDateStr(createdRaw);
+
+          if (modifiedStr != null) {
+            lastSurveyDt = DateTime.tryParse(modifiedStr);
+            lastSurveyDate = modifiedStr;
+          } else if (createdStr != null) {
+            lastSurveyDt = DateTime.tryParse(createdStr);
+            lastSurveyDate = createdStr;
+          }
+
+          // 6-month filter intentionally disabled as per latest requirement
+          // if (lastSurveyDt == null) {
+          //   continue;
+          // }
+          // final now = DateTime.now();
+          // final sixMonthsAgo = DateTime(now.year, now.month - 6, now.day);
+          // if (!lastSurveyDt.isBefore(sixMonthsAgo)) {
+          //   // last survey is within the last 6 months -> skip
+          //   continue;
+          // }
+
+          String rawId =
+              row['unique_key']?.toString() ??
+              row['server_id']?.toString() ??
+              '-';
+          if (rawId.length > 11) {
+            rawId = rawId.substring(rawId.length - 11);
+          }
+
+          items.add({
+            'id': rawId,
+            'household_ref_key': row['household_ref_key']?.toString(),
+            'name': name,
+            'age': ageText,
+            'gender': gender ?? '-',
+            'last survey date': lastSurveyDate,
+            'Next HBNC due date': '-',
+            'mobile': mobile ?? '-',
+            'badge': 'Family',
+          });
+        } catch (_) {
+          continue;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _familySurveyItems = items;
+        });
+      }
+    } catch (_) {}
+  }
+
+  // Helper similar to EligibleCoupleIdentifiedScreen
+  Map<String, dynamic> _toStringMap(dynamic map) {
+    if (map == null) return {};
+    if (map is Map<String, dynamic>) return map;
+    if (map is Map) {
+      return Map<String, dynamic>.from(map);
+    }
+    return {};
+  }
+
+  bool _isEligibleFemaleEc(Map<String, dynamic> person) {
+    if (person.isEmpty) return false;
+
+    final gender = person['gender']?.toString().toLowerCase();
+    final isFemale = gender == 'f' || gender == 'female';
+    if (!isFemale) return false;
+
+    final maritalStatus = person['maritalStatus']?.toString().toLowerCase();
+    if (maritalStatus != 'married') return false;
+
+    final age = _calculateAgeEc(person['dob']);
+    return age >= 15 && age <= 49;
+  }
+
+  int _calculateAgeEc(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<void> _loadEligibleCoupleItems() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final couples = <Map<String, dynamic>>[];
+
+      // Group by household
+      final households = <String, List<Map<String, dynamic>>>{};
+      for (final row in rows) {
+        final hhKey = row['household_ref_key']?.toString() ?? '';
+        households.putIfAbsent(hhKey, () => []).add(row);
+      }
+
+      for (final household in households.values) {
+        Map<String, dynamic>? head;
+        Map<String, dynamic>? spouse;
+
+        for (final member in household) {
+          final info = _toStringMap(member['beneficiary_info']);
+          final relation =
+              (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+
+          if (relation == 'self') {
+            head = info;
+            head['_row'] = Map<String, dynamic>.from(member);
+          } else if (relation == 'spouse') {
+            spouse = info;
+            spouse['_row'] = Map<String, dynamic>.from(member);
+          }
+        }
+
+        if (head != null && _isEligibleFemaleEc(head)) {
+          final formatted = _formatEligibleCoupleForTodayProgram(
+            head['_row'] ?? {},
+            head,
+            spouse ?? {},
+            isHead: true,
+          );
+          if (formatted != null) couples.add(formatted);
+        }
+
+        if (spouse != null && _isEligibleFemaleEc(spouse)) {
+          final formatted = _formatEligibleCoupleForTodayProgram(
+            spouse['_row'] ?? {},
+            spouse,
+            head ?? {},
+            isHead: false,
+          );
+          if (formatted != null) couples.add(formatted);
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _eligibleCoupleItems = couples;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Map<String, dynamic>? _formatEligibleCoupleForTodayProgram(
+    Map<String, dynamic> row,
+    Map<String, dynamic> female,
+    Map<String, dynamic> headOrSpouse, {
+    required bool isHead,
+  }) {
+    try {
+      final uniqueKey = row['unique_key']?.toString() ?? '';
+      final createdDate = row['created_date_time']?.toString() ?? '';
+      final modifiedDate = row['modified_date_time']?.toString() ?? '';
+
+      DateTime? lastDt;
+      String? pickDateStr(String raw) {
+        if (raw.isEmpty) return null;
+        String s = raw;
+        if (s.contains('T')) {
+          s = s.split('T')[0];
+        }
+        return s;
+      }
+
+      final modStr = pickDateStr(modifiedDate);
+      final creStr = pickDateStr(createdDate);
+      if (modStr != null) {
+        lastDt = DateTime.tryParse(modStr);
+      } else if (creStr != null) {
+        lastDt = DateTime.tryParse(creStr);
+      }
+
+      if (lastDt == null) return null;
+      // 30-day filter intentionally disabled as per latest requirement
+      // final now = DateTime.now();
+      // final diffDays = now.difference(lastDt).inDays;
+      // if (diffDays < 30) {
+      //   // Updated less than 1 month ago -> skip
+      //   return null;
+      // }
+
+      final name =
+          female['memberName']?.toString() ??
+          female['headName']?.toString() ??
+          '';
+
+      final genderRaw = female['gender']?.toString().toLowerCase();
+      final genderDisplay = genderRaw == 'f'
+          ? 'Female'
+          : genderRaw == 'm'
+          ? 'Male'
+          : 'Female';
+
+      final ageYears = _calculateAgeEc(female['dob']);
+      final ageText = ageYears > 0 ? '${ageYears}y' : '-';
+      final mobile = female['mobileNo']?.toString() ?? '';
+
+      final lastVisitDate =
+          '${lastDt.year.toString().padLeft(4, '0')}-${lastDt.month.toString().padLeft(2, '0')}-${lastDt.day.toString().padLeft(2, '0')}';
+
+      String rawId = uniqueKey;
+      if (rawId.length > 11) {
+        rawId = rawId.substring(rawId.length - 11);
+      }
+
+      return {
+        'id': rawId,
+        'name': name,
+        'age': ageText,
+        'gender': genderDisplay,
+        'last Visit date': lastVisitDate,
+        'mobile': mobile.isNotEmpty ? mobile : '-',
+        'badge': 'EligibleCouple',
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+
   List<Widget> _getAncListItems() {
-    // Sample ANC data - replace with your actual data
-    final List<Map<String, dynamic>> ancItems = [
-      {
-        'id': 'ANC-001',
-        'name': 'Priya Sharma',
-        'age': '25y',
-        'gender': 'Female',
-        'Current ANC last due date' :'18 Nov 2023',
-        'last Visit date': 'no visit yet',
-        'mobile': '9876543210',
-        'badge': 'ANC',
-      },
-      {
-        'id': 'ANC-002',
-        'name': 'Meera Patel',
-        'age': '28y',
-        'gender': 'Female',
-        'last Visit date': '18 Nov 2023',
-        'Current ANC last due date' :'18 Nov 2023',
-        'mobile': '9876543211',
-        'badge': 'ANC',
-      },
-    ];
+    final List<Map<String, dynamic>> ancItems = _ancItems;
 
     return ancItems.map((item) => _routineCard(item)).toList();
   }
 
   Widget _routineCard(Map<String, dynamic> item) {
     final primary = Theme.of(context).primaryColor;
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: Row(
-              children: [
-                Icon(Icons.home, color: primary, size: 18),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    item['id']?.toString() ?? '-',
-                    style: TextStyle(color: primary, fontWeight: FontWeight.w700),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE1F7E9),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Text(
-                    item['badge']?.toString() ?? 'ANC',
-                    style: const TextStyle(color: Color(0xFF0E7C3A), fontWeight: FontWeight.w700, fontSize: 12),
-                  ),
-                ),
-              ],
+    final badge = item['badge']?.toString() ?? '';
+
+    return InkWell(
+      onTap: () async {
+        await showConfirmationDialog(
+          context: context,
+          message: 'Move forward?',
+          yesText: 'Yes',
+          noText: 'No',
+        );
+      },
+      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 2,
+              spreadRadius: 1,
+              offset: const Offset(0, 2),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: primary,
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(Icons.home, color: primary, size: 15.sp),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      (item['household_ref_key']?.toString().isNotEmpty ?? false)
+                          ? _last11(item['household_ref_key']?.toString())
+                          : _last11(item['id']?.toString()),
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15.sp,
+                      ),
+                    ),
+                  ),
+                  if (badge != 'Family')
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE1F7E9),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Text(
+                        badge,
+                        style: const TextStyle(
+                          color: Color(0xFF0E7C3A),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            Container(
+              decoration: BoxDecoration(
+                color: primary,
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(4),
+                ),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['name']?.toString() ?? '-',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15.sp,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${item['age'] ?? '-'} | ${item['gender'] ?? '-'}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15.sp,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        if (badge == 'ANC') ...[
+                          Text(
+                            'last Visit date: ${item['last Visit date'] ?? '-'}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Current ANC last due date: ${item['Current ANC last due date'] ?? '-'}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                        ] else if (badge == 'Family') ...[
+                          Text(
+                            'Last survey date: ${item['last survey date'] ?? '-'}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                        ] else if (badge == 'EligibleCouple') ...[
+                          Text(
+                            'last Visit date: ${item['last Visit date'] ?? '-'}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                        ] else if (badge == 'HBNC') ...[
+                          Text(
+                            'Last HBNC due date: ${item['last HBNC due date'] ?? '-'}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                        ] else if (badge == 'RI') ...[
+                          Text(
+                            'last Visit date: ${item['last Visit date'] ?? '-'}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                        ],
+                        Text(
+                          'Mobile: ${item['mobile'] ?? '-'}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
                     children: [
-                      Text(
-                        item['name']?.toString() ?? '-',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+                      GestureDetector(
+                        onTap: () => _launchPhoneDialer(item['mobile']?.toString()),
+                        child: CircleAvatar(
+                          radius: 22,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.phone, color: primary, size: 24),
+                        ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${item['age'] ?? '-'} | ${item['gender'] ?? '-'}',
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'last Visit date: ${item['last Visit date'] ?? '-'}',
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Current ANC last due date: ${item['Current ANC last due date'] ?? '-'}',
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Mobile: ${item['mobile'] ?? '-'}',
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
-                      ),
+                      if (badge != 'Family') ...[
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Image.asset(
+                              badge == 'ANC'
+                                  ? 'assets/images/pregnant-woman.png'
+                                  : badge == 'EligibleCouple'
+                                  ? 'assets/images/couple.png'
+                                  : badge == 'HBNC'
+                                  ? 'assets/images/pnc-mother.png'
+                                  : 'assets/images/capsule2.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
-                ),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 22,
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.phone, color: primary, size: 24),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Image.asset('assets/images/hrp.png'),
-                      ),
-                    ),
-                  ],
-                )
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -180,6 +774,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    // Calculate total count for To Do Visits card across all expansion tiles
+    final familyCount = _familySurveyItems.length;
+    final eligibleCoupleCount = _eligibleCoupleItems.length;
+    final ancCount = _ancItems.length;
+    final hbncCount = widget.apiData[l10n.listHBNC]?.length ?? 0;
+    final riCount = widget.apiData[l10n.listRoutineImmunization]?.length ?? 0;
+    final totalToDoCount =
+        familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -198,7 +801,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   highlightColor: Colors.transparent,
                   child: Card(
                     elevation: 3,
-                    color: widget.selectedGridIndex == 0 ? AppColors.primary : AppColors.surface,
+                    color: widget.selectedGridIndex == 0
+                        ? AppColors.primary
+                        : AppColors.surface,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -224,10 +829,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 ),
                               ),
                               Text(
-                                "0",
+                                "$totalToDoCount",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: widget.selectedGridIndex == 0 ? AppColors.onPrimary : AppColors.onSurface,
+                                  color: widget.selectedGridIndex == 0
+                                      ? AppColors.onPrimary
+                                      : AppColors.onSurface,
                                   fontSize: 15.sp,
                                 ),
                               ),
@@ -239,7 +846,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 15.sp,
-                              color: widget.selectedGridIndex == 0 ? AppColors.onPrimary : AppColors.outline,
+                              color: widget.selectedGridIndex == 0
+                                  ? AppColors.onPrimary
+                                  : AppColors.outline,
                             ),
                           ),
                         ],
@@ -257,7 +866,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   highlightColor: Colors.transparent,
                   child: Card(
                     elevation: 3,
-                    color: widget.selectedGridIndex == 1 ? AppColors.primary : AppColors.surface,
+                    color: widget.selectedGridIndex == 1
+                        ? AppColors.primary
+                        : AppColors.surface,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -287,7 +898,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 "0",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: widget.selectedGridIndex == 1 ? AppColors.onPrimary : AppColors.onSurface,
+                                  color: widget.selectedGridIndex == 1
+                                      ? AppColors.onPrimary
+                                      : AppColors.onSurface,
                                   fontSize: 15.sp,
                                 ),
                               ),
@@ -297,10 +910,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           Text(
                             l10n.completedVisits,
                             style: TextStyle(
-
                               fontWeight: FontWeight.w500,
-                              fontSize: 15.sp  ,
-                              color: widget.selectedGridIndex == 1 ? AppColors.onPrimary : AppColors.outline,
+                              fontSize: 15.sp,
+                              color: widget.selectedGridIndex == 1
+                                  ? AppColors.onPrimary
+                                  : AppColors.outline,
                             ),
                           ),
                         ],
@@ -342,14 +956,22 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15.sp,
-                          color: _expandedKey == entry.key ? Colors.blueAccent : null,
+                          color: _expandedKey == entry.key
+                              ? Colors.blueAccent
+                              : null,
                         ),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "${entry.value.length}",
+                            entry.key == l10n.listFamilySurvey
+                                ? "${_familySurveyItems.length}"
+                                : entry.key == l10n.listEligibleCoupleDue
+                                    ? "${_eligibleCoupleItems.length}"
+                                    : entry.key == l10n.listANC
+                                        ? "${_ancItems.length}"
+                                        : "${entry.value.length}",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _expandedKey == entry.key
@@ -372,23 +994,85 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           ),
                         ],
                       ),
-                      children: entry.key == 'ANC List'
-                          ? _getAncListItems()
+                      children: entry.key == l10n.listANC
+                          ? (_ancItems.isEmpty
+                              ? [
+                                  const Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text('No data found'),
+                                    ),
+                                  ),
+                                ]
+                              : _getAncListItems())
+                          : entry.key == l10n.listFamilySurvey
+                          ? (_familySurveyItems.isEmpty
+                                ? [
+                                    const Padding(
+                                      padding: EdgeInsets.all(12.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text('No data found'),
+                                      ),
+                                    ),
+                                  ]
+                                : _familySurveyItems
+                                      .map((item) => _routineCard(item))
+                                      .toList())
+                          : entry.key == l10n.listEligibleCoupleDue
+                          ? (_eligibleCoupleItems.isEmpty
+                                ? [
+                                    const Padding(
+                                      padding: EdgeInsets.all(12.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text('No data found'),
+                                      ),
+                                    ),
+                                  ]
+                                : _eligibleCoupleItems
+                                      .map((item) => _routineCard(item))
+                                      .toList())
+                          : entry.key == l10n.listHBNC
+                          ? entry.value
+                                .map(
+                                  (name) => _routineCard({
+                                    'id': '-',
+                                    'name': name,
+                                    'age': '-',
+                                    'gender': '-',
+                                    'last HBNC due date': '-',
+                                    'mobile': '-',
+                                    'badge': 'HBNC',
+                                  }),
+                                )
+                                .toList()
+                          : entry.key == l10n.listRoutineImmunization
+                          ? entry.value
+                                .map(
+                                  (name) => _routineCard({
+                                    'id': '-',
+                                    'name': name,
+                                    'age': '-',
+                                    'gender': '-',
+                                    'last Visit date': '-',
+                                    'mobile': '-',
+                                    'badge': 'Child Tracking',
+                                  }),
+                                )
+                                .toList()
                           : entry.value
-                              .map((item) => ListTile(title: Text(item)))
-                              .toList(),
+                                .map((item) => ListTile(title: Text(item)))
+                                .toList(),
                     ),
                   ),
-                  Divider(
-                    color: AppColors.divider,
-                    thickness: 1,
-                    height: 1,
-                  ),
+                  Divider(color: AppColors.divider, thickness: 1, height: 1),
                 ],
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }

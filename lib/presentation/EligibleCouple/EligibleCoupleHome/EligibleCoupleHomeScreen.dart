@@ -28,7 +28,6 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
   @override
   void initState() {
     super.initState();
-    _startEcScheduler();
     _loadCounts();
     _printEligibleCoupleActivities();
   }
@@ -98,12 +97,6 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     }
   }
 
-  Future<void> _startEcScheduler() async {
-    await _ecRepo.startAutoSyncEligibleCoupleActivitiesFromCurrentUser(
-      lastId: '691560a5dd20eb7fbb883e83',
-      limit: 20,
-    );
-  }
 
   bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     final gender = person['gender']?.toString().toLowerCase() ?? '';

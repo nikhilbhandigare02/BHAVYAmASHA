@@ -139,6 +139,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
         key: _formKey,
         child: BlocBuilder<SpousBloc, SpousState>(
           builder: (context, state) {
+            final spBloc = context.read<SpousBloc>();
+            if (state.gender == 'Female' && state.isPregnant == 'Yes' && state.lmp == null) {
+              final now = DateTime.now();
+              final lmp = DateTime(now.year, now.month - 1, now.day);
+              final edd = DateTime(lmp.year, lmp.month + 9, lmp.day + 5);
+              spBloc.add(SpLMPChange(lmp));
+              spBloc.add(SpEDDChange(edd));
+            }
             return ListView(
               padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
               children: [
@@ -761,18 +769,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   if (state.isPregnant == 'Yes') ...[
                     _section(
                       InkWell(
-                        onTap: () async {
-                          final now = DateTime.now();
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: state.lmp ?? now,
-                            firstDate: DateTime(now.year - 5),
-                            lastDate: now,
-                          );
-                          if (picked != null) {
-                            context.read<SpousBloc>().add(SpLMPChange(picked));
-                          }
-                        },
+                        onTap: null,
                         child: InputDecorator(
                           decoration: InputDecoration(
                             labelText: '${l.lmpDateLabel} *',
@@ -792,23 +789,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                     _section(
                       InkWell(
-                        onTap: state.lmp == null 
-                            ? null 
-                            : () async {
-                                final now = DateTime.now();
-                                final firstDate = state.lmp?.add(const Duration(days: 1)) ?? now.add(const Duration(days: 1));
-                                final lastDate = state.lmp?.add(const Duration(days: 280)) ?? now.add(const Duration(days: 280));
-                                
-                                final picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: state.edd ?? firstDate,
-                                  firstDate: firstDate,
-                                  lastDate: lastDate,
-                                );
-                                if (picked != null) {
-                                  context.read<SpousBloc>().add(SpEDDChange(picked));
-                                }
-                              },
+                        onTap: null,
                         child: InputDecorator(
                           decoration: InputDecoration(
                             labelText: '${l.eddDateLabel} *',
