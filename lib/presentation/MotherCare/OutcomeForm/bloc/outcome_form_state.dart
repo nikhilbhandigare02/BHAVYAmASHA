@@ -1,6 +1,8 @@
 part of 'outcome_form_bloc.dart';
 
 class OutcomeFormState extends Equatable {
+  final String? householdId;
+  final String? beneficiaryId;
   final DateTime? deliveryDate;
   final String gestationWeeks;
   final String? deliveryTime;
@@ -21,6 +23,8 @@ class OutcomeFormState extends Equatable {
   final String? ecpQuantity;
 
   const OutcomeFormState({
+    this.householdId,
+    this.beneficiaryId,
     this.fpMethod,
     this.removalDate,
     this.removalReason,
@@ -42,6 +46,8 @@ class OutcomeFormState extends Equatable {
   });
 
   factory OutcomeFormState.initial() => const OutcomeFormState(
+        householdId: null,
+        beneficiaryId: null,
         deliveryDate: null,
         gestationWeeks: '',
         deliveryTime: null,
@@ -49,7 +55,7 @@ class OutcomeFormState extends Equatable {
         deliveryType: '',
         complications: '',
         outcomeCount: '',
-        familyPlanningCounseling: '',
+        familyPlanningCounseling: 'No',
         submitting: false,
         submitted: false,
         errorMessage: null,
@@ -63,6 +69,8 @@ class OutcomeFormState extends Equatable {
       );
 
   OutcomeFormState copyWith({
+    String? householdId,
+    String? beneficiaryId,
     DateTime? deliveryDate,
     String? gestationWeeks,
     String? deliveryTime,
@@ -83,6 +91,8 @@ class OutcomeFormState extends Equatable {
     String? ecpQuantity,
   }) {
     return OutcomeFormState(
+      householdId: householdId ?? this.householdId,
+      beneficiaryId: beneficiaryId ?? this.beneficiaryId,
       deliveryDate: deliveryDate ?? this.deliveryDate,
       gestationWeeks: gestationWeeks ?? this.gestationWeeks,
       deliveryTime: deliveryTime ?? this.deliveryTime,

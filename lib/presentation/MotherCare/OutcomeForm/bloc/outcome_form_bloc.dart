@@ -17,6 +17,12 @@ part 'outcome_form_state.dart';
 
 class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
   OutcomeFormBloc() : super(OutcomeFormState.initial()) {
+    on<OutcomeFormInitialized>((event, emit) {
+      emit(state.copyWith(
+        householdId: event.householdId,
+        beneficiaryId: event.beneficiaryId,
+      ));
+    });
     on<DeliveryDateChanged>((event, emit) {
       emit(state.copyWith(deliveryDate: event.date, errorMessage: null));
     });
@@ -108,12 +114,17 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
 
           String? beneficiaryRefKey = beneficiaryId.isNotEmpty ? beneficiaryId : null;
 
+
+          String householdRefKey = event.beneficiaryData?['householdId']?.toString() ?? '';
+          
           final formData = {
             'form_type': formType,
             'form_name': formName,
             'unique_key': formsRefKey,
+            'household_ref_key': householdRefKey,
             'form_data': {
               'beneficiaryId': beneficiaryId,
+              'household_ref_key': householdRefKey,
               'delivery_date': state.deliveryDate?.toIso8601String(),
               'gestation_weeks': state.gestationWeeks,
               'delivery_time': state.deliveryTime,
@@ -136,7 +147,6 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
             'updated_at': now,
           };
 
-          String householdRefKey = '';
           String motherKey = '';
           String fatherKey = '';
 

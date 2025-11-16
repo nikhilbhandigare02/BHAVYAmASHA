@@ -29,6 +29,7 @@ class _DeliveryOutcomeScreenState
     extends State<DeliveryOutcomeScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
 
+  List<Map<String, dynamic>> _allData = []; // Store all loaded data
   List<Map<String, dynamic>> _filtered = [];
   bool _isLoading = true;
 
@@ -50,142 +51,209 @@ class _DeliveryOutcomeScreenState
     setState(() { _isLoading = true; });
 
     try {
-
       final db = await DatabaseProvider.instance.database;
+
+      // Directly use the key from the table file
+      const ancRefKey = 'bt7gs9rl1a5d26mz'; // From followup_form_data_table.dart
+
+      print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
+
       final ancForms = await db.rawQuery('''
         SELECT 
           f.beneficiary_ref_key,
           f.form_json,
-          f.household_ref_key
+          f.household_ref_key,
+          f.forms_ref_key,
+          f.created_date_time,
+          f.id as form_id
         FROM ${FollowupFormDataTable.table} f
         WHERE 
-          f.forms_ref_key = '${FollowupFormDataTable.formUniqueKeys['ancDueRegistration']}'
+          f.forms_ref_key = '$ancRefKey'
           AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
           AND f.is_deleted = 0
+        ORDER BY f.created_date_time DESC
       ''');
 
+      print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
+
       if (ancForms.isEmpty) {
+        print('ℹ️ No ANC forms found with gives_birth_to_baby: Yes');
         setState(() {
           _isLoading = false;
+          _allData = [];
           _filtered = [];
         });
         return;
       }
 
-      // Get unique beneficiary keys
-      final beneficiaryKeys = ancForms
-          .map((f) => f['beneficiary_ref_key']?.toString())
-          .where((key) => key != null && key.isNotEmpty)
-          .toSet()
-          .toList();
+      // Process each form
+      final List<Map<String, dynamic>> processedData = [];
 
-      if (beneficiaryKeys.isEmpty) {
-        setState(() {
-          _isLoading = false;
-          _filtered = [];
-        });
-        return;
-      }
-
-      // Get beneficiary details
-      final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
-      final beneficiaries = await db.rawQuery('''
-        SELECT 
-          b.unique_key,
-          b.household_ref_key,
-          b.beneficiary_info,
-          b.created_date_time
-        FROM ${BeneficiariesTable.table} b
-        WHERE b.unique_key IN ($placeholders)
-          AND b.is_deleted = 0
-      ''', beneficiaryKeys);
-
-      final couples = <Map<String, dynamic>>[];
-
-      for (final beneficiary in beneficiaries) {
+      for (final form in ancForms) {
         try {
-          final info = jsonDecode(beneficiary['beneficiary_info'] as String? ?? '{}') as Map<String, dynamic>;
-          final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-          final spouse = Map<String, dynamic>.from((info['spousedetails'] as Map?) ?? const {});
-          
-          if (head.isNotEmpty && _isEligibleFemale(head)) {
-            couples.add(_formatCoupleData(beneficiary, head, spouse, isHead: true));
+          // Get beneficiary details
+          final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
+          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
+            print('⚠️ Form missing beneficiary_ref_key: $form');
+            continue;
           }
-          
-          if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-            couples.add(_formatCoupleData(beneficiary, spouse, head, isHead: false));
-          }
+
+          // Format the data for display
+          final formattedData = _formatCoupleData(form, {}, {}, isHead: true);
+          processedData.add(formattedData);
+
         } catch (e) {
-          print('Error processing beneficiary ${beneficiary['unique_key']}: $e');
+          print('❌ Error processing form: $e');
+          print('Form data: $form');
         }
       }
 
+      print('✅ Processed ${processedData.length} out of ${ancForms.length} forms');
+
+      // Set the data ONCE at the end
       setState(() {
-        _filtered = couples;
+        _allData = processedData;
+        _filtered = processedData;
         _isLoading = false;
       });
+
     } catch (e) {
-      print('Error loading pregnancy outcome couples: $e');
+      print('❌ Error loading pregnancy outcome couples: $e');
       setState(() {
         _isLoading = false;
+        _allData = [];
         _filtered = [];
       });
     }
   }
+
   bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     if (person.isEmpty) return false;
+
+    // Check if this is a form with gives_birth_to_baby = 'Yes'
+    if (person['gives_birth_to_baby']?.toString().toLowerCase() == 'yes') {
+      return true;
+    }
+
+    // Original eligibility checks
     final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
     final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? head?['maritalStatus']?.toString().toLowerCase() ?? '';
     final gender = genderRaw == 'f' || genderRaw == 'female';
     final maritalStatus = maritalStatusRaw == 'married';
     final dob = person['dob'];
     final age = _calculateAge(dob);
+
     return gender && maritalStatus && age >= 15 && age <= 49;
   }
 
   Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
-    final hhId = row['household_ref_key']?.toString() ?? '';
-    final uniqueKey = row['unique_key']?.toString() ?? '';
-    final createdDate = row['created_date_time']?.toString() ?? '';
-    final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-    final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
-    final gender = female['gender']?.toString().toLowerCase();
-    final displayGender = gender == 'f' ? 'Female' : gender == 'm' ? 'Male' : 'Other';
-    final age = _calculateAge(female['dob']);
-    final richId = female['RichID']?.toString() ?? '';
-    final mobile = female['mobileNo']?.toString() ?? '';
-    final husbandName = isHead
-        ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
-        : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
+    try {
+      print('🔄 Formatting couple data for row: $row');
 
-    // children summary can live at top-level children_details or under head childrendetails/childrenDetails
-    final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
-    Map<String, dynamic>? childrenSummary;
-    if (childrenRaw is Map) {
-      childrenSummary = {
-        'totalBorn': childrenRaw['totalBorn'],
-        'totalLive': childrenRaw['totalLive'],
-        'totalMale': childrenRaw['totalMale'],
-        'totalFemale': childrenRaw['totalFemale'],
-        'youngestAge': childrenRaw['youngestAge'],
-        'ageUnit': childrenRaw['ageUnit'],
-        'youngestGender': childrenRaw['youngestGender'],
-      }..removeWhere((k, v) => v == null);
+      // Parse form JSON to get the actual form data
+      final formJson = row['form_json'] is String
+          ? jsonDecode(row['form_json'] as String)
+          : (row['form_json'] ?? {}) as Map<String, dynamic>;
+
+      final formData = (formJson['form_data'] ?? formJson) as Map<String, dynamic>;
+      print('📋 Form data: $formData');
+
+      // Extract all required fields with proper fallbacks
+      final womanName = (formData['woman_name'] ?? formData['name'] ?? 'Unknown').toString();
+      final husbandName = (formData['husband_name'] ?? formData['spouse_name'] ?? 'N/A').toString();
+      final rchNumber = (formData['rch_number'] ?? '').toString();
+      final lmpDate = (formData['lmp_date'] ?? '').toString();
+      final eddDate = (formData['edd_date'] ?? '').toString();
+      final weeksOfPregnancy = (formData['weeks_of_pregnancy'] ?? '').toString();
+      final createdAt = (formData['created_at'] ?? row['created_date_time'] ?? '').toString();
+      final mobileNo = (formData['mobile_no'] ?? formData['phone'] ?? '').toString();
+      final houseNumber = (formData['house_number'] ?? '').toString();
+
+      // Get household and beneficiary info
+      final hhRefKey = (formData['household_ref_key'] ?? row['household_ref_key'] ?? '').toString();
+      final beneficiaryRefKey = (formData['beneficiary_ref_key'] ?? row['beneficiary_ref_key'] ?? '').toString();
+
+      // Keep full household ID for data passing, will be truncated for display only
+      final hhId = hhRefKey;
+
+      // Calculate age from EDD or LMP if available
+      int age = 0;
+      String displayAge = '';
+
+      if (eddDate.isNotEmpty) {
+        final edd = DateTime.tryParse(eddDate);
+        if (edd != null) {
+          age = (DateTime.now().difference(edd).inDays / 7).round();
+          displayAge = '$weeksOfPregnancy weeks (EDD: ${_formatDate(eddDate)})';
+        }
+      } else if (lmpDate.isNotEmpty) {
+        final lmp = DateTime.tryParse(lmpDate);
+        if (lmp != null) {
+          age = (DateTime.now().difference(lmp).inDays / 7).round();
+          displayAge = '$weeksOfPregnancy weeks (LMP: ${_formatDate(lmpDate)})';
+        }
+      }
+
+      if (displayAge.isEmpty && weeksOfPregnancy.isNotEmpty) {
+        displayAge = '$weeksOfPregnancy weeks';
+      }
+
+      // Format the data for display
+      final formattedData = {
+        'hhId': hhId.isNotEmpty ? hhId : 'N/A',
+        'household_id': hhRefKey, // Keep full household ID for data passing
+        'RegistrationDate': _formatDate(createdAt),
+        'RegistrationType': 'General',
+        'BeneficiaryID': beneficiaryRefKey,
+        'Name': womanName,
+        'age': displayAge.isNotEmpty ? displayAge : 'N/A',
+        'RichID': rchNumber.isNotEmpty ? rchNumber : 'N/A',
+        'mobileno': mobileNo.isNotEmpty ? mobileNo : 'N/A',
+        'HusbandName': husbandName,
+        'weeksOfPregnancy': weeksOfPregnancy.isNotEmpty ? weeksOfPregnancy : 'N/A',
+        'eddDate': _formatDate(eddDate).isNotEmpty ? _formatDate(eddDate) : 'N/A',
+        'lmpDate': _formatDate(lmpDate).isNotEmpty ? _formatDate(lmpDate) : 'N/A',
+        'houseNumber': houseNumber.isNotEmpty ? houseNumber : 'N/A',
+        '_rawRow': row,
+        'beneficiary_info': {
+          'head_details': {
+            'name': womanName,
+            'mobile': mobileNo,
+            'age': age,
+            'rch_number': rchNumber,
+          },
+          'spouse_details': {
+            'name': husbandName,
+          },
+        },
+      };
+
+      print('✅ Formatted data for $womanName:');
+      print('   - Household ID: ${formattedData['hhId']}');
+      print('   - Registration Date: ${formattedData['RegistrationDate']}');
+      print('   - Beneficiary ID: $beneficiaryRefKey');
+      print('   - Name: $womanName');
+      print('   - Mobile: $mobileNo');
+
+      return formattedData;
+    } catch (e) {
+      print('❌ Error formatting couple data: $e');
+      return {
+        'hhId': 'N/A',
+        'RegistrationDate': 'N/A',
+        'RegistrationType': 'Error',
+        'BeneficiaryID': '',
+        'Name': 'Error loading data',
+        'age': 'N/A',
+        'RichID': 'N/A',
+        'mobileno': 'N/A',
+        'HusbandName': 'N/A',
+        'weeksOfPregnancy': 'N/A',
+        'eddDate': 'N/A',
+        'lmpDate': 'N/A',
+        '_rawRow': row,
+      };
     }
-    return {
-      'hhId': hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId,
-      'RegistrationDate': _formatDate(createdDate),
-      'RegistrationType': 'General',
-      'BeneficiaryID': uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey,
-      'Name': name,
-      'age': age > 0 ? '$age Y / $displayGender' : 'N/A',
-      'RichID': richId,
-      'mobileno': mobile,
-      'HusbandName': husbandName,
-      'childrenSummary': childrenSummary,
-      '_rawRow': row,
-    };
   }
 
   int _calculateAge(dynamic dobRaw) {
@@ -200,7 +268,7 @@ class _DeliveryOutcomeScreenState
   }
 
   String _formatDate(String dateStr) {
-    if (dateStr.isEmpty) return '';
+    if (dateStr.isEmpty || dateStr == 'null') return '';
     try {
       final dt = DateTime.tryParse(dateStr);
       if (dt == null) return '';
@@ -214,9 +282,10 @@ class _DeliveryOutcomeScreenState
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _loadPregnancyOutcomeeCouples();
+        // Don't reload, just show all data
+        _filtered = _allData;
       } else {
-        _filtered = _filtered.where((e) {
+        _filtered = _allData.where((e) {
           return ((e['hhId'] ?? '') as String).toLowerCase().contains(q) ||
               ((e['Name'] ?? '') as String).toLowerCase().contains(q) ||
               ((e['mobileno'] ?? '') as String).toLowerCase().contains(q);
@@ -233,7 +302,6 @@ class _DeliveryOutcomeScreenState
         screenTitle: l10n?.pregnancyOutcome ?? '',
         showBack: false,
         icon1Image: 'assets/images/home.png',
-
         onIcon1Tap: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -273,7 +341,19 @@ class _DeliveryOutcomeScreenState
 
           // Household List
           Expanded(
-            child: ListView.builder(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _filtered.isEmpty
+                ? Center(
+              child: Text(
+                'No pregnancy outcomes found',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Colors.grey,
+                ),
+              ),
+            )
+                : ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               itemCount: _filtered.length,
               itemBuilder: (context, index) {
@@ -282,7 +362,6 @@ class _DeliveryOutcomeScreenState
               },
             ),
           ),
-
         ],
       ),
     );
@@ -292,21 +371,24 @@ class _DeliveryOutcomeScreenState
     final primary = Theme.of(context).primaryColor;
     final t = AppLocalizations.of(context);
 
-    // Extract the raw row data and beneficiary info
-    final rowData = data['_rawRow'] ?? {};
-    final beneficiaryInfo = rowData['beneficiary_info'] is String
-        ? jsonDecode(rowData['beneficiary_info'])
-        : (rowData['beneficiary_info'] ?? {});
+    // Extract the data directly from the formatted data
+    final hhId = data['hhId']?.toString() ?? 'N/A';
+    final registrationDate = data['RegistrationDate']?.toString() ?? 'N/A';
+    final registrationType = data['RegistrationType']?.toString() ?? 'General';
+    final beneficiaryId = data['BeneficiaryID']?.toString() ?? 'N/A';
+    final name = data['Name']?.toString() ?? 'N/A';
+    final age = data['age']?.toString() ?? 'N/A';
+    final richId = data['RichID']?.toString() ?? 'N/A';
+    final mobileNo = data['mobileno']?.toString() ?? 'N/A';
+    final husbandName = data['HusbandName']?.toString() ?? 'N/A';
+    final weeksOfPregnancy = data['weeksOfPregnancy']?.toString() ?? 'N/A';
+    final eddDate = data['eddDate']?.toString() ?? 'N/A';
+    final displayHhId = (hhId.length > 11) ? hhId.substring(hhId.length - 11) : hhId;
 
-    // Extract head and spouse details with proper fallbacks
-    final headDetails = (beneficiaryInfo['head_details'] ?? {}) as Map<String, dynamic>;
-    final spouseDetails = (beneficiaryInfo['spouse_details'] ?? {}) as Map<String, dynamic>;
 
-    // Get children details with fallbacks
-    final childrenDetails = (beneficiaryInfo['children_details'] ??
-        headDetails['childrendetails'] ??
-        headDetails['childrenDetails'] ??
-        {}) as Map<String, dynamic>;
+    print('🔄 Rendering card for: $name');
+    print('   - HH ID: $hhId, Reg Date: $registrationDate');
+    print('   - Mobile: $mobileNo, RCH: $richId');
 
     return Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -320,50 +402,46 @@ class _DeliveryOutcomeScreenState
             final beneficiaryData = <String, dynamic>{};
 
             print('📋 Raw data: $data');
-            
+
             // First try to get from _rawRow
             if (data['_rawRow'] is Map) {
               final rawRow = data['_rawRow'] as Map;
-              final uniqueKey = rawRow['unique_key']?.toString() ?? '';
-              final beneficiaryId = uniqueKey.length > 11 
-                  ? uniqueKey.substring(uniqueKey.length - 11) 
-                  : uniqueKey;
-                  
-              beneficiaryData['unique_key'] = uniqueKey;
-              beneficiaryData['BeneficiaryID'] = beneficiaryId;
-              
+              final beneficiaryRefKey = rawRow['beneficiary_ref_key']?.toString() ?? '';
+
+              beneficiaryData['unique_key'] = beneficiaryRefKey;
+              beneficiaryData['BeneficiaryID'] = beneficiaryRefKey;
+
               print('🔑 Passing to form:');
-              print('   - unique_key: ${beneficiaryData['unique_key']}');
-              print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']} (derived from unique_key)');
-            } 
+              print('   - unique_key: ${beneficiaryData['household_id']}');
+              print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
+            }
             // Fallback to data['BeneficiaryID'] if _rawRow is not available
             else if (data['BeneficiaryID'] != null) {
               beneficiaryData['BeneficiaryID'] = data['BeneficiaryID'].toString();
               print('🔍 Using direct BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
-            } 
-            // Last resort - try to get from the data map
-            else {
-              final uniqueKey = data['_rawRow']?['unique_key']?.toString() ?? '';
-              final beneficiaryId = uniqueKey.isNotEmpty 
-                  ? (uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey)
-                  : '';
-                  
-              beneficiaryData['BeneficiaryID'] = beneficiaryId;
-              print('⚠️ Using fallback BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
             }
-            
+
             if ((beneficiaryData['BeneficiaryID'] as String?)?.isEmpty ?? true) {
               print('❌ No BeneficiaryID could be determined!');
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Error: Missing beneficiary information')),
+              );
+              return;
             }
 
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => OutcomeFormPage(beneficiaryData: beneficiaryData),
+                builder: (context) => OutcomeFormPage(
+                  beneficiaryData: {
+                    ...beneficiaryData,
+                    'householdId': data['household_id'] ?? data['_rawRow']?['household_ref_key'] ?? '',
+                    'beneficiaryId': beneficiaryId,
+                  },
+                ),
               ),
             );
           },
-
           borderRadius: BorderRadius.circular(8),
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 8),
@@ -393,16 +471,22 @@ class _DeliveryOutcomeScreenState
                     color: AppColors.background,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
                   ),
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(8),
                   child: Row(
                     children: [
                       const Icon(Icons.home, color: Colors.black54, size: 18),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          data['hhId'] ?? '',
-                          style: TextStyle(color: primary, fontWeight: FontWeight.w600),
+                          '$displayHhId',
+                          style: TextStyle(
+                            color: primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.sp,
+                          ),
                         ),
                       ),
+
                       const SizedBox(width: 8),
                       SizedBox(
                         width: 60,
@@ -425,31 +509,31 @@ class _DeliveryOutcomeScreenState
                     children: [
                       Row(
                         children: [
-                          Expanded(child: _rowText('Registration Date', data['RegistrationDate'] ?? '')),
+                          Expanded(child: _rowText('EDD Date', eddDate)),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Registration Type', data['RegistrationType'] ?? '')),
+                          Expanded(child: _rowText('Registration Type', registrationType)),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryID'] ?? '')),
+                          Expanded(child: _rowText('Beneficiary ID', beneficiaryId)),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Expanded(child: _rowText(  'Name', data['Name'] ?? '')),
+                          Expanded(child: _rowText('Name', name)),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText( 'Age', data['age']?.toString() ?? '')),
+                          Expanded(child: _rowText('Age', age)),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Rich ID', data['RichID']?.toString() ?? '')),
+                          Expanded(child: _rowText('RCH ID', richId)),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
                           Expanded(
-                              child: _rowText( 'Mobile No.', data['mobileno']?.toString() ?? '')),
+                              child: _rowText('Mobile No.', mobileNo)),
                           const SizedBox(width: 12),
                           Expanded(
-                              child: _rowText('Husband Name', data['HusbandName'] ?? '')),
+                              child: _rowText('Husband Name', husbandName)),
                         ],
                       ),
                     ],
@@ -463,17 +547,31 @@ class _DeliveryOutcomeScreenState
   }
 
   Widget _rowText(String title, String value) {
+    // For Beneficiary ID, show only last 11 digits if longer than 11 characters
+    final displayValue = (title == 'Beneficiary ID' && value.length > 11) 
+        ? '${value.substring(value.length - 11)}'
+        : value;
+        
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.background,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
-          value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          displayValue,
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w400,
+            fontSize: 13.sp,
+          ),
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

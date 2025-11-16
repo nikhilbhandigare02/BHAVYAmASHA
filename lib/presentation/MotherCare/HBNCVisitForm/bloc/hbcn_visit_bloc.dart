@@ -2,14 +2,40 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../../../core/utils/device_info_utils.dart';
 import '../../../../data/Local_Storage/User_Info.dart';
 import '../../../../data/Local_Storage/database_provider.dart';
-import '../../../../data/Local_Storage/local_storage_dao.dart';
+
 import '../../../../data/Local_Storage/tables/followup_form_data_table.dart';
 import '../../../../data/SecureStorage/SecureStorage.dart';
+
 import 'hbcn_visit_event.dart';
 import 'hbcn_visit_state.dart';
+
+
+Map<String, dynamic> _convertDatesToStrings(Map<String, dynamic> data) {
+  final result = <String, dynamic>{};
+  data.forEach((key, value) {
+    if (value is DateTime) {
+      result[key] = value.toIso8601String();
+    } else if (value is Map<String, dynamic>) {
+      result[key] = _convertDatesToStrings(value);
+    } else if (value is List) {
+      result[key] = value.map((item) {
+        if (item is Map<String, dynamic>) {
+          return _convertDatesToStrings(item);
+        } else if (item is DateTime) {
+          return item.toIso8601String();
+        }
+        return item;
+      }).toList();
+    } else {
+      result[key] = value;
+    }
+  });
+  return result;
+}
 
 class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
   HbncVisitBloc() : super(const HbncVisitState()) {
@@ -25,225 +51,176 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
 
   Future<void> _onSaveHbncVisit(
       SaveHbncVisit event, Emitter<HbncVisitState> emit) async {
+    print('🚀 _onSaveHbncVisit started');
     emit(state.copyWith(isSaving: true, saveSuccess: false, errorMessage: null));
 
     try {
-      // Validate required fields before saving
+      print('🔍 Validating form data...');
       final validationErrors = <String>[];
       final visitDetails = state.visitDetails;
-      
+
+      print('📋 Visit details: $visitDetails');
+      print('👤 Beneficiary data: ${event.beneficiaryData}');
+
       if (visitDetails['visitDate'] == null) {
         validationErrors.add('Visit date is required');
       }
       if (visitDetails['visitNumber']?.toString().isEmpty ?? true) {
         validationErrors.add('Visit number is required');
       }
-      
+
       if (validationErrors.isNotEmpty) {
+        final errorMessage = validationErrors.join('\n');
+        print('❌ Validation errors: $errorMessage');
         emit(state.copyWith(
           isSaving: false,
-          errorMessage: validationErrors.join('\n'),
+          errorMessage: errorMessage,
           validationErrors: validationErrors,
         ));
         return;
       }
 
-      // Prepare data for saving
+      print('✅ Form validation passed');
       emit(state.copyWith(isSubmitting: true, errorMessage: null));
 
-      try {
-        final db = await DatabaseProvider.instance.database;
-        final now = DateTime.now().toIso8601String();
-        final beneficiaryId = event.beneficiaryData != null
-            ? (event.beneficiaryData!['unique_key']?.toString() ?? '')
-            : '';
+      final db = await DatabaseProvider.instance.database;
+      print('🔌 Database connection established');
 
-        final formType = FollowupFormDataTable.hbycForm;
-        final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Delivery Outcome';
-        final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
+      final now = DateTime.now().toIso8601String();
+      print('⏰ Current time: $now');
 
-        String? beneficiaryRefKey = beneficiaryId.isNotEmpty ? beneficiaryId : null;
+      final beneficiaryId = event.beneficiaryData != null
+          ? (event.beneficiaryData!['unique_key']?.toString() ?? '')
+          : '';
 
-        // Helper function to convert DateTime objects to ISO strings
-        Map<String, dynamic> _convertDatesToStrings(Map<String, dynamic> data) {
-          return data.map((key, value) {
-            if (value is DateTime) {
-              return MapEntry(key, value.toIso8601String());
-            } else if (value is Map<String, dynamic>) {
-              return MapEntry(key, _convertDatesToStrings(value));
-            } else if (value is Map) {
-              return MapEntry(key, _convertDatesToStrings(Map<String, dynamic>.from(value)));
-            }
-            return MapEntry(key, value);
-          });
-        }
+      print('👤 Beneficiary ID: $beneficiaryId');
 
-        final processedMotherDetails = _convertDatesToStrings(Map<String, dynamic>.from(state.motherDetails));
-        final processedNewbornDetails = _convertDatesToStrings(Map<String, dynamic>.from(state.newbornDetails));
-        final processedVisitDetails = _convertDatesToStrings(Map<String, dynamic>.from(state.visitDetails));
+      // Get household reference key from beneficiary data
+      String? householdRefKey;
+      String? motherKey;
+      String? fatherKey;
 
-        final formData = {
-          'form_type': formType,
-          'form_name': formName,
-          'unique_key': formsRefKey,
-          'form_data': {
-            'beneficiaryId': beneficiaryId.length >= 11
-                ? beneficiaryId.substring(beneficiaryId.length - 11)
-                : beneficiaryId,
-            'motherDetails': processedMotherDetails,
-            'newbornDetails': processedNewbornDetails,
-            'visitDetails': processedVisitDetails,
-          },
-          'created_at': now,
-          'updated_at': now,
-        };
-
-        String householdRefKey = '';
-        String motherKey = '';
-        String fatherKey = '';
-
-        if (beneficiaryId.isNotEmpty) {
-          List<Map<String, dynamic>> beneficiaryMaps = await db.query(
-            'beneficiaries',
-            where: 'unique_key = ?',
-            whereArgs: [beneficiaryId],
-          );
-
-          if (beneficiaryMaps.isEmpty) {
-            beneficiaryMaps = await db.query(
-              'beneficiaries',
-              where: 'id = ?',
-              whereArgs: [int.tryParse(beneficiaryId) ?? 0],
-            );
-          }
-
-          if (beneficiaryMaps.isNotEmpty) {
-            final beneficiary = beneficiaryMaps.first;
-            householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
-            motherKey = beneficiary['mother_key'] as String? ?? '';
-            fatherKey = beneficiary['father_key'] as String? ?? '';
-          }
-        }
-
-        final formDataForDb = {
-          'server_id': '',
-          'forms_ref_key': formsRefKey,
-          'household_ref_key': householdRefKey,
-          'beneficiary_ref_key': beneficiaryId,
-          'mother_key': motherKey,
-          'father_key': fatherKey,
-          'child_care_state': '',
-          'device_details': jsonEncode({
-            'id': await DeviceInfo.getDeviceInfo().then((value) => value.deviceId),
-            'platform': await DeviceInfo.getDeviceInfo().then((value) => value.platform),
-            'version': await DeviceInfo.getDeviceInfo().then((value) => value.osVersion),
-          }),
-          'app_details': jsonEncode({
-            'app_version': await DeviceInfo.getDeviceInfo().then((value) => value.appVersion.split('+').first),
-            'app_name': await DeviceInfo.getDeviceInfo().then((value) => value.appName),
-            'build_number': await DeviceInfo.getDeviceInfo().then((value) => value.buildNumber),
-            'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
-          }),
-          'parent_user': '',
-          'current_user_key': '',
-          'facility_id': await UserInfo.getCurrentUser().then((value) {
-            if (value != null) {
-              if (value['details'] is String) {
-                try {
-                  final userDetails = jsonDecode(value['details'] ?? '{}');
-                  return userDetails['asha_associated_with_facility_id'] ??
-                      userDetails['facility_id'] ??
-                      userDetails['facilityId'] ??
-                      userDetails['facility'] ??
-                      0;
-                } catch (e) {
-                  return 0;
-                }
-              } else if (value['details'] is Map) {
-                final userDetails = Map<String, dynamic>.from(value['details']);
-                return userDetails['asha_associated_with_facility_id'] ??
-                    userDetails['facility_id'] ??
-                    userDetails['facilityId'] ??
-                    userDetails['facility'] ??
-                    0;
-              }
-            }
-            return 0;
-          }),
-          'form_json': jsonEncode(formData),
-          'created_date_time': now,
-          'modified_date_time': now,
-          'is_synced': 0,
-          'is_deleted': 0,
-        };
-
-        try {
-          final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
-
-          try {
-            final outcomeData = {
-              'id': formId,
-              'beneficiaryId': beneficiaryId.length >= 11
-                  ? beneficiaryId.substring(beneficiaryId.length - 11)
-                  : beneficiaryId,
-              'motherDetails': processedMotherDetails,
-              'newbornDetails': processedNewbornDetails,
-              'visitDetails': processedVisitDetails,
-              'isSubmit': true,
-              'form_data': formDataForDb,
-            };
-
-            await SecureStorageService.saveDeliveryOutcome(outcomeData);
-
-            emit(state.copyWith(
-              isSubmitting: false,
-              isSaving: false,
-              saveSuccess: true,
-              errorMessage: null,
-            ));
-
-            if (beneficiaryId.isNotEmpty) {
-              try {
-                final newCount = await SecureStorageService.incrementVisitCount(beneficiaryId);
-                print('Submission count for beneficiary $beneficiaryId: $newCount');
-              } catch (e) {
-                print('Error updating submission count: $e');
-              }
-            }
-          } catch (e) {
-            print('Error saving to secure storage: $e');
-            emit(state.copyWith(
-              isSubmitting: false,
-              isSaving: false,
-              saveSuccess: true,
-              errorMessage: 'Failed to save delivery outcome to secure storage.',
-            ));
-          }
-        } catch (e) {
-          print('Error saving delivery outcome to database: $e');
-          emit(state.copyWith(
-            isSubmitting: false,
-            isSaving: false,
-            saveSuccess: true,
-            errorMessage: 'Failed to save delivery outcome to database.',
-          ));
-        }
-      } catch (e, stackTrace) {
-        print('Error in delivery outcome submission: $e');
-        print('Stack trace: $stackTrace');
-        emit(state.copyWith(
-          isSubmitting: false,
-          isSaving: false,
-          saveSuccess: true,
-          errorMessage: 'An unexpected error occurred. Please try again.',
-        ));
+      if (event.beneficiaryData != null) {
+        householdRefKey = event.beneficiaryData!['household_ref_key']?.toString();
+        motherKey = event.beneficiaryData!['mother_key']?.toString();
+        fatherKey = event.beneficiaryData!['father_key']?.toString();
+        print('🏠 Household Ref Key: $householdRefKey');
+        print('👩 Mother Key: $motherKey');
+        print('👨 Father Key: $fatherKey');
       }
-    } catch (e) {
-      print('Error saving HBNC visit: $e');
+
+      final formType = FollowupFormDataTable.pncMother;
+      final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'PNC Mother';
+      final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
+
+      print('📝 Form Details:');
+      print('  - Type: $formType');
+      print('  - Name: $formName');
+      print('  - Ref Key: $formsRefKey');
+
+      final userInfo = await UserInfo.getCurrentUser();
+      final facilityId = userInfo?['facility_id']?.toString() ?? '0';
+      final currentUserKey = userInfo?['user_key']?.toString() ?? '';
+
+      print('👤 Current User:');
+      print('  - User Key: $currentUserKey');
+      print('  - Facility ID: $facilityId');
+
+      // Update the device info section
+      final deviceInfo = await DeviceInfo.getDeviceInfo();
+      final appInfo = {
+        'app_version': deviceInfo.appVersion.split('+').first,
+        'build_number': deviceInfo.buildNumber,
+        'platform': deviceInfo.platform,
+        'os_version': deviceInfo.osVersion,
+        'device_id': deviceInfo.deviceId,
+      };
+
+// Update the formData creation
+      final formData = _convertDatesToStrings({
+        'form_type': formType,
+        'form_name': formName,
+        'unique_key': formsRefKey,
+        'form_data': {
+          'motherDetails': state.motherDetails,
+          'newbornDetails': state.newbornDetails,
+          'visitDetails': state.visitDetails,
+        },
+        'created_at': now,
+        'updated_at': now,
+      });
+
+// Update the device_details in followupData
+      final followupData = {
+        'server_id': '',
+        'forms_ref_key': formsRefKey,
+        'household_ref_key': householdRefKey,
+        'beneficiary_ref_key': beneficiaryId.isNotEmpty ? beneficiaryId : null,
+        'mother_key': motherKey,
+        'father_key': fatherKey,
+        'child_care_state': '',
+        'device_details': jsonEncode({
+          'id': deviceInfo.deviceId,
+          'platform': deviceInfo.platform,
+          'version': deviceInfo.osVersion,
+
+        }),
+        'app_details': jsonEncode(appInfo),
+        'parent_user': '',
+        'current_user_key': currentUserKey,
+        'facility_id': int.tryParse(facilityId) ?? 0,
+        'form_json': jsonEncode(formData),
+        'created_date_time': now,
+        'modified_date_time': now,
+        'is_synced': 0,
+        'is_deleted': 0,
+      };
+      print('💾 Attempting to save followup data:');
+      print('  - Table: ${FollowupFormDataTable.table}');
+      print('  - Forms Ref Key: $formsRefKey');
+      print('  - Beneficiary Ref Key: $beneficiaryId');
+      print('  - Form Data: ${jsonEncode(formData)}');
+
+      try {
+        final id = await db.insert(
+          FollowupFormDataTable.table,
+          followupData,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+        print('✅ Record inserted with ID: $id');
+
+        // Verify the data was saved
+        final savedData = await db.query(
+          FollowupFormDataTable.table,
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+
+        print('🔍 Saved data verification:');
+        print('  - ID: ${savedData.first['id']}');
+        print('  - Forms Ref Key: ${savedData.first['forms_ref_key']}');
+        print('  - Beneficiary Ref Key: ${savedData.first['beneficiary_ref_key']}');
+        print('  - Created: ${savedData.first['created_date_time']}');
+
+        emit(state.copyWith(
+          isSaving: false,
+          isSubmitting: false,
+          saveSuccess: true,
+          errorMessage: null,
+        ));
+      } catch (e) {
+        print('❌ Error inserting record: $e');
+        print('Data being inserted: ${jsonEncode(followupData)}');
+        rethrow;
+      }
+    } catch (e, stackTrace) {
+      print('❌ Error in _onSaveHbncVisit: $e');
+      print('Stack trace: $stackTrace');
       emit(state.copyWith(
         isSaving: false,
-        saveSuccess: true,
-        errorMessage: 'Failed to save HBNC visit: ${e.toString()}',
+        isSubmitting: false,
+        saveSuccess: false,
+        errorMessage: 'Unexpected error: $e',
       ));
     }
   }
@@ -253,7 +230,6 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
   }
 
   void _onMotherDetailsChanged(
-
       MotherDetailsChanged event, Emitter<HbncVisitState> emit) {
     final updatedDetails = Map<String, dynamic>.from(state.motherDetails);
     updatedDetails[event.field] = event.value;
@@ -268,10 +244,17 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
   }
 
   void _onVisitDetailsChanged(
-      VisitDetailsChanged event, Emitter<HbncVisitState> emit) {
-    final updatedDetails = Map<String, dynamic>.from(state.visitDetails);
-    updatedDetails[event.field] = event.value;
-    emit(state.copyWith(visitDetails: updatedDetails));
+      VisitDetailsChanged event,
+      Emitter<HbncVisitState> emit,
+      ) {
+    final value = event.field == 'visitDate' && event.value is String
+        ? DateTime.tryParse(event.value as String) ?? event.value
+        : event.value;
+
+    final updatedVisitDetails = Map<String, dynamic>.from(state.visitDetails)
+      ..[event.field] = value;
+
+    emit(state.copyWith(visitDetails: updatedVisitDetails));
   }
 
   Future<void> _onSubmitHbncVisit(
@@ -279,16 +262,15 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
     emit(state.copyWith(isSubmitting: true));
 
     try {
-      print('Mother Details: ' + jsonEncode(state.motherDetails));
-      print('Visit Details: ' + jsonEncode(state.visitDetails));
-      print('Newborn Details: ' + jsonEncode(state.newbornDetails));
+      print('Mother Details: ${jsonEncode(state.motherDetails)}');
+      print('Visit Details: ${jsonEncode(state.visitDetails)}');
+      print('Newborn Details: ${jsonEncode(state.newbornDetails)}');
       await Future.delayed(const Duration(seconds: 2)); // Simulate API call
 
       emit(state.copyWith(
         isSubmitting: false,
         isSaving: false,
         saveSuccess: true,
-
       ));
     } catch (e) {
       emit(state.copyWith(

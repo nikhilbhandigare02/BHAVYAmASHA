@@ -19,7 +19,11 @@ class OutcomeFormPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => OutcomeFormBloc(),
+      create: (context) => OutcomeFormBloc()
+        ..add(OutcomeFormInitialized(
+          householdId: beneficiaryData['householdId']?.toString(),
+          beneficiaryId: beneficiaryData['beneficiaryId']?.toString(),
+        )),
       child: _OutcomeFormView(beneficiaryData: beneficiaryData),
     );
   }
@@ -32,15 +36,20 @@ class _OutcomeFormView extends StatelessWidget {
     print('OutcomeFormView created with beneficiaryData: $beneficiaryData');
   }
 
+  void _logState(OutcomeFormState state) {
+    print('Current state - householdId: ${state.householdId}, beneficiaryId: ${state.beneficiaryId}');
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppHeader(screenTitle: l10n.deliveryOutcomeTitle, showBack: true),
-      body: BlocListener<OutcomeFormBloc, OutcomeFormState>(
+      body: BlocConsumer<OutcomeFormBloc, OutcomeFormState>(
         listenWhen: (previous, current) => true,
         listener: (context, state) {
+          _logState(state);
           ScaffoldMessenger.of(context).clearSnackBars();
 
           if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
@@ -66,63 +75,67 @@ class _OutcomeFormView extends StatelessWidget {
             Navigator.pop(context);
           }
         },
-        child: Column(
-          children: [
-            _SectionHeader(title: l10n.deliveryOutcomeDetails),
-            
-            // Display submission count with debug info
-            FutureBuilder<int>(
-              future: () async {
-                try {
-                  final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString();
-                  print('🔍 Checking submission count for BeneficiaryID: $beneficiaryId');
-                  
-                  if (beneficiaryId == null || beneficiaryId.isEmpty) {
-                    print('⚠️ No valid BeneficiaryID found in beneficiaryData: $beneficiaryData');
+        builder: (context, state) {
+          return Column(
+            children: [
+              // Header Section
+              _SectionHeader(title: l10n.deliveryOutcomeDetails),
+
+              // Submission Count Section
+              FutureBuilder<int>(
+                future: () async {
+                  try {
+                    final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString();
+                    print('🔍 Checking submission count for BeneficiaryID: $beneficiaryId');
+
+                    if (beneficiaryId == null || beneficiaryId.isEmpty) {
+                      print('⚠️ No valid BeneficiaryID found in beneficiaryData: $beneficiaryData');
+                      return 0;
+                    }
+
+                    final count = await SecureStorageService.getSubmissionCount(beneficiaryId);
+                    print('✅ Found $count submissions for BeneficiaryID: $beneficiaryId');
+                    return count;
+                  } catch (e) {
+                    print('❌ Error getting submission count: $e');
                     return 0;
                   }
-                  
-                  final count = await SecureStorageService.getSubmissionCount(beneficiaryId);
-                  print('✅ Found $count submissions for BeneficiaryID: $beneficiaryId');
-                  return count;
-                } catch (e) {
-                  print('❌ Error getting submission count: $e');
-                  return 0;
-                }
-              }(),
-              builder: (context, snapshot) {
-                final count = snapshot.data ?? 0;
-                return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  color: Colors.blue.shade50,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.history, size: 20, color: Colors.blue),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${l10n.visitsLabel ?? 'Previous Submissions'}: $count',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.blue.shade800,
+                }(),
+                builder: (context, snapshot) {
+                  final count = snapshot.data ?? 0;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    color: Colors.blue.shade50,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.history, size: 20, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${l10n.visitsLabel ?? 'Previous Submissions'}: $count',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.blue.shade800,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 8),
-
-            // 🔹 Form Area
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(8),
-                child: _OutcomeFormFields(beneficiaryData: beneficiaryData),
+                      ],
+                    ),
+                  );
+                },
               ),
-            ),
-          ],
-        ),
+              const SizedBox(height: 8),
+
+              // Form Area
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(8),
+                  child: _OutcomeFormFields(beneficiaryData: beneficiaryData),
+                ),
+              ),
+            ],
+          )
+         ;
+        }
       ),
     );
   }
