@@ -507,6 +507,59 @@ class LocalStorageDao {
     return result;
   }
 
+  /// Returns ANC followup forms where the woman is marked as high-risk
+  Future<List<Map<String, dynamic>>> getHighRiskANCVisits() async {
+    final db = await _db;
+
+    final forms = await db.query(
+      FollowupFormDataTable.table,
+      where: 'is_deleted = 0 AND forms_ref_key = ?',
+      whereArgs: [
+        FollowupFormDataTable.formUniqueKeys[
+          FollowupFormDataTable.ancDueRegistration
+        ],
+      ],
+      orderBy: 'created_date_time DESC',
+    );
+
+    final List<Map<String, dynamic>> result = [];
+
+    for (final form in forms) {
+      try {
+        final formJson = form['form_json'] as String?;
+        if (formJson == null || formJson.isEmpty) continue;
+
+        final decoded = jsonDecode(formJson);
+        if (decoded is! Map || decoded['form_data'] is! Map) continue;
+
+        final formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+
+        final hr = formData['high_risk'];
+        final bool isHighRisk =
+            hr == true ||
+            hr == 1 ||
+            (hr is String &&
+                (hr.toLowerCase() == 'true' || hr.toLowerCase() == 'yes' || hr == '1'));
+
+        if (!isHighRisk) continue;
+
+        result.add({
+          'id': form['id'],
+          'forms_ref_key': form['forms_ref_key'],
+          'household_ref_key': form['household_ref_key'],
+          'beneficiary_ref_key': form['beneficiary_ref_key'],
+          'created_date_time': form['created_date_time'],
+          'modified_date_time': form['modified_date_time'],
+          'form_data': formData,
+        });
+      } catch (e) {
+        print('Error processing high-risk ANC form ${form['id']}: $e');
+      }
+    }
+
+    return result;
+  }
+
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {
     try {
       final db = await _db;

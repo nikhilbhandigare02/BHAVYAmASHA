@@ -4,6 +4,7 @@ import 'package:medixcel_new/core/models/anc_visit_model.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:convert';
 import '../../../core/config/routes/Route_Name.dart';
@@ -36,135 +37,91 @@ class _EligibleCoupleListState extends State<HighRisk> {
         _isLoading = true;
         _error = '';
       });
+      // 1) Primary source: ANC followup forms stored in local DB
+      final dbForms = await LocalStorageDao.instance.getHighRiskANCVisits();
 
-      Map<String, dynamic> highRiskBeneficiaries = {};
-      try {
-        final storageVisits = await SecureStorageService.getAncVisits();
-        for (var visit in storageVisits) {
-          final beneficiaryId = visit['beneficiaryId']?.toString();
-          final highRiskValue = visit['high_risk']?.toString().toLowerCase();
-          final isHighRisk = highRiskValue == 'yes' ||
-              highRiskValue == 'true' ||
-              highRiskValue == '1';
+      final List<ANCVisitModel> highRiskVisits = [];
 
-          if (beneficiaryId != null && isHighRisk) {
-            // Store the most recent visit for each high-risk beneficiary
-            final visitDate = visit['date_of_inspection'] != null
-                ? DateTime.tryParse(visit['date_of_inspection'].toString())
-                : null;
+      for (final row in dbForms) {
+        try {
+          final formData = Map<String, dynamic>.from(row['form_data'] as Map);
 
-            if (!highRiskBeneficiaries.containsKey(beneficiaryId) ||
-                (visitDate != null &&
-                    highRiskBeneficiaries[beneficiaryId]?['date'] != null &&
-                    visitDate.isAfter(highRiskBeneficiaries[beneficiaryId]!['date']))) {
-              highRiskBeneficiaries[beneficiaryId] = {
-                'date': visitDate,
-                'visit': visit,
-              };
+          // Fetch beneficiary to get DOB
+          final String beneficiaryKey = row['beneficiary_ref_key']?.toString() ?? '';
+          String? dobStr;
+          if (beneficiaryKey.isNotEmpty) {
+            try {
+              final ben = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryKey);
+              if (ben != null) {
+                final rawInfo = ben['beneficiary_info'];
+                Map<String, dynamic> info;
+                if (rawInfo is Map) {
+                  info = Map<String, dynamic>.from(rawInfo);
+                } else if (rawInfo is String && rawInfo.isNotEmpty) {
+                  info = jsonDecode(rawInfo) as Map<String, dynamic>;
+                } else {
+                  info = <String, dynamic>{};
+                }
+                dobStr = info['dob']?.toString();
+              }
+            } catch (e) {
+              print('Error fetching beneficiary for high-risk ANC: $e');
             }
           }
+
+          final visitData = {
+            'id': beneficiaryKey,
+            'hhId': row['household_ref_key']?.toString(),
+            'house_number': formData['house_number'],
+            'woman_name': formData['woman_name'],
+            'husband_name': formData['husband_name'],
+            'rch_number': formData['rch_number'],
+            'visit_type': formData['visit_type'],
+            'high_risk': true,
+            'date_of_inspection': formData['date_of_inspection'],
+            'edd_date': formData['edd_date'],
+            'weeks_of_pregnancy': formData['weeks_of_pregnancy'],
+            'weight': formData['weight'],
+            'hemoglobin': formData['hemoglobin'],
+            'pre_existing_disease': formData['pre_existing_disease'],
+            'mobileNumber': formData['mobile_number'] ?? formData['contact_number'],
+            'age': '', // age will be derived from DOB
+            'date_of_birth': dobStr,
+            'gender': formData['gender'] ?? 'F',
+          };
+
+          highRiskVisits.add(ANCVisitModel.fromJson(visitData));
+        } catch (e) {
+          print('Error mapping high-risk ANC DB row: $e');
         }
-      } catch (e) {
-        print('Error getting high-risk visits: $e');
       }
 
-      if (highRiskBeneficiaries.isEmpty) {
+      // If no DB-backed high-risk records, show empty state
+      if (highRiskVisits.isEmpty) {
         setState(() {
-          _error = 'No high-risk ANC visits found';
-          _isLoading = false;
           _ancVisits = [];
           _filteredVisits = [];
+          _isLoading = false;
+          _error = 'No high-risk ANC visits found';
         });
         return;
       }
 
-      // Get all visits from getUserData and match with high-risk beneficiaries
-      final storageData = await SecureStorageService.getUserData();
-      if (storageData != null && storageData.isNotEmpty) {
-        try {
-          final Map<String, dynamic> parsedData = jsonDecode(storageData);
-          final List<ANCVisitModel> highRiskVisits = [];
+      // Sort and update state for DB-backed records
+      highRiskVisits.sort((a, b) {
+        if (a.dateOfInspection == null) return 1;
+        if (b.dateOfInspection == null) return -1;
+        return b.dateOfInspection!.compareTo(a.dateOfInspection!);
+      });
 
-          if (parsedData['visits'] is List) {
-            for (var visit in parsedData['visits']) {
-              try {
-                final beneficiaryId = visit['BeneficiaryID']?.toString();
-                if (beneficiaryId == null || !highRiskBeneficiaries.containsKey(beneficiaryId)) {
-                  continue; // Skip if not a high-risk beneficiary
-                }
-
-                final rawRow = visit['_rawRow'] ?? {};
-                final beneficiaryInfo = visit['beneficiary_info'] ?? {};
-                final headDetails = beneficiaryInfo['head_details'] ?? {};
-
-                // Extract age and gender from the visit data
-                final String? ageWithGender = visit['age']?.toString();
-                String? extractedAge;
-                String? extractedGender;
-
-                if (ageWithGender != null && ageWithGender.isNotEmpty) {
-                  final parts = ageWithGender.split('/').map((e) => e.trim()).toList();
-                  if (parts.isNotEmpty) {
-                    extractedAge = parts[0];
-                    if (parts.length > 1) {
-                      extractedGender = parts[1];
-                    }
-                  }
-                }
-
-                final visitData = {
-                  'id': beneficiaryId,
-                  'hhId': visit['hhId'],
-                  'house_number': headDetails['houseNo'],
-                  'gender': extractedGender ?? headDetails['gender'] ?? 'F',
-                  'age': extractedAge ?? visit['age'],
-                  'woman_name': visit['Name'],
-                  'husband_name': visit['HusbandName'],
-                  'rch_number': visit['RichID'],
-                  'visit_type': visit['RegistrationType'],
-                  'high_risk': true, // Since we already filtered high-risk beneficiaries
-                  'date_of_inspection': visit['RegistrationDate'],
-                  'mobileNumber': visit['mobileno'],
-                };
-
-                highRiskVisits.add(ANCVisitModel.fromJson(visitData));
-              } catch (e) {
-                print('Error processing visit: $e\nVisit data: $visit');
-              }
-            }
-          }
-
-          // Sort by date descending to show most recent first
-          highRiskVisits.sort((a, b) {
-            if (a.dateOfInspection == null) return 1;
-            if (b.dateOfInspection == null) return -1;
-            return b.dateOfInspection!.compareTo(a.dateOfInspection!);
-          });
-
-          setState(() {
-            _ancVisits = highRiskVisits;
-            _filteredVisits = List.from(_ancVisits);
-            _isLoading = false;
-            if (_ancVisits.isEmpty) {
-              _error = 'No matching high-risk ANC visits found';
-            }
-          });
-
-        } catch (e) {
-          print('Error parsing JSON data: $e');
-          setState(() {
-            _error = 'Error parsing data: $e';
-            _isLoading = false;
-          });
+      setState(() {
+        _ancVisits = highRiskVisits;
+        _filteredVisits = List.from(_ancVisits);
+        _isLoading = false;
+        if (_ancVisits.isEmpty) {
+          _error = 'No high-risk ANC visits found';
         }
-      } else {
-        setState(() {
-          _error = 'No ANC visit data found';
-          _isLoading = false;
-          _ancVisits = [];
-          _filteredVisits = [];
-        });
-      }
+      });
     } catch (e) {
       print('Error loading ANC visits: $e');
       setState(() {
