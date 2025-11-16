@@ -547,7 +547,7 @@ class _DeliveryOutcomeScreenState
   }
 
   Widget _rowText(String title, String value) {
-    // For Beneficiary ID, show only last 11 digits if longer than 11 characters
+
     final displayValue = (title == 'Beneficiary ID' && value.length > 11) 
         ? '${value.substring(value.length - 11)}'
         : value;
