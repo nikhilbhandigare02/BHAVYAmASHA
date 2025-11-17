@@ -75,18 +75,16 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                   ),
                 );
                 
-                // Navigate back to previous screen after a short delay
                 if (mounted) {
                   Future.delayed(const Duration(milliseconds: 2200), () {
                     if (mounted) {
-                      Navigator.of(context).pop(true);
+                      Navigator.pushNamedAndRemoveUntil(context, Route_Names.HBNCScreen,  (route) => false,);
                     }
                   });
                 }
               }
               
-              // Handle tab changes after validation
-              if (state.lastValidatedIndex == idx && 
+              if (state.lastValidatedIndex == idx &&
                   !state.lastValidationWasSave && 
                   state.validationErrors.isEmpty) {
                 final newIndex = idx + 1;

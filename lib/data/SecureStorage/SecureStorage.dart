@@ -11,10 +11,30 @@ class SecureStorageService {
   static const String _keyAncVisits = 'anc_visits';
   static const String _keydelivery_outcome = 'delivery_outcome';
   static const String _keyHbncVisits = 'hbnc_visits';
+  static const String _keyTodayToDoCount = 'today_todo_visits_count';
+  static const String _keyTodayCompletedCount = 'today_completed_visits_count';
 
 
   static Future<void> saveToken(String token) async {
     await _storage.write(key: _keyToken, value: token);
+  }
+
+  static Future<void> saveTodayWorkCounts({required int toDo, required int completed}) async {
+    await _storage.write(key: _keyTodayToDoCount, value: toDo.toString());
+    await _storage.write(key: _keyTodayCompletedCount, value: completed.toString());
+  }
+
+  static Future<Map<String, int>> getTodayWorkCounts() async {
+    final toDoStr = await _storage.read(key: _keyTodayToDoCount);
+    final completedStr = await _storage.read(key: _keyTodayCompletedCount);
+
+    final toDo = int.tryParse(toDoStr ?? '') ?? 0;
+    final completed = int.tryParse(completedStr ?? '') ?? 0;
+
+    return {
+      'toDo': toDo,
+      'completed': completed,
+    };
   }
 
   static Future<String?> getToken() async {
