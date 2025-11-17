@@ -44,6 +44,6 @@ class DatabaseProvider {
     await db.execute(EligibleCoupleActivitiesTable.create);
     await db.execute(MotherCareActivitiesTable.create);
     await db.execute(ChildCareActivitiesTable.create);
-    await db.execute(FollowupFormDataTable.create);
+    await db.execute(FollowupFormDataTable.create); 
   }
 }

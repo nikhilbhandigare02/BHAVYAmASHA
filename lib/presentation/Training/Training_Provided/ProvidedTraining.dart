@@ -130,7 +130,7 @@ class _TrainingProvidedState
                 padding: const EdgeInsets.all(4),
                 child: Row(
                   children: [
-                    const Icon(Icons.school, color: Colors.black54, size: 18),
+                     Icon(Icons.home, color: primary, size: 18),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -160,12 +160,12 @@ class _TrainingProvidedState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _rowText(
-                      l10n?.trainingNameLabel ?? 'Training Name',
+                      l10n?.trainingNameLabel ?? 'Training Name:',
                       data['trainingName'] ?? '',
                     ),
                     const SizedBox(height: 6),
                     _rowText(
-                       l10n?.trainingDateLabel ?? 'Training Date',
+                       l10n?.trainingDateLabel ?? 'Date:',
                       data['Date'] ?? '',
                     ),
                   ],
@@ -179,17 +179,17 @@ class _TrainingProvidedState
   }
 
   Widget _rowText(String title, String value) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
           style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(width: 2),
         Text(
           value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 14.sp),
         ),
       ],
     );

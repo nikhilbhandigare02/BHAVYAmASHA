@@ -31,7 +31,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           beneficiaryRefKey: beneficiaryRefKey,
           isProtected: isProtected,
         )) {
-    // Load previous form data if this is a protected beneficiary
+
     if (isProtected) {
       _loadPreviousFormData();
     }
@@ -41,18 +41,37 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
     });
 
     on<IsPregnantChanged>((event, emit) {
-      emit(state.copyWith(
-        isPregnant: event.isPregnant,
-        clearPregnantFields: !event.isPregnant,
-        clearNonPregnantFields: event.isPregnant,
-        status: state.isValid ? FormStatus.valid : FormStatus.initial,
-        clearError: true,
-      ));
+      if (event.isPregnant == true) {
+        final lmp = state.lmpDate ?? DateTime.now();
+        final edd = _calculateEddFromLmp(lmp);
+        emit(state.copyWith(
+          isPregnant: true,
+          lmpDate: lmp,
+          eddDate: edd,
+          clearNonPregnantFields: true,
+          status: state.isValid ? FormStatus.valid : FormStatus.initial,
+          clearError: true,
+        ));
+      } else {
+        // Not pregnant: clear pregnancy-specific fields
+        emit(state.copyWith(
+          isPregnant: false,
+          clearPregnantFields: true,
+          status: state.isValid ? FormStatus.valid : FormStatus.initial,
+          clearError: true,
+        ));
+      }
     });
 
     on<LmpDateChanged>((event, emit) {
+      final lmp = event.date;
+      if (lmp == null) {
+        return;
+      }
+      final edd = _calculateEddFromLmp(lmp);
       emit(state.copyWith(
-        lmpDate: event.date,
+        lmpDate: lmp,
+        eddDate: edd,
         status: state.isValid ? FormStatus.valid : FormStatus.initial,
         clearError: true,
       ));
@@ -446,6 +465,18 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
   String _deriveFinancialYear(DateTime? date) {
     if (date == null) return '';
     return date.year.toString();
+  }
+
+  DateTime _calculateEddFromLmp(DateTime lmp) {
+    // Add 8 months and 10 days to LMP
+    int year = lmp.year;
+    int month = lmp.month + 8;
+    if (month > 12) {
+      year += (month - 1) ~/ 12;
+      month = ((month - 1) % 12) + 1;
+    }
+    final base = DateTime(year, month, lmp.day);
+    return base.add(const Duration(days: 10));
   }
 
   Future<void> _loadPreviousFormData() async {

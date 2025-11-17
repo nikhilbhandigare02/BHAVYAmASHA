@@ -201,6 +201,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       }
 
       try {
+
         final deviceInfo = await DeviceInfo.getDeviceInfo();
         final now = DateTime.now();
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
@@ -215,215 +216,166 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
             userDetails['asha_associated_with_facility_id'] ?? 0;
         final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
+
+
         final geoLocation = await GeoLocation.getCurrentLocation();
         final geoLocationJson = _geoLocationJson(geoLocation);
+
         final childrenData = _childrenData(event.context);
 
-        final isEdit =
-            state.headUniqueKey != null && state.headUniqueKey!.trim().isNotEmpty;
+        final isEdit = state.headUniqueKey != null && state.headUniqueKey!.isNotEmpty;
 
         if (isEdit) {
-          // EDIT MODE: update existing head (and spouse if present)
-          try {
-            // Update head beneficiary
-            final existingHead = await LocalStorageDao.instance
-                .getBeneficiaryByUniqueKey(state.headUniqueKey!);
-            if (existingHead != null) {
-              final headRow = Map<String, dynamic>.from(existingHead);
-              final headInfo = {
-                'houseNo': state.houseNo,
-                'headName': state.headName,
-                'fatherName': state.fatherName,
-                'gender': state.gender,
-                'dob': state.dob?.toIso8601String(),
-                'years': state.years,
-                'months': state.months,
-                'days': state.days,
-                'approxAge': state.approxAge,
-                'mobileNo': state.mobileNo,
-                'mobileOwner': state.mobileOwner,
-                'maritalStatus': state.maritalStatus,
-                'ageAtMarriage': state.ageAtMarriage,
-                'spouseName': state.spouseName,
-                'education': state.education,
-                'occupation': state.occupation,
-                'religion': state.religion,
-                'category': state.category,
-                'hasChildren': state.hasChildren,
-                'isPregnant': state.isPregnant,
-                'lmp': state.lmp?.toIso8601String(),
-                'edd': state.edd?.toIso8601String(),
-                'village': state.village,
-                'ward': state.ward,
-                'wardNo': state.wardNo,
-                'mohalla': state.mohalla,
-                'mohallaTola': state.mohallaTola,
-                'abhaAddress': state.abhaAddress,
-                'abhaNumber': state.abhaNumber,
-                'voterId': state.voterId,
-                'rationId': state.rationId,
-                'rationCardId': state.rationCardId,
-                'phId': state.phId,
-                'personalHealthId': state.personalHealthId,
-                'bankAcc': state.bankAcc,
-                'bankAccountNumber': state.bankAccountNumber,
-                'ifsc': state.ifsc,
-                'ifscCode': state.ifscCode,
-                'beneficiaryType': state.beneficiaryType,
-                'isMigrantWorker': state.isMigrantWorker,
-                'migrantState': state.migrantState,
-                'migrantDistrict': state.migrantDistrict,
-                'migrantBlock': state.migrantBlock,
-                'migrantPanchayat': state.migrantPanchayat,
-                'migrantVillage': state.migrantVillage,
-                'migrantContactNo': state.migrantContactNo,
-                'migrantDuration': state.migrantDuration,
-                'migrantWorkType': state.migrantWorkType,
-                'migrantWorkPlace': state.migrantWorkPlace,
-                'migrantRemarks': state.migrantRemarks,
-                'AfhABHAChange': state.AfhABHAChange,
-                'AfhRichIdChange': state.AfhRichIdChange,
-                'updatedAt': DateTime.now().toIso8601String(),
-                ...childrenData,
-              }..removeWhere((k, v) => v == null);
+          // --- UPDATE EXISTING HEAD ROW ---
+          final existingHead = await LocalStorageDao.instance
+              .getBeneficiaryByUniqueKey(state.headUniqueKey!);
+          if (existingHead != null) {
+            final headInfoRaw = existingHead['beneficiary_info'];
+            final Map<String, dynamic> headInfo = headInfoRaw is Map
+                ? Map<String, dynamic>.from(headInfoRaw)
+                : (headInfoRaw is String && headInfoRaw.isNotEmpty)
+                    ? Map<String, dynamic>.from(jsonDecode(headInfoRaw))
+                    : <String, dynamic>{};
 
-              headRow['beneficiary_info'] = headInfo;
-              headRow['geo_location'] = geoLocationJson;
-              headRow['modified_date_time'] = ts;
+            headInfo
+              ..['houseNo'] = state.houseNo
+              ..['headName'] = state.headName
+              ..['fatherName'] = state.fatherName
+              ..['gender'] = state.gender
+              ..['dob'] = state.dob?.toIso8601String()
+              ..['years'] = state.years
+              ..['months'] = state.months
+              ..['days'] = state.days
+              ..['approxAge'] = state.approxAge
+              ..['mobileNo'] = state.mobileNo
+              ..['mobileOwner'] = state.mobileOwner
+              ..['maritalStatus'] = state.maritalStatus
+              ..['ageAtMarriage'] = state.ageAtMarriage
+              ..['spouseName'] = state.spouseName
+              ..['education'] = state.education
+              ..['occupation'] = state.occupation
+              ..['religion'] = state.religion
+              ..['category'] = state.category
+              ..['hasChildren'] = state.hasChildren
+              ..['isPregnant'] = state.isPregnant
+              ..['lmp'] = state.lmp?.toIso8601String()
+              ..['edd'] = state.edd?.toIso8601String()
+              ..['village'] = state.village
+              ..['ward'] = state.ward
+              ..['wardNo'] = state.wardNo
+              ..['mohalla'] = state.mohalla
+              ..['mohallaTola'] = state.mohallaTola
+              ..['abhaAddress'] = state.abhaAddress
+              ..['abhaNumber'] = state.abhaNumber
+              ..['voterId'] = state.voterId
+              ..['rationId'] = state.rationId
+              ..['rationCardId'] = state.rationCardId
+              ..['phId'] = state.phId
+              ..['personalHealthId'] = state.personalHealthId
+              ..['bankAcc'] = state.bankAcc
+              ..['bankAccountNumber'] = state.bankAccountNumber
+              ..['ifsc'] = state.ifsc
+              ..['ifscCode'] = state.ifscCode
+              ..['beneficiaryType'] = state.beneficiaryType
+              ..['isMigrantWorker'] = state.isMigrantWorker
+              ..['migrantState'] = state.migrantState
+              ..['migrantDistrict'] = state.migrantDistrict
+              ..['migrantBlock'] = state.migrantBlock
+              ..['migrantPanchayat'] = state.migrantPanchayat
+              ..['migrantVillage'] = state.migrantVillage
+              ..['migrantContactNo'] = state.migrantContactNo
+              ..['migrantDuration'] = state.migrantDuration
+              ..['migrantWorkType'] = state.migrantWorkType
+              ..['migrantWorkPlace'] = state.migrantWorkPlace
+              ..['migrantRemarks'] = state.migrantRemarks
+              ..['AfhABHAChange'] = state.AfhABHAChange
+              ..['AfhRichIdChange'] = state.AfhRichIdChange
+              ..addAll(childrenData);
 
-              await LocalStorageDao.instance.updateBeneficiary(headRow);
-            }
+            final updatedHead = Map<String, dynamic>.from(existingHead);
+            updatedHead['beneficiary_info'] = headInfo;
+            updatedHead['geo_location'] = existingHead['geo_location'] ?? geoLocationJson;
 
-            // Update or insert spouse beneficiary
-            if (state.maritalStatus == 'Married' && state.spouseName != null) {
-              final spousBloc = BlocProvider.of<SpousBloc>(event.context);
-              final spousState = spousBloc.state;
+            await LocalStorageDao.instance.updateBeneficiary(updatedHead);
 
-              if (state.spouseUniqueKey != null &&
-                  state.spouseUniqueKey!.trim().isNotEmpty) {
+            // --- UPDATE SPOUSE ROW IF PRESENT ---
+            if (state.spouseUniqueKey != null && state.spouseUniqueKey!.isNotEmpty) {
+              try {
                 final existingSpouse = await LocalStorageDao.instance
                     .getBeneficiaryByUniqueKey(state.spouseUniqueKey!);
                 if (existingSpouse != null) {
-                  final spouseRow = Map<String, dynamic>.from(existingSpouse);
-                  final spInfo = {
-                    'relation': spousState.relation ?? 'spouse',
-                    'memberName': spousState.memberName ?? state.spouseName,
-                    'ageAtMarriage': spousState.ageAtMarriage,
-                    'RichIDChanged': spousState.RichIDChanged,
-                    'spouseName': spousState.spouseName,
-                    'fatherName': spousState.fatherName,
-                    'useDob': spousState.useDob,
-                    'dob': spousState.dob?.toIso8601String(),
-                    'edd': spousState.edd?.toIso8601String(),
-                    'lmp': spousState.lmp?.toIso8601String(),
-                    'approxAge': spousState.approxAge,
-                    'gender': spousState.gender ??
-                        (state.gender == 'Male' ? 'Female' : 'Male'),
-                    'occupation': spousState.occupation,
-                    'education': spousState.education,
-                    'religion': spousState.religion,
-                    'category': spousState.category,
-                    'abhaAddress': spousState.abhaAddress,
-                    'mobileOwner': spousState.mobileOwner,
-                    'mobileNo': spousState.mobileNo,
-                    'bankAcc': spousState.bankAcc,
-                    'ifsc': spousState.ifsc,
-                    'voterId': spousState.voterId,
-                    'rationId': spousState.rationId,
-                    'phId': spousState.phId,
-                    'beneficiaryType': spousState.beneficiaryType,
-                    'isPregnant': spousState.isPregnant,
-                    'maritalStatus': 'Married',
-                    'relation_to_head': 'spouse',
-                    ...childrenData,
-                  }..removeWhere((k, v) => v == null);
+                  final spousBloc = BlocProvider.of<SpousBloc>(event.context);
+                  final spousState = spousBloc.state;
 
-                  spouseRow['beneficiary_info'] = spInfo;
-                  spouseRow['geo_location'] = geoLocationJson;
-                  spouseRow['modified_date_time'] = ts;
+                  final spInfoRaw = existingSpouse['beneficiary_info'];
+                  final Map<String, dynamic> spInfo = spInfoRaw is Map
+                      ? Map<String, dynamic>.from(spInfoRaw)
+                      : (spInfoRaw is String && spInfoRaw.isNotEmpty)
+                          ? Map<String, dynamic>.from(jsonDecode(spInfoRaw))
+                          : <String, dynamic>{};
 
-                  await LocalStorageDao.instance.updateBeneficiary(spouseRow);
+                  spInfo
+                    ..['relation'] = spousState.relation ?? 'spouse'
+                    ..['memberName'] = spousState.memberName ?? state.spouseName
+                    ..['ageAtMarriage'] = spousState.ageAtMarriage
+                    ..['RichIDChanged'] = spousState.RichIDChanged
+                    ..['spouseName'] = spousState.spouseName
+                    ..['fatherName'] = spousState.fatherName
+                    ..['useDob'] = spousState.useDob
+                    ..['dob'] = spousState.dob?.toIso8601String()
+                    ..['edd'] = spousState.edd?.toIso8601String()
+                    ..['lmp'] = spousState.lmp?.toIso8601String()
+                    ..['approxAge'] = spousState.approxAge
+                    ..['gender'] = spousState.gender ?? (state.gender == 'Male' ? 'Female' : 'Male')
+                    ..['occupation'] = spousState.occupation
+                    ..['education'] = spousState.education
+                    ..['religion'] = spousState.religion
+                    ..['category'] = spousState.category
+                    ..['abhaAddress'] = spousState.abhaAddress
+                    ..['mobileOwner'] = spousState.mobileOwner
+                    ..['mobileNo'] = spousState.mobileNo
+                    ..['bankAcc'] = spousState.bankAcc
+                    ..['ifsc'] = spousState.ifsc
+                    ..['voterId'] = spousState.voterId
+                    ..['rationId'] = spousState.rationId
+                    ..['phId'] = spousState.phId
+                    ..['beneficiaryType'] = spousState.beneficiaryType
+                    ..['isPregnant'] = spousState.isPregnant
+                    ..['maritalStatus'] = 'Married'
+                    ..['relation_to_head'] = 'spouse'
+                    ..addAll(childrenData);
+
+                  final updatedSpouse = Map<String, dynamic>.from(existingSpouse);
+                  updatedSpouse['beneficiary_info'] = spInfo;
+                  updatedSpouse['geo_location'] = existingSpouse['geo_location'] ?? geoLocationJson;
+
+                  await LocalStorageDao.instance.updateBeneficiary(updatedSpouse);
                 }
-              } else {
-                // No existing spouse row; create a new one linked to the head
-                final spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
-                final headUniqueKey = state.headUniqueKey!;
-
-                final spousePayload = {
-                  'server_id': null,
-                  'household_ref_key': state.hhUniqueKey ??
-                      existingHead?['household_ref_key'],
-                  'unique_key': spouseKey,
-                  'beneficiary_state': 'active',
-                  'pregnancy_count': 0,
-                  'beneficiary_info': {
-                    'relation': spousState.relation ?? 'spouse',
-                    'memberName': spousState.memberName ?? state.spouseName,
-                    'ageAtMarriage': spousState.ageAtMarriage,
-                    'RichIDChanged': spousState.RichIDChanged,
-                    'spouseName': spousState.spouseName,
-                    'fatherName': spousState.fatherName,
-                    'useDob': spousState.useDob,
-                    'dob': spousState.dob?.toIso8601String(),
-                    'edd': spousState.edd?.toIso8601String(),
-                    'lmp': spousState.lmp?.toIso8601String(),
-                    'approxAge': spousState.approxAge,
-                    'gender': spousState.gender ??
-                        (state.gender == 'Male' ? 'Female' : 'Male'),
-                    'occupation': spousState.occupation,
-                    'education': spousState.education,
-                    'religion': spousState.religion,
-                    'category': spousState.category,
-                    'abhaAddress': spousState.abhaAddress,
-                    'mobileOwner': spousState.mobileOwner,
-                    'mobileNo': spousState.mobileNo,
-                    'bankAcc': spousState.bankAcc,
-                    'ifsc': spousState.ifsc,
-                    'voterId': spousState.voterId,
-                    'rationId': spousState.rationId,
-                    'phId': spousState.phId,
-                    'beneficiaryType': spousState.beneficiaryType,
-                    'isPregnant': spousState.isPregnant,
-                    'maritalStatus': 'Married',
-                    'relation_to_head': 'spouse',
-                    ...childrenData,
-                  },
-                  'geo_location': geoLocationJson,
-                  'spouse_key': headUniqueKey,
-                  'mother_key': null,
-                  'father_key': null,
-                  'is_family_planning': 0,
-                  'is_adult': 1,
-                  'is_guest': 0,
-                  'is_death': 0,
-                  'death_details': jsonEncode({}),
-                  'is_migrated': 0,
-                  'is_separated': 0,
-                  'device_details': jsonEncode(_deviceDetails(deviceInfo)),
-                  'app_details': jsonEncode(_appDetails(deviceInfo)),
-                  'parent_user': jsonEncode({}),
-                  'current_user_key': ashaUniqueKey,
-                  'facility_id': facilityId,
-                  'created_date_time': ts,
-                  'modified_date_time': ts,
-                };
-
-                await LocalStorageDao.instance.insertBeneficiary(spousePayload);
+              } catch (e) {
+                print('Error updating spouse: $e');
               }
             }
 
-            emit(state.copyWith(postApiStatus: PostApiStatus.success));
-          } catch (e) {
-            print('Error updating family head: $e');
-            emit(
-              state.copyWith(
-                postApiStatus: PostApiStatus.error,
-                errorMessage: 'Failed to update family data: ${e.toString()}',
-              ),
-            );
+            try {
+              await _syncBeneficiaryByUniqueKey(
+                uniqueKey: state.headUniqueKey!,
+                deviceInfo: deviceInfo,
+                ts: ts,
+              );
+
+              if (state.spouseUniqueKey != null && state.spouseUniqueKey!.isNotEmpty) {
+                await _syncBeneficiaryByUniqueKey(
+                  uniqueKey: state.spouseUniqueKey!,
+                  deviceInfo: deviceInfo,
+                  ts: ts,
+                );
+              }
+            } catch (e) {
+              print('Error syncing updated beneficiary: $e');
+            }
           }
         } else {
-          // CREATE MODE: existing behavior (insert new head/household/spouse)
+          // --- INSERT NEW HOUSEHOLD + HEAD + SPOUSE (existing behavior) ---
           final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
           final headId = await IdGenerator.generateUniqueId(deviceInfo);
           final spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
@@ -492,8 +444,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
               ...childrenData,
             }),
             'geo_location': geoLocationJson,
-            'spouse_key':
-                state.maritalStatus == 'Married' ? spouseKey : null,
+            'spouse_key': state.maritalStatus == 'Married' ? spouseKey : null,
             'mother_key': null,
             'father_key': null,
             'is_family_planning': 0,
@@ -501,12 +452,8 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
             'is_guest': 0,
             'is_death': 0,
             'death_details': jsonEncode({}),
-            'is_migrated':
-                state.beneficiaryType == 'SeasonalMigrant' ? 1 : 0,
-            'is_separated': state.maritalStatus == 'Separated' ||
-                    state.maritalStatus == 'Divorced'
-                ? 1
-                : 0,
+            'is_migrated': state.beneficiaryType == 'SeasonalMigrant' ? 1 : 0,
+            'is_separated': state.maritalStatus == 'Separated' || state.maritalStatus == 'Divorced' ? 1 : 0,
             'device_details': jsonEncode(_deviceDetails(deviceInfo)),
             'app_details': jsonEncode(_appDetails(deviceInfo)),
             'parent_user': jsonEncode({}),
@@ -580,8 +527,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
                   'edd': spousState.edd?.toIso8601String(),
                   'lmp': spousState.lmp?.toIso8601String(),
                   'approxAge': spousState.approxAge,
-                  'gender': spousState.gender ??
-                      (state.gender == 'Male' ? 'Female' : 'Male'),
+                  'gender': spousState.gender ?? (state.gender == 'Male' ? 'Female' : 'Male'),
                   'occupation': spousState.occupation,
                   'education': spousState.education,
                   'religion': spousState.religion,
@@ -623,7 +569,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
               await LocalStorageDao.instance.insertBeneficiary(spousePayload);
             } catch (e) {
               print('Error saving spouse: $e');
-              // Continue even if spouse save fails
             }
           }
 
@@ -644,9 +589,9 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
           } catch (e) {
             print('Error preparing or posting add_beneficiary: $e');
           }
-
-          emit(state.copyWith(postApiStatus: PostApiStatus.success));
         }
+
+        emit(state.copyWith(postApiStatus: PostApiStatus.success));
       } catch (e) {
         print('Error saving family head: $e');
         emit(

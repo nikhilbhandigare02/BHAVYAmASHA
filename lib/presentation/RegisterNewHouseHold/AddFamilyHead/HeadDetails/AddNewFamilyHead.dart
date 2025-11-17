@@ -19,6 +19,7 @@ import '../../../../core/utils/enums.dart';
 import '../../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
 
 import 'bloc/add_family_head_bloc.dart';
 
@@ -761,12 +762,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             b.add(
               AfhHydrate(
                 AddFamilyHeadState(
-                  hhUniqueKey: m['hh_unique_key'],
-                  hhId: int.tryParse(m['hh_id'] ?? ''),
-                  headUniqueKey: m['head_unique_key'],
-                  headId: int.tryParse(m['head_id'] ?? ''),
-                  spouseUniqueKey: m['sp_unique_key'],
-                  spouseId: int.tryParse(m['sp_id'] ?? ''),
                   houseNo: m['houseNo'],
                   headName: m['headName'],
                   fatherName: m['fatherName'],
@@ -799,6 +794,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   AfhRichIdChange: m['AfhRichIdChange'],
                   hasChildren: m['hasChildren'],
                   isPregnant: m['isPregnant'],
+                  householdRefKey: m['hh_unique_key'],
+                  headUniqueKey: m['head_unique_key'],
+                  spouseUniqueKey: m['spouse_unique_key'],
                 ),
               ),
             );
@@ -932,10 +930,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   }
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => RegisterNewHouseHoldScreen(
-                        initialMembers: members,
-                        headAddedInit: true,
-                        hideAddMemberButton: true,
+                      builder: (_) => BlocProvider<RegisterNewHouseholdBloc>(
+                        create: (_) => RegisterNewHouseholdBloc(),
+                        child: RegisterNewHouseHoldScreen(
+                          initialMembers: members,
+                          headAddedInit: true,
+                          hideAddMemberButton: true,
+                          showSuccessOnSave: false, // update flow: no popup
+                        ),
                       ),
                     ),
                   );

@@ -157,35 +157,33 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
                 builder: (context, state) {
                   if (state.isPregnant == true) {
+                    final lmp = state.lmpDate ?? DateTime.now();
+                    final edd = state.eddDate;
+
+                    String formatDate(DateTime? d) {
+                      if (d == null) return '';
+                      return '${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year.toString()}';
+                    }
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        CustomDatePicker(
+                        CustomTextField(
                           labelText: '${t?.lmpDateLabel ?? 'एलएमपी की तिथि'} *',
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime(2100),
-                          onDateChanged: (date) {
-                            if (date != null) {
-                              context
-                                  .read<TrackEligibleCoupleBloc>()
-                                  .add(LmpDateChanged(date));
-                            }
-                          },
+                          readOnly: true,
+                          controller: TextEditingController(
+                            text: formatDate(lmp),
+                          ),
                         ),
                         const Divider(thickness: 1, color: Colors.grey),
                         const SizedBox(height: 8),
-                        CustomDatePicker(
+                        CustomTextField(
                           labelText:
                           '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime(2100),
-                          onDateChanged: (date) {
-                            if (date != null) {
-                              context
-                                  .read<TrackEligibleCoupleBloc>()
-                                  .add(EddDateChanged(date));
-                            }
-                          },
+                          readOnly: true,
+                          controller: TextEditingController(
+                            text: formatDate(edd),
+                          ),
                         ),
                         const Divider(thickness: 1, color: Colors.grey),
                       ],
