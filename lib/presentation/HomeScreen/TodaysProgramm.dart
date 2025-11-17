@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../data/Local_Storage/local_storage_dao.dart';
 import '../../data/Local_Storage/database_provider.dart';
 import '../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../data/SecureStorage/SecureStorage.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../l10n/app_localizations.dart';
 import '../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
@@ -72,6 +73,27 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     return _expandedKey == key;
   }
 
+  Future<void> _saveTodayWorkCountsToStorage() async {
+    try {
+      final l10n = AppLocalizations.of(context);
+      final familyCount = _familySurveyItems.length;
+      final eligibleCoupleCount = _eligibleCoupleItems.length;
+      final ancCount = _ancItems.length;
+      final hbncCount = _hbncItems.length;
+      final riCount = l10n == null
+          ? 0
+          : widget.apiData[l10n.listRoutineImmunization]?.length ?? 0;
+
+      final totalToDoCount =
+          familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
+
+      await SecureStorageService.saveTodayWorkCounts(
+        toDo: totalToDoCount,
+        completed: _completedVisitsCount,
+      );
+    } catch (_) {}
+  }
+
   Future<void> _loadCompletedVisitsCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -113,6 +135,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         setState(() {
           _completedVisitsCount = count;
         });
+        _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
@@ -298,6 +321,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         setState(() {
           _ancItems = items;
         });
+        _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
@@ -308,6 +332,28 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       // Same delivery outcome key as HBNCList
       const deliveryOutcomeKey = '4r7twnycml3ej1vg';
+      final hbncVisitFormKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother] ?? '';
+
+      // Beneficiaries that already have at least one HBNC visit
+      final Set<String> hbncCompletedBeneficiaries = <String>{};
+      try {
+        if (hbncVisitFormKey.isNotEmpty) {
+          final visitRows = await db.query(
+            FollowupFormDataTable.table,
+            columns: ['beneficiary_ref_key'],
+            where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+            whereArgs: [hbncVisitFormKey],
+          );
+          for (final v in visitRows) {
+            final key = v['beneficiary_ref_key']?.toString() ?? '';
+            if (key.isNotEmpty) {
+              hbncCompletedBeneficiaries.add(key);
+            }
+          }
+        }
+      } catch (_) {}
+
       final outcomes = await db.query(
         'followup_form_data',
         where: 'forms_ref_key = ?',
@@ -325,6 +371,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           final formData = formJson['form_data'] ?? {};
           final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) continue;
+
+          // Skip HBNC items that already have at least one HBNC visit recorded
+          if (hbncCompletedBeneficiaries.contains(beneficiaryRefKey)) {
+            continue;
+          }
 
           // Fetch beneficiary from DB
           final benRows = await db.query(
@@ -404,6 +455,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         setState(() {
           _hbncItems = items;
         });
+        _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
@@ -618,6 +670,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         setState(() {
           _familySurveyItems = items;
         });
+        _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
@@ -738,6 +791,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         setState(() {
           _eligibleCoupleItems = couples;
         });
+        _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
@@ -994,6 +1048,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               _completedVisitsCount++;
             });
             _loadEligibleCoupleItems();
+            _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'ANC') {
           // Navigate to ANC Visit Form with full beneficiary data
@@ -1020,12 +1075,22 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               _completedVisitsCount++;
             });
             _loadAncItems();
+            _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'HBNC') {
-          // Navigate to HBNC Visit Form; pass the item as beneficiaryData
-          final beneficiaryData = Map<String, dynamic>.from(item);
+          // Navigate to HBNC Visit Form with full beneficiary IDs
+          final fullBeneficiaryId =
+              item['fullBeneficiaryId']?.toString() ?? '';
+          final fullHhId = item['fullHhId']?.toString() ?? '';
+          if (fullBeneficiaryId.isEmpty || fullHhId.isEmpty) return;
 
-          Navigator.push(
+          final beneficiaryData = <String, dynamic>{
+            'unique_key': fullBeneficiaryId,
+            'household_ref_key': fullHhId,
+            'name': item['name']?.toString() ?? '-',
+          };
+
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => HbncVisitScreen(
@@ -1033,6 +1098,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               ),
             ),
           );
+
+          if (result == true && mounted) {
+            await _loadHbncItems();
+            _saveTodayWorkCountsToStorage();
+          }
         }
       },
       borderRadius: BorderRadius.circular(4),
@@ -1128,7 +1198,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
-                            fontSize: 15.sp,
+                            fontSize: 14.sp,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -1136,7 +1206,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           '${item['age'] ?? '-'} | ${item['gender'] ?? '-'}',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 15.sp,
+                            fontSize: 14.sp,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -1145,7 +1215,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             'last Visit date: ${item['last Visit date'] ?? '-'}',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15.sp,
+                              fontSize: 14.sp,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -1153,7 +1223,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             'Current ANC last due date: ${item['Current ANC last due date'] ?? '-'}',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15.sp,
+                              fontSize: 14.sp,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -1162,7 +1232,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             'Last survey date: ${item['last survey date'] ?? '-'}',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15.sp,
+                              fontSize: 14.sp,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -1171,7 +1241,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             'last Visit date: ${item['last Visit date'] ?? '-'}',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15.sp,
+                              fontSize: 14.sp,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -1180,7 +1250,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             'Last HBNC due date: ${item['last HBNC due date'] ?? '-'}',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15.sp,
+                              fontSize: 14.sp,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -1189,7 +1259,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             'last Visit date: ${item['last Visit date'] ?? '-'}',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15.sp,
+                              fontSize: 14.sp,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -1198,7 +1268,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           'Mobile: ${item['mobile'] ?? '-'}',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 15.sp,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ],

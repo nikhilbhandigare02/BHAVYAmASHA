@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import 'bloc/todays_work_bloc.dart';
@@ -15,16 +16,29 @@ class Todaywork extends StatefulWidget {
 }
 
 class _TodayworkState extends State<Todaywork> {
-  @override
-  void initState() {
-    super.initState();
+  Future<void> _loadCountsFromStorage(TodaysWorkBloc bloc) async {
+    try {
+      final stored = await SecureStorageService.getTodayWorkCounts();
+      final toDo = stored['toDo'] ?? 0;
+      final completed = stored['completed'] ?? 0;
+
+      if (!mounted) return;
+
+      bloc.add(TwUpdateCounts(toDo: toDo, completed: completed));
+    } catch (_) {
+      // leave defaults if anything fails
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => TodaysWorkBloc()..add(const TwLoad(toDo: 34, completed: 1)),
+      create: (_) {
+        final bloc = TodaysWorkBloc()..add(const TwLoad(toDo: 0, completed: 0));
+        _loadCountsFromStorage(bloc);
+        return bloc;
+      },
       child: Scaffold(
         appBar: AppHeader(screenTitle: l10n?.todayWorkTitle ?? "Today's Work Progress", showBack: true),
         body: SafeArea(
