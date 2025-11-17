@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
+import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
@@ -380,7 +381,7 @@ class _HBNCListScreenState
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(4),
         side: BorderSide(color: Colors.grey.shade200),
       ),
       child: InkWell(
@@ -405,9 +406,9 @@ class _HBNCListScreenState
             ),
           );
         },
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(4),
         child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
+          margin: const EdgeInsets.symmetric(),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
             boxShadow: [
@@ -428,7 +429,6 @@ class _HBNCListScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header with HH ID and Visits count
               Container(
                 decoration: const BoxDecoration(
                   color: AppColors.background,
@@ -445,7 +445,7 @@ class _HBNCListScreenState
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
@@ -460,7 +460,7 @@ class _HBNCListScreenState
                               'Visits : ',
                               style: TextStyle(
                                 color: Colors.black87,
-                                fontSize: 14,
+                                fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -478,17 +478,17 @@ class _HBNCListScreenState
                     ),
                     const SizedBox(width: 8),
                     SizedBox(
-                      width: 40,
-                      height: 40,
+                      width: 20,
+                      height: 20,
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.green.shade400,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child:  Icon(
                           Icons.cloud_done,
                           color: Colors.white,
-                          size: 24,
+                          size: 15.sp,
                         ),
                       ),
                     ),
@@ -604,7 +604,7 @@ class _HBNCListScreenState
           title,
           style: TextStyle(
             color: AppColors.background,
-            fontSize: 14,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -614,7 +614,7 @@ class _HBNCListScreenState
           style: TextStyle(
             color: AppColors.background,
             fontWeight: FontWeight.w400,
-            fontSize: 13,
+            fontSize: 13.sp,
           ),
           overflow: TextOverflow.ellipsis,
         ),

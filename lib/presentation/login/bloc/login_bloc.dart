@@ -4,7 +4,7 @@ import 'package:medixcel_new/core/error/Exception/app_exception.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import '../../../core/utils/enums.dart';
 import '../../../data/models/auth/login_response_model.dart';
-import '../../../data/repositories/auth_repository.dart';
+import '../../../data/repositories/Auth_Repository/auth_repository.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
@@ -88,6 +88,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           emit(state.copyWith(
             postApiStatus: PostApiStatus.success,
             isNewUser: isNewUser,
+            error: loginResponse.msg ?? '',
           ));
           
           // Navigation will be handled in the UI based on isNewUser
@@ -100,14 +101,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       } else {
         emit(state.copyWith(
           postApiStatus: PostApiStatus.error,
-          error: loginResponse.msg ?? 'Login failed',
+          error: loginResponse.msg ?? '',
         ));
       }
     } catch (e) {
       print('Login error: $e');
       emit(state.copyWith(
         postApiStatus: PostApiStatus.error,
-        error: 'An error occurred during login. Please try again.',
+        error: e is AppExceptions ? e.toString() : 'An error occurred during login. Please try again.',
       ));
     }
   }

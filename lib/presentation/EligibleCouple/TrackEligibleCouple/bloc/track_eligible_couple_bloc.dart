@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/utils/device_info_utils.dart';
 import '../../../../core/utils/enums.dart' show FormStatus;
 import '../../../../data/Local_Storage/User_Info.dart';
-import '../../../../data/repositories/EligibleCoupleRepository.dart';
+import '../../../../data/repositories/EligibleCoupleRepository/EligibleCoupleRepository.dart';
 
 part 'track_eligible_couple_event.dart';
 part 'track_eligible_couple_state.dart';

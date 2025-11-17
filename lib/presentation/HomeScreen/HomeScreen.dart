@@ -19,7 +19,7 @@ import '../../data/models/TimeStamp/Timestamp_Response.dart';
 import '../../data/repositories/AbhaCreated/AbhaCreated.dart';
 import '../../data/repositories/ExistingAbha/ExistingAbha.dart';
 import '../../data/repositories/TimeStamp/time_stamp.dart';
-import '../../data/repositories/BeneficiaryRepository.dart';
+import '../../data/repositories/AddBeneficiary/BeneficiaryRepository.dart';
 import '../../data/sync/sync_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../GuestBeneficiarySearch/GuestBeneficiarySearch.dart';

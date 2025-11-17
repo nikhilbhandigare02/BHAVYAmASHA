@@ -6,8 +6,8 @@ import 'package:medixcel_new/data/NetworkAPIServices/api_services/network_servic
 import 'package:medixcel_new/data/models/auth/login_request_model.dart';
 import 'package:medixcel_new/data/models/auth/login_response_model.dart';
 
-import '../Local_Storage/User_Info.dart';
-import '../SecureStorage/SecureStorage.dart';
+import '../../Local_Storage/User_Info.dart';
+import '../../SecureStorage/SecureStorage.dart';
 
 class AuthRepository {
   final NetworkServiceApi _apiService = NetworkServiceApi();

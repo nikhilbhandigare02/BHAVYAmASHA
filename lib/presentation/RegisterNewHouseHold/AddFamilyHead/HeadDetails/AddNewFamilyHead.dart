@@ -761,6 +761,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
             b.add(
               AfhHydrate(
                 AddFamilyHeadState(
+                  hhUniqueKey: m['hh_unique_key'],
+                  hhId: int.tryParse(m['hh_id'] ?? ''),
+                  headUniqueKey: m['head_unique_key'],
+                  headId: int.tryParse(m['head_id'] ?? ''),
+                  spouseUniqueKey: m['sp_unique_key'],
+                  spouseId: int.tryParse(m['sp_id'] ?? ''),
                   houseNo: m['houseNo'],
                   headName: m['headName'],
                   fatherName: m['fatherName'],
