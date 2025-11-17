@@ -1,44 +1,55 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 
 class TrainingReceived extends StatefulWidget {
   const TrainingReceived({super.key});
 
   @override
-  State<TrainingReceived> createState() =>
-      _TrainingReceivedState();
+  State<TrainingReceived> createState() => _TrainingReceivedState();
 }
 
-class _TrainingReceivedState
-    extends State<TrainingReceived> {
+class _TrainingReceivedState extends State<TrainingReceived> {
   final TextEditingController _searchCtrl = TextEditingController();
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
 
-      'Date': '16-10-2025',
-      'trainingName': 'ASHA module 2',
-
-    },
-
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  List<Map<String, dynamic>> _allData = [];
+  List<Map<String, dynamic>> _filtered = [];
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    // _loadTrainingData();
     _searchCtrl.addListener(_onSearchChanged);
   }
+
+  // Future<void> _loadTrainingData() async {
+  //   final List<Map<String, dynamic>> rows =
+  //   await LocalStorageDao.instance.fetchTrainingList();
+  //
+  //   final parsed = rows.map((row) {
+  //     final formJson = row['form_json'];
+  //     final decoded = jsonDecode(formJson);
+  //
+  //     final data = decoded['form_data'];
+  //
+  //     return {
+  //       'hhId': "N/A",
+  //       'trainingName': data['training_name'] ?? '',
+  //       'Date': data['training_date']?.toString().split('T').first ?? '',
+  //     };
+  //   }).toList();
+  //
+  //   setState(() {
+  //     _allData = parsed;
+  //     _filtered = List.from(parsed);
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -48,52 +59,41 @@ class _TrainingReceivedState
   }
 
   void _onSearchChanged() {
-    final q = _searchCtrl.text.trim().toLowerCase();
+    final q = _searchCtrl.text.toLowerCase();
     setState(() {
-      if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-      } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['trainingName'] as String).toLowerCase().contains(q);
-        }).toList();
-      }
+      _filtered = _allData.where((e) {
+        return e['trainingName'].toLowerCase().contains(q) ||
+            e['Date'].toLowerCase().contains(q);
+      }).toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.trainingReceivedTitle ?? 'Training Received',
+        screenTitle: l10n?.trainingReceivedTitle ?? "Training Received",
         showBack: true,
-
-
       ),
       body: Column(
         children: [
-          // Search
-
-
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               itemCount: _filtered.length,
               itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
+                return _householdCard(context, _filtered[index]);
               },
             ),
-          ),
-
+          )
         ],
       ),
     );
   }
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
-    final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
     return Column(
@@ -121,7 +121,6 @@ class _TrainingReceivedState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Container(
                 decoration: const BoxDecoration(
                   color: AppColors.background,
@@ -130,7 +129,7 @@ class _TrainingReceivedState
                 padding: const EdgeInsets.all(4),
                 child: Row(
                   children: [
-                    const Icon(Icons.school, color: Colors.black54, size: 18),
+                    Icon(Icons.home, color: primary, size: 18),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -138,16 +137,14 @@ class _TrainingReceivedState
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
-                          fontSize: 14.sp
+                          fontSize: 14.sp,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Body
               Container(
                 decoration: BoxDecoration(
                   color: primary.withOpacity(0.95),
@@ -155,19 +152,13 @@ class _TrainingReceivedState
                     bottom: Radius.circular(4),
                   ),
                 ),
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _rowText(
-                       l10n?.trainingNameLabel ?? 'Training Name',
-                      data['trainingName'] ?? '',
-                    ),
+                    _rowText("Training Name:", data['trainingName'] ?? ''),
                     const SizedBox(height: 6),
-                    _rowText(
-                      l10n?.trainingDateLabel ?? 'Training Date',
-                      data['Date'] ?? '',
-                    ),
+                    _rowText("Date:", data['Date'] ?? ''),
                   ],
                 ),
               ),
@@ -179,17 +170,25 @@ class _TrainingReceivedState
   }
 
   Widget _rowText(String title, String value) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w600,
+            fontSize: 14.sp,
+          ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(width: 2),
         Text(
           value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w400,
+            fontSize: 14.sp,
+          ),
         ),
       ],
     );

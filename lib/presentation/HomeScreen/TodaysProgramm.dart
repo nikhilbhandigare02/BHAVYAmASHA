@@ -725,15 +725,13 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           Map<String, String> initial = {};
           try {
-            // Load household to find configured head_id and DB id
+            // Load household to find configured head_id
             final households = await LocalStorageDao.instance.getAllHouseholds();
             String? headId;
-            int? householdDbId;
             for (final hh in households) {
               final key = (hh['unique_key'] ?? '').toString();
               if (key == hhKey) {
                 headId = (hh['head_id'] ?? '').toString();
-                householdDbId = hh['id'] as int?;
                 break;
               }
             }
@@ -772,14 +770,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 }
               });
 
-              // Core identifiers for edit mode
+              // Technical identifiers to support edit/update flow
               map['hh_unique_key'] = hhKey;
-              if (householdDbId != null) {
-                map['hh_id'] = householdDbId.toString();
-              }
-              map['head_unique_key'] = (headRow['unique_key'] ?? '').toString();
+              map['head_unique_key'] = headRow['unique_key']?.toString() ?? '';
               if (headRow['id'] != null) {
-                map['head_id'] = headRow['id'].toString();
+                map['head_id_pk'] = headRow['id'].toString();
               }
 
               // Try to attach spouse info from the dedicated spouse beneficiary row
@@ -821,10 +816,10 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                     spInfo = <String, dynamic>{};
                   }
 
-                  // Spouse identifiers
-                  map['sp_unique_key'] = (spouseRow['unique_key'] ?? '').toString();
+                  // Technical identifiers for spouse row
+                  map['spouse_unique_key'] = spouseRow['unique_key']?.toString() ?? '';
                   if (spouseRow['id'] != null) {
-                    map['sp_id'] = spouseRow['id'].toString();
+                    map['spouse_id_pk'] = spouseRow['id'].toString();
                   }
 
                   spInfo.forEach((key, value) {

@@ -25,8 +25,8 @@ class TrainingState extends Equatable {
   });
 
   factory TrainingState.initial() => TrainingState(
-        trainingTypes: const ['Select', 'Orientation', 'Refresher', 'Other'],
-        trainingNames: const ['Select', 'Immunization', 'ANC', 'PNC', 'Nutrition'],
+        trainingTypes: const ['Receiving', 'Providing'],
+        trainingNames: const ['ASHA module 1', 'ASHA module 2','ASHA module 3','ASHA module 4','ASHA module 5,6 & 7','NCD', 'HBNC', 'HBYC', 'ASHA Facilitator training','Induction Training','MAA(Mothers Absolute Affection)','IDCF(Integrated Diarrhoea Control Fortnight)','Other Training'],
         trainingType: null,
         trainingName: null,
         date: null,

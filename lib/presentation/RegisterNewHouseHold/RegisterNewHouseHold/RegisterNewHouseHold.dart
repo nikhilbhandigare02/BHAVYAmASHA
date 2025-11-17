@@ -24,11 +24,14 @@ class RegisterNewHouseHoldScreen extends StatefulWidget {
   final List<Map<String, String>>? initialMembers;
   final bool headAddedInit;
   final bool hideAddMemberButton;
+  // If false, do not show success popup when saving (used for update flows)
+  final bool showSuccessOnSave;
   const RegisterNewHouseHoldScreen({
     super.key,
     this.initialMembers,
     this.headAddedInit = false,
     this.hideAddMemberButton = false,
+    this.showSuccessOnSave = true,
   });
 
   @override
@@ -58,12 +61,18 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     });
     headAdded = widget.headAddedInit;
     _hideAddMemberButton = widget.hideAddMemberButton;
+    if (widget.initialMembers != null && widget.initialMembers!.isNotEmpty) {
+      _members.clear();
+      _members.addAll(widget.initialMembers!
+          .map((m) => Map<String, String>.from(m)));
+      totalMembers = _members.length;
+    }
   }
 
   dynamic _convertYesNoDynamic(dynamic value) {
     if (value is String) {
       if (value == 'Yes') return 1;
-      if (value == 'No') return 0;
+      if (value == 'No') return 0; 
       return value;
     } else if (value is Map) {
       return _convertYesNoMap(Map<String, dynamic>.from(value as Map));
@@ -212,9 +221,15 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               builder: (context) {
                 final idx = _tabController.index;
                 final bool disableNext = idx == 0 && !headAdded;
-                final String rightTitle = idx == 2
-                    ? (l10n?.saveButton ?? 'SAVE')
-                    : (l10n?.nextButton ?? 'NEXT');
+                String rightTitle;
+                if (idx == 2) {
+                  // Last tab: use SAVE for add flow, UPDATE for update flow
+                  rightTitle = widget.showSuccessOnSave
+                      ? (l10n?.saveButton ?? 'SAVE')
+                      : (l10n?.updateButton ?? 'UPDATE');
+                } else {
+                  rightTitle = (l10n?.nextButton ?? 'NEXT');
+                }
 
                 final householdBloc = context.read<RegisterNewHouseholdBloc>();
                 
@@ -222,15 +237,25 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   listener: (context, state) {
                     if (state.isSaved) {
                       _skipExitConfirm = true;
-                      showSuccessDialog(context).then((shouldNavigate) {
-                        if (shouldNavigate == true && mounted) {
+                      if (widget.showSuccessOnSave) {
+                        showSuccessDialog(context).then((shouldNavigate) {
+                          if (shouldNavigate == true && mounted) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              Route_Names.homeScreen,
+                              (route) => false,
+                            );
+                          }
+                        });
+                      } else {
+                        if (mounted) {
                           Navigator.pushNamedAndRemoveUntil(
                             context,
                             Route_Names.homeScreen,
                             (route) => false,
                           );
                         }
-                      });
+                      }
                     } else if (state.error != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -683,6 +708,15 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 ),
               ],
               rows: _members.map((m) {
+                // Prefer numeric children count from head form when available
+                String totalChildrenText = '';
+                if (_headForm != null && _headForm!['children'] != null &&
+                    _headForm!['children'].toString().isNotEmpty) {
+                  totalChildrenText = _headForm!['children'].toString();
+                } else {
+                  totalChildrenText = m['Total Children'] ?? '';
+                }
+
                 return DataRow(
                   cells: [
                     DataCell(Center(child: Text(m['#'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
@@ -693,7 +727,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     DataCell(Center(child: Text(m['Relation'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
                     DataCell(Center(child: Text(m['Father'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
                     DataCell(Center(child: Text(m['Spouse'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
-                    DataCell(Center(child: Text(m['Total Children'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                    DataCell(Center(child: Text(totalChildrenText, textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
                   ],
                 );
               }).toList(),

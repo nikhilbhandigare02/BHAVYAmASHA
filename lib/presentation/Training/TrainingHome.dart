@@ -25,7 +25,7 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
     final double cardWidth = (MediaQuery.of(context).size.width -
         totalHorizontalPadding -
         spacingBetweenCards) /
-        2;
+        3;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -35,7 +35,6 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
       ),
       drawer: const CustomDrawer(),
 
-      // 🔹 Button stays at the bottom of the screen
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
         child: SizedBox(
@@ -67,7 +66,6 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
                     width: cardWidth,
                     title: (l10n?.trainingReceivedTitle ?? 'Training Received')
                         .toString(),
-                    count: 0,
                     image: 'assets/images/id-card.png',
                     onClick: () {
                       Navigator.pushNamed(context, Route_Names.TrainingReceived);
@@ -78,7 +76,6 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
                     width: cardWidth,
                     title: (l10n?.trainingProvidedTitle ?? 'Training Provided')
                         .toString(),
-                    count: 0,
                     image: 'assets/images/notes.png',
                     onClick: () {
                       Navigator.pushNamed(context, Route_Names.TrainingProvided);
@@ -96,14 +93,12 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
 
 class _FeatureCard extends StatelessWidget {
   final String title;
-  final int count;
   final String image;
   final VoidCallback onClick;
   final double width;
 
   const _FeatureCard({
     required this.title,
-    required this.count,
     required this.image,
     required this.onClick,
     required this.width,
@@ -141,14 +136,7 @@ class _FeatureCard extends StatelessWidget {
                       height: 28.sp,
                       fit: BoxFit.contain,
                     ),
-                    Text(
-                      '$count',
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13.5.sp,
-                      ),
-                    ),
+
                   ],
                 ),
                 SizedBox(height: 1.5.h),
