@@ -611,8 +611,6 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           ),
         ),
 
-
-        // Show CBAC button only for age 30 or older
         if (_isEligibleForCBAC(data['Age|Gender'] as String))
           Padding(
             padding: const EdgeInsets.only(right: 8, top: 6, bottom: 8),
@@ -623,31 +621,45 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 color: AppColors.primary,
                 borderRadius: 6,
                 width: 100,
+                // In the CBAC button's onPress handler
                 onPress: () {
-                  // Use the original unique_key instead of the truncated BeneficiaryID
-                  final beneficiaryId = data['unique_key']?.toString() ?? data['BeneficiaryID']?.toString() ?? '';
-                  final hhid = data['hhId']?.toString() ?? '';
 
-                  if (beneficiaryId.isEmpty || hhid.isEmpty) {
-                    debugPrint('Warning: Missing required data for CBAC - BeneficiaryID: $beneficiaryId, hhId: $hhid');
+                  final beneficiaryData = {
+                    'beneficiaryId': data['unique_key']?.toString() ?? '',
+                    'hhid': data['hhId']?.toString() ?? '',
+                    'name': data['Name']?.toString() ?? '',
+                    'age': data['Age|Gender']?.toString().split(' ').first ?? '',
+                    'gender': data['Gender']?.toString().toLowerCase() ?? '',
+                    'mobile': data['Mobileno.']?.toString() ?? '',
+                    'village': data['village']?.toString() ?? '',
+                    'tolaMohalla': data['Tola/Mohalla']?.toString() ?? '',
+                    'fatherName': data['FatherName']?.toString() ?? '',
+                    'husbandName': data['HusbandName']?.toString() ?? '',
+                    'wifeName': data['WifeName']?.toString() ?? '',
+                    'relation': data['Relation']?.toString() ?? '',
+                  };
+
+                  if (beneficiaryData['beneficiaryId']!.isEmpty || beneficiaryData['hhid']!.isEmpty) {
+                    debugPrint('Warning: Missing required data for CBAC - BeneficiaryID: ${beneficiaryData['beneficiaryId']}, hhId: ${beneficiaryData['hhid']}');
                     debugPrint('Available data keys: ${data.keys.join(', ')}');
                   }
 
                   Navigator.pushNamed(
                     context,
                     Route_Names.cbacScreen,
-                    arguments: {
-                      'beneficiaryId': data['unique_key']?.toString() ?? '', // This will now have value
-                      'hhid': data['hhId']?.toString() ?? '',
-                    },
+                    arguments: beneficiaryData,
                   );
-                  if (beneficiaryId.isNotEmpty && hhid.isNotEmpty) {
+
+                  if (beneficiaryData['beneficiaryId']!.isNotEmpty && beneficiaryData['hhid']!.isNotEmpty) {
                     debugPrint('✅ CBAC Navigation Data:');
-                    debugPrint('   Beneficiary ID: $beneficiaryId');
-                    debugPrint('   Household ID: $hhid');
-                    debugPrint('   Name: ${data['Name']}');
+                    debugPrint('   Beneficiary ID: ${beneficiaryData['beneficiaryId']}');
+                    debugPrint('   Household ID: ${beneficiaryData['hhid']}');
+                    debugPrint('   Name: ${beneficiaryData['name']}');
+                    debugPrint('   Age: ${beneficiaryData['age']}');
+                    debugPrint('   Gender: ${beneficiaryData['gender']}');
+                    debugPrint('   Mobile: ${beneficiaryData['mobile']}');
                   } else {
-                    debugPrint('❌ Missing data - BeneficiaryID: $beneficiaryId, hhId: $hhid');
+                    debugPrint('❌ Missing data - BeneficiaryID: ${beneficiaryData['beneficiaryId']}, hhId: ${beneficiaryData['hhid']}');
                   }
                 },
               ),

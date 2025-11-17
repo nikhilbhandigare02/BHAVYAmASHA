@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
@@ -5,12 +7,16 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/widgets/Loader/Loader.dart';
 import '../../core/widgets/RoundButton/RoundButton.dart';
+import '../../data/Local_Storage/database_provider.dart';
 import '../../data/Local_Storage/local_storage_dao.dart';
+import '../../data/Local_Storage/tables/followup_form_data_table.dart' as ffd;
 import '../HomeScreen/HomeScreen.dart';
-import '../RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
+import 'NCD_CBAC_DETAIL.dart';
+
 
 class Ncdlist extends StatefulWidget {
   const Ncdlist({super.key});
@@ -23,56 +29,104 @@ class _NCDHomeState extends State<Ncdlist> {
   final TextEditingController _searchCtrl = TextEditingController();
   bool _isLoading = true;
 
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'RegitrationDate': '16-10-2025',
-      'RegitrationType': 'General',
-      'BeneficiaryID': '8347683437',
-      'Tola/Mohalla': 'Shivpuri',
-      'village': 'Rampur',
-      'RichID': 'RCH123456',
-      'Name': 'Rohit Sharma',
-      'Age|Gender': '27 Y | Male',
-      'Mobileno.': '9876543210',
-      'FatherName': 'Rajesh Sharma',
-      'HusbandName': '',
-      'WifeName': 'Anjali Sharma',
-    },
-    {
-      'hhId': '51016121848',
-      'RegitrationDate': '18-10-2025',
-      'RegitrationType': 'Special',
-      'BeneficiaryID': '8347683438',
-      'Tola/Mohalla': 'Gandhi Nagar',
-      'village': 'Mohanpur',
-      'RichID': 'RCH987654',
-      'Name': 'Priya Verma',
-      'Age|Gender': '25 Y | Female',
-      'Mobileno.': '9998887776',
-      'FatherName': 'Vinod Verma',
-      'HusbandName': 'Ravi Verma',
-      'WifeName': '',
-    },
-  ];
-
+  List<Map<String, dynamic>> _allHouseholds = [];
   late List<Map<String, dynamic>> _filtered;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
     _searchCtrl.addListener(_onSearchChanged);
+    _loadCBACFormsData();
   }
 
-  Future<void> _loadData() async {
-    // Simulate network/database delay
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (mounted) {
-      setState(() {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
-        _isLoading = false;
-      });
+  Future<void> _loadCBACFormsData() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final List<Map<String, dynamic>> result = await db.query(
+        ffd.FollowupFormDataTable.table,
+        where: 'forms_ref_key = ?',
+        whereArgs: ['vl7o6r9b6v3fbesk'],
+      );
+
+      debugPrint('CBAC Forms Data (${result.length} records):');
+
+      List<Map<String, dynamic>> households = [];
+
+      for (var form in result) {
+        try {
+          final formJson = jsonDecode(form['form_json']);
+          final formData = formJson['form_data'] ?? {};
+
+          // Extract data from form_data
+          String name = formData['name'] ?? formData['personal']?['name'] ?? 'N/A';
+          String age = formData['age']?.toString() ?? formData['personal']?['age']?.toString() ?? 'N/A';
+          String gender = formData['gender'] ?? formData['personal']?['gender'] ?? 'N/A';
+          String mobile = formData['mobile'] ?? formData['personal']?['mobile'] ?? 'N/A';
+          String fatherName = formData['father'] ?? formData['personal']?['father'] ?? '';
+          String husbandName = formData['husband'] ?? formData['personal']?['husband'] ?? '';
+          String wifeName = formData['wife'] ?? formData['personal']?['wife'] ?? '';
+          String village = formData['village'] ?? 'N/A';
+          String address = formData['address'] ?? '';
+
+          // Format registration date from created_at in form_json
+          String registrationDate = 'N/A';
+          if (formJson['created_at'] != null) {
+            try {
+              DateTime dateTime = DateTime.parse(formJson['created_at'].toString());
+              registrationDate = DateFormat('dd-MM-yyyy').format(dateTime);
+            } catch (e) {
+              debugPrint('Error parsing created_at from form_json: $e');
+            }
+          }
+
+          // Extract last 11 digits for household and beneficiary IDs
+          String hhId = formJson['household_ref_key']?.toString() ?? 'N/A';
+          if (hhId != 'N/A' && hhId.length > 11) {
+            hhId = hhId.substring(hhId.length - 11);
+          }
+
+          String beneficiaryId = formJson['beneficiary_id']?.toString() ?? 'N/A';
+          if (beneficiaryId != 'N/A' && beneficiaryId.length > 11) {
+            beneficiaryId = beneficiaryId.substring(beneficiaryId.length - 11);
+          }
+
+          households.add({
+            'hhId': hhId,
+            'RegitrationDate': registrationDate,
+            'RegitrationType': 'General',
+            'BeneficiaryID': beneficiaryId,
+            'Tola/Mohalla': address.isNotEmpty ? address : 'N/A',
+            'village': village,
+            'RichID': form['id']?.toString() ?? 'N/A',
+            'Name': name,
+            'Age|Gender': '$age Y | $gender',
+            'Mobileno.': mobile,
+            'FatherName': fatherName.isNotEmpty ? fatherName : 'N/A',
+            'HusbandName': husbandName.isNotEmpty ? husbandName : 'N/A',
+            'WifeName': wifeName.isNotEmpty ? wifeName : 'N/A',
+            'formId': form['id'], // Store only the form ID
+          });
+
+          debugPrint('Processed Form ID: ${form['id']}');
+        } catch (e) {
+          debugPrint('Error parsing form JSON: $e');
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _allHouseholds = households;
+          _filtered = List<Map<String, dynamic>>.from(households);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading CBAC forms data: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -87,9 +141,9 @@ class _NCDHomeState extends State<Ncdlist> {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _filtered = List<Map<String, dynamic>>.from(_allHouseholds);
       } else {
-        _filtered = _staticHouseholds.where((e) {
+        _filtered = _allHouseholds.where((e) {
           return (e['hhId'] as String).toLowerCase().contains(q) ||
               (e['Name'] as String).toLowerCase().contains(q) ||
               (e['Mobileno.'] as String).toLowerCase().contains(q) ||
@@ -109,7 +163,6 @@ class _NCDHomeState extends State<Ncdlist> {
         screenTitle: l10n?.ncdListTitle ?? 'NCD List',
         showBack: false,
         icon2Image: 'assets/images/home.png',
-
         onIcon2Tap: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -120,6 +173,13 @@ class _NCDHomeState extends State<Ncdlist> {
       drawer: const CustomDrawer(),
       body: _isLoading
           ? const CenterBoxLoader()
+          : _filtered.isEmpty
+          ? Center(
+        child: Text(
+          'No records found',
+          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+        ),
+      )
           : Column(
         children: [
           Padding(
@@ -127,26 +187,28 @@ class _NCDHomeState extends State<Ncdlist> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  'Household Search ',
+                hintText: 'Household Search',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12, horizontal: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
+                  borderSide:
+                  BorderSide(color: AppColors.outlineVariant),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor),
                 ),
               ),
             ),
           ),
-
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
@@ -157,34 +219,44 @@ class _NCDHomeState extends State<Ncdlist> {
               },
             ),
           ),
-
-
         ],
       ),
     );
   }
 
-  // 🧱 Household Card UI
+  // 🧱 Household Card UI - Now fully tappable
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 2,
-                spreadRadius: 1,
-                offset: const Offset(0, 2),
-              ),
-            ],
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 2,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
           ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            // Navigate to detail screen when card is tapped
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CBACDetailScreen(
+                  formId: data['formId'],
+                ),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(6),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -201,16 +273,18 @@ class _NCDHomeState extends State<Ncdlist> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        data['hhId'] ?? '',
+                        data['hhId'] ?? 'N/A',
                         style: TextStyle(
                             color: primary,
                             fontWeight: FontWeight.w600,
-                            fontSize: 14.sp
-                        ),
+                            fontSize: 14.sp),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-
+                    // Optional: Add arrow icon to indicate it's tappable
+                    Icon(Icons.arrow_forward_ios,
+                        color: Colors.black54,
+                        size: 16),
                   ],
                 ),
               ),
@@ -219,34 +293,43 @@ class _NCDHomeState extends State<Ncdlist> {
               Container(
                 decoration: BoxDecoration(
                   color: primary.withOpacity(0.95),
-                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(6)),
+                  borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(6)),
                 ),
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildRow([
-                      _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate']),
-                      _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType']),
-                      _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID']),
+                      _rowText(l10n?.registrationDateLabel ?? 'Registration Date',
+                          data['RegitrationDate']),
+                      _rowText(l10n?.registrationTypeLabel ?? 'Registration Type',
+                          data['RegitrationType']),
+                      _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                          data['BeneficiaryID']),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.villageLabel ?? 'Village', data['village']),
-                      _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla', data['Tola/Mohalla']),
+                      _rowText(
+                          l10n?.villageLabel ?? 'Village', data['village']),
+                      _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
+                          data['Tola/Mohalla']),
                       _rowText('RCH ID', data['RichID']),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
                       _rowText(l10n?.thName ?? 'Name', data['Name']),
-                      _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender']),
-                      _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.']),
+                      _rowText(l10n?.ageGenderLabel ?? 'Age | Gender',
+                          data['Age|Gender']),
+                      _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.',
+                          data['Mobileno.']),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.fatherNameLabel ?? 'Father Name', data['FatherName']),
-                      _rowText( 'Husband Name', data['HusbandName']),
-                      _rowText( 'Wife Name', data['WifeName']),
+                      _rowText(l10n?.fatherNameLabel ?? 'Father Name',
+                          data['FatherName']),
+                      _rowText('Husband Name', data['HusbandName']),
+                      _rowText('Wife Name', data['WifeName']),
                     ]),
                   ],
                 ),
@@ -254,10 +337,7 @@ class _NCDHomeState extends State<Ncdlist> {
             ],
           ),
         ),
-
-
-
-      ],
+      ),
     );
   }
 
@@ -278,15 +358,20 @@ class _NCDHomeState extends State<Ncdlist> {
       children: [
         Text(
           title,
-          style:  TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+              color: AppColors.background,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style:  TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          style: TextStyle(
+              color: AppColors.background,
+              fontWeight: FontWeight.w400,
+              fontSize: 13.sp),
         ),
       ],
     );
   }
-
 }

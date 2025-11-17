@@ -181,7 +181,13 @@ class Routes{
         );
 
       case Route_Names.cbacScreen:
-        return MaterialPageRoute(builder: (context) => const Cbacform(),);
+        final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (context) => Cbacform(
+            beneficiaryId: args?['beneficiaryId'],
+            hhid: args?['hhid'],
+          ),
+        );
       case Route_Names.Abhalinkscreen:
         return MaterialPageRoute(builder: (context) => const Abhalinkscreen(),);
       case Route_Names.TrainingReceived:
@@ -201,6 +207,7 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const HbncVisitScreen(),);
       case Route_Names.CHildTrackingDueList:
         return MaterialPageRoute(builder: (context) => const CHildTrackingDueList(),);
+
       case Route_Names.ChildTrackingDueListForm:
         final args = setting.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(

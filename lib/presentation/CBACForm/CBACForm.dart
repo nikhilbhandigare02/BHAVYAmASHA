@@ -38,8 +38,13 @@ class _CbacformState extends State<Cbacform> {
     final beneficiaryId = widget.beneficiaryId ?? args?['beneficiaryId']?.toString();
     final hhid = widget.hhid ?? args?['hhid']?.toString();
 
+    print('🚀 Initializing CBAC Form with - beneficiaryId: $beneficiaryId, hhid: $hhid');
+    
     return BlocProvider(
-      create: (_) => CbacFormBloc()..add(CbacOpened(
+      create: (_) => CbacFormBloc(
+        beneficiaryId: beneficiaryId,
+        householdId: hhid,
+      )..add(CbacOpened(
         beneficiaryId: beneficiaryId,
         hhid: hhid,
       )),
@@ -70,7 +75,7 @@ class _CbacformState extends State<Cbacform> {
                       backgroundColor: Colors.green,
                     ),
                   );
-                // Navigate back after a short delay
+                
                 Future.delayed(const Duration(milliseconds: 500), () {
                   Navigator.of(context).pop();
                 });
@@ -950,18 +955,31 @@ class _PartBTab extends StatelessWidget {
         ...qRow(l10n.cbacB_b1_holdingDifficulty, 'partB.b1.holdingDifficulty'),
         ...qRow(l10n.cbacB_b1_legWeaknessWalk, 'partB.b1.legWeaknessWalk'),
 
-        chip(l10n.cbacPartB2),
-        ...qRow(l10n.cbacB_b2_breastLump, 'partB.b2.breastLump'),
-        ...qRow(l10n.cbacB_b2_nippleBleed, 'partB.b2.nippleBleed'),
-        ...qRow(l10n.cbacB_b2_breastShapeDiff, 'partB.b2.breastShapeDiff'),
-        ...qRow(l10n.cbacB_b2_excessBleeding, 'partB.b2.excessBleeding'),
-        ...qRow(l10n.cbacB_b2_depression, 'partB.b2.depression'),
-        ...qRow(l10n.cbacB_b2_uterusProlapse, 'partB.b2.uterusProlapse'),
-        ...qRow(l10n.cbacB_b2_postMenopauseBleed, 'partB.b2.postMenopauseBleed'),
-        ...qRow(l10n.cbacB_b2_postIntercourseBleed, 'partB.b2.postIntercourseBleed'),
-        ...qRow(l10n.cbacB_b2_smellyDischarge, 'partB.b2.smellyDischarge'),
-        ...qRow(l10n.cbacB_b2_irregularPeriods, 'partB.b2.irregularPeriods'),
-        ...qRow(l10n.cbacB_b2_jointPain, 'partB.b2.jointPain'),
+        // Female-specific questions - only show if gender is female
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (previous, current) => previous.data['personal.gender'] != current.data['personal.gender'],
+          builder: (context, state) {
+            final isFemale = state.data['personal.gender'] == l10n.genderFemale;
+            if (!isFemale) return const SizedBox.shrink();
+            
+            return Column(
+              children: [
+                chip(l10n.cbacPartB2),
+                ...qRow(l10n.cbacB_b2_breastLump, 'partB.b2.breastLump'),
+                ...qRow(l10n.cbacB_b2_nippleBleed, 'partB.b2.nippleBleed'),
+                ...qRow(l10n.cbacB_b2_breastShapeDiff, 'partB.b2.breastShapeDiff'),
+                ...qRow(l10n.cbacB_b2_excessBleeding, 'partB.b2.excessBleeding'),
+                ...qRow(l10n.cbacB_b2_depression, 'partB.b2.depression'),
+                ...qRow(l10n.cbacB_b2_uterusProlapse, 'partB.b2.uterusProlapse'),
+                ...qRow(l10n.cbacB_b2_postMenopauseBleed, 'partB.b2.postMenopauseBleed'),
+                ...qRow(l10n.cbacB_b2_postIntercourseBleed, 'partB.b2.postIntercourseBleed'),
+                ...qRow(l10n.cbacB_b2_smellyDischarge, 'partB.b2.smellyDischarge'),
+                ...qRow(l10n.cbacB_b2_irregularPeriods, 'partB.b2.irregularPeriods'),
+                ...qRow(l10n.cbacB_b2_jointPain, 'partB.b2.jointPain'),
+              ],
+            );
+          },
+        ),
       ],
     );
   }

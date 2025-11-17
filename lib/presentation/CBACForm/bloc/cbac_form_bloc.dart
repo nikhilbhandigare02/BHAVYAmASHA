@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'package:bloc/bloc.dart';
+ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -97,22 +96,46 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
     return openDatabase(path);
   }
   
-  CbacFormBloc({this.beneficiaryId, this.householdId}) : super(const CbacFormInitial()) {
+  CbacFormBloc({String? beneficiaryId, String? householdId}) : super(const CbacFormInitial()) {
+    this.beneficiaryId = beneficiaryId;
+    this.householdId = householdId;
+    
     on<CbacOpened>((event, emit) async {
+      // Update beneficiary and household IDs from event
+      if (event.beneficiaryId != null && event.beneficiaryId!.isNotEmpty) {
+        this.beneficiaryId = event.beneficiaryId;
+      }
+      if (event.hhid != null && event.hhid!.isNotEmpty) {
+        this.householdId = event.hhid;
+      }
+      
+      print('🔄 CbacOpened - beneficiaryId: ${this.beneficiaryId}, householdId: ${this.householdId}');
+      
       // Show consent dialog if not shown before
       if (!state.consentDialogShown) {
         emit(state.copyWith(consentDialogShown: true));
       }
       
+      // Update state with the provided IDs
+      emit(state.copyWith(
+        data: {
+          ...state.data,
+          'beneficiary_id': this.beneficiaryId,
+          'household_ref_key': this.householdId,
+        },
+      ));
+      
       // Load beneficiary data if ID is provided
-      if (event.beneficiaryId?.isNotEmpty == true) {
+      if (this.beneficiaryId?.isNotEmpty == true) {
         try {
           final db = await _database;
+          print('🔍 Querying beneficiary with key: ${this.beneficiaryId}');
           final List<Map<String, dynamic>> results = await db.query(
             'beneficiaries',
             where: 'unique_key = ?',
-            whereArgs: [event.beneficiaryId],
+            whereArgs: [this.beneficiaryId],
           );
+          print('🔍 Found ${results.length} matching beneficiaries');
           
           if (results.isNotEmpty) {
             final beneficiary = BeneficiaryInfo.fromMap(results.first);
@@ -128,9 +151,15 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
               'uniqueKey': beneficiary.uniqueKey,
               'householdRefKey': beneficiary.householdRefKey,
             }));
+          } else {
+            print('⚠️ No beneficiary found with ID: ${this.beneficiaryId}');
+            // Even if beneficiary not found, we can still proceed with the form
+            // The user can manually enter the required information
           }
         } catch (e) {
           debugPrint('Error loading beneficiary data: $e');
+          // Even if there's an error, we can still proceed with the form
+          // The user can manually enter the required information
         }
       }
     });
@@ -244,13 +273,48 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
     on<CbacSubmitted>(_onSubmit);
   }
 
-  void _onSubmit(CbacSubmitted event, Emitter<CbacFormState> emit) async {
+  Future<void> _onSubmit(CbacSubmitted event, Emitter<CbacFormState> emit) async {
     emit(state.copyWith(submitting: true, clearError: true, isSuccess: false));
 
     try {
+      // Get database instance
       final db = await DatabaseProvider.instance.database;
-      final now = DateTime.now().toIso8601String();
 
+      print('� _onSubmit - Initial values - beneficiaryId: $beneficiaryId, householdId: $householdId');
+
+      // Initialize reference keys
+      String householdRefKey = householdId ?? '';
+      String beneficiaryRefKey = beneficiaryId ?? '';
+
+      print('🔍 Initial reference keys - beneficiaryRefKey: $beneficiaryRefKey, householdRefKey: $householdRefKey');
+
+      // If we have a household ID but no beneficiary ID, try to get the first beneficiary in the household
+      if (householdRefKey.isNotEmpty && beneficiaryRefKey.isEmpty) {
+        print('🔍 Looking up beneficiary for household: $householdRefKey');
+        List<Map<String, dynamic>> beneficiaryMaps = await db.query(
+          'beneficiaries',
+          where: 'household_ref_key = ?',
+          whereArgs: [householdRefKey],
+          limit: 1,
+        );
+        
+        print('🔍 Found ${beneficiaryMaps.length} beneficiaries for household');
+        
+        if (beneficiaryMaps.isNotEmpty) {
+          final beneficiary = beneficiaryMaps.first;
+          print('🔍 Found beneficiary data: ${beneficiary.toString()}');
+          beneficiaryRefKey = beneficiary['unique_key']?.toString() ?? '';
+          print('✅ Updated beneficiaryRefKey to: $beneficiaryRefKey');
+        } else {
+          print('⚠️ No beneficiaries found for household: $householdRefKey');
+        }
+      } else {
+        print('ℹ️ Skipping beneficiary lookup - householdRefKey: $householdRefKey, beneficiaryRefKey: $beneficiaryRefKey');
+      }
+      
+      print('💾 Final reference keys - beneficiaryRefKey: $beneficiaryRefKey, householdRefKey: $householdRefKey');
+
+      final now = DateTime.now().toIso8601String();
       final formType = FollowupFormDataTable.cbac;
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Community Based Assessment Checklist';
       final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? 'vl7o6r9b6v3fbesk';
@@ -260,136 +324,99 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       final partDScore = _calculatePartDScore(state);
       final totalScore = partAScore + partDScore;
 
-      // Build form data with all fields, setting null for missing values
+      print('💾 Saving form with - beneficiaryRefKey: $beneficiaryRefKey, householdRefKey: $householdRefKey');
+
       final formData = {
         'form_type': formType,
         'form_name': formName,
         'unique_key': formsRefKey,
+        'beneficiary_id': beneficiaryRefKey,
+        'household_ref_key': householdRefKey,
         'form_data': {
-          // General Information
-          'general': {
-            'asha_name': state.data['general.ashaName'],
-            'anm_name': state.data['general.anmName'],
-            'phc': state.data['general.phc'],
-            'village': state.data['general.village'],
-            'hsc': state.data['general.hsc'],
-          },
+          'beneficiary_id': beneficiaryRefKey,
+          'household_ref_key': householdRefKey,
+          'asha_name': state.data['general.ashaName'],
+          'anm_name': state.data['general.anmName'],
+          'phc': state.data['general.phc'],
+          'village': state.data['general.village'],
+          'hsc': state.data['general.hsc'],
           // Personal Information
-          'personal': {
-            'name': state.data['personal.name'],
-            'father': state.data['personal.father'],
-            'age': state.data['personal.age'],
-            'gender': state.data['personal.gender'],
-            'address': state.data['personal.address'],
-            'id_type': state.data['personal.idType'],
-            'has_conditions': state.data['personal.hasConditions'],
-            'mobile': state.data['personal.mobile'],
-            'disability': state.data['personal.disability'],
-          },
+          'name': state.data['personal.name'],
+          'father': state.data['personal.father'],
+          'age': state.data['personal.age'],
+          'gender': state.data['personal.gender'],
+          'address': state.data['personal.address'],
+          'id_type': state.data['personal.idType'],
+          'has_conditions': state.data['personal.hasConditions'],
+          'mobile': state.data['personal.mobile'],
+          'disability': state.data['personal.disability'],
           // Part A
-          'partA': {
-            'age': state.data['partA.age'],
-            'tobacco': state.data['partA.tobacco'],
-            'alcohol': state.data['partA.alcohol'],
-            'activity': state.data['partA.activity'],
-            'waist': state.data['partA.waist'],
-            'family_history': state.data['partA.familyHistory'],
-          },
-          // Part B
-          'partB': {
-            'b1': {
-              'breath': state.data['partB.b1.breath'],
-              'cough2w': state.data['partB.b1.cough2w'],
-              'blood_mucus': state.data['partB.b1.bloodMucus'],
-              'fever2w': state.data['partB.b1.fever2w'],
-              'weight_loss': state.data['partB.b1.weightLoss'],
-              'night_sweat': state.data['partB.b1.nightSweat'],
-              'seizures': state.data['partB.b1.seizures'],
-              'open_mouth': state.data['partB.b1.openMouth'],
-              'ulcers': state.data['partB.b1.ulcers'],
-              'swelling_mouth': state.data['partB.b1.swellingMouth'],
-              'rash_mouth': state.data['partB.b1.rashMouth'],
-              'chew_pain': state.data['partB.b1.chewPain'],
-              'druggs': state.data['partB.b1.druggs'],
-              'tuberculosis': state.data['partB.b1.Tuberculosis'],
-              'history': state.data['partB.b1.history'],
-              'palms': state.data['partB.b1.palms'],
-              'tingling': state.data['partB.b1.tingling'],
-              'vision_blurred': state.data['partB.b1.visionBlurred'],
-              'reading_difficulty': state.data['partB.b1.readingDifficulty'],
-              'eye_pain': state.data['partB.b1.eyePain'],
-              'eye_redness': state.data['partB.b1.eyeRedness'],
-              'hearing_difficulty': state.data['partB.b1.hearingDifficulty'],
-              'change_voice': state.data['partB.b1.changeVoice'],
-              'skin_rash_discolor': state.data['partB.b1.skinRashDiscolor'],
-              'skin_thick': state.data['partB.b1.skinThick'],
-              'skin_lump': state.data['partB.b1.skinLump'],
-              'numbness_hot_cold': state.data['partB.b1.numbnessHotCold'],
-              'scratches_cracks': state.data['partB.b1.scratchesCracks'],
-              'tingling_numbness': state.data['partB.b1.tinglingNumbness'],
-              'close_eyelids_difficulty': state.data['partB.b1.closeEyelidsDifficulty'],
-              'holding_difficulty': state.data['partB.b1.holdingDifficulty'],
-              'leg_weakness_walk': state.data['partB.b1.legWeaknessWalk'],
-            },
-            'b2': {
-              'breast_lump': state.data['partB.b2.breastLump'],
-              'nipple_bleed': state.data['partB.b2.nippleBleed'],
-              'breast_shape_diff': state.data['partB.b2.breastShapeDiff'],
-              'excess_bleeding': state.data['partB.b2.excessBleeding'],
-              'depression': state.data['partB.b2.depression'],
-              'uterus_prolapse': state.data['partB.b2.uterusProlapse'],
-              'post_menopause_bleed': state.data['partB.b2.postMenopauseBleed'],
-              'post_intercourse_bleed': state.data['partB.b2.postIntercourseBleed'],
-              'smelly_discharge': state.data['partB.b2.smellyDischarge'],
-              'irregular_periods': state.data['partB.b2.irregularPeriods'],
-              'joint_pain': state.data['partB.b2.jointPain'],
-            },
-          },
+          'partA_age': state.data['partA.age'],
+          'partA_tobacco': state.data['partA.tobacco'],
+          'partA_alcohol': state.data['partA.alcohol'],
+          'partA_activity': state.data['partA.activity'],
+          'partA_waist': state.data['partA.waist'],
+          'partA_family_history': state.data['partA.familyHistory'],
+
+          'partB_b1_breath': state.data['partB.b1.breath'],
+          'partB_b1_cough2w': state.data['partB.b1.cough2w'],
+          'partB_b1_blood_mucus': state.data['partB.b1.bloodMucus'],
+          'partB_b1_fever2w': state.data['partB.b1.fever2w'],
+          'partB_b1_weight_loss': state.data['partB.b1.weightLoss'],
+          'partB_b1_night_sweat': state.data['partB.b1.nightSweat'],
+          'partB_b1_seizures': state.data['partB.b1.seizures'],
+          'partB_b1_open_mouth': state.data['partB.b1.openMouth'],
+          'partB_b1_ulcers': state.data['partB.b1.ulcers'],
+          'partB_b1_swelling_mouth': state.data['partB.b1.swellingMouth'],
+          'partB_b1_rash_mouth': state.data['partB.b1.rashMouth'],
+          'partB_b1_chew_pain': state.data['partB.b1.chewPain'],
+          'partB_b1_druggs': state.data['partB.b1.druggs'],
+          'partB_b1_tuberculosis': state.data['partB.b1.Tuberculosis'],
+          'partB_b1_history': state.data['partB.b1.history'],
+          'partB_b1_palms': state.data['partB.b1.palms'],
+          'partB_b1_tingling': state.data['partB.b1.tingling'],
+          'partB_b1_vision_blurred': state.data['partB.b1.visionBlurred'],
+          'partB_b1_reading_difficulty': state.data['partB.b1.readingDifficulty'],
+          'partB_b1_eye_pain': state.data['partB.b1.eyePain'],
+          'partB_b1_eye_redness': state.data['partB.b1.eyeRedness'],
+          'partB_b1_hearing_difficulty': state.data['partB.b1.hearingDifficulty'],
+          'partB_b1_change_voice': state.data['partB.b1.changeVoice'],
+          'partB_b1_skin_rash_discolor': state.data['partB.b1.skinRashDiscolor'],
+          'partB_b1_skin_thick': state.data['partB.b1.skinThick'],
+          'partB_b1_skin_lump': state.data['partB.b1.skinLump'],
+          'partB_b1_numbness_hot_cold': state.data['partB.b1.numbnessHotCold'],
+          'partB_b1_scratches_cracks': state.data['partB.b1.scratchesCracks'],
+          'partB_b1_tingling_numbness': state.data['partB.b1.tinglingNumbness'],
+          'partB_b1_close_eyelids_difficulty': state.data['partB.b1.closeEyelidsDifficulty'],
+          'partB_b1_holding_difficulty': state.data['partB.b1.holdingDifficulty'],
+          'partB_b1_leg_weakness_walk': state.data['partB.b1.legWeaknessWalk'],
+          // Part B - B2
+          'partB_b2_breast_lump': state.data['partB.b2.breastLump'],
+          'partB_b2_nipple_bleed': state.data['partB.b2.nippleBleed'],
+          'partB_b2_breast_shape_diff': state.data['partB.b2.breastShapeDiff'],
+          'partB_b2_excess_bleeding': state.data['partB.b2.excessBleeding'],
+          'partB_b2_depression': state.data['partB.b2.depression'],
+          'partB_b2_uterus_prolapse': state.data['partB.b2.uterusProlapse'],
+          'partB_b2_post_menopause_bleed': state.data['partB.b2.postMenopauseBleed'],
+          'partB_b2_post_intercourse_bleed': state.data['partB.b2.postIntercourseBleed'],
+          'partB_b2_smelly_discharge': state.data['partB.b2.smellyDischarge'],
+          'partB_b2_irregular_periods': state.data['partB.b2.irregularPeriods'],
+          'partB_b2_joint_pain': state.data['partB.b2.jointPain'],
           // Part C
-          'partC': {
-            'cooking_fuel': state.data['partC.cookingFuel'],
-            'business_risk': state.data['partC.businessRisk'],
-          },
+          'partC_cooking_fuel': state.data['partC.cookingFuel'],
+          'partC_business_risk': state.data['partC.businessRisk'],
           // Part D
-          'partD': {
-            'q1': state.data['partD.q1'],
-            'q2': state.data['partD.q2'],
-          },
+          'partD_q1': state.data['partD.q1'],
+          'partD_q2': state.data['partD.q2'],
           // Scores
-          'scores': {
-            'partA': partAScore,
-            'partD': partDScore,
-            'total': totalScore,
-          },
+          'score_partA': partAScore,
+          'score_partD': partDScore,
+          'score_total': totalScore,
         },
         'created_at': now,
         'updated_at': now,
       };
 
-      // Get beneficiary details
-      String householdRefKey = '';
-      String beneficiaryRefKey = beneficiaryId ?? '';
-
-      if (householdId != null && householdId!.isNotEmpty) {
-        List<Map<String, dynamic>> beneficiaryMaps = await db.query(
-          'beneficiaries',
-          where: 'household_ref_key = ?',
-          whereArgs: [householdId],
-        );
-
-        if (beneficiaryMaps.isEmpty) {
-          beneficiaryMaps = await db.query(
-            'beneficiaries',
-            where: 'id = ?',
-            whereArgs: [int.tryParse(householdId!) ?? 0],
-          );
-        }
-
-        if (beneficiaryMaps.isNotEmpty) {
-          final beneficiary = beneficiaryMaps.first;
-          householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
-        }
-      }
 
       final formJson = jsonEncode(formData);
       print('💾 CBAC Form JSON to be saved: $formJson');
