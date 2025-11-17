@@ -255,6 +255,11 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Community Based Assessment Checklist';
       final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? 'vl7o6r9b6v3fbesk';
 
+      // Calculate scores
+      final partAScore = _calculatePartAScore(state);
+      final partDScore = _calculatePartDScore(state);
+      final totalScore = partAScore + partDScore;
+
       // Build form data with all fields, setting null for missing values
       final formData = {
         'form_type': formType,
@@ -349,6 +354,12 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
           'partD': {
             'q1': state.data['partD.q1'],
             'q2': state.data['partD.q2'],
+          },
+          // Scores
+          'scores': {
+            'partA': partAScore,
+            'partD': partDScore,
+            'total': totalScore,
           },
         },
         'created_at': now,
@@ -516,11 +527,85 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
         ));
       }
     } catch (e) {
-      print('❌ Error in CBAC form submission: $e');
+      print(' Error in CBAC form submission: $e');
       emit(state.copyWith(
         submitting: false,
-        errorMessage: 'Error: $e',
+        errorMessage: 'An error occurred: $e',
       ));
     }
+  }
+
+  int _calculatePartAScore(CbacFormState state) {
+    final itemsAge = [
+      'Less than 30 years',
+      '30-39 years',
+      '40-49 years',
+      '50-69 years',
+    ];
+    
+    final itemsTobacco = [
+      'Never consumed',
+      'Sometimes',
+      'Daily',
+    ];
+    
+    final itemsActivity = [
+      'Less than 150 minutes per week',
+      '150 minutes or more per week',
+    ];
+    
+    final itemsWaist = [
+      '≤ 80 cm',
+      '81-90 cm',
+      '> 90 cm',
+    ];
+
+    // Calculate Part A scores
+    final age = state.data['partA.age'] as String?;
+    final tobacco = state.data['partA.tobacco'] as String?;
+    final alcohol = state.data['partA.alcohol'] as String?;
+    final activity = state.data['partA.activity'] as String?;
+    final waist = state.data['partA.waist'] as String?;
+    final familyHx = state.data['partA.familyHistory'] as String?;
+
+    final idxAge = age == null ? -1 : itemsAge.indexOf(age);
+    final scoreAge = switch (idxAge) { 1 => 1, 2 => 2, 3 => 3, _ => 0 };
+    
+    final idxTob = tobacco == null ? -1 : itemsTobacco.indexOf(tobacco);
+    final scoreTobacco = idxTob <= 0 ? 0 : 1;
+    
+    final idxAlcohol = alcohol == null ? -1 : (alcohol.toLowerCase() == 'yes' ? 0 : 1);
+    final scoreAlcohol = idxAlcohol == 0 ? 1 : 0;
+    
+    final idxActivity = activity == null ? -1 : itemsActivity.indexOf(activity);
+    final scoreActivity = idxActivity == 0 ? 1 : 0;
+    
+    final idxWaist = waist == null ? -1 : itemsWaist.indexOf(waist);
+    final scoreWaist = switch (idxWaist) { 1 => 1, 2 => 2, _ => 0 };
+    
+    final idxFamily = familyHx == null ? -1 : (familyHx.toLowerCase() == 'yes' ? 0 : 1);
+    final scoreFamily = idxFamily == 0 ? 2 : 0;
+
+    return scoreAge + scoreTobacco + scoreAlcohol + scoreActivity + scoreWaist + scoreFamily;
+  }
+
+  int _calculatePartDScore(CbacFormState state) {
+    final q1 = state.data['partD.q1'] as String?;
+    final q2 = state.data['partD.q2'] as String?;
+    
+    final options = [
+      'Not at all',
+      'Several days',
+      'More than half the days',
+      'Nearly every day',
+    ];
+
+    int scoreFromValue(String? v) {
+      if (v == null) return 0;
+      final idx = options.indexOf(v);
+      return idx < 0 ? 0 : idx;
+    }
+
+    return scoreFromValue(q1) + scoreFromValue(q2);
   }
 }

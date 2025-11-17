@@ -104,7 +104,6 @@ class SecureStorageService {
     }
   }
 
-  /// Retrieves all HBNC visits for a specific beneficiary
   static Future<List<Map<String, dynamic>>> getHbncVisits(String beneficiaryId) async {
     try {
       final data = await _storage.read(key: _keyHbncVisits);
@@ -377,12 +376,12 @@ class SecureStorageService {
     }
   }
 
-  // Get current user's unique key
+
   static Future<String?> getCurrentUserKey() async {
     return await _storage.read(key: _keyCurrentUser);
   }
 
-  // Clear all user data including current user
+
   static Future<void> clearUserData() async {
     final currentUser = await _storage.read(key: _keyCurrentUser);
     if (currentUser != null) {

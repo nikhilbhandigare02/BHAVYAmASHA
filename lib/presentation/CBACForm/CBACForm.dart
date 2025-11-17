@@ -274,15 +274,20 @@ class _CbacformState extends State<Cbacform> {
   }
 }
 
-
 class _GeneralInfoTab extends StatefulWidget {
   @override
   _GeneralInfoTabState createState() => _GeneralInfoTabState();
 }
 
 class _GeneralInfoTabState extends State<_GeneralInfoTab> {
-  late Map<String, dynamic> _userData = {};
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
+  Map<String, dynamic>? _userData;
+  String _ashaName = '';
+  String _hscName = '';
+  String _district = '';
+  String _block = '';
+  bool _fieldsInitialized = false;
 
   @override
   void initState() {
@@ -290,226 +295,295 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
     _loadUserData();
   }
 
-  // Helper method to print all users from the local database
-  Future<Map<String, dynamic>?> _printAllUsers() async {
+
+  String _fixJsonString(String invalidJson) {
     try {
-      debugPrint('🔍 Querying users from local database...');
-      
-      // Get the database path
-      final databasePath = await getDatabasesPath();
-      final path = join(databasePath, 'bhavya_masha.db');
-
-      final db = await openDatabase(path);
-
-      final List<Map<String, dynamic>> users = await db.query(
-        'users',
-        where: 'is_deleted = ?',
-        whereArgs: [0],
-        orderBy: 'modified_date_time DESC',
-      );
-      
-      debugPrint('👥 Found ${users.length} users in the database:');
-      
-      for (final user in users) {
-        debugPrint('   User ID: ${user['id']}');
-        debugPrint('   Username: ${user['user_name']}');
-        debugPrint('   Role ID: ${user['role_id']}');
-        
-
-        if (user['details'] != null) {
-          try {
-            final details = jsonDecode(user['details']);
-            debugPrint('   Details:');
-            details.forEach((key, value) {
-              debugPrint('     $key: $value');
-            });
-          } catch (e) {
-            debugPrint('   Could not parse details: ${user['details']}');
-          }
+      // Add quotes around keys and string values
+      String fixedJson = invalidJson
+          .replaceAllMapped(RegExp(r'(\w+):'), (match) => '"${match.group(1)}":')
+          .replaceAllMapped(RegExp(r':\s*([^",{}\[\]]+?)\s*(?=[,}])'), (match) {
+        final value = match.group(1)!.trim();
+        if (value == 'null' || value.isEmpty) {
+          return ': null';
         }
-        debugPrint('   --------------------');
-      }
-
-      // Close the database
-      await db.close();
-      
-      return users.isNotEmpty ? users.first : null;
-    } catch (e) {
-      debugPrint('❌ Error querying users: $e');
-      return null;
-    }
-  }
-
-  // Helper function to get nested value from map using dot notation
-  dynamic _getNestedValue(Map<String, dynamic> map, String key) {
-    try {
-      var keys = key.split('.');
-      dynamic value = map;
-      for (var k in keys) {
-        if (value is Map && value.containsKey(k)) {
-          value = value[k];
-        } else {
-          return null;
+        // Check if it's a number
+        if (double.tryParse(value) != null) {
+          return ': $value';
         }
-      }
-      return value?.toString().trim();
+        // Check if it's a boolean
+        if (value == 'true' || value == 'false') {
+          return ': $value';
+        }
+        // It's a string, wrap in quotes
+        return ': "$value"';
+      });
+
+      debugPrint('🛠️ Fixed JSON: $fixedJson');
+      return fixedJson;
     } catch (e) {
-      debugPrint('Error getting nested value for key $key: $e');
-      return null;
+      debugPrint('❌ Error fixing JSON: $e');
+      return invalidJson;
     }
   }
 
   Future<void> _loadUserData() async {
     try {
       setState(() => _isLoading = true);
-      
-      // First, print all users for debugging
-      await _printAllUsers();
-      
+
+      debugPrint('🔍 Loading user data for auto-fill...');
+
       // Get the current user using UserInfo
       final user = await UserInfo.getCurrentUser();
-      
-      if (user != null && mounted) {
+
+      if (user != null) {
         debugPrint('✅ Found current user: ${user['user_name']}');
-        
-        Map<String, dynamic> userData = {};
-        userData.addAll(user);
-        
-        // Parse details if it's a JSON string
-        if (user['details'] is String) {
+
+        // Print the details string to see exact format
+        debugPrint('📦 DETAILS STRING: ${user['details']}');
+
+        Map<String, dynamic> userDetails = {};
+
+        // Parse the details field which contains the nested data
+        if (user['details'] != null && user['details'] is String) {
           try {
-            final details = jsonDecode(user['details']);
-            if (details is Map) {
-              userData.addAll(Map<String, dynamic>.from(details));
-            }
+            String detailsString = user['details']!.toString().trim();
+
+            // Fix the invalid JSON format
+            String fixedJson = _fixJsonString(detailsString);
+
+            userDetails = jsonDecode(fixedJson);
+
+            debugPrint('📋 SUCCESSFULLY PARSED DETAILS:');
+            userDetails.forEach((key, value) {
+              debugPrint('   $key: $value (${value.runtimeType})');
+            });
           } catch (e) {
-            debugPrint('Error parsing user details: $e');
+            debugPrint('❌ Error parsing user details: $e');
+            // Try alternative parsing method
+            _tryAlternativeParsing(user['details']!.toString());
           }
         }
-        
-        setState(() {
-          _userData = userData;
-          _isLoading = false;
-        });
-        
-        final bloc = BlocProvider.of<CbacFormBloc>(context as BuildContext);
 
-        final fieldMappings = {
+        // Extract values using the exact structure from your console output
+        final name = userDetails['name'] is Map ? userDetails['name'] as Map<String, dynamic> : {};
+        final workingLocation = userDetails['working_location'] is Map ? userDetails['working_location'] as Map<String, dynamic> : {};
 
-          'name.first_name': 'general.ashaName',
-          
-          // Working location mappings
-          'working_location.hsc_name': 'general.hsc',
-          'working_location.district': 'general.phc',
-          'working_location.block': 'general.village',
-          
-          // ANM name (if available)
-          'anm_name': 'general.anmName',
-        };
-        
-        // Debug print all available keys
-        debugPrint('Available user data keys: ${userData.keys.join(', ')}');
-
-        fieldMappings.forEach((dataKey, formField) {
-          final value = _getNestedValue(userData, dataKey);
-          if (value != null && value.isNotEmpty) {
-            debugPrint('Setting $formField from $dataKey: $value');
-            bloc.add(CbacFieldChanged(formField, value));
-          } else {
-            debugPrint('No value found for key: $dataKey');
-          }
-        });
-
-        final firstName = _getNestedValue(userData, 'name.first_name') ?? '';
-        final lastName = _getNestedValue(userData, 'name.last_name') ?? '';
+        // Extract name fields
+        final firstName = name['first_name']?.toString()?.trim() ?? '';
+        final lastName = name['last_name']?.toString()?.trim() ?? '';
         final fullName = '$firstName $lastName'.trim();
-        if (fullName.isNotEmpty) {
-          debugPrint('Setting ASHA name to: $fullName');
-          bloc.add(CbacFieldChanged('general.ashaName', fullName));
+
+        // Extract working location fields
+        final hscName = workingLocation['hsc_name']?.toString()?.trim() ?? '';
+        final district = workingLocation['district']?.toString()?.trim() ?? '';
+        final block = workingLocation['block']?.toString()?.trim() ?? '';
+
+        debugPrint('🎯 EXTRACTED VALUES FROM DETAILS:');
+        debugPrint('   First Name: "$firstName"');
+        debugPrint('   Last Name: "$lastName"');
+        debugPrint('   Full Name: "$fullName"');
+        debugPrint('   HSC Name: "$hscName"');
+        debugPrint('   District: "$district"');
+        debugPrint('   Block: "$block"');
+
+        // Use the actual name from details instead of username
+        final finalAshaName = fullName.isNotEmpty ? fullName : user['user_name']?.toString()?.trim() ?? '';
+        final finalHscName = hscName;
+        final finalDistrict = district;
+        final finalBlock = block;
+
+        debugPrint('🎯 FINAL VALUES FOR AUTO-FILL:');
+        debugPrint('   ASHA Name: "$finalAshaName"');
+        debugPrint('   HSC Name: "$finalHscName"');
+        debugPrint('   District: "$finalDistrict"');
+        debugPrint('   Block: "$finalBlock"');
+
+        if (mounted) {
+          setState(() {
+            _ashaName = finalAshaName;
+            _hscName = finalHscName;
+            _district = finalDistrict;
+            _block = finalBlock;
+            _isLoading = false;
+          });
         }
+
       } else {
-        debugPrint(' No active user found in local database');
+        debugPrint('❌ No active user found in local database');
         if (mounted) {
           setState(() => _isLoading = false);
         }
       }
     } catch (e) {
-      debugPrint('Error loading user data: $e');
+      debugPrint('❌ Error loading user data: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
   }
 
+  // Alternative parsing method using string manipulation
+  void _tryAlternativeParsing(String detailsString) {
+    try {
+      debugPrint('🔄 Trying alternative parsing...');
+
+      // Extract first_name using regex
+      final firstNameMatch = RegExp(r'first_name:\s*([^,]+)').firstMatch(detailsString);
+      final lastNameMatch = RegExp(r'last_name:\s*([^,]+)').firstMatch(detailsString);
+      final hscNameMatch = RegExp(r'hsc_name:\s*([^,]+)').firstMatch(detailsString);
+      final districtMatch = RegExp(r'district:\s*([^,]+)').firstMatch(detailsString);
+      final blockMatch = RegExp(r'block:\s*([^,}]+)').firstMatch(detailsString);
+
+      String firstName = firstNameMatch?.group(1)?.trim() ?? '';
+      String lastName = lastNameMatch?.group(1)?.trim() ?? '';
+      String hscName = hscNameMatch?.group(1)?.trim() ?? '';
+      String district = districtMatch?.group(1)?.trim() ?? '';
+      String block = blockMatch?.group(1)?.trim() ?? '';
+
+      // Clean up the values (remove trailing commas, etc.)
+      firstName = firstName.replaceAll(RegExp(r'[,\s]*$'), '');
+      lastName = lastName.replaceAll(RegExp(r'[,\s]*$'), '');
+      hscName = hscName.replaceAll(RegExp(r'[,\s]*$'), '');
+      district = district.replaceAll(RegExp(r'[,\s]*$'), '');
+      block = block.replaceAll(RegExp(r'[,\s]*$'), '');
+
+      debugPrint('🎯 ALTERNATIVE PARSING RESULTS:');
+      debugPrint('   First Name: "$firstName"');
+      debugPrint('   Last Name: "$lastName"');
+      debugPrint('   HSC Name: "$hscName"');
+      debugPrint('   District: "$district"');
+      debugPrint('   Block: "$block"');
+
+      if (mounted) {
+        setState(() {
+          _ashaName = '$firstName $lastName'.trim();
+          _hscName = hscName;
+          _district = district;
+          _block = block;
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ Alternative parsing also failed: $e');
+    }
+  }
+
+  // Method to update bloc with form fields
+  void _updateFormFields(BuildContext context) {
+    if (_fieldsInitialized || _isLoading) return;
+
+    final bloc = BlocProvider.of<CbacFormBloc>(context);
+
+    debugPrint('🔄 UPDATING FORM FIELDS WITH EXTRACTED DATA:');
+    debugPrint('   ASHA Name: "$_ashaName"');
+    debugPrint('   HSC Name: "$_hscName"');
+    debugPrint('   District: "$_district"');
+    debugPrint('   Block: "$_block"');
+
+    if (_ashaName.isNotEmpty) {
+      bloc.add(CbacFieldChanged('general.ashaName', _ashaName));
+      debugPrint('   ✅ Set ASHA Name: $_ashaName');
+    }
+    if (_hscName.isNotEmpty) {
+      bloc.add(CbacFieldChanged('general.hsc', _hscName));
+      debugPrint('   ✅ Set HSC Name: $_hscName');
+    }
+    if (_district.isNotEmpty) {
+      bloc.add(CbacFieldChanged('general.phc', _district));
+      debugPrint('   ✅ Set District: $_district');
+    }
+    if (_block.isNotEmpty) {
+      bloc.add(CbacFieldChanged('general.village', _block));
+      debugPrint('   ✅ Set Block: $_block');
+    }
+
+    _fieldsInitialized = true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<CbacFormBloc>();
     final l10n = AppLocalizations.of(context)!;
-    
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+
     return BlocBuilder<CbacFormBloc, CbacFormState>(
-      builder: (context, state)
-    {
-      // Helper function to safely get form field value
-      String getFieldValue(String key) => state.data[key]?.toString() ?? '';
+      builder: (context, state) {
+        // Update form fields after build is complete
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _updateFormFields(context);
+        });
 
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-        children: [
-          CustomTextField(
-            hintText: l10n.ashaNameLabel,
-            labelText: l10n.ashaNameLabel,
-            initialValue: getFieldValue('general.ashaName'),
-            onChanged: (v) =>
-                bloc.add(CbacFieldChanged('general.ashaName', v.trim())),
-          ),
-          const Divider(height: 0.5),
-          CustomTextField(
-            hintText: l10n.anmNameLabel,
-            labelText: l10n.anmNameLabel,
-            initialValue: getFieldValue('general.anmName'),
-            onChanged: (v) =>
-                bloc.add(CbacFieldChanged('general.anmName', v.trim())),
-          ),
-          const Divider(height: 0.5),
-          CustomTextField(
-            hintText: l10n.phcNameLabel,
-            labelText: l10n.phcNameLabel,
-            initialValue: getFieldValue('general.phc'),
-            onChanged: (v) =>
-                bloc.add(CbacFieldChanged('general.phc', v.trim())),
-          ),
-          const Divider(height: 0.5),
-          CustomTextField(
-            hintText: l10n.villageLabel,
-            labelText: l10n.villageLabel,
-            initialValue: getFieldValue('general.village'),
-            onChanged: (v) =>
-                bloc.add(CbacFieldChanged('general.village', v.trim())),
-          ),
-          const Divider(height: 0.5),
-          CustomTextField(
-            hintText: l10n.hscNameLabel,
-            labelText: l10n.hscNameLabel,
-            initialValue: getFieldValue('general.hsc'),
-            onChanged: (v) =>
-                bloc.add(CbacFieldChanged('general.hsc', v.trim())),
-          ),
-          const Divider(height: 0.5),
-          CustomDatePicker(
-            hintText: l10n.dateLabel,
-            labelText: l10n.dateLabel,
-            initialDate: DateTime.now(),
-            isEditable: false,
-            onDateChanged: null,
-          ),
-          const Divider(height: 0.5),
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+          children: [
+            // ASHA Name Field - Should show "Sita Kumari"
+            CustomTextField(
+              key: ValueKey('ashaName_${_ashaName}'),
+              hintText: l10n.ashaNameLabel,
+              labelText: l10n.ashaNameLabel,
+              initialValue: _ashaName,
+              readOnly: _ashaName.isNotEmpty,
+              onChanged: (v) {
+                context.read<CbacFormBloc>().add(CbacFieldChanged('general.ashaName', v.trim()));
+              },
+            ),
+            const Divider(height: 0.5),
 
-        ],
-      );
-    });
+            // ANM Name Field
+            CustomTextField(
+              hintText: l10n.anmNameLabel,
+              labelText: l10n.anmNameLabel,
+              initialValue: state.data['general.anmName']?.toString() ?? '',
+              onChanged: (v) => context.read<CbacFormBloc>().add(CbacFieldChanged('general.anmName', v.trim())),
+            ),
+            const Divider(height: 0.5),
+
+            // PHC/District Field - Should show "Muzaffarpur"
+            CustomTextField(
+              key: ValueKey('phc_${_district}'),
+              hintText: l10n.phcNameLabel,
+              labelText: l10n.phcNameLabel,
+              initialValue: _district,
+              onChanged: (v) => context.read<CbacFormBloc>().add(CbacFieldChanged('general.phc', v.trim())),
+            ),
+            const Divider(height: 0.5),
+
+            // Village/Block Field - Should show "Bandra"
+            CustomTextField(
+              key: ValueKey('village_${_block}'),
+              hintText: l10n.villageLabel,
+              labelText: l10n.villageLabel,
+              initialValue: _block,
+              onChanged: (v) => context.read<CbacFormBloc>().add(CbacFieldChanged('general.village', v.trim())),
+            ),
+            const Divider(height: 0.5),
+
+            // HSC Name Field - Should show "HSC Bandra"
+            CustomTextField(
+              key: ValueKey('hsc_${_hscName}'),
+              hintText: l10n.hscNameLabel,
+              labelText: l10n.hscNameLabel,
+              initialValue: _hscName,
+              readOnly: _hscName.isNotEmpty,
+              onChanged: (v) => context.read<CbacFormBloc>().add(CbacFieldChanged('general.hsc', v.trim())),
+            ),
+            const Divider(height: 0.5),
+
+            CustomDatePicker(
+              hintText: l10n.dateLabel,
+              labelText: l10n.dateLabel,
+              initialDate: DateTime.now(),
+              isEditable: false,
+              onDateChanged: null,
+            ),
+            const Divider(height: 0.5),
+
+
+          ],
+        );
+      },
+    );
   }
 }
 
