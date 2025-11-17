@@ -507,7 +507,6 @@ class LocalStorageDao {
     return result;
   }
 
-  /// Returns ANC followup forms where the woman is marked as high-risk
   Future<List<Map<String, dynamic>>> getHighRiskANCVisits() async {
     final db = await _db;
 
