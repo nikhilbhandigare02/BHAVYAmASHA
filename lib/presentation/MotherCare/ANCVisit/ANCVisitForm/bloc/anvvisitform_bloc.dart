@@ -32,8 +32,12 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<RchNumberChanged>((e, emit) => emit(state.copyWith(rchNumber: e.value)));
 
     on<LmpDateChanged>((e, emit) {
-      // EDD = LMP + 280 days (when LMP provided)
-      final edd = (e.value == null) ? null : e.value!.add(const Duration(days: 280));
+      if (e.value == null) {
+        emit(state.copyWith(lmpDate: null, eddDate: null));
+        return;
+      }
+      // EDD = LMP + 8 months and 10 days (same as TrackEligibleCouple)
+      final edd = _calculateEddFromLmp(e.value!);
       emit(state.copyWith(lmpDate: e.value, eddDate: edd));
     });
     on<EddDateChanged>((e, emit) => emit(state.copyWith(eddDate: e.value)));
@@ -60,6 +64,17 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     });
 
     on<SubmitPressed>(_onSubmit);
+  }
+
+  DateTime _calculateEddFromLmp(DateTime lmp) {
+    int year = lmp.year;
+    int month = lmp.month + 8;
+    if (month > 12) {
+      year += (month - 1) ~/ 12;
+      month = ((month - 1) % 12) + 1;
+    }
+    final base = DateTime(year, month, lmp.day);
+    return base.add(const Duration(days: 10));
   }
 
   Future<void> _onSubmit(SubmitPressed e, Emitter<AnvvisitformState> emit) async {

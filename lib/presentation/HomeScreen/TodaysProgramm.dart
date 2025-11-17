@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart' show Database;
 import 'package:url_launcher/url_launcher.dart';
 import '../../data/Local_Storage/local_storage_dao.dart';
 import '../../data/Local_Storage/database_provider.dart';
+import '../../data/Local_Storage/tables/followup_form_data_table.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../l10n/app_localizations.dart';
 import '../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
@@ -37,6 +38,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   List<Map<String, dynamic>> _eligibleCoupleItems = [];
   List<Map<String, dynamic>> _ancItems = [];
   List<Map<String, dynamic>> _hbncItems = [];
+  int _completedVisitsCount = 0;
 
   @override
   void initState() {
@@ -50,6 +52,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     _loadEligibleCoupleItems();
     _loadAncItems();
     _loadHbncItems();
+    _loadCompletedVisitsCount();
   }
 
   String _last11(String? input) {
@@ -69,14 +72,86 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     return _expandedKey == key;
   }
 
+  Future<void> _loadCompletedVisitsCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      final ecFormKey = FollowupFormDataTable
+              .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ??
+          '';
+      final ancFormKey = FollowupFormDataTable
+              .formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ??
+          '';
+
+      final formKeys = <String>[];
+      if (ecFormKey.isNotEmpty) formKeys.add(ecFormKey);
+      if (ancFormKey.isNotEmpty) formKeys.add(ancFormKey);
+
+      if (formKeys.isEmpty) return;
+
+      final placeholders = List.filled(formKeys.length, '?').join(',');
+      final rows = await db.rawQuery(
+        'SELECT COUNT(*) AS cnt FROM ${FollowupFormDataTable.table} '
+        'WHERE forms_ref_key IN ($placeholders) '
+        'AND (is_deleted IS NULL OR is_deleted = 0)',
+        formKeys,
+      );
+
+      int count = 0;
+      if (rows.isNotEmpty) {
+        final value = rows.first['cnt'];
+        if (value is int) {
+          count = value;
+        } else if (value is num) {
+          count = value.toInt();
+        } else if (value != null) {
+          count = int.tryParse(value.toString()) ?? 0;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _completedVisitsCount = count;
+        });
+      }
+    } catch (_) {}
+  }
+
   Future<void> _loadAncItems() async {
     try {
+      // Load beneficiaries that already have an ANC Due Registration form
+      final db = await DatabaseProvider.instance.database;
+      final ancFormKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+      final Set<String> ancCompletedBeneficiaries = <String>{};
+      if (ancFormKey.isNotEmpty) {
+        final ancForms = await db.query(
+          FollowupFormDataTable.table,
+          columns: ['beneficiary_ref_key'],
+          where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          whereArgs: [ancFormKey],
+        );
+        for (final formRow in ancForms) {
+          final key = formRow['beneficiary_ref_key']?.toString() ?? '';
+          if (key.isNotEmpty) {
+            ancCompletedBeneficiaries.add(key);
+          }
+        }
+      }
+
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
 
       final List<Map<String, dynamic>> items = [];
 
       for (final row in rows) {
         try {
+          final uniqueKeyFull = row['unique_key']?.toString() ?? '';
+          if (uniqueKeyFull.isNotEmpty &&
+              ancCompletedBeneficiaries.contains(uniqueKeyFull)) {
+            // Skip ANC items that already have a saved ANC form
+            continue;
+          }
+
           final isDeath = row['is_death'] == 1;
           final isMigrated = row['is_migrated'] == 1;
           if (isDeath || isMigrated) continue;
@@ -272,8 +347,32 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           final name = beneficiaryInfo['memberName']?.toString() ??
               beneficiaryInfo['headName']?.toString() ??
               'N/A';
-          final dob = beneficiaryInfo['dob']?.toString();
-          final age = _calculateAgeEc(dob);
+
+          final dobRaw = beneficiaryInfo['dob']?.toString();
+          String ageText = '-';
+          if (dobRaw != null && dobRaw.isNotEmpty) {
+            try {
+              String dateStr = dobRaw;
+              if (dateStr.contains('T')) {
+                dateStr = dateStr.split('T')[0];
+              }
+              final dobDt = DateTime.tryParse(dateStr);
+              if (dobDt != null) {
+                final now = DateTime.now();
+                final diffDays = now.difference(dobDt).inDays;
+                if (diffDays < 30) {
+                  ageText = '${diffDays}d';
+                } else if (diffDays < 365) {
+                  final months = (diffDays / 30).floor();
+                  ageText = '${months}m';
+                } else {
+                  final years = (diffDays / 365).floor();
+                  ageText = '${years}y';
+                }
+              }
+            } catch (_) {}
+          }
+
           final gender = beneficiaryInfo['gender']?.toString() ?? 'N/A';
           final mobile = beneficiaryInfo['mobileNo']?.toString() ?? 'N/A';
           final householdRefKey = beneficiary['household_ref_key']?.toString() ?? 'N/A';
@@ -287,7 +386,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'id': _last11(beneficiaryRefKey),
             'household_ref_key': householdRefKey,
             'name': name,
-            'age': age > 0 ? '${age}y' : '-',
+            'age': ageText,
             'gender': gender,
             'last HBNC due date': nextHBNCDate ?? previousHBNCDate ?? '-',
             'mobile': mobile,
@@ -375,7 +474,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       final List<Map<String, dynamic>> items = [];
 
-      // Build map of household_ref_key -> configured head unique_key (head_id)
       final headKeyByHousehold = <String, String>{};
       for (final hh in households) {
         try {
@@ -481,6 +579,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           }
 
           // 6-month filter intentionally disabled as per latest requirement
+
           // if (lastSurveyDt == null) {
           //   continue;
           // }
@@ -560,6 +659,26 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
   Future<void> _loadEligibleCoupleItems() async {
     try {
+      final db = await DatabaseProvider.instance.database;
+      final trackingFormKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
+      final Set<String> trackedBeneficiaries = <String>{};
+      if (trackingFormKey.isNotEmpty) {
+        final trackingRows = await db.query(
+          FollowupFormDataTable.table,
+          columns: ['beneficiary_ref_key'],
+          where:
+              'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          whereArgs: [trackingFormKey],
+        );
+        for (final row in trackingRows) {
+          final key = row['beneficiary_ref_key']?.toString() ?? '';
+          if (key.isNotEmpty) {
+            trackedBeneficiaries.add(key);
+          }
+        }
+      }
+
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final couples = <Map<String, dynamic>>[];
 
@@ -569,12 +688,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         final hhKey = row['household_ref_key']?.toString() ?? '';
         households.putIfAbsent(hhKey, () => []).add(row);
       }
-
       for (final household in households.values) {
         Map<String, dynamic>? head;
         Map<String, dynamic>? spouse;
 
         for (final member in household) {
+          // Skip beneficiaries that already have a tracking form saved
+          final memberUniqueKey = member['unique_key']?.toString() ?? '';
+          if (memberUniqueKey.isNotEmpty &&
+              trackedBeneficiaries.contains(memberUniqueKey)) {
+            continue;
+          }
+
           final info = _toStringMap(member['beneficiary_info']);
           final relation =
               (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
@@ -649,12 +774,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       if (lastDt == null) return null;
       // 30-day filter intentionally disabled as per latest requirement
-      // final now = DateTime.now();
-      // final diffDays = now.difference(lastDt).inDays;
-      // if (diffDays < 30) {
-      //   // Updated less than 1 month ago -> skip
-      //   return null;
-      // }
+      final now = DateTime.now();
+      final diffDays = now.difference(lastDt).inDays;
+      if (diffDays < 30) {
+        // Updated less than 1 month ago -> skip
+        return null;
+      }
 
       final name =
           female['memberName']?.toString() ??
@@ -725,7 +850,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           Map<String, String> initial = {};
           try {
-            // Load household to find configured head_id
             final households = await LocalStorageDao.instance.getAllHouseholds();
             String? headId;
             for (final hh in households) {
@@ -736,7 +860,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               }
             }
 
-            // Load all beneficiaries for this household
             final members = await LocalStorageDao.instance.getBeneficiariesByHousehold(hhKey);
 
             Map<String, dynamic>? headRow;
@@ -853,15 +976,25 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             ),
           );
         } else if (badge == 'EligibleCouple') {
-          final beneficiaryId = item['beneficiaryId']?.toString() ?? '';
-          if (beneficiaryId.isEmpty) return;
+          // Align with UpdatedEligibleCoupleListScreen: pass short ID + full ref key
+          final displayId = item['id']?.toString() ?? '';
+          final beneficiaryRefKey = item['beneficiaryId']?.toString() ?? '';
+          if (displayId.isEmpty || beneficiaryRefKey.isEmpty) return;
 
-          Navigator.push(
+          final result = await Navigator.push(
             context,
             TrackEligibleCoupleScreen.route(
-              beneficiaryId: beneficiaryId,
+              beneficiaryId: displayId,
+              beneficiaryRefKey: beneficiaryRefKey,
             ),
           );
+
+          if (result == true && mounted) {
+            setState(() {
+              _completedVisitsCount++;
+            });
+            _loadEligibleCoupleItems();
+          }
         } else if (badge == 'ANC') {
           // Navigate to ANC Visit Form with full beneficiary data
           final hhId = item['hhId']?.toString() ??
@@ -875,12 +1008,19 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           formData['BeneficiaryID'] = beneficiaryId;
           formData['unique_key'] = item['unique_key']?.toString() ?? beneficiaryId;
 
-          Navigator.push(
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => Ancvisitform(beneficiaryData: formData),
             ),
           );
+
+          if (result == true && mounted) {
+            setState(() {
+              _completedVisitsCount++;
+            });
+            _loadAncItems();
+          }
         } else if (badge == 'HBNC') {
           // Navigate to HBNC Visit Form; pass the item as beneficiaryData
           final beneficiaryData = Map<String, dynamic>.from(item);
@@ -921,9 +1061,24 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      (item['household_ref_key']?.toString().isNotEmpty ?? false)
-                          ? _last11(item['household_ref_key']?.toString())
-                          : _last11(item['id']?.toString()),
+                      () {
+                        if (badge == 'EligibleCouple') {
+                          return _last11(item['beneficiaryId']?.toString());
+                        }
+
+                        // Prefer beneficiary/unique identifiers over household_ref_key
+                        final beneficiaryId = item['BeneficiaryID']?.toString();
+                        if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
+                          return _last11(beneficiaryId);
+                        }
+
+                        final uniqueKey = item['unique_key']?.toString();
+                        if (uniqueKey != null && uniqueKey.isNotEmpty) {
+                          return _last11(uniqueKey);
+                        }
+
+                        return _last11(item['id']?.toString());
+                      }(),
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w500,
@@ -1218,7 +1373,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                               ),
 
                               Text(
-                                "0",
+                                "$_completedVisitsCount",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: widget.selectedGridIndex == 1

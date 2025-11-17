@@ -252,7 +252,7 @@ class _AncvisitformState extends State<Ancvisitform> {
       print('  - unique_key: $uniqueKey');
       print('  - hhId: $hhId');
 
-       String? beneficiaryIdToUse = dataBeneficiaryId.isNotEmpty
+      String? beneficiaryIdToUse = dataBeneficiaryId.isNotEmpty
           ? dataBeneficiaryId
           : (dataId.isNotEmpty ? dataId : uniqueKey);
 
@@ -261,6 +261,44 @@ class _AncvisitformState extends State<Ancvisitform> {
 
       if (beneficiaryIdToUse != null && beneficiaryIdToUse.isNotEmpty) {
         _bloc.add(BeneficiaryIdSet(beneficiaryIdToUse));
+
+        try {
+          final beneficiaryRow =
+              await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryIdToUse);
+          if (beneficiaryRow != null) {
+            final infoRaw = beneficiaryRow['beneficiary_info'];
+            Map<String, dynamic> info;
+            if (infoRaw is Map<String, dynamic>) {
+              info = infoRaw;
+            } else if (infoRaw is Map) {
+              info = Map<String, dynamic>.from(infoRaw);
+            } else if (infoRaw is String && infoRaw.isNotEmpty) {
+              info = Map<String, dynamic>.from(jsonDecode(infoRaw));
+            } else {
+              info = {};
+            }
+
+            final womanName = (info['memberName'] ?? info['headName'])?.toString();
+            if (womanName != null && womanName.isNotEmpty) {
+              _bloc.add(WomanNameChanged(womanName));
+            }
+
+            final spouseName = info['spouseName']?.toString();
+            if (spouseName != null && spouseName.isNotEmpty) {
+              _bloc.add(HusbandNameChanged(spouseName));
+            }
+
+            final houseNoFromBen = info['houseNo']?.toString();
+            if (houseNoFromBen != null && houseNoFromBen.isNotEmpty) {
+              _bloc.add(HouseNumberChanged(houseNoFromBen));
+              houseNo ??= houseNoFromBen;
+            }
+
+            final mobileFromBen = info['mobileNo']?.toString();
+          }
+        } catch (e) {
+          print('⚠️ Error pre-filling ANC form from beneficiaries table: $e');
+        }
 
         // Set woman's name if available
         if (data['Name'] != null) {
@@ -449,7 +487,7 @@ class _AncvisitformState extends State<Ancvisitform> {
               }
               if (state.isSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n?.saveSuccess ?? 'Saved successfully')));
-                Navigator.pop(context);
+                Navigator.pop(context, true);
               }
             },
             builder: (context, state) {

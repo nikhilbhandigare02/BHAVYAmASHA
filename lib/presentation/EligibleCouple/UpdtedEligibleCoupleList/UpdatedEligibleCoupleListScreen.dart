@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import '../../../data/Local_Storage/database_provider.dart';
+import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
 
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
@@ -30,7 +31,7 @@ class _UpdatedEligibleCoupleListScreenState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-     final args = ModalRoute.of(context)?.settings.arguments;
+    final args = ModalRoute.of(context)?.settings.arguments;
     if (args != null && args is Map<String, dynamic>) {
       _initialData = args;
       print('📋 Received initial data: ${_initialData?.keys}');
@@ -60,6 +61,40 @@ class _UpdatedEligibleCoupleListScreenState
   Future<void> _loadCouples() async {
     setState(() { _isLoading = true; });
     print('🔍 Starting to load couples...');
+
+    // Collect beneficiaries whose tracking form marks them as pregnant
+    final db = await DatabaseProvider.instance.database;
+    final trackingFormKey =
+        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
+    final Set<String> pregnantBeneficiaries = <String>{};
+    if (trackingFormKey.isNotEmpty) {
+      final trackingRows = await db.query(
+        FollowupFormDataTable.table,
+        columns: ['beneficiary_ref_key', 'form_json'],
+        where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [trackingFormKey],
+      );
+      for (final row in trackingRows) {
+        try {
+          final formJsonStr = row['form_json']?.toString() ?? '';
+          if (formJsonStr.isEmpty) continue;
+          final decoded = jsonDecode(formJsonStr);
+          if (decoded is! Map<String, dynamic>) continue;
+          Map<String, dynamic> formData = decoded;
+          if (decoded['form_data'] is Map) {
+            formData = Map<String, dynamic>.from(decoded['form_data']);
+          }
+          final isPregnant = formData['is_pregnant'];
+          if (isPregnant == true) {
+            final key = row['beneficiary_ref_key']?.toString() ?? '';
+            if (key.isNotEmpty) {
+              pregnantBeneficiaries.add(key);
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
     final rows = await LocalStorageDao.instance.getAllBeneficiaries();
     print('📊 Total beneficiaries: ${rows.length}');
     final couples = <Map<String, dynamic>>[];
@@ -82,6 +117,13 @@ class _UpdatedEligibleCoupleListScreenState
       for (final member in household) {
         try {
           // Handle both String and Map types for beneficiary_info
+          final memberUniqueKey = member['unique_key']?.toString() ?? '';
+          if (memberUniqueKey.isNotEmpty &&
+              pregnantBeneficiaries.contains(memberUniqueKey)) {
+            // Skip ECs that are already marked pregnant in tracking form
+            continue;
+          }
+
           final dynamic infoRaw = member['beneficiary_info'];
           final Map<String, dynamic> info = infoRaw is String 
               ? jsonDecode(infoRaw) 
