@@ -11,6 +11,7 @@ import '../../../../core/utils/enums.dart';
 import '../../../../core/utils/geolocation_utils.dart';
 import '../../../../core/utils/id_generator_utils.dart';
 import '../../../../data/Local_Storage/User_Info.dart';
+import '../../../../data/Local_Storage/database_provider.dart';
 import '../../../../data/Local_Storage/local_storage_dao.dart';
 import '../../../../data/repositories/AddBeneficiary/AddBeneficiaryRepository.dart';
 import '../../AddFamilyHead/Children_Details/bloc/children_bloc.dart' show ChildrenBloc;
@@ -23,14 +24,126 @@ class AddnewfamilymemberBloc
     extends Bloc<AddnewfamilymemberEvent, AddnewfamilymemberState> {
   final LocalStorageDao _localStorageDao = LocalStorageDao();
 
-  // Helper method to determine if a member is an adult based on memberType and DOB
-  int _getIsAdultValue(String? memberType, bool useDob, DateTime? dob) {
+  Future<void> _onLoadBeneficiaryData(
+      LoadBeneficiaryData event,
+      Emitter<AddnewfamilymemberState> emit,
+      ) async {
+    try {
+      // Get the complete beneficiary record
+      final db = await DatabaseProvider.instance.database;
+      final List<Map<String, dynamic>> results = await db.query(
+        'beneficiaries',
+        where: 'unique_key = ?',
+        whereArgs: [event.beneficiaryId],
+      );
+
+      if (results.isNotEmpty) {
+        final beneficiary = results.first;
+        final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info'] as String? ?? '{}');
+
+        // Create a map to hold all the data
+        final Map<String, dynamic> allData = {
+          // Basic info
+          'id': beneficiary['id'],
+          'server_id': beneficiary['server_id'],
+          'household_ref_key': beneficiary['household_ref_key'],
+          'unique_key': beneficiary['unique_key'],
+          'beneficiary_state': beneficiary['beneficiary_state'],
+          'pregnancy_count': beneficiary['pregnancy_count'],
+
+          // JSON data from beneficiary_info
+          ...beneficiaryInfo,
+
+          // Other fields
+          'geo_location': beneficiary['geo_location'],
+          'spouse_key': beneficiary['spouse_key'],
+          'mother_key': beneficiary['mother_key'],
+          'father_key': beneficiary['father_key'],
+          'is_family_planning': beneficiary['is_family_planning'] == 1,
+          'is_adult': beneficiary['is_adult'] == 1,
+          'is_guest': beneficiary['is_guest'] == 1,
+          'is_death': beneficiary['is_death'] == 1,
+          'death_details': beneficiary['death_details'],
+          'is_migrated': beneficiary['is_migrated'] == 1,
+          'is_separated': beneficiary['is_separated'] == 1,
+          'device_details': beneficiary['device_details'],
+          'app_details': beneficiary['app_details'],
+          'parent_user': beneficiary['parent_user'],
+          'current_user_key': beneficiary['current_user_key'],
+          'facility_id': beneficiary['facility_id'],
+          'created_date_time': beneficiary['created_date_time'],
+          'modified_date_time': beneficiary['modified_date_time'],
+          'is_synced': beneficiary['is_synced'] == 1,
+          'is_deleted': beneficiary['is_deleted'] == 1,
+        };
+
+        // Update the state with all the data
+        emit(state.copyWith(
+          // Map all the fields to the state
+          name: allData['name'] as String?,
+          fatherName: allData['fatherName'] as String?,
+          motherName: allData['motherName'] as String?,
+          memberType: allData['memberType'] as String? ?? 'Adult',
+          relation: allData['relation'] as String?,
+          useDob: allData['useDob'] as bool? ?? true,
+          dob: allData['dob'] != null ? DateTime.tryParse(allData['dob']) : null,
+          approxAge: allData['approxAge']?.toString(),
+          children: allData['children']?.toString(),
+          birthOrder: allData['birthOrder']?.toString(),
+          gender: allData['gender'] as String?,
+          bankAcc: allData['bankAcc'] as String?,
+          ifsc: allData['ifsc'] as String?,
+          occupation: allData['occupation'] as String?,
+          education: allData['education'] as String?,
+          religion: allData['religion'] as String?,
+          category: allData['category'] as String?,
+          abhaAddress: allData['abhaAddress'] as String?,
+          mobileOwner: allData['mobileOwner'] as String?,
+          mobileNo: allData['mobileNo'] as String?,
+          voterId: allData['voterId'] as String?,
+          rationId: allData['rationId'] as String?,
+          phId: allData['phId'] as String?,
+          beneficiaryType: allData['beneficiaryType'] as String?,
+          maritalStatus: allData['maritalStatus'] as String?,
+          ageAtMarriage: allData['ageAtMarriage'] as String?,
+          spouseName: allData['spouseName'] as String?,
+          hasChildren: allData['hasChildren'] as String?,
+          isPregnant: allData['isPregnant'] as String?,
+          updateDay: allData['updateDay']?.toString(),
+          updateMonth: allData['updateMonth']?.toString(),
+          updateYear: allData['updateYear']?.toString(),
+          WeightChange: allData['weight'] as String?,
+          ChildSchool: allData['childSchool'] as String?,
+          BirthCertificateChange: allData['birthCertificate'] as String?,
+          errorMessage: null,
+
+          // Additional fields from the database
+          memberStatus: allData['member_status'] as String?,
+          dateOfDeath: allData['date_of_death'] != null
+              ? DateTime.tryParse(allData['date_of_death'])
+              : null,
+          deathReason: allData['death_reason'] as String?,
+          otherDeathReason: allData['other_death_reason'] as String?,
+          deathPlace: allData['death_place'] as String?,
+        ));
+      } else {
+        emit(state.copyWith(
+          errorMessage: 'Beneficiary not found',
+        ));
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        errorMessage: 'Error loading beneficiary data: $e',
+      ));
+    }
+  }
+
+   int _getIsAdultValue(String? memberType, bool useDob, DateTime? dob) {
     // If member type is explicitly 'child', return 0
     if (memberType == 'child') {
       return 0;
     }
 
-    // If member type is explicitly 'Adult', return 1
     if (memberType == 'Adult') {
       return 1;
     }
@@ -52,7 +165,11 @@ class AddnewfamilymemberBloc
     }
   }
 
-  AddnewfamilymemberBloc() : super(AddnewfamilymemberState()) {
+  AddnewfamilymemberBloc() : super(const AddnewfamilymemberState()) {
+    on<LoadBeneficiaryData>(_onLoadBeneficiaryData);
+    on<AddnewfamilymemberEvent>((event, emit) {
+      // TODO: implement event handler
+    });
     on<AnmUpdateMemberType>(
           (e, emit) => emit(state.copyWith(memberType: e.value)),
     );

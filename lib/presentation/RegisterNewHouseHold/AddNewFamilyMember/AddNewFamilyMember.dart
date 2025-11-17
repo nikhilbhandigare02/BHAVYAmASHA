@@ -68,6 +68,22 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   late final SpousBloc _spousBloc;
   late final ChildrenBloc _childrenBloc;
   late final AddFamilyHeadBloc _dummyHeadBloc;
+  
+  // Form controllers
+  bool _isLoading = false;
+  bool _isFirstLoad = true;
+  
+  // Controllers for form fields
+  final TextEditingController _memberTypeController = TextEditingController();
+  final TextEditingController _genderController = TextEditingController();
+  final TextEditingController _maritalStatusController = TextEditingController();
+  final TextEditingController _educationController = TextEditingController();
+  final TextEditingController _occupationController = TextEditingController();
+  final TextEditingController _religionController = TextEditingController();
+  final TextEditingController _categoryController = TextEditingController();
+  final TextEditingController _beneficiaryTypeController = TextEditingController();
+  final TextEditingController _relationController = TextEditingController();
+  final TextEditingController _memberStatusController = TextEditingController();
 
   String _formatGender(String? gender) {
     if (gender == null) return 'Other';
@@ -83,22 +99,48 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     if (g == 'Female') return 'Male';
     return 'Other';
   }
+  Future<void> _loadBeneficiaryData(String beneficiaryId) async {
+    try {
+      // Load beneficiary data through bloc
+      _bloc.add(LoadBeneficiaryData(beneficiaryId));
+      
+      // Show loading indicator
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
 
-  @override
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Hide loading indicator
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading beneficiary data: $e')),
+        );
+      }
+    }
+  }
+
+    @override
   void initState() {
     super.initState();
     _bloc = AddnewfamilymemberBloc();
     _spousBloc = SpousBloc();
     _childrenBloc = ChildrenBloc();
-     _dummyHeadBloc = AddFamilyHeadBloc();
+    _dummyHeadBloc = AddFamilyHeadBloc();
     
-
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
 
     _fatherOption = 'Select';
     _motherOption = 'Select';
-    
-    // Use passed arguments instead of querying database
+
     _headName = widget.headName;
     _headGender = widget.headGender;
     _spouseName = widget.spouseName;
@@ -109,8 +151,15 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     print('Spouse: $_spouseName ($_spouseGender)');
     print('==============================');
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      
+      // Handle beneficiary data loading if in edit mode
+      final args = ModalRoute.of(context)?.settings.arguments as Map?;
+      if (args != null && args['isBeneficiary'] == true && args['beneficiaryId'] != null) {
+        await _loadBeneficiaryData(args['beneficiaryId']);
+      }
+      
       if (_fatherOption != 'Other') {
         _bloc.add(AnmUpdateFatherName(_fatherOption));
       }
@@ -122,7 +171,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   
     
   void _updateParentNames(String relation) {
-    // Determine father and mother based on head and spouse gender
+    // Determine father and mother based on head and spouse
     String? fatherName;
     String? motherName;
     
@@ -137,8 +186,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     } else if (_headGender == 'Female') {
       motherName = _headName;
     }
-    
-    // Update the dropdowns and bloc state
+  
     if (relation == 'Father' && fatherName != null) {
       setState(() {
         _fatherOption = fatherName!;
@@ -154,10 +202,24 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
   @override
   void dispose() {
+    // Close all BLoCs
     _bloc.close();
     _spousBloc.close();
     _childrenBloc.close();
     _dummyHeadBloc.close();
+    
+    // Dispose all controllers
+    _memberTypeController.dispose();
+    _genderController.dispose();
+    _maritalStatusController.dispose();
+    _educationController.dispose();
+    _occupationController.dispose();
+    _religionController.dispose();
+    _categoryController.dispose();
+    _beneficiaryTypeController.dispose();
+    _relationController.dispose();
+    _memberStatusController.dispose();
+    
     super.dispose();
   }
 
@@ -342,10 +404,106 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     }
                                   },
                                   validator: (value) => Validations.validateMemberType(l, value),
-
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              
+                              // Member Status (only shown in edit mode)
+                              if (_isEdit) ...[
+                                _section(
+                                  ApiDropdown<String>(
+                                    labelText: 'Member Status *',
+                                    items: const ['Alive', 'Death'],
+                                    getLabel: (s) => s,
+                                    value: state.memberStatus ?? 'Alive',
+                                    onChanged: (v) {
+                                      if (v != null) {
+                                        context.read<AddnewfamilymemberBloc>().add(UpdateIsMemberStatus(v));
+                                      }
+                                    },
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please select member status';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),                                if (state.memberStatus == 'Death') ...[
+                                  _section(
+                                    CustomDatePicker(
+                                      labelText: 'Date of Death *',
+                                      initialDate: state.dateOfDeath ?? DateTime.now(),
+                                      firstDate: DateTime(1900),
+                                      lastDate: DateTime.now(),
+                                      onDateChanged: (date) {
+                                        context.read<AddnewfamilymemberBloc>().add(UpdateDateOfDeath(date!));
+                                      },
+                                      validator: (value) {
+                                        if (state.memberStatus == 'Death' && value == null) {
+                                          return 'Please select date of death';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  _section(
+                                    CustomTextField(
+                                      labelText: 'Place of Death *',
+                                      hintText: 'Enter place of death',
+                                      onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateDatePlace(v ?? '')),
+                                      validator: (value) {
+                                        if (state.memberStatus == 'Death' && (value == null || value.isEmpty)) {
+                                          return 'Please enter place of death';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  _section(
+                                    ApiDropdown<String>(
+                                      labelText: 'Reason of Death *',
+                                      items: const [
+                                        'Natural Causes',
+                                        'Illness',
+                                        'Accident',
+                                        'Other',
+                                      ],
+                                      getLabel: (s) => s,
+                                      value: state.deathReason,
+                                      onChanged: (v) {
+                                        if (v != null) {
+                                          context.read<AddnewfamilymemberBloc>().add(UpdateReasonOfDeath(v));
+                                        }
+                                      },
+                                      validator: (value) {
+                                        if (state.memberStatus == 'Death' && (value == null || value.isEmpty)) {
+                                          return 'Please select reason of death';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  if (state.deathReason == 'Other')
+                                    _section(
+                                      CustomTextField(
+                                        labelText: 'Specify Reason *',
+                                        hintText: 'Enter reason of death',
+                                        onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateOtherReasonOfDeath(v ?? '')),
+                                        validator: (value) {
+                                          if (state.memberStatus == 'Death' && state.deathReason == 'Other' && (value == null || value.isEmpty)) {
+                                            return 'Please specify reason of death';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                ],
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
 
                               if (state.memberType == 'Child') ...[
                                 _section(

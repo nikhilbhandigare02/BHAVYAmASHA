@@ -6,6 +6,15 @@ abstract class AddnewfamilymemberEvent extends Equatable{
   List<Object> get props => [];
 }
 
+class LoadBeneficiaryData extends AddnewfamilymemberEvent {
+  final String beneficiaryId;
+  
+  const LoadBeneficiaryData(this.beneficiaryId);
+  
+  @override
+  List<Object> get props => [beneficiaryId];
+}
+
 final class AnmUpdateMemberType extends AddnewfamilymemberEvent {
   final String value;
   const AnmUpdateMemberType(this.value);
