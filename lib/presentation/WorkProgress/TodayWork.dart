@@ -24,62 +24,69 @@ class _TodayworkState extends State<Todaywork> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => TodaysWorkBloc()..add(const TwLoad(toDo: 1, completed: 0)),
+      create: (_) => TodaysWorkBloc()..add(const TwLoad(toDo: 34, completed: 1)),
       child: Scaffold(
         appBar: AppHeader(screenTitle: l10n?.todayWorkTitle ?? "Today's Work Progress", showBack: true),
         body: SafeArea(
           child: BlocBuilder<TodaysWorkBloc, TodaysWorkState>(
-            builder: (context, state) {
-              final percent = (state.progress * 100).toStringAsFixed(2);
-              return ListView(
-                padding: const EdgeInsets.all(12),
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2)),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _kv(l10n?.todayWorkToDo ?? 'To do visits :', state.toDo.toString()),
-                          _kv(l10n?.todayWorkCompleted ?? 'Completed visits :', state.completed.toString()),
-                          _kv(l10n?.todayWorkPending ?? 'Pending visits :', state.pending.toString()),
-                          _kv(l10n?.todayWorkProgress ?? 'Progress :', '$percent%'),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _legend(color: Colors.green, label: l10n?.legendCompleted ?? 'Completed'),
-                              const SizedBox(width: 16),
-                              _legend(color: Colors.blue, label: l10n?.legendPending ?? 'Pending'),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            height: 260,
-                            child: Center(
-                              child: CustomPaint(
-                                size: const Size(220, 220),
-                                painter: _PiePainter(
-                                  completed: state.completed,
-                                  pending: state.pending,
-                                ),
-                              ),
-                            ),
+              builder: (context, state) {
+                final total = (state.completed + state.pending);
+                final progress = total == 0 ? 0 : (state.completed / total) * 100;
+                final percent = progress.toStringAsFixed(2);
+
+                return ListView(
+                  padding: const EdgeInsets.all(12),
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _kv('To do visits :', state.toDo.toString()),
+                            _kv('Completed visits :', state.completed.toString()),
+                            _kv('Pending visits :', state.pending.toString()),
+                            _kv('Progress :', '$percent%'),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _legend(color: Colors.green, label: 'Completed'),
+                                const SizedBox(width: 16),
+                                _legend(color: Colors.blue, label: 'Pending'),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              height: 260,
+                              child: Center(
+                                child: CustomPaint(
+                                  size: const Size(220, 220),
+                                  painter: _PiePainter(
+                                    completed: state.completed,
+                                    pending: state.pending,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              }
           ),
         ),
       ),
@@ -117,10 +124,10 @@ class _TodayworkState extends State<Todaywork> {
     );
   }
 }
-
 class _PiePainter extends CustomPainter {
   final int completed;
   final int pending;
+
   _PiePainter({required this.completed, required this.pending});
 
   @override
@@ -129,20 +136,13 @@ class _PiePainter extends CustomPainter {
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
 
     final bgPaint = Paint()..color = Colors.blue;
-    canvas.drawArc(rect, -1.5708, 6.28318, true, bgPaint); // full circle pending as blue
+    canvas.drawArc(rect, -1.5708, 6.28318, true, bgPaint); // full circle pending
 
     if (total > 0 && completed > 0) {
-      final sweep = (completed / total) * 6.28318; // radians
+      final sweep = (completed / total) * 6.28318;
       final compPaint = Paint()..color = Colors.green;
       canvas.drawArc(rect, -1.5708, sweep, true, compPaint);
     }
-
-    // center split line for aesthetic (optional)
-    final center = Offset(size.width / 2, size.height / 2);
-    final linePaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 2;
-    canvas.drawLine(center, Offset(center.dx, center.dy - size.height / 2), linePaint);
   }
 
   @override

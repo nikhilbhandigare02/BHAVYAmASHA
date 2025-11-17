@@ -2,6 +2,12 @@ part of 'add_family_head_bloc.dart';
 
 @immutable
 class AddFamilyHeadState extends Equatable {
+  final String? hhUniqueKey;
+  final int? hhId;
+  final String? headUniqueKey;
+  final int? headId;
+  final String? spouseUniqueKey;
+  final int? spouseId;
   final String? houseNo;
   final String? headName;
   final String? children;
@@ -67,6 +73,12 @@ class AddFamilyHeadState extends Equatable {
   final String? errorMessage;
 
   const AddFamilyHeadState({
+    this.hhUniqueKey,
+    this.hhId,
+    this.headUniqueKey,
+    this.headId,
+    this.spouseUniqueKey,
+    this.spouseId,
     this.houseNo,
     this.headName,
     this.fatherName,
@@ -130,6 +142,12 @@ class AddFamilyHeadState extends Equatable {
   });
 
   AddFamilyHeadState copyWith({
+    String? hhUniqueKey,
+    int? hhId,
+    String? headUniqueKey,
+    int? headId,
+    String? spouseUniqueKey,
+    int? spouseId,
     String? houseNo,
     String? headName,
     String? fatherName,
@@ -193,6 +211,12 @@ class AddFamilyHeadState extends Equatable {
     bool clearError = false,
   }) {
     return AddFamilyHeadState(
+      hhUniqueKey: hhUniqueKey ?? this.hhUniqueKey,
+      hhId: hhId ?? this.hhId,
+      headUniqueKey: headUniqueKey ?? this.headUniqueKey,
+      headId: headId ?? this.headId,
+      spouseUniqueKey: spouseUniqueKey ?? this.spouseUniqueKey,
+      spouseId: spouseId ?? this.spouseId,
       houseNo: houseNo ?? this.houseNo,
       headName: headName ?? this.headName,
       AfhABHAChange: AfhABHAChange ?? this.AfhABHAChange,
@@ -258,6 +282,12 @@ class AddFamilyHeadState extends Equatable {
 
   @override
   List<Object?> get props => [
+    hhUniqueKey,
+    hhId,
+    headUniqueKey,
+    headId,
+    spouseUniqueKey,
+    spouseId,
     houseNo,
     AfhABHAChange,
     AfhRichIdChange,
@@ -322,6 +352,12 @@ class AddFamilyHeadState extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
+      'hhUniqueKey': hhUniqueKey,
+      'hhId': hhId,
+      'headUniqueKey': headUniqueKey,
+      'headId': headId,
+      'spouseUniqueKey': spouseUniqueKey,
+      'spouseId': spouseId,
       'houseNo': houseNo,
       'headName': headName,
       'children': children,

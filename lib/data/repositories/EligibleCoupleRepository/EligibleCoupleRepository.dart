@@ -7,7 +7,8 @@ import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../Local_Storage/User_Info.dart';
+import '../../Local_Storage/User_Info.dart';
+
 
 class EligibleCoupleRepository {
   final NetworkServiceApi _api = NetworkServiceApi();

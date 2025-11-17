@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 import 'package:sizer/sizer.dart';
+import 'package:sqflite/sqflite.dart' show Database;
 import 'package:url_launcher/url_launcher.dart';
 import '../../data/Local_Storage/local_storage_dao.dart';
+import '../../data/Local_Storage/database_provider.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../l10n/app_localizations.dart';
 import '../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
@@ -34,6 +36,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   List<Map<String, dynamic>> _familySurveyItems = [];
   List<Map<String, dynamic>> _eligibleCoupleItems = [];
   List<Map<String, dynamic>> _ancItems = [];
+  List<Map<String, dynamic>> _hbncItems = [];
 
   @override
   void initState() {
@@ -46,6 +49,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     _loadFamilySurveyItems();
     _loadEligibleCoupleItems();
     _loadAncItems();
+    _loadHbncItems();
   }
 
   String _last11(String? input) {
@@ -221,6 +225,126 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         });
       }
     } catch (_) {}
+  }
+
+  Future<void> _loadHbncItems() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      // Same delivery outcome key as HBNCList
+      const deliveryOutcomeKey = '4r7twnycml3ej1vg';
+      final outcomes = await db.query(
+        'followup_form_data',
+        where: 'forms_ref_key = ?',
+        whereArgs: [deliveryOutcomeKey],
+      );
+
+      final List<Map<String, dynamic>> items = [];
+
+      for (final outcome in outcomes) {
+        try {
+          final formJsonRaw = outcome['form_json'] as String?;
+          if (formJsonRaw == null || formJsonRaw.isEmpty) continue;
+
+          final formJson = jsonDecode(formJsonRaw);
+          final formData = formJson['form_data'] ?? {};
+          final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
+          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) continue;
+
+          // Fetch beneficiary from DB
+          final benRows = await db.query(
+            'beneficiaries',
+            where: 'unique_key = ? AND is_deleted = 0',
+            whereArgs: [beneficiaryRefKey],
+            limit: 1,
+          );
+          if (benRows.isEmpty) continue;
+
+          final beneficiary = benRows.first;
+          final beneficiaryInfoRaw = beneficiary['beneficiary_info'] as String? ?? '{}';
+          Map<String, dynamic> beneficiaryInfo;
+          try {
+            beneficiaryInfo = jsonDecode(beneficiaryInfoRaw);
+          } catch (_) {
+            continue;
+          }
+
+          final name = beneficiaryInfo['memberName']?.toString() ??
+              beneficiaryInfo['headName']?.toString() ??
+              'N/A';
+          final dob = beneficiaryInfo['dob']?.toString();
+          final age = _calculateAgeEc(dob);
+          final gender = beneficiaryInfo['gender']?.toString() ?? 'N/A';
+          final mobile = beneficiaryInfo['mobileNo']?.toString() ?? 'N/A';
+          final householdRefKey = beneficiary['household_ref_key']?.toString() ?? 'N/A';
+
+          // We use next HBNC date like HBNCList
+          final previousHBNCDate = await _getLastHbncVisitDate(db, beneficiaryRefKey);
+          final nextHBNCDate = await _getNextHbncVisitDate(db, beneficiaryRefKey, formData['delivery_date']?.toString());
+
+          items.add({
+            // Display IDs (trimmed)
+            'id': _last11(beneficiaryRefKey),
+            'household_ref_key': householdRefKey,
+            'name': name,
+            'age': age > 0 ? '${age}y' : '-',
+            'gender': gender,
+            'last HBNC due date': nextHBNCDate ?? previousHBNCDate ?? '-',
+            'mobile': mobile,
+            'badge': 'HBNC',
+            // Full IDs for navigation if needed
+            'fullBeneficiaryId': beneficiaryRefKey,
+            'fullHhId': householdRefKey,
+          });
+        } catch (_) {
+          continue;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _hbncItems = items;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<String?> _getLastHbncVisitDate(Database db, String beneficiaryId) async {
+    try {
+      final results = await db.query(
+        'followup_form_data',
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ?',
+        whereArgs: [beneficiaryId, 'hbnc_visit_form_key'],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+      if (results.isEmpty) return null;
+      final formJsonRaw = results.first['form_json'] as String?;
+      if (formJsonRaw == null || formJsonRaw.isEmpty) return null;
+      final formJson = jsonDecode(formJsonRaw);
+      final visitDate = formJson['form_data']?['visit_date'];
+      if (visitDate == null) return null;
+      final dt = DateTime.tryParse(visitDate.toString());
+      if (dt == null) return null;
+      return '${dt.year.toString().padLeft(4, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> _getNextHbncVisitDate(Database db, String beneficiaryId, String? deliveryDate) async {
+    if (deliveryDate == null || deliveryDate.isEmpty) return null;
+    try {
+      // Same simple rule as HBNCList: first visit 1 day after delivery if none yet
+      final last = await _getLastHbncVisitDate(db, beneficiaryId);
+      if (last == null) {
+        final d = DateTime.tryParse(deliveryDate);
+        if (d == null) return null;
+        final next = d.add(const Duration(days: 1));
+        return '${next.year.toString().padLeft(4, '0')}-${next.month.toString().padLeft(2, '0')}-${next.day.toString().padLeft(2, '0')}';
+      }
+    } catch (_) {}
+    return null;
   }
 
   Map<String, DateTime> _calculateAncDateRangesForToday(DateTime lmp) {
@@ -601,13 +725,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           Map<String, String> initial = {};
           try {
-            // Load household to find configured head_id
+            // Load household to find configured head_id and DB id
             final households = await LocalStorageDao.instance.getAllHouseholds();
             String? headId;
+            int? householdDbId;
             for (final hh in households) {
               final key = (hh['unique_key'] ?? '').toString();
               if (key == hhKey) {
                 headId = (hh['head_id'] ?? '').toString();
+                householdDbId = hh['id'] as int?;
                 break;
               }
             }
@@ -646,12 +772,39 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 }
               });
 
-              // Try to attach spouse info (separate beneficiary where spouse_key == head unique_key)
+              // Core identifiers for edit mode
+              map['hh_unique_key'] = hhKey;
+              if (householdDbId != null) {
+                map['hh_id'] = householdDbId.toString();
+              }
+              map['head_unique_key'] = (headRow['unique_key'] ?? '').toString();
+              if (headRow['id'] != null) {
+                map['head_id'] = headRow['id'].toString();
+              }
+
+              // Try to attach spouse info from the dedicated spouse beneficiary row
               try {
                 Map<String, dynamic>? spouseRow;
-                final headUnique = (headRow['unique_key'] ?? '').toString();
+
                 for (final m in members) {
-                  if ((m['spouse_key'] ?? '').toString() == headUnique) {
+                  final rawSpInfo = m['beneficiary_info'];
+                  Map<String, dynamic> sInfo;
+                  if (rawSpInfo is Map<String, dynamic>) {
+                    sInfo = rawSpInfo;
+                  } else if (rawSpInfo is String && rawSpInfo.isNotEmpty) {
+                    try {
+                      sInfo = jsonDecode(rawSpInfo) as Map<String, dynamic>;
+                    } catch (_) {
+                      continue;
+                    }
+                  } else {
+                    continue;
+                  }
+
+                  final rel = (sInfo['relation_to_head'] ?? sInfo['relation'])
+                      ?.toString()
+                      .toLowerCase();
+                  if (rel == 'spouse') {
                     spouseRow = m;
                     break;
                   }
@@ -666,6 +819,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                     spInfo = jsonDecode(rawSpInfo) as Map<String, dynamic>;
                   } else {
                     spInfo = <String, dynamic>{};
+                  }
+
+                  // Spouse identifiers
+                  map['sp_unique_key'] = (spouseRow['unique_key'] ?? '').toString();
+                  if (spouseRow['id'] != null) {
+                    map['sp_id'] = spouseRow['id'].toString();
                   }
 
                   spInfo.forEach((key, value) {
@@ -948,7 +1107,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     final familyCount = _familySurveyItems.length;
     final eligibleCoupleCount = _eligibleCoupleItems.length;
     final ancCount = _ancItems.length;
-    final hbncCount = widget.apiData[l10n.listHBNC]?.length ?? 0;
+    final hbncCount = _hbncItems.length;
     final riCount = widget.apiData[l10n.listRoutineImmunization]?.length ?? 0;
     final totalToDoCount =
         familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
@@ -1140,7 +1299,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                     ? "${_eligibleCoupleItems.length}"
                                     : entry.key == l10n.listANC
                                         ? "${_ancItems.length}"
-                                        : "${entry.value.length}",
+                                        : entry.key == l10n.listHBNC
+                                            ? "${_hbncItems.length}"
+                                            : "${entry.value.length}",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _expandedKey == entry.key
@@ -1204,19 +1365,19 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                       .map((item) => _routineCard(item))
                                       .toList())
                           : entry.key == l10n.listHBNC
-                          ? entry.value
-                                .map(
-                                  (name) => _routineCard({
-                                    'id': '-',
-                                    'name': name,
-                                    'age': '-',
-                                    'gender': '-',
-                                    'last HBNC due date': '-',
-                                    'mobile': '-',
-                                    'badge': 'HBNC',
-                                  }),
-                                )
-                                .toList()
+                          ? (_hbncItems.isEmpty
+                                ? [
+                                    const Padding(
+                                      padding: EdgeInsets.all(12.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text('No data found'),
+                                      ),
+                                    ),
+                                  ]
+                                : _hbncItems
+                                    .map((item) => _routineCard(item))
+                                    .toList())
                           : entry.key == l10n.listRoutineImmunization
                           ? entry.value
                                 .map(

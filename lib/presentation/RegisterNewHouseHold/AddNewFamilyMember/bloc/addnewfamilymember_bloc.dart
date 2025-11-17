@@ -12,7 +12,7 @@ import '../../../../core/utils/geolocation_utils.dart';
 import '../../../../core/utils/id_generator_utils.dart';
 import '../../../../data/Local_Storage/User_Info.dart';
 import '../../../../data/Local_Storage/local_storage_dao.dart';
-import '../../../../data/repositories/AddBeneficiaryRepository.dart';
+import '../../../../data/repositories/AddBeneficiary/AddBeneficiaryRepository.dart';
 import '../../AddFamilyHead/Children_Details/bloc/children_bloc.dart' show ChildrenBloc;
 import '../../AddFamilyHead/SpousDetails/bloc/spous_bloc.dart';
 

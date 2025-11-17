@@ -9,7 +9,7 @@ import 'package:medixcel_new/core/utils/device_info_utils.dart';
 import 'package:medixcel_new/core/utils/geolocation_utils.dart';
 import 'package:medixcel_new/core/utils/id_generator_utils.dart';
 import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
-import 'package:medixcel_new/data/repositories/household_repository.dart';
+import 'package:medixcel_new/data/repositories/HousholdRepository/household_repository.dart';
 
 import '../../../../data/Local_Storage/local_storage_dao.dart';
 import '../../HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';

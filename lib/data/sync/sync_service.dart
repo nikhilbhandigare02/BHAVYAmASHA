@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
-import 'package:medixcel_new/data/repositories/AddBeneficiaryRepository.dart';
-import 'package:medixcel_new/data/repositories/household_repository.dart';
-import 'package:medixcel_new/data/repositories/BeneficiaryRepository.dart';
-import 'package:medixcel_new/data/repositories/EligibleCoupleRepository.dart';
-import 'package:medixcel_new/data/repositories/ChildCareRepository.dart';
+import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryRepository.dart';
+import 'package:medixcel_new/data/repositories/HousholdRepository/household_repository.dart';
+import 'package:medixcel_new/data/repositories/AddBeneficiary/BeneficiaryRepository.dart';
+
 import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
+
+import '../repositories/ChildCareRepository/ChildCareRepository.dart';
+import '../repositories/EligibleCoupleRepository/EligibleCoupleRepository.dart';
 
 class SyncService {
   SyncService._();

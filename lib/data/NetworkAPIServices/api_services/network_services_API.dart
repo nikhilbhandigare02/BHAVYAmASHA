@@ -112,20 +112,32 @@ dynamic returnResponse(http.Response response) {
       case 201:
         return responseJson;
       case 400:
-        throw BadRequestException(responseJson['message'] ?? 'Invalid request');
+        throw BadRequestException(
+          responseJson['msg'] ?? responseJson['message'] ?? 'Invalid request',
+        );
       case 401:
-        throw UnAuthorizedException(responseJson['message'] ?? 'Unauthorized');
+        throw UnAuthorizedException(
+          responseJson['msg'] ?? responseJson['message'] ?? 'Unauthorized',
+        );
       case 403:
-        throw UnAuthorizedException(responseJson['message'] ?? 'Forbidden');
+        throw UnAuthorizedException(
+          responseJson['msg'] ?? responseJson['message'] ?? 'Forbidden',
+        );
       case 404:
-        throw NotFoundException(responseJson['message'] ?? 'Resource not found');
+        throw NotFoundException(
+          responseJson['msg'] ?? responseJson['message'] ?? 'Resource not found',
+        );
       case 500:
       default:
         throw FetchDataException(
-          responseJson['message'] ??
+          responseJson['msg'] ??
+              responseJson['message'] ??
               'Error occurred while communicating with server. Status code: ${response.statusCode}',
         );
     }
+  } on AppExceptions {
+    // Preserve specific API error messages
+    rethrow;
   } catch (e) {
     throw FetchDataException('Invalid response from server');
   }

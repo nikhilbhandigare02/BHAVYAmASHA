@@ -11,7 +11,8 @@ import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 import 'package:meta/meta.dart';
-import 'package:medixcel_new/data/repositories/ChildCareRepository.dart';
+
+import '../../../../data/repositories/ChildCareRepository/ChildCareRepository.dart';
 
 part 'register_child_form_event.dart';
 part 'register_child_form_state.dart';
