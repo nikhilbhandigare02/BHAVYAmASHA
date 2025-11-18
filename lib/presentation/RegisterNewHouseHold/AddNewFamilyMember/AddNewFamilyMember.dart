@@ -1283,7 +1283,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                                _section(
+                                if (!widget.isEdit) _section(
                                   CustomTextField(
                                     labelText: '${l.spouseNameLabel} *',
                                     hintText: l.spouseNameHint,
@@ -1389,37 +1389,40 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                if (_currentStep > 0)
-                                  SizedBox(
-                                    width: 120,
-                                    height: 44,
-                                    child: RoundButton(
-                                      title: 'Previous',
-                                      color: AppColors.primary,
-                                      borderRadius: 8,
+                                if (!widget.isEdit) ...[
+                                  if (_currentStep > 0)
+                                    SizedBox(
+                                      width: 120,
                                       height: 44,
-                                      isLoading: false,
-                                      onPress: () {
-                                        if (_currentStep > 0) {
-                                          setState(() { _currentStep -= 1; });
-                                          final ctrl = DefaultTabController.of(context);
-                                          ctrl?.animateTo(_currentStep);
-                                        }
-                                      },
-                                    ),
-                                  )
-                                else
-                                  const SizedBox.shrink(),
+                                      child: RoundButton(
+                                        title: 'Previous',
+                                        color: AppColors.primary,
+                                        borderRadius: 8,
+                                        height: 44,
+                                        isLoading: false,
+                                        onPress: () {
+                                          if (_currentStep > 0) {
+                                            setState(() { _currentStep -= 1; });
+                                            final ctrl = DefaultTabController.of(context);
+                                            ctrl?.animateTo(_currentStep);
+                                          }
+                                        },
+                                      ),
+                                    )
+                                  else
+                                    const SizedBox.shrink(),
+                                ],
                                 SizedBox(
                                   width: 120,
                                   height: 44,
                                   child: RoundButton(
                                     title: () {
                                       if (isLoading) return (_isEdit ? 'UPDATING...' : l.addingButton);
+                                      if (widget.isEdit) return 'UPDATE';
                                       final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
                                       final showChildren = showSpouse && state.hasChildren == 'Yes';
                                       final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
-                                      return (_currentStep < lastStep) ? 'Next' : (_isEdit ? 'UPDATE' : l.addButton);
+                                      return (_currentStep < lastStep) ? 'Next' : l.addButton;
                                     }(),
                                     color: AppColors.primary,
                                     borderRadius: 8,
@@ -1482,15 +1485,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
 
                                         print('Submitting member data: ${jsonEncode(memberData)}');
-                                        final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
-                                        final showChildren = showSpouse && state.hasChildren == 'Yes';
-                                        final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
+                                        if (!widget.isEdit) {
+                                          final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
+                                          final showChildren = showSpouse && state.hasChildren == 'Yes';
+                                          final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
 
-                                        if (_currentStep < lastStep) {
-                                          setState(() { _currentStep += 1; });
-                                          final ctrl = DefaultTabController.of(context);
-                                          ctrl?.animateTo(_currentStep);
-                                          return;
+                                          if (_currentStep < lastStep) {
+                                            setState(() { _currentStep += 1; });
+                                            final ctrl = DefaultTabController.of(context);
+                                            ctrl?.animateTo(_currentStep);
+                                            return;
+                                          }
                                         }
 
                                         bloc.add(AnmSubmit(context, hhid: widget.hhId));

@@ -224,30 +224,64 @@ class _OutcomeFormFields extends StatelessWidget {
         ApiDropdown<String>(
           items: [
             l10n.select,
-            l10n.home,
-            l10n.subCenter,
-            l10n.phc,
-            l10n.chc,
-            l10n.districtHospital,
-            l10n.privateHospital,
+            'Institutional',
+            'Non-Institutional',
+            'Other',
           ],
           getLabel: (s) => s,
           value:
               state.placeOfDelivery.isEmpty ||
                   ![
                     l10n.select,
-                    l10n.home,
-                    l10n.subCenter,
-                    l10n.phc,
-                    l10n.chc,
-                    l10n.districtHospital,
-                    l10n.privateHospital,
+                    'Institutional',
+                    'Non-Institutional',
+                    'Other',
                   ].contains(state.placeOfDelivery)
               ? l10n.select
               : state.placeOfDelivery,
           onChanged: (v) => bloc.add(PlaceOfDeliveryChanged(v ?? '')),
           labelText: l10n.selectPlaceOfDelivery,
         ),
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+         if (state.placeOfDelivery == 'Institutional') ...[
+          const SizedBox(height: 16),
+          ApiDropdown<String>(
+            items: [
+              l10n.select,
+              'Public',
+              'Private',
+            ],
+            getLabel: (s) => s,
+            value: state.institutionalPlaceType?.isEmpty ?? true
+                ? l10n.select
+                : state.institutionalPlaceType!,
+            onChanged: (v) => bloc.add(InstitutionalPlaceTypeChanged(v ?? '')),
+            labelText: 'Type of Institution',
+          ),
+          const SizedBox(height: 8),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          
+          ApiDropdown<String>(
+            items: [
+              l10n.select,
+              'ANM',
+              'LHV',
+              'Doctor',
+              'Staff Nurse',
+              'Relative TBA',
+            ],
+            getLabel: (s) => s,
+            value: state.conductedBy?.isEmpty ?? true ? l10n.select : state.conductedBy!,
+            onChanged: (v) => bloc.add(ConductedByChanged(v ?? '')),
+            labelText: 'Who conducted the delivery?',
+          ),
+          const SizedBox(height: 8),
+
+          
+
+          const SizedBox(height: 8),
+        ],
+        
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(

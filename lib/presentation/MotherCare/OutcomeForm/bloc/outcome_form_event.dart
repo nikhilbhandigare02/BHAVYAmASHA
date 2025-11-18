@@ -1,5 +1,42 @@
 part of 'outcome_form_bloc.dart';
 
+// Institutional delivery events
+class InstitutionalPlaceTypeChanged extends OutcomeFormEvent {
+  final String value;
+
+  const InstitutionalPlaceTypeChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class ConductedByChanged extends OutcomeFormEvent {
+  final String value;
+
+  const ConductedByChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class TypeOfDeliveryChanged extends OutcomeFormEvent {
+  final String value;
+
+  const TypeOfDeliveryChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class HadComplicationsChanged extends OutcomeFormEvent {
+  final String value;
+
+  const HadComplicationsChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
 @immutable
 abstract class OutcomeFormEvent extends Equatable {
   const OutcomeFormEvent();
