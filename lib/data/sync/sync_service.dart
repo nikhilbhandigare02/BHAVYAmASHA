@@ -10,6 +10,7 @@ import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
 
 import '../repositories/ChildCareRepository/ChildCareRepository.dart';
 import '../repositories/EligibleCoupleRepository/EligibleCoupleRepository.dart';
+import '../repositories/FollowupFormsRepository/FollowupFormsRepository.dart';
 import '../repositories/MotherCareRepository/MotherCareRepository.dart';
 
 class SyncService {
@@ -22,12 +23,13 @@ class SyncService {
   final _beneficiaryPullRepo = BeneficiaryRepository();
   final _ecRepo = EligibleCoupleRepository();
   final _ccRepo = ChildCareRepository();
+  final _followupRepo = FollowupFormsRepository();
   final _mcRepo = MotherCareRepository();
 
   Timer? _timer;
   bool _running = false;
 
-  void start({Duration  interval = const Duration(minutes: 5)}) {
+  void start({Duration   interval = const Duration(minutes: 5)}) {
     stop();
 
     print('SyncService: starting with interval ${interval.inMinutes} minute(s)');
@@ -103,6 +105,25 @@ class SyncService {
       print('MotherCare Pull: fetched=${result['fetched']}, inserted=${result['inserted']}, updated=${result['updated']}');
     } catch (e) {
       print('MotherCare Pull: error -> $e');
+    }
+  }
+
+  Future<void> fetchFollowupFormsFromServer() async {
+    try {
+      final ids = await _getUserWorkingIds();
+      if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
+      final lastId = await _dao.getLatestFollowupFormServerId();
+      final useLast = lastId.isEmpty ? '0' : lastId;
+      print('FollowupForms Pull: Fetching with last_id=$useLast limit=20');
+      final result = await _followupRepo.fetchAndStoreFollowupForms(
+        facilityId: ids['facilityId']!,
+        ashaId: ids['ashaId']!,
+        lastId: useLast,
+        limit: 20,
+      );
+      print('FollowupForms Pull: fetched=${result['fetched']}, inserted=${result['inserted']}, updated=${result['updated']}');
+    } catch (e) {
+      print('FollowupForms Pull: error -> $e');
     }
   }
 
@@ -310,11 +331,34 @@ class SyncService {
     }
   }
 
+  Future<void> syncUnsyncedFollowupForms() async {
+    try {
+      final list = await _dao.getUnsyncedFollowupForms();
+      if (list.isEmpty) {
+        print('FollowupForms Push: No unsynced forms');
+        return;
+      }
+
+      print('FollowupForms Push: Found ${list.length} unsynced form(s)');
+
+      for (final r in list) {
+        final id = r['id'] as int? ?? 0;
+        if (id <= 0) continue;
+        try {
+          await _followupRepo.addFollowupFormsFromDb(id);
+        } catch (e) {
+          print('FollowupForms Push: error syncing followup_form_data id=$id -> $e');
+        }
+      }
+    } catch (e) {
+      print('FollowupForms Push: error -> $e');
+    }
+  }
+
   void stop() {
     _timer?.cancel();
     _timer = null;
   }
-
   Future<void> _triggerOnce() async {
     if (_running) {
       print('SyncService: previous run still in progress, skipping this tick');
@@ -329,9 +373,11 @@ class SyncService {
       await syncUnsyncedEligibleCoupleActivities();
       await syncUnsyncedChildCareActivities();
       await syncUnsyncedMotherCareAncActivities();
+      await syncUnsyncedFollowupForms();
       await fetchEligibleCoupleActivitiesFromServer();
       await fetchChildCareActivitiesFromServer();
       await fetchMotherCareActivitiesFromServer();
+      await fetchFollowupFormsFromServer();
     } catch (e) {
       print('SyncService periodic error: $e');
     } finally {

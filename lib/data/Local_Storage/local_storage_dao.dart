@@ -150,6 +150,23 @@ class LocalStorageDao {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getUnsyncedFollowupForms() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        where:
+            '(is_deleted IS NULL OR is_deleted = 0) AND (is_synced IS NULL OR is_synced = 0)',
+        orderBy: 'created_date_time ASC',
+      );
+
+      return rows.map((row) => Map<String, dynamic>.from(row)).toList();
+    } catch (e) {
+      print('Error getting unsynced followup forms: $e');
+      rethrow;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> fetchTrainingList() async {
     try {
       final db = await _db;
@@ -1090,6 +1107,25 @@ class LocalStorageDao {
       return sid?.toString() ?? '';
     } catch (e) {
       print('Error getting latest mother care activity server_id: $e');
+      return '';
+    }
+  }
+
+  Future<String> getLatestFollowupFormServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "(is_deleted IS NULL OR is_deleted = 0) AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest followup form server_id: $e');
       return '';
     }
   }

@@ -173,6 +173,9 @@ class BeneficiaryAbsentChanged extends AnvvisitformEvent {
 class GivesBirthToBaby extends AnvvisitformEvent {
   final String value;
   const GivesBirthToBaby(this.value);
+  
+  @override
+  List<Object?> get props => [value];
 }
 
 class VisitNumberChanged extends AnvvisitformEvent {

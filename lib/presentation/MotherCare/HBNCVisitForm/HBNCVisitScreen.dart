@@ -195,21 +195,28 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                           const SizedBox(width: 12),
                           Expanded(
                             child: isLast
-                                ? BlocBuilder<HbncVisitBloc, HbncVisitState>(
+                                ? BlocConsumer<HbncVisitBloc, HbncVisitState>(
+                              listener: (context, state) {
+                                // Handle any state changes after save
+                                if (state.saveSuccess) {
+                                  // Reset form or navigate away
+                                  Navigator.pop(context, true);
+                                }
+                              },
                               builder: (context, state) {
                                 return RoundButton(
                                   title: t.saveButton,
                                   isLoading: state.isSaving,
                                   onPress: () {
-                                    // Only trigger validation, the BlocListener will handle the save
-                                    // when validation is successful
-                                    if (_formKey.currentState?.validate() ?? true) {
-                                      context.read<HbncVisitBloc>().add(
-                                        ValidateSection(
-                                          _tabController.index,
-                                          isSave: true,
-                                        ),
-                                      );
+                                    if (!state.isSaving) {
+                                      if (_formKey.currentState?.validate() ?? true) {
+                                        context.read<HbncVisitBloc>().add(
+                                          ValidateSection(
+                                            _tabController.index,
+                                            isSave: true,
+                                          ),
+                                        );
+                                      }
                                     }
                                   },
                                 );

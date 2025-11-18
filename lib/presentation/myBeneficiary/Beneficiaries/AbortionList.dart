@@ -114,12 +114,12 @@ class _AbortionlistState extends State<Abortionlist> {
         return;
       }
 
-      // Sort by abortion date descending (most recent first)
-      // abortionVisits.sort((a, b) {
-      //   if (a.abortionDate == null) return 1;
-      //   if (b.abortionDate == null) return -1;
-      //   return b.abortionDate!.compareTo(a.abortionDate!);
-      // });
+
+      abortionVisits.sort((a, b) {
+        if (a.abortionDate == null) return 1;
+        if (b.abortionDate == null) return -1;
+        return b.abortionDate!.compareTo(a.abortionDate!);
+      });
 
       setState(() {
         _ancVisits = abortionVisits;
@@ -239,8 +239,7 @@ class _AbortionlistState extends State<Abortionlist> {
 
     return InkWell(
       onTap: () {
-        // Navigate to detail view if needed
-        // Navigator.pushNamed(context, Route_Names.ANCDetail, arguments: visit);
+
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
@@ -272,7 +271,9 @@ class _AbortionlistState extends State<Abortionlist> {
                       Icon(Icons.home, color: Colors.black54, size: 14.sp),
                       const SizedBox(width: 6),
                       Text(
-                        visit.hhId ?? 'N/A',
+                        (visit.hhId != null && visit.hhId!.length > 11)
+                            ? '${visit.hhId!.substring(visit.hhId!.length - 11)}'
+                            : visit.hhId ?? 'N/A',
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
@@ -328,6 +329,7 @@ class _AbortionlistState extends State<Abortionlist> {
                   const SizedBox(height: 2),
 
                   Row(
+
                     children: [
                       if (visit.formattedAge.isNotEmpty || visit.displayGender.isNotEmpty)
                         Text(
@@ -335,6 +337,18 @@ class _AbortionlistState extends State<Abortionlist> {
                           style:  TextStyle(
                             color: Colors.white,
                             fontSize: 14.sp,
+                          ),
+                        ),
+                      if (visit.abortionDate != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 200.0),
+                          child: Text(
+                            'Abortion: ${_formatDate(visit.abortionDate!)}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                              fontStyle: FontStyle.italic,
+                            ),
                           ),
                         ),
                     ],
@@ -349,23 +363,11 @@ class _AbortionlistState extends State<Abortionlist> {
     );
   }
 
-  // Widget _buildInfoRow(IconData icon, String text) {
-  //   return Row(
-  //     children: [
-  //       Icon(icon, size: 16, color: Colors.grey[600]),
-  //       const SizedBox(width: 4),
-  //       Text(
-  //         text,
-  //         style: TextStyle(
-  //           fontSize: 13,
-  //           color: Colors.grey[800],
-  //         ),
-  //         maxLines: 1,
-  //         overflow: TextOverflow.ellipsis,
-  //       ),
-  //     ],
-  //   );
-  // }
+
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+  }
 
   Widget _infoRow(String title, String value,
       {bool isWrappable = false, TextStyle? textStyle}) {

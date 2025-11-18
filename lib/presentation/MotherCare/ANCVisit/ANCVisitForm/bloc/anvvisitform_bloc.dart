@@ -220,6 +220,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         } catch (e) {
           print('Error saving to secure storage: $e');
         }
+
+
         try {
           final dbRows = await db.query(
             FollowupFormDataTable.table,

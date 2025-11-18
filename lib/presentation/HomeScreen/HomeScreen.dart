@@ -77,9 +77,14 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchExistingAbhaCreated();
     // Start background sync scheduler at app launch
     SyncService.instance.start(interval: const Duration(minutes: 5));
-
-
-
+    // Explicitly trigger a one-time follow-up forms pull when Home loads
+    Future.microtask(() async {
+      try {
+        await SyncService.instance.fetchFollowupFormsFromServer();
+      } catch (e) {
+        print('HomeScreen: error pulling followup forms on init -> $e');
+      }
+    });
   }
   final ExistingAbhaCreatedRepository _repositoryABHA = ExistingAbhaCreatedRepository();
   ExistingAbhaCreated? _existingAbhaData;

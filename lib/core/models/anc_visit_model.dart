@@ -19,6 +19,8 @@ class ANCVisitModel {
   final String? mobileNumber;
   final String? age;
   final String? dateOfBirth;
+  final DateTime? abortionDate;
+  final bool? hasAbortionComplication;
 
   // Getter: compute age only from DOB
   String get formattedAge {
@@ -75,6 +77,8 @@ class ANCVisitModel {
     this.mobileNumber,
     this.age,
     this.dateOfBirth,
+    this.abortionDate,
+    this.hasAbortionComplication,
   });
 
   factory ANCVisitModel.fromJson(Map<String, dynamic> json) {
@@ -122,6 +126,8 @@ class ANCVisitModel {
       hemoglobin: json['hemoglobin'] != null ? double.tryParse(json['hemoglobin'].toString()) : null,
       preExistingDisease: json['pre_existing_disease']?.toString(),
       beneficiaryAbsent: json['beneficiary_absent'] == true || json['beneficiary_absent'] == 'true',
+      abortionDate: parseDate(json['abortion_date']?.toString()),
+      hasAbortionComplication: json['has_abortion_complication'] == true || json['has_abortion_complication'] == 'yes',
     );
   }
 
@@ -144,6 +150,8 @@ class ANCVisitModel {
       'hemoglobin': hemoglobin,
       'pre_existing_disease': preExistingDisease,
       'beneficiary_absent': beneficiaryAbsent,
+      'abortion_date': abortionDate?.toIso8601String(),
+      'has_abortion_complication': hasAbortionComplication,
     };
   }
 

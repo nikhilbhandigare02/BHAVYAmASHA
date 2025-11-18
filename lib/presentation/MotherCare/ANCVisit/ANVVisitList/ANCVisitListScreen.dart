@@ -355,13 +355,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () async {
-
-
         final formData = Map<String, dynamic>.from(data);
+        final visitCount = await _getVisitCount(beneficiaryId);
 
         formData['hhId'] = hhId;
         formData['BeneficiaryID'] = beneficiaryId;
         formData['unique_key'] = uniqueKey;
+        formData['visit_count'] = visitCount;
 
         Navigator.push(
           context,

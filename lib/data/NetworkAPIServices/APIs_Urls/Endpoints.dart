@@ -15,5 +15,6 @@ class Endpoints {
   static const String getMotherCareActivityDataByFal3 = '${BaseUrls.baseUrl}/get_mother_care_activity_data_by_fal3';
   static const String getBeneficiary = '${BaseUrls.baseUrl}/hsc/v4/get_beneficiary';
   static const String getHousehold = '${BaseUrls.baseUrl}/hsc/v4/get_household';
-
+  static const String addFollowupForms1 = '${BaseUrls.baseUrl}/add_followup_forms1';
+  static const String getFollowupFormsDataByFal3 = '${BaseUrls.baseUrl}/get_followup_forms_data_by_fal3';
 }

@@ -151,11 +151,14 @@ class GeneralDetailsTab extends StatelessWidget {
       builder: (context, state) {
         final t = AppLocalizations.of(context)!;
         final visitMap = state.visitDetails;
+        // Handle visit number selection
         final dynamic dayRaw = visitMap['visitNumber'];
-        final int? selectedDay = dayRaw is int ? dayRaw : int.tryParse('$dayRaw');
+        final int? selectedDay = dayRaw != null 
+            ? (dayRaw is int ? dayRaw : int.tryParse(dayRaw.toString())) 
+            : null;
+            
         // Set default visit date to current date if not already set
         final DateTime currentDate = DateTime.now();
-       // final DateTime visitDate = visitMap['visitDate'] as DateTime? ?? currentDate;
 
         DateTime? _parseDate(dynamic date) {
           if (date == null) return null;
@@ -172,7 +175,7 @@ class GeneralDetailsTab extends StatelessWidget {
 
         final DateTime visitDate = _parseDate(visitMap['visitDate']) ?? currentDate;
 
-        if (visitMap['visitDate'] == null) {
+         if (visitMap['visitDate'] == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             context.read<HbncVisitBloc>().add(
               VisitDetailsChanged(
@@ -217,7 +220,7 @@ class GeneralDetailsTab extends StatelessWidget {
                           const SizedBox(height: 8),
                           ApiDropdown<int>(
                             labelText: t.homeVisitDayLabel,
-                            items: List.generate(7, (index) => index + 1),
+                            items: [1, 3, 7, 14, 21, 28, 42],
                             getLabel: (v) => v.toString(),
                             value: displayDay,
                             onChanged: (val) {
