@@ -75,6 +75,7 @@ import '../../../presentation/myBeneficiary/Beneficiaries/DeathRegister.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/EligibleCoupleList.dart' show EligibleCoupleList;
 import '../../../presentation/myBeneficiary/Beneficiaries/FamilyUpdateList.dart' show FamliyUpdate;
 import '../../../presentation/myBeneficiary/Beneficiaries/HBNCList.dart';
+import '../../../presentation/myBeneficiary/Beneficiaries/LBWRefered.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/PregnantWomanList.dart' show PregnantWomenList;
 import 'Route_Name.dart' show Route_Names;
 
@@ -258,6 +259,8 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const DeseasedList(),);
       case Route_Names.Abortionlist:
         return MaterialPageRoute(builder: (context) => const Abortionlist(),);
+      case Route_Names.Lbwrefered:
+        return MaterialPageRoute(builder: (context) =>   Lbwrefered(),);
       case Route_Names.ChildTrackingDueListForm:
         return MaterialPageRoute(builder: (context) => const ChildTrackingDueListForm(),);
       case Route_Names.updateMemberDetail:

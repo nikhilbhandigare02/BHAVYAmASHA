@@ -568,6 +568,15 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
+                          CustomTextField(
+                            labelText: 'Birth weight (g)',
+                            hintText: 'Enter birth weight',
+                            initialValue: state.birthWeightGrams,
+                            keyboardType: TextInputType.number,
+                            onChanged: (v) => bloc.add(BirthWeightGramsChanged(v)),
+                          ),
+                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4.0),
                             child: ApiDropdown<String>(

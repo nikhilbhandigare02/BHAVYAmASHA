@@ -17,6 +17,7 @@ class RegisterChildFormState extends Equatable {
   final String birthCertificateIssued; // Yes/No
   final String birthCertificateNumber;
   final String weightGrams;
+  final String birthWeightGrams;
   final String religion;
   final String caste;
 
@@ -41,6 +42,7 @@ class RegisterChildFormState extends Equatable {
     this.birthCertificateIssued = '',
     this.birthCertificateNumber = '',
     this.weightGrams = '',
+    this.birthWeightGrams = '',
     this.religion = '',
     this.caste = '',
     this.isSubmitting = false,
@@ -67,6 +69,7 @@ class RegisterChildFormState extends Equatable {
     String? birthCertificateIssued,
     String? birthCertificateNumber,
     String? weightGrams,
+    String? birthWeightGrams,
     String? religion,
     String? caste,
     bool? isSubmitting,
@@ -91,6 +94,7 @@ class RegisterChildFormState extends Equatable {
       birthCertificateIssued: birthCertificateIssued ?? this.birthCertificateIssued,
       birthCertificateNumber: birthCertificateNumber ?? this.birthCertificateNumber,
       weightGrams: weightGrams ?? this.weightGrams,
+      birthWeightGrams: birthWeightGrams ?? this.birthWeightGrams,
       religion: religion ?? this.religion,
       caste: caste ?? this.caste,
       isSubmitting: isSubmitting ?? this.isSubmitting,
@@ -117,6 +121,7 @@ class RegisterChildFormState extends Equatable {
         birthCertificateIssued,
         birthCertificateNumber,
         weightGrams,
+        birthWeightGrams,
         religion,
         caste,
         isSubmitting,
