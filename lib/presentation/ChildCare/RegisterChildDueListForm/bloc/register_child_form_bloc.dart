@@ -41,6 +41,7 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
     on<BirthCertificateIssuedChanged>((e, emit) => emit(state.copyWith(birthCertificateIssued: e.value, clearError: true)));
     on<BirthCertificateNumberChanged>((e, emit) => emit(state.copyWith(birthCertificateNumber: e.value, clearError: true)));
     on<WeightGramsChanged>((e, emit) => emit(state.copyWith(weightGrams: e.value, clearError: true)));
+    on<BirthWeightGramsChanged>((e, emit) => emit(state.copyWith(birthWeightGrams: e.value, clearError: true)));
     on<ReligionChanged>((e, emit) => emit(state.copyWith(religion: e.value, clearError: true)));
     on<CasteChanged>((e, emit) => emit(state.copyWith(caste: e.value, clearError: true)));
     on<SerialNumberOFRegister>((e, emit) => emit(state.copyWith(registerSerialNumber: e.value, clearError: true)));
@@ -92,6 +93,7 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
           'birth_certificate_issued': state.birthCertificateIssued,
           'birth_certificate_number': state.birthCertificateNumber,
           'weight_grams': state.weightGrams,
+          'birth_weight_grams': state.birthWeightGrams,
           'religion': state.religion,
           'caste': state.caste,
         },

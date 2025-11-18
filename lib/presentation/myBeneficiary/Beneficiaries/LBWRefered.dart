@@ -9,6 +9,7 @@ import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Local_Storage/database_provider.dart';
 import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
 
 class Lbwrefered extends StatefulWidget {
   const Lbwrefered({super.key});
@@ -25,82 +26,97 @@ class _Lbwrefered extends State<Lbwrefered> {
   @override
   void initState() {
     super.initState();
-    _loadEligibleCouples();
+    _loadLbwChildren();
   }
 
-  Future<void> _loadEligibleCouples() async {
+  Future<void> _loadLbwChildren() async {
     final db = await DatabaseProvider.instance.database;
 
-    // First, get all households
-    final households = <String, List<Map<String, dynamic>>>{};
+    try {
 
-    // Get all beneficiaries and group by household
-    final allBeneficiaries = await db.query('beneficiaries');
+      final formsRefKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childRegistrationDue] ??
+              '2ol35gbp7rczyvn6';
 
-    for (final row in allBeneficiaries) {
-      try {
-        final hhId = row['household_ref_key']?.toString() ?? '';
-        if (hhId.isEmpty) continue;
+      print('🔎 Loading followup_form_data for forms_ref_key (childRegistrationDue): $formsRefKey');
 
-        final info = row['beneficiary_info'] is String
-            ? jsonDecode(row['beneficiary_info'] as String)
-            : (row['beneficiary_info'] as Map?) ?? {};
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND is_deleted = 0',
+        whereArgs: [formsRefKey],
+      );
 
-        if (info is! Map) continue;
+      print('🔎 Total rows found in ${FollowupFormDataTable.table} for childRegistrationDue: ${rows.length}');
 
-        // Add to household group
-        if (!households.containsKey(hhId)) {
-          households[hhId] = [];
-        }
-
-        households[hhId]!.add({
-          ...row,
-          'info': info,
-        });
-      } catch (e) {
-        print('Error processing beneficiary: $e');
-      }
-    }
-
-    final couples = <Map<String, dynamic>>[];
-
-     for (final hhId in households.keys) {
-      final members = households[hhId]!;
-
-       for (final member in members) {
+      for (final row in rows) {
         try {
-          final info = member['info'] as Map;
-
-           final gender = info['gender']?.toString().toLowerCase() ?? '';
-          if (gender != 'female' && gender != 'f') continue;
-
-           final maritalStatus = info['maritalStatus']?.toString().toLowerCase() ?? '';
-          if (maritalStatus != 'married') continue;
-
-          // Check age
-          final dob = info['dob'];
-          final age = _calculateAge(dob);
-          if (age < 15 || age > 49) continue;
-
-           couples.add({
-            'hhId': hhId,
-            'name': info['memberName']?.toString() ?? info['headName']?.toString() ?? 'Unknown',
-            'age': age,
-            'age_gender': _formatAgeGender(dob, gender),
-            'mobile': info['mobileNo']?.toString() ?? '',
-            'status': 'Eligible Couple',
-            '_raw': member,
-          });
-
+          print('🧾 followup_form_data row => ID: ${row['id']}, household_ref_key: ${row['household_ref_key']}, beneficiary_ref_key: ${row['beneficiary_ref_key']}, forms_ref_key: ${row['forms_ref_key']}');
+          print('🧾 form_json: ${row['form_json']}');
         } catch (e) {
-          print('Error processing household member: $e');
+          print('Error printing followup_form_data row: $e');
         }
       }
-    }
 
-    setState(() {
-      _filtered = couples;
-    });
+      final List<Map<String, dynamic>> lbwChildren = [];
+
+      for (final row in rows) {
+        try {
+          final hhId = row['household_ref_key']?.toString() ?? '';
+          if (hhId.isEmpty) continue;
+
+          final formJsonStr = row['form_json']?.toString() ?? '';
+          if (formJsonStr.isEmpty) continue;
+
+          final decoded = jsonDecode(formJsonStr);
+          if (decoded is! Map) continue;
+
+          final formData = decoded['form_data'] is Map
+              ? Map<String, dynamic>.from(decoded['form_data'])
+              : <String, dynamic>{};
+
+          if (formData.isEmpty) continue;
+
+          final weightStr = formData['weight_grams']?.toString() ?? '';
+          final birthWeightStr = formData['birth_weight_grams']?.toString() ?? '';
+
+          final weight = double.tryParse(weightStr);
+          final birthWeight = double.tryParse(birthWeightStr);
+
+          // Filter: either current weight OR birth weight less than 1600 grams
+          final isLbw = (weight != null && weight < 1600) ||
+              (birthWeight != null && birthWeight < 1600);
+
+          if (!isLbw) continue;
+
+          final childName = formData['child_name']?.toString() ?? 'Unknown';
+          final genderRaw = formData['gender'];
+          final dobRaw = formData['date_of_birth'];
+
+          final age = _calculateAge(dobRaw);
+          final ageGender = _formatAgeGender(dobRaw, genderRaw);
+
+          lbwChildren.add({
+            'hhId': hhId,
+            'name': childName,
+            'age': age,
+            'age_gender': ageGender,
+            'status': 'LBW',
+            '_raw': row,
+          });
+        } catch (e) {
+          print('Error processing LBW child row: $e');
+        }
+      }
+
+      setState(() {
+        _filtered = lbwChildren;
+      });
+    } catch (e) {
+      print('Error loading LBW children: $e');
+      setState(() {
+        _filtered = [];
+      });
+    }
   }
 
   int _calculateAge(dynamic dobRaw) {
@@ -115,23 +131,41 @@ class _Lbwrefered extends State<Lbwrefered> {
   }
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
-    String age = 'N/A';
+    String ageDisplay = 'N/A';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
+
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
       DateTime? dob;
       try {
         dob = DateTime.tryParse(dobRaw.toString());
       } catch (_) {}
+
       if (dob != null) {
-        age = '${DateTime.now().difference(dob).inDays ~/ 365}';
+        final now = DateTime.now();
+        final diffDays = now.difference(dob).inDays;
+
+        if (diffDays >= 365) {
+          // Show in years
+          final years = diffDays ~/ 365;
+          ageDisplay = '${years}Y';
+        } else if (diffDays >= 30) {
+          // Show in months
+          final months = diffDays ~/ 30;
+          ageDisplay = '${months}M';
+        } else if (diffDays >= 0) {
+          // Show in days (for < 1 month)
+          ageDisplay = '${diffDays}D';
+        }
       }
     }
+
     String displayGender = gender == 'm' || gender == 'male'
         ? 'Male'
         : gender == 'f' || gender == 'female'
         ? 'Female'
         : 'Other';
-    return '$age Y | $displayGender';
+
+    return '$ageDisplay | $displayGender';
   }
 
   @override

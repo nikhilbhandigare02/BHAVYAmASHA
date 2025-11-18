@@ -71,6 +71,7 @@ class Route_Names{
   static const String PreviousVisitsScreenHBYC = 'PreviousVisitsScreenHBYC';
   static const String CBACDetailScreen = 'CBACDetailScreen';
   static const String Abortionlist = 'Abortionlist';
+  static const String Lbwrefered = 'Lbwrefered';
 
 
 }
