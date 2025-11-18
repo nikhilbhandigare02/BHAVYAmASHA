@@ -55,6 +55,9 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<DiastolicChanged>((e, emit) => emit(state.copyWith(diastolic: e.value)));
     on<HemoglobinChanged>((e, emit) => emit(state.copyWith(hemoglobin: e.value)));
     on<HighRiskChanged>((e, emit) => emit(state.copyWith(highRisk: e.value)));
+    on<SelectedRisksChanged>((e, emit) => emit(state.copyWith(selectedRisks: e.selectedRisks)));
+    on<HasAbortionComplicationChanged>((e, emit) => emit(state.copyWith(hasAbortionComplication: e.value)));
+    on<AbortionDateChanged>((e, emit) => emit(state.copyWith(abortionDate: e.value)));
     on<BeneficiaryAbsentChanged>((e, emit) => emit(state.copyWith(beneficiaryAbsent: e.value)));
     on<BeneficiaryIdSet>((e, emit) => emit(state.copyWith(beneficiaryId: e.beneficiaryId)));
     on<GivesBirthToBaby>((e, emit) => emit(state.copyWith(givesBirthToBaby: e.value)));
@@ -109,6 +112,9 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'edd_date': state.eddDate?.toIso8601String(),
           'weeks_of_pregnancy': state.weeksOfPregnancy,
           'gravida': state.gravida,
+          'selected_risks': state.selectedRisks,
+          'has_abortion_complication': state.hasAbortionComplication,
+          'abortion_date': state.abortionDate?.toIso8601String(),
           'is_breast_feeding': state.isBreastFeeding,
           'td1_date': state.td1Date?.toIso8601String(),
           'td2_date': state.td2Date?.toIso8601String(),
@@ -206,6 +212,9 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'td2_date': state.td2Date?.toIso8601String(),
             'td_booster_date': state.tdBoosterDate?.toIso8601String(),
             'folic_acid_tablets': state.folicAcidTablets,
+             'selected_risks': state.selectedRisks,
+             'has_abortion_complication': state.hasAbortionComplication,
+            'abortion_date': state.abortionDate?.toIso8601String(),
             'pre_existing_disease': state.preExistingDisease,
             'weight': state.weight,
             'systolic': state.systolic,

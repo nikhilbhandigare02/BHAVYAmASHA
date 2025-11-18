@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
@@ -14,6 +15,7 @@ import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import '../../../../data/Local_Storage/local_storage_dao.dart';
 import '../../../../data/Local_Storage/tables/followup_form_data_table.dart';
 import 'bloc/anvvisitform_bloc.dart';
+import 'package:medixcel_new/core/widgets/MultiSelect/MultiSelect.dart';
 
 class Ancvisitform extends StatefulWidget {
   final Map<String, dynamic>? beneficiaryData;
@@ -50,7 +52,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     });
   }
 
-  // Fetch the latest ANC visit data for the current beneficiary
+
   Future<Map<String, dynamic>> _getLatestAncVisitData() async {
     try {
       if (_bloc.state.beneficiaryId == null || _bloc.state.beneficiaryId!.isEmpty) {
@@ -60,7 +62,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
       final localStorageDao = LocalStorageDao();
       print('🔍 Fetching ANC forms for beneficiary: ${_bloc.state.beneficiaryId}');
-      
+
       final existingForms = await localStorageDao.getFollowupFormsByHouseholdAndBeneficiary(
         formType: FollowupFormDataTable.ancDueRegistration,
         householdId: _bloc.state.householdRefKey ?? '',
@@ -68,12 +70,12 @@ class _AncvisitformState extends State<Ancvisitform> {
       );
 
       print('📊 Found ${existingForms.length} existing ANC forms');
-      
+
       if (existingForms.isNotEmpty) {
         // Get the most recent form (ordered by created_date_time DESC)
         final latestForm = existingForms.first;
         print('📅 Latest form created at: ${latestForm['created_date_time']}');
-        
+
         if (latestForm['form_json'] != null) {
           try {
             final formJson = jsonDecode(latestForm['form_json'] as String);
@@ -101,7 +103,7 @@ class _AncvisitformState extends State<Ancvisitform> {
   void dispose() {
     _bloc.close();
     super.dispose();
-  } 
+  }
 
   DateTime? _parseDate(String? dateString) {
     if (dateString == null || dateString.isEmpty) return null;
@@ -512,7 +514,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 : Future.value({}),
                             builder: (context, snapshot) {
                               int nextVisitNumber = 1; // Default to 1 if no previous visits
-                              
+
                               if (snapshot.connectionState == ConnectionState.done) {
                                 if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
                                   final formData = snapshot.data!;
@@ -522,19 +524,19 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     print('🔢 Current visit number: $currentVisitNo, Next visit number: $nextVisitNumber');
                                   }
                                 }
-                                
+
                                 // Update the visit number in the bloc
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
                                   _bloc.add(VisitNumberChanged(nextVisitNumber.toString()));
                                 });
                               }
-                              
+
                               return Padding(
                                 padding: const EdgeInsets.only(left: 12.0),
                                 child: Text(
                                   '$nextVisitNumber',
                                   style: TextStyle(
-                                    fontSize: 14.sp, 
+                                    fontSize: 14.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.blue, // Make it more visible for debugging
                                   ),
@@ -774,6 +776,63 @@ class _AncvisitformState extends State<Ancvisitform> {
                             onChanged: (v) => bloc.add(HighRiskChanged(v ?? '')),
                             hintText: l10n?.select ?? 'Select',
                           ),
+                          if (state.highRisk == 'Yes') ...[
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            MultiSelect<String>(
+                              items: [
+                                'Severe Anemia',
+                                'Hypertensive Disorder',
+                                'Syphilis, HIV Positive, Hepatitis B, Hepatitis C',
+                                'Gestational Diabetes',
+                                'Hypothyroidism',
+                              ].map((risk) => MultiSelectItem<String>(
+                                label: risk,
+                                value: risk,
+                              )).toList(),
+                              selectedValues: state.selectedRisks,
+                              labelText: 'Select Risks',
+                              hintText: 'Select Risks',
+                              onSelectionChanged: (values) {
+                                bloc.add(SelectedRisksChanged(List<String>.from(values)));
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            ApiDropdown<String>(
+                              labelText: 'Any complication leading to abortion?',
+                              items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
+                              value: state.hasAbortionComplication.isEmpty ? null : state.hasAbortionComplication,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(HasAbortionComplicationChanged(v ?? '')),
+                              hintText: l10n?.select ?? 'Select',
+                            ),
+                            if (state.hasAbortionComplication == 'Yes') ...[
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  labelText: 'Date of Abortion',
+                                  suffixIcon: const Icon(Icons.calendar_today),
+                                  border: const OutlineInputBorder(),
+                                ),
+                                controller: TextEditingController(
+                                  text: state.abortionDate != null
+                                      ? '${state.abortionDate!.day}/${state.abortionDate!.month}/${state.abortionDate!.year}'
+                                      : '',
+                                ),
+                                onTap: () async {
+                                  final DateTime? picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: state.abortionDate ?? DateTime.now(),
+                                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                                    lastDate: DateTime.now(),
+                                  );
+                                  if (picked != null && picked != state.abortionDate) {
+                                    bloc.add(AbortionDateChanged(picked));
+                                  }
+                                },
+                              ),
+                            ],
+                          ],
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                           if (int.tryParse(state.weeksOfPregnancy) != null &&
                               int.parse(state.weeksOfPregnancy) < 3) ...[
