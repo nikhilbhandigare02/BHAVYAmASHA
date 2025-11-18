@@ -48,7 +48,8 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
       listener: (context, state) {
         if (state.status == FormStatus.success) {
 
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.trainingSave)));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Training scheduled successfully')));
+          Navigator.pop(context);
         } else if (state.status == FormStatus.failure && state.error != null) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!)));
         }

@@ -13,6 +13,8 @@ import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../data/Local_Storage/local_storage_dao.dart';
 import '../../data/SecureStorage/SecureStorage.dart';
 
+import '../ChildCare/child_care_count_provider.dart';
+
 import '../../data/models/AbhaCreated/AbhaCreated.dart';
 import '../../data/models/ExistingAbhaCreated/ExistingAbhaCreated.dart';
 import '../../data/models/TimeStamp/Timestamp_Response.dart';
@@ -52,6 +54,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int beneficiariesCount = 0;
   int eligibleCouplesCount = 0;
   int pregnantWomenCount = 0;
+  int ancVisitCount = 0;
+  int childRegisteredCount = 0;
+  int highRiskCount = 0;
+
+  final ChildCareCountProvider _childCareCountProvider = ChildCareCountProvider();
 
   @override
   void initState() {
@@ -62,6 +69,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadBeneficiariesCount();
     _loadEligibleCouplesCount();
     _loadPregnantWomenCount();
+    _loadAncVisitCount();
+    _loadChildRegisteredCount();
+    _loadHighRiskCount();
     _fetchTimeStamp();
     _fetchAbhaCreated();
     _fetchExistingAbhaCreated();
@@ -229,7 +239,41 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadHouseholdCount() async {
     try {
-      final count = await LocalStorageDao.instance.getHouseholdCount();
+      // Mirror AllHousehold_Screen logic: count only active household heads
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final households = await LocalStorageDao.instance.getAllHouseholds();
+
+      final headKeyByHousehold = <String, String>{};
+      for (final hh in households) {
+        try {
+          final hhRefKey = (hh['unique_key'] ?? '').toString();
+          final headId = (hh['head_id'] ?? '').toString();
+          if (hhRefKey.isEmpty || headId.isEmpty) continue;
+          headKeyByHousehold[hhRefKey] = headId;
+        } catch (_) {}
+      }
+
+      int count = 0;
+      for (final r in rows) {
+        try {
+          final householdRefKey = (r['household_ref_key'] ?? '').toString();
+          final uniqueKey = (r['unique_key'] ?? '').toString();
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) continue;
+
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+          if (configuredHeadKey == null || configuredHeadKey.isEmpty) continue;
+
+          final isDeath = r['is_death'] == 1;
+          final isMigrated = r['is_migrated'] == 1;
+
+          if (configuredHeadKey == uniqueKey && !isDeath && !isMigrated) {
+            count++;
+          }
+        } catch (_) {
+          continue;
+        }
+      }
+
       if (mounted) {
         setState(() {
           householdCount = count;
@@ -242,49 +286,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadBeneficiariesCount() async {
     try {
+      // Align with AllBeneficiaryScreen: one entry per beneficiary row
+      // that belongs to a household (non-empty household_ref_key) and is not deleted
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       int count = 0;
 
-      // Create a set to track unique beneficiaries by their unique_key
-      final Set<String> uniqueBeneficiaries = {};
-
       for (final row in rows) {
         try {
-          // Skip if no unique key
-          final uniqueKey = row['unique_key']?.toString();
-          if (uniqueKey == null || uniqueKey.isEmpty) continue;
-
-          // Skip if we've already counted this beneficiary
-          if (uniqueBeneficiaries.contains(uniqueKey)) continue;
-
-          // Parse the beneficiary info
-          final dynamic rawInfo = row['beneficiary_info'];
-          if (rawInfo == null) continue;
-
-          Map<String, dynamic> info;
-          try {
-            info = rawInfo is String
-                ? jsonDecode(rawInfo) as Map<String, dynamic>
-                : Map<String, dynamic>.from(rawInfo as Map);
-          } catch (e) {
-            print('Error parsing beneficiary info: $e');
-            continue;
-          }
-
-          // Get relation type
-          final relation = (info['relation']?.toString().toLowerCase().trim() ??
-              info['relation_to_head']?.toString().toLowerCase().trim() ??
-              '');
-
-          // Count all valid beneficiaries regardless of relation type
-          // as long as they have a name and a valid unique key
-          final name = info['headName'] ?? info['memberName'] ?? info['name'];
-          if (name != null && name.toString().trim().isNotEmpty) {
-            count++;
-            uniqueBeneficiaries.add(uniqueKey);
-          }
+          final hhId = row['household_ref_key']?.toString() ?? '';
+          if (hhId.isEmpty) continue;
+          count++;
         } catch (e) {
-          print('Error processing beneficiary row: $e');
+          print('Error processing beneficiary row for count: $e');
         }
       }
 
@@ -306,32 +319,82 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadEligibleCouplesCount() async {
     try {
+      // Mirror EligibleCoupleIdentifiedScreen logic so the dashboard
+      // Eligible Couple tile matches the identified list
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      int count = 0;
+      final households = <String, List<Map<String, dynamic>>>{};
 
       for (final row in rows) {
-        final info = Map<String, dynamic>.from((row['beneficiary_info'] as Map?) ?? const {});
-        final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-        final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
+        final hhKey = row['household_ref_key']?.toString() ?? '';
+        if (hhKey.isEmpty) continue;
+        households.putIfAbsent(hhKey, () => []).add(row);
+      }
 
-        // Check if head is eligible female
-        if (_isEligibleFemale(head)) {
-          count++;
+      int totalIdentified = 0;
+      for (final household in households.values) {
+        Map<String, dynamic>? head;
+        Map<String, dynamic>? spouse;
+
+        for (final member in household) {
+          final info = _toStringMapEc(member['beneficiary_info']);
+          final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+          if (relation == 'self') {
+            head = info;
+          } else if (relation == 'spouse') {
+            spouse = info;
+          }
         }
 
-        // Check if spouse is eligible female
-        if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-          count++;
+        if (head != null && _isIdentifiedEcFemale(head)) {
+          totalIdentified++;
+        }
+        if (spouse != null && _isIdentifiedEcFemale(spouse)) {
+          totalIdentified++;
         }
       }
 
       if (mounted) {
         setState(() {
-          eligibleCouplesCount = count;
+          eligibleCouplesCount = totalIdentified;
         });
       }
     } catch (e) {
       print('Error loading eligible couples count: $e');
+    }
+  }
+
+  Map<String, dynamic> _toStringMapEc(dynamic map) {
+    if (map == null) return {};
+    if (map is Map<String, dynamic>) return map;
+    if (map is Map) {
+      return Map<String, dynamic>.from(map);
+    }
+    return {};
+  }
+
+  bool _isIdentifiedEcFemale(Map<String, dynamic> person) {
+    if (person.isEmpty) return false;
+
+    final gender = person['gender']?.toString().toLowerCase();
+    final isFemale = gender == 'f' || gender == 'female';
+    if (!isFemale) return false;
+
+    final maritalStatus = person['maritalStatus']?.toString().toLowerCase();
+    if (maritalStatus != 'married') return false;
+
+    final dob = person['dob'];
+    final age = _calculateEcAge(dob);
+    return age >= 15 && age <= 49;
+  }
+
+  int _calculateEcAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
     }
   }
 
@@ -441,6 +504,75 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       print('Error loading pregnant women count: $e');
+    }
+  }
+
+  Future<void> _loadAncVisitCount() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      int count = 0;
+
+      for (final row in rows) {
+        try {
+          final dynamic rawInfo = row['beneficiary_info'];
+          if (rawInfo == null) continue;
+
+          Map<String, dynamic> info = {};
+          try {
+            info = rawInfo is String
+                ? jsonDecode(rawInfo) as Map<String, dynamic>
+                : Map<String, dynamic>.from(rawInfo as Map);
+          } catch (_) {
+            continue;
+          }
+
+          final isPregnant =
+              info['isPregnant']?.toString().toLowerCase() == 'yes';
+          if (!isPregnant) continue;
+
+          final gender = info['gender']?.toString().toLowerCase() ?? '';
+          if (gender != 'f' && gender != 'female') continue;
+
+          count++;
+        } catch (e) {
+          print('Error processing beneficiary for ANC visit count: $e');
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          ancVisitCount = count;
+        });
+      }
+    } catch (e) {
+      print('Error loading ANC visit count: $e');
+    }
+  }
+
+  Future<void> _loadChildRegisteredCount() async {
+    try {
+      final count = await _childCareCountProvider.getRegisteredChildCount();
+
+      if (mounted) {
+        setState(() {
+          childRegisteredCount = count;
+        });
+      }
+    } catch (e) {
+      print('Error loading registered child beneficiary count: $e');
+    }
+  }
+
+  Future<void> _loadHighRiskCount() async {
+    try {
+      final dbForms = await LocalStorageDao.instance.getHighRiskANCVisits();
+      if (mounted) {
+        setState(() {
+          highRiskCount = dbForms.length;
+        });
+      }
+    } catch (e) {
+      print('Error loading high-risk ANC visit count: $e');
     }
   }
 
@@ -605,6 +737,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     beneficiariesCount: beneficiariesCount,
                     eligibleCouplesCount: eligibleCouplesCount,
                     pregnantWomenCount: pregnantWomenCount,
+                    ancVisitCount: ancVisitCount,
+                    childRegisteredCount: childRegisteredCount,
+                    highRiskCount: highRiskCount,
                     selectedGridIndex: selectedGridIndex,
                     onGridTap: (index) =>
                         setState(() => selectedGridIndex = index),

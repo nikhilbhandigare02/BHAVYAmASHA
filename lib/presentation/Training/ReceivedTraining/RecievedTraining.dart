@@ -24,32 +24,51 @@ class _TrainingReceivedState extends State<TrainingReceived> {
   @override
   void initState() {
     super.initState();
-    // _loadTrainingData();
+    _loadTrainingData();
     _searchCtrl.addListener(_onSearchChanged);
   }
 
-  // Future<void> _loadTrainingData() async {
-  //   final List<Map<String, dynamic>> rows =
-  //   await LocalStorageDao.instance.fetchTrainingList();
-  //
-  //   final parsed = rows.map((row) {
-  //     final formJson = row['form_json'];
-  //     final decoded = jsonDecode(formJson);
-  //
-  //     final data = decoded['form_data'];
-  //
-  //     return {
-  //       'hhId': "N/A",
-  //       'trainingName': data['training_name'] ?? '',
-  //       'Date': data['training_date']?.toString().split('T').first ?? '',
-  //     };
-  //   }).toList();
-  //
-  //   setState(() {
-  //     _allData = parsed;
-  //     _filtered = List.from(parsed);
-  //   });
-  // }
+  Future<void> _loadTrainingData() async {
+    try {
+      final rows = await LocalStorageDao.instance.fetchTrainingList();
+
+      final List<Map<String, dynamic>> parsed = [];
+      for (final row in rows) {
+        try {
+          final formJson = row['form_json'];
+          if (formJson is! Map) continue;
+          final data = formJson['form_data'];
+          if (data is! Map) continue;
+
+          final trainingType = (data['training_type'] ?? '').toString();
+          if (trainingType != 'Receiving') continue;
+
+          final trainingName = (data['training_name'] ?? '').toString();
+          final rawDate = data['training_date']?.toString();
+          String dateStr = '';
+          if (rawDate != null && rawDate.isNotEmpty) {
+            dateStr = rawDate.contains('T')
+                ? rawDate.split('T').first
+                : rawDate;
+          }
+
+          parsed.add({
+            'hhId': 'N/A',
+            'trainingName': trainingName,
+            'Date': dateStr,
+          });
+        } catch (_) {
+          continue;
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _allData = parsed;
+        _filtered = List.from(parsed);
+      });
+    } catch (_) {}
+  }
 
   @override
   void dispose() {

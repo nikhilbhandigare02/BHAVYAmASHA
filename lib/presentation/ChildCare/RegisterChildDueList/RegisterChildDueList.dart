@@ -454,7 +454,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         });
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         height: 180,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
@@ -475,10 +475,10 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                 color: AppColors.background,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
               child: Row(
                 children: [
-                  const Icon(Icons.home, color: AppColors.primary, size: 16),
+                   Icon(Icons.home, color: AppColors.primary, size: 15.sp),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -488,7 +488,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: 15.sp,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -581,7 +581,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           title,
           style: TextStyle(
             color: textColor.withOpacity(0.9),
-            fontSize: 12,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -591,7 +591,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           style: TextStyle(
             color: textColor,
             fontWeight: FontWeight.w400,
-            fontSize: 12,
+            fontSize: 13.sp,
           ),
         ),
       ],
