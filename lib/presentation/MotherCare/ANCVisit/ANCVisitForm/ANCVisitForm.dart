@@ -917,7 +917,7 @@ Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
         border: Border.all(color: AppColors.outlineVariant),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Icon(icon, size: 18, color: Colors.black87),
+      child: Icon(icon, size: 18, color: Colors.black87),///////
     ),
   );
 }

@@ -118,6 +118,7 @@ class AnvvisitformState extends Equatable {
       husbandName: husbandName ?? this.husbandName,
       rchNumber: rchNumber ?? this.rchNumber,
       lmpDate: lmpDate ?? this.lmpDate,
+      givesBirthToBaby: givesBirthToBaby ?? this.givesBirthToBaby,
       eddDate: eddDate ?? this.eddDate,
       weeksOfPregnancy: weeksOfPregnancy ?? this.weeksOfPregnancy,
       gravida: gravida ?? this.gravida,
