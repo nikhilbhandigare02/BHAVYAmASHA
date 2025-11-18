@@ -21,6 +21,10 @@ class OutcomeFormState extends Equatable {
   final String? malaQuantity;
   final String? chhayaQuantity;
   final String? ecpQuantity;
+  final String? institutionalPlaceType; // 'Public' or 'Private'
+  final String? conductedBy; // 'ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative TBA'
+  final String? typeOfDelivery; // 'Cesarean', 'Assisted/Forceps', 'Normal'
+  final String? hadComplications; // 'Yes' or 'No'
 
   const OutcomeFormState({
     this.householdId,
@@ -43,6 +47,10 @@ class OutcomeFormState extends Equatable {
     required this.submitting,
     required this.submitted,
     required this.errorMessage,
+    this.institutionalPlaceType,
+    this.conductedBy,
+    this.typeOfDelivery,
+    this.hadComplications,
   });
 
   factory OutcomeFormState.initial() => const OutcomeFormState(
@@ -89,6 +97,13 @@ class OutcomeFormState extends Equatable {
     String? malaQuantity,
     String? chhayaQuantity,
     String? ecpQuantity,
+    String? institutionalPlaceType,
+    String? conductedBy,
+    String? typeOfDelivery,
+    String? hadComplications,
+    String? institutionalDelivery,
+    String? institutionalDeliveryPlace,
+    String? institutionalDeliveryConductedBy,
   }) {
     return OutcomeFormState(
       householdId: householdId ?? this.householdId,
@@ -112,6 +127,10 @@ class OutcomeFormState extends Equatable {
       malaQuantity: malaQuantity ?? this.malaQuantity,
       chhayaQuantity: chhayaQuantity ?? this.chhayaQuantity,
       ecpQuantity: ecpQuantity ?? this.ecpQuantity,
+      institutionalPlaceType: institutionalPlaceType ?? this.institutionalPlaceType,
+      conductedBy: conductedBy ?? this.conductedBy,
+      typeOfDelivery: typeOfDelivery ?? this.typeOfDelivery,
+      hadComplications: hadComplications ?? this.hadComplications,
     );
   }
 

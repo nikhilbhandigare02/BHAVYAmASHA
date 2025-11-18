@@ -47,6 +47,18 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     on<FamilyPlanningCounselingChanged>((event, emit) {
       emit(state.copyWith(familyPlanningCounseling: event.value, errorMessage: null));
     });
+    on<InstitutionalPlaceTypeChanged>((event, emit) {
+      emit(state.copyWith(institutionalPlaceType: event.value, errorMessage: null));
+    });
+    on<ConductedByChanged>((event, emit) {
+      emit(state.copyWith(conductedBy: event.value, errorMessage: null));
+    });
+    on<TypeOfDeliveryChanged>((event, emit) {
+      emit(state.copyWith(typeOfDelivery: event.value, errorMessage: null));
+    });
+    on<HadComplicationsChanged>((event, emit) {
+      emit(state.copyWith(hadComplications: event.value, errorMessage: null));
+    });
     on<FpMethodChanged>((event, emit) {
       emit(state.copyWith(fpMethod: event.value, errorMessage: null));
     });
@@ -116,7 +128,8 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
 
 
           String householdRefKey = event.beneficiaryData?['householdId']?.toString() ?? '';
-          
+
+          // In outcome_form_bloc.dart, update the formData map to include the new fields
           final formData = {
             'form_type': formType,
             'form_name': formName,
@@ -129,6 +142,11 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               'gestation_weeks': state.gestationWeeks,
               'delivery_time': state.deliveryTime,
               'place_of_delivery': state.placeOfDelivery,
+              // Add new institutional delivery fields
+              'institutional_place_type': state.institutionalPlaceType,
+              'conducted_by': state.conductedBy,
+              'type_of_delivery': state.typeOfDelivery,
+              'had_complications': state.hadComplications,
               'delivery_type': state.deliveryType,
               'complications': state.complications,
               'outcome_count': state.outcomeCount,
