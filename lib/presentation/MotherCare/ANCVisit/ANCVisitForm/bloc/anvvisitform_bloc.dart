@@ -11,6 +11,7 @@ import '../../../../../data/Local_Storage/database_provider.dart';
 import '../../../../../data/Local_Storage/local_storage_dao.dart';
 import '../../../../../data/Local_Storage/tables/followup_form_data_table.dart';
 import '../../../../../data/SecureStorage/SecureStorage.dart';
+import '../../../../../data/repositories/MotherCareRepository/MotherCareRepository.dart';
 
 part 'anvvisitform_event.dart';
 part 'anvvisitform_state.dart';
@@ -55,6 +56,9 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<DiastolicChanged>((e, emit) => emit(state.copyWith(diastolic: e.value)));
     on<HemoglobinChanged>((e, emit) => emit(state.copyWith(hemoglobin: e.value)));
     on<HighRiskChanged>((e, emit) => emit(state.copyWith(highRisk: e.value)));
+    on<SelectedRisksChanged>((e, emit) => emit(state.copyWith(selectedRisks: e.selectedRisks)));
+    on<HasAbortionComplicationChanged>((e, emit) => emit(state.copyWith(hasAbortionComplication: e.value)));
+    on<AbortionDateChanged>((e, emit) => emit(state.copyWith(abortionDate: e.value)));
     on<BeneficiaryAbsentChanged>((e, emit) => emit(state.copyWith(beneficiaryAbsent: e.value)));
     on<BeneficiaryIdSet>((e, emit) => emit(state.copyWith(beneficiaryId: e.beneficiaryId)));
     on<GivesBirthToBaby>((e, emit) => emit(state.copyWith(givesBirthToBaby: e.value)));
@@ -109,6 +113,9 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'edd_date': state.eddDate?.toIso8601String(),
           'weeks_of_pregnancy': state.weeksOfPregnancy,
           'gravida': state.gravida,
+          'selected_risks': state.selectedRisks,
+          'has_abortion_complication': state.hasAbortionComplication,
+          'abortion_date': state.abortionDate?.toIso8601String(),
           'is_breast_feeding': state.isBreastFeeding,
           'td1_date': state.td1Date?.toIso8601String(),
           'td2_date': state.td2Date?.toIso8601String(),
@@ -130,6 +137,17 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         'updated_at': now,
       };
 
+      final currentUser = await UserInfo.getCurrentUser();
+      final userDetails = currentUser?['details'] is String
+          ? jsonDecode(currentUser?['details'] ?? '{}')
+          : currentUser?['details'] ?? {};
+
+      final working = userDetails['working_location'] ?? {};
+      final facilityId = working['asha_associated_with_facility_id'] ??
+          userDetails['asha_associated_with_facility_id'] ?? 0;
+      final ashaUniqueKey = userDetails['unique_key'] ?? {};
+
+
       final formDataForDb = {
         'server_id': '',
         'forms_ref_key': formsRefKey,
@@ -150,31 +168,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
         }),
         'parent_user': '',
-        'current_user_key': '',
-        'facility_id': await UserInfo.getCurrentUser().then((value) {
-          if (value != null) {
-            if (value['details'] is String) {
-              try {
-                final userDetails = jsonDecode(value['details'] ?? '{}');
-                return userDetails['asha_associated_with_facility_id'] ??
-                    userDetails['facility_id'] ??
-                    userDetails['facilityId'] ??
-                    userDetails['facility'] ??
-                    0;
-              } catch (e) {
-                return 0;
-              }
-            } else if (value['details'] is Map) {
-              final userDetails = Map<String, dynamic>.from(value['details']);
-              return userDetails['asha_associated_with_facility_id'] ??
-                  userDetails['facility_id'] ??
-                  userDetails['facilityId'] ??
-                  userDetails['facility'] ??
-                  0;
-            }
-          }
-          return 0;
-        }),
+        'current_user_key': ashaUniqueKey,
+        'facility_id': facilityId,
         'form_json': jsonEncode(formData),
         'created_date_time': now,
         'modified_date_time': now,
@@ -206,6 +201,9 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'td2_date': state.td2Date?.toIso8601String(),
             'td_booster_date': state.tdBoosterDate?.toIso8601String(),
             'folic_acid_tablets': state.folicAcidTablets,
+             'selected_risks': state.selectedRisks,
+             'has_abortion_complication': state.hasAbortionComplication,
+            'abortion_date': state.abortionDate?.toIso8601String(),
             'pre_existing_disease': state.preExistingDisease,
             'weight': state.weight,
             'systolic': state.systolic,
@@ -221,6 +219,132 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           print('ANC visit data saved to secure storage');
         } catch (e) {
           print('Error saving to secure storage: $e');
+        }
+
+        // After local save, try to sync with mother care activity API
+        try {
+          final dbRows = await db.query(
+            FollowupFormDataTable.table,
+            where: 'id = ?',
+            whereArgs: [formId],
+            limit: 1,
+          );
+
+          if (dbRows.isNotEmpty) {
+            final saved = Map<String, dynamic>.from(dbRows.first);
+
+            Map<String, dynamic> deviceJson = {};
+            Map<String, dynamic> appJson = {};
+            Map<String, dynamic> geoJson = {};
+            Map<String, dynamic> formRoot = {};
+            Map<String, dynamic> formDataJson = {};
+
+            try {
+              if (saved['device_details'] is String && (saved['device_details'] as String).isNotEmpty) {
+                deviceJson = Map<String, dynamic>.from(jsonDecode(saved['device_details']));
+              }
+            } catch (_) {}
+
+            try {
+              if (saved['app_details'] is String && (saved['app_details'] as String).isNotEmpty) {
+                appJson = Map<String, dynamic>.from(jsonDecode(saved['app_details']));
+              }
+            } catch (_) {}
+
+            try {
+              if (saved['form_json'] is String && (saved['form_json'] as String).isNotEmpty) {
+                final fj = jsonDecode(saved['form_json']);
+                if (fj is Map) {
+                  formRoot = Map<String, dynamic>.from(fj);
+                  if (fj['form_data'] is Map) {
+                    formDataJson = Map<String, dynamic>.from(fj['form_data']);
+                  }
+                  if (fj['geolocation_details'] is Map) {
+                    geoJson = Map<String, dynamic>.from(fj['geolocation_details']);
+                  } else if (formDataJson['geolocation_details'] is Map) {
+                    geoJson = Map<String, dynamic>.from(formDataJson['geolocation_details']);
+                  }
+                }
+              }
+            } catch (_) {}
+
+            // All meta values should come from DB / form_json
+            final String userId = (saved['current_user_key'] ?? formRoot['user_id'] ?? formDataJson['user_id'] ?? '').toString();
+            final String facility = (saved['facility_id']?.toString() ?? formRoot['facility_id']?.toString() ?? formDataJson['facility_id']?.toString() ?? '');
+            final String appRoleId = (formRoot['app_role_id'] ?? formDataJson['app_role_id'] ?? '').toString();
+            final String createdAt = (saved['created_date_time'] ?? formRoot['created_date_time'] ?? formDataJson['created_date_time'] ?? '').toString();
+            final String modifiedAt = (saved['modified_date_time'] ?? formRoot['modified_date_time'] ?? formDataJson['modified_date_time'] ?? '').toString();
+
+            final dbHouseholdRefKey = (saved['household_ref_key'] ?? householdRefKey).toString();
+            final dbBeneficiaryRefKey = (saved['beneficiary_ref_key'] ?? beneficiaryId).toString();
+
+            final motherCarePayload = [
+              {
+                'unique_key': dbHouseholdRefKey,
+                'beneficiaries_registration_ref_key': dbBeneficiaryRefKey,
+                'mother_care_type': 'anc_due',
+                'user_id': userId,
+                'facility_id': facility,
+                'is_deleted': 0,
+                'created_by': userId,
+                'created_date_time': createdAt,
+                'modified_by': userId,
+                'modified_date_time': modifiedAt,
+                'parent_added_by': userId,
+                'parent_facility_id': int.tryParse(facility) ?? facility,
+                'app_role_id': appRoleId,
+                'is_guest': 0,
+                'pregnancy_count': 1,
+                'device_details': {
+                  'device_id': deviceJson['id'] ?? deviceJson['device_id'],
+                  'device_plateform': deviceJson['platform'] ?? deviceJson['device_plateform'],
+                  'device_plateform_version': deviceJson['version'] ?? deviceJson['device_plateform_version'],
+                },
+                'app_details': {
+                  'app_version': appJson['app_version'],
+                  'app_name': appJson['app_name'],
+                },
+                'geolocation_details': {
+                  'latitude': geoJson['lat']?.toString() ?? '',
+                  'longitude': geoJson['long']?.toString() ?? '',
+                },
+              },
+            ];
+
+            try {
+              final repo = MotherCareRepository();
+              final apiResp = await repo.addMotherCareActivity(motherCarePayload);
+
+              try {
+                if (apiResp is Map && apiResp['success'] == true && apiResp['data'] is List) {
+                  final List data = apiResp['data'];
+                  Map? rec = data.cast<Map>().firstWhere(
+                    (e) => (e['mother_care_type']?.toString() ?? '') == 'anc_due',
+                    orElse: () => {},
+                  );
+                  final serverId = (rec?['_id'] ?? '').toString();
+                  if (serverId.isNotEmpty) {
+                    final updated = await db.update(
+                      FollowupFormDataTable.table,
+                      {
+                        'server_id': serverId,
+                        // keep modified_date_time as stored in DB, no new timestamp
+                      },
+                      where: 'id = ?',
+                      whereArgs: [formId],
+                    );
+                    print('Updated followup_form_data with mother care server_id=$serverId rows=$updated');
+                  }
+                }
+              } catch (e) {
+                print('Error updating followup_form_data with mother care server_id: $e');
+              }
+            } catch (e) {
+              print('Mother care API call failed: $e');
+            }
+          }
+        } catch (e) {
+          print('Error reading saved followup_form_data to build mother care payload: $e');
         }
 
         // Update submission count

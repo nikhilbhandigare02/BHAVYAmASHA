@@ -140,6 +140,29 @@ class HemoglobinChanged extends AnvvisitformEvent {
 class HighRiskChanged extends AnvvisitformEvent {
   final String value;
   const HighRiskChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class SelectedRisksChanged extends AnvvisitformEvent {
+  final List<String> selectedRisks;
+  const SelectedRisksChanged(this.selectedRisks);
+  @override
+  List<Object?> get props => [selectedRisks];
+}
+
+class HasAbortionComplicationChanged extends AnvvisitformEvent {
+  final String value;
+  const HasAbortionComplicationChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class AbortionDateChanged extends AnvvisitformEvent {
+  final DateTime? value;
+  const AbortionDateChanged(this.value);
+  @override
+  List<Object?> get props => [value];
 }
 
 class BeneficiaryAbsentChanged extends AnvvisitformEvent {

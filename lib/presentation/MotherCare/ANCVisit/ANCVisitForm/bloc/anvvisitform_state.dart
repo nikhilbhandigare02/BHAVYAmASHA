@@ -25,6 +25,9 @@ class AnvvisitformState extends Equatable {
   final String diastolic;
   final String hemoglobin;
   final String highRisk;
+  final List<String> selectedRisks;
+  final String hasAbortionComplication;
+  final DateTime? abortionDate;
   final String beneficiaryAbsent;
   final String beneficiaryId;
   final String? householdRefKey;
@@ -58,6 +61,9 @@ class AnvvisitformState extends Equatable {
     this.diastolic = '',
     this.hemoglobin = '',
     this.highRisk = '',
+    this.selectedRisks = const [],
+    this.hasAbortionComplication = '',
+    this.abortionDate,
     this.beneficiaryAbsent = '',
     this.beneficiaryId = '',
     this.householdRefKey,
@@ -91,6 +97,9 @@ class AnvvisitformState extends Equatable {
     String? diastolic,
     String? hemoglobin,
     String? highRisk,
+    List<String>? selectedRisks,
+    String? hasAbortionComplication,
+    DateTime? abortionDate,
     String? beneficiaryAbsent,
     String? beneficiaryId,
     String? householdRefKey,
@@ -103,20 +112,19 @@ class AnvvisitformState extends Equatable {
       ancVisitNo: ancVisitNo ?? this.ancVisitNo,
       visitType: visitType ?? this.visitType,
       placeOfAnc: placeOfAnc ?? this.placeOfAnc,
-      givesBirthToBaby: givesBirthToBaby ?? this.givesBirthToBaby,
-      dateOfInspection: dateOfInspection,
+      dateOfInspection: dateOfInspection ?? this.dateOfInspection,
       houseNumber: houseNumber ?? this.houseNumber,
       womanName: womanName ?? this.womanName,
       husbandName: husbandName ?? this.husbandName,
       rchNumber: rchNumber ?? this.rchNumber,
-      lmpDate: lmpDate,
-      eddDate: eddDate,
+      lmpDate: lmpDate ?? this.lmpDate,
+      eddDate: eddDate ?? this.eddDate,
       weeksOfPregnancy: weeksOfPregnancy ?? this.weeksOfPregnancy,
       gravida: gravida ?? this.gravida,
       isBreastFeeding: isBreastFeeding ?? this.isBreastFeeding,
-      td1Date: td1Date,
-      td2Date: td2Date,
-      tdBoosterDate: tdBoosterDate,
+      td1Date: td1Date ?? this.td1Date,
+      td2Date: td2Date ?? this.td2Date,
+      tdBoosterDate: tdBoosterDate ?? this.tdBoosterDate,
       folicAcidTablets: folicAcidTablets ?? this.folicAcidTablets,
       preExistingDisease: preExistingDisease ?? this.preExistingDisease,
       weight: weight ?? this.weight,
@@ -124,6 +132,9 @@ class AnvvisitformState extends Equatable {
       diastolic: diastolic ?? this.diastolic,
       hemoglobin: hemoglobin ?? this.hemoglobin,
       highRisk: highRisk ?? this.highRisk,
+      selectedRisks: selectedRisks ?? this.selectedRisks,
+      hasAbortionComplication: hasAbortionComplication ?? this.hasAbortionComplication,
+      abortionDate: abortionDate ?? this.abortionDate,
       beneficiaryAbsent: beneficiaryAbsent ?? this.beneficiaryAbsent,
       beneficiaryId: beneficiaryId ?? this.beneficiaryId,
       householdRefKey: householdRefKey ?? this.householdRefKey,
@@ -158,6 +169,9 @@ class AnvvisitformState extends Equatable {
         diastolic,
         hemoglobin,
         highRisk,
+        selectedRisks,
+        hasAbortionComplication,
+        abortionDate,
         beneficiaryAbsent,
         beneficiaryId,
         householdRefKey,

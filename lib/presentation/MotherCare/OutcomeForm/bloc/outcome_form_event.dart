@@ -1,5 +1,24 @@
 part of 'outcome_form_bloc.dart';
 
+// Non-institutional delivery events
+class NonInstitutionalPlaceTypeChanged extends OutcomeFormEvent {
+  final String value;
+
+  const NonInstitutionalPlaceTypeChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class TransitPlaceChanged extends OutcomeFormEvent {
+  final String value;
+
+  const TransitPlaceChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
 // Institutional delivery events
 class InstitutionalPlaceTypeChanged extends OutcomeFormEvent {
   final String value;

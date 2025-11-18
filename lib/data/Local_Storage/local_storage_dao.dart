@@ -389,6 +389,50 @@ class LocalStorageDao {
     return db.insert('child_care_activities', row);
   }
 
+  Future<List<Map<String, dynamic>>> getUnsyncedMotherCareAncForms() async {
+    try {
+      final db = await _db;
+      final ancFormsRefKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+      if (ancFormsRefKey.isEmpty) return [];
+
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        where:
+            '(is_deleted IS NULL OR is_deleted = 0) AND (is_synced IS NULL OR is_synced = 0) AND (server_id IS NULL OR TRIM(server_id) = "") AND forms_ref_key = ?',
+        whereArgs: [ancFormsRefKey],
+        orderBy: 'created_date_time ASC',
+      );
+
+      return rows.map((row) => Map<String, dynamic>.from(row)).toList();
+    } catch (e) {
+      print('Error getting unsynced mother care ANC forms: $e');
+      return [];
+    }
+  }
+
+  Future<int> markMotherCareAncFormSyncedById(int id, {String? serverId}) async {
+    try {
+      final db = await _db;
+      final values = <String, Object?>{
+        'is_synced': 1,
+        'modified_date_time': DateTime.now().toIso8601String(),
+      };
+      if (serverId != null && serverId.isNotEmpty) {
+        values['server_id'] = serverId;
+      }
+      return await db.update(
+        FollowupFormDataTable.table,
+        values,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      print('Error marking mother care ANC form as synced: $e');
+      rethrow;
+    }
+  }
+
   Future<int> insertFollowupFormData(Map<String, dynamic> data) async {
     final db = await _db;
 
@@ -1068,6 +1112,7 @@ class LocalStorageDao {
       return [];
     }
   }
+
 }
 
 extension LocalStorageDaoReads on LocalStorageDao {

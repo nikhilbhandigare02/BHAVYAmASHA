@@ -9,6 +9,7 @@ import 'dart:convert';
 import '../../l10n/app_localizations.dart';
 
 import '../../core/config/routes/Route_Name.dart';
+import 'Beneficiaries/AbortionList.dart';
 
 class Mybeneficiaries extends StatefulWidget {
   const Mybeneficiaries({super.key});
@@ -83,7 +84,6 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
         }
       }
 
-      // Count pregnant women
       for (final members in households.values) {
         for (final member in members) {
           try {
@@ -222,9 +222,9 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
                 // case 5:
                 //   Navigator.pushNamed(context, Route_Names.LBWReferred);
                 //   break;
-                // case 6:
-                //   Navigator.pushNamed(context, Route_Names.AbortionList);
-                //   break;
+                 case 6:
+                  Navigator.pushNamed(context, Route_Names.Abortionlist);
+                   break;
                 case 7:
                   Navigator.pushNamed(context, Route_Names.DeathRegister);
                   break;

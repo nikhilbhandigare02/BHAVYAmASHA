@@ -25,6 +25,8 @@ class OutcomeFormState extends Equatable {
   final String? conductedBy; // 'ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative TBA'
   final String? typeOfDelivery; // 'Cesarean', 'Assisted/Forceps', 'Normal'
   final String? hadComplications; // 'Yes' or 'No'
+  final String? nonInstitutionalPlaceType; // 'Home', 'In Transit', 'Other'
+  final String? transitPlace; // 'Ambulance', 'Other'
 
   const OutcomeFormState({
     this.householdId,
@@ -51,6 +53,8 @@ class OutcomeFormState extends Equatable {
     this.conductedBy,
     this.typeOfDelivery,
     this.hadComplications,
+    this.nonInstitutionalPlaceType,
+    this.transitPlace,
   });
 
   factory OutcomeFormState.initial() => const OutcomeFormState(
@@ -101,6 +105,8 @@ class OutcomeFormState extends Equatable {
     String? conductedBy,
     String? typeOfDelivery,
     String? hadComplications,
+    String? nonInstitutionalPlaceType,
+    String? transitPlace,
     String? institutionalDelivery,
     String? institutionalDeliveryPlace,
     String? institutionalDeliveryConductedBy,
@@ -131,6 +137,8 @@ class OutcomeFormState extends Equatable {
       conductedBy: conductedBy ?? this.conductedBy,
       typeOfDelivery: typeOfDelivery ?? this.typeOfDelivery,
       hadComplications: hadComplications ?? this.hadComplications,
+      nonInstitutionalPlaceType: nonInstitutionalPlaceType ?? this.nonInstitutionalPlaceType,
+      transitPlace: transitPlace ?? this.transitPlace,
     );
   }
 

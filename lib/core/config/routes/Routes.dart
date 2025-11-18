@@ -70,6 +70,7 @@ import '../../../presentation/Training/ReceivedTraining/RecievedTraining.dart' s
 import '../../../presentation/Training/Training_Form/TrainingForm.dart' show Trainingform;
 import '../../../presentation/Training/Training_Provided/ProvidedTraining.dart';
 import '../../../presentation/login/Login_Screen.dart';
+import '../../../presentation/myBeneficiary/Beneficiaries/AbortionList.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/DeathRegister.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/EligibleCoupleList.dart' show EligibleCoupleList;
 import '../../../presentation/myBeneficiary/Beneficiaries/FamilyUpdateList.dart' show FamliyUpdate;
@@ -255,6 +256,8 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const AshaKiDuniyaScreen(),);
       case Route_Names.DeseasedList:
         return MaterialPageRoute(builder: (context) => const DeseasedList(),);
+      case Route_Names.Abortionlist:
+        return MaterialPageRoute(builder: (context) => const Abortionlist(),);
       case Route_Names.ChildTrackingDueListForm:
         return MaterialPageRoute(builder: (context) => const ChildTrackingDueListForm(),);
       case Route_Names.updateMemberDetail:
