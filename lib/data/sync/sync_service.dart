@@ -29,7 +29,7 @@ class SyncService {
   Timer? _timer;
   bool _running = false;
 
-  void start({Duration   interval = const Duration(minutes: 5)}) {
+  void start({Duration    interval = const Duration(minutes: 5)}) {
     stop();
 
     print('SyncService: starting with interval ${interval.inMinutes} minute(s)');
