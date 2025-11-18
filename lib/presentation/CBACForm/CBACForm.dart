@@ -715,7 +715,7 @@ class _PartATab extends StatelessWidget {
               ],
             );
         Widget rowScore(int score) => SizedBox(
-              width: 28,
+              width: 25,
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text('$score', style: const TextStyle(color: Colors.black54)),
@@ -736,7 +736,7 @@ class _PartATab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 320,
+                    width: 300,
                     child: ApiDropdown<String>(
                       labelText: question,
                       hintText: '',

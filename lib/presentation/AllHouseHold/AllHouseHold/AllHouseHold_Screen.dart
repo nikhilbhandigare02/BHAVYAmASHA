@@ -196,7 +196,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             ? uniqueKey.substring(uniqueKey.length - 11) 
             : uniqueKey;
 
-        // Eligible couples and elderly counts remain derived from pre-calculated maps
         final maritalStatus = (info['maritalStatus'] ?? '').toString();
         final eligibleCouples = maritalStatus == 'Married' ? 1 : 0;
         final elderly = elderlyCountMap[householdRefKey] ?? 0;
@@ -205,7 +204,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           'name': name,
           'mobile': mobile,
           'hhId': headId,
-          'houseNo': houseNo.isNotEmpty ? houseNo : hhId, // Use houseNo if available, otherwise fallback to hhId
+          'houseNo': houseNo.isNotEmpty ? houseNo : 0,
           'totalMembers': totalMembers,
           'eligibleCouples': eligibleCouples,
           'elderly': elderly,
@@ -217,7 +216,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         };
       }).toList();
 
-      // Sort so that latest records (by created_date_time, then modified_date_time) appear first
       mapped.sort((a, b) {
         final ra = a['_raw'] as Map<String, dynamic>? ?? const {};
         final rb = b['_raw'] as Map<String, dynamic>? ?? const {};
@@ -229,7 +227,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           return createdB.compareTo(createdA); // newest first
         }
 
-        // Fallback to modified_date_time if created_date_time is missing
         final modifiedA = DateTime.tryParse((ra['modified_date_time'] ?? '').toString());
         final modifiedB = DateTime.tryParse((rb['modified_date_time'] ?? '').toString());
 

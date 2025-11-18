@@ -142,25 +142,10 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
   Future<void> _loadAncItems() async {
     try {
-      // Load beneficiaries that already have an ANC Due Registration form
+      // Load ANC forms DB reference for per-beneficiary visit checks
       final db = await DatabaseProvider.instance.database;
       final ancFormKey =
           FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
-      final Set<String> ancCompletedBeneficiaries = <String>{};
-      if (ancFormKey.isNotEmpty) {
-        final ancForms = await db.query(
-          FollowupFormDataTable.table,
-          columns: ['beneficiary_ref_key'],
-          where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-          whereArgs: [ancFormKey],
-        );
-        for (final formRow in ancForms) {
-          final key = formRow['beneficiary_ref_key']?.toString() ?? '';
-          if (key.isNotEmpty) {
-            ancCompletedBeneficiaries.add(key);
-          }
-        }
-      }
 
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
 
@@ -169,11 +154,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       for (final row in rows) {
         try {
           final uniqueKeyFull = row['unique_key']?.toString() ?? '';
-          if (uniqueKeyFull.isNotEmpty &&
-              ancCompletedBeneficiaries.contains(uniqueKeyFull)) {
-            // Skip ANC items that already have a saved ANC form
-            continue;
-          }
 
           final isDeath = row['is_death'] == 1;
           final isMigrated = row['is_migrated'] == 1;
@@ -277,14 +257,125 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             lmpDate = lastVisitDt ?? DateTime.now();
           }
 
+          // Calculate ANC visit windows based on LMP (same logic as ANCVisitListScreen)
           final ancRanges = _calculateAncDateRangesForToday(lmpDate);
-          final currentAncLastDueDate = ancRanges['4th_anc_end'];
 
-          String currentAncLastDueDateText = '-';
-          if (currentAncLastDueDate != null) {
-            currentAncLastDueDateText =
-                '${currentAncLastDueDate.year.toString().padLeft(4, '0')}-${currentAncLastDueDate.month.toString().padLeft(2, '0')}-${currentAncLastDueDate.day.toString().padLeft(2, '0')}';
+          // We will check each ANC window (1st–4th). If today is within a
+          // window and there is NO ANC form whose date_of_inspection falls
+          // inside that window, the record will be shown in Today's ANC list.
+          final today = DateTime.now();
+          final todayDate = DateTime(today.year, today.month, today.day);
+
+          bool _isTodayInWindow(DateTime start, DateTime end) {
+            final startDate = DateTime(start.year, start.month, start.day);
+            final endDate = DateTime(end.year, end.month, end.day);
+            return (todayDate.isAtSameMomentAs(startDate) || todayDate.isAfter(startDate)) &&
+                (todayDate.isAtSameMomentAs(endDate) || todayDate.isBefore(endDate));
           }
+
+          bool _hasFormInWindow(List<Map<String, dynamic>> forms, DateTime start, DateTime end) {
+            for (final formRow in forms) {
+              try {
+                final formJsonRaw = formRow['form_json']?.toString();
+                String? dateRaw;
+
+                if (formJsonRaw != null && formJsonRaw.isNotEmpty) {
+                  final decoded = jsonDecode(formJsonRaw);
+                  if (decoded is Map && decoded['form_data'] is Map) {
+                    final formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+                    dateRaw = formData['date_of_inspection']?.toString();
+                  }
+                }
+
+                // Fallback to created_date_time if date_of_inspection is missing
+                dateRaw ??= formRow['created_date_time']?.toString();
+                if (dateRaw == null || dateRaw.isEmpty) {
+                  // If we can't get any date, treat this form as within the window
+                  return true;
+                }
+
+                String dateStr = dateRaw;
+                if (dateStr.contains('T')) {
+                  dateStr = dateStr.split('T')[0];
+                }
+                final dt = DateTime.tryParse(dateStr);
+                if (dt == null) {
+                  // If parsing fails, still consider it as within the window
+                  return true;
+                }
+
+                final d = DateTime(dt.year, dt.month, dt.day);
+                final startDate = DateTime(start.year, start.month, start.day);
+                final endDate = DateTime(end.year, end.month, end.day);
+                final within = (d.isAtSameMomentAs(startDate) || d.isAfter(startDate)) &&
+                    (d.isAtSameMomentAs(endDate) || d.isBefore(endDate));
+                if (within) return true;
+              } catch (_) {}
+            }
+            return false;
+          }
+
+          // Fetch all ANC forms for this beneficiary once
+          List<Map<String, dynamic>> existingForms = [];
+          if (ancFormKey.isNotEmpty && uniqueKeyFull.isNotEmpty) {
+            existingForms = await db.query(
+              FollowupFormDataTable.table,
+              columns: ['form_json', 'created_date_time'],
+              where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+              whereArgs: [ancFormKey, uniqueKeyFull],
+            );
+          }
+
+          // Determine if any ANC visit (1st–4th) is currently due
+          DateTime? dueVisitEndDate;
+
+          final firstStart = ancRanges['1st_anc_start'];
+          final firstEnd = ancRanges['1st_anc_end'];
+          final secondStart = ancRanges['2nd_anc_start'];
+          final secondEnd = ancRanges['2nd_anc_end'];
+          final thirdStart = ancRanges['3rd_anc_start'];
+          final thirdEnd = ancRanges['3rd_anc_end'];
+          final fourthStart = ancRanges['4th_anc_start'];
+          final fourthEnd = ancRanges['4th_anc_end'];
+
+          bool hasDueVisit = false;
+
+          if (!hasDueVisit && firstStart != null && firstEnd != null && _isTodayInWindow(firstStart, firstEnd)) {
+            if (!_hasFormInWindow(existingForms, firstStart, firstEnd)) {
+              hasDueVisit = true;
+              dueVisitEndDate = firstEnd;
+            }
+          }
+
+          if (!hasDueVisit && secondStart != null && secondEnd != null && _isTodayInWindow(secondStart, secondEnd)) {
+            if (!_hasFormInWindow(existingForms, secondStart, secondEnd)) {
+              hasDueVisit = true;
+              dueVisitEndDate = secondEnd;
+            }
+          }
+
+          if (!hasDueVisit && thirdStart != null && thirdEnd != null && _isTodayInWindow(thirdStart, thirdEnd)) {
+            if (!_hasFormInWindow(existingForms, thirdStart, thirdEnd)) {
+              hasDueVisit = true;
+              dueVisitEndDate = thirdEnd;
+            }
+          }
+
+          if (!hasDueVisit && fourthStart != null && fourthEnd != null && _isTodayInWindow(fourthStart, fourthEnd)) {
+            if (!_hasFormInWindow(existingForms, fourthStart, fourthEnd)) {
+              hasDueVisit = true;
+              dueVisitEndDate = fourthEnd;
+            }
+          }
+
+          // If no ANC visit is currently due (or all have forms in their windows), skip this beneficiary
+          if (!hasDueVisit || dueVisitEndDate == null) {
+            continue;
+          }
+
+          // For display, use the end date of the currently due visit window
+          final currentAncLastDueDateText =
+              '${dueVisitEndDate.year.toString().padLeft(4, '0')}-${dueVisitEndDate.month.toString().padLeft(2, '0')}-${dueVisitEndDate.day.toString().padLeft(2, '0')}';
 
           final householdRefKey = row['household_ref_key']?.toString() ?? '';
 

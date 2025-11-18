@@ -69,9 +69,14 @@ class _EligibleCoupleListState extends State<HighRisk> {
             }
           }
 
+          final rawHhId = row['household_ref_key']?.toString() ?? '';
+          final trimmedHhId = rawHhId.length > 11
+              ? rawHhId.substring(rawHhId.length - 11)
+              : rawHhId;
+
           final visitData = {
             'id': beneficiaryKey,
-            'hhId': row['household_ref_key']?.toString(),
+            'hhId': trimmedHhId,
             'house_number': formData['house_number'],
             'woman_name': formData['woman_name'],
             'husband_name': formData['husband_name'],

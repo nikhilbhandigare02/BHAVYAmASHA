@@ -444,7 +444,7 @@ class _DeliveryOutcomeScreenState
           },
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
+            margin: const EdgeInsets.symmetric(vertical: 0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),
               boxShadow: [

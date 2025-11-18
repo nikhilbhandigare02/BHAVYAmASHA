@@ -148,7 +148,6 @@ class BeneficiaryRepository {
               skipped++;
               continue;
             }
-            // Even if not synced, per requirement do not insert duplicates and do not update
             skipped++;
             continue;
           }
@@ -156,8 +155,7 @@ class BeneficiaryRepository {
         await LocalStorageDao.instance.insertBeneficiary(row);
         inserted++;
       } catch (e) {
-        // Skip faulty record
-        // print('Error inserting beneficiary: $e');
+        print('Error inserting beneficiary: $e');
       }
     }
 
@@ -207,8 +205,7 @@ class BeneficiaryRepository {
       return info;
     }
 
-    // Otherwise, treat it as the canonical API format and map it
-    // into the local app structure.
+
 
     final nameMap = info['name'] is Map
         ? Map<String, dynamic>.from(info['name'] as Map)
@@ -244,7 +241,6 @@ class BeneficiaryRepository {
         : <String, dynamic>{};
 
     final mapped = <String, dynamic>{
-      // Common identification fields
       'memberType': 'Adult',
       'relation': info['relation'] ?? info['relation_to_head'] ?? '',
       'name': fullName,

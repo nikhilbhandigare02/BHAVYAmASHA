@@ -105,19 +105,19 @@ class _OutcomeFormView extends StatelessWidget {
                   final count = snapshot.data ?? 0;
                   return Container(
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    color: Colors.blue.shade50,
+                    color: Colors.white,
                     child: Row(
                       children: [
-                        const Icon(Icons.history, size: 20, color: Colors.blue),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${l10n.visitsLabel ?? 'Previous Submissions'}: $count',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue.shade800,
-                          ),
-                        ),
+                        // const Icon(Icons.history, size: 20, color: Colors.blue),
+                        // const SizedBox(width: 8),
+                        // Text(
+                        //   '${l10n.visitsLabel ?? 'Previous Submissions'}: $count',
+                        //   style: TextStyle(
+                        //     fontSize: 14.sp,
+                        //     fontWeight: FontWeight.w500,
+                        //     color: Colors.blue.shade800,
+                        //   ),
+                        // ),
                       ],
                     ),
                   );
