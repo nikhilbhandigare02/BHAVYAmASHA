@@ -449,19 +449,117 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                       borderRadius: 4,
                       height: 3.h,
                       fontSize: 14.sp,
-                      onPress: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => AddNewFamilyHeadScreen(
-                              isEdit: true,
-                              initial: {
-                                'houseNo': data['houseNo']?.toString() ?? '',
-                                'name': data['name']?.toString() ?? '',
-                                'mobile': data['mobile']?.toString() ?? '',
-                              },
+                      onPress: () async {
+                        try {
+                          final hhKey = data['_raw']['household_ref_key']?.toString() ?? '';
+                          if (hhKey.isEmpty) {
+                            return;
+                          }
+
+                          final members = await LocalStorageDao.instance.getBeneficiariesByHousehold(hhKey);
+                          if (members.isEmpty) {
+                            return;
+                          }
+
+                          Map<String, dynamic>? headRow;
+                          final configuredHeadKey = data['_raw']['unique_key']?.toString();
+                          if (configuredHeadKey != null && configuredHeadKey.isNotEmpty) {
+                            for (final m in members) {
+                              if ((m['unique_key'] ?? '').toString() == configuredHeadKey) {
+                                headRow = m;
+                                break;
+                              }
+                            }
+                          }
+
+                          headRow ??= members.first;
+
+                          Map<String, dynamic> info;
+                          final rawInfo = headRow['beneficiary_info'];
+                          if (rawInfo is Map<String, dynamic>) {
+                            info = rawInfo;
+                          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+                            info = Map<String, dynamic>.from(jsonDecode(rawInfo) as Map);
+                          } else {
+                            info = <String, dynamic>{};
+                          }
+
+                          final map = <String, String>{};
+                          info.forEach((key, value) {
+                            if (value != null) {
+                              map[key] = value.toString();
+                            }
+                          });
+
+                          map['hh_unique_key'] = hhKey;
+                          map['head_unique_key'] = headRow['unique_key']?.toString() ?? '';
+                          if (headRow['id'] != null) {
+                            map['head_id_pk'] = headRow['id'].toString();
+                          }
+
+                          try {
+                            Map<String, dynamic>? spouseRow;
+
+                            for (final m in members) {
+                              final rawSpInfo = m['beneficiary_info'];
+                              Map<String, dynamic> sInfo;
+                              if (rawSpInfo is Map<String, dynamic>) {
+                                sInfo = rawSpInfo;
+                              } else if (rawSpInfo is String && rawSpInfo.isNotEmpty) {
+                                try {
+                                  sInfo = Map<String, dynamic>.from(jsonDecode(rawSpInfo) as Map);
+                                } catch (_) {
+                                  continue;
+                                }
+                              } else {
+                                continue;
+                              }
+
+                              final rel = (sInfo['relation_to_head'] ?? sInfo['relation'])
+                                  ?.toString()
+                                  .toLowerCase();
+                              if (rel == 'spouse') {
+                                spouseRow = m;
+                                break;
+                              }
+                            }
+
+                            if (spouseRow != null) {
+                              final rawSpInfo = spouseRow['beneficiary_info'];
+                              Map<String, dynamic> spInfo;
+                              if (rawSpInfo is Map<String, dynamic>) {
+                                spInfo = rawSpInfo;
+                              } else if (rawSpInfo is String && rawSpInfo.isNotEmpty) {
+                                spInfo = Map<String, dynamic>.from(jsonDecode(rawSpInfo) as Map);
+                              } else {
+                                spInfo = <String, dynamic>{};
+                              }
+
+                              map['spouse_unique_key'] = spouseRow['unique_key']?.toString() ?? '';
+                              if (spouseRow['id'] != null) {
+                                map['spouse_id_pk'] = spouseRow['id'].toString();
+                              }
+
+                              spInfo.forEach((key, value) {
+                                if (value != null) {
+                                  map['sp_$key'] = value.toString();
+                                }
+                              });
+                            }
+                          } catch (_) {}
+
+                          map['headName'] ??= data['name']?.toString() ?? '';
+                          map['mobileNo'] ??= data['mobile']?.toString() ?? '';
+
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => AddNewFamilyHeadScreen(
+                                isEdit: true,
+                                initial: map,
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        } catch (_) {}
                       },
                     ),
                   ),
