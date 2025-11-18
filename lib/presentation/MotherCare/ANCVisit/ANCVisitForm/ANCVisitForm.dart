@@ -413,53 +413,24 @@ class _AncvisitformState extends State<Ancvisitform> {
       } else {
         print('ℹ️ No valid ID or BeneficiaryID provided for secure storage lookup');
       }
-    }
 
-    // Set initial values
-    _bloc.add(LmpDateChanged(DateTime.now()));
+      // Use visitCount passed from previous screen to determine next ANC visit number
+      try {
+        final dynamic rawVisitCount = data['visitCount'];
+        int visitCount = 0;
 
-    if (data != null) {
-      // Set name if available
-      if (data['Name'] != null) {
-        _bloc.add(WomanNameChanged(data['Name'].toString()));
-      }
-
-      // Set husband's name if available
-      if (data['HusbandName'] != null) {
-        _bloc.add(HusbandNameChanged(data['HusbandName'].toString()));
-      }
-
-      // Set RCH number if available - safe navigation
-      if (data['_rawRow'] != null) {
-        final rawRow = data['_rawRow'] as Map<String, dynamic>?;
-        final rchNumber = rawRow?['rch_number'];
-        if (rchNumber != null) {
-          _bloc.add(RchNumberChanged(rchNumber.toString()));
+        if (rawVisitCount is int) {
+          visitCount = rawVisitCount;
+        } else if (rawVisitCount is String) {
+          visitCount = int.tryParse(rawVisitCount) ?? 0;
         }
-      }
 
-      // Set house number - prefer secure storage value over raw data
-      if (houseNo != null) {
-        _bloc.add(HouseNumberChanged(houseNo));
-      } else if (data['_rawRow'] != null) {
-        final rawRow = data['_rawRow'] as Map<String, dynamic>?;
-        final rawHouseNo = rawRow?['houseNo'];
-        if (rawHouseNo != null) {
-          _bloc.add(HouseNumberChanged(rawHouseNo.toString()));
-        }
-      }
+        final nextVisitNumber = visitCount + 1;
+        print('🔢 visitCount from list screen: $visitCount, nextVisitNumber: $nextVisitNumber');
 
-      // Set beneficiary ID from the first available source
-      if (data['id'] != null) {
-        _bloc.add(BeneficiaryIdSet(data['id'].toString()));
-      } else if (data['_rawRow'] != null) {
-        final rawRow = data['_rawRow'] as Map<String, dynamic>?;
-        if (rawRow?['id'] != null) {
-          _bloc.add(BeneficiaryIdSet(rawRow!['id'].toString()));
-        }
-      }
-      if (data['BeneficiaryID'] != null) {
-        _bloc.add(BeneficiaryIdSet(data['BeneficiaryID'].toString()));
+        _bloc.add(VisitNumberChanged(nextVisitNumber.toString()));
+      } catch (e) {
+        print('⚠️ Error processing visitCount from beneficiaryData: $e');
       }
     }
 
@@ -508,41 +479,16 @@ class _AncvisitformState extends State<Ancvisitform> {
                             child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: TextStyle(fontSize: 14.sp)),
                           ),
                           const SizedBox(height: 6),
-                          FutureBuilder<Map<String, dynamic>>(
-                            future: state.beneficiaryId != null && state.beneficiaryId!.isNotEmpty
-                                ? _getLatestAncVisitData()
-                                : Future.value({}),
-                            builder: (context, snapshot) {
-                              int nextVisitNumber = 1; // Default to 1 if no previous visits
-
-                              if (snapshot.connectionState == ConnectionState.done) {
-                                if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
-                                  final formData = snapshot.data!;
-                                  if (formData['anc_visit_no'] != null) {
-                                    final currentVisitNo = int.tryParse(formData['anc_visit_no'].toString()) ?? 0;
-                                    nextVisitNumber = currentVisitNo + 1;
-                                    print('🔢 Current visit number: $currentVisitNo, Next visit number: $nextVisitNumber');
-                                  }
-                                }
-
-                                // Update the visit number in the bloc
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  _bloc.add(VisitNumberChanged(nextVisitNumber.toString()));
-                                });
-                              }
-
-                              return Padding(
-                                padding: const EdgeInsets.only(left: 12.0),
-                                child: Text(
-                                  '$nextVisitNumber',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue, // Make it more visible for debugging
-                                  ),
-                                ),
-                              );
-                            },
+                          Padding(
+                            padding: const EdgeInsets.only(left: 12.0),
+                            child: Text(
+                              '${state.ancVisitNo == 0 ? 1 : state.ancVisitNo}',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -917,7 +863,7 @@ Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
         border: Border.all(color: AppColors.outlineVariant),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Icon(icon, size: 18, color: Colors.black87),///////
+      child: Icon(icon, size: 18, color: Colors.black87),
     ),
   );
 }

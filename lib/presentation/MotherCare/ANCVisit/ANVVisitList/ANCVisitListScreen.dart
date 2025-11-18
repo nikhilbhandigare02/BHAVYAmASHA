@@ -355,13 +355,21 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () async {
+        // Get the visit count before navigating
+        final visitCount = await (beneficiaryId.isNotEmpty
+            ? _getVisitCount(beneficiaryId)
+            : Future.value(0));
+
         final formData = Map<String, dynamic>.from(data);
-        final visitCount = await _getVisitCount(beneficiaryId);
 
         formData['hhId'] = hhId;
         formData['BeneficiaryID'] = beneficiaryId;
         formData['unique_key'] = uniqueKey;
-        formData['visit_count'] = visitCount;
+
+        formData['visitCount'] = visitCount;
+        // ignore: avoid_print
+        print('Passing visitCount to form: $visitCount');
+
 
         Navigator.push(
           context,
