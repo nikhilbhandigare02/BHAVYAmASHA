@@ -8,6 +8,8 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/widgets/AppHeader/AppHeader.dart' show AppHeader;
+import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
 import '../../../data/repositories/EligibleCoupleRepository/EligibleCoupleRepository.dart';
 import '../../HomeScreen/HomeScreen.dart';
 
@@ -35,55 +37,119 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
   Future<void> _loadCounts() async {
     try {
       final db = await DatabaseProvider.instance.database;
-      
-      final eligibleCouples = await db.query('beneficiaries');
-      int totalEligible = 0;
-      
-      for (final row in eligibleCouples) {
-        try {
-          final info = jsonDecode(row['beneficiary_info'] as String? ?? '{}');
-          final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-          final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-          
-          if (_isEligibleFemale(head)) {
-            totalEligible++;
+
+      // === Count for EligibleCoupleIdentifiedScreen ===
+      final identifiedRows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final identifiedHouseholds = <String, List<Map<String, dynamic>>>{};
+      for (final row in identifiedRows) {
+        final hhKey = row['household_ref_key']?.toString() ?? '';
+        if (hhKey.isEmpty) continue;
+        identifiedHouseholds.putIfAbsent(hhKey, () => []).add(row);
+      }
+
+      int totalIdentified = 0;
+      for (final household in identifiedHouseholds.values) {
+        Map<String, dynamic>? head;
+        Map<String, dynamic>? spouse;
+
+        for (final member in household) {
+          final info = _toStringMap(member['beneficiary_info']);
+          final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+          if (relation == 'self') {
+            head = info;
+          } else if (relation == 'spouse') {
+            spouse = info;
           }
-          
-          // Check if spouse is eligible female
-          if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-            totalEligible++;
-          }
-        } catch (e) {
-          print('Error processing beneficiary: $e');
+        }
+
+        if (head != null && _isIdentifiedEligibleFemale(head)) {
+          totalIdentified++;
+        }
+        if (spouse != null && _isIdentifiedEligibleFemale(spouse)) {
+          totalIdentified++;
         }
       }
-      
+
+      // === Count for UpdatedEligibleCoupleListScreen (All tab) ===
+      final trackingFormKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
+      final Set<String> pregnantBeneficiaries = <String>{};
+      if (trackingFormKey.isNotEmpty) {
+        final trackingRows = await db.query(
+          FollowupFormDataTable.table,
+          columns: ['beneficiary_ref_key', 'form_json'],
+          where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          whereArgs: [trackingFormKey],
+        );
+        for (final row in trackingRows) {
+          try {
+            final formJsonStr = row['form_json']?.toString() ?? '';
+            if (formJsonStr.isEmpty) continue;
+            final decoded = jsonDecode(formJsonStr);
+            if (decoded is! Map<String, dynamic>) continue;
+            Map<String, dynamic> formData = decoded;
+            if (decoded['form_data'] is Map) {
+              formData = Map<String, dynamic>.from(decoded['form_data']);
+            }
+            final isPregnant = formData['is_pregnant'];
+            if (isPregnant == true) {
+              final key = row['beneficiary_ref_key']?.toString() ?? '';
+              if (key.isNotEmpty) {
+                pregnantBeneficiaries.add(key);
+              }
+            }
+          } catch (_) {}
+        }
+      }
+
+      final updatedRows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final updatedHouseholds = <String, List<Map<String, dynamic>>>{};
+      for (final row in updatedRows) {
+        final hhKey = row['household_ref_key']?.toString() ?? '';
+        if (hhKey.isEmpty) continue;
+        updatedHouseholds.putIfAbsent(hhKey, () => []).add(row);
+      }
 
       int totalUpdatedEligible = 0;
-      
-      for (final row in eligibleCouples) {
-        try {
-          final info = jsonDecode(row['beneficiary_info'] as String? ?? '{}');
-          final head = Map<String, dynamic>.from((info['head_details'] as Map?) ?? const {});
-          final spouse = Map<String, dynamic>.from((head['spousedetails'] as Map?) ?? const {});
-          
-          if (_isEligibleFemale(head)) {
-            totalUpdatedEligible++;
+      for (final household in updatedHouseholds.values) {
+        Map<String, dynamic>? head;
+        Map<String, dynamic>? spouse;
+
+        for (final member in household) {
+          try {
+            final memberUniqueKey = member['unique_key']?.toString() ?? '';
+            if (memberUniqueKey.isNotEmpty &&
+                pregnantBeneficiaries.contains(memberUniqueKey)) {
+              continue;
+            }
+
+            final dynamic infoRaw = member['beneficiary_info'];
+            final Map<String, dynamic> info = infoRaw is String
+                ? jsonDecode(infoRaw)
+                : Map<String, dynamic>.from(infoRaw ?? {});
+            final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+            if (relation == 'self') {
+              head = info;
+            } else if (relation == 'spouse') {
+              spouse = info;
+            }
+          } catch (e) {
+            print('Error processing household member for updated count: $e');
           }
-          
-          // Check if spouse is eligible female
-          if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-            totalUpdatedEligible++;
-          }
-        } catch (e) {
-          print('Error processing beneficiary for updated count: $e');
+        }
+
+        if (head != null && _isUpdatedEligibleFemale(head, head: head)) {
+          totalUpdatedEligible++;
+        }
+        if (spouse != null && _isUpdatedEligibleFemale(spouse, head: head)) {
+          totalUpdatedEligible++;
         }
       }
-      
+
       if (mounted) {
         setState(() {
-          eligibleCouplesCount = totalEligible;
-          updatedEligibleCouplesCount = totalUpdatedEligible; // This now includes all eligible couples
+          eligibleCouplesCount = totalIdentified;
+          updatedEligibleCouplesCount = totalUpdatedEligible;
           isLoading = false;
         });
       }
@@ -97,26 +163,51 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     }
   }
 
-
-  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
-    final gender = person['gender']?.toString().toLowerCase() ?? '';
-    if (gender != 'f' && gender != 'female') return false;
-    
-    // Check age if available
-    final dobStr = person['dob']?.toString() ?? '';
-    if (dobStr.isNotEmpty) {
-      try {
-        final dob = DateTime.tryParse(dobStr);
-        if (dob != null) {
-          final age = DateTime.now().difference(dob).inDays ~/ 365;
-          return age >= 15 && age <= 49;
-        }
-      } catch (e) {
-        print('Error parsing date: $e');
-      }
+  Map<String, dynamic> _toStringMap(dynamic map) {
+    if (map == null) return {};
+    if (map is Map<String, dynamic>) return map;
+    if (map is Map) {
+      return Map<String, dynamic>.from(map);
     }
-    
-    return true;
+    return {};
+  }
+
+  bool _isIdentifiedEligibleFemale(Map<String, dynamic> person) {
+    if (person.isEmpty) return false;
+
+    final gender = person['gender']?.toString().toLowerCase();
+    final isFemale = gender == 'f' || gender == 'female';
+    if (!isFemale) return false;
+
+    final maritalStatus = person['maritalStatus']?.toString().toLowerCase();
+    if (maritalStatus != 'married') return false;
+
+    final dob = person['dob'];
+    final age = _calculateAge(dob);
+    return age >= 15 && age <= 49;
+  }
+
+  bool _isUpdatedEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
+    if (person.isEmpty) return false;
+    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
+    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ??
+        head?['maritalStatus']?.toString().toLowerCase() ?? '';
+    final isFemale = genderRaw == 'f' || genderRaw == 'female';
+    final isMarried = maritalStatusRaw == 'married';
+    final dob = person['dob'];
+    final age = _calculateAge(dob);
+    return isFemale && isMarried && age >= 15 && age <= 49;
+  }
+
+  int _calculateAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
   }
 
   Future<void> _printEligibleCoupleActivities() async {

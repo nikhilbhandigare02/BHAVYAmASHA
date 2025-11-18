@@ -5,7 +5,8 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
-import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
+import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
@@ -20,30 +21,26 @@ class Mothercarehomescreen extends StatefulWidget {
 
 class _MothercarehomescreenState extends State<Mothercarehomescreen> {
   int _ancVisitCount = 0;
+  int _deliveryOutcomeCount = 0;
   int _hbcnMotherCount = 0;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadEligiblePregnantWomenCount();
+    _loadAncVisitCount();
+    _loadDeliveryOutcomeCount();
     _loadHBCNCount();
   }
 
-  Future<void> _loadEligiblePregnantWomenCount() async {
+  // Matches ANCVisitListScreen._loadPregnantWomen logic, but only counts rows
+  Future<void> _loadAncVisitCount() async {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       int count = 0;
 
       for (final row in rows) {
         try {
-          // Check if is_family_planning is set
-          final isFamilyPlanning = row['is_family_planning'] == 1 || 
-                                 row['is_family_planning'] == '1' ||
-                                 (row['is_family_planning']?.toString().toLowerCase() == 'true');
-          
-          if (!isFamilyPlanning) continue;
-
           // Parse the beneficiary info
           final dynamic rawInfo = row['beneficiary_info'];
           if (rawInfo == null) continue;
@@ -56,24 +53,15 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
             continue;
           }
 
-          // Process head and spouse
-          final head = (info['head_details'] is Map)
-              ? Map<String, dynamic>.from(info['head_details'] as Map)
-              : <String, dynamic>{};
+          // Match ANC list filter: isPregnant == 'yes' and female
+          final isPregnant =
+              info['isPregnant']?.toString().toLowerCase() == 'yes';
+          if (!isPregnant) continue;
 
-          final spouse = (info['spouse_details'] is Map)
-              ? Map<String, dynamic>.from(info['spouse_details'] as Map)
-              : <String, dynamic>{};
+          final gender = info['gender']?.toString().toLowerCase() ?? '';
+          if (gender != 'f' && gender != 'female') continue;
 
-          // Check if head is eligible pregnant woman
-          if (_isEligiblePregnantWoman(head, spouse)) {
-            count++;
-          }
-
-          // Check if spouse is eligible pregnant woman
-          if (spouse.isNotEmpty && _isEligiblePregnantWoman(spouse, head)) {
-            count++;
-          }
+          count++;
         } catch (e) {
           print('Error processing beneficiary: $e');
         }
@@ -90,33 +78,6 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
-    }
-  }
-
-  bool _isEligiblePregnantWoman(Map<String, dynamic> person, Map<String, dynamic> otherPerson) {
-    try {
-      final gender = (person['gender']?.toString().toLowerCase()?.trim() ?? '');
-      
-      final maritalStatus = (person['maritalStatus']?.toString().toLowerCase()?.trim() ??
-          person['marital_status']?.toString().toLowerCase()?.trim() ??
-          otherPerson['maritalStatus']?.toString().toLowerCase()?.trim() ??
-          otherPerson['marital_status']?.toString().toLowerCase()?.trim() ??
-          '');
-
-      final isPregnant = person['isPregnant']?.toString().toLowerCase() == 'true' ||
-          person['isPregnant']?.toString().toLowerCase() == 'yes' ||
-          person['pregnancyStatus']?.toString().toLowerCase() == 'pregnant';
-
-      final dob = person['dob'] ?? person['dateOfBirth'];
-      final age = _calculateAge(dob);
-
-      return (gender == 'f' || gender == 'female') &&
-          (maritalStatus == 'married' || maritalStatus == 'm') &&
-          (age != null && age >= 15 && age <= 49) &&
-          isPregnant;
-    } catch (e) {
-      print('Error checking eligibility: $e');
-      return false;
     }
   }
 
@@ -141,19 +102,81 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
     }
   }
 
+  // Matches DeliveryOutcomeScreen._loadPregnancyOutcomeeCouples logic for counting
+  Future<void> _loadDeliveryOutcomeCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      // Same ANC ref key used in DeliveryOutcomeScreen
+      const ancRefKey = 'bt7gs9rl1a5d26mz';
+
+      final ancForms = await db.rawQuery('''
+        SELECT 
+          f.beneficiary_ref_key,
+          f.form_json,
+          f.household_ref_key,
+          f.forms_ref_key,
+          f.created_date_time,
+          f.id as form_id
+        FROM ${FollowupFormDataTable.table} f
+        WHERE 
+          f.forms_ref_key = '$ancRefKey'
+          AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+          AND f.is_deleted = 0
+      ''');
+
+      if (mounted) {
+        setState(() {
+          _deliveryOutcomeCount = ancForms.length;
+        });
+      }
+    } catch (e) {
+      print('Error loading delivery outcome count: $e');
+      if (mounted) {
+        setState(() {
+          _deliveryOutcomeCount = 0;
+        });
+      }
+    }
+  }
+
   Future<void> _loadHBCNCount() async {
     try {
-      // Get all delivery outcomes
-      final deliveryOutcomes = await SecureStorageService.getDeliveryOutcomes();
-      
-      // Count only submitted outcomes
+      // Align with HBNCListScreen: count delivery outcomes with valid beneficiaries
+      final db = await DatabaseProvider.instance.database;
+      const deliveryOutcomeKey = '4r7twnycml3ej1vg';
+
+      final dbOutcomes = await db.query(
+        'followup_form_data',
+        where: 'forms_ref_key = ?',
+        whereArgs: [deliveryOutcomeKey],
+      );
+
       int count = 0;
-      for (var outcome in deliveryOutcomes) {
-        if (outcome['isSubmit'] == true) {
+
+      for (final outcome in dbOutcomes) {
+        try {
+          final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
+          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
+            continue;
+          }
+
+          final beneficiaryResults = await db.query(
+            'beneficiaries',
+            where: 'unique_key = ? AND is_deleted = 0',
+            whereArgs: [beneficiaryRefKey],
+          );
+
+          if (beneficiaryResults.isEmpty) {
+            continue;
+          }
+
           count++;
+        } catch (e) {
+          print('Error processing HBNC outcome for count: $e');
         }
       }
-      
+
       if (mounted) {
         setState(() {
           _hbcnMotherCount = count;
@@ -219,7 +242,7 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
                     title:
                     (l10n?.deliveryOutcomeTitle ?? 'Delivery\nOutcome')
                         .toString(),
-                    count: 0,
+                    count: _deliveryOutcomeCount,
                     image: 'assets/images/mother.png',
                     onClick: () {
                       Navigator.pushNamed(

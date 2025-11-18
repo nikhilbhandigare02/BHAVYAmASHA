@@ -8,6 +8,7 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 
 class TrainingProvided extends StatefulWidget {
   const TrainingProvided({super.key});
@@ -20,23 +21,13 @@ class TrainingProvided extends StatefulWidget {
 class _TrainingProvidedState
     extends State<TrainingProvided> {
   final TextEditingController _searchCtrl = TextEditingController();
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-
-      'Date': '16-10-2025',
-      'trainingName': 'ASHA module 2',
-
-    },
-
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  List<Map<String, dynamic>> _allData = [];
+  List<Map<String, dynamic>> _filtered = [];
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _loadTrainingData();
     _searchCtrl.addListener(_onSearchChanged);
   }
 
@@ -51,14 +42,58 @@ class _TrainingProvidedState
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
-        _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+        _filtered = List<Map<String, dynamic>>.from(_allData);
       } else {
-        _filtered = _staticHouseholds.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['trainingName'] as String).toLowerCase().contains(q);
+        _filtered = _allData.where((e) {
+          final id = (e['hhId'] ?? '').toString().toLowerCase();
+          final name = (e['trainingName'] ?? '').toString().toLowerCase();
+          final date = (e['Date'] ?? '').toString().toLowerCase();
+          return id.contains(q) || name.contains(q) || date.contains(q);
         }).toList();
       }
     });
+  }
+
+  Future<void> _loadTrainingData() async {
+    try {
+      final rows = await LocalStorageDao.instance.fetchTrainingList();
+
+      final List<Map<String, dynamic>> parsed = [];
+      for (final row in rows) {
+        try {
+          final formJson = row['form_json'];
+          if (formJson is! Map) continue;
+          final data = formJson['form_data'];
+          if (data is! Map) continue;
+
+          final trainingType = (data['training_type'] ?? '').toString();
+          if (trainingType != 'Providing') continue;
+
+          final trainingName = (data['training_name'] ?? '').toString();
+          final rawDate = data['training_date']?.toString();
+          String dateStr = '';
+          if (rawDate != null && rawDate.isNotEmpty) {
+            dateStr = rawDate.contains('T')
+                ? rawDate.split('T').first
+                : rawDate;
+          }
+
+          parsed.add({
+            'hhId': 'N/A',
+            'trainingName': trainingName,
+            'Date': dateStr,
+          });
+        } catch (_) {
+          continue;
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _allData = parsed;
+        _filtered = List.from(parsed);
+      });
+    } catch (_) {}
   }
 
   @override

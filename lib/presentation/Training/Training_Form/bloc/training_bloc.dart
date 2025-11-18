@@ -114,15 +114,15 @@ class TrainingBloc extends Bloc<TrainingEvent, TrainingState> {
         'is_deleted': 0,
       };
 
-      // final formId = await LocalStorageDao.instance.insertTrainingData(formDataForDb);
-      // if (formId > 0) {
-      //   emit(state.copyWith(status: FormStatus.success));
-      // } else {
-      //   emit(state.copyWith(
-      //     status: FormStatus.failure,
-      //     error: 'Failed to save form data.',
-      //   ));
-      // }
+      final formId = await LocalStorageDao.instance.insertTrainingData(formDataForDb);
+      if (formId > 0) {
+        emit(state.copyWith(status: FormStatus.success));
+      } else {
+        emit(state.copyWith(
+          status: FormStatus.failure,
+          error: 'Failed to save form data.',
+        ));
+      }
 
     } catch (e) {
       emit(state.copyWith(

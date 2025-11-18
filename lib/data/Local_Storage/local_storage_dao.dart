@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Local_Storage/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'database_provider.dart';
@@ -126,6 +127,31 @@ class LocalStorageDao {
       return mapped;
     } catch (e) {
       print('Error getting beneficiary by unique_key: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchTrainingList() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        TrainingDataTable.table,
+        where: 'is_deleted = 0',
+        orderBy: 'created_date_time DESC',
+      );
+
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        final formJson = mapped['form_json']?.toString();
+        if (formJson != null && formJson.isNotEmpty) {
+          try {
+            mapped['form_json'] = jsonDecode(formJson);
+          } catch (_) {}
+        }
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error fetching training list: $e');
       rethrow;
     }
   }
@@ -882,6 +908,17 @@ class LocalStorageDao {
     } catch (e) {
       print('Error getting household by server_id: $e');
       return null;
+    }
+  }
+
+  Future<int> insertTrainingData(Map<String, dynamic> data) async {
+    try {
+      final db = await _db;
+      final row = Map<String, dynamic>.from(data);
+      return await db.insert(TrainingDataTable.table, row);
+    } catch (e) {
+      print('Error inserting training data: $e');
+      rethrow;
     }
   }
 

@@ -759,7 +759,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
                 const SizedBox(height: 8),
                 Text(
-                  l10n?.dataSavedSuccessfully ??
                       'New house has been added successfully',
                   textAlign: TextAlign.center,
                   style:  TextStyle(
@@ -769,8 +768,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  l10n?.householdSavedSuccessfully(memberCount) ??
-                      '$memberCount household(s) saved successfully',
+                  'Total beneficiary added: $memberCount ',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 16,

@@ -11,13 +11,14 @@ import 'tables/eligible_couple_activities_table.dart';
 import 'tables/mother_care_activities_table.dart';
 import 'tables/child_care_activities_table.dart';
 import 'tables/followup_form_data_table.dart';
+import 'tables/training_data_table.dart';
 
 class DatabaseProvider {
   DatabaseProvider._();
   static final DatabaseProvider instance = DatabaseProvider._();
 
   static const _dbName = 'medixcel.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
 
   Database? _db;
 
@@ -34,6 +35,7 @@ class DatabaseProvider {
       dbPath,
       version: _dbVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -44,6 +46,13 @@ class DatabaseProvider {
     await db.execute(EligibleCoupleActivitiesTable.create);
     await db.execute(MotherCareActivitiesTable.create);
     await db.execute(ChildCareActivitiesTable.create);
-    await db.execute(FollowupFormDataTable.create); 
+    await db.execute(FollowupFormDataTable.create);
+    await TrainingDataTable.createTable(db);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await TrainingDataTable.createTable(db);
+    }
   }
 }
