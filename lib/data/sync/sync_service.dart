@@ -87,6 +87,25 @@ class SyncService {
     }
   }
 
+  Future<void> fetchMotherCareActivitiesFromServer() async {
+    try {
+      final ids = await _getUserWorkingIds();
+      if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
+      final lastId = await _dao.getLatestMotherCareActivityServerId();
+      final useLast = lastId.isEmpty ? null : lastId;
+      print('MotherCare Pull: Fetching with last_id=${useLast ?? '[default]'} limit=20');
+      final result = await _mcRepo.fetchAndStoreMotherCareActivities(
+        facilityId: ids['facilityId']!,
+        ashaId: ids['ashaId']!,
+        lastId: useLast,
+        limit: 20,
+      );
+      print('MotherCare Pull: fetched=${result['fetched']}, inserted=${result['inserted']}, updated=${result['updated']}');
+    } catch (e) {
+      print('MotherCare Pull: error -> $e');
+    }
+  }
+
   Future<void> syncUnsyncedEligibleCoupleActivities() async {
     try {
       final ids = await _getUserWorkingIds();
@@ -312,6 +331,7 @@ class SyncService {
       await syncUnsyncedMotherCareAncActivities();
       await fetchEligibleCoupleActivitiesFromServer();
       await fetchChildCareActivitiesFromServer();
+      await fetchMotherCareActivitiesFromServer();
     } catch (e) {
       print('SyncService periodic error: $e');
     } finally {

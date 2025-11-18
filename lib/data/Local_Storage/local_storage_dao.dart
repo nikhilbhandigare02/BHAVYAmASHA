@@ -87,6 +87,25 @@ class LocalStorageDao {
       return '';
     }
   }
+
+  Future<String> getLatestMotherCareActivityServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'mother_care_activities',
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest mother care activity server_id: $e');
+      return '';
+    }
+  }
   }
 
   /// Returns the count of ANC visits for a specific beneficiary
@@ -1054,6 +1073,25 @@ class LocalStorageDao {
     };
     if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
     return db.update('child_care_activities', values, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<String> getLatestMotherCareActivityServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'mother_care_activities',
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest mother care activity server_id: $e');
+      return '';
+    }
   }
 
   Future<List<Map<String, dynamic>>> getFollowupFormsByHouseholdAndBeneficiary({

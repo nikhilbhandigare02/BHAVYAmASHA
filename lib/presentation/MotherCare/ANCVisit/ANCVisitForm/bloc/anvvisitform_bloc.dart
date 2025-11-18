@@ -220,8 +220,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         } catch (e) {
           print('Error saving to secure storage: $e');
         }
-
-        // After local save, try to sync with mother care activity API
         try {
           final dbRows = await db.query(
             FollowupFormDataTable.table,
