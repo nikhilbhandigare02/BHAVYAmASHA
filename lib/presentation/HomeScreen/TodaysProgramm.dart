@@ -111,12 +111,23 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       if (formKeys.isEmpty) return;
 
+      // Limit count to forms completed **today** so the completed
+      // visits count effectively resets every new day.
       final placeholders = List.filled(formKeys.length, '?').join(',');
+
+      final now = DateTime.now();
+      final todayStr =
+          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
       final rows = await db.rawQuery(
         'SELECT COUNT(*) AS cnt FROM ${FollowupFormDataTable.table} '
         'WHERE forms_ref_key IN ($placeholders) '
-        'AND (is_deleted IS NULL OR is_deleted = 0)',
-        formKeys,
+        'AND (is_deleted IS NULL OR is_deleted = 0) '
+        'AND DATE(created_date_time) = DATE(?)',
+        [
+          ...formKeys,
+          todayStr,
+        ],
       );
 
       int count = 0;
@@ -431,47 +442,55 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
   Future<void> _loadHbncItems() async {
     try {
-      final db = await DatabaseProvider.instance.database;
-
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-
       final List<Map<String, dynamic>> items = [];
 
-      for (final row in rows) {
+      // Use same source as HBNCList: delivery outcome records
+      final db = await DatabaseProvider.instance.database;
+      const deliveryOutcomeKey = '4r7twnycml3ej1vg';
+
+      final dbOutcomes = await db.query(
+        'followup_form_data',
+        where: 'forms_ref_key = ?',
+        whereArgs: [deliveryOutcomeKey],
+      );
+
+      for (final outcome in dbOutcomes) {
         try {
-          final isDeath = row['is_death'] == 1;
-          final isMigrated = row['is_migrated'] == 1;
-          if (isDeath || isMigrated) continue;
+          final formJson = jsonDecode(outcome['form_json'] as String);
+          final formData = formJson['form_data'] ?? {};
+          final beneficiaryRefKey =
+              outcome['beneficiary_ref_key']?.toString() ?? '';
+          if (beneficiaryRefKey.isEmpty) continue;
 
-          final infoRaw = row['beneficiary_info'];
-          if (infoRaw == null) continue;
+          final beneficiaryResults = await db.query(
+            'beneficiaries',
+            where: 'unique_key = ? AND is_deleted = 0',
+            whereArgs: [beneficiaryRefKey],
+          );
+          if (beneficiaryResults.isEmpty) continue;
 
-          final Map<String, dynamic> info = infoRaw is Map<String, dynamic>
-              ? infoRaw
-              : Map<String, dynamic>.from(infoRaw as Map);
+          final beneficiary = beneficiaryResults.first;
 
-          final isPregnant =
-              info['isPregnant']?.toString().toLowerCase() == 'yes';
-          if (!isPregnant) continue;
+          final beneficiaryInfoRaw =
+              beneficiary['beneficiary_info'] as String? ?? '{}';
 
-          final genderRaw = info['gender']?.toString().toLowerCase();
-          if (genderRaw != 'f' && genderRaw != 'female') continue;
+          Map<String, dynamic> info;
+          try {
+            info = jsonDecode(beneficiaryInfoRaw);
+          } catch (_) {
+            continue;
+          }
 
-          final name = (info['memberName'] ?? info['headName'] ?? info['name'])
-              ?.toString()
-              .trim();
-          if (name == null || name.isEmpty) continue;
+          final name = info['memberName']?.toString() ??
+              info['headName']?.toString() ??
+              info['name']?.toString() ??
+              'N/A';
 
           String ageText = '-';
-          final dobRaw =
-              info['dob']?.toString() ?? info['dateOfBirth']?.toString();
+          final dobRaw = info['dob']?.toString();
           if (dobRaw != null && dobRaw.isNotEmpty) {
             try {
-              String dateStr = dobRaw;
-              if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              final birthDate = DateTime.tryParse(dateStr);
+              final birthDate = DateTime.tryParse(dobRaw);
               if (birthDate != null) {
                 final now = DateTime.now();
                 int ageYears = now.year - birthDate.year;
@@ -496,42 +515,13 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                     : '-';
           }
 
-          final mobile = (info['mobileNo'] ?? info['phone'])?.toString();
+          final gender = info['gender']?.toString() ?? 'N/A';
+          final mobile = info['mobileNo']?.toString() ?? info['phone']?.toString();
 
-          String lastVisitDate = '-';
-          DateTime? lastVisitDt;
+          final householdRefKey =
+              beneficiary['household_ref_key']?.toString() ?? '';
 
-          String? modifiedRaw = row['modified_date_time']?.toString();
-          String? createdRaw = row['created_date_time']?.toString();
-
-          String? pickDateStr(String? raw) {
-            if (raw == null || raw.isEmpty) return null;
-            String s = raw;
-            if (s.contains('T')) {
-              s = s.split('T')[0];
-            }
-            return s;
-          }
-
-          String? modifiedStr = pickDateStr(modifiedRaw);
-          String? createdStr = pickDateStr(createdRaw);
-
-          if (modifiedStr != null) {
-            lastVisitDt = DateTime.tryParse(modifiedStr);
-            lastVisitDate = modifiedStr;
-          } else if (createdStr != null) {
-            lastVisitDt = DateTime.tryParse(createdStr);
-            lastVisitDate = createdStr;
-          }
-
-          final householdRefKey = row['household_ref_key']?.toString() ?? '';
-
-          final beneficiaryRefKey = row['unique_key']?.toString() ?? '';
-
-          // Fetch delivery date from delivery outcome form (same as HBNCList)
-          final deliveryDate = await _getHbncDeliveryDateForBeneficiary(
-            beneficiaryRefKey,
-          );
+          final deliveryDate = formData['delivery_date']?.toString();
 
           // Compute next HBNC visit date using same logic as HBNCList
           final nextHbncDate = await _getHbncNextVisitDateForDisplay(
@@ -539,6 +529,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             deliveryDate,
           );
 
+          // Apply existing HBNC condition logic: only show if this due date
+          // falls within the 7-day window without a recorded visit.
           if (nextHbncDate != null && nextHbncDate.isNotEmpty) {
             final shouldShow = await _shouldShowHbncItemForDueDate(
               db,
@@ -546,12 +538,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               nextHbncDate,
             );
             if (!shouldShow) {
-              // Record was already processed within this 7-day window
               continue;
             }
           }
-
-          final gender = info['gender']?.toString() ?? 'N/A';
 
           items.add({
             'id': _last11(beneficiaryRefKey),

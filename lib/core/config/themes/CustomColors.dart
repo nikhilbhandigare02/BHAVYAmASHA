@@ -70,6 +70,13 @@ class AppColors {
   static const Color cardBackground = surface;
   // Utility
   static const Color transparent = Colors.transparent;
+
+  static const Color greentick = Color(0xFF028102);
+
+  static const Color greenApp = Color(0xFF1ABC9C);
+  static const Color blueApp = Color(0xFF4a90e2);
+  static const Color orangeApp = Color(0xFFf5a623);
+  static const Color bgColorScreen = Color.fromRGBO(248, 249, 254, 1.0);
 }
 
 /// Dark mode colors. Keep brand hues consistent while adjusting luminance.
@@ -123,6 +130,14 @@ class AppColorsDark {
    static const Color disabled = Color(0xFF3A3940);
    static const Color scaffoldBackground = background;
    static const Color cardBackground = surface;
+
+
+  static const Color greentick = Color(0xFF028102);
+
+  static const Color green = Color(0xFF4CAF50);
+  static const Color greenApp = Color(0xFF1ABC9C);
+  static const Color blueApp = Color(0xFF4a90e2);
+  static const Color orangeApp = Color(0xFFf5a623);
  }
 
  /// App color schemes for light and dark themes.

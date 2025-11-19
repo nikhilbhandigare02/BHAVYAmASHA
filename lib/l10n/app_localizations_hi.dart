@@ -245,7 +245,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ageGenderLabel => 'आयु | लिंग';
 
   @override
-  String get ageLabel => 'आयु';
+  String get ageLabel => 'उम्र: ';
 
   @override
   String get ageLabelSimple => 'आयु';
@@ -947,7 +947,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateHint => 'dd-mm-yyyy';
 
   @override
-  String get dateLabel => 'तिथि';
+  String get dateLabel => 'तारीख';
 
   @override
   String get dateOfInspectionLabel => 'Date of inspection *';
@@ -1108,7 +1108,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get closeButton => 'बंद करा';
 
   @override
-  String get ok => 'ठीक आहे';
+  String get ok => 'ठीक है';
 
   @override
   String get elecKeroseneLamp => 'मिट्टी के तेल का दीया';
@@ -1261,7 +1261,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get fuelOther => 'अन्य';
 
   @override
-  String get genderLabel => 'लिंग';
+  String get genderLabel => 'लिंग: ';
 
   @override
   String get genderOther => 'अन्य';
@@ -2094,7 +2094,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get socioEconomicDetailsTitle => 'सामाजिक-आर्थिक विवरण';
 
   @override
-  String get somethingWentWrong => 'Something went wrong';
+  String get somethingWentWrong => 'कुछ गलत हो गया!';
 
   @override
   String get son => 'पुत्र';
@@ -2307,9 +2307,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get villageNameLabel => 'गांव का नाम';
 
   @override
-  String visitDate(Object date) {
-    return 'मिलने की तिथि: $date';
-  }
+  String get visitDate => 'भ्रमण दिनांक :';
 
   @override
   String get visitDateLabel => 'भ्रमण की तिथि';
@@ -2399,7 +2397,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get weightKgLabel => 'Weight (Kg)';
 
   @override
-  String get welcome => 'स्वागत है';
+  String get welcome => 'हमारे ऐप में आपका स्वागत है';
 
   @override
   String get whoseMobileLabel => 'मोबाइल नंबर किसका?';
@@ -2846,7 +2844,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectOption => 'Select';
 
   @override
-  String get home => 'Home';
+  String get home => 'होम';
 
   @override
   String get subCenter => 'Sub-Center';
@@ -3492,4 +3490,971 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get deceasedChildDetails => 'मृत बच्चे का विवरण';
+
+  @override
+  String get login_button => 'लॉगिन करें';
+
+  @override
+  String get logout => 'लॉग आउट करें';
+
+  @override
+  String get cancel => 'रद्द करें';
+
+  @override
+  String get success => 'सफलता';
+
+  @override
+  String get error => 'त्रुटि';
+
+  @override
+  String get patients => 'मरीज';
+
+  @override
+  String get bills => 'बिल';
+
+  @override
+  String get settings => 'सेटिंग्स';
+
+  @override
+  String get performance => 'प्रदर्शन';
+
+  @override
+  String get selfHelp => 'स्व-सहायता';
+
+  @override
+  String get scanAndShare => 'स्कैन करें और साझा करें';
+
+  @override
+  String get notifications => 'सूचनाएं';
+
+  @override
+  String get appUpdates => 'ऐप अपडेट्स';
+
+  @override
+  String get upcomingAppointments => 'आगामी अपॉइंटमेंट्स';
+
+  @override
+  String get morningSummary => 'सुबह की सारांश';
+
+  @override
+  String get biometricLogin => 'बायोमेट्रिक लॉगिन';
+
+  @override
+  String get updatePin => 'पिन अपडेट करें';
+
+  @override
+  String get switchClinic => 'क्लिनिक बदलें';
+
+  @override
+  String get defaultEmrSettings => 'डिफ़ॉल्ट ईएमआर सेटिंग्स';
+
+  @override
+  String get appSettings => 'ऐप सेटिंग्स';
+
+  @override
+  String get allowBackDatedAppointments => 'पिछली तारीख की अपॉइंटमेंट्स की अनुमति दें';
+
+  @override
+  String get hindiLanguage => 'हिंदी भाषा';
+
+  @override
+  String get change_language => 'भाषा बदलें';
+
+  @override
+  String get verifyPin => 'पिन सत्यापित करें';
+
+  @override
+  String get loginWithBiometric => 'बायोमेट्रिक से लॉगिन करें';
+
+  @override
+  String get enter4DigitPin => 'अपना 4 अंकों का पिन दर्ज करें';
+
+  @override
+  String get signInWithOtp => 'ओटीपी से साइन इन करें';
+
+  @override
+  String get enterEmailOrMobile => 'अपना ईमेल या मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get sendOtp => 'ओटीपी भेजें';
+
+  @override
+  String get verifyOtp => 'ओटीपी सत्यापित करें';
+
+  @override
+  String get resendOtp => 'ओटीपी पुनः भेजें';
+
+  @override
+  String get setupNewPin => 'नया पिन सेट करें';
+
+  @override
+  String get enterNewPin => 'नया पिन दर्ज करें';
+
+  @override
+  String get reenterNewPin => 'नया पिन फिर से दर्ज करें';
+
+  @override
+  String get pinInstruction => 'पिन एक 4-अंकों का कोड है जिसे आपको अनिवार्य दो-स्तरीय प्रमाणीकरण के लिए सेट करना होगा';
+
+  @override
+  String get setPin => 'पिन सेट करें';
+
+  @override
+  String get pinSuccessfullySet => 'पिन सफलतापूर्वक सेट किया गया';
+
+  @override
+  String get pinLengthError => 'पिन 4 अंकों का होना चाहिए';
+
+  @override
+  String get pinMismatchError => 'पिन और पुनः दर्ज किया गया पिन मेल नहीं खाते';
+
+  @override
+  String get noVisitToday => 'आज आपकी कोई विज़िट नहीं है';
+
+  @override
+  String get noVisit => 'आपकी कोई विज़िट नहीं है';
+
+  @override
+  String get confirm => 'पुष्टि करें';
+
+  @override
+  String get consultFreely => 'निःशुल्क परामर्श दें। कहीं से भी अभ्यास करें';
+
+  @override
+  String get selectClinic => 'कृपया अपनी क्लिनिक चुनें';
+
+  @override
+  String get youHaveNoBillingDetails => 'आपके पास कोई बिलिंग विवरण नहीं है';
+
+  @override
+  String get addPatient => 'मरीज़ जोड़ें';
+
+  @override
+  String get noPatients => 'आपके पास अभी तक कोई मरीज़ नहीं है';
+
+  @override
+  String get fillDetailsToAddPatient => 'मरीज़ जोड़ने के लिए नीचे दिए गए विवरण भरें';
+
+  @override
+  String get uploadProfilePhoto => 'प्रोफ़ाइल फोटो अपलोड करें';
+
+  @override
+  String get patientFullName => 'मरीज़ का पूरा नाम';
+
+  @override
+  String get enterPatientFullName => 'कृपया मरीज़ का पूरा नाम दर्ज करें';
+
+  @override
+  String get dob => 'जन्म तिथि';
+
+  @override
+  String get enterDob => 'कृपया जन्म तिथि दर्ज करें';
+
+  @override
+  String get age => 'आयु';
+
+  @override
+  String get enterAge => 'कृपया आयु दर्ज करें';
+
+  @override
+  String get mobileNumber => 'मोबाइल नंबर';
+
+  @override
+  String get enterMobileNumber => 'कृपया मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get enterValidMobileNumber => 'कृपया एक मान्य मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get gender => 'लिंग';
+
+  @override
+  String get isGuardianPresent => 'क्या अभिभावक उपस्थित है?';
+
+  @override
+  String get guardianFullName => 'अभिभावक का पूरा नाम';
+
+  @override
+  String get enterGuardianFullName => 'कृपया अभिभावक का पूरा नाम दर्ज करें';
+
+  @override
+  String get addPatientButton => '+ मरीज़ जोड़ें';
+
+  @override
+  String get quickDemo => 'त्वरित डेमो';
+
+  @override
+  String get noVideoAvailable => 'इस विषय के लिए कोई वीडियो उपलब्ध नहीं है';
+
+  @override
+  String get supportRequestSent => 'आपका सहायता अनुरोध सफलतापूर्वक भेज दिया गया है!';
+
+  @override
+  String get pleaseSelectSupportType => 'कृपया सहायता प्रकार चुनें *';
+
+  @override
+  String get name => 'नाम';
+
+  @override
+  String get phone => 'फोन';
+
+  @override
+  String get email => 'ईमेल';
+
+  @override
+  String get details => 'विवरण';
+
+  @override
+  String get requestCallback => 'कॉल बैक का अनुरोध करें';
+
+  @override
+  String get supportType => 'सहायता प्रकार';
+
+  @override
+  String get appointments => 'नियोजन';
+
+  @override
+  String get abha => 'आभा';
+
+  @override
+  String get emr => 'ईएमआर (इलेक्ट्रॉनिक मेडिकल रिकॉर्ड)';
+
+  @override
+  String get teleconsultation => 'दूरस्थ परामर्श';
+
+  @override
+  String get mis => 'एमआईएस (प्रबंधन सूचना प्रणाली)';
+
+  @override
+  String get billDetailsTitle => 'बिल विवरण';
+
+  @override
+  String get billItemsTitle => 'बिल आइटम';
+
+  @override
+  String get consultation => 'परामर्श';
+
+  @override
+  String get totalLabel => 'कुल';
+
+  @override
+  String get discountLabel => 'छूट';
+
+  @override
+  String get taxesLabel => 'कर';
+
+  @override
+  String get netAmountLabel => 'शुद्ध राशि';
+
+  @override
+  String get paidAmountLabel => 'भरी गई राशि';
+
+  @override
+  String get pendingAmountLabel => 'बकाया राशि';
+
+  @override
+  String get paymentsTitle => 'भुगतान';
+
+  @override
+  String get sNoLabel => 'क्रम संख्या';
+
+  @override
+  String get detailLabel => 'विवरण';
+
+  @override
+  String paidByLabel(Object amount, Object paymentMode) {
+    return '$paymentMode द्वारा ₹$amount का भुगतान';
+  }
+
+  @override
+  String get billNumber => 'बिल नंबर :';
+
+  @override
+  String get visitNumber => 'भ्रमण संख्या :';
+
+  @override
+  String get billedTo => 'बिल किया गया :';
+
+  @override
+  String get billDate => 'बिल दिनांक :';
+
+  @override
+  String get pendingAmount => 'बकाया राशि :';
+
+  @override
+  String get visitTime => 'भ्रमण समय :';
+
+  @override
+  String get inClinic => 'क्लिनिक में';
+
+  @override
+  String get withDoctor => 'के साथ';
+
+  @override
+  String onDateAtTime(Object date, Object time) {
+    return '$date को $time बजे';
+  }
+
+  @override
+  String get selectDateRange => 'दिनांक सीमा चुनें';
+
+  @override
+  String get save => 'सहेजें';
+
+  @override
+  String get today => 'आज';
+
+  @override
+  String get yesterday => 'कल';
+
+  @override
+  String get currentWeek => 'वर्तमान सप्ताह';
+
+  @override
+  String get currentMonth => 'वर्तमान माह';
+
+  @override
+  String get revenue => 'राजस्व';
+
+  @override
+  String get currencySymbol => '(रु.)';
+
+  @override
+  String get billed => 'बिल किया गया';
+
+  @override
+  String get pending => 'बकाया';
+
+  @override
+  String get collected => 'संग्रहित';
+
+  @override
+  String get yearToDate => 'वर्ष की शुरुआत से अब तक';
+
+  @override
+  String get month => 'महीना';
+
+  @override
+  String get toDate => 'अब तक';
+
+  @override
+  String get date => 'तिथि';
+
+  @override
+  String get all => 'सभी';
+
+  @override
+  String get total => 'कुल';
+
+  @override
+  String get newP => 'नया';
+
+  @override
+  String get repeat => 'दोहराना';
+
+  @override
+  String get avgPatientLoad => 'औसत रोगी भार';
+
+  @override
+  String get avgPatientWaitTime => 'औसत रोगी प्रतीक्षा समय';
+
+  @override
+  String get mins => 'मिनट';
+
+  @override
+  String get noOfLogins => 'लॉगिन की संख्या';
+
+  @override
+  String get logins => 'लॉगिन्स';
+
+  @override
+  String get timeSpent => 'समय व्यतीत';
+
+  @override
+  String get timeInHrs => 'समय (घंटों में)';
+
+  @override
+  String get appointmentType => 'नियुक्ति प्रकार';
+
+  @override
+  String get clinic => 'क्लिनिक';
+
+  @override
+  String get video => 'वीडियो';
+
+  @override
+  String get audio => 'ऑडियो';
+
+  @override
+  String get unknown => 'अज्ञात';
+
+  @override
+  String get abdm => 'एबीडीएम';
+
+  @override
+  String get hfr => 'एचएफआर';
+
+  @override
+  String get hprDhis => 'एचपीआर डीएचआईएस';
+
+  @override
+  String get dhis => 'डीएचआईएस';
+
+  @override
+  String get languageEnglish => 'अंग्रेज़ी';
+
+  @override
+  String get languageHindi => 'हिंदी';
+
+  @override
+  String get languageBengali => 'बांग्ला';
+
+  @override
+  String get takePhoto => 'फोटो लें';
+
+  @override
+  String get useAI => 'एआई का उपयोग करें';
+
+  @override
+  String get writeClinicalNotes => 'क्लिनिकल नोट्स लिखें';
+
+  @override
+  String get medicalSummary => 'चिकित्सा सारांश';
+
+  @override
+  String get visitedSummaryText => '15 दिन पहले उच्च रक्तचाप और उच्च कोलेस्ट्रॉल के लिए देखा गया। अक्सर सिरदर्द और चक्कर आने की शिकायत करता है (इस साल 6 बार आया)। एम्लोडिपाइन 5 मि.ग्रा और एटोरवास्टेटिन 20 मि.ग्रा लेता है। पेनिसिलिन और मूंगफली से एलर्जी है। पिछले 10 वर्षों से टाइप 2 मधुमेह है। रोज़ 5 सिगरेट पीता है, कभी-कभी शराब पीता है। पारिवारिक इतिहास में हृदय रोग और मधुमेह है। बीपी: 150/90, बीएमआई: 28। बेहतर स्वास्थ्य के लिए आहार में बदलाव और धूम्रपान छोड़ने की जरूरत है।';
+
+  @override
+  String get clickToTakePhoto => 'फोटो लेने के लिए क्लिक करें';
+
+  @override
+  String get complaints => 'शिकायतें';
+
+  @override
+  String get vitals => 'वाइटल्स';
+
+  @override
+  String get diagnosis => 'निदान';
+
+  @override
+  String get icd10 => 'आईसीडी-10';
+
+  @override
+  String get prescription => 'प्रिस्क्रिप्शन';
+
+  @override
+  String get searchMedicinesHint => 'दवाइयों को खोजें।';
+
+  @override
+  String get doctorsPad => 'डॉक्टर का पैड';
+
+  @override
+  String get recommendations => 'सिफारिशें';
+
+  @override
+  String get followUp => 'फॉलो-अप';
+
+  @override
+  String get selectDate => 'तारीख चुनें';
+
+  @override
+  String get doctorNote => 'डॉक्टर की टिप्पणी';
+
+  @override
+  String get abhaRecords => 'आभा रिकॉर्ड';
+
+  @override
+  String get how_to_book_appointment_new_patient => 'नए मरीज के लिए अपॉइंटमेंट कैसे बुक करें?';
+
+  @override
+  String get how_to_book_appointment_existing_patient => 'मौजूदा मरीज के लिए अपॉइंटमेंट कैसे बुक करें?';
+
+  @override
+  String get how_to_book_appointment_with_abha => 'ABHA के साथ अपॉइंटमेंट कैसे बुक करें?';
+
+  @override
+  String get how_to_update_patient_details => 'अपॉइंटमेंट जोड़ते समय मरीज की जानकारी कैसे अपडेट करें?';
+
+  @override
+  String get how_to_reschedule_cancel_appointment => 'अपॉइंटमेंट को पुनर्निर्धारित या रद्द कैसे करें?';
+
+  @override
+  String get how_to_view_daily_visit_list => 'रोजाना विज़िट सूची कैसे देखें?';
+
+  @override
+  String get how_to_view_upcoming_visit_list => 'आगामी विज़िट सूची कैसे देखें?';
+
+  @override
+  String get how_to_view_past_visit_list => 'पिछली विज़िट सूची कैसे देखें?';
+
+  @override
+  String get how_to_search_patient_and_view_record => 'मरीज को खोजकर उसका पूरा मेडिकल रिकॉर्ड कैसे देखें?';
+
+  @override
+  String get how_to_view_patient_records_abdm => 'ABDM के माध्यम से मरीज के रिकॉर्ड कैसे देखें?';
+
+  @override
+  String get how_to_pay_pending_bill => 'बकाया बिल का भुगतान कैसे करें?';
+
+  @override
+  String get how_to_access_patient_bills => 'मरीज के बिलों तक कैसे पहुँचें?';
+
+  @override
+  String get how_to_check_pending_payments_today => 'दिन के लिए बकाया भुगतान कैसे जांचें?';
+
+  @override
+  String get how_to_create_abha_for_new_patient => 'नए मरीज के लिए ABHA कैसे बनाएं?';
+
+  @override
+  String get how_to_link_existing_abha_with_appointment => 'मरीज के मौजूदा ABHA को अपॉइंटमेंट से कैसे जोड़ें?';
+
+  @override
+  String get how_to_link_abha_completed_consultation => 'पूर्ण की गई परामर्श के लिए ABHA को कैसे जोड़ें?';
+
+  @override
+  String get how_to_upload_rx_complete_consultation => 'Rx कैसे अपलोड करें और परामर्श पूरा करें?';
+
+  @override
+  String get how_to_add_notes_complete_consultation => 'क्लिनिकल नोट्स कैसे जोड़ें और परामर्श पूरा करें?';
+
+  @override
+  String get how_to_consult_using_voice_analyzer => 'वॉयस एनालाइज़र का उपयोग करके परामर्श कैसे करें?';
+
+  @override
+  String get how_to_view_prescription_info => 'मरीज की प्रिस्क्रिप्शन या परामर्श जानकारी कैसे देखें?';
+
+  @override
+  String get how_to_send_prescription_info_whatsapp => 'प्रिस्क्रिप्शन या परामर्श जानकारी मरीज को WhatsApp पर कैसे भेजें?';
+
+  @override
+  String get how_to_create_prescription_templates => 'प्रिस्क्रिप्शन टेम्पलेट्स कैसे बनाएं?';
+
+  @override
+  String get how_to_create_test_recommendation_lists => 'टेस्ट सिफारिश सूची कैसे बनाएं?';
+
+  @override
+  String get how_to_add_complete_tele_consult => 'How to add and complete a tele-consult?';
+
+  @override
+  String get how_to_enable_tele_consultation => 'How to enable tele-consultation?';
+
+  @override
+  String get how_to_change_account_password => 'खाता पासवर्ड कैसे बदलें?';
+
+  @override
+  String get how_to_change_account_pin => 'खाता पिन कैसे बदलें?';
+
+  @override
+  String get how_to_consult_in_multiple_clinics => 'कई क्लिनिकों में परामर्श कैसे करें?';
+
+  @override
+  String get how_to_switch_between_clinics => 'क्लिनिकों के बीच कैसे स्विच करें?';
+
+  @override
+  String get how_to_set_primary_consultation_type => 'प्राथमिक परामर्श प्रकार कैसे सेट करें?';
+
+  @override
+  String get how_to_setup_biometric_login => 'बायोमेट्रिक लॉगिन कैसे सेट करें?';
+
+  @override
+  String get how_to_check_clinic_insights => 'क्लिनिक इनसाइट्स कैसे जांचें?';
+
+  @override
+  String get doctorNotesAnalyser => 'डॉक्टर नोट्स विश्लेषक';
+
+  @override
+  String get transcribedNotes => 'लिखित नोट्स';
+
+  @override
+  String get chiefComplaints => 'मुख्य शिकायतें';
+
+  @override
+  String get advice => 'सलाह';
+
+  @override
+  String get provisionalDiagnosis => 'अस्थायी निदान';
+
+  @override
+  String get drugListSelectOne => 'दवा सूची - सूची से एक चुनें';
+
+  @override
+  String get view => 'देखें';
+
+  @override
+  String get temperature => 'तापमान';
+
+  @override
+  String get bloodPressure => 'रक्तचाप';
+
+  @override
+  String get heartRate => 'हृदय गति';
+
+  @override
+  String get noPrescriptionsAvailable => 'कोई पर्ची उपलब्ध नहीं है';
+
+  @override
+  String get strength => 'ताकत';
+
+  @override
+  String get formulation => 'संयोजन';
+
+  @override
+  String get frequency => 'बारंबारता';
+
+  @override
+  String get noOfDays => 'दिनों की संख्या';
+
+  @override
+  String get instruction => 'निर्देश';
+
+  @override
+  String get matchingDrugs => 'मिलते-जुलते दवा';
+
+  @override
+  String get instructions => 'निर्देश';
+
+  @override
+  String get visitHistory => 'भ्रमण इतिहास';
+
+  @override
+  String get noVisitHistoryFound => 'कोई भ्रमण इतिहास नहीं मिला';
+
+  @override
+  String get noDoctorNotesAvailable => 'कोई डॉक्टर नोट उपलब्ध नहीं है';
+
+  @override
+  String get unknownComplaint => 'अज्ञात शिकायत';
+
+  @override
+  String get na => 'प्र/ल';
+
+  @override
+  String get dosageFrequency => 'खुराक | आवृत्ति';
+
+  @override
+  String get drugNameStrengthFormulation => 'दवा का नाम [ताकत | संयोजन]';
+
+  @override
+  String get doctorNotes => 'डॉक्टर नोट्स';
+
+  @override
+  String get unknownVital => 'अज्ञात महत्वपूर्ण संकेत';
+
+  @override
+  String get vitalName => 'महत्वपूर्ण संकेत का नाम';
+
+  @override
+  String get noImageFound => 'कोई छवि नहीं मिली';
+
+  @override
+  String get attachments => 'संलग्नक';
+
+  @override
+  String get service => 'सेवा';
+
+  @override
+  String get noDocumentFound => 'कोई दस्तावेज़ नहीं मिला';
+
+  @override
+  String get consultationDetails => 'परामर्श विवरण';
+
+  @override
+  String get tapToStop => 'रोकने के लिए टैप करें';
+
+  @override
+  String get consultationAboutToComplete => 'परामर्श पूरा होने वाला है';
+
+  @override
+  String get consultationDataGathered => 'हमने लगभग आपका परामर्श डेटा इकट्ठा कर लिया है';
+
+  @override
+  String get analysingData => 'डेटा विश्लेषण कर रहा है';
+
+  @override
+  String get transcribedNote => 'ट्रांसक्राइब किया गया नोट';
+
+  @override
+  String get totalUsageTime => 'कुल उपयोग समय';
+
+  @override
+  String get analysedNotedSummary => 'विश्लेषित नोट सारांश';
+
+  @override
+  String get analysedOn => 'विश्लेषित तारीख';
+
+  @override
+  String get hearRecording => 'रिकॉर्डिंग सुनें';
+
+  @override
+  String get drugList => 'दवा सूची';
+
+  @override
+  String get noAdvice => 'कोई सलाह नहीं';
+
+  @override
+  String get noDiagnosisAvailable => 'कोई निदान उपलब्ध नहीं है';
+
+  @override
+  String get noVitalsAvailable => 'कोई महत्वपूर्ण संकेत उपलब्ध नहीं है';
+
+  @override
+  String get value => 'मूल्य';
+
+  @override
+  String get fillBelowDetailsToAddPatient => 'रोगी जोड़ने के लिए नीचे विवरण भरें';
+
+  @override
+  String get patientsFullName => 'रोगी का पूरा नाम';
+
+  @override
+  String get pleaseEnterPatientsFullName => 'कृपया रोगी का पूरा नाम दर्ज करें';
+
+  @override
+  String get dateOfBirth => 'जन्म तिथि';
+
+  @override
+  String get others => 'अन्य';
+
+  @override
+  String get pleaseEnterGuardianFullName => 'कृपया अभिभावक का पूरा नाम दर्ज करें';
+
+  @override
+  String get update => 'अपडेट';
+
+  @override
+  String get searchPatientName => 'रोगी का नाम खोजें';
+
+  @override
+  String get addNew => '+ नया जोड़ें';
+
+  @override
+  String get abhaIdLabel => 'ABHA आईडी: ';
+
+  @override
+  String get availableSlots => 'उपलब्ध स्लॉट';
+
+  @override
+  String get morning => 'सुबह';
+
+  @override
+  String get afternoon => 'दोपहर';
+
+  @override
+  String get evening => 'शाम';
+
+  @override
+  String get consultantFees => 'सलाहकार शुल्क';
+
+  @override
+  String get walkInConsultation => 'वॉक-इन परामर्श';
+
+  @override
+  String get selectConsultantType => 'सलाहकार प्रकार चुनें :';
+
+  @override
+  String get payNow => 'अभी भुगतान करें';
+
+  @override
+  String get payLater => 'बाद में भुगतान करें';
+
+  @override
+  String get pleaseEnterValidMobileNumber => 'कृपया एक वैध मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get enterPatientName => 'रोगी का नाम दर्ज करें';
+
+  @override
+  String get mon => 'सोम';
+
+  @override
+  String get tue => 'मंगल';
+
+  @override
+  String get wed => 'बुध';
+
+  @override
+  String get thu => 'गुरु';
+
+  @override
+  String get fri => 'शुक्र';
+
+  @override
+  String get sat => 'शनि';
+
+  @override
+  String get sun => 'रवि';
+
+  @override
+  String get bookNow => 'अभी बुक करें';
+
+  @override
+  String get bookWithAbha => 'ABHA के साथ बुक करें';
+
+  @override
+  String get appointmentActions => 'नियुक्ति क्रियाएँ';
+
+  @override
+  String get rxUploadAndSave => 'Rx अपलोड करें और सहेजें';
+
+  @override
+  String get upload => 'अपलोड करें';
+
+  @override
+  String get reschedule => 'पुनर्निर्धारित करें';
+
+  @override
+  String get linkWithAbha => 'ABHA से लिंक करें';
+
+  @override
+  String get viewRx => 'Rx देखें';
+
+  @override
+  String get cancelAppointment => 'नियुक्ति रद्द करें';
+
+  @override
+  String get enterYourReasonHere => 'अपना कारण यहाँ दर्ज करें';
+
+  @override
+  String get uploadRx => 'Rx अपलोड करें';
+
+  @override
+  String get useCamera => 'कैमरा का उपयोग करें';
+
+  @override
+  String get chooseFromGallery => 'गैलरी से चुनें';
+
+  @override
+  String get healthIdAbhaAddress => 'हेल्थ आईडी (ABHA पता)';
+
+  @override
+  String get healthId => 'हेल्थ आईडी';
+
+  @override
+  String get verify => 'सत्यापित करें';
+
+  @override
+  String get createAbha => 'ABHA बनाएं';
+
+  @override
+  String get igree1 => 'मैं आधार के अलावा किसी अन्य दस्तावेज़ का उपयोग करके आयुष्मान भारत स्वास्थ्य खाता संख्या (“ABHA नंबर”) और आयुष्मान भारत स्वास्थ्य खाता पता (“ABHA पता”) बनाना चाहता/चाहती हूँ। (आगे बढ़ने के लिए यहाँ क्लिक करें)';
+
+  @override
+  String get igree2 => 'मैं अपने ABHA पते और ABHA नंबर के उपयोग के लिए सहमति देता/देती हूँ ताकि मेरे पुराने (पूर्व) सरकारी स्वास्थ्य रिकॉर्ड और इस मुलाकात के दौरान उत्पन्न होने वाले रिकॉर्ड को जोड़ा जा सके।';
+
+  @override
+  String get igree3 => 'मैं अपने सभी स्वास्थ्य रिकॉर्ड को स्वास्थ्य सेवा प्रदाता(ओं) के साथ साझा करने के लिए अधिकृत करता/करती हूँ ताकि इस मुलाकात के दौरान मुझे स्वास्थ्य सेवाएं प्रदान की जा सकें।';
+
+  @override
+  String get igree4 => 'मैं अपने सरकारी स्वास्थ्य रिकॉर्ड के गुमनाम करने और उसके बाद सार्वजनिक स्वास्थ्य उद्देश्यों के लिए उपयोग की सहमति देता/देती हूँ।';
+
+  @override
+  String get igree5 => 'मैं पुष्टि करता/करती हूँ कि मैंने लाभार्थी को उपर्युक्त उद्देश्यों के लिए सहमति की सामग्री duly सूचित और समझा दी है।';
+
+  @override
+  String get igree6 => 'मुझे ऊपर बताए अनुसार सहमति के बारे में समझाया गया है और मैं उपर्युक्त उद्देश्यों के लिए अपनी सहमति प्रदान करता/करती हूँ।';
+
+  @override
+  String get checkAvailableAbhaAddress => 'उपलब्ध ABHA पता जांचें';
+
+  @override
+  String get abhaNumber => 'ABHA नंबर';
+
+  @override
+  String get linkExisting => 'मौजूदा लिंक करें';
+
+  @override
+  String get createNew => 'नया बनाएं';
+
+  @override
+  String get createVia => 'के माध्यम से बनाएं';
+
+  @override
+  String get aadhaarNumber => 'आधार नंबर';
+
+  @override
+  String get iHerebyDeclareThat => 'मैं एतद्द्वारा घोषणा करता/करती हूं कि';
+
+  @override
+  String get agreeAll => 'सभी से सहमत';
+
+  @override
+  String get enterOtp => 'ओटीपी दर्ज करें';
+
+  @override
+  String get useExisting => 'मौजूदा का उपयोग करें';
+
+  @override
+  String get createAbhaAddress => 'एबीएचए पता बनाएं';
+
+  @override
+  String get submit => 'सबमिट करें';
+
+  @override
+  String get proceedwithkyc => 'केवाईसी जारी रखें';
+
+  @override
+  String get firstName => 'पहला नाम';
+
+  @override
+  String get enterFirstName => 'पहला नाम दर्ज करें';
+
+  @override
+  String get middleName => 'मध्य नाम';
+
+  @override
+  String get enterMiddleName => 'मध्य नाम दर्ज करें';
+
+  @override
+  String get lastName => 'अंतिम नाम';
+
+  @override
+  String get enterLastName => 'अंतिम नाम दर्ज करें';
+
+  @override
+  String get state => 'राज्य';
+
+  @override
+  String get district => 'जिला';
+
+  @override
+  String get emailId => 'ईमेल आईडी';
+
+  @override
+  String get enterEmailId => 'ईमेल आईडी दर्ज करें';
+
+  @override
+  String get enterMobileNo => 'मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get pinCode => 'पिन कोड';
+
+  @override
+  String get enterPincode => 'पिन कोड दर्ज करें';
+
+  @override
+  String get address => 'पता';
+
+  @override
+  String get abhaId => 'आभा आईडी';
+
+  @override
+  String get suggestedAbhaAddress => 'सुझाया गया आभा पता';
+
+  @override
+  String get download => 'डाउनलोड';
+
+  @override
+  String get linkHealthId => 'हेल्थ आईडी लिंक करें';
+
+  @override
+  String get authenticationMethod => 'प्रमाणीकरण विधि';
+
+  @override
+  String get otp => 'ओटीपी';
+
+  @override
+  String get verifyAndLink => 'सत्यापित करें और लिंक करें';
+
+  @override
+  String get msg_no_slots_available => 'के स्लॉट उपलब्ध नहीं हैं';
 }

@@ -782,6 +782,47 @@ class AddnewfamilymemberBloc
                 'village': working['village'] ?? userDetails['villageName'],
                 'pincode': working['pincode'] ?? userDetails['pincode'],
               }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
+
+              // Extra flat fields required by backend sample schema,
+              // mapped from existing local info/state when possible.
+              'is_abha_verified': info['is_abha_verified'] ?? false,
+              'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
+              'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,
+              'is_fetched_from_rch': info['is_fetched_from_rch'] ?? false,
+              'is_existing_father': info['is_existing_father'] ?? false,
+              'is_existing_mother': info['is_existing_mother'] ?? false,
+              'ben_type': info['ben_type'] ?? (info['memberType'] ?? state.memberType ?? 'adult'),
+              'mother_ben_ref_key': info['mother_ben_ref_key'] ?? savedMember['mother_key']?.toString() ?? '',
+              'father_ben_ref_key': info['father_ben_ref_key'] ?? savedMember['father_key']?.toString() ?? '',
+              'relaton_with_family_head':
+                  info['relaton_with_family_head'] ?? info['relation_to_head'] ?? state.relation,
+              'member_status': info['member_status'] ?? state.memberStatus ?? 'alive',
+              'member_name': info['member_name'] ?? nameStr,
+              'father_or_spouse_name': info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'],
+              'have_children': info['have_children'] ?? info['hasChildren'] ?? state.hasChildren,
+              'is_family_planning': info['is_family_planning'] ?? savedMember['is_family_planning'] ?? 0,
+              'total_children': info['total_children'] ?? info['totalBorn'],
+              'total_live_children': info['total_live_children'] ?? info['totalLive'],
+              'total_male_children': info['total_male_children'] ?? info['totalMale'],
+              'age_of_youngest_child': info['age_of_youngest_child'] ?? info['youngestAge'],
+              'gender_of_younget_child': info['gender_of_younget_child'] ?? info['youngestGender'],
+              'whose_mob_no': info['whose_mob_no'] ?? info['mobileOwner'],
+              'mobile_no': info['mobile_no'] ?? info['mobileNo'] ?? state.mobileNo,
+              'dob_day': info['dob_day'],
+              'dob_month': info['dob_month'],
+              'dob_year': info['dob_year'],
+              'age_by': info['age_by'],
+              'date_of_birth': info['date_of_birth'] ?? info['dob'],
+              'age': info['age'] ?? info['approxAge'] ?? state.approxAge,
+              'village_name': info['village_name'] ?? working['village'] ?? userDetails['villageName'],
+              'is_new_member': info['is_new_member'] ?? true,
+              'isFamilyhead': info['isFamilyhead'] ?? false,
+              'isFamilyheadWife': info['isFamilyheadWife'] ?? false,
+              'age_of_youngest_child_unit':
+                  info['age_of_youngest_child_unit'] ?? info['ageUnit'],
+              'type_of_beneficiary':
+                  info['type_of_beneficiary'] ?? info['beneficiaryType'] ?? state.beneficiaryType,
+              'name_of_spouse': info['name_of_spouse'] ?? info['spouseName'] ?? state.spouseName,
             }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
 
             final apiPayload = {

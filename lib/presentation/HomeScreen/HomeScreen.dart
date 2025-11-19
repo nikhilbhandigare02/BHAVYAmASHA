@@ -27,6 +27,7 @@ import '../../l10n/app_localizations.dart';
 import '../GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import 'TodaysProgramm.dart';
 import 'AshaDashboardSection.dart';
+import '../../data/repositories/NotificationRepository/Notification_Repository.dart';
 
 class HomeScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -57,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int ancVisitCount = 0;
   int childRegisteredCount = 0;
   int highRiskCount = 0;
+  int notificationCount = 0;
 
   final ChildCareCountProvider _childCareCountProvider = ChildCareCountProvider();
 
@@ -72,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadAncVisitCount();
     _loadChildRegisteredCount();
     _loadHighRiskCount();
+    _loadNotificationCount();
     _fetchTimeStamp();
     _fetchAbhaCreated();
     _fetchExistingAbhaCreated();
@@ -81,6 +84,19 @@ class _HomeScreenState extends State<HomeScreen> {
     Future.microtask(() async {
       try {
         await SyncService.instance.fetchFollowupFormsFromServer();
+        // After initial follow-up forms sync completes (e.g. first launch
+        // after reinstall), reload the local dashboard counts so they
+        // reflect the freshly synced data without requiring an app restart.
+        if (mounted) {
+          _loadHouseholdCount();
+          _loadBeneficiariesCount();
+          _loadEligibleCouplesCount();
+          _loadPregnantWomenCount();
+          _loadAncVisitCount();
+          _loadChildRegisteredCount();
+          _loadHighRiskCount();
+          _loadNotificationCount();
+        }
       } catch (e) {
         print('HomeScreen: error pulling followup forms on init -> $e');
       }
@@ -244,41 +260,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadHouseholdCount() async {
     try {
-      // Mirror AllHousehold_Screen logic: count only active household heads
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final households = await LocalStorageDao.instance.getAllHouseholds();
-
-      final headKeyByHousehold = <String, String>{};
-      for (final hh in households) {
-        try {
-          final hhRefKey = (hh['unique_key'] ?? '').toString();
-          final headId = (hh['head_id'] ?? '').toString();
-          if (hhRefKey.isEmpty || headId.isEmpty) continue;
-          headKeyByHousehold[hhRefKey] = headId;
-        } catch (_) {}
-      }
-
-      int count = 0;
-      for (final r in rows) {
-        try {
-          final householdRefKey = (r['household_ref_key'] ?? '').toString();
-          final uniqueKey = (r['unique_key'] ?? '').toString();
-          if (householdRefKey.isEmpty || uniqueKey.isEmpty) continue;
-
-          final configuredHeadKey = headKeyByHousehold[householdRefKey];
-          if (configuredHeadKey == null || configuredHeadKey.isEmpty) continue;
-
-          final isDeath = r['is_death'] == 1;
-          final isMigrated = r['is_migrated'] == 1;
-
-          if (configuredHeadKey == uniqueKey && !isDeath && !isMigrated) {
-            count++;
-          }
-        } catch (_) {
-          continue;
-        }
-      }
-
+      // Use households table count directly so the dashboard value
+      // matches the total number of household records shown in the
+      // All Household screen.
+      final count = await LocalStorageDao.instance.getHouseholdCount();
       if (mounted) {
         setState(() {
           householdCount = count;
@@ -291,20 +276,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadBeneficiariesCount() async {
     try {
-      // Align with AllBeneficiaryScreen: one entry per beneficiary row
-      // that belongs to a household (non-empty household_ref_key) and is not deleted
+      // Count all beneficiary records so the dashboard value matches
+      // the total rows visible in the All Beneficiaries screen.
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      int count = 0;
-
-      for (final row in rows) {
-        try {
-          final hhId = row['household_ref_key']?.toString() ?? '';
-          if (hhId.isEmpty) continue;
-          count++;
-        } catch (e) {
-          print('Error processing beneficiary row for count: $e');
-        }
-      }
+      final count = rows.length;
 
       if (mounted) {
         setState(() {
@@ -581,6 +556,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _loadNotificationCount() async {
+    try {
+      // Keep HomeScreen notification badge in sync with the
+      // Notifications screen: first fetch from server and
+      // save to local DB, then read the list and count.
+      try {
+        await NotificationRepository().fetchAndSaveNotifications();
+      } catch (e) {
+        print('HomeScreen: error while fetching notifications -> $e');
+      }
+
+      final notifications = await LocalStorageDao.instance.getNotifications();
+      if (mounted) {
+        setState(() {
+          notificationCount = notifications.length;
+        });
+      }
+    } catch (e) {
+      print('Error loading notification count: $e');
+    }
+  }
+
   Future<void> fetchApiData() async {
     await Future.delayed(const Duration(seconds: 2));
 
@@ -619,7 +616,48 @@ class _HomeScreenState extends State<HomeScreen> {
             showBack: false,
             icon1Image: 'assets/images/search.png',
             onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.GuestBeneficiarySearch),
-            icon2Image: 'assets/images/img_1.png',
+            icon2Widget: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: Image.asset(
+                    'assets/images/img_1.png',
+                    height: 2.8.h,
+                    width: 2.8.h,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+                if (notificationCount > 0)
+                  Positioned(
+                    right: 6,
+                    top: -4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Center(
+                        child: Text(
+                          notificationCount.toString(),
+                          style:  TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             onIcon2Tap: () => Navigator.pushNamed(context, Route_Names.notificationScreen),
             icon3Image: 'assets/images/home.png',
             onIcon3Tap: () => Navigator.pushReplacement(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/presentation/Abha_Generation/ABHA_Generationscreen.dart';
 import 'package:medixcel_new/presentation/NotificationScreen/NotificationScreen.dart';
+import 'package:medixcel_new/presentation/abha/abha_screen.dart';
 import 'package:medixcel_new/presentation/profile/bloc/profile_bloc.dart';
 import 'package:medixcel_new/presentation/AboutUs/AboutUs.dart';
 import 'package:medixcel_new/presentation/AllBeneficiary/AllBeneficiary.dart';
@@ -132,7 +133,7 @@ class Routes{
       case Route_Names.Mybeneficiaries:
         return MaterialPageRoute(builder: (context) => Mybeneficiaries(),);
       case Route_Names.ABHAGeneration:
-        return MaterialPageRoute(builder: (context) => AbhaGenerationscreen(),);
+        return MaterialPageRoute(builder: (context) => ABHAScreen(),);
       case Route_Names.WorkProgress:
         return MaterialPageRoute(builder: (context) => Todaywork(),);
       case Route_Names.Annoucement:
