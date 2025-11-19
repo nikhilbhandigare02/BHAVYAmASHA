@@ -606,7 +606,7 @@ class _HomeScreenState extends State<HomeScreen> {
             message: l10n.exitAppMessage, // Add to l10n: "Are you sure you want to exit?"
             yesText: l10n.yes,
             noText: l10n.no,
-          );
+          );///
           return shouldExit ?? false;
         },
         child: Scaffold(
