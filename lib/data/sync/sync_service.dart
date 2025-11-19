@@ -12,6 +12,7 @@ import '../repositories/ChildCareRepository/ChildCareRepository.dart';
 import '../repositories/EligibleCoupleRepository/EligibleCoupleRepository.dart';
 import '../repositories/FollowupFormsRepository/FollowupFormsRepository.dart';
 import '../repositories/MotherCareRepository/MotherCareRepository.dart';
+import '../repositories/NotificationRepository/Notification_Repository.dart';
 
 class SyncService {
   SyncService._();
@@ -25,6 +26,7 @@ class SyncService {
   final _ccRepo = ChildCareRepository();
   final _followupRepo = FollowupFormsRepository();
   final _mcRepo = MotherCareRepository();
+  final _notificationRepo = NotificationRepository();
 
   Timer? _timer;
   bool _running = false;
@@ -378,10 +380,22 @@ class SyncService {
       await fetchChildCareActivitiesFromServer();
       await fetchMotherCareActivitiesFromServer();
       await fetchFollowupFormsFromServer();
+      await fetchNotificationsFromServer();
+
     } catch (e) {
       print('SyncService periodic error: $e');
     } finally {
       _running = false;
+    }
+  }
+
+  Future<void> fetchNotificationsFromServer() async {
+    try {
+      print('Notification Sync: Fetching notifications...');
+      await _notificationRepo.fetchAndSaveNotifications();
+      print('Notification Sync: Completed');
+    } catch (e) {
+      print('Notification Sync: Error -> $e');
     }
   }
 

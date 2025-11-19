@@ -620,7 +620,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon1Image: 'assets/images/search.png',
             onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.GuestBeneficiarySearch),
             icon2Image: 'assets/images/img_1.png',
-            onIcon2Tap: () => print("Notifications tapped"),
+            onIcon2Tap: () => Navigator.pushNamed(context, Route_Names.notificationScreen),
             icon3Image: 'assets/images/home.png',
             onIcon3Tap: () => Navigator.pushReplacement(
               context,

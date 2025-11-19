@@ -17,4 +17,6 @@ class Endpoints {
   static const String getHousehold = '${BaseUrls.baseUrl}/hsc/v4/get_household';
   static const String addFollowupForms1 = '${BaseUrls.baseUrl}/add_followup_forms1';
   static const String getFollowupFormsDataByFal3 = '${BaseUrls.baseUrl}/get_followup_forms_data_by_fal3';
+  static const String getNotification = '${BaseUrls.baseUrl}/get_app_announcement_data';
+
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Local_Storage/tables/notification_table.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -1187,6 +1188,107 @@ class LocalStorageDao {
     }
   }
 
+
+
+
+  Future<void> insertNotifications(List<Map<String, dynamic>> list) async {
+    try {
+      final db = await _db;
+      final batch = db.batch();
+
+      for (var data in list) {
+        // Check if a record with the same unique_key exists
+        final existingRecords = await db.query(
+          NotificationDetailsTable.table,
+          where: 'unique_key = ?',
+          whereArgs: [data['unique_key']],
+        );
+
+        if (existingRecords.isEmpty) {
+          // Insert new record if it doesn't exist
+          batch.insert(
+            NotificationDetailsTable.table,
+            {
+              '_id': data['_id'],
+              'unique_key': data['unique_key'],
+              'added_date_time': data['added_date_time'],
+              'announcement_end_period': data['announcement_end_period'],
+              'announcement_for': data['announcement_for'],
+              'announcement_start_period': data['announcement_start_period'],
+              'announcement_type': data['announcement_type'],
+              'block_id': data['block_id'],
+              'block_name': data['block_name'],
+              'content_en': data['content_en'],
+              'content_hi': data['content_hi'],
+              'district_id': data['district_id'],
+              'district_name': data['district_name'],
+              'state_id': data['state_id'],
+              'state_name': data['state_name'],
+              'title_en': data['title_en'],
+              'title_hi': data['title_hi'],
+              'modified_date_time': data['modified_date_time'],
+              'option': data['option'],
+              'is_deleted': data['is_deleted'] ?? 0,
+              'is_published': data['is_published'] ?? 1,
+              '__v': data['__v'],
+              'is_read': 0,
+              'is_synced': 0,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        } else {
+          // Optionally update the existing record
+          batch.update(
+            NotificationDetailsTable.table,
+            {
+              'added_date_time': data['added_date_time'],
+              'announcement_end_period': data['announcement_end_period'],
+              'announcement_for': data['announcement_for'],
+              'announcement_start_period': data['announcement_start_period'],
+              'announcement_type': data['announcement_type'],
+              'block_id': data['block_id'],
+              'block_name': data['block_name'],
+              'content_en': data['content_en'],
+              'content_hi': data['content_hi'],
+              'district_id': data['district_id'],
+              'district_name': data['district_name'],
+              'state_id': data['state_id'],
+              'state_name': data['state_name'],
+              'title_en': data['title_en'],
+              'title_hi': data['title_hi'],
+              'modified_date_time': data['modified_date_time'],
+              'option': data['option'],
+              'is_deleted': data['is_deleted'] ?? 0,
+              'is_published': data['is_published'] ?? 1,
+              '__v': data['__v'],
+              'is_synced': 0,
+            },
+            where: 'unique_key = ?',
+            whereArgs: [data['unique_key']],
+          );
+        }
+      }
+
+      await batch.commit(noResult: true);
+    } catch (e, s) {
+      print("Error inserting notifications batch: $e\n$s");
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getNotifications() async {
+    try {
+      final db = await _db;
+      return await db.query(
+        NotificationDetailsTable.table,
+        where: "is_deleted = 0",
+        orderBy: "added_date_time DESC",
+      );
+    } catch (e) {
+      print("Error fetching notifications: $e");
+      rethrow;
+    }
+  }
 }
 
 extension LocalStorageDaoReads on LocalStorageDao {

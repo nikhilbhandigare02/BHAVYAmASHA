@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/presentation/Abha_Generation/ABHA_Generationscreen.dart';
+import 'package:medixcel_new/presentation/NotificationScreen/NotificationScreen.dart';
 import 'package:medixcel_new/presentation/profile/bloc/profile_bloc.dart';
 import 'package:medixcel_new/presentation/AboutUs/AboutUs.dart';
 import 'package:medixcel_new/presentation/AllBeneficiary/AllBeneficiary.dart';
@@ -263,6 +264,8 @@ class Routes{
         return MaterialPageRoute(builder: (context) =>   Lbwrefered(),);
       case Route_Names.ChildTrackingDueListForm:
         return MaterialPageRoute(builder: (context) => const ChildTrackingDueListForm(),);
+      case Route_Names.notificationScreen:
+        return MaterialPageRoute(builder: (context) => const Notificationscreen(),);
       case Route_Names.updateMemberDetail:
         final args = setting.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
