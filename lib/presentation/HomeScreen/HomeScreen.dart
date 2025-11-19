@@ -42,11 +42,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int? selectedGridIndex;
 
   Map<String, List<String>> apiData = {
-    "Family Survey List": [],
-    "Eligible Couple Due List": [],
-    "ANC List": [],
-    "HBNC List": [],
-    "Routine Immunization (RI)": [],
+    "Family Survey List": <String>[],
+    "Eligible Couple Due List": <String>[],
+    "ANC List": <String>[],
+    "HBNC List": <String>[],
+    "Routine Immunization (RI)": <String>[],
   };
 
   bool isLoading = true;
@@ -57,7 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int ancVisitCount = 0;
   int childRegisteredCount = 0;
   int highRiskCount = 0;
-
+  
+  // Routine Immunization data
+  List<Map<String, dynamic>> _routineImmunizationList = [];
   final ChildCareCountProvider _childCareCountProvider = ChildCareCountProvider();
 
   @override
@@ -75,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchTimeStamp();
     _fetchAbhaCreated();
     _fetchExistingAbhaCreated();
+    _loadRoutineImmunizationData();
     // Start background sync scheduler at app launch
     SyncService.instance.start(interval: const Duration(minutes: 5));
 
@@ -563,6 +566,47 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _loadRoutineImmunizationData() async {
+    try {
+      final rows = await LocalStorageDao.instance.getChildTrackingDueFor16Year();
+      
+      setState(() {
+        _routineImmunizationList = rows.map((row) {
+          final formData = row['form_json'];
+          final formDataContent = formData is Map ? (formData['form_data'] ?? formData) : formData;
+          
+          if (formDataContent != null) {
+            return {
+              'name': formDataContent['child_name'] ?? formDataContent['name'] ?? 'N/A',
+              'age': formDataContent['age'] ?? 'N/A',
+              'gender': formDataContent['gender'] ?? 'N/A',
+              'father_name': formDataContent['father_name'] ?? 'N/A',
+              'mother_name': formDataContent['mother_name'] ?? 'N/A',
+              'mobile': formDataContent['mobile_number'] ?? formDataContent['mobile'] ?? 'N/A',
+              'rch_id': formDataContent['rch_id_child'] ?? formDataContent['rch_id'] ?? 'N/A',
+              'registration_date': formDataContent['registration_date'] ?? 'N/A',
+              'household_id': formDataContent['household_id'] ?? 'N/A',
+              'beneficiary_id': formDataContent['beneficiary_id'] ?? 'N/A',
+              'id': formDataContent['id'] ?? row['id']?.toString() ?? 'N/A',
+            };
+          }
+          return null;
+        }).whereType<Map<String, dynamic>>().toList();
+      });
+      
+      // Update the API data with the fetched names
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        setState(() {
+          apiData[l10n.listRoutineImmunization] = 
+              (_routineImmunizationList.map((child) =>  child['name']?.toString() ?? 'N/A').toList() as List<String>);
+        });
+      }
+    } catch (e) {
+      print('Error loading routine immunization data: $e');
+    }
+  }
+
   Future<void> _loadHighRiskCount() async {
     try {
       final dbForms = await LocalStorageDao.instance.getHighRiskANCVisits();
@@ -587,7 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
         l10n.listEligibleCoupleDue: ["Couple 1", "Couple 2"],
         l10n.listANC: ["ANC 1", "ANC 2", "ANC 3", "ANC 4"],
         l10n.listHBNC: ["HBNC 1", "HBNC 2"],
-        l10n.listRoutineImmunization: ["Child 1", "Child 2", "Child 3"],
+        l10n.listRoutineImmunization: _routineImmunizationList.map((child) => child['name']?.toString() ?? 'N/A').toList().cast<String>(),
       };
       isLoading = false;
     });

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:medixcel_new/data/Local_Storage/tables/beneficiaries_table.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
@@ -48,6 +49,213 @@ class LocalStorageDao {
       rethrow;
     }
   }
+  }
+
+  Future<List<Map<String, dynamic>>> getChildTrackingDueFor16Year() async {
+    print('Executing getChildTrackingDueFor16Year query...');
+    try {
+      final db = await _db;
+
+      // Query to get the latest entry for each beneficiary
+      final rows = await db.rawQuery('''
+      WITH LatestEntries AS (
+        SELECT 
+          beneficiary_ref_key,
+          MAX(created_date_time) as latest_date
+        FROM followup_form_data
+        WHERE forms_ref_key = '30bycxe4gv7fqnt6'
+          AND form_json LIKE '%"current_tab"%16 YEAR%'
+        GROUP BY beneficiary_ref_key
+      )
+      SELECT f.* 
+      FROM followup_form_data f
+      INNER JOIN LatestEntries le ON 
+        f.beneficiary_ref_key = le.beneficiary_ref_key AND 
+        f.created_date_time = le.latest_date
+      WHERE f.forms_ref_key = '30bycxe4gv7fqnt6'
+        AND f.form_json LIKE '%"current_tab"%16 YEAR%'
+      ORDER BY f.created_date_time DESC
+    ''');
+
+      print('Found ${rows.length} latest entries for 16 YEAR tracking forms');
+
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['form_json'] = safeJsonDecode(mapped['form_json']);
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error in getChildTrackingDueFor16Year: $e');
+      if (e is Error) {
+        print('Stack trace: ${e.stackTrace}');
+      }
+      rethrow;
+    }
+  }
+  Future<List<Map<String, dynamic>>> getChildTrackingDueFor9Year() async {
+    print('Executing getChildTrackingDueFor9Year query...');
+    try {
+      final db = await _db;
+
+      // Query to get the latest entry for each beneficiary
+      final rows = await db.rawQuery('''
+      WITH LatestEntries AS (
+        SELECT 
+          beneficiary_ref_key,
+          MAX(created_date_time) as latest_date
+        FROM followup_form_data
+        WHERE forms_ref_key = '30bycxe4gv7fqnt6'
+          AND form_json LIKE '%"current_tab"%9 MONTHS%' 
+        GROUP BY beneficiary_ref_key
+      )
+      SELECT f.* 
+      FROM followup_form_data f
+      INNER JOIN LatestEntries le ON 
+        f.beneficiary_ref_key = le.beneficiary_ref_key AND 
+        f.created_date_time = le.latest_date
+      WHERE f.forms_ref_key = '30bycxe4gv7fqnt6'
+        AND f.form_json LIKE '%"current_tab"%9 MONTHS%'
+      ORDER BY f.created_date_time DESC
+    ''');
+
+      print('Found ${rows.length} latest entries for 9 YEAR tracking forms');
+
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['form_json'] = safeJsonDecode(mapped['form_json']);
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error in getChildTrackingDueFor9Year: $e');
+      if (e is Error) {
+        print('Stack trace: ${e.stackTrace}');
+      }
+      rethrow;
+    }
+  }
+  Future<void> debugFormDataFor10Weeks() async {
+    try {
+      final db = await _db;
+      final rows = await db.rawQuery('''
+      SELECT id, substr(form_json, 1, 200) as preview 
+      FROM followup_form_data 
+      WHERE form_json LIKE '%10 WEEK%'
+      LIMIT 5
+    ''');
+
+      print('Found ${rows.length} rows containing "10 WEEK"');
+      for (var row in rows) {
+        print('ID: ${row['id']}, Preview: ${row['preview']}');
+      }
+    } catch (e) {
+      print('Error in debugFormDataFor10Weeks: $e');
+    }
+  }
+  // Add these methods to LocalStorageDao class
+
+  Future<List<Map<String, dynamic>>> getChildTrackingForBirthDose() async {
+    return _getChildTrackingForAgeGroup('"current_tab"%Birth dose%', 'Birth dose');
+  }
+
+  Future<List<Map<String, dynamic>>> getChildTrackingFor6Weeks() async {
+    return _getChildTrackingForAgeGroup('"current_tab"%6 WEEK%', '6 WEEK');
+  }
+
+  Future<List<Map<String, dynamic>>> getChildTrackingFor10Weeks() async {
+    // Try different patterns to match the data
+    final patterns = [
+      '"current_tab":"10 WEEK"',  // with quotes and colon
+      '"current_tab" : "10 WEEK"', // with spaces around colon
+      'current_tab":"10 WEEK',    // missing first quote
+      '10 WEEK'                   // just the value
+    ];
+
+    for (var pattern in patterns) {
+      try {
+        final result = await _getChildTrackingForAgeGroup(pattern, '10 WEEK');
+        if (result.isNotEmpty) {
+          print('Found ${result.length} records with pattern: $pattern');
+          return result;
+        }
+      } catch (e) {
+        print('Error with pattern $pattern: $e');
+      }
+    }
+    return []; // Return empty if no records found with any pattern
+  }
+
+  Future<List<Map<String, dynamic>>> getChildTrackingFor14Weeks() async {
+    return _getChildTrackingForAgeGroup('"current_tab"%14 WEEK%', '14 WEEK');
+  }
+
+  Future<List<Map<String, dynamic>>> getChildTrackingFor16To24Months() async {
+    return _getChildTrackingForAgeGroup('"current_tab"%16-24%', '16-24 MONTHS');
+  }
+
+  Future<List<Map<String, dynamic>>> getChildTrackingFor5To6Years() async {
+    return _getChildTrackingForAgeGroup('"current_tab"%5-6 YEAR%', '5-6 YEARS');
+  }
+
+// Helper method to avoid code duplication
+  Future<List<Map<String, dynamic>>> _getChildTrackingForAgeGroup(String likePattern, String logName) async {
+    print('Executing query for $logName with pattern: $likePattern');
+    try {
+      final db = await _db;
+      final rows = await db.rawQuery('''
+      WITH LatestEntries AS (
+        SELECT 
+          beneficiary_ref_key,
+          MAX(created_date_time) as latest_date
+        FROM followup_form_data
+        WHERE forms_ref_key = '30bycxe4gv7fqnt6'
+          AND form_json LIKE ?
+        GROUP BY beneficiary_ref_key
+      )
+      SELECT f.* 
+      FROM followup_form_data f
+      INNER JOIN LatestEntries le ON 
+        f.beneficiary_ref_key = le.beneficiary_ref_key AND 
+        f.created_date_time = le.latest_date
+      WHERE f.forms_ref_key = '30bycxe4gv7fqnt6'
+        AND f.form_json LIKE ?
+      ORDER BY f.created_date_time DESC
+    ''', ['%$likePattern%', '%$likePattern%']);  // Added % around the pattern
+
+      print('Found ${rows.length} latest entries for $logName tracking forms');
+      if (rows.isNotEmpty) {
+        print('First row preview: ${rows.first.toString().substring(0, min(200, rows.first.toString().length))}');
+      }
+
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['form_json'] = safeJsonDecode(mapped['form_json']);
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error in getChildTrackingFor$logName: $e');
+      if (e is Error) {
+        print('Stack trace: ${e.stackTrace}');
+      }
+      rethrow;
+    }
+  }
+  Future<void> debugFormData() async {
+    try {
+      final db = await _db;
+      final rows = await db.rawQuery('''
+      SELECT id, substr(form_json, 1, 500) as preview 
+      FROM followup_form_data 
+      WHERE form_json LIKE '%16 YEAR%' 
+      LIMIT 5
+    ''');
+
+      print('Found ${rows.length} rows with "16 YEAR" in form_json');
+      for (var row in rows) {
+        print('ID: ${row['id']}, Preview: ${row['preview']}');
+      }
+    } catch (e) {
+      print('Error in debugFormData: $e');
+    }
   }
 
   Future<int> setBeneficiaryMigratedByUniqueKey({required String uniqueKey, required int isMigrated}) async {
