@@ -261,7 +261,6 @@ class _HBNCListScreenState
       print('🔍 Fetching last visit date for beneficiary: $beneficiaryId');
       final db = await DatabaseProvider.instance.database;
 
-      // Use the same form reference key as _getVisitCount
       final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
       print('🔑 Using form reference key: $hbncVisitKey');
 
@@ -283,7 +282,6 @@ class _HBNCListScreenState
           final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
           final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
 
-          // Debug: Print all form data keys and values
           print('🔑 Form data:');
           formData.forEach((key, value) {
             print('  - $key: $value (${value.runtimeType})');
@@ -293,14 +291,12 @@ class _HBNCListScreenState
           print('🔍 Full form data structure:');
           print(jsonEncode(formData));
 
-          // Try to get visit date from visitDetails
           if (formData.containsKey('visitDetails')) {
             final visitDetails = formData['visitDetails'];
             print('🔍 Found visitDetails: ${visitDetails.runtimeType}');
 
             if (visitDetails is Map) {
-              // Try different possible field names for visit date
-              final visitDate = visitDetails['visitDate'] ?? 
+              final visitDate = visitDetails['visitDate'] ??
                                visitDetails['visit_date'] ??
                                visitDetails['dateOfVisit'] ??
                                visitDetails['date_of_visit'];

@@ -436,26 +436,41 @@ class SecureStorageService {
       return 0;
     }
   }
+  static const List<int> _hbncScheduleDays = [1, 3, 7, 14, 21, 28, 42];
+
+  static int _normalizeHbncVisitCount(int raw) {
+    if (raw <= 0) return 0;
+    if (_hbncScheduleDays.contains(raw)) return raw;
+
+    int last = 0;
+    for (final d in _hbncScheduleDays) {
+      if (raw < d) return last;
+      last = d;
+    }
+    return last;
+  }
+
   static Future<int> getVisitCount(String beneficiaryId) async {
     try {
       if (beneficiaryId.isEmpty) {
         print('⚠️ Empty beneficiaryId provided to getVisitCount');
-        return 1;
+        return 0;
       }
 
       final key = 'visit_count_$beneficiaryId';
       final countStr = await _storage.read(key: key);
 
       if (countStr == null) {
-        print('ℹ️ No submission count found for beneficiary: $beneficiaryId');
-        return 1;
+        print('ℹ️ No visit count found for beneficiary: $beneficiaryId');
+        return 0;
       }
 
-      final count = int.tryParse(countStr) ?? 1;
-      print('ℹ️ Found submission count for $beneficiaryId: $count');
-      return count;
+      final raw = int.tryParse(countStr) ?? 0;
+      final normalized = _normalizeHbncVisitCount(raw);
+      print('ℹ️ Found visit count for $beneficiaryId: raw=$raw normalized=$normalized');
+      return normalized;
     } catch (e) {
-      print('❌ Error getting submission count for $beneficiaryId: $e');
+      print('❌ Error getting visit count for $beneficiaryId: $e');
       return 0;
     }
   }
@@ -497,22 +512,34 @@ class SecureStorageService {
       }
 
       final key = 'visit_count_$beneficiaryId';
-      final currentCount = await getVisitCount(beneficiaryId);
-      final newCount = currentCount + 2;
+      final currentCount = await getVisitCount(beneficiaryId); // already normalized
 
-      print('ℹ️ Incrementing count for $beneficiaryId from $currentCount to $newCount');
+      int newCount;
+      if (currentCount <= 0) {
+        newCount = _hbncScheduleDays.first;
+      } else {
+        final idx = _hbncScheduleDays.indexOf(currentCount);
+        if (idx >= 0 && idx < _hbncScheduleDays.length - 1) {
+          newCount = _hbncScheduleDays[idx + 1];
+        } else {
+          // Already at or beyond last scheduled day (42) -> keep as is
+          newCount = currentCount;
+        }
+      }
+
+      print('ℹ️ Incrementing HBNC visit count for $beneficiaryId from $currentCount to $newCount');
       await _storage.write(key: key, value: newCount.toString());
 
       final savedCount = await _storage.read(key: key);
       if (savedCount == newCount.toString()) {
-        print('✅ Successfully updated count for $beneficiaryId to $newCount');
+        print('✅ Successfully updated visit count for $beneficiaryId to $newCount');
       } else {
-        print('⚠️ Failed to verify count update for $beneficiaryId');
+        print('⚠️ Failed to verify visit count update for $beneficiaryId');
       }
 
       return newCount;
     } catch (e) {
-      print('❌ Error incrementing submission count for $beneficiaryId: $e');
+      print('❌ Error incrementing visit count for $beneficiaryId: $e');
       return 0;
     }
   }

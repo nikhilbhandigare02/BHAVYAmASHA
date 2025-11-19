@@ -148,7 +148,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
 
-      final formDataForDb = {
+      final formDataForDb  = {
         'server_id': '',
         'forms_ref_key': formsRefKey,
         'household_ref_key': householdRefKey,
