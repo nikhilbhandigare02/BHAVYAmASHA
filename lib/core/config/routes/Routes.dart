@@ -77,6 +77,7 @@ import '../../../presentation/myBeneficiary/Beneficiaries/FamilyUpdateList.dart'
 import '../../../presentation/myBeneficiary/Beneficiaries/HBNCList.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/LBWRefered.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/MigratedOut.dart';
+import '../../../presentation/myBeneficiary/Beneficiaries/PregnancyOutcome.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/PregnantWomanList.dart' show PregnantWomenList;
 import 'Route_Name.dart' show Route_Names;
 
@@ -251,6 +252,8 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const Ncdprioritylist(),);
       case Route_Names.Migratedout:
         return MaterialPageRoute(builder: (context) => const Migratedout(),);
+      case Route_Names.Pregnancyoutcome:
+        return MaterialPageRoute(builder: (context) => const Pregnancyoutcome(),);
 
       case Route_Names.HighRisk:
         return MaterialPageRoute(builder: (context) => const HighRisk(),);

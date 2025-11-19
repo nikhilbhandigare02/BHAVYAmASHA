@@ -213,9 +213,9 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
                 case 2:
                   Navigator.pushNamed(context, Route_Names.PregnantWomenList);
                   break;
-                // case 3:
-                //   Navigator.pushNamed(context, Route_Names.PregnancyOutcome);
-                //   break;
+                case 3:
+                  Navigator.pushNamed(context, Route_Names.Pregnancyoutcome);
+                  break;
                 case 4:
                   Navigator.pushNamed(context, Route_Names.HBNCListBeneficiaries);
                   break;
