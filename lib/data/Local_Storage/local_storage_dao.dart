@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:medixcel_new/data/Local_Storage/tables/beneficiaries_table.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
@@ -23,6 +24,51 @@ class LocalStorageDao {
       print('Error decoding JSON: $e');
       return null;
     }
+
+  Future<List<Map<String, dynamic>>> getMigratedBeneficiaries() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'beneficiaries',
+        where: 'is_deleted = 0 AND is_migrated = 1',
+        orderBy: 'created_date_time DESC',
+      );
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error getting migrated beneficiaries: $e');
+      rethrow;
+    }
+  }
+  }
+
+  Future<int> setBeneficiaryMigratedByUniqueKey({required String uniqueKey, required int isMigrated}) async {
+    try {
+      final db = await _db;
+      final values = <String, Object?>{
+        'is_migrated': isMigrated,
+        'modified_date_time': DateTime.now().toIso8601String(),
+      };
+      final changes = await db.update(
+        'beneficiaries',
+        values,
+        where: 'unique_key = ?',
+        whereArgs: [uniqueKey],
+      );
+      return changes;
+    } catch (e) {
+      print('Error updating is_migrated for beneficiary: $e');
+      rethrow;
+    }
+  }
 
   Future<List<Map<String, dynamic>>> getUnsyncedEligibleCoupleActivities() async {
     final db = await _db;
@@ -86,7 +132,6 @@ class LocalStorageDao {
       print('Error getting latest child care activity server_id: $e');
       return '';
     }
-  }
   }
 
   /// Returns the count of ANC visits for a specific beneficiary
@@ -181,8 +226,6 @@ class LocalStorageDao {
     if (v is Map || v is List) return jsonEncode(v);
     return v;
   }
-
-
 
   Future<int> insertHousehold(Map<String, dynamic> data) async {
     try {
@@ -776,6 +819,8 @@ class LocalStorageDao {
     }
   }
 
+
+
   Future<int> markBeneficiarySyncedByUniqueKey({required String uniqueKey, String? serverId}) async {
     try {
       final db = await _db;
@@ -799,51 +844,109 @@ class LocalStorageDao {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getDeathRecords() async {
+  // Debug method to check death records
+  Future<Map<String, dynamic>> debugDeathRecords() async {
     try {
       final db = await _db;
+      
+      // Check total records count
+      final countResult = await db.rawQuery('''
+        SELECT 
+          COUNT(*) as total,
+          SUM(CASE WHEN is_death = 1 THEN 1 ELSE 0 END) as death_count,
+          SUM(CASE WHEN is_death = 1 AND is_deleted = 0 THEN 1 ELSE 0 END) as valid_death_count
+        FROM ${BeneficiariesTable.table}
+      ''');
+      
+      // Get sample death records
+      final sampleRecords = await db.query(
+        BeneficiariesTable.table,
+        where: 'is_death = 1 AND is_deleted = 0',
+        limit: 5,
+      );
+      
+      return {
+        'counts': countResult.first,
+        'sample_records': sampleRecords,
+      };
+    } catch (e) {
+      return {'error': e.toString()};
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getDeathRecords() async {
+    try {
+      print('🔍 [getDeathRecords] Querying death records...');
+      final db = await _db;
+      
+      // First, run debug query
+      final debugInfo = await debugDeathRecords();
+      print('🔍 [getDeathRecords] Debug Info: $debugInfo');
+      
       final rows = await db.query(
-        'beneficiaries',
-        where: 'is_death = ? AND is_deleted = ?',
-        whereArgs: [1, 0],
+        BeneficiariesTable.table,
+        where: 'is_death = 1 AND is_deleted = 0',
         orderBy: 'created_date_time DESC',
       );
-      final result = <Map<String, dynamic>>[];
       
-      for (final row in rows) {
+      print('✅ [getDeathRecords] Found ${rows.length} death records');
+
+      return rows.map((row) {
         try {
           final mapped = Map<String, dynamic>.from(row);
-
-          final beneficiaryInfo = safeJsonDecode(mapped['beneficiary_info']);
-          final deathDetails = safeJsonDecode(mapped['death_details']);
-
-          final headDetails = beneficiaryInfo is Map 
-              ? (beneficiaryInfo['head_details'] ?? {}) 
-              : {};
-          
-          // Format the death record
-          final deathRecord = {
-            'id': mapped['id'],
-            'hhId': mapped['household_ref_key'],
-            'name': headDetails['headName'] ?? headDetails['memberName'] ?? 'Unknown',
-            'age/gender': _getAgeGender(headDetails),
-            'date': _formatDeathDate(deathDetails),
-            'place': deathDetails['placeOfDeath'] ?? 'Not specified',
-            'status': headDetails['maritalStatus'] ?? 'Unknown',
-            'beneficiary_info': beneficiaryInfo,
-            'death_details': deathDetails,
-          };
-          
-          result.add(deathRecord);
-          
+          // Parse JSON fields
+          mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+          mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+          mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+          mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+          mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+          return mapped;
         } catch (e) {
-          print('Error processing death record: $e');
+          print('❌ Error parsing record $row: $e');
+          return <String, dynamic>{}; // Return empty map on parse error
         }
-      }
-      return result;
-      
+      }).where((map) => map.isNotEmpty).toList(); // Filter out any empty maps from failed parses
     } catch (e, stackTrace) {
-      print('Error getting death records: $e');
+      print('❌ [getDeathRecords] Error: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getMigratedBeneficiaries() async {
+    try {
+      print('🔍 [getMIGRecords] Querying  mig records...');
+      final db = await _db;
+
+
+      final debugInfo = await debugDeathRecords();
+      print('🔍 [getMIGRecords] Debug Info: $debugInfo');
+
+      final rows = await db.query(
+        BeneficiariesTable.table,
+        where: 'is_migrated = 1 AND is_deleted = 0',
+        orderBy: 'created_date_time DESC',
+      );
+
+      print('✅ [getDeathRecords] Found ${rows.length} death records');
+
+      return rows.map((row) {
+        try {
+          final mapped = Map<String, dynamic>.from(row);
+          // Parse JSON fields
+          mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+          mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+          mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+          mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+          mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+          return mapped;
+        } catch (e) {
+          print('❌ Error parsing record $row: $e');
+          return <String, dynamic>{}; // Return empty map on parse error
+        }
+      }).where((map) => map.isNotEmpty).toList(); // Filter out any empty maps from failed parses
+    } catch (e, stackTrace) {
+      print('❌ [getDeathRecords] Error: $e');
       print('Stack trace: $stackTrace');
       rethrow;
     }
@@ -966,69 +1069,10 @@ class LocalStorageDao {
     }
   }
 
-  Future<String> getLatestEligibleCoupleActivityServerId() async {
-    try {
-      final db = await _db;
-      final rows = await db.query(
-        'eligible_couple_activities',
-        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
-        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
-        limit: 1,
-      );
-      if (rows.isEmpty) return '';
-      final sid = rows.first['server_id'];
-      return sid?.toString() ?? '';
-    } catch (e) {
-      print('Error getting latest EC activity server_id: $e');
-      return '';
-    }
-  }
 
-  Future<String> getLatestChildCareActivityServerId() async {
-    try {
-      final db = await _db;
-      final rows = await db.query(
-        'child_care_activities',
-        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
-        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
-        limit: 1,
-      );
-      if (rows.isEmpty) return '';
-      final sid = rows.first['server_id'];
-      return sid?.toString() ?? '';
-    } catch (e) {
-      print('Error getting latest child care activity server_id: $e');
-      return '';
-    }
-  }
 
-  Future<List<Map<String, dynamic>>> getUnsyncedEligibleCoupleActivities() async {
-    final db = await _db;
-    final rows = await db.query(
-      'eligible_couple_activities',
-      where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 0)',
-      orderBy: 'created_date_time ASC',
-    );
-    return rows.map((row) {
-      final mapped = Map<String, dynamic>.from(row);
-      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
-      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
-      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
-      return mapped;
-    }).toList();
-  }
 
-  Future<int> markEligibleCoupleActivitySyncedById(int id, {String? serverId}) async {
-    final db = await _db;
-    final values = <String, Object?>{
-      'is_synced': 1,
-      'modified_date_time': DateTime.now().toIso8601String(),
-    };
-    if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
-    return db.update('eligible_couple_activities', values, where: 'id = ?', whereArgs: [id]);
-  }
+
 
   Future<List<Map<String, dynamic>>> getUnsyncedChildCareActivities() async {
     final db = await _db;

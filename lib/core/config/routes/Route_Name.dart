@@ -72,6 +72,7 @@ class Route_Names{
   static const String CBACDetailScreen = 'CBACDetailScreen';
   static const String Abortionlist = 'Abortionlist';
   static const String Lbwrefered = 'Lbwrefered';
+  static const String Migratedout = 'Migratedout';
 
 
 }

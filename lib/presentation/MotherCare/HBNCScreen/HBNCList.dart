@@ -504,7 +504,7 @@ class _HBNCListScreenState
       ),
       child: InkWell(
         onTap: () {
-          // Print the complete IDs before navigation
+
           print('🔵 Navigating to HbncVisitScreen');
           print('🆔 Complete Household ID: ${data['fullHhId']}');
           print('🆔 Complete Beneficiary ID: ${data['fullBeneficiaryId']}');

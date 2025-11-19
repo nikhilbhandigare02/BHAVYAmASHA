@@ -39,15 +39,26 @@ class _DeathRegisterState extends State<DeathRegister> {
 
   Future<void> _loadDeathRecords() async {
     try {
+      print('🔍 [DeathRegister] Fetching death records...');
       final records = await LocalStorageDao.instance.getDeathRecords();
+      print('✅ [DeathRegister] Fetched ${records.length} death records');
+
+      // Debug: Print first few records
+      for (var i = 0; i < (records.length < 3 ? records.length : 3); i++) {
+        print('📝 Record ${i + 1}: ${records[i]}');
+      }
+
       if (mounted) {
         setState(() {
           _deathRecords = records;
           _filtered = List<Map<String, dynamic>>.from(_deathRecords);
           _isLoading = false;
+          print('🔄 [DeathRegister] State updated with ${_deathRecords.length} records');
         });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ [DeathRegister] Error loading death records: $e');
+      print('Stack trace: $stackTrace');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -83,7 +94,6 @@ class _DeathRegisterState extends State<DeathRegister> {
       drawer: const CustomDrawer(),
       body: Column(
         children: [
-
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
@@ -106,28 +116,103 @@ class _DeathRegisterState extends State<DeathRegister> {
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: Theme.of(context).primaryColor),
                 ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: _loadDeathRecords,
+                  tooltip: 'Refresh data',
+                ),
               ),
             ),
           ),
 
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _filtered.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No death records found',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                        itemCount: _filtered.length,
-                        itemBuilder: (context, index) {
-                          final data = _filtered[index];
-                          return _householdCard(context, data);
-                        },
-                      ),
+          _isLoading
+              ? const Expanded(child: Center(child: CircularProgressIndicator()))
+              : _deathRecords.isEmpty
+              ? _buildEmptyState(context)
+              : Expanded(
+            child: _filtered.isEmpty
+                ? _buildNoResults()
+                : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              itemCount: _filtered.length,
+              itemBuilder: (context, index) {
+                final data = _filtered[index];
+                return _householdCard(context, data);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Expanded(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.assignment_late_outlined,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No death records found',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'There are no death records in the database.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _loadDeathRecords,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Refresh'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoResults() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.search_off_outlined,
+            size: 64,
+            color: Colors.grey,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No matching records found',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try a different search term',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.grey[600],
+            ),
           ),
         ],
       ),
@@ -136,114 +221,216 @@ class _DeathRegisterState extends State<DeathRegister> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
-final l10n = AppLocalizations.of(context);
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          Route_Names.FamliyUpdate,
-          arguments: {'isBeneficiary': true},
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 3,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    final l10n = AppLocalizations.of(context);
+
+    // Extract data with null safety
+    final beneficiaryInfo = data['beneficiary_info'] is Map ? Map<String, dynamic>.from(data['beneficiary_info']) : {};
+    final deathDetails = data['death_details'] is Map ? Map<String, dynamic>.from(data['death_details']) : {};
+
+    // Parse beneficiary info
+    final name = beneficiaryInfo['memberName'] ?? 
+                beneficiaryInfo['headName'] ?? 
+                beneficiaryInfo['name'] ?? 'Unknown';
+    
+    // Calculate age from DOB if available
+    String age = 'N/A';
+    if (beneficiaryInfo['dob'] != null) {
+      try {
+        final dob = DateTime.tryParse(beneficiaryInfo['dob']);
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+            years--;
+          }
+          age = '$years years';
+        }
+      } catch (e) {
+        print('Error parsing DOB: $e');
+      }
+    } else if (beneficiaryInfo['age'] != null) {
+      age = '${beneficiaryInfo['age']} years';
+    }
+
+    final gender = (beneficiaryInfo['gender'] ?? '').toString().toLowerCase() == 'm' ? 'Male' : 'Female';
+    final hhId = data['household_ref_key']?.toString() ?? 'N/A';
+    final mobile = beneficiaryInfo['mobileNo'] ?? beneficiaryInfo['mobile'] ?? 'N/A';
+    
+    // Parse death details
+    final deathDate = deathDetails['date_of_death'] ?? deathDetails['deathDate'] ?? 'Not recorded';
+    final causeOfDeath = deathDetails['probable_cause_of_death'] ?? deathDetails['causeOfDeath'] ?? 'Not specified';
+    final deathPlace = deathDetails['death_place'] ?? deathDetails['deathPlace'] ?? 'Not specified';
+    final otherCause = deathDetails['other_cause_of_death'] ?? deathDetails['otherCause'];
+    final deathReason = deathDetails['reason_of_death'] ?? deathDetails['deathReason'];
+    final otherReason = deathDetails['other_reason'] ?? deathDetails['otherReason'];
+    final recordedDate = deathDetails['recorded_date'] ?? deathDetails['recordedDate'];
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: ExpansionTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.red.shade100,
+          child: const Icon(Icons.person_off, color: Colors.red),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 🔹 Header
-            Container(
-              decoration: const BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-              ),
-              padding: const EdgeInsets.all(6),
-              child: Row(
-                children: [
-                  const Icon(Icons.home, color: Colors.black54, size: 18),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      (data['hhId'] ?? '').toString(),
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+        title: Text(
+          name,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Text(
+          'Age: $age • $gender • HH ID: ${hhId.length > 8 ? '...${hhId.substring(hhId.length - 8)}' : hhId}',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 13,
+          ),
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Basic Info Section
+                Text(
+                  'Basic Information',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow('👤 Name', name),
+                _buildInfoRow('🎂 Age', age),
+                _buildInfoRow('👥 Gender', gender),
+                _buildInfoRow('📱 Contact', mobile),
+                _buildInfoRow('🏠 Household ID', hhId),
+                
+                // Death Details Section
+                const SizedBox(height: 12),
+                const Divider(),
+                Text(
+                  'Death Details',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow('📅 Date of Death', _formatDate(deathDate)),
+                _buildInfoRow('💀 Cause of Death', causeOfDeath),
+                if (otherCause?.isNotEmpty == true) 
+                  _buildInfoRow('   ↳ Other Cause', otherCause, padding: const EdgeInsets.only(left: 16, bottom: 4)),
+                _buildInfoRow('🏠 Place of Death', deathPlace),
+                if (deathReason?.isNotEmpty == true)
+                  _buildInfoRow('📝 Reason', deathReason),
+                if (otherReason?.isNotEmpty == true)
+                  _buildInfoRow('   ↳ Other Reason', otherReason, padding: const EdgeInsets.only(left: 16, bottom: 4)),
+                if (recordedDate?.isNotEmpty == true)
+                  _buildInfoRow('📋 Recorded On', _formatDate(recordedDate)),
+                
+                // Additional Details Section
+                if (deathDetails.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  Text(
+                    'Additional Details',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                      fontSize: 14,
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            // 🔹 Body
-            Container(
-              decoration: BoxDecoration(
-                color: primary.withOpacity(0.95),
-                borderRadius:
-                const BorderRadius.vertical(bottom: Radius.circular(8)),
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(child: _infoRow('', data['name'] ?? '')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _infoRow('${l10n?.dateLabel ?? 'Date'}:', data['date'] ?? l10n?.notAvailable ?? 'N/A')),
-                    ],
-                  ),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                          child:
-                          _infoRow('', data['age/gender'] ?? '')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _infoRow('${l10n?.placeLabel ?? 'Place'}:', data['place'] ?? l10n?.notAvailable ?? 'N/A')),
-                    ],
-                  ),
+                  ...deathDetails.entries.where((entry) => ![
+                    'date_of_death', 'deathDate',
+                    'probable_cause_of_death', 'causeOfDeath',
+                    'death_place', 'deathPlace',
+                    'other_cause_of_death', 'otherCause',
+                    'reason_of_death', 'deathReason',
+                    'other_reason', 'otherReason',
+                    'recorded_date', 'recordedDate'
+                  ].contains(entry.key))
+                  .map((entry) => _buildInfoRow(
+                    '• ${entry.key.replaceAll('_', ' ').replaceAllMapped(
+                      RegExp(r'([A-Z])'), 
+                      (match) => ' ${match.group(0)}'
+                    ).toUpperCase().trim()}',
+                    entry.value?.toString() ?? 'N/A',
+                    padding: const EdgeInsets.only(left: 8, top: 2),
+                  )).toList(),
                 ],
-              ),
+
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      _showDeathDetails(context, data);
+                    },
+                    icon: const Icon(Icons.visibility, size: 16),
+                    label: const Text('View Raw Data'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+  
+  String _formatDate(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return 'Not recorded';
+    try {
+      final date = DateTime.tryParse(dateString);
+      if (date == null) return dateString;
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    } catch (e) {
+      return dateString;
+    }
+  }
 
-  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
+  Widget _buildInfoRow(String label, String value, {EdgeInsetsGeometry? padding}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: padding ?? const EdgeInsets.only(bottom: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$title ',
-            style:  TextStyle(
-              color: AppColors.background,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
             ),
           ),
+          const Text(':', style: TextStyle(color: Colors.grey)),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
-              value.isEmpty ? 'N/A' : value,
-              style:  TextStyle(
-                color: Colors.white,
+              value,
+              style: const TextStyle(
+                fontSize: 13,
                 fontWeight: FontWeight.w400,
-                fontSize: 13.sp,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -251,4 +438,24 @@ final l10n = AppLocalizations.of(context);
     );
   }
 
+  void _showDeathDetails(BuildContext context, Map<String, dynamic> data) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Death Record Details'),
+        content: SingleChildScrollView(
+          child: Text(
+            const JsonEncoder.withIndent('  ').convert(data),
+            style: const TextStyle(fontFamily: 'monospace'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
 }
