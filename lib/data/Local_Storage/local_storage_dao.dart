@@ -25,31 +25,9 @@ class LocalStorageDao {
       print('Error decoding JSON: $e');
       return null;
     }
+  }
 
-  Future<List<Map<String, dynamic>>> getMigratedBeneficiaries() async {
-    try {
-      final db = await _db;
-      final rows = await db.query(
-        'beneficiaries',
-        where: 'is_deleted = 0 AND is_migrated = 1',
-        orderBy: 'created_date_time DESC',
-      );
-      return rows.map((row) {
-        final mapped = Map<String, dynamic>.from(row);
-        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
-        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
-        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
-        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
-        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
-        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
-        return mapped;
-      }).toList();
-    } catch (e) {
-      print('Error getting migrated beneficiaries: $e');
-      rethrow;
-    }
-  }
-  }
+
 
   Future<List<Map<String, dynamic>>> getChildTrackingDueFor16Year() async {
     print('Executing getChildTrackingDueFor16Year query...');
