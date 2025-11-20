@@ -75,6 +75,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       debugPrint('\n🔍 Found ${results.length} child registration/tracking records after filtering');
 
       final List<Map<String, dynamic>> childTrackingList = [];
+      final Set<String> seenBeneficiaries = <String>{};
 
       for (final row in results) {
         try {
@@ -112,6 +113,15 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           if (childName.isEmpty) {
             debugPrint('Skipping record with empty child name');
             continue;
+          }
+
+          // De-duplicate on beneficiary_ref_key so each child appears only once
+          if (beneficiaryRefKey.isNotEmpty && seenBeneficiaries.contains(beneficiaryRefKey)) {
+            debugPrint('⏭️ Skipping duplicate record for beneficiary: $beneficiaryRefKey');
+            continue;
+          }
+          if (beneficiaryRefKey.isNotEmpty) {
+            seenBeneficiaries.add(beneficiaryRefKey);
           }
 
           // Check if case closure exists for this beneficiary
