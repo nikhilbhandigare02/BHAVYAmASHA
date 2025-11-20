@@ -980,17 +980,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             lastSurveyDate = createdStr;
           }
 
-          // 6-month filter intentionally disabled as per latest requirement
-
-          // if (lastSurveyDt == null) {
-          //   continue;
-          // }
-          // final now = DateTime.now();
-          // final sixMonthsAgo = DateTime(now.year, now.month - 6, now.day);
-          // if (!lastSurveyDt.isBefore(sixMonthsAgo)) {
-          //   // last survey is within the last 6 months -> skip
-          //   continue;
-          // }
+          // 6-month condition: show this family only if the last survey
+          // was done more than 6 months ago. If there is no lastSurveyDt,
+          // skip (treat as not eligible).
+          if (lastSurveyDt == null) {
+            continue;
+          }
+          final now = DateTime.now();
+          final sixMonthsAgo = DateTime(now.year, now.month - 6, now.day);
+          if (!lastSurveyDt.isBefore(sixMonthsAgo)) {
+            // last survey is within the last 6 months -> skip
+            continue;
+          }
 
           String rawId =
               row['unique_key']?.toString() ??
