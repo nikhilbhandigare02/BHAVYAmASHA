@@ -16,6 +16,7 @@ import '../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
 import '../EligibleCouple/TrackEligibleCouple/TrackEligibleCoupleScreen.dart';
 import '../MotherCare/ANCVisit/ANCVisitForm/ANCVisitForm.dart';
 import '../MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
+import 'package:intl/intl.dart';
 
 class TodayProgramSection extends StatefulWidget {
   final int? selectedGridIndex;
@@ -39,6 +40,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   List<Map<String, dynamic>> _eligibleCoupleItems = [];
   List<Map<String, dynamic>> _ancItems = [];
   List<Map<String, dynamic>> _hbncItems = [];
+  List<Map<String, dynamic>> _pwList = [];
   int _completedVisitsCount = 0;
 
   @override
@@ -53,12 +55,54 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     _loadEligibleCoupleItems();
     _loadAncItems();
     _loadHbncItems();
+    _loadPregnantWomen();
     _loadCompletedVisitsCount();
   }
 
   String _last11(String? input) {
     if (input == null || input.isEmpty) return '-';
     return input.length <= 11 ? input : input.substring(input.length - 11);
+  }
+
+  int _calculateAge(String? dob) {
+    if (dob == null || dob.isEmpty) return 0;
+    try {
+      DateTime? birthDate;
+      
+      // Try parsing the date string
+      if (dob.contains('T')) {
+        birthDate = DateTime.tryParse(dob.split('T')[0]);
+      } else {
+        birthDate = DateTime.tryParse(dob);
+      }
+      
+      if (birthDate == null) {
+        // If parsing fails, try to extract date parts manually
+        final parts = dob.split(RegExp(r'[^0-9]'));
+        if (parts.length >= 3) {
+          final year = int.tryParse(parts[0]) ?? 0;
+          final month = int.tryParse(parts[1]) ?? 1;
+          final day = int.tryParse(parts[2]) ?? 1;
+          birthDate = DateTime(year, month, day);
+        } else {
+          return 0;
+        }
+      }
+      
+      final now = DateTime.now();
+      int age = now.year - birthDate.year;
+      
+      // Adjust age if birthday hasn't occurred yet this year
+      if (now.month < birthDate.month || 
+          (now.month == birthDate.month && now.day < birthDate.day)) {
+        age--;
+      }
+      
+      return age > 0 ? age : 0;
+    } catch (e) {
+      print('Error calculating age: $e');
+      return 0;
+    }
   }
 
   Future<void> _launchPhoneDialer(String? mobile) async {
@@ -169,7 +213,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final db = await DatabaseProvider.instance.database;
       final ancFormKey =
           FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
-
 
       final rows = await LocalStorageDao.instance.getANCList();
 
@@ -866,6 +909,77 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     ranges['pmsma_end'] = lmp.add(const Duration(days: 44 * 7));
 
     return ranges;
+  }
+
+  Future<void> _loadPregnantWomen() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final pregnantWomen = <Map<String, dynamic>>[];
+
+      for (final row in rows) {
+        try {
+          final dynamic rawInfo = row['beneficiary_info'];
+          if (rawInfo == null) continue;
+
+          Map<String, dynamic> info = {};
+          try {
+            info = rawInfo is String
+                ? jsonDecode(rawInfo) as Map<String, dynamic>
+                : Map<String, dynamic>.from(rawInfo as Map);
+          } catch (e) {
+            print('Error parsing beneficiary_info: $e');
+            continue;
+          }
+
+          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes';
+          if (!isPregnant) continue;
+
+          final gender = info['gender']?.toString().toLowerCase() ?? '';
+          if (gender != 'f' && gender != 'female') continue;
+
+          final name = info['memberName'] ?? info['headName'] ?? 'Unknown';
+          final age = _calculateAge(info['dob']);
+          final mobile = info['mobileNo'] ?? '';
+          final lmp = info['lmp']?.toString();
+          final uniqueKey = row['unique_key']?.toString() ?? '';
+          final householdRefKey = row['household_ref_key']?.toString() ?? '';
+
+          // Format last visit date if available
+          String lastVisitDate = '-';
+          if (info.containsKey('lastVisitDate') && info['lastVisitDate'] != null) {
+            try {
+              final date = DateTime.tryParse(info['lastVisitDate'].toString());
+              if (date != null) {
+                lastVisitDate = DateFormat('dd MMM yyyy').format(date);
+              }
+            } catch (e) {
+              print('Error parsing last visit date: $e');
+            }
+          }
+
+          pregnantWomen.add({
+            'name': name,
+            'age': age,
+            'gender': 'Female',
+            'mobile': mobile,
+            'id': uniqueKey,
+            'badge': 'RI',
+            'last Visit date': lastVisitDate,
+            'unique_key': uniqueKey,
+            'household_ref_key': householdRefKey,
+            'lmp': lmp,
+          });
+        } catch (e) {
+          print('Error processing beneficiary: $e');
+        }
+      }
+
+      setState(() {
+        _pwList = pregnantWomen;
+      });
+    } catch (e) {
+      print('Error loading pregnant women: $e');
+    }
   }
 
   Future<void> _loadFamilySurveyItems() async {
@@ -1781,19 +1895,27 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                     .map((item) => _routineCard(item))
                                     .toList())
                           : entry.key == l10n.listRoutineImmunization
-                          ? entry.value
-                                .map(
-                                  (name) => _routineCard({
-                                    'id': '-',
-                                    'name': name,
-                                    'age': '-',
-                                    'gender': '-',
-                                    'last Visit date': '-',
-                                    'mobile': '-',
-                                    'badge': 'Child Tracking',
-                                  }),
-                                )
-                                .toList()
+                          ? _pwList.isEmpty
+                              ? [
+                                  const Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: Text('No pregnant women found'),
+                                  ),
+                                ]
+                              : _pwList
+                                  .map((item) => _routineCard({
+                                        'id': item['id'],
+                                        'name': item['name'],
+                                        'age': item['age'],
+                                        'gender': item['gender'],
+                                        'last Visit date': item['last Visit date'],
+                                        'mobile': item['mobile'],
+                                        'badge': 'RI',
+                                        'unique_key': item['unique_key'],
+                                        'household_ref_key': item['household_ref_key'],
+                                        'lmp': item['lmp'],
+                                      }))
+                                  .toList()
                           : entry.value
                                 .map((item) => ListTile(title: Text(item)))
                                 .toList(),
