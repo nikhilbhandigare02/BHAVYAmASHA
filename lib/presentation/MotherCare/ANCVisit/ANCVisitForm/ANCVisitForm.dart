@@ -52,53 +52,6 @@ class _AncvisitformState extends State<Ancvisitform> {
     });
   }
 
-
-  Future<Map<String, dynamic>> _getLatestAncVisitData() async {
-    try {
-      if (_bloc.state.beneficiaryId == null || _bloc.state.beneficiaryId!.isEmpty) {
-        print('⚠️ No beneficiary ID available');
-        return {};
-      }
-
-      final localStorageDao = LocalStorageDao();
-      print('🔍 Fetching ANC forms for beneficiary: ${_bloc.state.beneficiaryId}');
-
-      final existingForms = await localStorageDao.getFollowupFormsByHouseholdAndBeneficiary(
-        formType: FollowupFormDataTable.ancDueRegistration,
-        householdId: _bloc.state.householdRefKey ?? '',
-        beneficiaryId: _bloc.state.beneficiaryId!,
-      );
-
-      print('📊 Found ${existingForms.length} existing ANC forms');
-
-      if (existingForms.isNotEmpty) {
-        // Get the most recent form (ordered by created_date_time DESC)
-        final latestForm = existingForms.first;
-        print('📅 Latest form created at: ${latestForm['created_date_time']}');
-
-        if (latestForm['form_json'] != null) {
-          try {
-            final formJson = jsonDecode(latestForm['form_json'] as String);
-            if (formJson is Map && formJson['form_data'] is Map) {
-              final formData = Map<String, dynamic>.from(formJson['form_data'] as Map);
-              print('✅ Loaded form data with anc_visit_no: ${formData['anc_visit_no']}');
-              return formData;
-            }
-          } catch (e) {
-            print('❌ Error parsing form JSON: $e');
-          }
-        } else {
-          print('⚠️ Latest form has no form_json');
-        }
-      } else {
-        print('ℹ️ No existing ANC forms found for this beneficiary');
-      }
-    } catch (e) {
-      print('❌ Error fetching latest ANC visit: $e');
-    }
-    return {};
-  }
-
   @override
   void dispose() {
     _bloc.close();
@@ -585,13 +538,31 @@ class _AncvisitformState extends State<Ancvisitform> {
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
+                          // Replace the LMP date picker section with this improved version:
+
                           Container(
-                            decoration: const BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.all(Radius.circular(4))),
+                            decoration: const BoxDecoration(
+                              color: AppColors.background,
+                              borderRadius: BorderRadius.all(Radius.circular(4)),
+                            ),
                             child: CustomDatePicker(
                               labelText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
                               hintText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
                               initialDate: state.lmpDate ?? DateTime.now(),
-                              onDateChanged: (d) => bloc.add(LmpDateChanged(d)),
+                              onDateChanged: (d) {
+                                if (d != null) {
+                                  bloc.add(LmpDateChanged(d));
+
+                                  final today = DateTime.now();
+                                  final difference = today.difference(d).inDays;
+                                  final weeksOfPregnancy = (difference / 7).floor();
+
+                                  // Add 1 to account for the first week of pregnancy
+                                  final calculatedWeeks = weeksOfPregnancy + 1;
+
+                                  bloc.add(WeeksOfPregnancyChanged(calculatedWeeks.toString()));
+                                }
+                              },
                             ),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -608,6 +579,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                             initialValue: state.weeksOfPregnancy,
                             keyboardType: TextInputType.number,
+                            readOnly: true, // Make it read-only since it's auto-calculated
                             onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                           ),
 
