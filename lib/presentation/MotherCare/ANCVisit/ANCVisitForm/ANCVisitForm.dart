@@ -265,20 +265,41 @@ class _AncvisitformState extends State<Ancvisitform> {
         _bloc.add(BeneficiaryIdSet(beneficiaryIdToUse));
 
         try {
-          final beneficiaryRow =
-              await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryIdToUse);
-          if (beneficiaryRow != null) {
-            final infoRaw = beneficiaryRow['beneficiary_info'];
-            Map<String, dynamic> info;
-            if (infoRaw is Map<String, dynamic>) {
-              info = infoRaw;
-            } else if (infoRaw is Map) {
-              info = Map<String, dynamic>.from(infoRaw);
-            } else if (infoRaw is String && infoRaw.isNotEmpty) {
-              info = Map<String, dynamic>.from(jsonDecode(infoRaw));
-            } else {
-              info = {};
-            }
+            final beneficiaryRow =
+                await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryIdToUse);
+            if (beneficiaryRow != null) {
+              final infoRaw = beneficiaryRow['beneficiary_info'];
+              Map<String, dynamic> info;
+              if (infoRaw is Map<String, dynamic>) {
+                info = infoRaw;
+              } else if (infoRaw is Map) {
+                info = Map<String, dynamic>.from(infoRaw);
+              } else if (infoRaw is String && infoRaw.isNotEmpty) {
+                info = Map<String, dynamic>.from(jsonDecode(infoRaw));
+              } else {
+                info = {};
+              }
+              
+              // Set LMP and EDD dates if available in beneficiary info
+              if (info['lmp'] != null) {
+                try {
+                  final lmpDate = DateTime.parse(info['lmp'].toString());
+                  _bloc.add(LmpDateChanged(lmpDate));
+                  print('📅 Set LMP date from beneficiary info: $lmpDate');
+                } catch (e) {
+                  print('⚠️ Error parsing LMP date: ${info['lmp']} - $e');
+                }
+              }
+              
+              if (info['edd'] != null) {
+                try {
+                  final eddDate = DateTime.parse(info['edd'].toString());
+                  _bloc.add(EddDateChanged(eddDate));
+                  print('📅 Set EDD date from beneficiary info: $eddDate');
+                } catch (e) {
+                  print('⚠️ Error parsing EDD date: ${info['edd']} - $e');
+                }
+              }
 
             final womanName = (info['memberName'] ?? info['headName'])?.toString();
             if (womanName != null && womanName.isNotEmpty) {

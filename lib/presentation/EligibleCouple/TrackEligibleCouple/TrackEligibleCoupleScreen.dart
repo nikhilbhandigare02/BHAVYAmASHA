@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
+import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
@@ -168,12 +169,17 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        CustomTextField(
+                        CustomDatePicker(
                           labelText: '${t?.lmpDateLabel ?? 'एलएमपी की तिथि'} *',
-                          readOnly: true,
-                          controller: TextEditingController(
-                            text: formatDate(lmp),
-                          ),
+                          initialDate: lmp,
+                          onDateChanged: (date) {
+                            if (date != null) {
+                              context.read<TrackEligibleCoupleBloc>().add(LmpDateChanged(date));
+                            }
+                          },
+                          isEditable: true,
+                          firstDate: DateTime.now().subtract(const Duration(days: 280)), // ~9 months ago
+                          lastDate: DateTime.now().add(const Duration(days: 30)), // 1 month from now
                         ),
                         const Divider(thickness: 1, color: Colors.grey),
                         const SizedBox(height: 8),
