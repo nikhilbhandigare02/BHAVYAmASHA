@@ -7,6 +7,7 @@ import 'package:medixcel_new/data/Local_Storage/tables/notification_table.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/guest_beneficiary/guest_beneficiary_model.dart';
 import 'database_provider.dart';
 
 class LocalStorageDao {
@@ -1295,6 +1296,53 @@ class LocalStorageDao {
     } catch (e) {
       print('Error getting latest household server_id: $e');
       return '';
+    }
+  }
+
+  Future<int> saveGuestBeneficiary(GuestBeneficiary beneficiary) async {
+    try {
+      final db = await _db;
+      final Map<String, dynamic> beneficiaryMap = beneficiary.toMap();
+
+      // Ensure all required fields are present
+      beneficiaryMap['current_user_key'] = ''; // Add current user key if available
+      beneficiaryMap['facility_id'] = 0; // Default facility ID
+      beneficiaryMap['parent_user'] = ''; // Parent user if available
+      beneficiaryMap['app_details'] = jsonEncode({
+        'app_name': 'BHAVYAmASHA',
+        'version': '1.0.0',
+      });
+      beneficiaryMap['device_details'] = jsonEncode({
+        'platform': 'mobile',
+        'os': 'android',
+      });
+
+      // Check if beneficiary already exists
+      final existing = await db.query(
+        BeneficiariesTable.table,
+        where: 'unique_key = ?',
+        whereArgs: [beneficiary.uniqueKey],
+      );
+
+      if (existing.isNotEmpty) {
+        // Update existing record
+        return await db.update(
+          BeneficiariesTable.table,
+          beneficiaryMap,
+          where: 'unique_key = ?',
+          whereArgs: [beneficiary.uniqueKey],
+        );
+      } else {
+        // Insert new record
+        return await db.insert(
+          BeneficiariesTable.table,
+          beneficiaryMap,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    } catch (e) {
+      print('Error saving guest beneficiary: $e');
+      rethrow;
     }
   }
 

@@ -40,7 +40,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   List<Map<String, dynamic>> _eligibleCoupleItems = [];
   List<Map<String, dynamic>> _ancItems = [];
   List<Map<String, dynamic>> _hbncItems = [];
-  List<Map<String, dynamic>> _pwList = [];
+  List<Map<String, dynamic>> _riItems = [];
   int _completedVisitsCount = 0;
 
   @override
@@ -55,7 +55,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     _loadEligibleCoupleItems();
     _loadAncItems();
     _loadHbncItems();
-    _loadPregnantWomen();
+    _loadRoutineImmunizationItems();
     _loadCompletedVisitsCount();
   }
 
@@ -124,9 +124,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final eligibleCoupleCount = _eligibleCoupleItems.length;
       final ancCount = _ancItems.length;
       final hbncCount = _hbncItems.length;
-      final riCount = l10n == null
-          ? 0
-          : widget.apiData[l10n.listRoutineImmunization]?.length ?? 0;
+      final riCount = _riItems.length;
 
       final totalToDoCount =
           familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
@@ -911,75 +909,171 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     return ranges;
   }
 
-  Future<void> _loadPregnantWomen() async {
+  Future<void> _loadRoutineImmunizationItems() async {
     try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final pregnantWomen = <Map<String, dynamic>>[];
+      final db = await DatabaseProvider.instance.database;
 
-      for (final row in rows) {
+      final results = await db.query(
+        FollowupFormDataTable.table,
+        where: 'form_json LIKE ? OR forms_ref_key = ?',
+        whereArgs: ['%child_registration_due%', '30bycxe4gv7fqnt6'],
+        orderBy: 'id DESC',
+      );
+
+      final List<Map<String, dynamic>> items = [];
+      final Set<String> seenBeneficiaries = <String>{};
+
+      for (final row in results) {
         try {
-          final dynamic rawInfo = row['beneficiary_info'];
-          if (rawInfo == null) continue;
-
-          Map<String, dynamic> info = {};
-          try {
-            info = rawInfo is String
-                ? jsonDecode(rawInfo) as Map<String, dynamic>
-                : Map<String, dynamic>.from(rawInfo as Map);
-          } catch (e) {
-            print('Error parsing beneficiary_info: $e');
+          final formJson = row['form_json'] as String?;
+          if (formJson == null || formJson.isEmpty) {
             continue;
           }
 
-          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes';
-          if (!isPregnant) continue;
+          final decoded = jsonDecode(formJson);
+          final formType = decoded['form_type']?.toString() ?? '';
+          final formsRefKey = row['forms_ref_key']?.toString() ?? '';
 
-          final gender = info['gender']?.toString().toLowerCase() ?? '';
-          if (gender != 'f' && gender != 'female') continue;
+          final isChildRegistration =
+              formType == FollowupFormDataTable.childRegistrationDue;
+          final isChildTracking =
+              formsRefKey == '30bycxe4gv7fqnt6' ||
+                  formType == FollowupFormDataTable.childTrackingDue;
 
-          final name = info['memberName'] ?? info['headName'] ?? 'Unknown';
-          final age = _calculateAge(info['dob']);
-          final mobile = info['mobileNo'] ?? '';
-          final lmp = info['lmp']?.toString();
-          final uniqueKey = row['unique_key']?.toString() ?? '';
-          final householdRefKey = row['household_ref_key']?.toString() ?? '';
+          if (!isChildRegistration && !isChildTracking) {
+            continue;
+          }
 
-          // Format last visit date if available
-          String lastVisitDate = '-';
-          if (info.containsKey('lastVisitDate') && info['lastVisitDate'] != null) {
-            try {
-              final date = DateTime.tryParse(info['lastVisitDate'].toString());
-              if (date != null) {
-                lastVisitDate = DateFormat('dd MMM yyyy').format(date);
+          final formDataMap =
+              decoded['form_data'] as Map<String, dynamic>? ?? {};
+          final childName = formDataMap['child_name']?.toString() ?? '';
+          final beneficiaryRefKey =
+              row['beneficiary_ref_key']?.toString() ?? '';
+
+          if (childName.isEmpty) {
+            continue;
+          }
+
+          if (beneficiaryRefKey.isNotEmpty &&
+              seenBeneficiaries.contains(beneficiaryRefKey)) {
+            continue;
+          }
+          if (beneficiaryRefKey.isNotEmpty) {
+            seenBeneficiaries.add(beneficiaryRefKey);
+          }
+
+          if (beneficiaryRefKey.isNotEmpty) {
+            final caseClosureRecords = await db.query(
+              FollowupFormDataTable.table,
+              where:
+                  'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0',
+              whereArgs: [beneficiaryRefKey, '%case_closure%'],
+            );
+
+            if (caseClosureRecords.isNotEmpty) {
+              bool hasCaseClosure = false;
+              for (final ccRecord in caseClosureRecords) {
+                try {
+                  final ccFormJson = ccRecord['form_json'] as String?;
+                  if (ccFormJson != null) {
+                    final ccDecoded = jsonDecode(ccFormJson);
+                    final ccFormDataMap =
+                        ccDecoded['form_data'] as Map<String, dynamic>? ?? {};
+                    final caseClosure =
+                        ccFormDataMap['case_closure'] as Map<String, dynamic>? ?? {};
+                    if (caseClosure['is_case_closure'] == true) {
+                      hasCaseClosure = true;
+                      break;
+                    }
+                  }
+                } catch (_) {}
               }
-            } catch (e) {
-              print('Error parsing last visit date: $e');
+
+              if (hasCaseClosure) {
+                continue;
+              }
             }
           }
 
-          pregnantWomen.add({
-            'name': name,
-            'age': age,
-            'gender': 'Female',
-            'mobile': mobile,
-            'id': uniqueKey,
-            'badge': 'RI',
+          final created = row['created_date_time']?.toString();
+          String lastVisitDate = '-';
+          if (created != null && created.isNotEmpty) {
+            try {
+              final date = DateTime.parse(created);
+              lastVisitDate =
+                  '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+            } catch (_) {}
+          }
+
+          String genderRaw =
+              formDataMap['gender']?.toString().toLowerCase() ?? '';
+          String gender;
+          switch (genderRaw) {
+            case 'm':
+            case 'male':
+              gender = 'Male';
+              break;
+            case 'f':
+            case 'female':
+              gender = 'Female';
+              break;
+            default:
+              gender = 'Other';
+          }
+
+          String ageText = '-';
+          final dobRaw = formDataMap['date_of_birth'];
+          if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+            try {
+              String dateStr = dobRaw.toString();
+              DateTime? dob = DateTime.tryParse(dateStr);
+              if (dob == null) {
+                final timestamp = int.tryParse(dateStr);
+                if (timestamp != null && timestamp > 0) {
+                  dob = DateTime.fromMillisecondsSinceEpoch(
+                    timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                    isUtc: true,
+                  );
+                }
+              }
+              if (dob != null) {
+                final now = DateTime.now();
+                int years = now.year - dob.year;
+                if (now.month < dob.month ||
+                    (now.month == dob.month && now.day < dob.day)) {
+                  years--;
+                }
+                ageText = years >= 0 ? '${years}y' : '0y';
+              }
+            } catch (_) {}
+          }
+
+          final hhId = row['household_ref_key']?.toString() ?? '';
+
+          items.add({
+            'id': _last11(beneficiaryRefKey),
+            'household_ref_key': hhId,
+            'hhId': hhId,
+            'BeneficiaryID': beneficiaryRefKey,
+            'name': childName,
+            'age': ageText,
+            'gender': gender,
             'last Visit date': lastVisitDate,
-            'unique_key': uniqueKey,
-            'household_ref_key': householdRefKey,
-            'lmp': lmp,
+            'mobile': formDataMap['mobile_number']?.toString() ?? '-',
+            'badge': 'RI',
           });
-        } catch (e) {
-          print('Error processing beneficiary: $e');
+        } catch (_) {
+          continue;
         }
       }
 
-      setState(() {
-        _pwList = pregnantWomen;
-      });
-    } catch (e) {
-      print('Error loading pregnant women: $e');
-    }
+      if (mounted) {
+        setState(() {
+          _riItems = items;
+        });
+        _saveTodayWorkCountsToStorage();
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadFamilySurveyItems() async {
@@ -1628,7 +1722,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     final eligibleCoupleCount = _eligibleCoupleItems.length;
     final ancCount = _ancItems.length;
     final hbncCount = _hbncItems.length;
-    final riCount = widget.apiData[l10n.listRoutineImmunization]?.length ?? 0;
+    final riCount = _riItems.length;
     final totalToDoCount =
         familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
 
@@ -1821,7 +1915,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                         ? "${_ancItems.length}"
                                         : entry.key == l10n.listHBNC
                                             ? "${_hbncItems.length}"
-                                            : "${entry.value.length}",
+                                            : entry.key == l10n.listRoutineImmunization
+                                                ? "${_riItems.length}"
+                                                : "${entry.value.length}",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _expandedKey == entry.key
@@ -1899,26 +1995,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                     .map((item) => _routineCard(item))
                                     .toList())
                           : entry.key == l10n.listRoutineImmunization
-                          ? _pwList.isEmpty
+                          ? _riItems.isEmpty
                               ? [
                                   const Padding(
                                     padding: EdgeInsets.all(12.0),
-                                    child: Text('No pregnant women found'),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text('No data found'),
+                                    ),
                                   ),
                                 ]
-                              : _pwList
-                                  .map((item) => _routineCard({
-                                        'id': item['id'],
-                                        'name': item['name'],
-                                        'age': item['age'],
-                                        'gender': item['gender'],
-                                        'last Visit date': item['last Visit date'],
-                                        'mobile': item['mobile'],
-                                        'badge': 'RI',
-                                        'unique_key': item['unique_key'],
-                                        'household_ref_key': item['household_ref_key'],
-                                        'lmp': item['lmp'],
-                                      }))
+                              : _riItems
+                                  .map((item) => _routineCard(item))
                                   .toList()
                           : entry.value
                                 .map((item) => ListTile(title: Text(item)))

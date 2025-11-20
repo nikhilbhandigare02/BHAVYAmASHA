@@ -19,7 +19,7 @@ class UserInfo {
   static Future<bool> isUserExists(String username) async {
     try {
       final dbPath = await getDatabasesPath();
-      final path = join(dbPath, 'bhavya_masha.db');
+      final path = join(dbPath, 'm_aasha.db');
       
       final database = await openDatabase(path);
       
@@ -70,8 +70,7 @@ class UserInfo {
         print('No active users found in the database');
         return null;
       }
-      
-      // Convert the result to a proper map
+
       final user = Map<String, dynamic>.from(result.first);
       
       // Parse the details if it's a string
@@ -89,7 +88,7 @@ class UserInfo {
       print('Error getting current user: $e');
       return null;
     } finally {
-      // Close the database connection when done
+
       if (db != null && db.isOpen) {
         await db.close();
       }
@@ -215,7 +214,7 @@ class UserInfo {
         print('New user $username added to the database');
       }
       
-      // Update shared preferences
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
       await prefs.setString('username', username);
@@ -240,7 +239,6 @@ class UserInfo {
         join(await getDatabasesPath(), 'bhavya_masha.db'),
       );
 
-      // Get the current user directly from this database instance
       final result = await db.query(
         'users',
         where: 'is_deleted = 0',

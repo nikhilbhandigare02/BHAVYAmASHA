@@ -18,5 +18,6 @@ class Endpoints {
   static const String addFollowupForms1 = '${BaseUrls.baseUrl}/add_followup_forms1';
   static const String getFollowupFormsDataByFal3 = '${BaseUrls.baseUrl}/get_followup_forms_data_by_fal3';
   static const String getNotification = '${BaseUrls.baseUrl}/get_app_announcement_data';
+  static const String searchBeneficiary = '${BaseUrls.baseUrl}/search_beneficiary5';
 
 }

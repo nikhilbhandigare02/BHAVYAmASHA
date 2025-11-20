@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -7,6 +8,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/repositories/GuestBeneficiaryRepository.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+ import '../../core/utils/enums.dart';
 import 'bloc/guest_beneficiary_search_bloc.dart';
 import 'bloc/guest_beneficiary_search_event.dart';
 import 'bloc/guest_beneficiary_search_state.dart';
@@ -19,11 +21,67 @@ class GuestBeneficiarySearch extends StatefulWidget {
 }
 
 class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
-
-  final List<String> districts = const [ 'Patna', 'Maner', 'Baank'];
-  final List<String> categories = const [ 'General', 'OBC', 'SC', 'ST'];
+  final List<String> districts = const ['Patna', 'Maner', 'Baank'];
+  final List<String> categories = const ['General', 'OBC', 'SC', 'ST'];
   final List<String> genders = const ['Male', 'Female', 'Other'];
-  final List<String> blocks = const [ 'Block A', 'Block B', 'Block C'];
+  final List<String> blocks = const ['Block A', 'Block B', 'Block C'];
+
+  // Build search results widget
+  Widget _buildSearchResults(BuildContext context, Map<String, dynamic> data) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Search Results',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...data.entries.map((entry) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${entry.key}: ',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Expanded(
+                    child: Text(
+                      entry.value?.toString() ?? 'N/A',
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            )).toList(),
+            const SizedBox(height: 12),
+            // Log the full response for debugging
+            OutlinedButton(
+              onPressed: () {
+                log('Full response data: $data');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Check console for full response data'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: const Text('View Raw Data (Check Console)'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +92,26 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
         repo: GuestBeneficiaryRepository(),
       ),
       child: Builder(builder: (context) {
-        return Scaffold(
+        // Add listener for state changes
+        return BlocListener<GuestBeneficiarySearchBloc, GuestBeneficiarySearchState>(
+          listener: (context, state) {
+            // Handle error state
+            if (state.status == GbsStatus.failure && state.errorMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage!),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+            // Handle success state
+            else if (state.status == GbsStatus.success) {
+              // You can add any success message or navigation here
+              log('✅ Search completed successfully');
+            }
+          },
+          child:
+          Scaffold(
           backgroundColor: AppColors.surface,
           appBar: AppHeader(
             screenTitle: l10n.guestSearchTitle,
@@ -42,8 +119,23 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
           ),
           body: BlocBuilder<GuestBeneficiarySearchBloc, GuestBeneficiarySearchState>(
             builder: (context, state) {
+              // Show loading indicator when searching
+              if (state.status == GbsStatus.loading) {
+                return const Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
+                  ),
+                );
+              }
+
               return Column(
                 children: [
+                  // Search Form
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(12),
@@ -123,7 +215,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
 
                           if (state.showAdvanced) ...[
                             ApiDropdown<String>(
-                              labelText: l10n.categoryLabel,  
+                              labelText: l10n.categoryLabel,
                               items: categories,
                               value: state.category,
                               getLabel: (s) => s,
@@ -168,15 +260,28 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
 
                           const SizedBox(height: 12),
 
-                          RoundButton(
-                            title: l10n.search,
-                            height: 35,
-                            color: AppColors.primary,
-                            onPress: () => context.read<GuestBeneficiarySearchBloc>().add(const GbsSubmitSearch()),
-                            icon: Icons.search,
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: state.status == GbsStatus.submitting
+                                ? const Center(child: CircularProgressIndicator())
+                                : RoundButton(
+                                    title: l10n.search,
+                                    height: 45,
+                                    color: AppColors.primary,
+                                    onPress: () {
+                                      // Dismiss keyboard when searching
+                                      FocusScope.of(context).unfocus();
+                                      context.read<GuestBeneficiarySearchBloc>().add(const GbsSubmitSearch());
+                                    },
+                                    icon: Icons.search,
+                                  ),
                           ),
 
                           const SizedBox(height: 16),
+
+                          if (state.status == GbsStatus.success && state.beneficiaryData != null)
+                            _buildSearchResults(context, state.beneficiaryData!),
                         ],
                       ),
                     ),
@@ -198,7 +303,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
               );
             },
           ),
-        );
+        ));
       }),
     );
   }
