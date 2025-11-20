@@ -152,7 +152,7 @@ class _HBNCListScreenState
           final db = await DatabaseProvider.instance.database;
           final beneficiaryResults = await db.query(
             'beneficiaries',
-            where: 'unique_key = ? AND is_deleted = 0',
+            where: 'unique_key = ?',
             whereArgs: [beneficiaryRefKey],
           );
 
@@ -264,7 +264,6 @@ class _HBNCListScreenState
       final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
       print('🔑 Using form reference key: $hbncVisitKey');
 
-      // Query to get the most recent HBNC visit
       final results = await db.query(
         FollowupFormDataTable.table,
         where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',

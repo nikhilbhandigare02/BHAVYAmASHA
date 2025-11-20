@@ -82,9 +82,23 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         }
       }
 
+      // De-duplicate by BeneficiaryID/unique_key so each beneficiary
+      // appears only once in the ANC visit list.
+      final Map<String, Map<String, dynamic>> byBeneficiary = {};
+      for (final item in pregnantWomen) {
+        final benId = item['BeneficiaryID']?.toString() ?? '';
+        final uniqueKey = item['unique_key']?.toString() ?? '';
+        final key = benId.isNotEmpty ? benId : uniqueKey;
+        if (key.isEmpty) continue;
+        // Latest item wins if duplicates exist for same key.
+        byBeneficiary[key] = item;
+      }
+
+      final dedupedList = byBeneficiary.values.toList();
+
       setState(() {
-        _allData = pregnantWomen;
-        _filtered = pregnantWomen;
+        _allData = dedupedList;
+        _filtered = dedupedList;
         _isLoading = false;
       });
     } catch (e, stackTrace) {

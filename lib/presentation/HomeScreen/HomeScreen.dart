@@ -602,8 +602,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onWillPop: () async {
           final shouldExit = await showConfirmationDialog(
             context: context,
-            title: l10n.exitAppTitle, // Add to l10n: "Exit Application"
-            message: l10n.exitAppMessage, // Add to l10n: "Are you sure you want to exit?"
+            title: l10n.exitAppTitle,
+            message: l10n.exitAppMessage,
             yesText: l10n.yes,
             noText: l10n.no,
           );///

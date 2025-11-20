@@ -5,7 +5,6 @@ import '../data/SecureStorage/SecureStorage.dart';
 
 class SplashServices {
   Future<void> isLogin(BuildContext context) async {
-    // Check login status
     final loginFlag = await SecureStorageService.getLoginFlag();
     
     Timer(
