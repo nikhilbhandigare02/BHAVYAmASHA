@@ -130,7 +130,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
           String householdRefKey = event.beneficiaryData?['householdId']?.toString() ?? '';
 
           // In outcome_form_bloc.dart, update the formData map to include the new fields
-          final formData = {
+          final formData  = {
             'form_type': formType,
             'form_name': formName,
             'unique_key': formsRefKey,

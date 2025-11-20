@@ -148,7 +148,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
 
-      final formDataForDb = {
+      final formDataForDb  = {
         'server_id': '',
         'forms_ref_key': formsRefKey,
         'household_ref_key': householdRefKey,
@@ -180,6 +180,20 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       try {
         final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
         print('✅ ANC visit form saved successfully with ID: $formId');
+
+        try {
+          // After a successful ANC submission, mark this beneficiary as
+          // logically deleted for local lists and flag it as unsynced so
+          // that the updated state is sent to the API.
+          await LocalStorageDao.instance
+              .updateBeneficiaryDeleteAndSyncFlagByUniqueKey(
+            uniqueKey: beneficiaryId,
+            isDeleted: 1,
+          );
+          print('✅ Beneficiary $beneficiaryId marked is_deleted=1 and is_synced=0');
+        } catch (e) {
+          print('❌ Error updating beneficiary delete/sync flags: $e');
+        }
 
         try {
           final visitData = {

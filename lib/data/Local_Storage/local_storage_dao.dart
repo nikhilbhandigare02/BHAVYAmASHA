@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:medixcel_new/data/Local_Storage/tables/beneficiaries_table.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Local_Storage/tables/notification_table.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -16,7 +17,6 @@ class LocalStorageDao {
 
   Future<Database> get _db async => DatabaseProvider.instance.database;
 
-
   dynamic safeJsonDecode(String? jsonString) {
     if (jsonString == null || jsonString.isEmpty) return null;
     try {
@@ -26,8 +26,6 @@ class LocalStorageDao {
       return null;
     }
   }
-
-
 
   Future<List<Map<String, dynamic>>> getChildTrackingDueFor16Year() async {
     print('Executing getChildTrackingDueFor16Year query...');
@@ -70,6 +68,7 @@ class LocalStorageDao {
       rethrow;
     }
   }
+
   Future<List<Map<String, dynamic>>> getChildTrackingDueFor9Year() async {
     print('Executing getChildTrackingDueFor9Year query...');
     try {
@@ -111,6 +110,7 @@ class LocalStorageDao {
       rethrow;
     }
   }
+
   Future<void> debugFormDataFor10Weeks() async {
     try {
       final db = await _db;
@@ -129,6 +129,7 @@ class LocalStorageDao {
       print('Error in debugFormDataFor10Weeks: $e');
     }
   }
+
   // Add these methods to LocalStorageDao class
 
   Future<List<Map<String, dynamic>>> getChildTrackingForBirthDose() async {
@@ -174,7 +175,7 @@ class LocalStorageDao {
     return _getChildTrackingForAgeGroup('"current_tab"%5-6 YEAR%', '5-6 YEARS');
   }
 
-// Helper method to avoid code duplication
+  // Helper method to avoid code duplication
   Future<List<Map<String, dynamic>>> _getChildTrackingForAgeGroup(String likePattern, String logName) async {
     print('Executing query for $logName with pattern: $likePattern');
     try {
@@ -217,6 +218,7 @@ class LocalStorageDao {
       rethrow;
     }
   }
+
   Future<void> debugFormData() async {
     try {
       final db = await _db;
@@ -320,7 +322,26 @@ class LocalStorageDao {
     }
   }
 
-   Future<int> getANCVisitCount(String beneficiaryId) async {
+  Future<String> getLatestMotherCareActivityServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'mother_care_activities',
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest mother care activity server_id: $e');
+      return '';
+    }
+  }
+
+  Future<int> getANCVisitCount(String beneficiaryId) async {
     try {
       final db = await _db;
       final result = await db.rawQuery('''
@@ -329,7 +350,7 @@ class LocalStorageDao {
         WHERE beneficiary_ref_key = ? 
         AND forms_ref_key = ?
       ''', [beneficiaryId, FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration]]);
-      
+
       return result.first['count'] as int? ?? 0;
     } catch (e) {
       print('Error getting ANC visit count: $e');
@@ -357,6 +378,23 @@ class LocalStorageDao {
       return mapped;
     } catch (e) {
       print('Error getting beneficiary by unique_key: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUnsyncedFollowupForms() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        where:
+        '(is_deleted IS NULL OR is_deleted = 0) AND (is_synced IS NULL OR is_synced = 0)',
+        orderBy: 'created_date_time ASC',
+      );
+
+      return rows.map((row) => Map<String, dynamic>.from(row)).toList();
+    } catch (e) {
+      print('Error getting unsynced followup forms: $e');
       rethrow;
     }
   }
@@ -416,24 +454,24 @@ class LocalStorageDao {
     try {
       final db = await _db;
       final householdInfo = data['household_info'];
-      
+
       final row = <String, dynamic>{
         'server_id': data['server_id'],
         'unique_key': data['unique_key'],
         'address': data['address'] is String ? data['address'] : jsonEncode(data['address'] ?? {}),
         'geo_location': data['geo_location'] is String ? data['geo_location'] : jsonEncode(data['geo_location'] ?? {}),
         'head_id': data['head_id'],
-        'household_info': householdInfo is String 
+        'household_info': householdInfo is String
             ? householdInfo  // Already a JSON string
             : jsonEncode(householdInfo ?? {}),
-        'device_details': data['device_details'] is String 
-            ? data['device_details'] 
+        'device_details': data['device_details'] is String
+            ? data['device_details']
             : jsonEncode(data['device_details'] ?? {}),
-        'app_details': data['app_details'] is String 
-            ? data['app_details'] 
+        'app_details': data['app_details'] is String
+            ? data['app_details']
             : jsonEncode(data['app_details'] ?? {}),
-        'parent_user': data['parent_user'] is String 
-            ? data['parent_user'] 
+        'parent_user': data['parent_user'] is String
+            ? data['parent_user']
             : jsonEncode(data['parent_user'] ?? {}),
         'current_user_key': data['current_user_key'],
         'facility_id': data['facility_id'],
@@ -627,7 +665,7 @@ class LocalStorageDao {
       final rows = await db.query(
         FollowupFormDataTable.table,
         where:
-            '(is_deleted IS NULL OR is_deleted = 0) AND (is_synced IS NULL OR is_synced = 0) AND (server_id IS NULL OR TRIM(server_id) = "") AND forms_ref_key = ?',
+        '(is_deleted IS NULL OR is_deleted = 0) AND (is_synced IS NULL OR is_synced = 0) AND (server_id IS NULL OR TRIM(server_id) = "") AND forms_ref_key = ?',
         whereArgs: [ancFormsRefKey],
         orderBy: 'created_date_time ASC',
       );
@@ -691,11 +729,10 @@ class LocalStorageDao {
   Future<int> getHouseholdCount() async {
     final db = await _db;
     final count = Sqflite.firstIntValue(
-      await db.rawQuery('SELECT COUNT(*) FROM households WHERE is_deleted = 0')
+        await db.rawQuery('SELECT COUNT(*) FROM households WHERE is_deleted = 0')
     );
     return count ?? 0;
   }
-
 
   Future<List<Map<String, dynamic>>> getFollowupFormsWithCaseClosure(String formType) async {
     final db = await _db;
@@ -712,29 +749,29 @@ class LocalStorageDao {
       try {
         final formJson = form['form_json'] as String?;
         if (formJson == null || formJson.isEmpty) continue;
-        
+
         final formData = jsonDecode(formJson);
 
         if (formData is Map && formData['form_data'] is Map) {
           final formDataMap = Map<String, dynamic>.from(formData['form_data'] as Map);
-          final caseClosure = formDataMap['case_closure'] is Map 
-            ? Map<String, dynamic>.from(formDataMap['case_closure'] as Map)
-            : null;
+          final caseClosure = formDataMap['case_closure'] is Map
+              ? Map<String, dynamic>.from(formDataMap['case_closure'] as Map)
+              : null;
 
-          if (caseClosure != null && 
-              caseClosure['is_case_closure'] == true && 
+          if (caseClosure != null &&
+              caseClosure['is_case_closure'] == true &&
               caseClosure['date_of_death'] != null) {
 
             final childDetails = formDataMap['child_details'] is Map
-              ? Map<String, dynamic>.from(formDataMap['child_details'] as Map)
-              : formDataMap;
+                ? Map<String, dynamic>.from(formDataMap['child_details'] as Map)
+                : formDataMap;
             final registrationData = formDataMap['registration_data'] is Map
-              ? Map<String, dynamic>.from(formDataMap['registration_data'] as Map)
-              : {};
+                ? Map<String, dynamic>.from(formDataMap['registration_data'] as Map)
+                : {};
 
             String beneficiaryRefKey = form['beneficiary_ref_key']?.toString() ?? '';
             Map<String, dynamic> beneficiaryData = {};
-            
+
             if (beneficiaryRefKey.isNotEmpty) {
               try {
                 final beneficiaryRows = await db.query(
@@ -743,19 +780,19 @@ class LocalStorageDao {
                   whereArgs: [beneficiaryRefKey],
                   limit: 1,
                 );
-                
+
                 if (beneficiaryRows.isNotEmpty) {
                   beneficiaryData = beneficiaryRows.first;
 
                   if (beneficiaryData['registration_type_followup'] is String) {
                     try {
-                      beneficiaryData['registration_type_followup'] = 
-                        jsonDecode(beneficiaryData['registration_type_followup']);
+                      beneficiaryData['registration_type_followup'] =
+                          jsonDecode(beneficiaryData['registration_type_followup']);
                     } catch (e) {
                       print('Error parsing registration_type_followup: $e');
                     }
                   }
-                  
+
                   print('Found beneficiary data for key: $beneficiaryRefKey');
                   print('Beneficiary data: $beneficiaryData');
                 }
@@ -766,12 +803,12 @@ class LocalStorageDao {
 
             final beneficiaryId = formDataMap['beneficiary_id'] ?? formDataMap['beneficiary_ref_key'] ?? '';
             final householdId = formDataMap['household_id'] ?? formDataMap['household_ref_key'] ?? '';
-            
+
             print(' Extracted from formDataMap:');
             print('  beneficiary_id: $beneficiaryId');
             print('  household_id: $householdId');
             print('  All formDataMap keys: ${formDataMap.keys.toList()}');
-            
+
             result.add({
               'id': form['id'],
               'form_data': formDataMap,
@@ -779,8 +816,8 @@ class LocalStorageDao {
               'child_details': childDetails,
               'case_closure': caseClosure,
               'beneficiary_data': beneficiaryData,
-              'name': childDetails['name'] ?? 
-                     '${childDetails['first_name'] ?? ''} ${childDetails['last_name'] ?? ''}'.trim(),
+              'name': childDetails['name'] ??
+                  '${childDetails['first_name'] ?? ''} ${childDetails['last_name'] ?? ''}'.trim(),
               'date_of_death': caseClosure['date_of_death'],
               'cause_of_death': caseClosure['probable_cause_of_death'] ?? 'Not specified',
               'death_place': caseClosure['death_place'] ?? 'Not specified',
@@ -801,7 +838,7 @@ class LocalStorageDao {
         print('Error processing form ${form['id']}: $e');
       }
     }
-    
+
     return result;
   }
 
@@ -813,7 +850,7 @@ class LocalStorageDao {
       where: 'is_deleted = 0 AND forms_ref_key = ?',
       whereArgs: [
         FollowupFormDataTable.formUniqueKeys[
-          FollowupFormDataTable.ancDueRegistration
+        FollowupFormDataTable.ancDueRegistration
         ],
       ],
       orderBy: 'created_date_time DESC',
@@ -834,9 +871,9 @@ class LocalStorageDao {
         final hr = formData['high_risk'];
         final bool isHighRisk =
             hr == true ||
-            hr == 1 ||
-            (hr is String &&
-                (hr.toLowerCase() == 'true' || hr.toLowerCase() == 'yes' || hr == '1'));
+                hr == 1 ||
+                (hr is String &&
+                    (hr.toLowerCase() == 'true' || hr.toLowerCase() == 'yes' || hr == '1'));
 
         if (!isHighRisk) continue;
 
@@ -860,26 +897,26 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {
     try {
       final db = await _db;
-      
-      final rows = await db.query('households', 
-        where: 'is_deleted = ?',
-        whereArgs: [0],
-        orderBy: 'created_date_time DESC');
+
+      final rows = await db.query('households',
+          where: 'is_deleted = ?',
+          whereArgs: [0],
+          orderBy: 'created_date_time DESC');
 
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
-        
- mapped['address'] = safeJsonDecode(mapped['address']);
+
+        mapped['address'] = safeJsonDecode(mapped['address']);
         mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
         mapped['household_info'] = safeJsonDecode(mapped['household_info']);
         mapped['device_details'] = safeJsonDecode(mapped['device_details']);
         mapped['app_details'] = safeJsonDecode(mapped['app_details']);
         mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
-        
+
         return mapped;
       }).toList();
       return result;
-      
+
     } catch (e, stackTrace) {
       print('Error getting households: $e');
       print('Stack trace: $stackTrace');
@@ -895,7 +932,7 @@ class LocalStorageDao {
         where: 'household_ref_key = ? AND is_deleted = ?',
         whereArgs: [householdId, 0],
       );
-      
+
       return rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
         mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
@@ -917,10 +954,10 @@ class LocalStorageDao {
       final db = await _db;
       final id = data['id'];
       if (id == null) throw Exception('Beneficiary ID is required for update');
-      
+
       final row = Map<String, dynamic>.from(data);
       row.remove('id');
-      
+
       // Convert nested objects to JSON strings
       if (row['beneficiary_info'] is Map) {
         row['beneficiary_info'] = jsonEncode(row['beneficiary_info']);
@@ -940,9 +977,9 @@ class LocalStorageDao {
       if (row['parent_user'] is Map) {
         row['parent_user'] = jsonEncode(row['parent_user']);
       }
-      
+
       row['modified_date_time'] = DateTime.now().toIso8601String();
-      
+
       return await db.update(
         'beneficiaries',
         row,
@@ -959,9 +996,9 @@ class LocalStorageDao {
     try {
       final db = await _db;
       final rows = await db.query('beneficiaries',
-        where: 'is_deleted = ?',
-        whereArgs: [0],
-        orderBy: 'created_date_time DESC');
+          where: 'is_deleted = ?',
+          whereArgs: [0],
+          orderBy: 'created_date_time DESC');
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
         mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
@@ -1030,7 +1067,7 @@ class LocalStorageDao {
   Future<Map<String, dynamic>> debugDeathRecords() async {
     try {
       final db = await _db;
-      
+
       // Check total records count
       final countResult = await db.rawQuery('''
         SELECT 
@@ -1039,14 +1076,14 @@ class LocalStorageDao {
           SUM(CASE WHEN is_death = 1 AND is_deleted = 0 THEN 1 ELSE 0 END) as valid_death_count
         FROM ${BeneficiariesTable.table}
       ''');
-      
+
       // Get sample death records
       final sampleRecords = await db.query(
         BeneficiariesTable.table,
         where: 'is_death = 1 AND is_deleted = 0',
         limit: 5,
       );
-      
+
       return {
         'counts': countResult.first,
         'sample_records': sampleRecords,
@@ -1060,17 +1097,17 @@ class LocalStorageDao {
     try {
       print('🔍 [getDeathRecords] Querying death records...');
       final db = await _db;
-      
+
       // First, run debug query
       final debugInfo = await debugDeathRecords();
       print('🔍 [getDeathRecords] Debug Info: $debugInfo');
-      
+
       final rows = await db.query(
         BeneficiariesTable.table,
         where: 'is_death = 1 AND is_deleted = 0',
         orderBy: 'created_date_time DESC',
       );
-      
+
       print('✅ [getDeathRecords] Found ${rows.length} death records');
 
       return rows.map((row) {
@@ -1099,7 +1136,6 @@ class LocalStorageDao {
     try {
       print('🔍 [getMIGRecords] Querying  mig records...');
       final db = await _db;
-
 
       final debugInfo = await debugDeathRecords();
       print('🔍 [getMIGRecords] Debug Info: $debugInfo');
@@ -1133,40 +1169,86 @@ class LocalStorageDao {
       rethrow;
     }
   }
-  
+  Future<List<Map<String, dynamic>>> getANCList() async {
+    try {
+      final db = await _db;
+      final rows = await db.query('beneficiaries',
+          where: 'is_deleted = ?',
+          whereArgs: [0],
+          orderBy: 'created_date_time DESC');
+      final result = rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+        return mapped;
+      }).toList();
+      return result;
+    } catch (e, stackTrace) {
+      print('Error getting beneficiaries: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+  Future<int> updateBeneficiaryDeleteAndSyncFlagByUniqueKey({
+    required String uniqueKey,
+    required int isDeleted,
+  }) async {
+    try {
+      final db = await _db;
+      final changes = await db.update(
+        'beneficiaries',
+        {
+          'is_deleted': isDeleted,
+          'is_synced': 0,
+          'modified_date_time': DateTime.now().toIso8601String(),
+        },
+        where: 'unique_key = ?',
+        whereArgs: [uniqueKey],
+      );
+      return changes;
+    } catch (e) {
+      print('Error updating beneficiary delete/sync flags by unique_key: $e');
+      rethrow;
+    }
+  }
+
   String _getAgeGender(Map<String, dynamic> headDetails) {
     final dob = headDetails['dob'];
     if (dob == null) return 'Unknown';
-    
+
     try {
       final birthDate = DateTime.tryParse(dob);
       if (birthDate == null) return 'Unknown';
-      
+
       final now = DateTime.now();
       int age = now.year - birthDate.year;
-      
+
       // Adjust age if birthday hasn't occurred yet this year
       if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
         age--;
       }
-      
+
       final gender = (headDetails['gender'] ?? '').toString().toLowerCase();
       final genderDisplay = gender == 'm' ? 'Male' : gender == 'f' ? 'Female' : 'Unknown';
-      
+
       return '$age Y / $genderDisplay';
     } catch (e) {
       return 'Unknown';
     }
   }
-  
+
   String _formatDeathDate(Map<String, dynamic> deathDetails) {
     final dateStr = deathDetails['dateOfDeath'];
     if (dateStr == null) return 'Date not available';
-    
+
     try {
       final date = DateTime.tryParse(dateStr);
       if (date == null) return dateStr; // Return original string if parsing fails
-      
+
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     } catch (e) {
       return dateStr; // Return original string if any error occurs
@@ -1277,6 +1359,25 @@ class LocalStorageDao {
     return db.update('child_care_activities', values, where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<String> getLatestFollowupFormServerId() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
+        where: "(is_deleted IS NULL OR is_deleted = 0) AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        limit: 1,
+      );
+      if (rows.isEmpty) return '';
+      final sid = rows.first['server_id'];
+      return sid?.toString() ?? '';
+    } catch (e) {
+      print('Error getting latest followup form server_id: $e');
+      return '';
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getFollowupFormsByHouseholdAndBeneficiary({
     required String formType,
     required String householdId,
@@ -1334,6 +1435,104 @@ class LocalStorageDao {
     }
   }
 
+  Future<void> insertNotifications(List<Map<String, dynamic>> list) async {
+    try {
+      final db = await _db;
+      final batch = db.batch();
+
+      for (var data in list) {
+        // Check if a record with the same unique_key exists
+        final existingRecords = await db.query(
+          NotificationDetailsTable.table,
+          where: 'unique_key = ?',
+          whereArgs: [data['unique_key']],
+        );
+
+        if (existingRecords.isEmpty) {
+          // Insert new record if it doesn't exist
+          batch.insert(
+            NotificationDetailsTable.table,
+            {
+              '_id': data['_id'],
+              'unique_key': data['unique_key'],
+              'added_date_time': data['added_date_time'],
+              'announcement_end_period': data['announcement_end_period'],
+              'announcement_for': data['announcement_for'],
+              'announcement_start_period': data['announcement_start_period'],
+              'announcement_type': data['announcement_type'],
+              'block_id': data['block_id'],
+              'block_name': data['block_name'],
+              'content_en': data['content_en'],
+              'content_hi': data['content_hi'],
+              'district_id': data['district_id'],
+              'district_name': data['district_name'],
+              'state_id': data['state_id'],
+              'state_name': data['state_name'],
+              'title_en': data['title_en'],
+              'title_hi': data['title_hi'],
+              'modified_date_time': data['modified_date_time'],
+              'option': data['option'],
+              'is_deleted': data['is_deleted'] ?? 0,
+              'is_published': data['is_published'] ?? 1,
+              '__v': data['__v'],
+              'is_read': 0,
+              'is_synced': 0,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        } else {
+          // Optionally update the existing record
+          batch.update(
+            NotificationDetailsTable.table,
+            {
+              'added_date_time': data['added_date_time'],
+              'announcement_end_period': data['announcement_end_period'],
+              'announcement_for': data['announcement_for'],
+              'announcement_start_period': data['announcement_start_period'],
+              'announcement_type': data['announcement_type'],
+              'block_id': data['block_id'],
+              'block_name': data['block_name'],
+              'content_en': data['content_en'],
+              'content_hi': data['content_hi'],
+              'district_id': data['district_id'],
+              'district_name': data['district_name'],
+              'state_id': data['state_id'],
+              'state_name': data['state_name'],
+              'title_en': data['title_en'],
+              'title_hi': data['title_hi'],
+              'modified_date_time': data['modified_date_time'],
+              'option': data['option'],
+              'is_deleted': data['is_deleted'] ?? 0,
+              'is_published': data['is_published'] ?? 1,
+              '__v': data['__v'],
+              'is_synced': 0,
+            },
+            where: 'unique_key = ?',
+            whereArgs: [data['unique_key']],
+          );
+        }
+      }
+
+      await batch.commit(noResult: true);
+    } catch (e, s) {
+      print("Error inserting notifications batch: $e\n$s");
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getNotifications() async {
+    try {
+      final db = await _db;
+      return await db.query(
+        NotificationDetailsTable.table,
+        where: "is_deleted = 0",
+        orderBy: "added_date_time DESC",
+      );
+    } catch (e) {
+      print("Error fetching notifications: $e");
+      rethrow;
+    }
+  }
 }
 
 extension LocalStorageDaoReads on LocalStorageDao {

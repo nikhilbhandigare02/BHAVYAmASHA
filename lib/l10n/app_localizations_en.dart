@@ -245,7 +245,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ageGenderLabel => 'Age | Gender';
 
   @override
-  String get ageLabel => 'Age';
+  String get ageLabel => 'Age: ';
 
   @override
   String get ageLabelSimple => 'Age';
@@ -1261,7 +1261,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fuelOther => 'Other';
 
   @override
-  String get genderLabel => 'Gender';
+  String get genderLabel => 'Gender: ';
 
   @override
   String get genderOther => 'Other';
@@ -2094,7 +2094,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socioEconomicDetailsTitle => 'Socio-economic Details';
 
   @override
-  String get somethingWentWrong => 'Something went wrong';
+  String get somethingWentWrong => 'Something went wrong!';
 
   @override
   String get son => 'Son';
@@ -2307,9 +2307,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get villageNameLabel => 'Village name';
 
   @override
-  String visitDate(Object date) {
-    return 'Visit Date: $date';
-  }
+  String get visitDate => 'Visit Date :';
 
   @override
   String get visitDateLabel => 'Visit Date';
@@ -2399,7 +2397,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightKgLabel => 'Weight (Kg)';
 
   @override
-  String get welcome => 'Welcome';
+  String get welcome => 'Welcome to our app';
 
   @override
   String get whoseMobileLabel => 'Whose mobile no.?';
@@ -3492,4 +3490,971 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deceasedChildDetails => 'Deceased Child Details';
+
+  @override
+  String get login_button => 'Login';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get success => 'Success';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get patients => 'Patients';
+
+  @override
+  String get bills => 'Bills';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get performance => 'Performance';
+
+  @override
+  String get selfHelp => 'Self-help';
+
+  @override
+  String get scanAndShare => 'Scan and Share';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get appUpdates => 'App Updates';
+
+  @override
+  String get upcomingAppointments => 'Upcoming Appointments';
+
+  @override
+  String get morningSummary => 'Morning Summary';
+
+  @override
+  String get biometricLogin => 'Biometric Login';
+
+  @override
+  String get updatePin => 'Update PIN';
+
+  @override
+  String get switchClinic => 'Switch Clinic';
+
+  @override
+  String get defaultEmrSettings => 'Default EMR Settings';
+
+  @override
+  String get appSettings => 'App Settings';
+
+  @override
+  String get allowBackDatedAppointments => 'Allow Back-dated Appointments';
+
+  @override
+  String get hindiLanguage => 'Hindi Language';
+
+  @override
+  String get change_language => 'Change Language';
+
+  @override
+  String get verifyPin => 'Verify PIN';
+
+  @override
+  String get loginWithBiometric => 'Login With Biometric';
+
+  @override
+  String get enter4DigitPin => 'Enter your 4 digit PIN';
+
+  @override
+  String get signInWithOtp => 'Sign In with OTP';
+
+  @override
+  String get enterEmailOrMobile => 'Enter your Email or Mobile No.';
+
+  @override
+  String get sendOtp => 'Send OTP';
+
+  @override
+  String get verifyOtp => 'Verify OTP';
+
+  @override
+  String get resendOtp => 'Resend OTP';
+
+  @override
+  String get setupNewPin => 'SET-UP NEW PIN';
+
+  @override
+  String get enterNewPin => 'Enter new PIN';
+
+  @override
+  String get reenterNewPin => 'Re-enter new PIN';
+
+  @override
+  String get pinInstruction => 'PIN is a 4-digit PIN that you have to set for mandatory two-factor authentication';
+
+  @override
+  String get setPin => 'Set PIN';
+
+  @override
+  String get pinSuccessfullySet => 'PIN successfully set';
+
+  @override
+  String get pinLengthError => 'PIN must be 4 digits long';
+
+  @override
+  String get pinMismatchError => 'PIN and Re-entered PIN do not match';
+
+  @override
+  String get noVisitToday => 'You have no visit today';
+
+  @override
+  String get noVisit => 'You have no visit';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get consultFreely => 'Consult Freely. Practice Anywhere';
+
+  @override
+  String get selectClinic => 'Please select your clinic';
+
+  @override
+  String get youHaveNoBillingDetails => 'You have no billing details';
+
+  @override
+  String get addPatient => 'Add Patient';
+
+  @override
+  String get noPatients => 'You have no patients yet';
+
+  @override
+  String get fillDetailsToAddPatient => 'Fill below details to add patient';
+
+  @override
+  String get uploadProfilePhoto => 'Upload Profile Photo';
+
+  @override
+  String get patientFullName => 'Patient\'s Full Name';
+
+  @override
+  String get enterPatientFullName => 'Please enter the patient\'s full name';
+
+  @override
+  String get dob => 'Date Of Birth';
+
+  @override
+  String get enterDob => 'Please enter the date of birth';
+
+  @override
+  String get age => 'Age';
+
+  @override
+  String get enterAge => 'Please enter the age';
+
+  @override
+  String get mobileNumber => 'Mobile Number';
+
+  @override
+  String get enterMobileNumber => 'Please enter the mobile number';
+
+  @override
+  String get enterValidMobileNumber => 'Please enter a valid mobile number';
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get isGuardianPresent => 'Is the guardian present?';
+
+  @override
+  String get guardianFullName => 'Guardian Full Name';
+
+  @override
+  String get enterGuardianFullName => 'Please enter the guardian full name';
+
+  @override
+  String get addPatientButton => '+ Add Patient';
+
+  @override
+  String get quickDemo => 'Quick Demo';
+
+  @override
+  String get noVideoAvailable => 'No video available for this topic';
+
+  @override
+  String get supportRequestSent => 'Your support request has been sent successfully!';
+
+  @override
+  String get pleaseSelectSupportType => 'Please select a support type *';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get requestCallback => 'Request Callback';
+
+  @override
+  String get supportType => 'Support Type';
+
+  @override
+  String get appointments => 'Appointments';
+
+  @override
+  String get abha => 'ABHA';
+
+  @override
+  String get emr => 'EMR (Electronic Medical Record)';
+
+  @override
+  String get teleconsultation => 'Teleconsultation';
+
+  @override
+  String get mis => 'MIS (Management Information System)';
+
+  @override
+  String get billDetailsTitle => 'Bill Details';
+
+  @override
+  String get billItemsTitle => 'Bill Items';
+
+  @override
+  String get consultation => 'Consultation';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String get discountLabel => 'Discount';
+
+  @override
+  String get taxesLabel => 'Taxes';
+
+  @override
+  String get netAmountLabel => 'Net Amount';
+
+  @override
+  String get paidAmountLabel => 'Paid Amount';
+
+  @override
+  String get pendingAmountLabel => 'Pending Amount';
+
+  @override
+  String get paymentsTitle => 'Payments';
+
+  @override
+  String get sNoLabel => 'SNo';
+
+  @override
+  String get detailLabel => 'Detail';
+
+  @override
+  String paidByLabel(Object amount, Object paymentMode) {
+    return 'Paid ₹$amount by $paymentMode';
+  }
+
+  @override
+  String get billNumber => 'Bill Number :';
+
+  @override
+  String get visitNumber => 'Visit No :';
+
+  @override
+  String get billedTo => 'Billed To :';
+
+  @override
+  String get billDate => 'Bill Date :';
+
+  @override
+  String get pendingAmount => 'Pending Amount :';
+
+  @override
+  String get visitTime => 'Visit Time :';
+
+  @override
+  String get inClinic => 'in clinic';
+
+  @override
+  String get withDoctor => 'with';
+
+  @override
+  String onDateAtTime(Object date, Object time) {
+    return 'on $date at $time';
+  }
+
+  @override
+  String get selectDateRange => 'Select Date Range';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get currentWeek => 'Current Week';
+
+  @override
+  String get currentMonth => 'Current Month';
+
+  @override
+  String get revenue => 'Revenue';
+
+  @override
+  String get currencySymbol => '(Rs.)';
+
+  @override
+  String get billed => 'Billed';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get collected => 'Collected';
+
+  @override
+  String get yearToDate => 'Year to Date';
+
+  @override
+  String get month => 'Month';
+
+  @override
+  String get toDate => 'To Date';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get newP => 'New';
+
+  @override
+  String get repeat => 'Repeat';
+
+  @override
+  String get avgPatientLoad => 'Avg Patient Load';
+
+  @override
+  String get avgPatientWaitTime => 'Avg Patient Wait Time';
+
+  @override
+  String get mins => 'Mins';
+
+  @override
+  String get noOfLogins => 'No of Logins';
+
+  @override
+  String get logins => 'Logins';
+
+  @override
+  String get timeSpent => 'Time Spent';
+
+  @override
+  String get timeInHrs => 'Time in Hrs';
+
+  @override
+  String get appointmentType => 'Appointment Type';
+
+  @override
+  String get clinic => 'Clinic';
+
+  @override
+  String get video => 'Video';
+
+  @override
+  String get audio => 'Audio';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get abdm => 'ABDM';
+
+  @override
+  String get hfr => 'HFR';
+
+  @override
+  String get hprDhis => 'HPR DHIS';
+
+  @override
+  String get dhis => 'DHIS';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageHindi => 'Hindi';
+
+  @override
+  String get languageBengali => 'Bengali';
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get useAI => 'Use AI';
+
+  @override
+  String get writeClinicalNotes => 'Write Clinical Notes';
+
+  @override
+  String get medicalSummary => 'Medical Summary';
+
+  @override
+  String get visitedSummaryText => 'Visited 15 days ago for hypertension and high cholesterol. Often complains of headaches and dizziness (6 visits this year). Takes Amlodipine 5 mg and Atorvastatin 20 mg. Allergic to penicillin and peanuts. Has Type 2 Diabetes for 10 years. Smokes 5 cigs/day, drinks alcohol occasionally. Family history of heart disease and diabetes. BP: 150/90, BMI: 28. Needs diet changes and to quit smoking for better health.';
+
+  @override
+  String get clickToTakePhoto => 'Click to take photo';
+
+  @override
+  String get complaints => 'Complaints';
+
+  @override
+  String get vitals => 'Vitals';
+
+  @override
+  String get diagnosis => 'Diagnosis';
+
+  @override
+  String get icd10 => 'ICD-10';
+
+  @override
+  String get prescription => 'Prescription';
+
+  @override
+  String get searchMedicinesHint => 'Search medicines.';
+
+  @override
+  String get doctorsPad => 'Doctor\'s Pad';
+
+  @override
+  String get recommendations => 'Recommendations';
+
+  @override
+  String get followUp => 'Follow-Up';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get doctorNote => 'Doctor Note';
+
+  @override
+  String get abhaRecords => 'ABHA Records';
+
+  @override
+  String get how_to_book_appointment_new_patient => 'How to book an appointment for a new patient?';
+
+  @override
+  String get how_to_book_appointment_existing_patient => 'How to book an appointment for an existing patient?';
+
+  @override
+  String get how_to_book_appointment_with_abha => 'How to book an appointment with ABHA?';
+
+  @override
+  String get how_to_update_patient_details => 'How to update patient details when adding an appointment?';
+
+  @override
+  String get how_to_reschedule_cancel_appointment => 'How to reschedule or cancel an appointment?';
+
+  @override
+  String get how_to_view_daily_visit_list => 'How to view the daily visit list?';
+
+  @override
+  String get how_to_view_upcoming_visit_list => 'How to view upcoming visit list?';
+
+  @override
+  String get how_to_view_past_visit_list => 'How to view past visit list?';
+
+  @override
+  String get how_to_search_patient_and_view_record => 'How to search for a patient and see their complete medical record?';
+
+  @override
+  String get how_to_view_patient_records_abdm => 'How to view patient records via ABDM?';
+
+  @override
+  String get how_to_pay_pending_bill => 'How to pay a pending bill?';
+
+  @override
+  String get how_to_access_patient_bills => 'How to access patient bills?';
+
+  @override
+  String get how_to_check_pending_payments_today => 'How to check pending payments for the day?';
+
+  @override
+  String get how_to_create_abha_for_new_patient => 'How to create ABHA for new patients?';
+
+  @override
+  String get how_to_link_existing_abha_with_appointment => 'How to link a patient’s existing ABHA with an appointment?';
+
+  @override
+  String get how_to_link_abha_completed_consultation => 'How to link ABHA for a completed consultation?';
+
+  @override
+  String get how_to_upload_rx_complete_consultation => 'How to upload an Rx and complete a consultation?';
+
+  @override
+  String get how_to_add_notes_complete_consultation => 'How to add clinical notes and complete a consultation?';
+
+  @override
+  String get how_to_consult_using_voice_analyzer => 'How to consult using the Voice analyzer?';
+
+  @override
+  String get how_to_view_prescription_info => 'How to view prescription or consultation information for the patient?';
+
+  @override
+  String get how_to_send_prescription_info_whatsapp => 'How to send prescription or consultation information to the patient via WhatsApp?';
+
+  @override
+  String get how_to_create_prescription_templates => 'How to create pre-set prescription templates?';
+
+  @override
+  String get how_to_create_test_recommendation_lists => 'How to create test recommendation lists?';
+
+  @override
+  String get how_to_add_complete_tele_consult => 'How to add and complete a tele-consult?';
+
+  @override
+  String get how_to_enable_tele_consultation => 'How to enable tele-consultation?';
+
+  @override
+  String get how_to_change_account_password => 'How to change account password?';
+
+  @override
+  String get how_to_change_account_pin => 'How to change account PIN?';
+
+  @override
+  String get how_to_consult_in_multiple_clinics => 'How to consult in multiple clinics?';
+
+  @override
+  String get how_to_switch_between_clinics => 'How to switch between clinics?';
+
+  @override
+  String get how_to_set_primary_consultation_type => 'How to set the primary consultation type?';
+
+  @override
+  String get how_to_setup_biometric_login => 'How to setup biometric login?';
+
+  @override
+  String get how_to_check_clinic_insights => 'How to check clinic insights?';
+
+  @override
+  String get doctorNotesAnalyser => 'Doctor Notes Analyser';
+
+  @override
+  String get transcribedNotes => 'Transcribed Notes';
+
+  @override
+  String get chiefComplaints => 'Chief Complaints';
+
+  @override
+  String get advice => 'Advice';
+
+  @override
+  String get provisionalDiagnosis => 'Provisional Diagnosis';
+
+  @override
+  String get drugListSelectOne => 'Drug List - Select one from list';
+
+  @override
+  String get view => 'View';
+
+  @override
+  String get temperature => 'Temperature';
+
+  @override
+  String get bloodPressure => 'Blood Pressure';
+
+  @override
+  String get heartRate => 'Heart Rate';
+
+  @override
+  String get noPrescriptionsAvailable => 'No prescriptions available';
+
+  @override
+  String get strength => 'Strength';
+
+  @override
+  String get formulation => 'Formulation';
+
+  @override
+  String get frequency => 'Frequency';
+
+  @override
+  String get noOfDays => 'No. of Days';
+
+  @override
+  String get instruction => 'Instruction';
+
+  @override
+  String get matchingDrugs => 'Matching Drugs';
+
+  @override
+  String get instructions => 'Instructions';
+
+  @override
+  String get visitHistory => 'Visit History';
+
+  @override
+  String get noVisitHistoryFound => 'No Visit History Found';
+
+  @override
+  String get noDoctorNotesAvailable => 'No doctor notes available';
+
+  @override
+  String get unknownComplaint => 'Unknown Complaint';
+
+  @override
+  String get na => 'N/A';
+
+  @override
+  String get dosageFrequency => 'Dosage | Frequency';
+
+  @override
+  String get drugNameStrengthFormulation => 'Drug Name [Strength | Formulation]';
+
+  @override
+  String get doctorNotes => 'Doctor Notes';
+
+  @override
+  String get unknownVital => 'Unknown Vital';
+
+  @override
+  String get vitalName => 'Vital Name';
+
+  @override
+  String get noImageFound => 'No image found';
+
+  @override
+  String get attachments => 'Attachments';
+
+  @override
+  String get service => 'Service';
+
+  @override
+  String get noDocumentFound => 'No document found';
+
+  @override
+  String get consultationDetails => 'Consultation Details';
+
+  @override
+  String get tapToStop => 'Tap to stop';
+
+  @override
+  String get consultationAboutToComplete => 'It is about to complete the consultation';
+
+  @override
+  String get consultationDataGathered => 'We have almost gathered your consultation data';
+
+  @override
+  String get analysingData => 'Analysing Data';
+
+  @override
+  String get transcribedNote => 'Transcribed Note';
+
+  @override
+  String get totalUsageTime => 'Total Usage Time';
+
+  @override
+  String get analysedNotedSummary => 'Analysed Noted Summary';
+
+  @override
+  String get analysedOn => 'Analysed on';
+
+  @override
+  String get hearRecording => 'Hear Recording';
+
+  @override
+  String get drugList => 'Drug List';
+
+  @override
+  String get noAdvice => 'No advice';
+
+  @override
+  String get noDiagnosisAvailable => 'No diagnosis available';
+
+  @override
+  String get noVitalsAvailable => 'No vitals available';
+
+  @override
+  String get value => 'Value';
+
+  @override
+  String get fillBelowDetailsToAddPatient => 'Fill below details to add patient';
+
+  @override
+  String get patientsFullName => 'Patient\'s Full Name';
+
+  @override
+  String get pleaseEnterPatientsFullName => 'Please enter the patient\'s full name';
+
+  @override
+  String get dateOfBirth => 'Date Of Birth';
+
+  @override
+  String get others => 'Others';
+
+  @override
+  String get pleaseEnterGuardianFullName => 'Please enter the guardian full name';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get searchPatientName => 'Search Patient Name';
+
+  @override
+  String get addNew => '+ Add New';
+
+  @override
+  String get abhaIdLabel => 'ABHA Id: ';
+
+  @override
+  String get availableSlots => 'Available Slots';
+
+  @override
+  String get morning => 'Morning';
+
+  @override
+  String get afternoon => 'Afternoon';
+
+  @override
+  String get evening => 'Evening';
+
+  @override
+  String get consultantFees => 'Consultant Fees';
+
+  @override
+  String get walkInConsultation => 'Walk-in Consultation';
+
+  @override
+  String get selectConsultantType => 'Select Consultant Type :';
+
+  @override
+  String get payNow => 'Pay Now';
+
+  @override
+  String get payLater => 'Pay Later';
+
+  @override
+  String get pleaseEnterValidMobileNumber => 'Please enter a valid mobile number';
+
+  @override
+  String get enterPatientName => 'Enter Patient Name';
+
+  @override
+  String get mon => 'Mon';
+
+  @override
+  String get tue => 'Tue';
+
+  @override
+  String get wed => 'Wed';
+
+  @override
+  String get thu => 'Thu';
+
+  @override
+  String get fri => 'Fri';
+
+  @override
+  String get sat => 'Sat';
+
+  @override
+  String get sun => 'Sun';
+
+  @override
+  String get bookNow => 'Book Now';
+
+  @override
+  String get bookWithAbha => 'Book With ABHA';
+
+  @override
+  String get appointmentActions => 'Appointment Actions';
+
+  @override
+  String get rxUploadAndSave => 'Rx upload and save';
+
+  @override
+  String get upload => 'Upload';
+
+  @override
+  String get reschedule => 'Reschedule';
+
+  @override
+  String get linkWithAbha => 'Link with ABHA';
+
+  @override
+  String get viewRx => 'View Rx';
+
+  @override
+  String get cancelAppointment => 'Cancel Appointment';
+
+  @override
+  String get enterYourReasonHere => 'Enter your reason here';
+
+  @override
+  String get uploadRx => 'Upload Rx';
+
+  @override
+  String get useCamera => 'Use Camera';
+
+  @override
+  String get chooseFromGallery => 'Choose from Gallery';
+
+  @override
+  String get healthIdAbhaAddress => 'Health ID (ABHA Address)';
+
+  @override
+  String get healthId => 'Health ID';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get createAbha => 'Create ABHA';
+
+  @override
+  String get igree1 => 'I intend to create Ayushman Bharat Health Account Number (“ABHA number”) and Ayushman Bharat Health Account address (“ABHA Address”) using a document other than Aadhaar. (Click here to proceed further)';
+
+  @override
+  String get igree2 => 'I consent to the usage of my ABHA address and ABHA number for linking my legacy (past) government health records and those which will be generated during this encounter.';
+
+  @override
+  String get igree3 => 'I authorize the sharing of all my health records with healthcare provider(s) for the purpose of providing healthcare services to me during this encounter.';
+
+  @override
+  String get igree4 => 'I consent to the anonymization and subsequent use of my government health records for public health purposes.';
+
+  @override
+  String get igree5 => 'I, confirm that I have duly informed and explained the beneficiary of the contents of consent for the aforementioned purposes.';
+
+  @override
+  String get igree6 => 'I have been explained about the consent as stated above and hereby provide my consent for the aforementioned purposes.';
+
+  @override
+  String get checkAvailableAbhaAddress => 'Check Available ABHA Address';
+
+  @override
+  String get abhaNumber => 'ABHA Number';
+
+  @override
+  String get linkExisting => 'Link Existing';
+
+  @override
+  String get createNew => 'Create New';
+
+  @override
+  String get createVia => 'Create Via';
+
+  @override
+  String get aadhaarNumber => 'Aadhaar Number';
+
+  @override
+  String get iHerebyDeclareThat => 'I hereby declare that';
+
+  @override
+  String get agreeAll => 'Agree All';
+
+  @override
+  String get enterOtp => 'Enter OTP';
+
+  @override
+  String get useExisting => 'Use Existing';
+
+  @override
+  String get createAbhaAddress => 'Create ABHA Address';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get proceedwithkyc => 'Proceed With KYC';
+
+  @override
+  String get firstName => 'First Name';
+
+  @override
+  String get enterFirstName => 'Enter First Name';
+
+  @override
+  String get middleName => 'Middle Name';
+
+  @override
+  String get enterMiddleName => 'Enter Middle Name';
+
+  @override
+  String get lastName => 'Last Name';
+
+  @override
+  String get enterLastName => 'Enter Last Name';
+
+  @override
+  String get state => 'State';
+
+  @override
+  String get district => 'District';
+
+  @override
+  String get emailId => 'Email ID';
+
+  @override
+  String get enterEmailId => 'Enter Email ID';
+
+  @override
+  String get enterMobileNo => 'Enter Mobile Number';
+
+  @override
+  String get pinCode => 'Pin Code';
+
+  @override
+  String get enterPincode => 'Enter Pincode';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get abhaId => 'ABHA ID';
+
+  @override
+  String get suggestedAbhaAddress => 'Suggested ABHA Address';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get linkHealthId => 'Link Health ID';
+
+  @override
+  String get authenticationMethod => 'Authentication Method';
+
+  @override
+  String get otp => 'OTP';
+
+  @override
+  String get verifyAndLink => 'Verify & Link';
+
+  @override
+  String get msg_no_slots_available => 'slots are not available';
 }

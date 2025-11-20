@@ -152,7 +152,7 @@ class _HBNCListScreenState
           final db = await DatabaseProvider.instance.database;
           final beneficiaryResults = await db.query(
             'beneficiaries',
-            where: 'unique_key = ? AND is_deleted = 0',
+            where: 'unique_key = ?',
             whereArgs: [beneficiaryRefKey],
           );
 
@@ -261,11 +261,9 @@ class _HBNCListScreenState
       print('🔍 Fetching last visit date for beneficiary: $beneficiaryId');
       final db = await DatabaseProvider.instance.database;
 
-      // Use the same form reference key as _getVisitCount
       final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
       print('🔑 Using form reference key: $hbncVisitKey');
 
-      // Query to get the most recent HBNC visit
       final results = await db.query(
         FollowupFormDataTable.table,
         where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
@@ -283,7 +281,6 @@ class _HBNCListScreenState
           final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
           final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
 
-          // Debug: Print all form data keys and values
           print('🔑 Form data:');
           formData.forEach((key, value) {
             print('  - $key: $value (${value.runtimeType})');
@@ -293,14 +290,12 @@ class _HBNCListScreenState
           print('🔍 Full form data structure:');
           print(jsonEncode(formData));
 
-          // Try to get visit date from visitDetails
           if (formData.containsKey('visitDetails')) {
             final visitDetails = formData['visitDetails'];
             print('🔍 Found visitDetails: ${visitDetails.runtimeType}');
 
             if (visitDetails is Map) {
-              // Try different possible field names for visit date
-              final visitDate = visitDetails['visitDate'] ?? 
+              final visitDate = visitDetails['visitDate'] ??
                                visitDetails['visit_date'] ??
                                visitDetails['dateOfVisit'] ??
                                visitDetails['date_of_visit'];

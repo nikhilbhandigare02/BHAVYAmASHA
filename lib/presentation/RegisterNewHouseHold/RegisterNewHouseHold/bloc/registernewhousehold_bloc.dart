@@ -509,36 +509,38 @@ class RegisterNewHouseholdBloc
         final cleanedPayload = _clean(apiPayload);
 
 
-        print('📡 Posting add_household: ' + jsonEncode(cleanedPayload));
-        try {
-          final apiResp = await _householdRepository.addHousehold(cleanedPayload);
-          print('✅ add_household response: $apiResp');
+        print(' Household and all members saved locally, proceeding to background sync.');
+        emit(state.saved());
+
+        () async {
+          print('📡 Posting add_household: ' + jsonEncode(cleanedPayload));
           try {
-            if (apiResp is Map && (apiResp['success'] == true) && apiResp['data'] is List) {
-              final List dataList = apiResp['data'] as List;
-              for (final item in dataList) {
-                if (item is Map) {
-                  final serverId = (item['_id'] ?? item['id'] ?? '').toString();
-                  final respUniqueKey = (item['unique_key'] ?? apiUniqueKey).toString();
-                  if (serverId.isNotEmpty && respUniqueKey.isNotEmpty) {
-                    final updated = await LocalStorageDao.instance.updateHouseholdServerIdByUniqueKey(
-                      uniqueKey: respUniqueKey,
-                      serverId: serverId,
-                    );
-                    print('🗄️ Updated $updated row(s) with server_id=$serverId for unique_key=$respUniqueKey');
+            final apiResp = await _householdRepository.addHousehold(cleanedPayload);
+            print('✅ add_household response: $apiResp');
+            try {
+              if (apiResp is Map && (apiResp['success'] == true) && apiResp['data'] is List) {
+                final List dataList = apiResp['data'] as List;
+                for (final item in dataList) {
+                  if (item is Map) {
+                    final serverId = (item['_id'] ?? item['id'] ?? '').toString();
+                    final respUniqueKey = (item['unique_key'] ?? apiUniqueKey).toString();
+                    if (serverId.isNotEmpty && respUniqueKey.isNotEmpty) {
+                      final updated = await LocalStorageDao.instance.updateHouseholdServerIdByUniqueKey(
+                        uniqueKey: respUniqueKey,
+                        serverId: serverId,
+                      );
+                      print('🗄️ Updated $updated row(s) with server_id=$serverId for unique_key=$respUniqueKey');
+                    }
                   }
                 }
               }
+            } catch (e) {
+              print('Error updating local household with server id: $e');
             }
-          } catch (e) {
-            print('Error updating local household with server id: $e');
+          } catch (apiError) {
+            print('⚠️ add_household API failed, continuing with local save: $apiError');
           }
-        } catch (apiError) {
-          print('⚠️ add_household API failed, continuing with local save: $apiError');
-        }
-
-        print(' Household and all members saved successfully!');
-        emit(state.saved());
+        }();
       } catch (e, stackTrace) {
         print('❌ Error saving household data: $e');
         print('Stack trace: $stackTrace');

@@ -197,21 +197,31 @@ class GeneralDetailsTab extends StatelessWidget {
                   FutureBuilder<int>(
                     future: SecureStorageService.getVisitCount(beneficiaryId),
                     builder: (context, snapshot) {
-                      final baseCount = snapshot.data ?? 1;
-                      final visitCount = baseCount + 2; // ✅ increment by 2
+                      final lastCompleted = snapshot.data ?? 0; // last completed visit day
+                      const schedule = [1, 3, 7, 14, 21, 28, 42];
                       final int displayDay;
 
-                      if (selectedDay != null && selectedDay > 1) {
+                      if (selectedDay != null && selectedDay > 0) {
                         displayDay = selectedDay;
                       } else {
-                        displayDay = visitCount;
-                        if (visitCount > 0 && visitCount <= 7) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            context.read<HbncVisitBloc>().add(
-                              VisitDetailsChanged(field: 'visitNumber', value: visitCount),
-                            );
-                          });
+                        int nextDay;
+                        if (lastCompleted <= 0) {
+                          nextDay = schedule.first;
+                        } else {
+                          final idx = schedule.indexOf(lastCompleted);
+                          if (idx >= 0 && idx < schedule.length - 1) {
+                            nextDay = schedule[idx + 1];
+                          } else {
+                            nextDay = schedule.last;
+                          }
                         }
+
+                        displayDay = nextDay;
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          context.read<HbncVisitBloc>().add(
+                            VisitDetailsChanged(field: 'visitNumber', value: displayDay),
+                          );
+                        });
                       }
 
                       return Column(

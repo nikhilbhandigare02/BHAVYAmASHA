@@ -12,6 +12,7 @@ import '../../../../core/utils/device_info_utils.dart';
 import '../../../../core/utils/enums.dart' show FormStatus;
 import '../../../../data/Local_Storage/User_Info.dart';
 import '../../../../data/repositories/EligibleCoupleRepository/EligibleCoupleRepository.dart';
+import '../../../../data/repositories/FollowupFormsRepository/FollowupFormsRepository.dart';
 
 part 'track_eligible_couple_event.dart';
 part 'track_eligible_couple_state.dart';
@@ -271,11 +272,16 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           }
         }
 
-        final facilityId = userDetails['asha_associated_with_facility_id'] ??
-            userDetails['facility_id'] ??
-            userDetails['facilityId'] ??
-            userDetails['facility'] ??
-            0;
+        // final currentUser = await UserInfo.getCurrentUser();
+        // final userDetails = currentUser?['details'] is String
+        //     ? jsonDecode(currentUser?['details'] ?? '{}')
+        //     : currentUser?['details'] ?? {};
+
+        final working = userDetails['working_location'] ?? {};
+        final facilityId = working['asha_associated_with_facility_id'] ??
+            userDetails['asha_associated_with_facility_id'] ?? 0;
+        final ashaUniqueKey = userDetails['unique_key'] ?? {};
+
 
         final formDataForDb = {
           'server_id': '',
@@ -297,7 +303,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
             'package_name': deviceInfo.packageName,
           }),
           'parent_user': '',
-          'current_user_key': '',
+          'current_user_key': ashaUniqueKey,
           'facility_id': facilityId,
           'form_json': formJson,
           'created_date_time': nowIso,
@@ -420,6 +426,14 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
             } catch (e) {
               print('Error reading saved followup_form_data to build EC payload: $e');
             }
+            try {
+              // Send generic followup form payload to add_followup_forms1
+              final followupRepo = FollowupFormsRepository();
+              await followupRepo.addFollowupFormsFromDb(formId);
+            } catch (e) {
+              print('Error calling add_followup_forms1 for followup_form_data id=$formId -> $e');
+            }
+
             try {
               await db.update(
                 'beneficiaries',

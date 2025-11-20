@@ -9,7 +9,7 @@ import '../../Local_Storage/User_Info.dart';
 class AddBeneficiaryRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
-  Future<dynamic> addBeneficiary(Map<String, dynamic>    payload) async {
+  Future<dynamic> addBeneficiary(Map<String, dynamic> payload) async {
     final currentUser = await UserInfo.getCurrentUser();
     final userDetails = currentUser?['details'] is String
         ? jsonDecode(currentUser?['details'] ?? '{}')

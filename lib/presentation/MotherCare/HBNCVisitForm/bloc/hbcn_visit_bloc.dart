@@ -87,7 +87,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       print('🔌 Database connection established');
 
       final now = DateTime.now().toIso8601String();
-      print('⏰ Current time: $now');
+      print('⏰ Current time: $now' );
 
       final beneficiaryId = event.beneficiaryData != null
           ? (event.beneficiaryData!['unique_key']?.toString() ?? '')
@@ -141,7 +141,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         'form_type': formType,
         'form_name': formName,
         'unique_key': formsRefKey,
-        'form_data': {
+        'hbyc_form': {
           'motherDetails': state.motherDetails,
           'newbornDetails': state.newbornDetails,
           'visitDetails': state.visitDetails,
@@ -201,6 +201,12 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         print('  - Forms Ref Key: ${savedData.first['forms_ref_key']}');
         print('  - Beneficiary Ref Key: ${savedData.first['beneficiary_ref_key']}');
         print('  - Created: ${savedData.first['created_date_time']}');
+
+        // Update HBNC visit count for this beneficiary so that next
+        // visit defaults to the next scheduled day (1,3,7,14,21,28,42).
+        if (beneficiaryId.isNotEmpty) {
+          await SecureStorageService.incrementVisitCount(beneficiaryId);
+        }
 
         emit(state.copyWith(
           isSaving: false,

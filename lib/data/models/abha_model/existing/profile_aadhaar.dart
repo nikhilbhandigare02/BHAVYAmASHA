@@ -1,0 +1,499 @@
+/// ABHANumber : "91-1130-8436-0800"
+/// preferredAbhaAddress : "rohhy1113@sbx"
+/// mobile : "9702713057"
+/// mobileVerified : true
+/// firstName : "Rohit"
+/// middleName : "Mohan"
+/// lastName : "Chavan"
+/// name : "Rohit Mohan Chavan"
+/// yearOfBirth : "1993"
+/// dayOfBirth : "26"
+/// monthOfBirth : "07"
+/// gender : "M"
+/// profilePhoto : "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"
+/// status : "ACTIVE"
+/// stateCode : "27"
+/// districtCode : "491"
+/// townCode : ""
+/// pincode : "410218"
+/// address : "building no/L-04,flat no-306, plot no-9,hansdhwani, roadpali, sector-15, Kalamboli Node, Raigarh, Maharashtra"
+/// kycPhoto : "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"
+/// stateName : "MAHARASHTRA"
+/// districtName : "RAIGAD"
+/// subdistrictName : "RAIGAD"
+/// townName : "Kalamboli Node"
+/// authMethods : ["AADHAAR_OTP","AADHAAR_BIO","DEMOGRAPHICS","MOBILE_OTP"]
+/// tags : []
+/// kycVerified : true
+/// verificationStatus : "VERIFIED"
+/// verificationType : "AADHAAR"
+/// source : "OTP"
+/// localizedDetails : {"name":"रोहित मोहन चव्हाण","stateName":"महाराष्ट्र","districtName":"रैगर्ह","villageName":"कळंबोली नोंदी","wardName":"प्लॉट नं-९,हंसध्वनी","townName":"सेक्टर-१५","gender":"पुरुष","localizedLabels":{"name":"नाव","abhaNumber":"आभा क्रमांक","abhaAddress":"आभा पत्ता","gender":"लिंग","dob":"जन्मतारीख","mobile":"मोबाईल"}}
+/// createdDate : "17-10-2024"
+/// status_code : 200
+/// tracking_id : "f2a7cc13-225e-423b-a2d4-daaf42d26f5d"
+/// iIsLinked : false
+
+class ProfileAadhaar {
+  ProfileAadhaar({
+      String? aBHANumber, 
+      String? preferredAbhaAddress, 
+      String? mobile, 
+      bool? mobileVerified, 
+      String? firstName, 
+      String? middleName, 
+      String? lastName, 
+      String? name, 
+      String? yearOfBirth, 
+      String? dayOfBirth, 
+      String? monthOfBirth, 
+      String? gender, 
+      String? profilePhoto, 
+      String? status, 
+      String? stateCode, 
+      String? districtCode, 
+      String? townCode, 
+      String? pincode, 
+      String? address, 
+      String? kycPhoto, 
+      String? stateName, 
+      String? districtName, 
+      String? subdistrictName, 
+      String? townName, 
+      List<String>? authMethods, 
+      List<dynamic>? tags, 
+      bool? kycVerified, 
+      String? verificationStatus, 
+      String? verificationType, 
+      String? source, 
+      LocalizedDetails? localizedDetails, 
+      String? createdDate, 
+      num? statusCode, 
+      String? trackingId, 
+      bool? iIsLinked,}){
+    _aBHANumber = aBHANumber;
+    _preferredAbhaAddress = preferredAbhaAddress;
+    _mobile = mobile;
+    _mobileVerified = mobileVerified;
+    _firstName = firstName;
+    _middleName = middleName;
+    _lastName = lastName;
+    _name = name;
+    _yearOfBirth = yearOfBirth;
+    _dayOfBirth = dayOfBirth;
+    _monthOfBirth = monthOfBirth;
+    _gender = gender;
+    _profilePhoto = profilePhoto;
+    _status = status;
+    _stateCode = stateCode;
+    _districtCode = districtCode;
+    _townCode = townCode;
+    _pincode = pincode;
+    _address = address;
+    _kycPhoto = kycPhoto;
+    _stateName = stateName;
+    _districtName = districtName;
+    _subdistrictName = subdistrictName;
+    _townName = townName;
+    _authMethods = authMethods;
+    _tags = tags;
+    _kycVerified = kycVerified;
+    _verificationStatus = verificationStatus;
+    _verificationType = verificationType;
+    _source = source;
+    _localizedDetails = localizedDetails;
+    _createdDate = createdDate;
+    _statusCode = statusCode;
+    _trackingId = trackingId;
+    _iIsLinked = iIsLinked;
+}
+
+  ProfileAadhaar.fromJson(dynamic json) {
+    _aBHANumber = json['ABHANumber'];
+    _preferredAbhaAddress = json['preferredAbhaAddress'];
+    _mobile = json['mobile'];
+    _mobileVerified = json['mobileVerified'];
+    _firstName = json['firstName'];
+    _middleName = json['middleName'];
+    _lastName = json['lastName'];
+    _name = json['name'];
+    _yearOfBirth = json['yearOfBirth'];
+    _dayOfBirth = json['dayOfBirth'];
+    _monthOfBirth = json['monthOfBirth'];
+    _gender = json['gender'];
+    _profilePhoto = json['profilePhoto'];
+    _status = json['status'];
+    _stateCode = json['stateCode'];
+    _districtCode = json['districtCode'];
+    _townCode = json['townCode'];
+    _pincode = json['pincode'];
+    _address = json['address'];
+    _kycPhoto = json['kycPhoto'];
+    _stateName = json['stateName'];
+    _districtName = json['districtName'];
+    _subdistrictName = json['subdistrictName'];
+    _townName = json['townName'];
+    _authMethods = json['authMethods'] != null ? json['authMethods'].cast<String>() : [];
+    if (json['tags'] != null) {
+      _tags = [];
+      json['tags'].forEach((v) {
+       // _tags?.add(Dynamic.fromJson(v));
+      });
+    }
+    _kycVerified = json['kycVerified'];
+    _verificationStatus = json['verificationStatus'];
+    _verificationType = json['verificationType'];
+    _source = json['source'];
+    _localizedDetails = json['localizedDetails'] != null ? LocalizedDetails.fromJson(json['localizedDetails']) : null;
+    _createdDate = json['createdDate'];
+    _statusCode = json['status_code'];
+    _trackingId = json['tracking_id'];
+    _iIsLinked = json['iIsLinked'];
+  }
+  String? _aBHANumber;
+  String? _preferredAbhaAddress;
+  String? _mobile;
+  bool? _mobileVerified;
+  String? _firstName;
+  String? _middleName;
+  String? _lastName;
+  String? _name;
+  String? _yearOfBirth;
+  String? _dayOfBirth;
+  String? _monthOfBirth;
+  String? _gender;
+  String? _profilePhoto;
+  String? _status;
+  String? _stateCode;
+  String? _districtCode;
+  String? _townCode;
+  String? _pincode;
+  String? _address;
+  String? _kycPhoto;
+  String? _stateName;
+  String? _districtName;
+  String? _subdistrictName;
+  String? _townName;
+  List<String>? _authMethods;
+  List<dynamic>? _tags;
+  bool? _kycVerified;
+  String? _verificationStatus;
+  String? _verificationType;
+  String? _source;
+  LocalizedDetails? _localizedDetails;
+  String? _createdDate;
+  num? _statusCode;
+  String? _trackingId;
+  bool? _iIsLinked;
+ProfileAadhaar copyWith({  String? aBHANumber,
+  String? preferredAbhaAddress,
+  String? mobile,
+  bool? mobileVerified,
+  String? firstName,
+  String? middleName,
+  String? lastName,
+  String? name,
+  String? yearOfBirth,
+  String? dayOfBirth,
+  String? monthOfBirth,
+  String? gender,
+  String? profilePhoto,
+  String? status,
+  String? stateCode,
+  String? districtCode,
+  String? townCode,
+  String? pincode,
+  String? address,
+  String? kycPhoto,
+  String? stateName,
+  String? districtName,
+  String? subdistrictName,
+  String? townName,
+  List<String>? authMethods,
+  List<dynamic>? tags,
+  bool? kycVerified,
+  String? verificationStatus,
+  String? verificationType,
+  String? source,
+  LocalizedDetails? localizedDetails,
+  String? createdDate,
+  num? statusCode,
+  String? trackingId,
+  bool? iIsLinked,
+}) => ProfileAadhaar(  aBHANumber: aBHANumber ?? _aBHANumber,
+  preferredAbhaAddress: preferredAbhaAddress ?? _preferredAbhaAddress,
+  mobile: mobile ?? _mobile,
+  mobileVerified: mobileVerified ?? _mobileVerified,
+  firstName: firstName ?? _firstName,
+  middleName: middleName ?? _middleName,
+  lastName: lastName ?? _lastName,
+  name: name ?? _name,
+  yearOfBirth: yearOfBirth ?? _yearOfBirth,
+  dayOfBirth: dayOfBirth ?? _dayOfBirth,
+  monthOfBirth: monthOfBirth ?? _monthOfBirth,
+  gender: gender ?? _gender,
+  profilePhoto: profilePhoto ?? _profilePhoto,
+  status: status ?? _status,
+  stateCode: stateCode ?? _stateCode,
+  districtCode: districtCode ?? _districtCode,
+  townCode: townCode ?? _townCode,
+  pincode: pincode ?? _pincode,
+  address: address ?? _address,
+  kycPhoto: kycPhoto ?? _kycPhoto,
+  stateName: stateName ?? _stateName,
+  districtName: districtName ?? _districtName,
+  subdistrictName: subdistrictName ?? _subdistrictName,
+  townName: townName ?? _townName,
+  authMethods: authMethods ?? _authMethods,
+  tags: tags ?? _tags,
+  kycVerified: kycVerified ?? _kycVerified,
+  verificationStatus: verificationStatus ?? _verificationStatus,
+  verificationType: verificationType ?? _verificationType,
+  source: source ?? _source,
+  localizedDetails: localizedDetails ?? _localizedDetails,
+  createdDate: createdDate ?? _createdDate,
+  statusCode: statusCode ?? _statusCode,
+  trackingId: trackingId ?? _trackingId,
+  iIsLinked: iIsLinked ?? _iIsLinked,
+);
+  String? get aBHANumber => _aBHANumber;
+  String? get preferredAbhaAddress => _preferredAbhaAddress;
+  String? get mobile => _mobile;
+  bool? get mobileVerified => _mobileVerified;
+  String? get firstName => _firstName;
+  String? get middleName => _middleName;
+  String? get lastName => _lastName;
+  String? get name => _name;
+  String? get yearOfBirth => _yearOfBirth;
+  String? get dayOfBirth => _dayOfBirth;
+  String? get monthOfBirth => _monthOfBirth;
+  String? get gender => _gender;
+  String? get profilePhoto => _profilePhoto;
+  String? get status => _status;
+  String? get stateCode => _stateCode;
+  String? get districtCode => _districtCode;
+  String? get townCode => _townCode;
+  String? get pincode => _pincode;
+  String? get address => _address;
+  String? get kycPhoto => _kycPhoto;
+  String? get stateName => _stateName;
+  String? get districtName => _districtName;
+  String? get subdistrictName => _subdistrictName;
+  String? get townName => _townName;
+  List<String>? get authMethods => _authMethods;
+  List<dynamic>? get tags => _tags;
+  bool? get kycVerified => _kycVerified;
+  String? get verificationStatus => _verificationStatus;
+  String? get verificationType => _verificationType;
+  String? get source => _source;
+  LocalizedDetails? get localizedDetails => _localizedDetails;
+  String? get createdDate => _createdDate;
+  num? get statusCode => _statusCode;
+  String? get trackingId => _trackingId;
+  bool? get iIsLinked => _iIsLinked;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['ABHANumber'] = _aBHANumber;
+    map['preferredAbhaAddress'] = _preferredAbhaAddress;
+    map['mobile'] = _mobile;
+    map['mobileVerified'] = _mobileVerified;
+    map['firstName'] = _firstName;
+    map['middleName'] = _middleName;
+    map['lastName'] = _lastName;
+    map['name'] = _name;
+    map['yearOfBirth'] = _yearOfBirth;
+    map['dayOfBirth'] = _dayOfBirth;
+    map['monthOfBirth'] = _monthOfBirth;
+    map['gender'] = _gender;
+    map['profilePhoto'] = _profilePhoto;
+    map['status'] = _status;
+    map['stateCode'] = _stateCode;
+    map['districtCode'] = _districtCode;
+    map['townCode'] = _townCode;
+    map['pincode'] = _pincode;
+    map['address'] = _address;
+    map['kycPhoto'] = _kycPhoto;
+    map['stateName'] = _stateName;
+    map['districtName'] = _districtName;
+    map['subdistrictName'] = _subdistrictName;
+    map['townName'] = _townName;
+    map['authMethods'] = _authMethods;
+    if (_tags != null) {
+      map['tags'] = _tags?.map((v) => v.toJson()).toList();
+    }
+    map['kycVerified'] = _kycVerified;
+    map['verificationStatus'] = _verificationStatus;
+    map['verificationType'] = _verificationType;
+    map['source'] = _source;
+    if (_localizedDetails != null) {
+      map['localizedDetails'] = _localizedDetails?.toJson();
+    }
+    map['createdDate'] = _createdDate;
+    map['status_code'] = _statusCode;
+    map['tracking_id'] = _trackingId;
+    map['iIsLinked'] = _iIsLinked;
+    return map;
+  }
+
+}
+
+/// name : "रोहित मोहन चव्हाण"
+/// stateName : "महाराष्ट्र"
+/// districtName : "रैगर्ह"
+/// villageName : "कळंबोली नोंदी"
+/// wardName : "प्लॉट नं-९,हंसध्वनी"
+/// townName : "सेक्टर-१५"
+/// gender : "पुरुष"
+/// localizedLabels : {"name":"नाव","abhaNumber":"आभा क्रमांक","abhaAddress":"आभा पत्ता","gender":"लिंग","dob":"जन्मतारीख","mobile":"मोबाईल"}
+
+class LocalizedDetails {
+  LocalizedDetails({
+      String? name, 
+      String? stateName, 
+      String? districtName, 
+      String? villageName, 
+      String? wardName, 
+      String? townName, 
+      String? gender, 
+      LocalizedLabels? localizedLabels,}){
+    _name = name;
+    _stateName = stateName;
+    _districtName = districtName;
+    _villageName = villageName;
+    _wardName = wardName;
+    _townName = townName;
+    _gender = gender;
+    _localizedLabels = localizedLabels;
+}
+
+  LocalizedDetails.fromJson(dynamic json) {
+    _name = json['name'];
+    _stateName = json['stateName'];
+    _districtName = json['districtName'];
+    _villageName = json['villageName'];
+    _wardName = json['wardName'];
+    _townName = json['townName'];
+    _gender = json['gender'];
+    _localizedLabels = json['localizedLabels'] != null ? LocalizedLabels.fromJson(json['localizedLabels']) : null;
+  }
+  String? _name;
+  String? _stateName;
+  String? _districtName;
+  String? _villageName;
+  String? _wardName;
+  String? _townName;
+  String? _gender;
+  LocalizedLabels? _localizedLabels;
+LocalizedDetails copyWith({  String? name,
+  String? stateName,
+  String? districtName,
+  String? villageName,
+  String? wardName,
+  String? townName,
+  String? gender,
+  LocalizedLabels? localizedLabels,
+}) => LocalizedDetails(  name: name ?? _name,
+  stateName: stateName ?? _stateName,
+  districtName: districtName ?? _districtName,
+  villageName: villageName ?? _villageName,
+  wardName: wardName ?? _wardName,
+  townName: townName ?? _townName,
+  gender: gender ?? _gender,
+  localizedLabels: localizedLabels ?? _localizedLabels,
+);
+  String? get name => _name;
+  String? get stateName => _stateName;
+  String? get districtName => _districtName;
+  String? get villageName => _villageName;
+  String? get wardName => _wardName;
+  String? get townName => _townName;
+  String? get gender => _gender;
+  LocalizedLabels? get localizedLabels => _localizedLabels;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['name'] = _name;
+    map['stateName'] = _stateName;
+    map['districtName'] = _districtName;
+    map['villageName'] = _villageName;
+    map['wardName'] = _wardName;
+    map['townName'] = _townName;
+    map['gender'] = _gender;
+    if (_localizedLabels != null) {
+      map['localizedLabels'] = _localizedLabels?.toJson();
+    }
+    return map;
+  }
+
+}
+
+/// name : "नाव"
+/// abhaNumber : "आभा क्रमांक"
+/// abhaAddress : "आभा पत्ता"
+/// gender : "लिंग"
+/// dob : "जन्मतारीख"
+/// mobile : "मोबाईल"
+
+class LocalizedLabels {
+  LocalizedLabels({
+      String? name, 
+      String? abhaNumber, 
+      String? abhaAddress, 
+      String? gender, 
+      String? dob, 
+      String? mobile,}){
+    _name = name;
+    _abhaNumber = abhaNumber;
+    _abhaAddress = abhaAddress;
+    _gender = gender;
+    _dob = dob;
+    _mobile = mobile;
+}
+
+  LocalizedLabels.fromJson(dynamic json) {
+    _name = json['name'];
+    _abhaNumber = json['abhaNumber'];
+    _abhaAddress = json['abhaAddress'];
+    _gender = json['gender'];
+    _dob = json['dob'];
+    _mobile = json['mobile'];
+  }
+  String? _name;
+  String? _abhaNumber;
+  String? _abhaAddress;
+  String? _gender;
+  String? _dob;
+  String? _mobile;
+LocalizedLabels copyWith({  String? name,
+  String? abhaNumber,
+  String? abhaAddress,
+  String? gender,
+  String? dob,
+  String? mobile,
+}) => LocalizedLabels(  name: name ?? _name,
+  abhaNumber: abhaNumber ?? _abhaNumber,
+  abhaAddress: abhaAddress ?? _abhaAddress,
+  gender: gender ?? _gender,
+  dob: dob ?? _dob,
+  mobile: mobile ?? _mobile,
+);
+  String? get name => _name;
+  String? get abhaNumber => _abhaNumber;
+  String? get abhaAddress => _abhaAddress;
+  String? get gender => _gender;
+  String? get dob => _dob;
+  String? get mobile => _mobile;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['name'] = _name;
+    map['abhaNumber'] = _abhaNumber;
+    map['abhaAddress'] = _abhaAddress;
+    map['gender'] = _gender;
+    map['dob'] = _dob;
+    map['mobile'] = _mobile;
+    return map;
+  }
+
+}

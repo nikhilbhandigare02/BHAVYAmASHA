@@ -24,6 +24,10 @@ class AddnewfamilymemberBloc
     extends Bloc<AddnewfamilymemberEvent, AddnewfamilymemberState> {
   final LocalStorageDao _localStorageDao = LocalStorageDao();
 
+  // Keep track of the beneficiary being edited (for update flow)
+  String? _editingBeneficiaryKey;
+  int? _editingBeneficiaryRowId;
+
   Future<void> _onLoadBeneficiaryData(
       LoadBeneficiaryData event,
       Emitter<AddnewfamilymemberState> emit,
@@ -39,6 +43,10 @@ class AddnewfamilymemberBloc
 
       if (results.isNotEmpty) {
         final beneficiary = results.first;
+
+        // Remember which row is being edited so that we can update it later
+        _editingBeneficiaryRowId = beneficiary['id'] as int?;
+        _editingBeneficiaryKey = beneficiary['unique_key']?.toString();
         final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info'] as String? ?? '{}');
 
         // Create a map to hold all the data
@@ -77,14 +85,56 @@ class AddnewfamilymemberBloc
           'is_deleted': beneficiary['is_deleted'] == 1,
         };
 
+        // Derive primary name from available fields
+        final String? primaryName =
+            (allData['name'] as String?) ??
+            (allData['memberName'] as String?) ??
+            (allData['headName'] as String?);
+
+        // Derive relation from either 'relation' or legacy 'relation_to_head'
+        final String? rawRelation =
+            (allData['relation'] as String?) ??
+            (allData['relation_to_head'] as String?);
+        String? primaryRelation;
+        if (rawRelation != null) {
+          final r = rawRelation.toString();
+          final rl = r.toLowerCase();
+          if (rl == 'self' || rl == 'head') {
+            primaryRelation = 'Self';
+          } else {
+            primaryRelation = r;
+          }
+        }
+
+        // If this beneficiary is actually the head of its household,
+        // force relation to 'self' regardless of stored relation value.
+        try {
+          final String hhRef = beneficiary['household_ref_key']?.toString() ?? '';
+          final String benKey = beneficiary['unique_key']?.toString() ?? '';
+          if (hhRef.isNotEmpty && benKey.isNotEmpty) {
+            final hhRows = await db.query(
+              'households',
+              where: 'unique_key = ?',
+              whereArgs: [hhRef],
+              limit: 1,
+            );
+            if (hhRows.isNotEmpty) {
+              final headId = hhRows.first['head_id']?.toString() ?? '';
+              if (headId.isNotEmpty && headId == benKey) {
+                primaryRelation = 'Self';
+              }
+            }
+          }
+        } catch (_) {}
+
         // Update the state with all the data
         emit(state.copyWith(
           // Map all the fields to the state
-          name: allData['name'] as String?,
+          name: primaryName,
           fatherName: allData['fatherName'] as String?,
           motherName: allData['motherName'] as String?,
           memberType: allData['memberType'] as String? ?? 'Adult',
-          relation: allData['relation'] as String?,
+          relation: primaryRelation,
           useDob: allData['useDob'] as bool? ?? true,
           dob: allData['dob'] != null ? DateTime.tryParse(allData['dob']) : null,
           approxAge: allData['approxAge']?.toString(),
@@ -732,6 +782,47 @@ class AddnewfamilymemberBloc
                 'village': working['village'] ?? userDetails['villageName'],
                 'pincode': working['pincode'] ?? userDetails['pincode'],
               }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
+
+              // Extra flat fields required by backend sample schema,
+              // mapped from existing local info/state when possible.
+              'is_abha_verified': info['is_abha_verified'] ?? false,
+              'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
+              'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,
+              'is_fetched_from_rch': info['is_fetched_from_rch'] ?? false,
+              'is_existing_father': info['is_existing_father'] ?? false,
+              'is_existing_mother': info['is_existing_mother'] ?? false,
+              'ben_type': info['ben_type'] ?? (info['memberType'] ?? state.memberType ?? 'adult'),
+              'mother_ben_ref_key': info['mother_ben_ref_key'] ?? savedMember['mother_key']?.toString() ?? '',
+              'father_ben_ref_key': info['father_ben_ref_key'] ?? savedMember['father_key']?.toString() ?? '',
+              'relaton_with_family_head':
+                  info['relaton_with_family_head'] ?? info['relation_to_head'] ?? state.relation,
+              'member_status': info['member_status'] ?? state.memberStatus ?? 'alive',
+              'member_name': info['member_name'] ?? nameStr,
+              'father_or_spouse_name': info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'],
+              'have_children': info['have_children'] ?? info['hasChildren'] ?? state.hasChildren,
+              'is_family_planning': info['is_family_planning'] ?? savedMember['is_family_planning'] ?? 0,
+              'total_children': info['total_children'] ?? info['totalBorn'],
+              'total_live_children': info['total_live_children'] ?? info['totalLive'],
+              'total_male_children': info['total_male_children'] ?? info['totalMale'],
+              'age_of_youngest_child': info['age_of_youngest_child'] ?? info['youngestAge'],
+              'gender_of_younget_child': info['gender_of_younget_child'] ?? info['youngestGender'],
+              'whose_mob_no': info['whose_mob_no'] ?? info['mobileOwner'],
+              'mobile_no': info['mobile_no'] ?? info['mobileNo'] ?? state.mobileNo,
+              'dob_day': info['dob_day'],
+              'dob_month': info['dob_month'],
+              'dob_year': info['dob_year'],
+              'age_by': info['age_by'],
+              'date_of_birth': info['date_of_birth'] ?? info['dob'],
+              'age': info['age'] ?? info['approxAge'] ?? state.approxAge,
+              'village_name': info['village_name'] ?? working['village'] ?? userDetails['villageName'],
+              'is_new_member': info['is_new_member'] ?? true,
+              'isFamilyhead': info['isFamilyhead'] ?? false,
+              'isFamilyheadWife': info['isFamilyheadWife'] ?? false,
+              'age_of_youngest_child_unit':
+                  info['age_of_youngest_child_unit'] ?? info['ageUnit'],
+              'type_of_beneficiary':
+                  info['type_of_beneficiary'] ?? info['beneficiaryType'] ?? state.beneficiaryType,
+              'name_of_spouse': info['name_of_spouse'] ?? info['spouseName'] ?? state.spouseName,
             }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
 
             final apiPayload = {
@@ -1028,32 +1119,36 @@ class AddnewfamilymemberBloc
         return;
       }
       try {
-        final now = DateTime.now();
-        final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-        final deviceInfo = await DeviceInfo.getDeviceInfo();
-
-        // Resolve household by the passed HHID
-        final households = await LocalStorageDao.instance.getAllHouseholds();
-        Map<String, dynamic>? matchedHousehold;
-        for (final h in households) {
-          if (h['unique_key'] == event.hhid) {
-            matchedHousehold = h;
-            break;
-          }
-        }
-        matchedHousehold ??= households.isNotEmpty ? households.first : null;
-        if (matchedHousehold == null) {
+        // We must have a beneficiary loaded for update
+        if (_editingBeneficiaryKey == null || _editingBeneficiaryRowId == null) {
           emit(
             state.copyWith(
               postApiStatus: PostApiStatus.error,
-              errorMessage: 'No household found. Please create a household first.',
+              errorMessage: 'No beneficiary loaded for update.',
             ),
           );
           return;
         }
 
-        final householdRefKey = event.hhid;
-        String? headId = matchedHousehold['head_id'] as String?;
+        final now = DateTime.now();
+        final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+        final deviceInfo = await DeviceInfo.getDeviceInfo();
+
+        // Load the existing beneficiary row by unique_key so we can merge changes
+        final existing = await LocalStorageDao.instance
+            .getBeneficiaryByUniqueKey(_editingBeneficiaryKey!);
+        if (existing == null) {
+          emit(
+            state.copyWith(
+              postApiStatus: PostApiStatus.error,
+              errorMessage: 'Beneficiary not found for update.',
+            ),
+          );
+          return;
+        }
+
+        final householdRefKey = existing['household_ref_key']?.toString() ?? event.hhid;
+        String? headId = existing['household_ref_key']?.toString();
 
         final currentUser = await UserInfo.getCurrentUser();
         final userDetails = currentUser?['details'] is String
@@ -1203,84 +1298,92 @@ class AddnewfamilymemberBloc
           }
         } catch (_) {}
 
-        final memberPayload = {
-          'server_id': null,
-          'household_ref_key': householdRefKey,
-          'unique_key': headId,
-          'beneficiary_state': beneficiaryState,
-          'pregnancy_count': 0,
-          'beneficiary_info': jsonEncode({
-            'memberType': state.memberType,
-            'relation': state.relation,
-            'name': state.name,
-            'fatherName': state.fatherName,
-            'motherName': state.motherName,
-            'useDob': state.useDob,
-            'dob': state.dob?.toIso8601String(),
-            'approxAge': state.approxAge,
-            'updateDay': state.updateDay,
-            'updateMonth': state.updateMonth,
-            'updateYear': state.updateYear,
-            'children': state.children,
-            'birthOrder': state.birthOrder,
-            'gender': state.gender,
-            'bankAcc': state.bankAcc,
-            'ifsc': state.ifsc,
-            'occupation': state.occupation,
-            'education': state.education,
-            'religion': state.religion,
-            'category': state.category,
-            'weight': state.WeightChange,
-            'childSchool': state.ChildSchool,
-            'birthCertificate': state.BirthCertificateChange,
-            'abhaAddress': state.abhaAddress,
-            'mobileOwner': state.mobileOwner,
-            'mobileNo': state.mobileNo,
-            'voterId': state.voterId,
-            'rationId': state.rationId,
-            'phId': state.phId,
-            'beneficiaryType': state.beneficiaryType,
-            'maritalStatus': state.maritalStatus,
-            'ageAtMarriage': state.ageAtMarriage,
-            'spouseName': state.spouseName,
-            'hasChildren': state.hasChildren,
-            'isPregnant': state.isPregnant,
-            'memberStatus': state.memberStatus,
-            'relation_to_head': state.relation,
-          }),
-          'geo_location': geoLocationJson,
-          'spouse_key': null,
-          'mother_key': resolvedMotherKey2,
-          'father_key': resolvedFatherKey2,
-          'is_family_planning': 0,
-          'is_adult': isAdult,
-          'is_guest': 0,
-          'is_death': isDeath,
-          'death_details': jsonEncode(deathDetails),
-          'is_migrated': 0,
-          'is_separated': 0,
-          'device_details': jsonEncode({
-            'id': deviceInfo.deviceId,
-            'platform': deviceInfo.platform,
-            'version': deviceInfo.osVersion,
-          }),
-          'app_details': jsonEncode({
-            'app_version': deviceInfo.appVersion.split('+').first,
-            'app_name': deviceInfo.appName,
-            'build_number': deviceInfo.buildNumber,
-            'package_name': deviceInfo.packageName,
-          }),
-          'parent_user': jsonEncode({}),
-          'current_user_key': ashaUniqueKey,
-          'facility_id': facilityId,
-          'created_date_time': ts,
-          'modified_date_time': ts,
-          'is_synced': 0,
-          'is_deleted': 0,
-        };
+        // Merge into existing beneficiary_info similar to family head update
+        final existingInfoRaw = existing['beneficiary_info'];
+        final Map<String, dynamic> existingInfo = existingInfoRaw is Map
+            ? Map<String, dynamic>.from(existingInfoRaw)
+            : (existingInfoRaw is String && existingInfoRaw.isNotEmpty)
+                ? Map<String, dynamic>.from(jsonDecode(existingInfoRaw))
+                : <String, dynamic>{};
 
-        print('Saving new family member (update submit) with payload: ${jsonEncode(memberPayload)}');
-        await LocalStorageDao.instance.insertBeneficiary(memberPayload);
+        existingInfo
+          ..['memberType'] = state.memberType
+          ..['relation'] = state.relation
+          ..['name'] = state.name
+          ..['memberName'] = state.name
+          ..['headName'] = existingInfo.containsKey('headName') ? state.name : existingInfo['headName']
+          ..['fatherName'] = state.fatherName
+          ..['motherName'] = state.motherName
+          ..['useDob'] = state.useDob
+          ..['dob'] = state.dob?.toIso8601String()
+          ..['approxAge'] = state.approxAge
+          ..['updateDay'] = state.updateDay
+          ..['updateMonth'] = state.updateMonth
+          ..['updateYear'] = state.updateYear
+          ..['children'] = state.children
+          ..['birthOrder'] = state.birthOrder
+          ..['gender'] = state.gender
+          ..['bankAcc'] = state.bankAcc
+          ..['ifsc'] = state.ifsc
+          ..['occupation'] = state.occupation
+          ..['education'] = state.education
+          ..['religion'] = state.religion
+          ..['category'] = state.category
+          ..['weight'] = state.WeightChange
+          ..['childSchool'] = state.ChildSchool
+          ..['birthCertificate'] = state.BirthCertificateChange
+          ..['abhaAddress'] = state.abhaAddress
+          ..['mobileOwner'] = state.mobileOwner
+          ..['mobileNo'] = state.mobileNo
+          ..['voterId'] = state.voterId
+          ..['rationId'] = state.rationId
+          ..['phId'] = state.phId
+          ..['beneficiaryType'] = state.beneficiaryType
+          ..['maritalStatus'] = state.maritalStatus
+          ..['ageAtMarriage'] = state.ageAtMarriage
+          ..['spouseName'] = state.spouseName
+          ..['hasChildren'] = state.hasChildren
+          ..['isPregnant'] = state.isPregnant
+          ..['memberStatus'] = state.memberStatus
+          ..['relation_to_head'] = state.relation;
+
+        final updatedRow = Map<String, dynamic>.from(existing);
+        updatedRow['beneficiary_info'] = existingInfo;
+        updatedRow['beneficiary_state'] = beneficiaryState;
+        updatedRow['is_adult'] = isAdult;
+        updatedRow['is_death'] = isDeath;
+        updatedRow['death_details'] = deathDetails;
+        updatedRow['mother_key'] = resolvedMotherKey2;
+        updatedRow['father_key'] = resolvedFatherKey2;
+        updatedRow['geo_location'] = existing['geo_location'] ?? geoLocationJson;
+
+        await LocalStorageDao.instance.updateBeneficiary(updatedRow);
+
+        try {
+          final String? partnerKey = existing['spouse_key']?.toString();
+          final String? currentName = state.name;
+          if (partnerKey != null && partnerKey.isNotEmpty && currentName != null && currentName.trim().isNotEmpty) {
+            final partner = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(partnerKey);
+            if (partner != null) {
+              final partnerInfoRaw = partner['beneficiary_info'];
+              final Map<String, dynamic> partnerInfo = partnerInfoRaw is Map
+                  ? Map<String, dynamic>.from(partnerInfoRaw)
+                  : (partnerInfoRaw is String && partnerInfoRaw.isNotEmpty)
+                      ? Map<String, dynamic>.from(jsonDecode(partnerInfoRaw))
+                      : <String, dynamic>{};
+
+              // Store edited member's name as spouseName on partner row
+              partnerInfo['spouseName'] = currentName;
+
+              final updatedPartner = Map<String, dynamic>.from(partner);
+              updatedPartner['beneficiary_info'] = partnerInfo;
+
+              await LocalStorageDao.instance.updateBeneficiary(updatedPartner);
+            }
+          }
+        } catch (e) {
+          print('Error updating partner spouseName during member update: $e');
+        }
 
         emit(state.copyWith(postApiStatus: PostApiStatus.success));
       } catch (e) {

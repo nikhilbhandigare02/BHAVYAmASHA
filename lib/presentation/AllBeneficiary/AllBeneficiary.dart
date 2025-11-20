@@ -139,6 +139,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           final isFemale = gender == 'female' || gender == 'f';
           final richId = info['RichIDChanged']?.toString() ?? info['richIdChanged']?.toString() ?? '';
 
+          // Unified display name: prefer name -> memberName -> headName
+          final String displayName = (info['name'] ?? info['memberName'] ?? info['headName'] ?? '').toString();
+
           // Find spouse name if exists
           String spouseName = '';
           String spouseGender = '';
@@ -161,7 +164,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             'village': info['village']?.toString() ?? '',
             'RichID': richId,
             'Gender': gender,
-            'Name': info['headName']?.toString() ?? '',
+            'Name': displayName,
             'Age|Gender': _formatAgeGender(info['dob'], info['gender']),
             'Mobileno.': info['mobileNo']?.toString() ?? '',
             'WifeName': isFemale ? '' : spouseName, // Only show if head is male
@@ -181,6 +184,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           final gender = (info['gender']?.toString().toLowerCase() ?? '');
           final isFemale = gender == 'female' || gender == 'f';
           final richId = info['RichIDChanged']?.toString() ?? info['richIdChanged']?.toString() ?? '';
+
+          // Unified display name: prefer name -> memberName -> headName
+          final String displayName = (info['name'] ?? info['memberName'] ?? info['headName'] ?? '').toString();
 
           // Find spouse (head) info if exists
           String spouseName = '';
@@ -213,7 +219,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             'village': headVillage.isNotEmpty ? headVillage : (info['village']?.toString() ?? ''),
             'RichID': richId,
             'Gender': gender,
-            'Name': info['memberName']?.toString() ?? '',
+            'Name': displayName,
             'Age|Gender': _formatAgeGender(info['dob'], info['gender']),
             'Mobileno.': info['mobileNo']?.toString() ?? '',
             'FatherName': info['fatherName']?.toString() ?? 'Not Available',
@@ -491,31 +497,37 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         InkWell(
-          onTap: () {
+          onTap: () async {
             // Pass complete household data to next screen
-            Navigator.pushNamed(
+            await Navigator.pushNamed(
               context,
               Route_Names.addFamilyMember,
               arguments: {
                 'isBeneficiary': true,
+                'isEdit': true,
                 'beneficiaryId': completeBeneficiaryId,
                 'hhId': data['hhId']?.toString() ?? '',
                 'headName': data['Name']?.toString() ?? '',
                 'headGender': data['Gender']?.toString() ?? '',
                 'spouseName': data['SpouseName']?.toString() ?? '',
                 'spouseGender': data['SpouseGender']?.toString() ?? '',
+                'relation': data['Relation']?.toString() ?? '',
                 'village': data['village']?.toString() ?? '',
                 'tolaMohalla': data['Tola/Mohalla']?.toString() ?? '',
                 'householdData': data,
               },
             );
 
-            debugPrint('🏠 Navigation to AddFamilyMember:');
+            debugPrint(' Navigation to AddFamilyMember:');
             debugPrint('   HHID: ${data['hhId']}');
             debugPrint('   Complete Beneficiary ID (from unique_key): $completeBeneficiaryId');
 
             debugPrint('   Head Name: ${data['Name']}');
             debugPrint('   Spouse Name: ${data['SpouseName']}');
+
+            // After returning from edit screen, reload data so updates are visible
+            await _loadData();
+            _onSearchChanged();
           },
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 8),

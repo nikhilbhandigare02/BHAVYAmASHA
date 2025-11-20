@@ -233,15 +233,31 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
         final dynamic flagB = args['isEdit'];
         final dynamic flagC = args['edit'];
         _isEdit = (flagA == true) || (flagB == true) || (flagC == true);
+
+        // Use relation passed from previous screen to prefill relation dropdown.
+        final relArg = args['relation']?.toString().trim();
+        if (relArg != null && relArg.isNotEmpty) {
+          String normalized;
+          final rl = relArg.toLowerCase();
+          if (rl == 'Head' || rl == 'self') {
+            normalized = 'Self';
+          } else {
+            normalized = relArg;
+          }
+          // Directly update bloc so that dropdown shows correct initial value.
+          _bloc.add(AnmUpdateRelation(normalized));
+        }
       } else if (args is bool) {
         _isEdit = args == true;
       }
       _argsHandled = true;
     }
     _isEdit = _isEdit || widget.isEdit;
-   return DefaultTabController(
-      length: 3,
-      initialIndex: _currentStep.clamp(0, 2),
+    final bool hideFamilyTabs = _isEdit;
+    final int tabCount = hideFamilyTabs ? 1 : 3;
+    return DefaultTabController(
+      length: tabCount,
+      initialIndex: _currentStep.clamp(0, tabCount - 1),
       child: MultiBlocProvider(
       providers: [
         BlocProvider<AddnewfamilymemberBloc>.value(value: _bloc),
@@ -329,8 +345,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                         }
                         return BlocBuilder<AddnewfamilymemberBloc, AddnewfamilymemberState>(
                           builder: (ctx2, st) {
-                            final spouseAllowed = st.memberType != 'Child' && st.maritalStatus == 'Married';
-                            final childrenAllowed = spouseAllowed && st.hasChildren == 'Yes';
+                            final bool spouseAllowed = !hideFamilyTabs && st.memberType != 'Child' && st.maritalStatus == 'Married';
+                            final bool childrenAllowed = !hideFamilyTabs && spouseAllowed && st.hasChildren == 'Yes';
+                            final String firstTabTitle = (st.memberType == 'Child')
+                                ? 'Child Details'
+                                : 'Member Details';
+                            if (hideFamilyTabs) {
+                              return TabBar(
+                                isScrollable: true,
+                                labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                tabs: [
+                                  Tab(text: firstTabTitle),
+                                ],
+                              );
+                            }
                             return TabBar(
                               isScrollable: true,
                               labelPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -352,7 +380,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ctrl?.animateTo(target);
                               },
                               tabs: [
-                                const Tab(text: 'Member Details'),
+                                Tab(text: firstTabTitle),
                                 Tab(child: Opacity(opacity: spouseAllowed ? 1.0 : 0.0, child: const Text('Spouse Details'))),
                                 Tab(child: Opacity(opacity: childrenAllowed ? 1.0 : 0.0, child: const Text('Children Details'))),
                               ],
@@ -548,9 +576,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   labelText: '${l.relationWithHeadLabel} *',
                                   items: state.memberType == 'Child'
                                       ? const ['Father', 'Mother', 'Brother', 'Sister', 'Other']
-                                      : const ['Spouse', 'Son', 'Daughter', 'Father', 'Mother', 'Brother', 'Sister', 'Other'],
+                                      : const ['Self','Spouse', 'Son', 'Daughter', 'Father', 'Mother', 'Brother', 'Sister', 'Other'],
                                   getLabel: (s) {
                                     switch (s) {
+                                      case 'Self':
+                                        return l.self;
                                       case 'Spouse':
                                         return l.relationSpouse;
                                       case 'Son':
@@ -588,15 +618,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               // Name
                               _section(
                                 CustomTextField(
+                                  key: ValueKey('member_name_${state.name ?? ''}'),
                                   labelText: '${l.nameOfMemberLabel} *',
                                   hintText: l.nameOfMemberHint,
+                                  initialValue: state.name ?? '',
                                   onChanged: (v) {
                                     final name = v.trim();
                                     context.read<AddnewfamilymemberBloc>().add(AnmUpdateName(name));
                                     // Auto-fill spouse details' spouseName with member name
                                     try {
                                       final spBloc = context.read<SpousBloc>();
-                                      if ((spBloc.state.spouseName ?? '') != name) {
+                                      if ((spBloc.state.memberName ?? '') != name) {
                                         spBloc.add(SpUpdateSpouseName(name));
                                       }
                                     } catch (_) {}
@@ -1272,7 +1304,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
 
                               // Spouse/Children conditional sections
-                              if (state.maritalStatus == 'Married') ...[
+                              if (!_isEdit && state.maritalStatus == 'Married') ...[
                                 _section(
                                   CustomTextField(
                                     labelText: l.ageAtMarriageLabel,
@@ -1322,7 +1354,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               ]
-                              else if (state.maritalStatus != null &&
+                              else if (!_isEdit && state.maritalStatus != null &&
                                   ['Widowed', 'Separated', 'Divorced']
                                       .contains(state.maritalStatus)) ...[
                                 _section(
@@ -1389,7 +1421,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                if (!widget.isEdit) ...[
+                                if (!_isEdit) ...[
                                   if (_currentStep > 0)
                                     SizedBox(
                                       width: 120,
@@ -1418,9 +1450,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   child: RoundButton(
                                     title: () {
                                       if (isLoading) return (_isEdit ? 'UPDATING...' : l.addingButton);
-                                      if (widget.isEdit) return 'UPDATE';
-                                      final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
-                                      final showChildren = showSpouse && state.hasChildren == 'Yes';
+                                      if (_isEdit) return 'UPDATE';
+                                      final bool showSpouse = !_isEdit && state.memberType != 'Child' && state.maritalStatus == 'Married';
+                                      final bool showChildren = !_isEdit && showSpouse && state.hasChildren == 'Yes';
                                       final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
                                       return (_currentStep < lastStep) ? 'Next' : l.addButton;
                                     }(),
@@ -1485,9 +1517,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
 
                                         print('Submitting member data: ${jsonEncode(memberData)}');
-                                        if (!widget.isEdit) {
-                                          final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
-                                          final showChildren = showSpouse && state.hasChildren == 'Yes';
+                                        if (!_isEdit) {
+                                          final showSpouse = !_isEdit && state.memberType != 'Child' && state.maritalStatus == 'Married';
+                                          final showChildren = !_isEdit && showSpouse && state.hasChildren == 'Yes';
                                           final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
 
                                           if (_currentStep < lastStep) {
@@ -1498,7 +1530,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           }
                                         }
 
-                                        bloc.add(AnmSubmit(context, hhid: widget.hhId));
+                                        if (_isEdit) {
+                                          // In edit mode, trigger update flow
+                                          bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
+                                        } else {
+                                          // Normal add flow
+                                          bloc.add(AnmSubmit(context, hhid: widget.hhId));
+                                        }
                                       } catch (e) {
                                         print('Error preparing member data: $e');
                                         ScaffoldMessenger.of(context).showSnackBar(
