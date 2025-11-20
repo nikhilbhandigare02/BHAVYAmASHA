@@ -320,8 +320,7 @@ class LocalStorageDao {
     }
   }
 
-  /// Returns the count of ANC visits for a specific beneficiary
-  Future<int> getANCVisitCount(String beneficiaryId) async {
+   Future<int> getANCVisitCount(String beneficiaryId) async {
     try {
       final db = await _db;
       final result = await db.rawQuery('''
@@ -1005,8 +1004,6 @@ class LocalStorageDao {
     }
   }
 
-
-
   Future<int> markBeneficiarySyncedByUniqueKey({required String uniqueKey, String? serverId}) async {
     try {
       final db = await _db;
@@ -1030,7 +1027,6 @@ class LocalStorageDao {
     }
   }
 
-  // Debug method to check death records
   Future<Map<String, dynamic>> debugDeathRecords() async {
     try {
       final db = await _db;
@@ -1254,11 +1250,6 @@ class LocalStorageDao {
       rethrow;
     }
   }
-
-
-
-
-
 
   Future<List<Map<String, dynamic>>> getUnsyncedChildCareActivities() async {
     final db = await _db;
