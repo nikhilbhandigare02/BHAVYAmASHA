@@ -579,7 +579,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                             initialValue: state.weeksOfPregnancy,
                             keyboardType: TextInputType.number,
-                            readOnly: true, // Make it read-only since it's auto-calculated
+                             // Make it read-only since it's auto-calculated
                             onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                           ),
 
