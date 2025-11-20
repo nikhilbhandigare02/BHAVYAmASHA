@@ -1475,7 +1475,6 @@ class LocalStorageDao {
     }
   }
 
-  /// Get PNC Mother forms by beneficiary ID
   Future<List<Map<String, dynamic>>> getPncMotherFormsByBeneficiaryId(String beneficiaryId) async {
     try {
       final db = await _db;
@@ -1607,7 +1606,7 @@ class LocalStorageDao {
   }
 }
 
-extension LocalStorageDaoReads on LocalStorageDao {
+   extension LocalStorageDaoReads on LocalStorageDao {
   Future<String> getLatestBeneficiaryServerId() async {
     try {
       final db = await _db;

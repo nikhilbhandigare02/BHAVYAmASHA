@@ -45,7 +45,7 @@ class GuestBeneficiaryRepository {
     }
   }
 
-  // Keeping the existing method for backward compatibility
+
   Future<Map<String, dynamic>> searchGuestBeneficiaries(Map<String, dynamic> data) async {
     final response = await _api.postApi('guest/search', data);
     return response;
