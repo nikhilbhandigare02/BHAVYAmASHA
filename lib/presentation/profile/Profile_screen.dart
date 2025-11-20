@@ -8,7 +8,8 @@
   import '../../core/config/routes/Route_Name.dart';
   import '../../core/widgets/Dropdown/Dropdown.dart';
   import '../../core/widgets/Dropdown/dropdown.dart' hide ApiDropdown;
-  import '../../l10n/app_localizations.dart';
+  import '../../data/SecureStorage/SecureStorage.dart';
+import '../../l10n/app_localizations.dart';
   import 'package:flutter_bloc/flutter_bloc.dart';
   import 'bloc/profile_bloc.dart';
   import '../../core/widgets/DatePicker/DatePicker.dart';
@@ -318,6 +319,7 @@
     @override
     Widget build(BuildContext context) {
       final l10n = AppLocalizations.of(context)!;
+      final loginFlag =  SecureStorageService.getLoginFlag();
 
       return WillPopScope(
         onWillPop: () async {
@@ -333,7 +335,9 @@
             backgroundColor: AppColors.surface,
             appBar: AppHeader(
               screenTitle: l10n.ashaProfile,
-              showBack: true,
+
+              showBack: loginFlag == 1 ? true : false,
+
               onBackTap: widget.fromLogin
                   ? () {
                       Navigator.of(context).pushNamedAndRemoveUntil(
