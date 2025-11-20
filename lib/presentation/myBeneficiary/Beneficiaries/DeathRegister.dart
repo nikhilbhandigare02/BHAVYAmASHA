@@ -228,10 +228,10 @@ class _DeathRegisterState extends State<DeathRegister> {
     final deathDetails = data['death_details'] is Map ? Map<String, dynamic>.from(data['death_details']) : {};
 
     // Parse beneficiary info
-    final name = beneficiaryInfo['memberName'] ?? 
-                beneficiaryInfo['headName'] ?? 
-                beneficiaryInfo['name'] ?? 'Unknown';
-    
+    final name = beneficiaryInfo['memberName'] ??
+        beneficiaryInfo['headName'] ??
+        beneficiaryInfo['name'] ?? 'Unknown';
+
     // Calculate age from DOB if available
     String age = 'N/A';
     if (beneficiaryInfo['dob'] != null) {
@@ -255,7 +255,7 @@ class _DeathRegisterState extends State<DeathRegister> {
     final gender = (beneficiaryInfo['gender'] ?? '').toString().toLowerCase() == 'm' ? 'Male' : 'Female';
     final hhId = data['household_ref_key']?.toString() ?? 'N/A';
     final mobile = beneficiaryInfo['mobileNo'] ?? beneficiaryInfo['mobile'] ?? 'N/A';
-    
+
     // Parse death details
     final deathDate = deathDetails['date_of_death'] ?? deathDetails['deathDate'] ?? 'Not recorded';
     final causeOfDeath = deathDetails['probable_cause_of_death'] ?? deathDetails['causeOfDeath'] ?? 'Not specified';
@@ -265,135 +265,147 @@ class _DeathRegisterState extends State<DeathRegister> {
     final otherReason = deathDetails['other_reason'] ?? deathDetails['otherReason'];
     final recordedDate = deathDetails['recorded_date'] ?? deathDetails['recordedDate'];
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: ExpansionTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.red.shade100,
-          child: const Icon(Icons.person_off, color: Colors.red),
+    return InkWell(
+      onTap: () {
+        _showDeathDetails(context, data);
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 3,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        title: Text(
-          name,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
-        ),
-        subtitle: Text(
-          'Age: $age • $gender • HH ID: ${hhId.length > 8 ? '...${hhId.substring(hhId.length - 8)}' : hhId}',
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 13,
-          ),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Basic Info Section
-                Text(
-                  'Basic Information',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
-                    fontSize: 14,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header with HH ID
+            Container(
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+              ),
+              padding: const EdgeInsets.all(6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.home, color: Colors.black54, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        (hhId.length) > 11 ? hhId.substring(hhId.length - 11) : hhId,
+                        style: TextStyle(
+                          color: primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                _buildInfoRow('👤 Name', name),
-                _buildInfoRow('🎂 Age', age),
-                _buildInfoRow('👥 Gender', gender),
-                _buildInfoRow('📱 Contact', mobile),
-                _buildInfoRow('🏠 Household ID', hhId),
-                
-                // Death Details Section
-                const SizedBox(height: 12),
-                const Divider(),
-                Text(
-                  'Death Details',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                _buildInfoRow('📅 Date of Death', _formatDate(deathDate)),
-                _buildInfoRow('💀 Cause of Death', causeOfDeath),
-                if (otherCause?.isNotEmpty == true) 
-                  _buildInfoRow('   ↳ Other Cause', otherCause, padding: const EdgeInsets.only(left: 16, bottom: 4)),
-                _buildInfoRow('🏠 Place of Death', deathPlace),
-                if (deathReason?.isNotEmpty == true)
-                  _buildInfoRow('📝 Reason', deathReason),
-                if (otherReason?.isNotEmpty == true)
-                  _buildInfoRow('   ↳ Other Reason', otherReason, padding: const EdgeInsets.only(left: 16, bottom: 4)),
-                if (recordedDate?.isNotEmpty == true)
-                  _buildInfoRow('📋 Recorded On', _formatDate(recordedDate)),
-                
-                // Additional Details Section
-                if (deathDetails.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  const Divider(),
-                  Text(
-                    'Additional Details',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[700],
-                      fontSize: 14,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  ...deathDetails.entries.where((entry) => ![
-                    'date_of_death', 'deathDate',
-                    'probable_cause_of_death', 'causeOfDeath',
-                    'death_place', 'deathPlace',
-                    'other_cause_of_death', 'otherCause',
-                    'reason_of_death', 'deathReason',
-                    'other_reason', 'otherReason',
-                    'recorded_date', 'recordedDate'
-                  ].contains(entry.key))
-                  .map((entry) => _buildInfoRow(
-                    '• ${entry.key.replaceAll('_', ' ').replaceAllMapped(
-                      RegExp(r'([A-Z])'), 
-                      (match) => ' ${match.group(0)}'
-                    ).toUpperCase().trim()}',
-                    entry.value?.toString() ?? 'N/A',
-                    padding: const EdgeInsets.only(left: 8, top: 2),
-                  )).toList(),
-                ],
-
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      _showDeathDetails(context, data);
-                    },
-                    icon: const Icon(Icons.visibility, size: 16),
-                    label: const Text('View Raw Data'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    child: const Text(
+                      'Death Record',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.5,
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // Card Body
+            Container(
+              decoration: BoxDecoration(
+                color: primary.withOpacity(0.95),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // First Row: Name and Date of Death
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _formatDate(deathDate),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Second Row: Age & Gender and Place of Death
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '$age • $gender',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 13,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          deathPlace,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 13,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-  
+
   String _formatDate(String? dateString) {
     if (dateString == null || dateString.isEmpty) return 'Not recorded';
     try {
@@ -403,39 +415,6 @@ class _DeathRegisterState extends State<DeathRegister> {
     } catch (e) {
       return dateString;
     }
-  }
-
-  Widget _buildInfoRow(String label, String value, {EdgeInsetsGeometry? padding}) {
-    return Padding(
-      padding: padding ?? const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-              ),
-            ),
-          ),
-          const Text(':', style: TextStyle(color: Colors.grey)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showDeathDetails(BuildContext context, Map<String, dynamic> data) {
