@@ -63,7 +63,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             continue;
           }
 
-          // Process the person if they are pregnant
           final name = info['memberName'] ?? info['headName'] ?? 'Unknown';
           final gender = info['gender']?.toString().toLowerCase() ?? '';
 
