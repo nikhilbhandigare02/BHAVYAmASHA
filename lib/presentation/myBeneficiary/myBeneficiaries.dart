@@ -213,12 +213,12 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
                 case 2:
                   Navigator.pushNamed(context, Route_Names.PregnantWomenList);
                   break;
-                // case 3:
-                //   Navigator.pushNamed(context, Route_Names.PregnancyOutcome);
-                //   break;
-                // case 4:
-                //   Navigator.pushNamed(context, Route_Names.HBNCList);
-                //   break;
+                case 3:
+                  Navigator.pushNamed(context, Route_Names.Pregnancyoutcome);
+                  break;
+                case 4:
+                  Navigator.pushNamed(context, Route_Names.HBNCListBeneficiaries);
+                  break;
                 case 5:
                   Navigator.pushNamed(context, Route_Names.Lbwrefered);
                   break;
@@ -228,9 +228,9 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
                 case 7:
                   Navigator.pushNamed(context, Route_Names.DeathRegister);
                   break;
-                // case 8:
-                //   Navigator.pushNamed(context, Route_Names.MigratedOut);
-                //   break;
+                case 8:
+                  Navigator.pushNamed(context, Route_Names.Migratedout);
+                  break;
                 // case 9:
                 //   Navigator.pushNamed(context, Route_Names.GuestBeneficiaryList);
                 //   break;

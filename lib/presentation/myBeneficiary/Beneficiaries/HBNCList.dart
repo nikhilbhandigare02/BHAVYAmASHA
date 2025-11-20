@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:sizer/sizer.dart';
-import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import '../../../core/config/themes/CustomColors.dart';
+import '../../../data/Local_Storage/database_provider.dart';
+import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
 
 class HBNCListBeneficiaries extends StatefulWidget {
   const HBNCListBeneficiaries({super.key});
@@ -15,40 +18,186 @@ class HBNCListBeneficiaries extends StatefulWidget {
 
 class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
   final TextEditingController _searchCtrl = TextEditingController();
-
-  final List<Map<String, dynamic>> _staticHouseholds = [
-    {
-      'hhId': '51016121847',
-      'name': 'Ramesh Kumar',
-      'age/gender': '18 Y / Male',
-      'status': 'Eligible Couple'
-    },
-    {
-      'hhId': '51016121848',
-      'name': 'Sita Devi',
-      'age/gender': '18 Y / Female',
-      'status': 'Eligible Couple'
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filtered;
+  List<Map<String, dynamic>> _filtered = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _filtered = List<Map<String, dynamic>>.from(_staticHouseholds);
+    _loadPregnancyOutcomeeCouples();
+    _searchCtrl.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
+    _searchCtrl.removeListener(_onSearchChanged);
     _searchCtrl.dispose();
     super.dispose();
   }
 
+  void _onSearchChanged() {
+    // Implement search functionality if needed
+  }
+
+  Future<int> _getVisitCount(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) return 0;
+
+      final db = await DatabaseProvider.instance.database;
+      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+
+      final List<Map<String, dynamic>> results = await db.query(
+        FollowupFormDataTable.table,
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time DESC',
+      );
+
+      if (results.isEmpty) return 0;
+
+      try {
+        final formJson = jsonDecode(results.first['form_json'] as String? ?? '{}');
+        final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
+        
+        if (formData.containsKey('visitDetails')) {
+          final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
+          return visitDetails['visitNumber'] as int? ?? results.length;
+        }
+      } catch (e) {
+        print('Error parsing form data: $e');
+      }
+
+      return results.length;
+    } catch (e) {
+      print('Error in _getVisitCount: $e');
+      return 0;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _getDeliveryOutcomeData() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final deliveryOutcomeKey = '4r7twnycml3ej1vg';
+
+      final results = await db.query(
+        'followup_form_data',
+        where: 'forms_ref_key = ?',
+        whereArgs: [deliveryOutcomeKey],
+      );
+
+      return results;
+    } catch (e) {
+      print('Error fetching delivery outcome data: $e');
+      return [];
+    }
+  }
+
+  String _calculateAge(String? dob) {
+    if (dob == null || dob.isEmpty) return 'N/A';
+    try {
+      final birthDate = DateTime.parse(dob);
+      final now = DateTime.now();
+      int years = now.year - birthDate.year;
+      int months = now.month - birthDate.month;
+      
+      if (now.day < birthDate.day) {
+        months--;
+      }
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+      
+      if (years > 0) {
+        return '$years ${years == 1 ? 'year' : 'years'}';
+      } else {
+        return '$months ${months == 1 ? 'month' : 'months'}';
+      }
+    } catch (e) {
+      return 'N/A';
+    }
+  }
+
+  Future<void> _loadPregnancyOutcomeeCouples() async {
+    setState(() => _isLoading = true);
+    _filtered = [];
+
+    try {
+      final dbOutcomes = await _getDeliveryOutcomeData();
+
+      if (dbOutcomes.isEmpty) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final List<Map<String, dynamic>> formattedData = [];
+
+      for (final outcome in dbOutcomes) {
+        try {
+          final formJson = jsonDecode(outcome['form_json'] as String);
+          final formData = formJson['form_data'] ?? {};
+          final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
+
+          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) continue;
+
+          final db = await DatabaseProvider.instance.database;
+          final beneficiaryResults = await db.query(
+            'beneficiaries',
+            where: 'unique_key = ? AND is_deleted = 0',
+            whereArgs: [beneficiaryRefKey],
+          );
+
+          if (beneficiaryResults.isEmpty) continue;
+
+          final beneficiary = beneficiaryResults.first;
+          final beneficiaryInfoRaw = beneficiary['beneficiary_info'] as String? ?? '{}';
+          
+          Map<String, dynamic> beneficiaryInfo;
+          try {
+            beneficiaryInfo = jsonDecode(beneficiaryInfoRaw);
+          } catch (e) {
+            continue;
+          }
+
+          final name = beneficiaryInfo['memberName']?.toString() ??
+              beneficiaryInfo['headName']?.toString() ?? 'N/A';
+          final dob = beneficiaryInfo['dob']?.toString();
+          final age = _calculateAge(dob);
+          final gender = beneficiaryInfo['gender']?.toString() ?? 'N/A';
+          final hhId = beneficiary['household_ref_key']?.toString() ?? 'N/A';
+          
+          final visitCount = await _getVisitCount(beneficiaryRefKey);
+          
+          // Get last 11 digits of hhId or use full if shorter
+          final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
+          
+          formattedData.add({
+            'hhId': displayHhId,
+            'name': name,
+            'age | gender': '$age | $gender',
+            'status': 'PNC',
+            'beneficiaryRefKey': beneficiaryRefKey,
+          });
+        } catch (e) {
+          print('Error processing beneficiary: $e');
+        }
+      }
+
+      setState(() {
+        _filtered = formattedData;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error in _loadPregnancyOutcomeeCouples: $e');
+      setState(() => _isLoading = false);
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context); 
 
     return Scaffold(
       appBar: AppHeader(
@@ -59,16 +208,28 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
       body: Column(
         children: [
 
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
-          ),
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _filtered.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          'No HBNC beneficiaries found',
+                          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                        ),
+                      ),
+                    )
+                  : Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                        itemCount: _filtered.length,
+                        itemBuilder: (context, index) {
+                          final data = _filtered[index];
+                          return _householdCard(context, data);
+                        },
+                      ),
+                    ),
         ],
       ),
     );
@@ -152,11 +313,10 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow('Name', data['name']),
+                  _infoRow(data['name']),
                   const SizedBox(height: 8),
                   _infoRow(
-                    'Age/Gender',
-                    data['age/gender'] ?? '',
+                    data['age | gender'] ?? '',
                     isWrappable: true,
                   ),
                 ],
@@ -168,19 +328,11 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
     );
   }
 
-  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
+  Widget _infoRow(String value,{bool isWrappable = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Text(
-            '$title ',
-            style:  TextStyle(
-              color: AppColors.background,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
           Expanded(
             child: Text(
               value.isEmpty ? 'N/A' : value,

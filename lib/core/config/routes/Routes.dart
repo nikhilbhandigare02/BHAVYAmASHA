@@ -78,6 +78,8 @@ import '../../../presentation/myBeneficiary/Beneficiaries/EligibleCoupleList.dar
 import '../../../presentation/myBeneficiary/Beneficiaries/FamilyUpdateList.dart' show FamliyUpdate;
 import '../../../presentation/myBeneficiary/Beneficiaries/HBNCList.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/LBWRefered.dart';
+import '../../../presentation/myBeneficiary/Beneficiaries/MigratedOut.dart';
+import '../../../presentation/myBeneficiary/Beneficiaries/PregnancyOutcome.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/PregnantWomanList.dart' show PregnantWomenList;
 import 'Route_Name.dart' show Route_Names;
 
@@ -250,11 +252,22 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const Ncdnoneligiblelist(),);
       case Route_Names.Ncdprioritylist:
         return MaterialPageRoute(builder: (context) => const Ncdprioritylist(),);
+      case Route_Names.Migratedout:
+        return MaterialPageRoute(builder: (context) => const Migratedout(),);
+      case Route_Names.Pregnancyoutcome:
+        return MaterialPageRoute(builder: (context) => const Pregnancyoutcome(),);
 
       case Route_Names.HighRisk:
         return MaterialPageRoute(builder: (context) => const HighRisk(),);
       case Route_Names.MigrationSplitOption:
-        return MaterialPageRoute(builder: (context) => const MigrationSplitScreen(),);
+        return MaterialPageRoute(
+          settings: setting,
+          builder: (context) {
+            final args = setting.arguments as Map<String, dynamic>?;
+            final hhid = args?['hhid'] as String?;
+            return MigrationSplitScreen(hhid: hhid);
+          },
+        );
       case Route_Names.AshaKiDuniyaScreen:
         return MaterialPageRoute(builder: (context) => const AshaKiDuniyaScreen(),);
       case Route_Names.DeseasedList:

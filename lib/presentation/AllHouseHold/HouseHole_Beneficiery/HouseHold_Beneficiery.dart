@@ -300,8 +300,21 @@ class _HouseHold_BeneficiaryScreenState
             : l10n?.householdBeneficiaryTitle ?? 'Household Beneficiary',
         showBack: true,
         icon1Image: 'assets/images/left-right-arrow.png',
-        onIcon1Tap: () =>
-            Navigator.pushNamed(context, Route_Names.MigrationSplitOption),
+        onIcon1Tap: () {
+          if (widget.hhId != null) {
+            print('Navigating to MigrationSplitScreen with HHID: ${widget.hhId}');
+            Navigator.pushNamed(
+              context, 
+              Route_Names.MigrationSplitOption,
+              arguments: {'hhid': widget.hhId},
+            );
+          } else {
+            print('Warning: No HHID available for navigation');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Household ID not available')),
+            );
+          }
+        },
         icon3Image: 'assets/images/home.png',
         onIcon3Tap: () => Navigator.pushReplacement(
           context,
