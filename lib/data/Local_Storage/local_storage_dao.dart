@@ -996,8 +996,8 @@ class LocalStorageDao {
     try {
       final db = await _db;
       final rows = await db.query('beneficiaries',
-          where: 'is_deleted = ?',
-          whereArgs: [0],
+          // where: 'is_deleted = ?',
+          // whereArgs: [0],
           orderBy: 'created_date_time DESC');
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
@@ -1040,6 +1040,30 @@ class LocalStorageDao {
       rethrow;
     }
   }
+
+  Future<List<Map<String, dynamic>>> getHbncListTodaysProgram() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'beneficiaries',
+        orderBy: 'created_date_time ASC',
+      );
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error getting unsynced beneficiaries: $e');
+      rethrow;
+    }
+  }
+
 
   Future<int> markBeneficiarySyncedByUniqueKey({required String uniqueKey, String? serverId}) async {
     try {

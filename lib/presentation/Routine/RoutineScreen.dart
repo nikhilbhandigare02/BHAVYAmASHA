@@ -533,6 +533,11 @@ class _RoutinescreenState extends State<Routinescreen> {
     final mobile = item['mobile']?.toString() ?? '';
     final isSampoornTikakaran = item['age']?.toString().contains('16') ?? false;
 
+    String _last11(String value) {
+      if (value.length <= 11) return value;
+      return value.substring(value.length - 11);
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -557,8 +562,12 @@ class _RoutinescreenState extends State<Routinescreen> {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    (item['beneficiary_ref_key'] ?? item['id'] ?? '-').toString(),
-                    style: TextStyle(color: primary, fontWeight: FontWeight.w700, fontSize: 12.sp),
+                    _last11((item['beneficiary_ref_key'] ?? item['id'] ?? '-').toString()),
+                    style: TextStyle(
+                      color: primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.sp,
+                    ),
                   ),
                 ),
                 Container(
@@ -569,7 +578,7 @@ class _RoutinescreenState extends State<Routinescreen> {
                   ),
                   child: Text(
                     item['badge']?.toString() ?? 'ANC',
-                    style: const TextStyle(color: Color(0xFF0E7C3A), fontWeight: FontWeight.w700, fontSize: 12),
+                    style:  TextStyle(color: Color(0xFF0E7C3A), fontWeight: FontWeight.w600, fontSize: 14.sp),
                   ),
                 ),
               ],
@@ -596,22 +605,22 @@ class _RoutinescreenState extends State<Routinescreen> {
                         children: [
                           Text(
                             item['name']?.toString() ?? '-',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+                            style:  TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16.sp),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             '${item['age'] ?? '-'} सा | ${item['gender'] ?? '-'}',
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                            style:  TextStyle(color: Colors.white, fontSize: 14.sp),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '${l10n!.antenatal} ${item['nextVisit'] ?? '-'}',
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                            style:  TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '${l10n.mobileLabel} ${item['mobile'] ?? '-'}',
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                            style:  TextStyle(color: Colors.white, fontSize: 14.sp),
                           ),
                         ],
                       ),

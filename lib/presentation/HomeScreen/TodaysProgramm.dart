@@ -444,7 +444,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final rows = await LocalStorageDao.instance.getHbncListTodaysProgram();
 
       final List<Map<String, dynamic>> items = [];
       final Set<String> seenHbncBeneficiaries = <String>{};
@@ -988,8 +988,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           }
           final now = DateTime.now();
           final sixMonthsAgo = DateTime(now.year, now.month - 6, now.day);
-          if (!lastSurveyDt.isBefore(sixMonthsAgo)) {
-            // last survey is within the last 6 months -> skip
+
+          // Hide records whose last survey is after sixMonthsAgo (i.e. within
+          // the last 6 months). Records dated exactly on or before
+          // sixMonthsAgo (6+ months ago) are shown.
+          if (lastSurveyDt.isAfter(sixMonthsAgo)) {
             continue;
           }
 
