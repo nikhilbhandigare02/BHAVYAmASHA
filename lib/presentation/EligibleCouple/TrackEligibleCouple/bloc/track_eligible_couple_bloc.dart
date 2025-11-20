@@ -249,6 +249,50 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
 
         final formJson = jsonEncode(formData);
 
+        // Update is_pregnant in beneficiaries table if isPregnant is true
+        if (state.isPregnant == true) {
+          try {
+            // Get the beneficiary record
+            final beneficiaryMaps = await db.query(
+              'beneficiaries',
+              where: 'unique_key = ?',
+              whereArgs: [state.beneficiaryRefKey ?? state.beneficiaryId],
+            );
+
+            if (beneficiaryMaps.isNotEmpty) {
+              final beneficiary = Map<String, dynamic>.from(beneficiaryMaps.first);
+              final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info'] ?? '{}');
+              
+              // Update the pregnancy related fields in beneficiary_info
+              beneficiaryInfo['isPregnant'] = 'YES';   // Using 1 instead of true for consistency
+              
+              // Add LMP and EDD dates if available
+              if (state.lmpDate != null) {
+                beneficiaryInfo['lmp'] = state.lmpDate?.toIso8601String();
+              }
+              if (state.eddDate != null) {
+                beneficiaryInfo['edd'] = state.eddDate?.toIso8601String();
+              }
+              
+              // Update the record in the database
+              await db.update(
+                'beneficiaries',
+                {
+                  'beneficiary_info': jsonEncode(beneficiaryInfo),
+                  'modified_date_time': nowIso,
+                },
+                where: 'unique_key = ?',
+                whereArgs: [state.beneficiaryRefKey ?? state.beneficiaryId],
+              );
+              
+              print('Updated pregnancy details in beneficiaries table');
+            }
+          } catch (e) {
+            print('Error updating isPregnant in beneficiaries table: $e');
+            // Don't fail the whole operation if this update fails
+          }
+        }
+
         late DeviceInfo deviceInfo;
         try {
           deviceInfo = await DeviceInfo.getDeviceInfo();

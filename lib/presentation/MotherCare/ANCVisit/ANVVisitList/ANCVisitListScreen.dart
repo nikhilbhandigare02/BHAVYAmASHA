@@ -55,7 +55,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             continue;
           }
 
-          // Check if isPregnant is 'Yes'
+
           final isPregnant =
               info['isPregnant']?.toString().toLowerCase() == 'yes';
           if (!isPregnant) {
@@ -67,7 +67,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           final name = info['memberName'] ?? info['headName'] ?? 'Unknown';
           final gender = info['gender']?.toString().toLowerCase() ?? '';
 
-          // Only include female beneficiaries who are pregnant
           if (gender == 'f' || gender == 'female') {
             print('  🤰 Found pregnant woman: $name');
             final personData = _processPerson(row, info, isPregnant: true);
@@ -82,16 +81,14 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         }
       }
 
-      // De-duplicate by BeneficiaryID/unique_key so each beneficiary
-      // appears only once in the ANC visit list.
+
       final Map<String, Map<String, dynamic>> byBeneficiary = {};
       for (final item in pregnantWomen) {
         final benId = item['BeneficiaryID']?.toString() ?? '';
         final uniqueKey = item['unique_key']?.toString() ?? '';
         final key = benId.isNotEmpty ? benId : uniqueKey;
         if (key.isEmpty) continue;
-        // Latest item wins if duplicates exist for same key.
-        byBeneficiary[key] = item;
+         byBeneficiary[key] = item;
       }
 
       final dedupedList = byBeneficiary.values.toList();
@@ -110,32 +107,28 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     }
   }
 
-  // Get last 11 characters of a string, or return empty string if null/empty
   String _getLast11Chars(String? input) {
     if (input == null || input.isEmpty) return '';
     return input.length <= 11 ? input : input.substring(input.length - 11);
   }
 
-  // Helper: add N weeks to a date
+
   DateTime _dateAfterWeeks(DateTime startDate, int noOfWeeks) {
     final days = noOfWeeks * 7;
     return startDate.add(Duration(days: days));
   }
 
-  // Helper: calculate EDD from LMP (approx. 40 weeks)
+
   DateTime _calculateEdd(DateTime lmp) {
     return _dateAfterWeeks(lmp, 40);
   }
 
-  // Calculate date range for ANC visits based on LMP
   Map<String, DateTime> _calculateAncDateRanges(DateTime lmp) {
     final ranges = <String, DateTime>{};
 
-    // 1st ANC: from LMP to 12 weeks
     ranges['1st_anc_start'] = lmp;
     ranges['1st_anc_end'] = _dateAfterWeeks(lmp, 12);
 
-    // 2nd ANC: 14 to 24 weeks from LMP
     ranges['2nd_anc_start'] = _dateAfterWeeks(lmp, 14);
     ranges['2nd_anc_end'] = _dateAfterWeeks(lmp, 24);
 
