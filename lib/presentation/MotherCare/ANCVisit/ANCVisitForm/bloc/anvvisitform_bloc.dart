@@ -62,6 +62,33 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<BeneficiaryAbsentChanged>((e, emit) => emit(state.copyWith(beneficiaryAbsent: e.value)));
     on<BeneficiaryIdSet>((e, emit) => emit(state.copyWith(beneficiaryId: e.beneficiaryId)));
     on<GivesBirthToBaby>((e, emit) => emit(state.copyWith(givesBirthToBaby: e.value)));
+    on<DeliveryOutcomeChanged>((e, emit) => emit(state.copyWith(deliveryOutcome: e.value)));
+    on<NumberOfChildrenChanged>((e, emit) {
+      emit(state.copyWith(
+        numberOfChildren: e.value,
+        baby1Name: '',
+        baby1Gender: '',
+        baby1Weight: '',
+        baby2Name: '',
+        baby2Gender: '',
+        baby2Weight: '',
+        baby3Name: '',
+        baby3Gender: '',
+        baby3Weight: '',
+      ));
+    });
+
+    on<Baby1NameChanged>((e, emit) => emit(state.copyWith(baby1Name: e.value)));
+    on<Baby1GenderChanged>((e, emit) => emit(state.copyWith(baby1Gender: e.value)));
+    on<Baby1WeightChanged>((e, emit) => emit(state.copyWith(baby1Weight: e.value)));
+
+    on<Baby2NameChanged>((e, emit) => emit(state.copyWith(baby2Name: e.value)));
+    on<Baby2GenderChanged>((e, emit) => emit(state.copyWith(baby2Gender: e.value)));
+    on<Baby2WeightChanged>((e, emit) => emit(state.copyWith(baby2Weight: e.value)));
+
+    on<Baby3NameChanged>((e, emit) => emit(state.copyWith(baby3Name: e.value)));
+    on<Baby3GenderChanged>((e, emit) => emit(state.copyWith(baby3Gender: e.value)));
+    on<Baby3WeightChanged>((e, emit) => emit(state.copyWith(baby3Weight: e.value)));
     on<VisitNumberChanged>((e, emit) {
       final visitNo = int.tryParse(e.visitNumber) ?? 1;
       emit(state.copyWith(ancVisitNo: visitNo));
