@@ -784,6 +784,222 @@ class _AncvisitformState extends State<Ancvisitform> {
                               hintText: l10n?.select ?? 'Select',
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                            if (state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) ...[
+                              ApiDropdown<String>(
+                                labelText: 'Delivery outcome *',
+                                items: ["Live birth", "Still birth", "Newborn death"],
+                                validator: state.givesBirthToBaby == 'Yes' ? validateDropdownRequired : null,
+                                value: state.deliveryOutcome.isEmpty ? null : state.deliveryOutcome,
+                                getLabel: (s) => s,
+                                onChanged: (v) => bloc.add(DeliveryOutcomeChanged(v ?? '')),
+                                hintText: l10n?.select ?? 'Select',
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                              if (state.deliveryOutcome == "Live birth") ...[
+                                ApiDropdown<String>(
+                                  labelText: 'Number of Children *',
+                                  items: ["One Child", "Twins", "Triplets"],
+                                  value: state.numberOfChildren.isEmpty ? null : state.numberOfChildren,
+                                  getLabel: (s) => s,
+                                  onChanged: (v) => bloc.add(NumberOfChildrenChanged(v ?? "")),
+                                  hintText: l10n?.select ?? 'Select',
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
+                              if (state.numberOfChildren == "One Child") ...[
+                                // Baby 1 Name
+                                CustomTextField(
+                                  labelText: "Baby's Name*",
+                                  hintText: "Enter Baby's Name",
+                                  validator: validateRequired,
+                                  initialValue: state.baby1Name,
+                                  onChanged: (v) => bloc.add(Baby1NameChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                // Baby 1 Gender
+                                ApiDropdown<String>(
+                                  labelText: "Baby's Gender*",
+                                  items: ["Male", "Female", "Transgender"],
+                                  value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
+                                  validator: validateDropdownRequired,
+                                  getLabel: (s) => s,
+                                  onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
+                                  hintText: l10n?.select ?? 'Select',
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                // Baby 1 Weight
+                                CustomTextField(
+                                  labelText: "Baby's Weight (1200–4000gms)*",
+                                  hintText: "Enter Baby's Weight",
+                                  initialValue: state.baby1Weight,
+                                  keyboardType: TextInputType.number,
+                                  validator: validateBabyWeight,
+                                  onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
+                              if (state.numberOfChildren == "Twins") ...[
+                                CustomTextField(
+                                  labelText: "First Baby  Name*",
+                                  hintText: "Enter First Baby  Name",
+                                  validator: validateRequired,
+                                  initialValue: state.baby1Name,
+                                  onChanged: (v) => bloc.add(Baby1NameChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                ApiDropdown<String>(
+                                  labelText: "First Baby  Gender*",
+                                  items: ["Male", "Female", "Transgender"],
+                                  validator: validateDropdownRequired,
+                                  value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
+                                  getLabel: (s) => s,
+                                  onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
+                                  hintText: l10n?.select ?? 'Select',
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                CustomTextField(
+                                  labelText: "First Baby Weight (1200–4000gms)*",
+                                  hintText: "Enter First Baby  Weight",
+                                  initialValue: state.baby1Weight,
+                                  keyboardType: TextInputType.number,
+                                  validator: validateBabyWeight,
+                                  onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                // ========== BABY 2 ==========
+                                CustomTextField(
+                                  labelText: "Second Baby  Name*",
+                                  hintText: "Enter Second Baby Name",
+                                  initialValue: state.baby2Name,
+                                  validator: validateRequired,
+                                  onChanged: (v) => bloc.add(Baby2NameChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                ApiDropdown<String>(
+                                  labelText: "Second Baby Gender*",
+                                  items: ["Male", "Female", "Transgender"],
+                                  validator: validateDropdownRequired,
+                                  value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
+                                  getLabel: (s) => s,
+                                  onChanged: (v) => bloc.add(Baby2GenderChanged(v ?? "")),
+                                  hintText: l10n?.select ?? 'Select',
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                CustomTextField(
+                                  labelText: "Second Baby Weight (1200–4000gms)*",
+                                  hintText: "Enter Second Baby Weight",
+                                  initialValue: state.baby2Weight,
+                                  keyboardType: TextInputType.number,
+                                  validator: validateBabyWeight,
+                                  onChanged: (v) => bloc.add(Baby2WeightChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
+                              if (state.numberOfChildren == "Triplets") ...[
+                                // ========== BABY 1 ==========
+                                CustomTextField(
+                                  labelText: "First Baby  Name*",
+                                  hintText: "Enter First Baby  Name",
+                                  validator: validateRequired,
+                                  initialValue: state.baby1Name,
+                                  onChanged: (v) => bloc.add(Baby1NameChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                ApiDropdown<String>(
+                                  labelText: "First Baby Gender*",
+                                  items: ["Male", "Female", "Transgender"],
+                                  validator: validateDropdownRequired,
+                                  value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
+                                  getLabel: (s) => s,
+                                  onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
+                                  hintText: l10n?.select ?? 'Select',
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                CustomTextField(
+                                  labelText: "First Baby Weight (1200–4000gms)*",
+                                  hintText: "Enter First Baby Weight",
+                                  initialValue: state.baby1Weight,
+                                  keyboardType: TextInputType.number,
+                                  validator: validateBabyWeight,
+                                  onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                // ========== BABY 2 ==========
+                                CustomTextField(
+                                  labelText: "Second Baby Name*",
+                                  hintText: "Enter Second Baby Name",
+                                  validator: validateRequired,
+                                  initialValue: state.baby2Name,
+                                  onChanged: (v) => bloc.add(Baby2NameChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                ApiDropdown<String>(
+                                  labelText: "Second Baby Gender*",
+                                  items: ["Male", "Female", "Transgender"],
+                                  validator: validateDropdownRequired,
+                                  value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
+                                  getLabel: (s) => s,
+                                  onChanged: (v) => bloc.add(Baby2GenderChanged(v ?? "")),
+                                  hintText: l10n?.select ?? 'Select',
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                CustomTextField(
+                                  labelText: "Second Baby Weight (1200–4000gms)*",
+                                  hintText: "Enter Second Baby Weight",
+                                  initialValue: state.baby2Weight,
+                                  keyboardType: TextInputType.number,
+                                  validator: validateBabyWeight,
+                                  onChanged: (v) => bloc.add(Baby2WeightChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                // ========== BABY 3 ==========
+                                CustomTextField(
+                                  labelText: "Third Baby Name*",
+                                  hintText: "Enter Third Baby Name",
+                                  validator: validateRequired,
+                                  initialValue: state.baby3Name,
+                                  onChanged: (v) => bloc.add(Baby3NameChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                ApiDropdown<String>(
+                                  labelText: "Third Baby Gender*",
+                                  items: ["Male", "Female", "Transgender"],
+                                  validator: validateDropdownRequired,
+                                  value: state.baby3Gender.isEmpty ? null : state.baby3Gender,
+                                  getLabel: (s) => s,
+                                  onChanged: (v) => bloc.add(Baby3GenderChanged(v ?? "")),
+                                  hintText: l10n?.select ?? 'Select',
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                CustomTextField(
+                                  labelText: "Third Baby Weight (1200–4000gms)*",
+                                  hintText: "Enter Third Baby Weight",
+                                  initialValue: state.baby3Weight,
+                                  keyboardType: TextInputType.number,
+                                  validator: validateBabyWeight,
+                                  onChanged: (v) => bloc.add(Baby3WeightChanged(v)),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
+
+                            ],
                           ],
 
                           ApiDropdown<String>(
@@ -841,6 +1057,55 @@ class _AncvisitformState extends State<Ancvisitform> {
         ),
       ),
     );
+  }
+
+
+  String? validateBabyWeight(String? value) {
+    if (value == null || value.trim().isEmpty) return "Required field";
+    final weight = int.tryParse(value);
+    if (weight == null) return "Enter a valid number";
+    if (weight < 1200) return "Minimum weight is 1200 gms";
+    if (weight > 4000) return "Maximum weight is 4000 gms";
+    return null;
+  }
+  // NEW VALIDATORS
+  String? validateRequired(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Required field";
+    }
+    return null;
+  }
+
+  String? validateDateRequired(DateTime? date) {
+    if (date == null) return "Required field is required";
+    return null;
+  }
+
+  String? validateWeightKg(String? value) {
+    if (value == null || value.trim().isEmpty) return null; // not mandatory
+    final w = num.tryParse(value);
+    if (w == null) return "Enter a valid number";
+    if (w < 30) return "Minimum weight is 30 kg";
+    if (w > 120) return "Maximum weight is 120 kg";
+    return null;
+  }
+
+  String? validateTabletCount(String? value) {
+    if (value == null || value.trim().isEmpty) return null; // optional
+    final n = int.tryParse(value);
+    if (n == null) return "Enter a valid number";
+    if (n > 500) return "Maximum 500 tablets allowed";
+    return null;
+  }
+
+  String? validateHighRiskSelection(List<String> selected) {
+    if (selected.isEmpty) return "Please select at least one risk";
+    return null;
+  }
+
+  String? validateDropdownRequired(String? value) {
+    if (value == null || value.isEmpty) return "Required field";
+    return null;
   }
 }
 

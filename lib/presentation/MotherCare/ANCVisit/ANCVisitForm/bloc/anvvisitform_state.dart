@@ -31,6 +31,19 @@ class AnvvisitformState extends Equatable {
   final String beneficiaryAbsent;
   final String beneficiaryId;
   final String? householdRefKey;
+  final String deliveryOutcome;
+  final String numberOfChildren;
+  final String baby1Name;
+  final String baby1Gender;
+  final String baby1Weight;
+
+  final String baby2Name;
+  final String baby2Gender;
+  final String baby2Weight;
+
+  final String baby3Name;
+  final String baby3Gender;
+  final String baby3Weight;
 
   final bool isSubmitting;
   final bool isSuccess;
@@ -67,6 +80,19 @@ class AnvvisitformState extends Equatable {
     this.beneficiaryAbsent = '',
     this.beneficiaryId = '',
     this.householdRefKey,
+    this.deliveryOutcome = '',
+    this.numberOfChildren = '',
+    this.baby1Name = "",
+    this.baby1Gender = "",
+    this.baby1Weight = "",
+
+    this.baby2Name = "",
+    this.baby2Gender = "",
+    this.baby2Weight = "",
+
+    this.baby3Name = "",
+    this.baby3Gender = "",
+    this.baby3Weight = "",
     this.isSubmitting = false,
     this.isSuccess = false,
     this.error,
@@ -104,6 +130,19 @@ class AnvvisitformState extends Equatable {
     String? beneficiaryId,
     String? householdRefKey,
     bool? isSubmitting,
+    String? deliveryOutcome,
+    String? numberOfChildren,
+    String? baby1Name,
+    String? baby1Gender,
+    String? baby1Weight,
+
+    String? baby2Name,
+    String? baby2Gender,
+    String? baby2Weight,
+
+    String? baby3Name,
+    String? baby3Gender,
+    String? baby3Weight,
     bool? isSuccess,
     String? error,
     bool clearError = false,
@@ -139,6 +178,19 @@ class AnvvisitformState extends Equatable {
       beneficiaryAbsent: beneficiaryAbsent ?? this.beneficiaryAbsent,
       beneficiaryId: beneficiaryId ?? this.beneficiaryId,
       householdRefKey: householdRefKey ?? this.householdRefKey,
+      deliveryOutcome: deliveryOutcome ?? this.deliveryOutcome,
+      numberOfChildren: numberOfChildren ?? this.numberOfChildren,
+      baby1Name: baby1Name ?? this.baby1Name,
+      baby1Gender: baby1Gender ?? this.baby1Gender,
+      baby1Weight: baby1Weight ?? this.baby1Weight,
+
+      baby2Name: baby2Name ?? this.baby2Name,
+      baby2Gender: baby2Gender ?? this.baby2Gender,
+      baby2Weight: baby2Weight ?? this.baby2Weight,
+
+      baby3Name: baby3Name ?? this.baby3Name,
+      baby3Gender: baby3Gender ?? this.baby3Gender,
+      baby3Weight: baby3Weight ?? this.baby3Weight,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isSuccess: isSuccess ?? this.isSuccess,
       error: clearError ? null : (error ?? this.error),
@@ -177,6 +229,20 @@ class AnvvisitformState extends Equatable {
         beneficiaryId,
         householdRefKey,
         isSubmitting,
+    deliveryOutcome,
+    numberOfChildren,
+
+    baby1Name,
+    baby1Gender,
+    baby1Weight,
+
+    baby2Name,
+    baby2Gender,
+    baby2Weight,
+
+    baby3Name,
+    baby3Gender,
+    baby3Weight,
         isSuccess,
         givesBirthToBaby,
         error,

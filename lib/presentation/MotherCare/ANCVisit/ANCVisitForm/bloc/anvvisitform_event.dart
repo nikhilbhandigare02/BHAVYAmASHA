@@ -193,6 +193,32 @@ class BeneficiaryIdSet extends AnvvisitformEvent {
   List<Object?> get props => [beneficiaryId];
 }
 
+
+class NumberOfChildrenChanged extends AnvvisitformEvent {
+  final String value;
+  NumberOfChildrenChanged(this.value);
+}
+
+class Baby1NameChanged extends AnvvisitformEvent { final String value; Baby1NameChanged(this.value); }
+class Baby1GenderChanged extends AnvvisitformEvent { final String value; Baby1GenderChanged(this.value); }
+class Baby1WeightChanged extends AnvvisitformEvent { final String value; Baby1WeightChanged(this.value); }
+
+class Baby2NameChanged extends AnvvisitformEvent { final String value; Baby2NameChanged(this.value); }
+class Baby2GenderChanged extends AnvvisitformEvent { final String value; Baby2GenderChanged(this.value); }
+class Baby2WeightChanged extends AnvvisitformEvent { final String value; Baby2WeightChanged(this.value); }
+
+class Baby3NameChanged extends AnvvisitformEvent { final String value; Baby3NameChanged(this.value); }
+class Baby3GenderChanged extends AnvvisitformEvent { final String value; Baby3GenderChanged(this.value); }
+class Baby3WeightChanged extends AnvvisitformEvent { final String value; Baby3WeightChanged(this.value); }
+
+class DeliveryOutcomeChanged extends AnvvisitformEvent {
+  final String? value;
+  const DeliveryOutcomeChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
 class SubmitPressed extends AnvvisitformEvent {
   const SubmitPressed();
 }
