@@ -68,6 +68,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
+
   // Update form fields with loaded data
   void _updateFormWithData(Map<String, dynamic> formData) {
     // Basic information
@@ -414,9 +415,12 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
+
   @override
+
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
 
     return BlocProvider.value(
       value: _bloc,
