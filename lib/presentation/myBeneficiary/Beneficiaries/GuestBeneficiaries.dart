@@ -67,23 +67,23 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
               'N/A');
 
           final dob = info['dob']?.toString();
-          final age = (info['age']?.toString() ?? _calculateAge(dob));
+          final ageShort = _formatAgeShort(info['age'], dob);
           final gender = (info['gender']?.toString() ?? 'N/A');
           final fatherSpouse = (info['father_or_spouse_name']?.toString() ??
               info['fatherName']?.toString() ??
-              info['spouseName']?.toString() ??
+              info['spouseName']?.toString() ?? 
               'N/A');
 
           final uniqueKey = row['unique_key']?.toString() ?? '';
           final displayHhId = uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey;
 
-          print('Guest row: unique_key=${row['unique_key']}, hhId=$displayHhId, name=$name, gender=$gender, age=$age, father_or_spouse=$fatherSpouse');
+          print('Guest row: unique_key=${row['unique_key']}, hhId=$displayHhId, name=$name, gender=$gender, age=$ageShort, father_or_spouse=$fatherSpouse');
           print('Beneficiary info keys: ${info.keys.join(', ')}');
 
           formatted.add({
             'hhId': displayHhId,
             'name': name,
-            'age | gender': '$age | $gender',
+            'age | gender': '$ageShort | $gender',
             'status': 'Guest',
             'father_spouse': fatherSpouse,
           });
@@ -124,6 +124,49 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
         return '$months ${months == 1 ? 'month' : 'months'}';
       }
     } catch (e) {
+      return 'N/A';
+    }
+  }
+
+  String _formatAgeShort(dynamic ageValue, String? dob) {
+    try {
+      if (ageValue != null) {
+        final s = ageValue.toString().trim().toLowerCase();
+        final n = int.tryParse(s);
+        if (n != null && n > 0) {
+          return '$n Y';
+        }
+        final yearMatch = RegExp(r"(\d+)\s*year").firstMatch(s);
+        final monthMatch = RegExp(r"(\d+)\s*month").firstMatch(s);
+        final dayMatch = RegExp(r"(\d+)\s*day").firstMatch(s);
+        final y = yearMatch != null ? int.tryParse(yearMatch.group(1)!) ?? 0 : 0;
+        final m = monthMatch != null ? int.tryParse(monthMatch.group(1)!) ?? 0 : 0;
+        final d = dayMatch != null ? int.tryParse(dayMatch.group(1)!) ?? 0 : 0;
+        if (y > 0) return '$y Y';
+        if (m > 0) return '$m M';
+        if (d > 0) return '$d D';
+      }
+      if (dob == null || dob.isEmpty) return 'N/A';
+      final birthDate = DateTime.parse(dob);
+      final now = DateTime.now();
+      int years = now.year - birthDate.year;
+      int months = now.month - birthDate.month;
+      int days = now.difference(birthDate).inDays;
+      if (now.day < birthDate.day) {
+        months--;
+      }
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+      if (years > 0) {
+        return '$years Y';
+      }
+      if (months > 0) {
+        return '$months M';
+      }
+      return '${days > 0 ? days : 0} D';
+    } catch (_) {
       return 'N/A';
     }
   }
@@ -238,8 +281,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
                 ],
               ),
             ),
-
-            // 🔸 Body
+ 
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
