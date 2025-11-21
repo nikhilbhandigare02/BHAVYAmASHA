@@ -312,18 +312,42 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
           errors.add(code);
         }
       }
+
+      void reqIf(bool condition, String key, String code) {
+        if (!condition) return;
+        final val = m[key];
+        if (val == null || (val is String && val.trim().isEmpty)) {
+          errors.add(code);
+        }
+      }
       req('motherStatus', 'err_mother_status_required');
       req('mcpCardAvailable', 'err_mcp_mother_required');
+      reqIf(m['mcpCardAvailable'] == 'Yes', 'mcpCardFilled', 'Please select whether MCP card is filled');
       req('postDeliveryProblems', 'err_post_delivery_problems_required');
+      final hasPostDeliveryProblem =
+          m['postDeliveryProblems'] != null && m['postDeliveryProblems'] != 'None';
+      reqIf(hasPostDeliveryProblem, 'excessiveBleeding', 'Please answer Excessive bleeding');
+      reqIf(hasPostDeliveryProblem, 'unconsciousFits', 'Please answer Unconscious / fits');
       req('breastfeedingProblems', 'err_breastfeeding_problems_required');
-      req('padsPerDay', 'err_pads_per_day_required');
-      req('temperature', 'err_mothers_temperature_required');
+      reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingProblemDescription', 'Please enter breastfeeding problem');
+      reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingHelpGiven', 'Please answer breastfeeding help question');
+      req('padsPerDay', 'Please select pads changed per day');
+      req('mealsPerDay', 'Please select number of full meals per day');
+      req('temperature', 'Please enter mother\'s temperature');
+      // Paracetamol question only when temperature entered (up to 102 per requirement)
+      final _tempStr = (m['temperature'] ?? '').toString();
+      final _tempVal = double.tryParse(_tempStr);
+      reqIf(_tempVal != null && _tempVal > 0 && _tempVal <= 102,
+          'paracetamolGiven', 'Please answer Paracetamol tablet given');
       req('foulDischargeHighFever', 'err_foul_discharge_high_fever_required');
       req('abnormalSpeechOrSeizure', 'err_abnormal_speech_or_seizure_required');
       // Newly added starred fields
-      req('counselingAdvice', 'err_counseling_advice_required');
-      req('milkNotProducingOrLess', 'err_milk_not_producing_or_less_required');
-      req('nippleCracksPainOrEngorged', 'err_nipple_cracks_pain_or_engorged_required');
+      req('counselingAdvice', 'Please select Counseling/Advise');
+      req('milkNotProducingOrLess', 'Please answer milk production question');
+      reqIf(m['milkNotProducingOrLess'] == 'Yes', 'milkCounselingAdvice', 'Please select Counseling/Advise for milk problem');
+      req('nippleCracksPainOrEngorged', 'Please answer cracked/painful/engorged breast question');
+      req('referHospital', 'Please answer Refer to Hospital');
+      reqIf(m['referHospital'] == 'Yes', 'referTo', 'Please select Refer to');
     } else if (idx == 2) {
       final c = state.newbornDetails;
       void req(String key, String code) {

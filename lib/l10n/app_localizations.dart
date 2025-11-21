@@ -5390,7 +5390,7 @@ abstract class AppLocalizations {
   /// No description provided for @mcpCardAvailableLabelMother.
   ///
   /// In en, this message translates to:
-  /// **'Is \'Matra Shishu Prakshyan (MCP)\' card available? *'**
+  /// **'Is there availability of \'Mother Child Protection (MCP) *'**
   String get mcpCardAvailableLabelMother;
 
   /// No description provided for @postDeliveryProblemsLabel.
@@ -5468,13 +5468,13 @@ abstract class AppLocalizations {
   /// No description provided for @foulDischargeHighFeverLabel.
   ///
   /// In en, this message translates to:
-  /// **'Foul-smelling discharge and fever 102°F (38.9°C) *'**
+  /// **'Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) * (Temperatue of mother - Temperature more than 102 degree F(38.9 degree C)) *'**
   String get foulDischargeHighFeverLabel;
 
   /// No description provided for @abnormalSpeechOrSeizureLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the mother speaking abnormally or having seizures? *'**
+  /// **'Is the mother speaking abnormally or having fits? *'**
   String get abnormalSpeechOrSeizureLabel;
 
   /// No description provided for @counselingAdviceLabel.

@@ -84,6 +84,13 @@ class BeneficiaryAbsentCHanged extends TrackEligibleCoupleEvent {
   List<Object?> get props => [value];
 }
 
+class BeneficiaryAbsentReasonChanged extends TrackEligibleCoupleEvent {
+  final String reason;
+  const BeneficiaryAbsentReasonChanged(this.reason);
+  @override
+  List<Object?> get props => [reason];
+}
+
 class FpAdoptionDateChanged extends TrackEligibleCoupleEvent {
   final DateTime? date;
   const FpAdoptionDateChanged(this.date);
