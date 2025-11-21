@@ -5006,7 +5006,7 @@ abstract class AppLocalizations {
   /// No description provided for @mobileNumberLabel.
   ///
   /// In en, this message translates to:
-  /// **'mobile number *'**
+  /// **'mobile number'**
   String get mobileNumberLabel;
 
   /// No description provided for @mothersRchIdLabel.

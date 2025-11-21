@@ -133,7 +133,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           });
         }
       },
-      validator: _isDirty ? widget.validator : null,
+      validator: widget.validator,
       obscureText: widget.obscureText ? _isObscure : false,
       keyboardType: widget.keyboardType,
       maxLines: widget.maxLines,
@@ -201,7 +201,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         counterText: "",
         errorStyle: TextStyle(
-          fontSize: 11.sp,
+          fontSize: 13.sp,
           height: 1.2,
           color: Colors.red[700],
         ),

@@ -247,7 +247,7 @@ class LocalStorageDao {
         'modified_date_time': DateTime.now().toIso8601String(),
       };
       final changes = await db.update(
-        'beneficiaries',
+        'beneficiaries_new',
         values,
         where: 'unique_key = ?',
         whereArgs: [uniqueKey],
@@ -291,7 +291,9 @@ class LocalStorageDao {
       final rows = await db.query(
         'eligible_couple_activities',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        where:
+              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
       );
@@ -310,7 +312,9 @@ class LocalStorageDao {
       final rows = await db.query(
         'child_care_activities',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        where:
+              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
       );
@@ -329,7 +333,9 @@ class LocalStorageDao {
       final rows = await db.query(
         'mother_care_activities',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        where:
+                "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
       );
@@ -363,7 +369,7 @@ class LocalStorageDao {
     try {
       final db = await _db;
       final rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'unique_key = ? AND is_deleted = 0',
         whereArgs: [uniqueKey],
         limit: 1,
@@ -429,7 +435,7 @@ class LocalStorageDao {
     try {
       final db = await _db;
       final changes = await db.update(
-        'beneficiaries',
+        'beneficiaries_new',
         {
           'server_id': serverId,
           // 'is_synced': 1,
@@ -591,7 +597,7 @@ class LocalStorageDao {
       'is_synced': data['is_synced'] ?? 0,
       'is_deleted': data['is_deleted'] ?? 0,
     };
-    return db.insert('beneficiaries', row);
+    return db.insert('beneficiaries_new', row);
   }
 
   Future<int> insertEligibleCoupleActivity(Map<String, dynamic> data) async {
@@ -729,9 +735,23 @@ class LocalStorageDao {
 
   Future<int> getHouseholdCount() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-        await db.rawQuery('SELECT COUNT(*) FROM households WHERE is_deleted = 0')
-    );
+
+    // Count "effective" households in the same way as the AllHousehold screen:
+    //  - household itself is not deleted
+    //  - has at least one beneficiary marked as head for that household
+    //  - that head beneficiary is not deleted, not migrated, and not marked as death
+    // This aligns the dashboard count with the cards shown in AllHouseHold_Screen.
+    final count = Sqflite.firstIntValue(await db.rawQuery('''
+      SELECT COUNT(DISTINCT h.unique_key) AS household_count
+      FROM households h
+      INNER JOIN beneficiaries_new b
+        ON b.household_ref_key = h.unique_key
+      WHERE h.is_deleted = 0
+        AND b.is_deleted = 0
+        AND b.is_migrated = 0
+        AND b.is_death = 0
+    '''));
+
     return count ?? 0;
   }
 
@@ -740,7 +760,7 @@ class LocalStorageDao {
 
     final forms = await db.query(
       FollowupFormDataTable.table,
-      where: 'is_deleted = 0 AND form_json LIKE ?',
+      where: ' form_json LIKE ?',
       whereArgs: ['%case_closure%'],
     );
 
@@ -776,7 +796,7 @@ class LocalStorageDao {
             if (beneficiaryRefKey.isNotEmpty) {
               try {
                 final beneficiaryRows = await db.query(
-                  'beneficiaries',
+                  'beneficiaries_new',
                   where: 'beneficiary_ref_key = ?',
                   whereArgs: [beneficiaryRefKey],
                   limit: 1,
@@ -925,11 +945,57 @@ class LocalStorageDao {
     }
   }
 
+  Future<int> getBeneficiariesDashboardCount() async {
+    try {
+      final rows = await getAllBeneficiaries();
+
+      final householdMap = <String, Map<String, dynamic>>{};
+
+      for (final row in rows) {
+        final hhId = row['household_ref_key']?.toString() ?? '';
+        if (hhId.isEmpty) continue;
+
+        final info = (row['beneficiary_info'] as Map?) ?? <String, dynamic>{};
+        String relationToHead =
+            (info['relation_to_head']?.toString().toLowerCase().trim() ?? '');
+
+        householdMap.putIfAbsent(hhId, () => {
+              'hasHead': false,
+              'hasSpouse': false,
+              'childrenCount': 0,
+            });
+
+        final bucket = householdMap[hhId]!;
+
+        if (relationToHead == 'self' || relationToHead.isEmpty) {
+          bucket['hasHead'] = true;
+        } else if (relationToHead == 'spouse') {
+          bucket['hasSpouse'] = true;
+        } else if (relationToHead == 'child' ||
+            info['memberType']?.toString().toLowerCase() == 'child') {
+          bucket['childrenCount'] = (bucket['childrenCount'] as int) + 1;
+        }
+      }
+
+      int total = 0;
+      for (final entry in householdMap.values) {
+        if (entry['hasHead'] == true) total++;
+        if (entry['hasSpouse'] == true) total++;
+        total += (entry['childrenCount'] as int);
+      }
+
+      return total;
+    } catch (e) {
+      print('Error computing beneficiaries dashboard count: $e');
+      rethrow;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getBeneficiariesByHousehold(String householdId) async {
     try {
       final db = await _db;
       final rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'household_ref_key = ? AND is_deleted = ?',
         whereArgs: [householdId, 0],
       );
@@ -982,7 +1048,7 @@ class LocalStorageDao {
       row['modified_date_time'] = DateTime.now().toIso8601String();
 
       return await db.update(
-        'beneficiaries',
+        'beneficiaries_new',
         row,
         where: 'id = ?',
         whereArgs: [id],
@@ -996,7 +1062,7 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAllBeneficiaries() async {
     try {
       final db = await _db;
-      final rows = await db.query('beneficiaries',
+      final rows = await db.query('beneficiaries_new',
           // where: 'is_deleted = ?',
           // whereArgs: [0],
           orderBy: 'created_date_time DESC');
@@ -1022,7 +1088,7 @@ class LocalStorageDao {
     try {
       final db = await _db;
       final rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 0)',
         orderBy: 'created_date_time ASC',
       );
@@ -1046,7 +1112,7 @@ class LocalStorageDao {
     try {
       final db = await _db;
       final rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         orderBy: 'created_date_time ASC',
       );
       return rows.map((row) {
@@ -1077,7 +1143,7 @@ class LocalStorageDao {
         values['server_id'] = serverId;
       }
       final changes = await db.update(
-        'beneficiaries',
+        'beneficiaries_new',
         values,
         where: 'unique_key = ?',
         whereArgs: [uniqueKey],
@@ -1197,7 +1263,7 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getANCList() async {
     try {
       final db = await _db;
-      final rows = await db.query('beneficiaries',
+      final rows = await db.query('beneficiaries_new',
           where: 'is_deleted = ?',
           whereArgs: [0],
           orderBy: 'created_date_time DESC');
@@ -1225,7 +1291,7 @@ class LocalStorageDao {
     try {
       final db = await _db;
       final changes = await db.update(
-        'beneficiaries',
+        'beneficiaries_new',
         {
           'is_deleted': isDeleted,
           'is_synced': 0,
@@ -1241,52 +1307,15 @@ class LocalStorageDao {
     }
   }
 
-  String _getAgeGender(Map<String, dynamic> headDetails) {
-    final dob = headDetails['dob'];
-    if (dob == null) return 'Unknown';
-
-    try {
-      final birthDate = DateTime.tryParse(dob);
-      if (birthDate == null) return 'Unknown';
-
-      final now = DateTime.now();
-      int age = now.year - birthDate.year;
-
-      // Adjust age if birthday hasn't occurred yet this year
-      if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
-        age--;
-      }
-
-      final gender = (headDetails['gender'] ?? '').toString().toLowerCase();
-      final genderDisplay = gender == 'm' ? 'Male' : gender == 'f' ? 'Female' : 'Unknown';
-
-      return '$age Y / $genderDisplay';
-    } catch (e) {
-      return 'Unknown';
-    }
-  }
-
-  String _formatDeathDate(Map<String, dynamic> deathDetails) {
-    final dateStr = deathDetails['dateOfDeath'];
-    if (dateStr == null) return 'Date not available';
-
-    try {
-      final date = DateTime.tryParse(dateStr);
-      if (date == null) return dateStr; // Return original string if parsing fails
-
-      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-    } catch (e) {
-      return dateStr; // Return original string if any error occurs
-    }
-  }
-
   Future<String> getLatestHouseholdServerId() async {
     try {
       final db = await _db;
       final rows = await db.query(
         'households',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        where:
+              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
       );
@@ -1486,10 +1515,13 @@ class LocalStorageDao {
       final rows = await db.query(
         FollowupFormDataTable.table,
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where: "(is_deleted IS NULL OR is_deleted = 0) AND server_id IS NOT NULL AND TRIM(server_id) != ''",
+        where:
+              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
       );
+
       if (rows.isEmpty) return '';
       final sid = rows.first['server_id'];
       return sid?.toString() ?? '';
@@ -1660,10 +1692,12 @@ class LocalStorageDao {
     try {
       final db = await _db;
       final rows = await db.query(
-        'beneficiaries',
-        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where: "is_deleted = 0 AND server_id IS NOT NULL AND TRIM(server_id) != ''",
-        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        'beneficiaries_new',
+        columns: ['server_id'],
+        where:
+            "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+
+        orderBy: "CAST(server_id AS INTEGER) DESC",
         limit: 1,
       );
       if (rows.isEmpty) return '';

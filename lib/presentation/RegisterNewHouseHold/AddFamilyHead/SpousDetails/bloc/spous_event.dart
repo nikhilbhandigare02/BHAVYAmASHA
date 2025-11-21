@@ -168,6 +168,62 @@ class SpUpdateIsPregnant extends SpousEvent {
   @override
   List<Object?> get props => [value];
 }
+
+class FamilyPlanningCounselingChanged extends SpousEvent {
+  final String value;
+  const FamilyPlanningCounselingChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class FpMethodChanged extends SpousEvent {
+  final String value;
+  const FpMethodChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class RemovalDateChanged extends SpousEvent {
+  final DateTime value;
+  const RemovalDateChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class RemovalReasonChanged extends SpousEvent {
+  final String value;
+  const RemovalReasonChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class CondomQuantityChanged extends SpousEvent {
+  final String value;
+  const CondomQuantityChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class MalaQuantityChanged extends SpousEvent {
+  final String value;
+  const MalaQuantityChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class ChhayaQuantityChanged extends SpousEvent {
+  final String value;
+  const ChhayaQuantityChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class ECPQuantityChanged extends SpousEvent {
+  final String value;
+  const ECPQuantityChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
 class UpdateYearsChanged extends SpousEvent {
   final String? value;
   const UpdateYearsChanged(this.value);

@@ -94,7 +94,7 @@ class EligibleCouleUpdateBloc
       // Now query the database to get full beneficiary details
       final db = await DatabaseProvider.instance.database;
       final rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'household_ref_key LIKE ?',
         whereArgs: ['%$hhId'],
       );

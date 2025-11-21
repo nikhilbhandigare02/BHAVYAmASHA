@@ -126,6 +126,9 @@ class _HBNCListScreenState
     setState(() => _isLoading = true);
     _filtered = [];
 
+    // Track which beneficiaries have already been added to avoid duplicate cards
+    final Set<String> processedBeneficiaries = <String>{};
+
     try {
       final dbOutcomes = await _getDeliveryOutcomeData();
       print('Found ${dbOutcomes.length} delivery outcomes');
@@ -149,9 +152,16 @@ class _HBNCListScreenState
             continue;
           }
 
+          // Skip if this beneficiary has already been processed
+          if (processedBeneficiaries.contains(beneficiaryRefKey)) {
+            print('ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey');
+            continue;
+          }
+          processedBeneficiaries.add(beneficiaryRefKey);
+
           final db = await DatabaseProvider.instance.database;
           final beneficiaryResults = await db.query(
-            'beneficiaries',
+            'beneficiaries_new',
             where: 'unique_key = ?',
             whereArgs: [beneficiaryRefKey],
           );

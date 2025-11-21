@@ -8,6 +8,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/Dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart' show Route_Names;
 import '../../../core/config/themes/CustomColors.dart';
@@ -54,6 +55,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   int _currentStep = 0; // 0: member, 1: spouse, 2: children
   bool _tabListenerAttached = false;
   bool _syncingGender = false;
+
+  // Collects the first validation error message for the member step
+  // so the Next/Add button can show it in a SnackBar.
+  static String? _anmLastFormError;
+
+  static void _clearAnmFormError() {
+    _anmLastFormError = null;
+  }
+
+  static String? _captureAnmError(String? message) {
+    if (message != null && _anmLastFormError == null) {
+      _anmLastFormError = message;
+    }
+    return message;
+  }
 
   String? _headName;
   String? _headGender;
@@ -431,7 +447,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       }
                                     }
                                   },
-                                  validator: (value) => Validations.validateMemberType(l, value),
+                                  validator: (value) => _captureAnmError(Validations.validateMemberType(l, value)),
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -609,7 +625,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       _updateParentNames(v!);
                                     }
                                   },
-                                  validator: (value) => Validations.validateFamilyHead(l, value),
+                                  validator: (value) => _captureAnmError(Validations.validateFamilyHeadRelation(l, value)),
 
                                 ),
                               ),
@@ -633,7 +649,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       }
                                     } catch (_) {}
                                   },
-                                  validator: (value) => Validations.validateNameofMember(l, value),
+                                  validator: (value) => _captureAnmError(Validations.validateNameofMember(l, value)),
 
                                 ),
                               ),
@@ -654,8 +670,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         print('Current mother option: $_motherOption');
                                         
                                         return ApiDropdown<String>(
-                                          labelText: "${l.motherNameLabel} *",
-                                          hintText: "${l.motherNameLabel} *",
+                                          labelText: "${l.motherNameLabel} ",
+                                          hintText: "${l.motherNameLabel} ",
                                           items: motherItems,
                                           getLabel: (s) => s,
                                           value: _motherOption,
@@ -703,7 +719,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         print('Current father option: $_fatherOption');
                                         
                                         return ApiDropdown<String>(
-                                          labelText: '${l.fatherGuardianNameLabel} *',
+                                          labelText: '${l.fatherGuardianNameLabel} ',
                                           items: fatherItems,
                                           getLabel: (s) => s,
                                           value: _fatherOption,
@@ -718,11 +734,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                               context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(''));
                                             }
                                           },
-                                          validator: (_) {
-                                            if (_fatherOption == 'Select') return l.select;
-                                            if (_fatherOption == 'Other') return null;
-                                            return null;
-                                          },
                                         );
                                       },
                                     ),
@@ -733,7 +744,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           labelText: l.fatherGuardianNameLabel,
                                           hintText: l.fatherGuardianNameLabel,
                                           onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v.trim())),
-                                          validator: (v) => (v == null || v.trim().isEmpty) ? l.requiredField : null,
                                         ),
                                       ),
                                   ],
@@ -777,7 +787,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       });
                                     }
                                   },
-                                  validator: (value) => Validations.validateGender(l, value),
+                                  validator: (value) => _captureAnmError(Validations.validateGender(l, value)),
 
                                 ),
                               ),
@@ -842,7 +852,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       // }
                                     }
                                   },
-                                  validator: (value) => Validations.validateWhoMobileNo(l, value),
+                                  validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
 
                                 ),
                               ),
@@ -857,7 +867,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   keyboardType: TextInputType.number,
                                   maxLength: 10,
                                   onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(v.trim())),
-                                  validator: (value) => Validations.validateMobileNo(l, value),
+                                  validator: (value) => _captureAnmError(Validations.validateMobileNo(l, value)),
                                   inputFormatters: [
                                     FilteringTextInputFormatter.digitsOnly,
                                     LengthLimitingTextInputFormatter(10),
@@ -893,7 +903,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     labelText: '${l.dobLabel} *',
                                     hintText: l.dateHint,
                                     onDateChanged: (d) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateDob(d!)),
-                                    validator: (date) => Validations.validateDOB(l, date),
+                                    validator: (date) => _captureAnmError(Validations.validateDOB(l, date)),
 
                                   ),
                                 )
@@ -1294,7 +1304,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     validator: (value) {
                                       // Skip validation for children
                                       if (state.memberType == 'Child') return null;
-                                      return Validations.validateMaritalStatus(l, value);
+                                      return _captureAnmError(Validations.validateMaritalStatus(l, value));
                                     },
 
                                   ),
@@ -1320,7 +1330,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     labelText: '${l.spouseNameLabel} *',
                                     hintText: l.spouseNameHint,
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateSpouseName(v.trim())),
-                                    validator: (value) => Validations.validateSpousName(l, value),
+                                    validator: (value) => _captureAnmError(Validations.validateSpousName(l, value)),
                                   ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -1341,18 +1351,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                                _section(
-                                  ApiDropdown<String>(
-                                    labelText: '${l.isWomanPregnantQuestion} *',
-                                    items: const ['Yes', 'No'],
-                                    getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                                    value: state.isPregnant,
-                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateIsPregnant(v!)),
-                                    validator: (value) => Validations.validateIsPregnant(l, value),
 
-                                  ),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               ]
                               else if (!_isEdit && state.maritalStatus != null &&
                                   ['Widowed', 'Separated', 'Divorced']
@@ -1461,19 +1460,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     height: 44,
                                     isLoading: isLoading,
                                     onPress: () async {
+                                      _clearAnmFormError();
                                       final formState = _formKey.currentState;
                                       if (formState == null) return;
 
                                       final isValid = formState.validate();
                                       if (!isValid) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Please correct the highlighted errors before continuing.'),
-                                            backgroundColor: Colors.redAccent,
-                                            behavior: SnackBarBehavior.floating,
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
+                                        final msg = _anmLastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                        showAppSnackBar(context, msg);
                                         return;
                                       }
 
@@ -1539,12 +1533,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         }
                                       } catch (e) {
                                         print('Error preparing member data: $e');
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Error preparing data. Please try again.'),
-                                            backgroundColor: Colors.redAccent,
-                                          ),
-                                        );
+                                        showAppSnackBar(context, 'Error preparing data. Please try again.');
                                       }
                                     },
                                   ),

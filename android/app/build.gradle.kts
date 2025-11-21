@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "io.lite.uat_maasha"
+    namespace = "io.lite.bhavya_maasha"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -30,32 +30,62 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "io.lite.uat_maasha"
+        applicationId = "io.lite.bhavya_maasha"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 1
+        versionCode = 19999
         versionName = "1.0.0"
     }
 
+//    signingConfigs {
+//        // create a release signing config using values from key.properties (if present)
+//        create("release") {
+//            // safe cast to String? - will be null if not present
+//            keyAlias = keystoreProperties.getProperty("keyAlias")
+//            keyPassword = keystoreProperties.getProperty("keyPassword")
+//            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+//            storePassword = keystoreProperties.getProperty("storePassword")
+//        }
+//    }
+//
+//    buildTypes {
+//        // configure release build to use signingConfig created above
+//        getByName("release") {
+//            signingConfig = signingConfigs.getByName("release")
+//        }
+//        // keep debug as is (or override if required)
+//    }
+
     signingConfigs {
-        // create a release signing config using values from key.properties (if present)
-        create("release") {
-            // safe cast to String? - will be null if not present
-            keyAlias = keystoreProperties.getProperty("keyAlias")
-            keyPassword = keystoreProperties.getProperty("keyPassword")
-            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
-            storePassword = keystoreProperties.getProperty("storePassword")
-        }
+    // create a release signing config using values from key.properties (if present)
+    create("release") {
+        // safe cast to String? - will be null if not present
+        keyAlias = keystoreProperties.getProperty("keyAlias")
+        keyPassword = keystoreProperties.getProperty("keyPassword")
+        storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+        storePassword = keystoreProperties.getProperty("storePassword")
     }
+    // MODIFY existing debug config instead of creating it
+    getByName("debug") {
+        keyAlias = keystoreProperties.getProperty("keyAlias")
+        keyPassword = keystoreProperties.getProperty("keyPassword")
+        storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+        storePassword = keystoreProperties.getProperty("storePassword")
+    }
+}
 
     buildTypes {
+
         // configure release build to use signingConfig created above
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
         }
         // keep debug as is (or override if required)
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 
 

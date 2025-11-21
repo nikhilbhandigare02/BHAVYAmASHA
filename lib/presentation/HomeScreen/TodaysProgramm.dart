@@ -16,6 +16,7 @@ import '../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
 import '../EligibleCouple/TrackEligibleCouple/TrackEligibleCoupleScreen.dart';
 import '../MotherCare/ANCVisit/ANCVisitForm/ANCVisitForm.dart';
 import '../MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
+import '../ChildCare/ChildTrackingDueList/ChildTrackingDueListForm.dart';
 import 'package:intl/intl.dart';
 
 class TodayProgramSection extends StatefulWidget {
@@ -923,6 +924,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final List<Map<String, dynamic>> items = [];
       final Set<String> seenBeneficiaries = <String>{};
 
+      final now = DateTime.now();
+      final todayDateOnly = DateTime(now.year, now.month, now.day);
+
       for (final row in results) {
         try {
           final formJson = row['form_json'] as String?;
@@ -993,6 +997,34 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 continue;
               }
             }
+          }
+
+          // Use modified_date_time if available, otherwise created_date_time,
+          // and only keep records whose date part equals today's date.
+          String? rawDate = row['modified_date_time']?.toString();
+          rawDate ??= row['created_date_time']?.toString();
+
+          DateTime? recordDate;
+          if (rawDate != null && rawDate.isNotEmpty) {
+            try {
+              String s = rawDate;
+              if (s.contains('T')) {
+                s = s.split('T')[0];
+              }
+              recordDate = DateTime.tryParse(s);
+            } catch (_) {}
+          }
+
+          if (recordDate == null) {
+            continue;
+          }
+
+          final recordDateOnly =
+              DateTime(recordDate.year, recordDate.month, recordDate.day);
+          // Show records whose date is **up to** today (past or today),
+          // and skip only those with future dates.
+          if (recordDateOnly.isAfter(todayDateOnly)) {
+            continue;
           }
 
           final created = row['created_date_time']?.toString();
@@ -1497,6 +1529,36 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             await _loadHbncItems();
             _saveTodayWorkCountsToStorage();
           }
+        } else if (badge == 'RI') {
+          // Navigate to Child Tracking Due List form for Routine Immunization
+          final hhKey = item['household_ref_key']?.toString() ??
+              item['hhId']?.toString() ?? '';
+          final beneficiaryRefKey = item['BeneficiaryID']?.toString() ??
+              item['id']?.toString() ?? '';
+          if (beneficiaryRefKey.isEmpty) return;
+
+          final formData = <String, dynamic>{
+            'household_ref_key': hhKey,
+            'beneficiary_ref_key': beneficiaryRefKey,
+            'hhId': hhKey,
+            'BeneficiaryID': beneficiaryRefKey,
+            'beneficiary_id': beneficiaryRefKey,
+            'household_id': hhKey,
+            'child_name': item['name']?.toString() ?? '',
+            'age': item['age']?.toString() ?? '',
+            'gender': item['gender']?.toString() ?? '',
+            'mobile_number': item['mobile']?.toString() ?? '',
+          };
+
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChildTrackingDueListForm(),
+              settings: RouteSettings(arguments: {
+                'formData': formData,
+              }),
+            ),
+          );
         }
       },
       borderRadius: BorderRadius.circular(4),

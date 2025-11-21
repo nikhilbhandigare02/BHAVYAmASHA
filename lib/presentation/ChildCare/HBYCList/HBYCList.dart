@@ -89,7 +89,7 @@ class _HBYCListState extends State<HBYCList> {
       final db = await DatabaseProvider.instance.database;
       final caseClosureRecords = await db.query(
         'followup_form_data',
-        where: 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0',
+        where: 'beneficiary_ref_key = ? AND form_json LIKE ?',
         whereArgs: [beneficiaryRefKey, '%case_closure%'],
       );
       
@@ -125,7 +125,7 @@ class _HBYCListState extends State<HBYCList> {
       
       // Query for child beneficiaries: is_adult = 0 and not deleted
       final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'is_deleted = ? AND is_adult = ?',
         whereArgs: [0, 0],
       );

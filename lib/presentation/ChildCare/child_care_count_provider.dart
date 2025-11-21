@@ -27,7 +27,7 @@ class ChildCareCountProvider {
 
       // First, get all child beneficiaries
       final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'is_deleted = ? AND is_adult = ?',
         whereArgs: [0, 0], // 0 for false, 1 for true
       );
@@ -81,7 +81,7 @@ class ChildCareCountProvider {
       final db = await DatabaseProvider.instance.database;
       
        final rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'is_deleted = ? AND beneficiary_state = ?',
         whereArgs: [0, 'registration_due'],
       );
@@ -206,7 +206,7 @@ class ChildCareCountProvider {
       
       // First, get all child beneficiaries
       final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'is_deleted = ? AND is_adult = ?',
         whereArgs: [0, 0],
       );
@@ -277,7 +277,7 @@ class ChildCareCountProvider {
       try {
         final count = await db.rawQuery('''
           SELECT COUNT(*) as count 
-          FROM beneficiaries 
+          FROM beneficiaries_new 
           WHERE is_death = 1 
           AND is_deleted = 0
         ''');

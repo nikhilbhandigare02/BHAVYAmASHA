@@ -74,69 +74,96 @@ class ApiDropdown<T> extends StatelessWidget {
       height: 1.5,
     );
 
-    return GestureDetector(
-      onTap: () => _showSelectDialog(context),
-      child: AbsorbPointer(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+    return FormField<T>(
+      initialValue: value,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: validator,
+      builder: (field) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () => _showSelectDialog(context, field),
+              child: AbsorbPointer(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
 
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // 🔹 Label and value side by side
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (labelText != null && labelText!.isNotEmpty)
-                      Text(
-                        labelText!.replaceAll(' *', ''),
-                        style: TextStyle(
-                          fontSize: labelFontSize ?? 14.sp,
-                          color: AppColors.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                          height: 1.2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // 🔹 Label and value side by side
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_labelWidget != null)
+                              DefaultTextStyle(
+                                style: TextStyle(
+                                  fontSize: labelFontSize ?? 14.sp,
+                                  color: AppColors.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.2,
+                                ),
+                                maxLines: labelMaxLines ?? 3,
+                                overflow: TextOverflow.ellipsis,
+                                child: _labelWidget!,
+                              ),
+                            const SizedBox(height: 3),
+                            Text(
+                              value != null
+                                  ? getLabel(value!)
+                                  : (hintText ?? 'Select option'),
+                              style: inputStyle.copyWith(
+                                color: value != null
+                                    ? AppColors.onSurface
+                                    : AppColors.onSurfaceVariant,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        maxLines: labelMaxLines ?? 3,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    const SizedBox(height: 3),
-                    Text(
-                      value != null
-                          ? getLabel(value!)
-                          : (hintText ?? 'Select option'),
-                      style: inputStyle.copyWith(
-                        color: value != null
-                            ? AppColors.onSurface
-                            : AppColors.onSurfaceVariant,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      // 🔹 Dropdown arrow
+                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    ],
+                  ),
                 ),
               ),
-              // 🔹 Dropdown arrow
-              const Icon(Icons.arrow_drop_down, color: Colors.grey),
-            ],
-          ),
-        ),
-      ),
+            ),
+            if (field.errorText != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(
+                  field.errorText!,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    height: 1.2,
+                    color: Colors.red[700],
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
 
-  Future<void> _showSelectDialog(BuildContext context) async {
+  Future<void> _showSelectDialog(
+      BuildContext context, FormFieldState<T> field) async {
     if (multiSelect) {
-      await _showMultiSelectDialog(context);
+      await _showMultiSelectDialog(context, field);
     } else {
-      await _showSingleSelectDialog(context);
+      await _showSingleSelectDialog(context, field);
     }
   }
 
-  Future<void> _showSingleSelectDialog(BuildContext context) async {
+  Future<void> _showSingleSelectDialog(
+      BuildContext context, FormFieldState<T> field) async {
     T? tempValue = items.contains(value) ? value : null;
 
     await showDialog<T>(
@@ -207,6 +234,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   onPressed: () {
                     if (tempValue != null && onChanged != null) {
                       onChanged!(tempValue);
+                      field.didChange(tempValue);
                     }
                     Navigator.pop(context);
                   },
@@ -227,7 +255,8 @@ class ApiDropdown<T> extends StatelessWidget {
     );
   }
 
-  Future<void> _showMultiSelectDialog(BuildContext context) async {
+  Future<void> _showMultiSelectDialog(
+      BuildContext context, FormFieldState<T> field) async {
     List<T> tempValues = List<T>.from(selectedValues);
   final l10n = AppLocalizations.of(context);
     await showDialog<List<T>>(

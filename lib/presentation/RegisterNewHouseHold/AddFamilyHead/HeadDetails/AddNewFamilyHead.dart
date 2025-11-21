@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/utils/Validations.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/Dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
@@ -34,8 +35,24 @@ class AddNewFamilyHeadScreen extends StatefulWidget {
   State<AddNewFamilyHeadScreen> createState() => _AddNewFamilyHeadScreenState();
 }
 
-class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
+class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
+
+  // Collects the first validation error message for head/spouse forms
+  // so the Next button can show it in a SnackBar.
+  static String? _lastFormError;
+
+  static void _clearFormError() {
+    _lastFormError = null;
+  }
+
+  static String? _captureError(String? message) {
+    if (message != null && _lastFormError == null) {
+      _lastFormError = message;
+    }
+    return message;
+  }
 
   int _ageFromDob(DateTime dob) {
     return DateTime.now().year - dob.year;
@@ -60,7 +77,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               hintText: l.houseNoHint,
               initialValue: state.houseNo,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateHouseNo(v.trim())),
-              validator: (value) => Validations.validateHouseNo(l, value),
+              validator: (value) => _captureError(Validations.validateHouseNo(l, value)),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -71,7 +88,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               hintText: l.nameOfFamilyHeadHint,
               initialValue: state.headName,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateHeadName(v.trim())),
-              validator: (value) => Validations.validateFamilyHead(l, value),
+              validator: (value) => _captureError(Validations.validateFamilyHead(l, value)),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -113,7 +130,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                 hintText: l.dateHint,
                 initialDate: state.dob,
                 onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(d)),
-                validator: (date) => Validations.validateDOB(l, date),
+                validator: (date) => _captureError(Validations.validateDOB(l, date)),
               ),
             )
           else
@@ -208,7 +225,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               },
               value: state.gender,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateGender(v)),
-              validator: (v) => v == null ? '${l.genderLabel} ${l.requiredField}' : null,
+              validator: (v) => _captureError(v == null ? '${l.genderLabel} ${l.requiredField}' : null),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -451,7 +468,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                 value: state.mobileOwner,
                 onChanged: (v) =>
                     context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileOwner(v)),
-                validator: (value) => Validations.validateWhoMobileNo(l, value),
+                validator: (value) => _captureError(Validations.validateWhoMobileNo(l, value)),
               ),
             ),
 
@@ -466,7 +483,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               maxLength: 10,
               initialValue: state.mobileNo,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileNo(v.trim())),
-              validator: (value) => Validations.validateMobileNo(l, value),
+              validator: (value) => _captureError(Validations.validateMobileNo(l, value)),
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
               ],
@@ -615,8 +632,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
               },
               value: state.maritalStatus,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMaritalStatus(v)),
-
-              validator: (value) => Validations.validateMaritalStatus(l, value),
+              validator: (value) => _captureError(Validations.validateMaritalStatus(l, value)),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -643,7 +659,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                 onChanged: (v) => context
                     .read<AddFamilyHeadBloc>()
                     .add(AfhUpdateSpouseName(v.trim())),
-                validator: (value) => Validations.validateSpousName(l, value),
+                validator: (value) => _captureError(Validations.validateSpousName(l, value)),
 
               ),
             ),
@@ -679,7 +695,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                   },
                   validator: (value) {
                     if (state.gender == 'Female' && state.maritalStatus == 'Married') {
-                      return Validations.validateIsPregnant(l, value);
+                      return _captureError(Validations.validateIsPregnant(l, value));
                     }
                     return null;
                   },
@@ -693,7 +709,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     hintText: l.dateHint,
                     initialDate: state.lmp,
                     onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(LMPChange(d)),
-                    validator: (date) => Validations.validateLMP(l, date),
+                    validator: (date) => _captureError(Validations.validateLMP(l, date)),
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -704,7 +720,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     hintText: l.dateHint,
                     initialDate: state.edd,
                     onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(EDDChange(d)),
-                    validator: (date) => Validations.validateEDD(l, date),
+                    validator: (date) => _captureError(Validations.validateEDD(l, date)),
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -717,7 +733,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                     onChanged: (v) => context
                         .read<AddFamilyHeadBloc>()
                         .add(AfhUpdateSpouseName(v.trim())),
-                    validator: (value) => Validations.validateAdoptingPlan(l, value),
+                    validator: (value) => _captureError(Validations.validateAdoptingPlan(l, value)),
                   ),
 
                 ),
@@ -1103,18 +1119,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                                     height: 5.5.h,
                                                     isLoading: isLoading,
                                                     onPress: () {
+                                                      _clearFormError();
                                                       final formState = _formKey.currentState;
                                                       if (formState == null) return;
                                                       final isValid = formState.validate();
                                                       if (!isValid) {
-                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                          const SnackBar(
-                                                            content: Text('Please correct the highlighted errors before continuing.'),
-                                                            backgroundColor: Colors.redAccent,
-                                                            behavior: SnackBarBehavior.floating,
-                                                            duration: Duration(seconds: 2),
-                                                          ),
-                                                        );
+                                                        if (_lastFormError != null) {
+                                                          showAppSnackBar(context, _lastFormError!);
+                                                        }
                                                         return;
                                                       }
                                                       context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
@@ -1172,6 +1184,25 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen> {
                                                             : (widget.isEdit ? 'UPDATE' : l.addButton)),
                                                         onPress: () {
                                                           if (i < last) {
+                                                            bool canProceed = true;
+                                                            if (i == 0) {
+                                                              _clearFormError();
+                                                              final headForm = _formKey.currentState;
+                                                              if (headForm == null || !headForm.validate()) {
+                                                                canProceed = false;
+                                                                final msg = _lastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                                                showAppSnackBar(context, msg);
+                                                              }
+                                                            } else if (i == 1) {
+                                                              clearSpousFormError();
+                                                              final spouseForm = spousFormKey.currentState;
+                                                              if (spouseForm == null || !spouseForm.validate()) {
+                                                                canProceed = false;
+                                                                final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                                                showAppSnackBar(context, msg);
+                                                              }
+                                                            }
+                                                            if (!canProceed) return;
                                                             controller.animateTo(i + 1);
                                                           } else {
                                                             // last tab → submit

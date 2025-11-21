@@ -844,7 +844,7 @@
   "dateOfRegistrationLabel": "Date of Registration *",
   "childNameLabel": "Child's name *",
   "whoseMobileNumberLabel": "Whose mobile number is this",
-  "mobileNumberLabel": "mobile number *",
+  "mobileNumberLabel": "mobile number",
   "mothersRchIdLabel": "Mother's RCH ID number",
   "birthCertificateIssuedLabel": "Has the birth certificate been issued?",
   "birthCertificateNumberLabel": "birth certificate number",

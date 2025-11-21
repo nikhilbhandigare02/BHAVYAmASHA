@@ -18,6 +18,8 @@ class Childrendetaills extends StatefulWidget {
 }
 
 class _ChildrendetaillsState extends State<Childrendetaills> {
+  String? _youngestAgeError;
+
   Widget _section(Widget child) => child;
 
   Widget _counterRow({
@@ -74,6 +76,33 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
       },
       child: BlocBuilder<ChildrenBloc, ChildrenState>(
         builder: (context, state) {
+          String? _validateYoungestAge(String raw) {
+            if (raw.trim().isEmpty) {
+              return null;
+            }
+            final unit = state.ageUnit;
+            final value = int.tryParse(raw.trim());
+            if (value == null) {
+              return  'Enter valid number';
+            }
+            if (unit == null || unit.isEmpty) {
+              return  'Select age unit';
+            }
+            if (unit == l.days) {
+              if (value < 1 || value > 30) {
+                return '${l.days}: 1-30';
+              }
+            } else if (unit == l.months) {
+              if (value < 1 || value > 11) {
+                return '${l.months}: 1-11';
+              }
+            } else if (unit == l.years) {
+              if (value < 1 || value > 90) {
+                return '${l.years}: 1-90';
+              }
+            }
+            return null;
+          }
           return ListView(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
               children: [
@@ -133,7 +162,12 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                         labelText: l.youngestChildAge,
                         hintText: l.youngestChildAge,
                         readOnly: true,
-                        onChanged: (v) => context.read<ChildrenBloc>().add(ChUpdateYoungestAge(v.trim())),
+                        onChanged: (v) {
+                          context.read<ChildrenBloc>().add(ChUpdateYoungestAge(v.trim()));
+                          setState(() {
+                            _youngestAgeError = _validateYoungestAge(v);
+                          });
+                        },
                         initialValue: state.youngestAge,
                         keyboardType: TextInputType.number,
                       ),
@@ -165,12 +199,27 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                         onChanged: (value) {
                           context.read<ChildrenBloc>().add(ChUpdateYoungestAge(value.trim()));
+                          setState(() {
+                            _youngestAgeError = _validateYoungestAge(value);
+                          });
                         },
                       ),
                     ),
                   ],
                 ),
               ),
+              if (_youngestAgeError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0, left: 4.0),
+                  child: Text(
+                    _youngestAgeError!,
+                    style: TextStyle(
+                      color: Colors.red.shade700,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
 
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -180,7 +229,12 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                   items: [l.days, l.months, l.years],
                   getLabel: (s) => s,
                   value: state.ageUnit,
-                  onChanged: (v) => context.read<ChildrenBloc>().add(ChUpdateAgeUnit(v)),
+                  onChanged: (v) {
+                    context.read<ChildrenBloc>().add(ChUpdateAgeUnit(v));
+                    setState(() {
+                      _youngestAgeError = _validateYoungestAge(state.youngestAge ?? '');
+                    });
+                  },
                 ),
               ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),

@@ -78,15 +78,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchTimeStamp();
     _fetchAbhaCreated();
     _fetchExistingAbhaCreated();
-    // Start background sync scheduler at app launch
     SyncService.instance.start(interval: const Duration(minutes: 5));
-    // Explicitly trigger a one-time follow-up forms pull when Home loads
     Future.microtask(() async {
       try {
         await SyncService.instance.fetchFollowupFormsFromServer();
-        // After initial follow-up forms sync completes (e.g. first launch
-        // after reinstall), reload the local dashboard counts so they
-        // reflect the freshly synced data without requiring an app restart.
+
         if (mounted) {
           _loadHouseholdCount();
           _loadBeneficiariesCount();
@@ -276,11 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadBeneficiariesCount() async {
     try {
-      // Count all beneficiary records so the dashboard value matches
-      // the total rows visible in the All Beneficiaries screen.
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final count = rows.length;
-
+      final count = await LocalStorageDao.instance.getBeneficiariesDashboardCount();
       if (mounted) {
         setState(() {
           beneficiariesCount = count;
@@ -577,6 +569,7 @@ class _HomeScreenState extends State<HomeScreen> {
       print('Error loading notification count: $e');
     }
   }
+
 
   Future<void> fetchApiData() async {
     await Future.delayed(const Duration(seconds: 2));

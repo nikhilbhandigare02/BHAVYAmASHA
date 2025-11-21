@@ -58,12 +58,18 @@ class HouseholdRepository {
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
 
+    // Determine cursor: prefer explicit lastId, otherwise latest from DB
+    String effectiveLastId = lastId;
+    if (effectiveLastId.isEmpty) {
+      effectiveLastId = await LocalStorageDao.instance.getLatestHouseholdServerId();
+    }
+
     dynamic response;
     try {
       response = await _api.getApiWithBody(
         Endpoints.getHousehold,
         {
-          'last_id': lastId,
+          'last_id': effectiveLastId,
           'limit': limit,
         },
         headers: headers,
@@ -74,7 +80,7 @@ class HouseholdRepository {
           Endpoints.getHousehold,
           headers: headers,
           queryParams: {
-            'last_id': lastId,
+            'last_id': effectiveLastId,
             'limit': limit.toString(),
           },
         );
@@ -83,7 +89,7 @@ class HouseholdRepository {
           Endpoints.getHousehold,
           headers: headers,
           queryParams: {
-            '_id': '69032ffcc63e2ddc9b7930f6',
+            '_id': effectiveLastId,
             'limit': limit.toString(),
           },
         );

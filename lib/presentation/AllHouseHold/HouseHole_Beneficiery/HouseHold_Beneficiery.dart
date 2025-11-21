@@ -62,7 +62,7 @@ class _HouseHold_BeneficiaryScreenState
       
       // First, get all records with the same household_ref_key
       final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: widget.hhId != null ? 'household_ref_key = ?' : null,
         whereArgs: widget.hhId != null ? [widget.hhId] : null,
       );

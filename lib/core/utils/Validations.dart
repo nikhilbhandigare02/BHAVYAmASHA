@@ -40,6 +40,12 @@ class Validations {
       return 'House number is required';
     }
 
+    // Allow only letters, numbers, space, dash, and slash
+    final regex = RegExp(r'^[a-zA-Z0-9\s\-\/]+$');
+    if (!regex.hasMatch(houseNo)) {
+      return 'House number can only contain letters, numbers, spaces, dash or slash';
+    }
+
     return null;
   }
 
@@ -77,12 +83,20 @@ class Validations {
     }
 
     final today = DateTime.now();
-
     final dobDate = DateTime(dob.year, dob.month, dob.day);
     final todayDate = DateTime(today.year, today.month, today.day);
 
     if (dobDate.isAfter(todayDate)) {
       return 'Date of birth cannot be in the future';
+    }
+
+    int age = today.year - dob.year;
+    if (today.month < dob.month || (today.month == dob.month && today.day < dob.day)) {
+      age--;
+    }
+
+    if (age < 15 || age > 110) {
+      return 'Age must be between 15 and 110 years';
     }
 
     return null; // ✅ valid
@@ -134,8 +148,14 @@ class Validations {
       return 'Mobile no. is required';
     }
 
-    return null;
+    final regex = RegExp(r'^[6-9]\d{9}$');
+    if (!regex.hasMatch(mobileNo)) {
+      return 'Mobile no. must be 10 digits and start with 6-9';
+    }
+
+    return null; // ✅ valid
   }
+
   static String? validateMaritalStatus(AppLocalizations l10n, String? maritalStatus) {
     if (maritalStatus == null || maritalStatus.isEmpty) {
       return 'Marital Status is required';
@@ -148,8 +168,25 @@ class Validations {
       return 'Family Head is required';
     }
 
+    // Only letters and spaces allowed between words
+    final regex = RegExp(r'^[a-zA-Z\s]+$');
+    if (!regex.hasMatch(familyHead)) {
+      return 'Family Head can only contain letters';
+    }
+
     return null;
   }
+
+  static String? validateFamilyHeadRelation(AppLocalizations l10n, String? familyHead) {
+    if (familyHead == null || familyHead.isEmpty) {
+      return 'Relation with family head is required';
+    }
+
+
+    return null;
+  }
+
+
   static String? validateSpousName(AppLocalizations l10n, String? spousName) {
     if (spousName == null || spousName.isEmpty) {
       return 'FSpous Name is required';

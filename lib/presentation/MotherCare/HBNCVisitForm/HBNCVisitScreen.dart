@@ -53,7 +53,6 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                 (previous.validationTick != current.validationTick) ||
                 (previous.isSaving && !current.isSaving && current.saveSuccess),
             listener: (context, state) {
-              // Handle validation errors
               final idx = _tabController.index;
               if (state.lastValidatedIndex == idx && state.validationErrors.isNotEmpty) {
                 final t = AppLocalizations.of(context)!;

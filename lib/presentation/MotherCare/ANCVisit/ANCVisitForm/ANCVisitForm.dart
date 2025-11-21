@@ -28,6 +28,7 @@ class Ancvisitform extends StatefulWidget {
 
 class _AncvisitformState extends State<Ancvisitform> {
   late final AnvvisitformBloc _bloc;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -67,7 +68,6 @@ class _AncvisitformState extends State<Ancvisitform> {
       return null;
     }
   }
-
 
   // Update form fields with loaded data
   void _updateFormWithData(Map<String, dynamic> formData) {
@@ -140,14 +140,12 @@ class _AncvisitformState extends State<Ancvisitform> {
         );
 
         if (existingForms.isNotEmpty) {
-
           final formData = existingForms.first;
           print('🔍 Found existing ANC form for beneficiary');
           print('  - Form ID: ${formData['id']}');
           print('  - Forms Ref Key: ${formData['forms_ref_key']}');
           print('  - Household Ref Key: ${formData['household_ref_key']}');
           print('  - Beneficiary Ref Key: ${formData['beneficiary_ref_key']}');
-
 
           if (formData['form_json'] != null) {
             try {
@@ -219,41 +217,41 @@ class _AncvisitformState extends State<Ancvisitform> {
         _bloc.add(BeneficiaryIdSet(beneficiaryIdToUse));
 
         try {
-            final beneficiaryRow =
-                await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryIdToUse);
-            if (beneficiaryRow != null) {
-              final infoRaw = beneficiaryRow['beneficiary_info'];
-              Map<String, dynamic> info;
-              if (infoRaw is Map<String, dynamic>) {
-                info = infoRaw;
-              } else if (infoRaw is Map) {
-                info = Map<String, dynamic>.from(infoRaw);
-              } else if (infoRaw is String && infoRaw.isNotEmpty) {
-                info = Map<String, dynamic>.from(jsonDecode(infoRaw));
-              } else {
-                info = {};
+          final beneficiaryRow =
+          await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryIdToUse);
+          if (beneficiaryRow != null) {
+            final infoRaw = beneficiaryRow['beneficiary_info'];
+            Map<String, dynamic> info;
+            if (infoRaw is Map<String, dynamic>) {
+              info = infoRaw;
+            } else if (infoRaw is Map) {
+              info = Map<String, dynamic>.from(infoRaw);
+            } else if (infoRaw is String && infoRaw.isNotEmpty) {
+              info = Map<String, dynamic>.from(jsonDecode(infoRaw));
+            } else {
+              info = {};
+            }
+
+            // Set LMP and EDD dates if available in beneficiary info
+            if (info['lmp'] != null) {
+              try {
+                final lmpDate = DateTime.parse(info['lmp'].toString());
+                _bloc.add(LmpDateChanged(lmpDate));
+                print('📅 Set LMP date from beneficiary info: $lmpDate');
+              } catch (e) {
+                print('⚠️ Error parsing LMP date: ${info['lmp']} - $e');
               }
-              
-              // Set LMP and EDD dates if available in beneficiary info
-              if (info['lmp'] != null) {
-                try {
-                  final lmpDate = DateTime.parse(info['lmp'].toString());
-                  _bloc.add(LmpDateChanged(lmpDate));
-                  print('📅 Set LMP date from beneficiary info: $lmpDate');
-                } catch (e) {
-                  print('⚠️ Error parsing LMP date: ${info['lmp']} - $e');
-                }
+            }
+
+            if (info['edd'] != null) {
+              try {
+                final eddDate = DateTime.parse(info['edd'].toString());
+                _bloc.add(EddDateChanged(eddDate));
+                print('📅 Set EDD date from beneficiary info: $eddDate');
+              } catch (e) {
+                print('⚠️ Error parsing EDD date: ${info['edd']} - $e');
               }
-              
-              if (info['edd'] != null) {
-                try {
-                  final eddDate = DateTime.parse(info['edd'].toString());
-                  _bloc.add(EddDateChanged(eddDate));
-                  print('📅 Set EDD date from beneficiary info: $eddDate');
-                } catch (e) {
-                  print('⚠️ Error parsing EDD date: ${info['edd']} - $e');
-                }
-              }
+            }
 
             final womanName = (info['memberName'] ?? info['headName'])?.toString();
             if (womanName != null && womanName.isNotEmpty) {
@@ -415,12 +413,58 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
+  // VALIDATION FUNCTIONS
+  String? validateRequired(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Required field";
+    }
+    return null;
+  }
+
+  String? validateDateRequired(DateTime? date) {
+    if (date == null) return "Required field";
+    return null;
+  }
+
+  String? validateWeightKg(String? value) {
+    if (value == null || value.trim().isEmpty) return null; // not mandatory
+    final w = num.tryParse(value);
+    if (w == null) return "Enter a valid number";
+    if (w < 30) return "Minimum weight is 30 kg";
+    if (w > 120) return "Maximum weight is 120 kg";
+    return null;
+  }
+
+  String? validateTabletCount(String? value) {
+    if (value == null || value.trim().isEmpty) return null; // optional
+    final n = int.tryParse(value);
+    if (n == null) return "Enter a valid number";
+    if (n > 500) return "Maximum 500 tablets allowed";
+    return null;
+  }
+
+  String? validateBabyWeight(String? value) {
+    if (value == null || value.trim().isEmpty) return "Required field";
+    final weight = int.tryParse(value);
+    if (weight == null) return "Enter a valid number";
+    if (weight < 1200) return "Minimum weight is 1200 gms";
+    if (weight > 4000) return "Maximum weight is 4000 gms";
+    return null;
+  }
+
+  String? validateDropdownRequired(String? value) {
+    if (value == null || value.isEmpty) return "Required field";
+    return null;
+  }
+
+  String? validateHighRiskSelection(List<String> selected) {
+    if (selected.isEmpty) return "Please select at least one risk";
+    return null;
+  }
 
   @override
-
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
 
     return BlocProvider.value(
       value: _bloc,
@@ -444,672 +488,622 @@ class _AncvisitformState extends State<Ancvisitform> {
             builder: (context, state) {
               final bloc = context.read<AnvvisitformBloc>();
 
-              return Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12.0),
-                            child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: TextStyle(fontSize: 14.sp)),
-                          ),
-                          const SizedBox(height: 6),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12.0),
-                            child: Text(
-                              '${state.ancVisitNo == 0 ? 1 : state.ancVisitNo}',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+              return Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 12.0),
+                              child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: TextStyle(fontSize: 14.sp)),
+                            ),
+                            const SizedBox(height: 6),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 12.0),
+                              child: Text(
+                                '${state.ancVisitNo == 0 ? 1 : state.ancVisitNo}',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                          const SizedBox(height: 12),
-                          ApiDropdown<String>(
-                            labelText: l10n?.visitTypeLabel ?? 'Visit type *',
-                            items: const [
-                              'ANC', 'PMSMA'
-                            ],
-                            value: state.visitType.isEmpty ? null : state.visitType,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(VisitTypeChanged(v ?? '')),
-                            hintText: l10n?.select ?? 'Select',
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                          ApiDropdown<String>(
-                            labelText: l10n?.placeOfAncLabel ?? 'Place of ANC',
-                            items: const [
-                              'VHSND/Anganwadi',
-                              'Health Sub-center/Health & Wealth Centre(HSC/HWC)',
-                              'Primary Health Centre(PHC)',
-                              'Community Health Centre(CHC)',
-                              'Referral Hospital(RH)',
-                              'District Hospital(DH)',
-                              'Medical College Hospital(MCH)',
-                              'PMSMA Site'
-                            ],
-                            value: state.placeOfAnc.isEmpty ? null : state.placeOfAnc,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(PlaceOfAncChanged(v ?? '')),
-                            hintText: l10n?.select ?? 'Select',
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                          CustomDatePicker(
-                            labelText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
-                            hintText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
-                            initialDate: state.dateOfInspection ?? DateTime.now(),
-                            onDateChanged: (d) => bloc.add(DateOfInspectionChanged(d)),
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                          CustomTextField(
-                            labelText: l10n?.houseNumberLabel ?? 'House number',
-                            hintText: l10n?.houseNumberLabel ?? 'House number',
-                            initialValue: state.houseNumber,
-                            onChanged: (v) => bloc.add(HouseNumberChanged(v)),
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomTextField(
-                            labelText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
-                            hintText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
-                            initialValue: state.womanName,
-                            onChanged: (v) => bloc.add(WomanNameChanged(v)),
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomTextField(
-                            labelText: l10n?.husbandNameLabel ?? "Husband's name",
-                            hintText: l10n?.husbandNameLabel ?? "Husband's name",
-                            initialValue: state.husbandName,
-                            onChanged: (v) => bloc.add(HusbandNameChanged(v)),
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomTextField(
-                            labelText: l10n?.rchNumberLabel ?? 'RCH number',
-                            hintText: l10n?.rchNumberLabel ?? 'RCH number',
-                            initialValue: state.rchNumber,
-                            onChanged: (v) => bloc.add(RchNumberChanged(v)),
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                          // Replace the LMP date picker section with this improved version:
-
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.all(Radius.circular(4)),
-                            ),
-                            child: CustomDatePicker(
-                              labelText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
-                              hintText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
-                              initialDate: state.lmpDate ?? DateTime.now(),
-                              onDateChanged: (d) {
-                                if (d != null) {
-                                  bloc.add(LmpDateChanged(d));
-
-                                  final today = DateTime.now();
-                                  final difference = today.difference(d).inDays;
-                                  final weeksOfPregnancy = (difference / 7).floor();
-
-                                  // Add 1 to account for the first week of pregnancy
-                                  final calculatedWeeks = weeksOfPregnancy + 1;
-
-                                  bloc.add(WeeksOfPregnancyChanged(calculatedWeeks.toString()));
-                                }
-                              },
-                            ),
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomDatePicker(
-                            labelText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
-                            hintText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
-                            initialDate: state.eddDate,
-                            onDateChanged: (d) => bloc.add(EddDateChanged(d)),
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomTextField(
-                            labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
-                            hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
-                            initialValue: state.weeksOfPregnancy,
-                            keyboardType: TextInputType.number,
-                             // Make it read-only since it's auto-calculated
-                            onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)', style: TextStyle(fontSize: 14.sp)),
-                              const SizedBox(height: 6),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  _qtyButton(icon: Icons.remove, onTap: () => bloc.add(const GravidaDecremented())),
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    width: 40,
-                                    height: 32,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: AppColors.outlineVariant),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text('${state.gravida}'),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  _qtyButton(icon: Icons.add, onTap: () => bloc.add(const GravidaIncremented())),
-                                ],
-                              ),
-                            ],
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 16),
-                          ApiDropdown<String>(
-                            labelText: l10n?.isWomanBreastfeedingLabel ?? 'Is woman breastfeeding?',
-                            items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                            value: state.isBreastFeeding.isEmpty ? null : state.isBreastFeeding,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(IsBreastFeedingChanged(v ?? '')),
-                            hintText: l10n?.select ?? 'Select',
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomDatePicker(
-                            labelText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
-                            hintText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
-                            initialDate: state.td1Date,
-                            onDateChanged: (d) => bloc.add(Td1DateChanged(d)),
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomDatePicker(
-                            labelText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
-                            hintText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
-                            initialDate: state.td2Date,
-                            readOnly: true,
-                            onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomDatePicker(
-                            labelText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
-                            hintText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
-                            initialDate: state.tdBoosterDate,
-                            readOnly: true,
-                            onDateChanged: (d) => bloc.add(TdBoosterDateChanged(d)),
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomTextField(
-                            labelText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
-                            hintText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
-                            initialValue: state.folicAcidTablets,
-                            keyboardType: TextInputType.number,
-                            onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          ApiDropdown<String>(
-                            labelText: l10n?.preExistingDiseaseLabel ?? 'Pre - Existing disease',
-                            items: [
-                              l10n?.diseaseNone ?? 'None',
-                              l10n?.diseaseDiabetes ?? 'Diabetes',
-                              l10n?.diseaseHypertension ?? 'Hypertension',
-                              l10n?.diseaseAnemia ?? 'Anemia',
-                              l10n?.diseaseOther ?? 'Other',
-                            ],
-                            value: state.preExistingDisease.isEmpty ? null : state.preExistingDisease,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(PreExistingDiseaseChanged(v ?? '')),
-                            hintText: l10n?.select ?? 'Select',
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomTextField(
-                            labelText: l10n?.weightKgLabel ?? 'Weight (Kg)',
-                            hintText: l10n?.weightKgLabel ?? 'Weight (Kg)',
-                            initialValue: state.weight,
-                            keyboardType: TextInputType.number,
-                            onChanged: (v) => bloc.add(WeightChanged(v)),
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomTextField(
-                            labelText: l10n?.systolicLabel ?? 'Systolic',
-                            hintText: l10n?.systolicLabel ?? 'Systolic',
-                            initialValue: state.systolic,
-                            keyboardType: TextInputType.number,
-                            onChanged: (v) => bloc.add(SystolicChanged(v)),
-                            readOnly: true,
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomTextField(
-                            labelText: l10n?.diastolicLabel ?? 'Diastolic',
-                            hintText: l10n?.diastolicLabel ?? 'Diastolic',
-                            initialValue: state.diastolic,
-                            keyboardType: TextInputType.number,
-                            onChanged: (v) => bloc.add(DiastolicChanged(v)),
-                            readOnly: true,
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          CustomTextField(
-                            labelText: l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
-                            hintText: l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
-                            initialValue: state.hemoglobin,
-                            keyboardType: TextInputType.number,
-                            onChanged: (v) => bloc.add(HemoglobinChanged(v)),
-                            readOnly: true,
-                          ),
-
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          ApiDropdown<String>(
-                            labelText: l10n?.anyHighRiskProblemLabel ?? 'Is there any high risk problem?',
-                            items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                            value: state.highRisk.isEmpty ? null : state.highRisk,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(HighRiskChanged(v ?? '')),
-                            hintText: l10n?.select ?? 'Select',
-                          ),
-                          if (state.highRisk == 'Yes') ...[
+                            const SizedBox(height: 12),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            MultiSelect<String>(
-                              items: [
-                                'Severe Anemia',
-                                'Hypertensive Disorder',
-                                'Syphilis, HIV Positive, Hepatitis B, Hepatitis C',
-                                'Gestational Diabetes',
-                                'Hypothyroidism',
-                              ].map((risk) => MultiSelectItem<String>(
-                                label: risk,
-                                value: risk,
-                              )).toList(),
-                              selectedValues: state.selectedRisks,
-                              labelText: 'Select Risks',
-                              hintText: 'Select Risks',
-                              onSelectionChanged: (values) {
-                                bloc.add(SelectedRisksChanged(List<String>.from(values)));
-                              },
-                            ),
-                            const SizedBox(height: 16),
+
+                            const SizedBox(height: 12),
                             ApiDropdown<String>(
-                              labelText: 'Any complication leading to abortion?',
-                              items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                              value: state.hasAbortionComplication.isEmpty ? null : state.hasAbortionComplication,
+                              labelText: l10n?.visitTypeLabel ?? 'Visit type *',
+                              items: const [
+                                'ANC', 'PMSMA'
+                              ],
+                              value: state.visitType.isEmpty ? null : state.visitType,
                               getLabel: (s) => s,
-                              onChanged: (v) => bloc.add(HasAbortionComplicationChanged(v ?? '')),
+                              onChanged: (v) => bloc.add(VisitTypeChanged(v ?? '')),
+                              hintText: l10n?.select ?? 'Select',
+                              validator: validateDropdownRequired,
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                            ApiDropdown<String>(
+                              labelText: l10n?.placeOfAncLabel ?? 'Place of ANC',
+                              items: const [
+                                'VHSND/Anganwadi',
+                                'Health Sub-center/Health & Wealth Centre(HSC/HWC)',
+                                'Primary Health Centre(PHC)',
+                                'Community Health Centre(CHC)',
+                                'Referral Hospital(RH)',
+                                'District Hospital(DH)',
+                                'Medical College Hospital(MCH)',
+                                'PMSMA Site'
+                              ],
+                              value: state.placeOfAnc.isEmpty ? null : state.placeOfAnc,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(PlaceOfAncChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
                             ),
-                            if (state.hasAbortionComplication == 'Yes') ...[
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  labelText: 'Date of Abortion',
-                                  suffixIcon: const Icon(Icons.calendar_today),
-                                  border: const OutlineInputBorder(),
-                                ),
-                                controller: TextEditingController(
-                                  text: state.abortionDate != null
-                                      ? '${state.abortionDate!.day}/${state.abortionDate!.month}/${state.abortionDate!.year}'
-                                      : '',
-                                ),
-                                onTap: () async {
-                                  final DateTime? picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: state.abortionDate ?? DateTime.now(),
-                                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                                    lastDate: DateTime.now(),
-                                  );
-                                  if (picked != null && picked != state.abortionDate) {
-                                    bloc.add(AbortionDateChanged(picked));
+
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                            CustomDatePicker(
+                              labelText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
+                              hintText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
+                              initialDate: state.dateOfInspection ?? DateTime.now(),
+                              onDateChanged: (d) => bloc.add(DateOfInspectionChanged(d)),
+                              validator: (date) => validateDateRequired(date),
+                            ),
+
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                            CustomTextField(
+                              labelText: l10n?.houseNumberLabel ?? 'House number',
+                              hintText: l10n?.houseNumberLabel ?? 'House number',
+                              initialValue: state.houseNumber,
+                              onChanged: (v) => bloc.add(HouseNumberChanged(v)),
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomTextField(
+                              labelText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
+                              hintText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
+                              initialValue: state.womanName,
+                              onChanged: (v) => bloc.add(WomanNameChanged(v)),
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomTextField(
+                              labelText: l10n?.husbandNameLabel ?? "Husband's name",
+                              hintText: l10n?.husbandNameLabel ?? "Husband's name",
+                              initialValue: state.husbandName,
+                              onChanged: (v) => bloc.add(HusbandNameChanged(v)),
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomTextField(
+                              labelText: l10n?.rchNumberLabel ?? 'RCH number',
+                              hintText: l10n?.rchNumberLabel ?? 'RCH number',
+                              initialValue: state.rchNumber,
+                              onChanged: (v) => bloc.add(RchNumberChanged(v)),
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                            // LMP Date Picker
+                            Container(
+                              decoration: const BoxDecoration(
+                                color: AppColors.background,
+                                borderRadius: BorderRadius.all(Radius.circular(4)),
+                              ),
+                              child: CustomDatePicker(
+                                labelText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
+                                hintText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
+                                initialDate: state.lmpDate ?? DateTime.now(),
+                                onDateChanged: (d) {
+                                  if (d != null) {
+                                    bloc.add(LmpDateChanged(d));
+
+                                    final today = DateTime.now();
+                                    final difference = today.difference(d).inDays;
+                                    final weeksOfPregnancy = (difference / 7).floor();
+
+                                    // Add 1 to account for the first week of pregnancy
+                                    final calculatedWeeks = weeksOfPregnancy + 1;
+
+                                    bloc.add(WeeksOfPregnancyChanged(calculatedWeeks.toString()));
                                   }
                                 },
+                                validator: (date) => validateDateRequired(date),
                               ),
-                            ],
-                          ],
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                          if (int.tryParse(state.weeksOfPregnancy) != null &&
-                              int.parse(state.weeksOfPregnancy) < 3) ...[
-                            ApiDropdown<String>(
-                              labelText: 'Did the pregnant woman give birth to a baby?',
-                              items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                              value: state.givesBirthToBaby.isEmpty ? null : state.givesBirthToBaby,
-                              getLabel: (s) => s,
-                              onChanged: (v) => bloc.add(GivesBirthToBaby(v ?? '')),
-                              hintText: l10n?.select ?? 'Select',
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomDatePicker(
+                              labelText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
+                              hintText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
+                              initialDate: state.eddDate,
+                              onDateChanged: (d) => bloc.add(EddDateChanged(d)),
+                            ),
 
-                            if (state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) ...[
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomTextField(
+                              labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
+                              hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
+                              initialValue: state.weeksOfPregnancy,
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
+                            ),
+
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)', style: TextStyle(fontSize: 14.sp)),
+                                const SizedBox(height: 6),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    _qtyButton(icon: Icons.remove, onTap: () => bloc.add(const GravidaDecremented())),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      width: 40,
+                                      height: 32,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: AppColors.outlineVariant),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text('${state.gravida}'),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    _qtyButton(icon: Icons.add, onTap: () => bloc.add(const GravidaIncremented())),
+                                  ],
+                                ),
+                              ],
+                            ),
+
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 16),
+                            ApiDropdown<String>(
+                              labelText: l10n?.isWomanBreastfeedingLabel ?? 'Is woman breastfeeding?',
+                              items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
+                              value: state.isBreastFeeding.isEmpty ? null : state.isBreastFeeding,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(IsBreastFeedingChanged(v ?? '')),
+                              hintText: l10n?.select ?? 'Select',
+                            ),
+
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomDatePicker(
+                              labelText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
+                              hintText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
+                              initialDate: state.td1Date,
+                              onDateChanged: (d) => bloc.add(Td1DateChanged(d)),
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomDatePicker(
+                              labelText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
+                              hintText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
+                              initialDate: state.td2Date,
+                              readOnly: true,
+                              onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomDatePicker(
+                              labelText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
+                              hintText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
+                              initialDate: state.tdBoosterDate,
+                              readOnly: true,
+                              onDateChanged: (d) => bloc.add(TdBoosterDateChanged(d)),
+                            ),
+
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomTextField(
+                              labelText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
+                              hintText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
+                              initialValue: state.folicAcidTablets,
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
+                              validator: validateTabletCount,
+                            ),
+
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            ApiDropdown<String>(
+                              labelText: l10n?.preExistingDiseaseLabel ?? 'Pre - Existing disease',
+                              items: [
+                                l10n?.diseaseNone ?? 'None',
+                                l10n?.diseaseDiabetes ?? 'Diabetes',
+                                l10n?.diseaseHypertension ?? 'Hypertension',
+                                l10n?.diseaseAnemia ?? 'Anemia',
+                                l10n?.diseaseOther ?? 'Other',
+                              ],
+                              value: state.preExistingDisease.isEmpty ? null : state.preExistingDisease,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(PreExistingDiseaseChanged(v ?? '')),
+                              hintText: l10n?.select ?? 'Select',
+                            ),
+
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomTextField(
+                              labelText: l10n?.weightKgLabel ?? 'Weight (Kg)',
+                              hintText: l10n?.weightKgLabel ?? 'Weight (Kg)',
+                              initialValue: state.weight,
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) => bloc.add(WeightChanged(v)),
+                              validator: validateWeightKg,
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomTextField(
+                              labelText: l10n?.systolicLabel ?? 'Systolic',
+                              hintText: l10n?.systolicLabel ?? 'Systolic',
+                              initialValue: state.systolic,
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) => bloc.add(SystolicChanged(v)),
+                              readOnly: true,
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomTextField(
+                              labelText: l10n?.diastolicLabel ?? 'Diastolic',
+                              hintText: l10n?.diastolicLabel ?? 'Diastolic',
+                              initialValue: state.diastolic,
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) => bloc.add(DiastolicChanged(v)),
+                              readOnly: true,
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            CustomTextField(
+                              labelText: l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
+                              hintText: l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
+                              initialValue: state.hemoglobin,
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) => bloc.add(HemoglobinChanged(v)),
+                              readOnly: true,
+                            ),
+
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            ApiDropdown<String>(
+                              labelText: l10n?.anyHighRiskProblemLabel ?? 'Is there any high risk problem?',
+                              items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
+                              value: state.highRisk.isEmpty ? null : state.highRisk,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(HighRiskChanged(v ?? '')),
+                              hintText: l10n?.select ?? 'Select',
+                            ),
+                            if (state.highRisk == 'Yes') ...[
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              MultiSelect<String>(
+                                items: [
+                                  'Severe Anemia',
+                                  'Hypertensive Disorder',
+                                  'Syphilis, HIV Positive, Hepatitis B, Hepatitis C',
+                                  'Gestational Diabetes',
+                                  'Hypothyroidism',
+                                ].map((risk) => MultiSelectItem<String>(
+                                  label: risk,
+                                  value: risk,
+                                )).toList(),
+                                selectedValues: state.selectedRisks,
+                                labelText: 'Select Risks',
+                                hintText: 'Select Risks',
+                                onSelectionChanged: (values) {
+                                  bloc.add(SelectedRisksChanged(List<String>.from(values)));
+                                },
+                              ),
+                              const SizedBox(height: 16),
                               ApiDropdown<String>(
-                                labelText: 'Delivery outcome *',
-                                items: ["Live birth", "Still birth", "Newborn death"],
-                                validator: state.givesBirthToBaby == 'Yes' ? validateDropdownRequired : null,
-                                value: state.deliveryOutcome.isEmpty ? null : state.deliveryOutcome,
+                                labelText: 'Any complication leading to abortion?',
+                                items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
+                                value: state.hasAbortionComplication.isEmpty ? null : state.hasAbortionComplication,
                                 getLabel: (s) => s,
-                                onChanged: (v) => bloc.add(DeliveryOutcomeChanged(v ?? '')),
+                                onChanged: (v) => bloc.add(HasAbortionComplicationChanged(v ?? '')),
+                                hintText: l10n?.select ?? 'Select',
+                              ),
+                              if (state.hasAbortionComplication == 'Yes') ...[
+                                const SizedBox(height: 16),
+                                CustomDatePicker(
+                                  labelText: 'Date of Abortion',
+                                  hintText: 'Date of Abortion',
+                                  initialDate: state.abortionDate,
+                                  onDateChanged: (d) => bloc.add(AbortionDateChanged(d)),
+                                ),
+                              ],
+                            ],
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            if (int.tryParse(state.weeksOfPregnancy) != null &&
+                                int.parse(state.weeksOfPregnancy) < 3) ...[
+                              ApiDropdown<String>(
+                                labelText: 'Did the pregnant woman give birth to a baby?',
+                                items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
+                                value: state.givesBirthToBaby.isEmpty ? null : state.givesBirthToBaby,
+                                getLabel: (s) => s,
+                                onChanged: (v) => bloc.add(GivesBirthToBaby(v ?? '')),
                                 hintText: l10n?.select ?? 'Select',
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                              if (state.deliveryOutcome == "Live birth") ...[
+                              if (state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) ...[
                                 ApiDropdown<String>(
-                                  labelText: 'Number of Children *',
-                                  items: ["One Child", "Twins", "Triplets"],
-                                  value: state.numberOfChildren.isEmpty ? null : state.numberOfChildren,
+                                  labelText: 'Delivery outcome *',
+                                  items: ["Live birth", "Still birth", "Newborn death"],
+                                  value: state.deliveryOutcome.isEmpty ? null : state.deliveryOutcome,
                                   getLabel: (s) => s,
-                                  onChanged: (v) => bloc.add(NumberOfChildrenChanged(v ?? "")),
+                                  onChanged: (v) => bloc.add(DeliveryOutcomeChanged(v ?? '')),
                                   hintText: l10n?.select ?? 'Select',
+                                  validator: state.givesBirthToBaby == 'Yes' ? validateDropdownRequired : null,
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                if (state.deliveryOutcome == "Live birth") ...[
+                                  ApiDropdown<String>(
+                                    labelText: 'Number of Children *',
+                                    items: ["One Child", "Twins", "Triplets"],
+                                    value: state.numberOfChildren.isEmpty ? null : state.numberOfChildren,
+                                    getLabel: (s) => s,
+                                    onChanged: (v) => bloc.add(NumberOfChildrenChanged(v ?? "")),
+                                    hintText: l10n?.select ?? 'Select',
+                                    validator: validateDropdownRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                ],
+                                if (state.numberOfChildren == "One Child") ...[
+                                  // Baby 1 Name
+                                  CustomTextField(
+                                    labelText: "Baby's Name*",
+                                    hintText: "Enter Baby's Name",
+                                    initialValue: state.baby1Name,
+                                    onChanged: (v) => bloc.add(Baby1NameChanged(v)),
+                                    validator: validateRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  // Baby 1 Gender
+                                  ApiDropdown<String>(
+                                    labelText: "Baby's Gender*",
+                                    items: ["Male", "Female", "Transgender"],
+                                    value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
+                                    getLabel: (s) => s,
+                                    onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
+                                    hintText: l10n?.select ?? 'Select',
+                                    validator: validateDropdownRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  // Baby 1 Weight
+                                  CustomTextField(
+                                    labelText: "Baby's Weight (1200–4000gms)*",
+                                    hintText: "Enter Baby's Weight",
+                                    initialValue: state.baby1Weight,
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
+                                    validator: validateBabyWeight,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                ],
+                                if (state.numberOfChildren == "Twins") ...[
+                                  CustomTextField(
+                                    labelText: "First Baby  Name*",
+                                    hintText: "Enter First Baby  Name",
+                                    initialValue: state.baby1Name,
+                                    onChanged: (v) => bloc.add(Baby1NameChanged(v)),
+                                    validator: validateRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  ApiDropdown<String>(
+                                    labelText: "First Baby  Gender*",
+                                    items: ["Male", "Female", "Transgender"],
+                                    value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
+                                    getLabel: (s) => s,
+                                    onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
+                                    hintText: l10n?.select ?? 'Select',
+                                    validator: validateDropdownRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  CustomTextField(
+                                    labelText: "First Baby Weight (1200–4000gms)*",
+                                    hintText: "Enter First Baby  Weight",
+                                    initialValue: state.baby1Weight,
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
+                                    validator: validateBabyWeight,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  // ========== BABY 2 ==========
+                                  CustomTextField(
+                                    labelText: "Second Baby  Name*",
+                                    hintText: "Enter Second Baby Name",
+                                    initialValue: state.baby2Name,
+                                    onChanged: (v) => bloc.add(Baby2NameChanged(v)),
+                                    validator: validateRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  ApiDropdown<String>(
+                                    labelText: "Second Baby Gender*",
+                                    items: ["Male", "Female", "Transgender"],
+                                    value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
+                                    getLabel: (s) => s,
+                                    onChanged: (v) => bloc.add(Baby2GenderChanged(v ?? "")),
+                                    hintText: l10n?.select ?? 'Select',
+                                    validator: validateDropdownRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  CustomTextField(
+                                    labelText: "Second Baby Weight (1200–4000gms)*",
+                                    hintText: "Enter Second Baby Weight",
+                                    initialValue: state.baby2Weight,
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (v) => bloc.add(Baby2WeightChanged(v)),
+                                    validator: validateBabyWeight,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                ],
+                                if (state.numberOfChildren == "Triplets") ...[
+                                  // ========== BABY 1 ==========
+                                  CustomTextField(
+                                    labelText: "First Baby  Name*",
+                                    hintText: "Enter First Baby  Name",
+                                    initialValue: state.baby1Name,
+                                    onChanged: (v) => bloc.add(Baby1NameChanged(v)),
+                                    validator: validateRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  ApiDropdown<String>(
+                                    labelText: "First Baby Gender*",
+                                    items: ["Male", "Female", "Transgender"],
+                                    value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
+                                    getLabel: (s) => s,
+                                    onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
+                                    hintText: l10n?.select ?? 'Select',
+                                    validator: validateDropdownRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  CustomTextField(
+                                    labelText: "First Baby Weight (1200–4000gms)*",
+                                    hintText: "Enter First Baby Weight",
+                                    initialValue: state.baby1Weight,
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
+                                    validator: validateBabyWeight,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  // ========== BABY 2 ==========
+                                  CustomTextField(
+                                    labelText: "Second Baby Name*",
+                                    hintText: "Enter Second Baby Name",
+                                    initialValue: state.baby2Name,
+                                    onChanged: (v) => bloc.add(Baby2NameChanged(v)),
+                                    validator: validateRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  ApiDropdown<String>(
+                                    labelText: "Second Baby Gender*",
+                                    items: ["Male", "Female", "Transgender"],
+                                    value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
+                                    getLabel: (s) => s,
+                                    onChanged: (v) => bloc.add(Baby2GenderChanged(v ?? "")),
+                                    hintText: l10n?.select ?? 'Select',
+                                    validator: validateDropdownRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  CustomTextField(
+                                    labelText: "Second Baby Weight (1200–4000gms)*",
+                                    hintText: "Enter Second Baby Weight",
+                                    initialValue: state.baby2Weight,
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (v) => bloc.add(Baby2WeightChanged(v)),
+                                    validator: validateBabyWeight,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  // ========== BABY 3 ==========
+                                  CustomTextField(
+                                    labelText: "Third Baby Name*",
+                                    hintText: "Enter Third Baby Name",
+                                    initialValue: state.baby3Name,
+                                    onChanged: (v) => bloc.add(Baby3NameChanged(v)),
+                                    validator: validateRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  ApiDropdown<String>(
+                                    labelText: "Third Baby Gender*",
+                                    items: ["Male", "Female", "Transgender"],
+                                    value: state.baby3Gender.isEmpty ? null : state.baby3Gender,
+                                    getLabel: (s) => s,
+                                    onChanged: (v) => bloc.add(Baby3GenderChanged(v ?? "")),
+                                    hintText: l10n?.select ?? 'Select',
+                                    validator: validateDropdownRequired,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  CustomTextField(
+                                    labelText: "Third Baby Weight (1200–4000gms)*",
+                                    hintText: "Enter Third Baby Weight",
+                                    initialValue: state.baby3Weight,
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (v) => bloc.add(Baby3WeightChanged(v)),
+                                    validator: validateBabyWeight,
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                ],
                               ],
-                              if (state.numberOfChildren == "One Child") ...[
-                                // Baby 1 Name
-                                CustomTextField(
-                                  labelText: "Baby's Name*",
-                                  hintText: "Enter Baby's Name",
-                                  validator: validateRequired,
-                                  initialValue: state.baby1Name,
-                                  onChanged: (v) => bloc.add(Baby1NameChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                // Baby 1 Gender
-                                ApiDropdown<String>(
-                                  labelText: "Baby's Gender*",
-                                  items: ["Male", "Female", "Transgender"],
-                                  value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
-                                  validator: validateDropdownRequired,
-                                  getLabel: (s) => s,
-                                  onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
-                                  hintText: l10n?.select ?? 'Select',
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                // Baby 1 Weight
-                                CustomTextField(
-                                  labelText: "Baby's Weight (1200–4000gms)*",
-                                  hintText: "Enter Baby's Weight",
-                                  initialValue: state.baby1Weight,
-                                  keyboardType: TextInputType.number,
-                                  validator: validateBabyWeight,
-                                  onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              ],
-                              if (state.numberOfChildren == "Twins") ...[
-                                CustomTextField(
-                                  labelText: "First Baby  Name*",
-                                  hintText: "Enter First Baby  Name",
-                                  validator: validateRequired,
-                                  initialValue: state.baby1Name,
-                                  onChanged: (v) => bloc.add(Baby1NameChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                ApiDropdown<String>(
-                                  labelText: "First Baby  Gender*",
-                                  items: ["Male", "Female", "Transgender"],
-                                  validator: validateDropdownRequired,
-                                  value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
-                                  getLabel: (s) => s,
-                                  onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
-                                  hintText: l10n?.select ?? 'Select',
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                CustomTextField(
-                                  labelText: "First Baby Weight (1200–4000gms)*",
-                                  hintText: "Enter First Baby  Weight",
-                                  initialValue: state.baby1Weight,
-                                  keyboardType: TextInputType.number,
-                                  validator: validateBabyWeight,
-                                  onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                // ========== BABY 2 ==========
-                                CustomTextField(
-                                  labelText: "Second Baby  Name*",
-                                  hintText: "Enter Second Baby Name",
-                                  initialValue: state.baby2Name,
-                                  validator: validateRequired,
-                                  onChanged: (v) => bloc.add(Baby2NameChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                ApiDropdown<String>(
-                                  labelText: "Second Baby Gender*",
-                                  items: ["Male", "Female", "Transgender"],
-                                  validator: validateDropdownRequired,
-                                  value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
-                                  getLabel: (s) => s,
-                                  onChanged: (v) => bloc.add(Baby2GenderChanged(v ?? "")),
-                                  hintText: l10n?.select ?? 'Select',
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                CustomTextField(
-                                  labelText: "Second Baby Weight (1200–4000gms)*",
-                                  hintText: "Enter Second Baby Weight",
-                                  initialValue: state.baby2Weight,
-                                  keyboardType: TextInputType.number,
-                                  validator: validateBabyWeight,
-                                  onChanged: (v) => bloc.add(Baby2WeightChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              ],
-                              if (state.numberOfChildren == "Triplets") ...[
-                                // ========== BABY 1 ==========
-                                CustomTextField(
-                                  labelText: "First Baby  Name*",
-                                  hintText: "Enter First Baby  Name",
-                                  validator: validateRequired,
-                                  initialValue: state.baby1Name,
-                                  onChanged: (v) => bloc.add(Baby1NameChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                ApiDropdown<String>(
-                                  labelText: "First Baby Gender*",
-                                  items: ["Male", "Female", "Transgender"],
-                                  validator: validateDropdownRequired,
-                                  value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
-                                  getLabel: (s) => s,
-                                  onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
-                                  hintText: l10n?.select ?? 'Select',
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                CustomTextField(
-                                  labelText: "First Baby Weight (1200–4000gms)*",
-                                  hintText: "Enter First Baby Weight",
-                                  initialValue: state.baby1Weight,
-                                  keyboardType: TextInputType.number,
-                                  validator: validateBabyWeight,
-                                  onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                // ========== BABY 2 ==========
-                                CustomTextField(
-                                  labelText: "Second Baby Name*",
-                                  hintText: "Enter Second Baby Name",
-                                  validator: validateRequired,
-                                  initialValue: state.baby2Name,
-                                  onChanged: (v) => bloc.add(Baby2NameChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                ApiDropdown<String>(
-                                  labelText: "Second Baby Gender*",
-                                  items: ["Male", "Female", "Transgender"],
-                                  validator: validateDropdownRequired,
-                                  value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
-                                  getLabel: (s) => s,
-                                  onChanged: (v) => bloc.add(Baby2GenderChanged(v ?? "")),
-                                  hintText: l10n?.select ?? 'Select',
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                CustomTextField(
-                                  labelText: "Second Baby Weight (1200–4000gms)*",
-                                  hintText: "Enter Second Baby Weight",
-                                  initialValue: state.baby2Weight,
-                                  keyboardType: TextInputType.number,
-                                  validator: validateBabyWeight,
-                                  onChanged: (v) => bloc.add(Baby2WeightChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                // ========== BABY 3 ==========
-                                CustomTextField(
-                                  labelText: "Third Baby Name*",
-                                  hintText: "Enter Third Baby Name",
-                                  validator: validateRequired,
-                                  initialValue: state.baby3Name,
-                                  onChanged: (v) => bloc.add(Baby3NameChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                ApiDropdown<String>(
-                                  labelText: "Third Baby Gender*",
-                                  items: ["Male", "Female", "Transgender"],
-                                  validator: validateDropdownRequired,
-                                  value: state.baby3Gender.isEmpty ? null : state.baby3Gender,
-                                  getLabel: (s) => s,
-                                  onChanged: (v) => bloc.add(Baby3GenderChanged(v ?? "")),
-                                  hintText: l10n?.select ?? 'Select',
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                                CustomTextField(
-                                  labelText: "Third Baby Weight (1200–4000gms)*",
-                                  hintText: "Enter Third Baby Weight",
-                                  initialValue: state.baby3Weight,
-                                  keyboardType: TextInputType.number,
-                                  validator: validateBabyWeight,
-                                  onChanged: (v) => bloc.add(Baby3WeightChanged(v)),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              ],
-
                             ],
-                          ],
 
-                          ApiDropdown<String>(
-                            labelText: l10n?.beneficiaryAbsentLabel ?? 'Is Beneficiary Absent?',
-                            items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                            value: state.beneficiaryAbsent.isEmpty ? null : state.beneficiaryAbsent,
-                            getLabel: (s) => s,
-                            onChanged: (v) => bloc.add(BeneficiaryAbsentChanged(v ?? '')),
-                            hintText: l10n?.select ?? 'Select',
-                          ),
-                          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                        ],
+                            ApiDropdown<String>(
+                              labelText: l10n?.beneficiaryAbsentLabel ?? 'Is Beneficiary Absent?',
+                              items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
+                              value: state.beneficiaryAbsent.isEmpty ? null : state.beneficiaryAbsent,
+                              getLabel: (s) => s,
+                              onChanged: (v) => bloc.add(BeneficiaryAbsentChanged(v ?? '')),
+                              hintText: l10n?.select ?? 'Select',
+                            ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 44,
-                              child: RoundButton(
-                                title: l10n?.previousVisitsButton ?? 'PREVIOUS VISITS',
-                                color: AppColors.primary,
-                                borderRadius: 8,
-                                onPress: () {
-                                  Navigator.pushNamed(context, Route_Names.Previousvisit);
-                                },
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 44,
+                                child: RoundButton(
+                                  title: l10n?.previousVisitsButton ?? 'PREVIOUS VISITS',
+                                  color: AppColors.primary,
+                                  borderRadius: 8,
+                                  onPress: () {
+                                    Navigator.pushNamed(context, Route_Names.Previousvisit);
+                                  },
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: SizedBox(
-                              height: 44,
-                              child: RoundButton(
-                                title: state.isSubmitting ? (l10n?.savingButton ?? 'SAVING...') : (l10n?.saveButton ?? 'SAVE'),
-                                color: AppColors.primary,
-                                borderRadius: 8,
-                                onPress: () => bloc.add(const SubmitPressed()),
-                                disabled: state.isSubmitting,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: SizedBox(
+                                height: 44,
+                                child: RoundButton(
+                                  title: state.isSubmitting ? (l10n?.savingButton ?? 'SAVING...') : (l10n?.saveButton ?? 'SAVE'),
+                                  color: AppColors.primary,
+                                  borderRadius: 8,
+                                  onPress: () {
+                                    // Validate the form before submission
+                                    if (_formKey.currentState!.validate()) {
+                                      // Form is valid, proceed with submission
+                                      bloc.add(const SubmitPressed());
+                                    } else {
+                                      // Form is invalid, show error message
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Please fill all required fields correctly')),
+                                      );
+                                    }
+                                  },
+                                  disabled: state.isSubmitting,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             },
           ),
         ),
       ),
     );
-  }
-
-
-  String? validateBabyWeight(String? value) {
-    if (value == null || value.trim().isEmpty) return "Required field";
-    final weight = int.tryParse(value);
-    if (weight == null) return "Enter a valid number";
-    if (weight < 1200) return "Minimum weight is 1200 gms";
-    if (weight > 4000) return "Maximum weight is 4000 gms";
-    return null;
-  }
-  // NEW VALIDATORS
-  String? validateRequired(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Required field";
-    }
-    return null;
-  }
-
-  String? validateDateRequired(DateTime? date) {
-    if (date == null) return "Required field is required";
-    return null;
-  }
-
-  String? validateWeightKg(String? value) {
-    if (value == null || value.trim().isEmpty) return null; // not mandatory
-    final w = num.tryParse(value);
-    if (w == null) return "Enter a valid number";
-    if (w < 30) return "Minimum weight is 30 kg";
-    if (w > 120) return "Maximum weight is 120 kg";
-    return null;
-  }
-
-  String? validateTabletCount(String? value) {
-    if (value == null || value.trim().isEmpty) return null; // optional
-    final n = int.tryParse(value);
-    if (n == null) return "Enter a valid number";
-    if (n > 500) return "Maximum 500 tablets allowed";
-    return null;
-  }
-
-  String? validateHighRiskSelection(List<String> selected) {
-    if (selected.isEmpty) return "Please select at least one risk";
-    return null;
-  }
-
-  String? validateDropdownRequired(String? value) {
-    if (value == null || value.isEmpty) return "Required field";
-    return null;
   }
 }
 

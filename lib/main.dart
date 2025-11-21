@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
+import 'data/Local_Storage/database_provider.dart';
 import 'data/sync/sync_service.dart';
 
 import 'core/config/routes/Route_Name.dart';
@@ -12,10 +13,13 @@ import 'core/locale/bloc/locale_state.dart';
 import 'core/locale/bloc/locale_event.dart';
 import 'l10n/app_localizations.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
+  final db   = await DatabaseProvider.instance.database;
+  await DatabaseProvider.instance.ensureTablesExist(db);
 
+  await DatabaseProvider.instance.runMigration(db);
 
   runApp(
     Sizer(

@@ -48,11 +48,10 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // Query beneficiaries table for children with registration_due status
       final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries',
-        where: 'is_deleted = ? AND beneficiary_state = ?',
-        whereArgs: [0, 'registration_due'],
+        'beneficiaries_new',
+        where: 'beneficiary_state = ?',
+        whereArgs: [ 'registration_due'],
       );
 
       debugPrint('🎯 Found ${rows.length} beneficiaries with registration_due status');
@@ -475,7 +474,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                 color: AppColors.background,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
                    Icon(Icons.home, color: AppColors.primary, size: 15.sp),
