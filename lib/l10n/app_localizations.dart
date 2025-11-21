@@ -2714,7 +2714,7 @@ abstract class AppLocalizations {
   /// No description provided for @hbycAdviceAdministeringIfaSyrupLabel.
   ///
   /// In en, this message translates to:
-  /// **'Advice on administering iron folic acid syrup'**
+  /// **'Counsel mother on how to measure the correct millilitres dose of IFA syrup'**
   String get hbycAdviceAdministeringIfaSyrupLabel;
 
   /// No description provided for @hbycAdviceComplementaryFoodsLabel.
@@ -2738,19 +2738,19 @@ abstract class AppLocalizations {
   /// No description provided for @hbycAdvicePreparingAdministeringOrsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Advice on preparing and administering ORS'**
+  /// **'Assisted mother on Steps to prepare ORS at home and serve to child'**
   String get hbycAdvicePreparingAdministeringOrsLabel;
 
   /// No description provided for @hbycBhramanLabel.
   ///
   /// In en, this message translates to:
-  /// **'HBYC Bhraman*'**
+  /// **'HBYC home visit*'**
   String get hbycBhramanLabel;
 
   /// No description provided for @hbycBhramanRequired.
   ///
   /// In en, this message translates to:
-  /// **'HBYC Bhraman is required'**
+  /// **'HBYC home visit'**
   String get hbycBhramanRequired;
 
   /// No description provided for @hbycBreastfeedingContinuingLabel.

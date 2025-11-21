@@ -11,7 +11,8 @@ part 'hbyc_child_care_state.dart';
 
 class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
   HbycChildCareBloc() : super(const HbycChildCareInitial()) {
-    on<BeneficiaryAbsentChanged>((event, emit) => emit(state.copyWith(beneficiaryAbsent: event.value)));
+    on<BeneficiaryAbsentChanged>((event, emit) => emit(state.copyWith(beneficiaryAbsent: event.value, beneficiaryAbsentReason: event.value == 'Yes' ? state.beneficiaryAbsentReason : '')));
+    on<BeneficiaryAbsentReasonChanged>((event, emit) => emit(state.copyWith(beneficiaryAbsentReason: event.value)));
     on<HbycBhramanChanged>((event, emit) => emit(state.copyWith(hbycBhraman: event.value)));
     on<IsChildSickChanged>((event, emit) => emit(state.copyWith(isChildSick: event.value)));
     on<BreastfeedingContinuingChanged>((event, emit) => emit(state.copyWith(breastfeedingContinuing: event.value)));
@@ -33,8 +34,21 @@ class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
     on<AdvicePreparingAdministeringOrsChanged>((event, emit) => emit(state.copyWith(advicePreparingAdministeringOrs: event.value)));
     on<AdviceAdministeringIfaSyrupChanged>((event, emit) => emit(state.copyWith(adviceAdministeringIfaSyrup: event.value)));
     on<CompletionDateChanged>((event, emit) => emit(state.copyWith(completionDate: event.value)));
+     on<FoodFrequency1Changed>((event, emit) => emit(state.copyWith(foodFrequency1: event.value)));
+    on<FoodFrequency2Changed>((event, emit) => emit(state.copyWith(foodFrequency2: event.value)));
+    on<FoodFrequency3Changed>((event, emit) => emit(state.copyWith(foodFrequency3: event.value)));
+    on<FoodFrequency4Changed>((event, emit) => emit(state.copyWith(foodFrequency4: event.value)));
+    // In hbyc_child_care_bloc.dart
+    on<WeightForAgeChanged>((event, emit) => emit(state.copyWith(weightForAge: event.value)));
+    on<WeightForLengthChanged>((event, emit) => emit(state.copyWith(weightForLength: event.value)));
+    on<OrsGivenChanged>((event, emit) => emit(state.copyWith(orsGiven: event.value, orsCount: event.value == 'Yes' ? state.orsCount : '')));
+    on<OrsCountChanged>((event, emit) => emit(state.copyWith(orsCount: event.value)));
+    on<IfaSyrupGivenChanged>((event, emit) => emit(state.copyWith(ifaSyrupGiven: event.value, ifaSyrupCount: event.value == 'Yes' ? state.ifaSyrupCount : '')));
+    on<IfaSyrupCountChanged>((event, emit) => emit(state.copyWith(ifaSyrupCount: event.value)));
 
     on<SubmitForm>((event, emit) async {
+
+
       emit(state.copyWith(status: HbycFormStatus.submitting, error: null));
       final errors = <String>[];
       if (state.hbycBhraman.trim().isEmpty) {
@@ -44,6 +58,7 @@ class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
         emit(state.copyWith(status: HbycFormStatus.failure, error: errors.join('\n')));
         return;
       }
+
 
       try {
         final db = await DatabaseProvider.instance.database;
@@ -56,10 +71,22 @@ class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
           'form_data': {
             'beneficiary_absent': state.beneficiaryAbsent,
             'hbyc_bhraman': state.hbycBhraman,
+            if (state.beneficiaryAbsent == 'Yes')
+              'beneficiary_absent_reason': state.beneficiaryAbsentReason,
             'is_child_sick': state.isChildSick,
             if (state.isChildSick == 'Yes' && event.sicknessDetails != null) 'sickness_details': event.sicknessDetails,
+            if (state.weighedByAww == 'Yes') 'weight_for_age': state.weightForAge,
+            if (state.lengthHeightRecorded == 'Yes') 'weight_for_length': state.weightForLength,
+            if (state.orsPacketAvailable == 'No') 'ors_given': state.orsGiven,
+            if (state.orsPacketAvailable == 'No' && state.orsGiven == 'Yes') 'ors_count': state.orsCount,
+            if (state.ironFolicSyrupAvailable == 'No') 'ifa_syrup_given': state.ifaSyrupGiven,
+            if (state.ironFolicSyrupAvailable == 'No' && state.ifaSyrupGiven == 'Yes') 'ifa_syrup_count': state.ifaSyrupCount,
             'breastfeeding_continuing': state.breastfeedingContinuing,
             'complete_diet_provided': state.completeDietProvided,
+            'food_frequency_1': state.foodFrequency1,
+            'food_frequency_2': state.foodFrequency2,
+            'food_frequency_3': state.foodFrequency3,
+            'food_frequency_4': state.foodFrequency4,
             'weighed_by_aww': state.weighedByAww,
             'length_height_recorded': state.lengthHeightRecorded,
             'weight_less_than_3sd_referred': state.weightLessThan3sdReferred,
@@ -79,6 +106,7 @@ class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
             'advice_preparing_administering_ors': state.advicePreparingAdministeringOrs,
             'advice_administering_ifa_syrup': state.adviceAdministeringIfaSyrup,
             'completion_date': state.completionDate,
+
           },
           'created_at': now,
           'updated_at': now,

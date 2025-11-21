@@ -13,7 +13,7 @@ class BeneficiariesTable {
     geo_location TEXT,
     spouse_key TEXT,
     mother_key TEXT,
-    father_key TEXT,
+    father_key TEXT, 
     is_family_planning INTEGER,
     is_adult INTEGER,
     is_guest INTEGER,

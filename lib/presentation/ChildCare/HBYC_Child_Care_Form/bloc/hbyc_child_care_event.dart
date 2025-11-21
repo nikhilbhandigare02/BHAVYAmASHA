@@ -6,6 +6,49 @@ class BeneficiaryAbsentChanged extends HbycChildCareEvent {
   @override
   List<Object?> get props => [value];
 }
+// In hbyc_child_care_event.dart
+class WeightForAgeChanged extends HbycChildCareEvent {
+  final String value;
+  const WeightForAgeChanged(this.value);
+  @override List<Object?> get props => [value];
+}
+
+class WeightForLengthChanged extends HbycChildCareEvent {
+  final String value;
+  const WeightForLengthChanged(this.value);
+  @override List<Object?> get props => [value];
+}
+
+class OrsGivenChanged extends HbycChildCareEvent {
+  final String value;
+  const OrsGivenChanged(this.value);
+  @override List<Object?> get props => [value];
+}
+
+class OrsCountChanged extends HbycChildCareEvent {
+  final String value;
+  const OrsCountChanged(this.value);
+  @override List<Object?> get props => [value];
+}
+
+class IfaSyrupGivenChanged extends HbycChildCareEvent {
+  final String value;
+  const IfaSyrupGivenChanged(this.value);
+  @override List<Object?> get props => [value];
+}
+
+class IfaSyrupCountChanged extends HbycChildCareEvent {
+  final String value;
+  const IfaSyrupCountChanged(this.value);
+  @override List<Object?> get props => [value];
+}
+
+class BeneficiaryAbsentReasonChanged extends HbycChildCareEvent {
+  final String value;
+  const BeneficiaryAbsentReasonChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
 
 abstract class HbycChildCareEvent extends Equatable {
   const HbycChildCareEvent();
@@ -145,6 +188,29 @@ class AdvicePreparingAdministeringOrsChanged extends HbycChildCareEvent {
   const AdvicePreparingAdministeringOrsChanged(this.value);
   @override
   List<Object?> get props => [value];
+}
+class FoodFrequency1Changed extends HbycChildCareEvent {
+  final String value;
+  const FoodFrequency1Changed(this.value);
+  @override List<Object?> get props => [value];
+}
+
+class FoodFrequency2Changed extends HbycChildCareEvent {
+  final String value;
+  const FoodFrequency2Changed(this.value);
+  @override List<Object?> get props => [value];
+}
+
+class FoodFrequency3Changed extends HbycChildCareEvent {
+  final String value;
+  const FoodFrequency3Changed(this.value);
+  @override List<Object?> get props => [value];
+}
+
+class FoodFrequency4Changed extends HbycChildCareEvent {
+  final String value;
+  const FoodFrequency4Changed(this.value);
+  @override List<Object?> get props => [value];
 }
 
 class AdviceAdministeringIfaSyrupChanged extends HbycChildCareEvent {

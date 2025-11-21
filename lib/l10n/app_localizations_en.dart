@@ -1327,7 +1327,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbncMotherTitle => 'HBNC Mother';
 
   @override
-  String get hbycAdviceAdministeringIfaSyrupLabel => 'Advice on administering iron folic acid syrup';
+  String get hbycAdviceAdministeringIfaSyrupLabel => 'Counsel mother on how to measure the correct millilitres dose of IFA syrup';
 
   @override
   String get hbycAdviceComplementaryFoodsLabel => 'Advice on introducing complementary foods';
@@ -1339,13 +1339,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbycAdviceParentingSupportLabel => 'Advice about parenting (parenting support)';
 
   @override
-  String get hbycAdvicePreparingAdministeringOrsLabel => 'Advice on preparing and administering ORS';
+  String get hbycAdvicePreparingAdministeringOrsLabel => 'Assisted mother on Steps to prepare ORS at home and serve to child';
 
   @override
-  String get hbycBhramanLabel => 'HBYC Bhraman*';
+  String get hbycBhramanLabel => 'HBYC home visit*';
 
   @override
-  String get hbycBhramanRequired => 'HBYC Bhraman is required';
+  String get hbycBhramanRequired => 'HBYC home visit';
 
   @override
   String get hbycBreastfeedingContinuingLabel => 'Is breastfeeding continuing?';

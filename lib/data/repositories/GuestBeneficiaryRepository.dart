@@ -154,20 +154,61 @@ class GuestBeneficiaryRepository {
         if (householdDetails != null && householdDetails.isNotEmpty) {
           String? headId;
           dynamic members;
+
+          // First try to get all_members from form_json
           if (householdDetails['form_json'] is Map<String, dynamic>) {
             members = (householdDetails['form_json'] as Map<String, dynamic>)['all_members'];
           }
+
+          // Fallback to direct all_members
           members ??= householdDetails['all_members'];
+
+          // CRITICAL FIX: If members is a String, parse it as JSON
+          if (members is String) {
+            try {
+              members = jsonDecode(members);
+            } catch (e) {
+              print('Error parsing all_members JSON: $e');
+              members = null;
+            }
+          }
+
           if (members is List) {
             for (final m in members) {
               try {
-                final rel = (m['relaton_with_family_head'] ?? m['relation_with_family_head'])?.toString().toLowerCase();
-                if (rel == 'self') {
-                  headId = m['beneficiary_key']?.toString();
+                String? rel;
+                String? benKey;
+
+                if (m is Map) {
+                  // Check memberDetails first (this is where the data actually is)
+                  final md = m['memberDetails'];
+                  if (md is Map) {
+                    rel = (md['relaton_with_family_head'] ?? md['relation_with_family_head'])?.toString();
+                    benKey = md['beneficiary_key']?.toString();
+                  }
+
+                  // Fallback to top level if not found in memberDetails
+                  if (rel == null || rel.isEmpty || benKey == null || benKey.isEmpty) {
+                    rel = (m['relaton_with_family_head'] ?? m['relation_with_family_head'])?.toString() ?? rel;
+                    benKey = (m['beneficiary_key'] ?? m['unique_key'])?.toString() ?? benKey;
+                  }
+                }
+
+                // Check for 'self' or 'Self' relation
+                if ((rel ?? '').toLowerCase() == 'self' && (benKey != null && benKey.isNotEmpty)) {
+                  headId = benKey;
+                  print('Found household head: $headId');
                   break;
                 }
-              } catch (_) {}
+              } catch (e) {
+                print('Error processing member: $e');
+              }
             }
+          }
+
+          // If still no head found, log warning
+          if (headId == null || headId.isEmpty) {
+            print('Warning: No household head found for household: ${householdDetails['unique_key']}');
           }
 
           final hhRow = <String, dynamic>{
@@ -195,8 +236,10 @@ class GuestBeneficiaryRepository {
           if (existsH == null || existsH.isEmpty) {
             await LocalStorageDao.instance.insertHousehold(hhRow);
             hhInserted++;
+            print('Household inserted: ${hhRow['unique_key']} with head_id: $headId');
           } else {
             hhSkipped++;
+            print('Household skipped (already exists): ${hhRow['unique_key']}');
           }
         }
       } catch (e) {

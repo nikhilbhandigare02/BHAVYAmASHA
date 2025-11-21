@@ -4,6 +4,7 @@ enum HbycFormStatus { initial, submitting, success, failure }
 
 class HbycChildCareState extends Equatable {
   final String beneficiaryAbsent;
+  final String beneficiaryAbsentReason;
   final String hbycBhraman; // required
   final String isChildSick;
   final String breastfeedingContinuing;
@@ -27,9 +28,21 @@ class HbycChildCareState extends Equatable {
   final String completionDate; // dd-MM-yyyy
   final HbycFormStatus status;
   final String? error;
+  final String foodFrequency1; // 2-3 tablespoons, 2-3 times daily
+  final String foodFrequency2; // 1/2 cup, 2-3 times daily + 1-2 snacks
+  final String foodFrequency3; // 1/2 cup, 3-4 times daily + 1-2 snacks
+  final String foodFrequency4;
+  final String weightForAge;  // For "Mention the recorded weight-for-age"
+  final String weightForLength;  // For "Mention the recorded weight-for-length/height"
+  final String orsGiven;  // For "ORS given?"
+  final String orsCount;  // For "Number of ORS given"
+  final String ifaSyrupGiven;  // For "Iron Folic Acid syrup Given?"
+  final String ifaSyrupCount;// 3/4-1 cup, 3-4 times daily + 1-2 snacks
+
 
   const HbycChildCareState({
     this.beneficiaryAbsent = '',
+    this.beneficiaryAbsentReason = '',
     this.hbycBhraman = '',
     this.isChildSick = '',
     this.breastfeedingContinuing = '',
@@ -53,10 +66,21 @@ class HbycChildCareState extends Equatable {
     this.completionDate = '',
     this.status = HbycFormStatus.initial,
     this.error,
+    this.foodFrequency1 = '',
+    this.foodFrequency2 = '',
+    this.foodFrequency3 = '',
+    this.foodFrequency4 = '',
+    this.weightForAge = '',
+    this.weightForLength = '',
+    this.orsGiven = '',
+    this.orsCount = '',
+    this.ifaSyrupGiven = '',
+    this.ifaSyrupCount = '',
   });
 
   HbycChildCareState copyWith({
     String? beneficiaryAbsent,
+    String? beneficiaryAbsentReason,
     String? hbycBhraman,
     String? isChildSick,
     String? breastfeedingContinuing,
@@ -80,9 +104,20 @@ class HbycChildCareState extends Equatable {
     String? completionDate,
     HbycFormStatus? status,
     String? error,
+    String? foodFrequency1,
+    String? foodFrequency2,
+    String? foodFrequency3,
+    String? foodFrequency4,
+    String? weightForAge,
+    String? weightForLength,
+    String? orsGiven,
+    String? orsCount,
+    String? ifaSyrupGiven,
+    String? ifaSyrupCount,
   }) {
     return HbycChildCareState(
       beneficiaryAbsent: beneficiaryAbsent ?? this.beneficiaryAbsent,
+      beneficiaryAbsentReason: beneficiaryAbsentReason ?? this.beneficiaryAbsentReason,
       hbycBhraman: hbycBhraman ?? this.hbycBhraman,
       isChildSick: isChildSick ?? this.isChildSick,
       breastfeedingContinuing: breastfeedingContinuing ?? this.breastfeedingContinuing,
@@ -106,12 +141,23 @@ class HbycChildCareState extends Equatable {
       completionDate: completionDate ?? this.completionDate,
       status: status ?? this.status,
       error: error,
+      foodFrequency1: foodFrequency1 ?? this.foodFrequency1,
+      foodFrequency2: foodFrequency2 ?? this.foodFrequency2,
+      foodFrequency3: foodFrequency3 ?? this.foodFrequency3,
+      foodFrequency4: foodFrequency4 ?? this.foodFrequency4,
+      weightForLength: weightForLength ?? this.weightForLength,
+      orsGiven: orsGiven ?? this.orsGiven,
+      orsCount: orsCount ?? this.orsCount,
+      ifaSyrupGiven: ifaSyrupGiven ?? this.ifaSyrupGiven,
+      ifaSyrupCount: ifaSyrupCount ?? this.ifaSyrupCount,
+
     );
   }
 
   @override
   List<Object?> get props => [
         beneficiaryAbsent,
+        beneficiaryAbsentReason,
         hbycBhraman,
         isChildSick,
         breastfeedingContinuing,
@@ -135,6 +181,16 @@ class HbycChildCareState extends Equatable {
         completionDate,
         status,
         error,
+    foodFrequency1,
+    foodFrequency2,
+    foodFrequency3,
+    foodFrequency4,
+    weightForAge,
+    weightForLength,
+    orsGiven,
+    orsCount,
+    ifaSyrupGiven,
+    ifaSyrupCount,
       ];
 }
 

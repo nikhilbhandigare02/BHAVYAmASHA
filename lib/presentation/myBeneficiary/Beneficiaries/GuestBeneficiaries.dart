@@ -71,7 +71,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
           final gender = (info['gender']?.toString() ?? 'N/A');
           final fatherSpouse = (info['father_or_spouse_name']?.toString() ??
               info['fatherName']?.toString() ??
-              info['spouseName']?.toString() ?? 
+              info['spouseName']?.toString() ??
               'N/A');
 
           final uniqueKey = row['unique_key']?.toString() ?? '';
@@ -171,7 +171,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
     }
   }
 
-  
+
 
 
 
@@ -192,14 +192,14 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
               ? const Center(child: CircularProgressIndicator())
               : _filtered.isEmpty
               ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'No guest beneficiaries found',
-                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                  ),
-                ),
-              )
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'No guest beneficiaries found',
+                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+              ),
+            ),
+          )
               : Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
@@ -281,7 +281,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
                 ],
               ),
             ),
- 
+
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),

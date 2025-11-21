@@ -122,11 +122,28 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               onChanged: (v) => context.read<HbycChildCareBloc>().add(BeneficiaryAbsentChanged(v ?? '')),
                               validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            if (state.beneficiaryAbsent == 'Yes') ...[ 
+                              const SizedBox(height: 8),
+                              Text('Reason for Absent', style: TextStyle(fontSize: 14.sp)),
+                              CustomTextField(
+                                key: const ValueKey('beneficiaryAbsentReason'),
+                                hintText: 'Enter reason for absence',
+                                onChanged: (value) => context.read<HbycChildCareBloc>().add(BeneficiaryAbsentReasonChanged(value)),
+                                validator: (value) {
+                                  if (state.beneficiaryAbsent == 'Yes' && (value == null || value.isEmpty)) {
+                                    return 'Please enter reason for absence';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
                           ],
                         );
                       },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
                     const SizedBox(height: 1),
                     BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                       builder: (context, state) {
@@ -162,16 +179,14 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               hintText: AppLocalizations.of(context)!.select,
                               onChanged: (v) => context.read<HbycChildCareBloc>().add(IsChildSickChanged(v ?? '')),
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (state.isChildSick == 'Yes')
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: CustomTextField(
-                                  controller: _sicknessDetailsController,
-                                  hintText: 'Please provide details of sickness',
-                                  maxLines: 3,
-                                ),
+                              CustomTextField(
+                                controller: _sicknessDetailsController,
+                                hintText: 'Child referred to health facility?',
+                                maxLines: 3,
                               ),
-                            const SizedBox(height: 8),
+
                           ],
                         );
                       },
@@ -197,12 +212,13 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
+                    // Replace the existing "Complementary Food is given" section with:
                     BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                       builder: (context, state) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycCompleteDietProvidedLabel, style: TextStyle(fontSize: 14.sp),),
+                            Text('Complementary Food is given', style: TextStyle(fontSize: 14.sp)),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -210,6 +226,51 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               hintText: AppLocalizations.of(context)!.select,
                               onChanged: (v) => context.read<HbycChildCareBloc>().add(CompleteDietProvidedChanged(v ?? '')),
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            if (state.completeDietProvided == 'Yes') ...[
+                              const SizedBox(height: 12),
+                              Text('1. 2-3 tablespoons of food at a time, 2-3 times each day', style: TextStyle(fontSize: 14.sp)),
+                              ApiDropdown<String>(
+                                items: _yesNoOptions,
+                                getLabel: (s) => s,
+                                value: state.foodFrequency1.isNotEmpty ? state.foodFrequency1 : null,
+                                hintText: AppLocalizations.of(context)!.select,
+                                onChanged: (v) => context.read<HbycChildCareBloc>().add(FoodFrequency1Changed(v ?? '')),
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              const SizedBox(height: 12),
+                              Text('2. 1/2 cup/katori serving at a time, 2-3 times each day with 1-2 snacks between meals',
+                                  style: TextStyle(fontSize: 14.sp)),
+                              ApiDropdown<String>(
+                                items: _yesNoOptions,
+                                getLabel: (s) => s,
+                                value: state.foodFrequency2.isNotEmpty ? state.foodFrequency2 : null,
+                                hintText: AppLocalizations.of(context)!.select,
+                                onChanged: (v) => context.read<HbycChildCareBloc>().add(FoodFrequency2Changed(v ?? '')),
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              const SizedBox(height: 12),
+                              Text('3. 1/2 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
+                                  style: TextStyle(fontSize: 14.sp)),
+                              ApiDropdown<String>(
+                                items: _yesNoOptions,
+                                getLabel: (s) => s,
+                                value: state.foodFrequency3.isNotEmpty ? state.foodFrequency3 : null,
+                                hintText: AppLocalizations.of(context)!.select,
+                                onChanged: (v) => context.read<HbycChildCareBloc>().add(FoodFrequency3Changed(v ?? '')),
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              const SizedBox(height: 12),
+                              Text('4. 3/4 to 1 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
+                                  style: TextStyle(fontSize: 14.sp)),
+                              ApiDropdown<String>(
+                                items: _yesNoOptions,
+                                getLabel: (s) => s,
+                                value: state.foodFrequency4.isNotEmpty ? state.foodFrequency4 : null,
+                                hintText: AppLocalizations.of(context)!.select,
+                                onChanged: (v) => context.read<HbycChildCareBloc>().add(FoodFrequency4Changed(v ?? '')),
+                              ),
+                            ],
                           ],
                         );
                       },
@@ -229,6 +290,22 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               hintText: AppLocalizations.of(context)!.select,
                               onChanged: (v) => context.read<HbycChildCareBloc>().add(WeighedByAwwChanged(v ?? '')),
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            if (state.weighedByAww == 'Yes') ...[
+                              const SizedBox(height: 8),
+                              CustomTextField(
+                                key: const ValueKey('weightForAge'),
+                                hintText: 'Mention the recorded weight-for-age as per MCP card (in kg)',
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) => context.read<HbycChildCareBloc>().add(WeightForAgeChanged(value)),
+                                validator: (value) {
+                                  if (state.weighedByAww == 'Yes' && (value == null || value.isEmpty)) {
+                                    return 'Please enter weight-for-age';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
                           ],
                         );
                       },
@@ -240,7 +317,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycLengthHeightRecordedLabel, style: TextStyle(fontSize: 14.sp),),
+                            Text('Recording of weight-for-length/height by Anganwadi Worker', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -248,6 +325,22 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               hintText: AppLocalizations.of(context)!.select,
                               onChanged: (v) => context.read<HbycChildCareBloc>().add(LengthHeightRecordedChanged(v ?? '')),
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            if (state.lengthHeightRecorded == 'Yes') ...[
+                              const SizedBox(height: 8),
+                              CustomTextField(
+                                key: const ValueKey('weightForLength'),
+                                hintText: 'Mention the recorded weight-for-length/height as per MCP card (in cm)',
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) => context.read<HbycChildCareBloc>().add(WeightForLengthChanged(value)),
+                                validator: (value) {
+                                  if (state.lengthHeightRecorded == 'Yes' && (value == null || value.isEmpty)) {
+                                    return 'Please enter weight-for-length/height';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
                           ],
                         );
                       },
@@ -273,7 +366,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: CustomTextField(
                                   controller: _referralDetailsController,
-                                  hintText: 'Please provide referral details',
+                                  hintText: 'Referred place ',
                                   maxLines: 3,
                                 ),
                               ),
@@ -290,7 +383,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycDevelopmentDelaysObservedLabel, style: TextStyle(fontSize: 14.sp),),
+                            Text('Developmental delay checked?', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -303,7 +396,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: CustomTextField(
                                   controller: _developmentDelaysDetailsController,
-                                  hintText: 'Please provide details of development delays',
+                                  hintText: 'is the child referred?',
                                   maxLines: 3,
                                 ),
                               ),
@@ -319,7 +412,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycFullyVaccinatedLabel, style: TextStyle(fontSize: 14.sp),),
+                            Text('Immunization status checked as per MCP card? ', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -382,8 +475,49 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               getLabel: (s) => s,
                               value: state.orsPacketAvailable.isNotEmpty ? state.orsPacketAvailable : null,
                               hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(OrsPacketAvailableChanged(v ?? '')),
+                              onChanged: (v) {
+                                context.read<HbycChildCareBloc>().add(OrsPacketAvailableChanged(v ?? ''));
+                                // Reset the dependent fields when changing the parent field
+                                if (v != 'No') {
+                                  context.read<HbycChildCareBloc>().add(OrsGivenChanged(''));
+                                  context.read<HbycChildCareBloc>().add(OrsCountChanged(''));
+                                }
+                              },
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            if (state.orsPacketAvailable == 'No') ...[
+                              const SizedBox(height: 8),
+                              Text('ORS given?', style: TextStyle(fontSize: 14.sp)),
+                              ApiDropdown<String>(
+                                items: _yesNoOptions,
+                                getLabel: (s) => s,
+                                value: state.orsGiven.isNotEmpty ? state.orsGiven : null,
+                                hintText: AppLocalizations.of(context)!.select,
+                                onChanged: (v) {
+                                  context.read<HbycChildCareBloc>().add(OrsGivenChanged(v ?? ''));
+                                  // Reset the count if "No" is selected
+                                  if (v != 'Yes') {
+                                    context.read<HbycChildCareBloc>().add(OrsCountChanged(''));
+                                  }
+                                },
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              if (state.orsGiven == 'Yes') ...[
+                                const SizedBox(height: 8),
+                                CustomTextField(
+                                  key: const ValueKey('orsCount'),
+                                  hintText: 'Number of ORS given',
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => context.read<HbycChildCareBloc>().add(OrsCountChanged(value)),
+                                  validator: (value) {
+                                    if (state.orsGiven == 'Yes' && (value == null || value.isEmpty)) {
+                                      return 'Please enter number of ORS given';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ],
                           ],
                         );
                       },
@@ -395,45 +529,86 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycIronFolicSyrupAvailableLabel, style: TextStyle(fontSize: 14.sp),),
+                            Text(
+                              AppLocalizations.of(context)!.hbycIronFolicSyrupAvailableLabel,
+                              style: TextStyle(fontSize: 14.sp),
+                            ),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
-                              value: state.ironFolicSyrupAvailable.isNotEmpty ? state.ironFolicSyrupAvailable : null,
+                              value: state.ironFolicSyrupAvailable.isNotEmpty
+                                  ? state.ironFolicSyrupAvailable
+                                  : null,
                               hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(IronFolicSyrupAvailableChanged(v ?? '')),
+                              onChanged: (v) {
+                                context.read<HbycChildCareBloc>().add(
+                                    IronFolicSyrupAvailableChanged(v ?? '')
+                                );
+
+                                if (v != 'Yes') {
+                                  context.read<HbycChildCareBloc>().add(IfaSyrupGivenChanged(''));
+                                  context.read<HbycChildCareBloc>().add(IfaSyrupCountChanged(''));
+                                }
+                              },
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                            // Show these fields when syrup IS available (Yes)
+                            if (state.ironFolicSyrupAvailable == 'Yes') ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                  'Iron Folic Acid syrup Given?',
+                                  style: TextStyle(fontSize: 14.sp)
+                              ),
+                              ApiDropdown<String>(
+                                items: _yesNoOptions,
+                                getLabel: (s) => s,
+                                value: state.ifaSyrupGiven.isNotEmpty
+                                    ? state.ifaSyrupGiven
+                                    : null,
+                                hintText: AppLocalizations.of(context)!.select,
+                                onChanged: (v) {
+                                  context.read<HbycChildCareBloc>().add(
+                                      IfaSyrupGivenChanged(v ?? '')
+                                  );
+                                  // Reset the count if "No" is selected
+                                  if (v != 'Yes') {
+                                    context.read<HbycChildCareBloc>().add(IfaSyrupCountChanged(''));
+                                  }
+                                },
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                              if (state.ifaSyrupGiven == 'Yes') ...[
+                                const SizedBox(height: 8),
+                                CustomTextField(
+                                  key: const ValueKey('ifaSyrupCount'),
+                                  hintText: 'Number of Iron Folic Acid syrup given',
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => context.read<HbycChildCareBloc>().add(
+                                      IfaSyrupCountChanged(value)
+                                  ),
+                                  validator: (value) {
+                                    if (state.ifaSyrupGiven == 'Yes' &&
+                                        (value == null || value.isEmpty)) {
+                                      return 'Please enter number of Iron Folic Acid syrup given';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ],
                           ],
                         );
                       },
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                     BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                       builder: (context, state) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycCounselingExclusiveBf6mLabel, style: TextStyle(fontSize: 14.sp),),
-                            ApiDropdown<String>(
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.counselingExclusiveBf6m.isNotEmpty ? state.counselingExclusiveBf6m : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(CounselingExclusiveBf6mChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(AppLocalizations.of(context)!.hbycAdviceComplementaryFoodsLabel, style: TextStyle(fontSize: 14.sp),),
+                            Text('Counsel for complementary feeding? ', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -452,7 +627,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycAdviceHandWashingHygieneLabel, style: TextStyle(fontSize: 14.sp),),
+                            Text('Counsel for hand washing?', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -471,7 +646,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycAdviceParentingSupportLabel, style: TextStyle(fontSize: 14.sp),),
+                            Text('Counsel for parenting?', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -490,7 +665,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycCounselingFamilyPlanningLabel, style: TextStyle(fontSize: 14.sp),),
+                            Text('Counsel for family planning?', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
