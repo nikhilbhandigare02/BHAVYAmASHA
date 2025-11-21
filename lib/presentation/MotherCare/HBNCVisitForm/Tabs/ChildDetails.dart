@@ -106,9 +106,9 @@ class ChildDetailsTab extends StatelessWidget {
               
                   ApiDropdown<String>(
                     labelText: t.weightColorMatchLabel,
-                    items: const ['Green', 'Yellow', 'Red'],
-                    getLabel: (e) => e == 'Green' ? t.colorGreen : (e == 'Yellow' ? t.colorYellow : t.colorRed),
-                    value: s(c['weightColorMatch']),
+                    items: const ['Yes', 'No'],
+                    getLabel: (e) => e == 'Yes' ? 'Yes' : 'No',
+                    value: yn(c['weightColorMatch']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'weightColorMatch', value: val),
                     ),
@@ -155,9 +155,16 @@ class ChildDetailsTab extends StatelessWidget {
               
                   ApiDropdown<String>(
                     labelText: t.firstBreastfeedTimingLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['firstBreastfeedTiming']),
+                    items: const [
+                      'within 30 minutes of birth',
+                      'within 1 hour of birth',
+                      'within 6 hours of birth',
+                      'within 24 hours of birth',
+                      'other',
+                      'not breastfed'
+                    ],
+                    getLabel: (e) => e,
+                    value: c['firstBreastfeedTiming'] ?? '',
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'firstBreastfeedTiming', value: val),
                     ),
@@ -166,9 +173,15 @@ class ChildDetailsTab extends StatelessWidget {
               
                   ApiDropdown<String>(
                     labelText: t.howWasBreastfedLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['howWasBreastfed']),
+                    items: const [
+                      'normal',
+                      'forcefully',
+                      'with weakness',
+                      'could not breast feed but had to be fed with spoon',
+                      'could neither breast feed nor take given by spoon'
+                    ],
+                    getLabel: (e) => e,
+                    value: c['howWasBreastfed'] ?? '',
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'howWasBreastfed', value: val),
                     ),
@@ -242,6 +255,19 @@ class ChildDetailsTab extends StatelessWidget {
                   ),
                                       const Divider(height: 0,),
               
+                  // Conditional dropdown for navel tied by ASHA/ANM
+                  if (c['bleedingUmbilicalCord'] == 'Yes')
+                    ApiDropdown<String>(
+                      labelText: 'Is navel tied with a clean thread by ASHA or ANM?',
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['navelTiedByAshaAnm']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'navelTiedByAshaAnm', value: val),
+                      ),
+                    ),
+                  if (c['bleedingUmbilicalCord'] == 'Yes')
+                    const Divider(height: 0,),
               
                   ApiDropdown<String>(
                     labelText: t.pusInNavelLabel,
@@ -266,6 +292,53 @@ class ChildDetailsTab extends StatelessWidget {
                   ),
                                       const Divider(height: 0,),
               
+                  // New Question 1: Wiped with clean cloth
+                  ApiDropdown<String>(
+                    labelText: 'Has the baby been wiped with a clean dry cloth?',
+                    items: const ['Yes', 'No'],
+                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                    value: yn(c['wipedWithCleanCloth']),
+                    onChanged: (val) => context.read<HbncVisitBloc>().add(
+                      NewbornDetailsChanged(field: 'wipedWithCleanCloth', value: val),
+                    ),
+                  ),
+                                      const Divider(height: 0,),
+              
+                  // New Question 2: Kept warm
+                  ApiDropdown<String>(
+                    labelText: 'Has the baby been kept warm?',
+                    items: const ['Yes', 'No'],
+                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                    value: yn(c['keptWarm']),
+                    onChanged: (val) => context.read<HbncVisitBloc>().add(
+                      NewbornDetailsChanged(field: 'keptWarm', value: val),
+                    ),
+                  ),
+                                      const Divider(height: 0,),
+              
+                  // New Question 3: Given bath
+                  ApiDropdown<String>(
+                    labelText: 'Has the baby been given a bath?',
+                    items: const ['Yes', 'No'],
+                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                    value: yn(c['givenBath']),
+                    onChanged: (val) => context.read<HbncVisitBloc>().add(
+                      NewbornDetailsChanged(field: 'givenBath', value: val),
+                    ),
+                  ),
+                                      const Divider(height: 0,),
+              
+                  // New Question 4: Wrapped and placed near mother
+                  ApiDropdown<String>(
+                    labelText: 'Was the baby wrapped in a cloth and placed near the mother?',
+                    items: const ['Yes', 'No'],
+                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                    value: yn(c['wrappedAndPlacedNearMother']),
+                    onChanged: (val) => context.read<HbncVisitBloc>().add(
+                      NewbornDetailsChanged(field: 'wrappedAndPlacedNearMother', value: val),
+                    ),
+                  ),
+                                      const Divider(height: 0,),
               
                   ApiDropdown<String>(
                     labelText: t.breathingRapidLabel,
@@ -468,6 +541,32 @@ class ChildDetailsTab extends StatelessWidget {
                     value: yn(c['mcpCardAvailable']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'mcpCardAvailable', value: val),
+                    ),
+                  ),
+                                      const Divider(height: 0,),
+              
+                  // Conditional dropdown for weight recorded in MCP card
+                  if (c['mcpCardAvailable'] == 'Yes')
+                    ApiDropdown<String>(
+                      labelText: 'Is the weight of the new born baby recorded in the Mother Card Protection card?',
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['weightRecordedInMcpCard']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'weightRecordedInMcpCard', value: val),
+                      ),
+                    ),
+                  if (c['mcpCardAvailable'] == 'Yes')
+                    const Divider(height: 0,),
+              
+                  // Refer to hospital field
+                  ApiDropdown<String>(
+                    labelText: 'Refer to hospital?',
+                    items: const ['Yes', 'No'],
+                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                    value: yn(c['referToHospital']),
+                    onChanged: (val) => context.read<HbncVisitBloc>().add(
+                      NewbornDetailsChanged(field: 'referToHospital', value: val),
                     ),
                   ),
                                       const Divider(height: 0,),

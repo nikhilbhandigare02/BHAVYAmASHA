@@ -2556,13 +2556,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dead => 'dead';
 
   @override
-  String get babyConditionLabel => 'Baby\'s condition*';
+  String get babyConditionLabel => 'Baby\'s condition *';
 
   @override
-  String get babyNameLabel => 'Baby\'s name*';
+  String get babyNameLabel => 'Baby\'s name  *';
 
   @override
-  String get babyGenderLabel => 'Baby\'s gender*';
+  String get babyGenderLabel => 'Baby\'s gender *';
 
   @override
   String get newbornWeightGramLabel => 'Baby\'s weight (g) *';
@@ -2571,7 +2571,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newbornTemperatureLabel => 'temperature *';
 
   @override
-  String get infantTemperatureUnitLabel => 'Infant\'s temperature (measure and record in the axilla) *';
+  String get infantTemperatureUnitLabel => 'Temperature of the baby (Measure in axial and record) *';
 
   @override
   String get temperatureUnitCelsius => 'Celsius';
@@ -2580,7 +2580,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get temperatureUnitFahrenheit => 'Fahrenheit';
 
   @override
-  String get weightColorMatchLabel => 'What color does the weight match?';
+  String get weightColorMatchLabel => 'Weghing matches with colour? *';
 
   @override
   String get weighingScaleColorLabel => 'Weighing Scale Color *';
@@ -2595,46 +2595,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get colorRed => 'Red';
 
   @override
-  String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold to the touch, or that the child\'s temperature is 37.5°C or higher or less than 35.5°C, and that the chest draws inward when breathing.*';
+  String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold to the touch, or that the child\'s temperature is 37.5°C or higher or less than 35.5°C, and that the chest draws inward when breathing. *';
 
   @override
-  String get bleedingUmbilicalCordLabel => 'Is there bleeding from the umbilical cord?*';
+  String get bleedingUmbilicalCordLabel => 'Is there bleeding from the umbilical cord? *';
 
   @override
-  String get pusInNavelLabel => 'Is there pus in the navel?*';
+  String get pusInNavelLabel => 'Is there pus in the navel? *';
 
   @override
   String get routineCareDoneLabel => 'Were routine newborn care tasks performed?*';
 
   @override
-  String get breathingRapidLabel => 'Is your baby breathing rapidly (60 or more per minute)?*';
+  String get breathingRapidLabel => 'Is your baby breathing rapidly (60 or more per minute)? *';
 
   @override
   String get lethargicLabel => 'Is the baby lethargic?';
 
   @override
-  String get congenitalAbnormalitiesLabel => 'Does the baby have any congenital physical abnormalities?*';
+  String get congenitalAbnormalitiesLabel => 'Does the baby have any congenital physical abnormalities? *';
 
   @override
-  String get eyesNormalLabel => 'Eyes: Normal*';
+  String get eyesNormalLabel => 'Eyes: Normal *';
 
   @override
-  String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming from the eyes?*';
+  String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming from the eyes? *';
 
   @override
   String get skinFoldRednessLabel => 'Is there any cracking/redness in the skin fold? (thigh/armpit/hip) *';
 
   @override
-  String get newbornJaundiceLabel => 'Yellowing of the skin/palms/soles/eyes: Jaundice*';
+  String get newbornJaundiceLabel => 'Yellowing of the skin/palms/soles/eyes: Jaundice *';
 
   @override
-  String get pusBumpsOrBoilLabel => 'More than 10 pus-filled bumps on the skin or one large boil?*';
+  String get pusBumpsOrBoilLabel => 'More than 10 pus-filled bumps on the skin or one large boil? *';
 
   @override
   String get newbornSeizuresLabel => 'Is the child having seizures?*';
 
   @override
-  String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying constantly or urinating less than 6 times a day?*';
+  String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying constantly or urinating less than 6 times a day? *';
 
   @override
   String get cryingSoftlyLabel => 'Is the baby crying softly? *';
@@ -2886,28 +2886,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
-  String get exclusiveBreastfeedingStartedLabel => 'Has exclusive breastfeeding started?*';
+  String get exclusiveBreastfeedingStartedLabel => 'Has exclusive breastfeeding started? *';
 
   @override
-  String get firstBreastfeedTimingLabel => 'When was the first breastfeed given to the baby?*';
+  String get firstBreastfeedTimingLabel => 'When was the first breastfeed given to the baby? *';
 
   @override
   String get howWasBreastfedLabel => 'How was the baby breastfed?*';
 
   @override
-  String get firstFeedGivenAfterBirthLabel => 'What was given to the baby as the first feed after birth?*';
+  String get firstFeedGivenAfterBirthLabel => 'What was given to the baby as the first feed after birth? *';
 
   @override
-  String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)?*';
+  String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)? *';
 
   @override
-  String get babyDrinkingLessMilkLabel => 'Is the baby drinking less milk?*';
+  String get babyDrinkingLessMilkLabel => 'Is the child feeding less? *';
 
   @override
-  String get breastfeedingStoppedLabel => 'Has breastfeeding been stopped for the baby?*';
+  String get breastfeedingStoppedLabel => 'Has the child stopped feeding? *';
 
   @override
-  String get bloatedStomachOrFrequentVomitingLabel => 'Is the baby\'s stomach bloated or does the mother report frequent vomiting?*';
+  String get bloatedStomachOrFrequentVomitingLabel => 'Bloated stomach or mother tells that the child vomits again and again *';
 
   @override
   String get err_visit_day_required => 'Home Visit Day is required.';
