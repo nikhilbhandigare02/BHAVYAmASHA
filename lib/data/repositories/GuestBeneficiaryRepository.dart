@@ -153,7 +153,11 @@ class GuestBeneficiaryRepository {
 
         if (householdDetails != null && householdDetails.isNotEmpty) {
           String? headId;
-          final members = householdDetails['all_members'];
+          dynamic members;
+          if (householdDetails['form_json'] is Map<String, dynamic>) {
+            members = (householdDetails['form_json'] as Map<String, dynamic>)['all_members'];
+          }
+          members ??= householdDetails['all_members'];
           if (members is List) {
             for (final m in members) {
               try {
@@ -172,7 +176,7 @@ class GuestBeneficiaryRepository {
             'address': householdDetails['address'] ?? {},
             'geo_location': householdDetails['geo_location'] ?? {},
             'head_id': headId,
-            'household_info': rec['form_json'] ?? rec,
+            'household_info': (householdDetails['form_json'] ?? rec['form_json']) ?? rec,
             'device_details': deviceDetails ?? householdDetails['device_details'] ?? {},
             'app_details': rec['app_details'] ?? {},
             'parent_user': rec['parent_user'] ?? {},
