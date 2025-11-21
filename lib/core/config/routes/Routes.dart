@@ -76,6 +76,7 @@ import '../../../presentation/myBeneficiary/Beneficiaries/AbortionList.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/DeathRegister.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/EligibleCoupleList.dart' show EligibleCoupleList;
 import '../../../presentation/myBeneficiary/Beneficiaries/FamilyUpdateList.dart' show FamliyUpdate;
+import '../../../presentation/myBeneficiary/Beneficiaries/GuestBeneficiaries.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/HBNCList.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/LBWRefered.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/MigratedOut.dart';
@@ -113,6 +114,8 @@ class Routes{
         return MaterialPageRoute(builder: (_) => const IncentivePortal());
       case Route_Names.incentiveForm:
         return MaterialPageRoute(builder: (_) => const IncentiveForm());
+      case Route_Names.Guestbeneficiaries:
+        return MaterialPageRoute(builder: (_) => const Guestbeneficiaries());
       case Route_Names.GuestBeneficiarySearch:
         return MaterialPageRoute(builder: (context) => GuestBeneficiarySearch(),);
       case Route_Names.RegisterNewHousehold:

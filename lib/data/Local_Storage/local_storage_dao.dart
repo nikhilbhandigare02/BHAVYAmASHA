@@ -1304,20 +1304,29 @@ class LocalStorageDao {
       final db = await _db;
       final Map<String, dynamic> beneficiaryMap = beneficiary.toMap();
 
-      // Ensure all required fields are present
-      beneficiaryMap['current_user_key'] = ''; // Add current user key if available
-      beneficiaryMap['facility_id'] = 0; // Default facility ID
-      beneficiaryMap['parent_user'] = ''; // Parent user if available
-      beneficiaryMap['app_details'] = jsonEncode({
-        'app_name': 'BHAVYAmASHA',
-        'version': '1.0.0',
-      });
-      beneficiaryMap['device_details'] = jsonEncode({
-        'platform': 'mobile',
-        'os': 'android',
-      });
+      if (!beneficiaryMap.containsKey('current_user_key') || (beneficiaryMap['current_user_key'] == null)) {
+        beneficiaryMap['current_user_key'] = '';
+      }
+      if (!beneficiaryMap.containsKey('facility_id') || (beneficiaryMap['facility_id'] == null)) {
+        beneficiaryMap['facility_id'] = 0;
+      }
+      if (!beneficiaryMap.containsKey('parent_user') || (beneficiaryMap['parent_user'] == null)) {
+        beneficiaryMap['parent_user'] = jsonEncode({});
+      }
+      if (!beneficiaryMap.containsKey('app_details') || (beneficiaryMap['app_details'] == null)) {
+        beneficiaryMap['app_details'] = jsonEncode({
+          'app_name': 'BHAVYAmASHA',
+          'version': '1.0.0',
+        });
+      }
+      if (!beneficiaryMap.containsKey('device_details') || (beneficiaryMap['device_details'] == null)) {
+        beneficiaryMap['device_details'] = jsonEncode({
+          'platform': 'mobile',
+          'os': 'android',
+        });
+      }
+      beneficiaryMap['is_guest'] = 1;
 
-      // Check if beneficiary already exists
       final existing = await db.query(
         BeneficiariesTable.table,
         where: 'unique_key = ?',
@@ -1326,19 +1335,59 @@ class LocalStorageDao {
 
       if (existing.isNotEmpty) {
         // Update existing record
-        return await db.update(
+        final affected = await db.update(
           BeneficiariesTable.table,
           beneficiaryMap,
           where: 'unique_key = ?',
           whereArgs: [beneficiary.uniqueKey],
         );
+        try {
+          final savedRows = await db.query(
+            BeneficiariesTable.table,
+            where: 'unique_key = ?',
+            whereArgs: [beneficiary.uniqueKey],
+            limit: 1,
+          );
+          if (savedRows.isNotEmpty) {
+            final row = Map<String, dynamic>.from(savedRows.first);
+            try {
+              row['beneficiary_info'] = safeJsonDecode(row['beneficiary_info']?.toString());
+              row['death_details'] = safeJsonDecode(row['death_details']?.toString());
+              row['device_details'] = safeJsonDecode(row['device_details']?.toString());
+              row['app_details'] = safeJsonDecode(row['app_details']?.toString());
+              row['parent_user'] = safeJsonDecode(row['parent_user']?.toString());
+            } catch (_) {}
+            print('Saved beneficiary row (update): ${jsonEncode(row)}');
+          }
+        } catch (_) {}
+        return affected;
       } else {
         // Insert new record
-        return await db.insert(
+        final insertedId = await db.insert(
           BeneficiariesTable.table,
           beneficiaryMap,
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
+        try {
+          final savedRows = await db.query(
+            BeneficiariesTable.table,
+            where: 'unique_key = ?',
+            whereArgs: [beneficiary.uniqueKey],
+            limit: 1,
+          );
+          if (savedRows.isNotEmpty) {
+            final row = Map<String, dynamic>.from(savedRows.first);
+            try {
+              row['beneficiary_info'] = safeJsonDecode(row['beneficiary_info']?.toString());
+              row['death_details'] = safeJsonDecode(row['death_details']?.toString());
+              row['device_details'] = safeJsonDecode(row['device_details']?.toString());
+              row['app_details'] = safeJsonDecode(row['app_details']?.toString());
+              row['parent_user'] = safeJsonDecode(row['parent_user']?.toString());
+            } catch (_) {}
+            print('Saved beneficiary row (insert): ${jsonEncode(row)}');
+          }
+        } catch (_) {}
+        return insertedId;
       }
     } catch (e) {
       print('Error saving guest beneficiary: $e');

@@ -1,7 +1,7 @@
 class SearchBeneficiaryResponse {
   final bool success;
   final String? message;
-  final Map<String, dynamic>? data;
+  final dynamic data;
 
   SearchBeneficiaryResponse({
     required this.success,
@@ -13,7 +13,7 @@ class SearchBeneficiaryResponse {
     return SearchBeneficiaryResponse(
       success: json['success'] ?? false,
       message: json['message'],
-      data: json['data'] is Map<String, dynamic> ? json['data'] : null,
+      data: json['data'],
     );
   }
 }

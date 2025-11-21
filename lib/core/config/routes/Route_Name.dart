@@ -75,4 +75,5 @@ class Route_Names{
   static const String Migratedout = 'Migratedout';
   static const String Pregnancyoutcome = 'Pregnancyoutcome';
   static const String notificationScreen = 'notificationScreen';
+  static const String Guestbeneficiaries = 'Guestbeneficiaries';
 }
