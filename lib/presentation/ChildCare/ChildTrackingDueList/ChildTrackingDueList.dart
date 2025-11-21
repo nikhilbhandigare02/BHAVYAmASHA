@@ -390,30 +390,19 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     return InkWell(
       onTap: () {
         final formData = data['formData'] as Map<String, dynamic>?;
-        debugPrint('🔄 Navigating to ChildTrackingDueListForm');
-        debugPrint('   - Child Name: ${formData?['child_name']}');
-        debugPrint('   - Date of Birth: ${formData?['date_of_birth']}');
-        debugPrint('   - Weight (grams): ${formData?['weight_grams']}');
-        debugPrint('   - Gender: ${formData?['gender']}');
-        debugPrint('   - Father Name: ${formData?['father_name']}');
-        debugPrint('   - Mother Name: ${formData?['mother_name']}');
-        debugPrint('   - Mobile Number: ${formData?['mobile_number']}');
-        debugPrint('🔄 Navigating to ChildTrackingDueListForm with formData: $formData');
+
         
         if (formData == null) {
           debugPrint('❌ formData is null, cannot navigate');
           return;
         }
         
-        // Prepare complete form data with all user details
         final completeFormData = {
           ...formData,
-          // Add reference keys from the card data
           'household_ref_key': data['hhId']?.toString() ?? '',
           'household_id': data['hhId']?.toString() ?? '',
           'beneficiary_ref_key': data['BeneficiaryID']?.toString() ?? '',
           'beneficiary_id': data['BeneficiaryID']?.toString() ?? '',
-          // Add all user details from the card
           'child_name': data['Name']?.toString() ?? formData['child_name'] ?? '',
           'age': data['Age|Gender']?.toString() ?? '',
           'gender': formData['gender'] ?? '',
@@ -440,11 +429,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             'isEdit': true,
           },
         )?.then((result) {
-          // Check if form was saved successfully
           if (result is Map && result['saved'] == true) {
             debugPrint('✅ Form saved, removing card for beneficiary: ${completeFormData['beneficiary_id']}');
             
-            // Remove the card from the list immediately
             setState(() {
               _childTrackingList.removeWhere((child) {
                 final childBeneficiaryId = child['BeneficiaryID']?.toString() ?? '';
@@ -462,7 +449,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
               ),
             );
           } else {
-            // If result is null or not saved, refresh the list
             _loadChildTrackingData();
           }
         });
@@ -493,7 +479,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                  const Icon(Icons.home, color: AppColors.primary, size: 16),
+                   Icon(Icons.home, color: AppColors.primary, size: 15.sp),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -503,7 +489,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: 15.sp,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -598,7 +584,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           title,
           style: TextStyle(
             color: textColor.withOpacity(0.9),
-            fontSize: 12,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -608,7 +594,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           style: TextStyle(
             color: textColor,
             fontWeight: FontWeight.w400,
-            fontSize: 12,
+            fontSize: 14.sp,
           ),
         ),
       ],

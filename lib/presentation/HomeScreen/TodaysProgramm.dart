@@ -923,6 +923,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final List<Map<String, dynamic>> items = [];
       final Set<String> seenBeneficiaries = <String>{};
 
+      final now = DateTime.now();
+      final todayDateOnly = DateTime(now.year, now.month, now.day);
+
       for (final row in results) {
         try {
           final formJson = row['form_json'] as String?;
@@ -993,6 +996,34 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 continue;
               }
             }
+          }
+
+          // Use modified_date_time if available, otherwise created_date_time,
+          // and only keep records whose date part equals today's date.
+          String? rawDate = row['modified_date_time']?.toString();
+          rawDate ??= row['created_date_time']?.toString();
+
+          DateTime? recordDate;
+          if (rawDate != null && rawDate.isNotEmpty) {
+            try {
+              String s = rawDate;
+              if (s.contains('T')) {
+                s = s.split('T')[0];
+              }
+              recordDate = DateTime.tryParse(s);
+            } catch (_) {}
+          }
+
+          if (recordDate == null) {
+            continue;
+          }
+
+          final recordDateOnly =
+              DateTime(recordDate.year, recordDate.month, recordDate.day);
+          // Show records whose date is **up to** today (past or today),
+          // and skip only those with future dates.
+          if (recordDateOnly.isAfter(todayDateOnly)) {
+            continue;
           }
 
           final created = row['created_date_time']?.toString();

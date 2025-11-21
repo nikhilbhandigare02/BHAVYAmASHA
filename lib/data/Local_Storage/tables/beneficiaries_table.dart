@@ -1,8 +1,8 @@
 class BeneficiariesTable {
-  static const table = 'beneficiaries';
+  static const table = 'beneficiaries_new';
 
   static const create = '''
-  CREATE TABLE IF NOT EXISTS beneficiaries (
+  CREATE TABLE IF NOT EXISTS beneficiaries_new (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     server_id TEXT,
     household_ref_key TEXT,

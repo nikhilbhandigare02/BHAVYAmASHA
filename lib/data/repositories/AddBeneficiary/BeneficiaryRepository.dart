@@ -28,12 +28,17 @@ class BeneficiaryRepository {
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
 
+    String effectiveLastId = lastId;
+    if (effectiveLastId.isEmpty) {
+      effectiveLastId = await LocalStorageDao.instance.getLatestBeneficiaryServerId();
+    }
+
     dynamic response;
     try {
       response = await _api.getApiWithBody(
         Endpoints.getBeneficiary,
         {
-          'last_id': lastId,
+          'last_id': effectiveLastId,
         },
         headers: headers,
       );
@@ -43,7 +48,7 @@ class BeneficiaryRepository {
           Endpoints.getBeneficiary,
           headers: headers,
           queryParams: {
-            'last_id': lastId,
+            'last_id': effectiveLastId,
             'page_size': pageSize.toString(),
           },
         );
@@ -53,7 +58,7 @@ class BeneficiaryRepository {
           Endpoints.getBeneficiary,
           headers: headers,
           queryParams: {
-            '_id': lastId,
+            'last_id': effectiveLastId,
             'page_size': pageSize.toString(),
           },
         );
@@ -74,8 +79,6 @@ class BeneficiaryRepository {
 
         final info = _mapBeneficiaryInfo(rec);
 
-        // Ensure corresponding household row exists using household_ref_key as households.unique_key
-        // and beneficiary unique_key as households.head_id.
         final hhRefKey = rec['household_ref_key']?.toString();
         final benUniqueKey = rec['unique_key']?.toString();
         if (hhRefKey != null && hhRefKey.isNotEmpty) {
@@ -84,7 +87,6 @@ class BeneficiaryRepository {
             final householdInfo = <String, dynamic>{};
             final beneficiaryInfo = info;
 
-            // Try to put some minimal head/house info if available
             householdInfo['houseNo'] = beneficiaryInfo['houseNo'];
             householdInfo['headName'] = beneficiaryInfo['headName'] ?? beneficiaryInfo['name'];
 

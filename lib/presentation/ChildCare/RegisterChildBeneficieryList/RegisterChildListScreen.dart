@@ -47,13 +47,11 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // Get all deceased beneficiaries
       print('🔍 Fetching deceased beneficiaries...');
       final deceasedChildren = await db.rawQuery('''
         SELECT DISTINCT beneficiary_ref_key, form_json 
         FROM followup_form_data 
         WHERE form_json LIKE '%"reason_of_death":%' 
-        AND is_deleted = 0
       ''');
 
       print('✅ Found ${deceasedChildren.length} potential deceased records');
@@ -81,7 +79,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
 
       final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         columns: ['*', 'is_death'],
         where: 'is_deleted = ? AND is_adult = ?',
         whereArgs: [0, 0], // 0 for false, 1 for true

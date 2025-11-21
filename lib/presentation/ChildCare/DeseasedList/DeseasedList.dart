@@ -35,14 +35,11 @@ class _DeseasedListState extends State<DeseasedList> {
         _isLoading = true;
       });
 
-      // Fetch deceased children from child tracking forms with case closure
       final deceasedChildren = await _storageDao.getFollowupFormsWithCaseClosure(
         FollowupFormDataTable.childTrackingDue,
       );
 
-      // Transform to match the expected format
       final transformed = deceasedChildren.map((child) {
-        // Safe casting helper
         Map<String, dynamic> safeCastMap(dynamic map) {
           if (map == null) return {};
           if (map is Map<String, dynamic>) return map;
@@ -56,7 +53,6 @@ class _DeseasedListState extends State<DeseasedList> {
         final registrationData = safeCastMap(child['registration_data']);
         final beneficiaryData = safeCastMap(child['beneficiary_data']);
 
-        // Get age in years if available, otherwise use the raw age
         String formatAge(dynamic age) {
           if (age == null) return 'N/A';
           if (age is int || age is double) {
@@ -89,14 +85,12 @@ class _DeseasedListState extends State<DeseasedList> {
           return child['name']?.toString() ?? 'Unknown';
         }
 
-        // Get age from registration data
         String getAge() {
           var age = registrationFollowup['age'] ?? beneficiaryData['age'] ?? child['age'];
           if (age == null) return 'N/A';
           return age.toString();
         }
 
-        // Get gender from registration data
         String getGender() {
           return registrationFollowup['gender']?.toString() ?? 
                  beneficiaryData['gender']?.toString() ?? 
@@ -104,7 +98,6 @@ class _DeseasedListState extends State<DeseasedList> {
                  'N/A';
         }
 
-        // Get RCH ID from registration data
         String getRchId() {
           return registrationFollowup['rch_id']?.toString() ?? 
                  registrationFollowup['rchId']?.toString() ?? 
@@ -121,14 +114,12 @@ class _DeseasedListState extends State<DeseasedList> {
                  'N/A';
         }
 
-        // Get registration type from registration data
         String getRegistrationType() {
           return registrationFollowup['registration_type']?.toString() ?? 
                  registrationData['registration_type']?.toString() ?? 
                  'General';
         }
 
-        // Get registration date from registration data
         String getRegistrationDate() {
           var date = registrationFollowup['registration_date'] ?? 
                     registrationFollowup['date_of_registration'] ??
@@ -152,13 +143,11 @@ class _DeseasedListState extends State<DeseasedList> {
           'reason': caseClosure['reason_of_death'] ?? 'Not specified',
           'place': caseClosure['death_place'] ?? 'Not specified',
           'DateofDeath': _formatDate(caseClosure['date_of_death']) ?? 'N/A',
-          // Include additional fields that might be needed
           'age': getAge(),
           'gender': getGender(),
         };
       }).toList();
 
-      // Print the transformed data for debugging
       print('Loaded ${transformed.length} deceased records');
       for (var record in transformed) {
         print('Deceased Record:');

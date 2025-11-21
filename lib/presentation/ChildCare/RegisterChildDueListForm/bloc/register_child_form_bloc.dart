@@ -109,14 +109,14 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
 
       if (householdId != null && householdId!.isNotEmpty) {
         List<Map<String, dynamic>> beneficiaryMaps = await db.query(
-          'beneficiaries',
+          'beneficiaries_new',
           where: 'household_ref_key = ?',
           whereArgs: [householdId],
         );
 
         if (beneficiaryMaps.isEmpty) {
           beneficiaryMaps = await db.query(
-            'beneficiaries',
+            'beneficiaries_new',
             where: 'id = ?',
             whereArgs: [int.tryParse(householdId!) ?? 0],
           );

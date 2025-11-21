@@ -19,7 +19,7 @@ class UserInfo {
   static Future<bool> isUserExists(String username) async {
     try {
       final dbPath = await getDatabasesPath();
-      final path = join(dbPath, 'bhavya_masha.db');
+      final path = join(dbPath, 'm_aasha.db');
       
       final database = await openDatabase(path);
       
@@ -29,7 +29,7 @@ class UserInfo {
         whereArgs: [username],
       );
       
-      await database.close();
+      // await database.close();
       return existingUser.isNotEmpty;
     } catch (e) {
       print('Error checking if user exists: $e');
@@ -42,7 +42,7 @@ class UserInfo {
     Database? db;
     try {
       db = await openDatabase(
-        join(await getDatabasesPath(), 'bhavya_masha.db'),
+        join(await getDatabasesPath(), 'm_aasha.db'),
         onCreate: (db, version) async {
           await db.execute(UsersTable.create);
         },
@@ -90,9 +90,9 @@ class UserInfo {
       return null;
     } finally {
       // Close the database connection when done
-      if (db != null && db.isOpen) {
-        await db.close();
-      }
+      // if (db != null && db.isOpen) {
+      //   await db.close();
+      // }
     }
   }
   
@@ -101,18 +101,18 @@ class UserInfo {
       final db = await database;
       
  
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_name TEXT,
-          password TEXT,
-          role_id INTEGER,
-          details TEXT,
-          created_date_time TEXT,
-          modified_date_time TEXT,
-          is_deleted INTEGER DEFAULT 0
-        )
-      ''');
+      // await db.execute('''
+      //   CREATE TABLE IF NOT EXISTS users (
+      //     id INTEGER PRIMARY KEY AUTOINCREMENT,
+      //     user_name TEXT,
+      //     password TEXT,
+      //     role_id INTEGER,
+      //     details TEXT,
+      //     created_date_time TEXT,
+      //     modified_date_time TEXT,
+      //     is_deleted INTEGER DEFAULT 0
+      //   )
+      // ''');
       
       final List<Map<String, dynamic>> users = await db.query(
         'users',
@@ -141,7 +141,7 @@ class UserInfo {
   
   static Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'bhavya_masha.db');
+    final path = join(dbPath, 'm_aasha.db');
     
     return await openDatabase(
       path,
@@ -162,7 +162,7 @@ class UserInfo {
     Database? db;
     try {
       db = await openDatabase(
-        join(await getDatabasesPath(), 'bhavya_masha.db'),
+        join(await getDatabasesPath(), 'm_aasha.db'),
         onCreate: (db, version) async {
           await db.execute(UsersTable.create);
         },
@@ -226,9 +226,9 @@ class UserInfo {
       print('Error in storeUserData: $e');
       rethrow;
     } finally {
-      if (db != null && db.isOpen) {
-        await db.close();
-      }
+      // if (db != null && db.isOpen) {
+      //   await db.close();
+      // }
     }
     return {'isNewUser': true};
   }
@@ -237,7 +237,7 @@ class UserInfo {
     Database? db;
     try {
       db = await openDatabase(
-        join(await getDatabasesPath(), 'bhavya_masha.db'),
+        join(await getDatabasesPath(), 'm_aasha.db'),
       );
 
       // Get the current user directly from this database instance
@@ -280,9 +280,9 @@ class UserInfo {
       log('Error in updatePopulationCovered: $e');
       rethrow;
     } finally {
-      if (db != null && db.isOpen) {
-        await db.close();
-      }
+      // if (db != null && db.isOpen) {
+      //   await db.close();
+      // }
     }
   }
 
@@ -292,7 +292,7 @@ class UserInfo {
   static Future<Map<String, dynamic>?> getUserData() async {
     try {
       final dbPath = await getDatabasesPath();
-      final path = join(dbPath, 'bhavya_masha.db');
+      final path = join(dbPath, 'm_aasha.db');
       
       final database = await openDatabase(path);
       
@@ -301,7 +301,7 @@ class UserInfo {
         limit: 1,
       );
       
-      await database.close();
+      // await database.close();
       
       if (users.isNotEmpty) {
         return users.first;
@@ -317,11 +317,11 @@ class UserInfo {
   static Future<void> clearUserData() async {
     try {
       final dbPath = await getDatabasesPath();
-      final path = join(dbPath, 'bhavya_masha.db');
+      final path = join(dbPath, 'm_aasha.db');
       
       final database = await openDatabase(path);
       await database.delete(UsersTable.table);
-      await database.close();
+      // await database.close();
       
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
@@ -335,7 +335,7 @@ class UserInfo {
   static Future<void> printUserData() async {
     try {
       final dbPath = await getDatabasesPath();
-      final path = join(dbPath, 'bhavya_masha.db');
+      final path = join(dbPath, 'm_aasha.db');
       
       final database = await openDatabase(path);
       
@@ -390,7 +390,7 @@ class UserInfo {
         print('-' * 40);
       }
       
-      await database.close();
+      // await database.close();
     } catch (e) {
       print('Error reading user data: $e');
       rethrow;

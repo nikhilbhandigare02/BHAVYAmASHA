@@ -36,7 +36,7 @@ class AddnewfamilymemberBloc
       // Get the complete beneficiary record
       final db = await DatabaseProvider.instance.database;
       final List<Map<String, dynamic>> results = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'unique_key = ?',
         whereArgs: [event.beneficiaryId],
       );
@@ -589,6 +589,8 @@ class AddnewfamilymemberBloc
             'isPregnant': state.isPregnant,
             'memberStatus': state.memberStatus,
             'relation_to_head': state.relation,
+            'isFamilyhead': false,
+            'isFamilyheadWife': false,
             ...childrenData,
           }),
           'geo_location': geoLocationJson,
@@ -664,6 +666,8 @@ class AddnewfamilymemberBloc
                 'beneficiaryType': spousState.beneficiaryType,
                 'isPregnant': spousState.isPregnant,
                 'relation_to_head': 'spouse',
+                'isFamilyhead': false,
+                'isFamilyheadWife': false,
                 ...childrenData,
               }),
               'geo_location': geoLocationJson,
