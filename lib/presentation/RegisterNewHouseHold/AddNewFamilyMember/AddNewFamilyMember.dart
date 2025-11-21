@@ -937,12 +937,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         return _captureAnmError(baseError);
                                       }
 
-                                      // Additional rule for children: age must be between 1 day and 15 years
                                       if (state.memberType == 'Child' && date != null) {
                                         final now = DateTime.now();
                                         final diffDays = now.difference(date).inDays;
 
-                                        // 1 day to 15 years (approx 15 * 365 days)
                                         const int minDays = 1;
                                         const int maxDays = 15 * 365;
 

@@ -208,7 +208,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               IgnorePointer(
                                 child: ApiDropdown<String>(
                                   key: const ValueKey('whoseMobileField'),
-                                  labelText: t?.whoseMobileLabel ??
+                                  labelText: "${t?.whoseMobileLabel} *" ??
                                       'Whose mobile no.',
                                 items: const [
                                   'Self',
