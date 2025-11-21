@@ -7,6 +7,7 @@ import 'package:medixcel_new/data/Local_Storage/tables/notification_table.dart';
 import 'package:medixcel_new/data/Local_Storage/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/guest_beneficiary/guest_beneficiary_model.dart';
 import 'database_provider.dart';
 
 class LocalStorageDao {
@@ -1327,6 +1328,102 @@ class LocalStorageDao {
     }
   }
 
+  Future<int> saveGuestBeneficiary(GuestBeneficiary beneficiary) async {
+    try {
+      final db = await _db;
+      final Map<String, dynamic> beneficiaryMap = beneficiary.toMap();
+
+      if (!beneficiaryMap.containsKey('current_user_key') || (beneficiaryMap['current_user_key'] == null)) {
+        beneficiaryMap['current_user_key'] = '';
+      }
+      if (!beneficiaryMap.containsKey('facility_id') || (beneficiaryMap['facility_id'] == null)) {
+        beneficiaryMap['facility_id'] = 0;
+      }
+      if (!beneficiaryMap.containsKey('parent_user') || (beneficiaryMap['parent_user'] == null)) {
+        beneficiaryMap['parent_user'] = jsonEncode({});
+      }
+      if (!beneficiaryMap.containsKey('app_details') || (beneficiaryMap['app_details'] == null)) {
+        beneficiaryMap['app_details'] = jsonEncode({
+          'app_name': 'BHAVYAmASHA',
+          'version': '1.0.0',
+        });
+      }
+      if (!beneficiaryMap.containsKey('device_details') || (beneficiaryMap['device_details'] == null)) {
+        beneficiaryMap['device_details'] = jsonEncode({
+          'platform': 'mobile',
+          'os': 'android',
+        });
+      }
+      beneficiaryMap['is_guest'] = 1;
+
+      final existing = await db.query(
+        BeneficiariesTable.table,
+        where: 'unique_key = ?',
+        whereArgs: [beneficiary.uniqueKey],
+      );
+
+      if (existing.isNotEmpty) {
+        // Update existing record
+        final affected = await db.update(
+          BeneficiariesTable.table,
+          beneficiaryMap,
+          where: 'unique_key = ?',
+          whereArgs: [beneficiary.uniqueKey],
+        );
+        try {
+          final savedRows = await db.query(
+            BeneficiariesTable.table,
+            where: 'unique_key = ?',
+            whereArgs: [beneficiary.uniqueKey],
+            limit: 1,
+          );
+          if (savedRows.isNotEmpty) {
+            final row = Map<String, dynamic>.from(savedRows.first);
+            try {
+              row['beneficiary_info'] = safeJsonDecode(row['beneficiary_info']?.toString());
+              row['death_details'] = safeJsonDecode(row['death_details']?.toString());
+              row['device_details'] = safeJsonDecode(row['device_details']?.toString());
+              row['app_details'] = safeJsonDecode(row['app_details']?.toString());
+              row['parent_user'] = safeJsonDecode(row['parent_user']?.toString());
+            } catch (_) {}
+            print('Saved beneficiary row (update): ${jsonEncode(row)}');
+          }
+        } catch (_) {}
+        return affected;
+      } else {
+        // Insert new record
+        final insertedId = await db.insert(
+          BeneficiariesTable.table,
+          beneficiaryMap,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+        try {
+          final savedRows = await db.query(
+            BeneficiariesTable.table,
+            where: 'unique_key = ?',
+            whereArgs: [beneficiary.uniqueKey],
+            limit: 1,
+          );
+          if (savedRows.isNotEmpty) {
+            final row = Map<String, dynamic>.from(savedRows.first);
+            try {
+              row['beneficiary_info'] = safeJsonDecode(row['beneficiary_info']?.toString());
+              row['death_details'] = safeJsonDecode(row['death_details']?.toString());
+              row['device_details'] = safeJsonDecode(row['device_details']?.toString());
+              row['app_details'] = safeJsonDecode(row['app_details']?.toString());
+              row['parent_user'] = safeJsonDecode(row['parent_user']?.toString());
+            } catch (_) {}
+            print('Saved beneficiary row (insert): ${jsonEncode(row)}');
+          }
+        } catch (_) {}
+        return insertedId;
+      }
+    } catch (e) {
+      print('Error saving guest beneficiary: $e');
+      rethrow;
+    }
+  }
+
   Future<Map<String, dynamic>?> getHouseholdByUniqueKey(String uniqueKey) async {
     try {
       final db = await _db;
@@ -1459,7 +1556,6 @@ class LocalStorageDao {
     }
   }
 
-  /// Get PNC Mother forms by beneficiary ID
   Future<List<Map<String, dynamic>>> getPncMotherFormsByBeneficiaryId(String beneficiaryId) async {
     try {
       final db = await _db;
@@ -1591,7 +1687,7 @@ class LocalStorageDao {
   }
 }
 
-extension LocalStorageDaoReads on LocalStorageDao {
+   extension LocalStorageDaoReads on LocalStorageDao {
   Future<String> getLatestBeneficiaryServerId() async {
     try {
       final db = await _db;

@@ -231,9 +231,9 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
                 case 8:
                   Navigator.pushNamed(context, Route_Names.Migratedout);
                   break;
-                // case 9:
-                //   Navigator.pushNamed(context, Route_Names.GuestBeneficiaryList);
-                //   break;
+                case 9:
+                  Navigator.pushNamed(context, Route_Names.Guestbeneficiaries);
+                  break;
                 default:
                   break;
               }

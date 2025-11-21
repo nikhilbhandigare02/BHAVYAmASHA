@@ -8,8 +8,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
-import '../../../../core/widgets/AppDrawer/Drawer.dart';
-import '../../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
+
 import '../../../../data/Local_Storage/local_storage_dao.dart';
 import '../ANCVisitForm/ANCVisitForm.dart';
 
@@ -130,17 +129,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
     ranges['2nd_anc_start'] = _dateAfterWeeks(lmp, 14);
     ranges['2nd_anc_end'] = _dateAfterWeeks(lmp, 24);
-
-    // 3rd ANC: 26 to 34 weeks from LMP
-    ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
+     ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
     ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
 
-    // 4th ANC: 36 weeks from LMP to EDD
-    ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
+     ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
     ranges['4th_anc_end'] = _calculateEdd(lmp);
 
-    // PMSMA: 4-week window immediately AFTER 4th ANC (40–44 weeks from LMP)
-    ranges['pmsma_start'] = _dateAfterWeeks(lmp, 40);
+     ranges['pmsma_start'] = _dateAfterWeeks(lmp, 40);
     ranges['pmsma_end'] = _dateAfterWeeks(lmp, 44);
 
     return ranges;
@@ -538,7 +533,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
                   const SizedBox(height: 12),
 
-                  // ANC Visit Date Ranges
                   FutureBuilder<int>(
                     future: beneficiaryId.isNotEmpty
                         ? _getVisitCount(beneficiaryId)
@@ -546,8 +540,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     builder: (context, snapshot) {
                       final visitCount = snapshot.data ?? 0;
 
-                      // Derive LMP date for this beneficiary
-                      DateTime? lmpDate;
+                       DateTime? lmpDate;
                       try {
                         final rawRow = data['_rawRow'] as Map<String, dynamic>?;
                         dynamic rawInfo = rawRow?['beneficiary_info'];
@@ -563,8 +556,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
                         final lmpRaw = info['lmp']?.toString();
                         if (lmpRaw != null && lmpRaw.isNotEmpty) {
-                          // Handle possible ISO-like strings (e.g., 2025-11-14T00:00:00.000)
-                          String dateStr = lmpRaw;
+                           String dateStr = lmpRaw;
                           if (dateStr.contains('T')) {
                             dateStr = dateStr.split('T')[0];
                           }
@@ -574,8 +566,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         print('⚠️ Error deriving LMP date: $e');
                       }
 
-                      // Fallback: use registration date if LMP is unavailable
-                      if (lmpDate == null) {
+                       if (lmpDate == null) {
                         try {
                           final parts = registrationDate.split('/');
                           if (parts.length == 3) {
