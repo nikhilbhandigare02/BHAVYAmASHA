@@ -170,14 +170,14 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
 
           if (beneficiaryId.isNotEmpty) {
             List<Map<String, dynamic>> beneficiaryMaps = await db.query(
-              'beneficiaries',
+              'beneficiaries_new',
               where: 'unique_key = ?',
               whereArgs: [beneficiaryId],
             );
 
             if (beneficiaryMaps.isEmpty) {
               beneficiaryMaps = await db.query(
-                'beneficiaries',
+                'beneficiaries_new',
                 where: 'id = ?',
                 whereArgs: [int.tryParse(beneficiaryId) ?? 0],
               );

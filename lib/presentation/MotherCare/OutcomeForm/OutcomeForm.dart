@@ -46,96 +46,99 @@ class _OutcomeFormView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppHeader(screenTitle: l10n.deliveryOutcomeTitle, showBack: true),
-      body: BlocConsumer<OutcomeFormBloc, OutcomeFormState>(
-        listenWhen: (previous, current) => true,
-        listener: (context, state) {
-          _logState(state);
-          ScaffoldMessenger.of(context).clearSnackBars();
+      body: SafeArea(
+        bottom: true,
+        child: BlocConsumer<OutcomeFormBloc, OutcomeFormState>(
+          listenWhen: (previous, current) => true,
+          listener: (context, state) {
+            _logState(state);
+            ScaffoldMessenger.of(context).clearSnackBars();
 
-          if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: Colors.redAccent,
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 4),
-              ),
-            );
-          }
+            if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage!),
+                  backgroundColor: Colors.redAccent,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            }
 
-          if (state.submitted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.dataSavedSuccessMessage),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 2),
-              ),
-            );
-            Navigator.pop(context);
-          }
-        },
-        builder: (context, state) {
-          return Column(
-            children: [
-              // Header Section
-              _SectionHeader(title: l10n.deliveryOutcomeDetails),
+            if (state.submitted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l10n.dataSavedSuccessMessage),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+              Navigator.pop(context);
+            }
+          },
+          builder: (context, state) {
+            return Column(
+              children: [
 
-              // Submission Count Section
-              FutureBuilder<int>(
-                future: () async {
-                  try {
-                    final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString();
-                    print('🔍 Checking submission count for BeneficiaryID: $beneficiaryId');
+                _SectionHeader(title: l10n.deliveryOutcomeDetails),
 
-                    if (beneficiaryId == null || beneficiaryId.isEmpty) {
-                      print('⚠️ No valid BeneficiaryID found in beneficiaryData: $beneficiaryData');
+                // Submission Count Section
+                FutureBuilder<int>(
+                  future: () async {
+                    try {
+                      final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString();
+                      print('🔍 Checking submission count for BeneficiaryID: $beneficiaryId');
+
+                      if (beneficiaryId == null || beneficiaryId.isEmpty) {
+                        print('⚠️ No valid BeneficiaryID found in beneficiaryData: $beneficiaryData');
+                        return 0;
+                      }
+
+                      final count = await SecureStorageService.getSubmissionCount(beneficiaryId);
+                      print('✅ Found $count submissions for BeneficiaryID: $beneficiaryId');
+                      return count;
+                    } catch (e) {
+                      print('❌ Error getting submission count: $e');
                       return 0;
                     }
-
-                    final count = await SecureStorageService.getSubmissionCount(beneficiaryId);
-                    print('✅ Found $count submissions for BeneficiaryID: $beneficiaryId');
-                    return count;
-                  } catch (e) {
-                    print('❌ Error getting submission count: $e');
-                    return 0;
-                  }
-                }(),
-                builder: (context, snapshot) {
-                  final count = snapshot.data ?? 0;
-                  return Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    color: Colors.white,
-                    child: Row(
-                      children: [
-                        // const Icon(Icons.history, size: 20, color: Colors.blue),
-                        // const SizedBox(width: 8),
-                        // Text(
-                        //   '${l10n.visitsLabel ?? 'Previous Submissions'}: $count',
-                        //   style: TextStyle(
-                        //     fontSize: 14.sp,
-                        //     fontWeight: FontWeight.w500,
-                        //     color: Colors.blue.shade800,
-                        //   ),
-                        // ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-
-              // Form Area
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(8),
-                  child: _OutcomeFormFields(beneficiaryData: beneficiaryData),
+                  }(),
+                  builder: (context, snapshot) {
+                    final count = snapshot.data ?? 0;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      color: Colors.white,
+                      child: Row(
+                        children: [
+                          // const Icon(Icons.history, size: 20, color: Colors.blue),
+                          // const SizedBox(width: 8),
+                          // Text(
+                          //   '${l10n.visitsLabel ?? 'Previous Submissions'}: $count',
+                          //   style: TextStyle(
+                          //     fontSize: 14.sp,
+                          //     fontWeight: FontWeight.w500,
+                          //     color: Colors.blue.shade800,
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              ),
-            ],
-          )
-         ;
-        }
+                const SizedBox(height: 8),
+
+                // Form Area
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(8),
+                    child: _OutcomeFormFields(beneficiaryData: beneficiaryData),
+                  ),
+                ),
+              ],
+            )
+           ;
+          }
+        ),
       ),
     );
   }
@@ -243,7 +246,9 @@ class _OutcomeFormFields extends StatelessWidget {
           labelText: l10n.selectPlaceOfDelivery,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-         if (state.placeOfDelivery == 'Institutional') ...[
+        // Replace the institutional dropdowns section with this fixed code:
+
+        if (state.placeOfDelivery == 'Institutional') ...[
           const SizedBox(height: 16),
           ApiDropdown<String>(
             items: [
@@ -252,7 +257,9 @@ class _OutcomeFormFields extends StatelessWidget {
               'Private',
             ],
             getLabel: (s) => s,
-            value: state.institutionalPlaceType?.isEmpty ?? true
+            value: (state.institutionalPlaceType == null ||
+                state.institutionalPlaceType!.isEmpty ||
+                ![l10n.select, 'Public', 'Private'].contains(state.institutionalPlaceType))
                 ? l10n.select
                 : state.institutionalPlaceType!,
             onChanged: (v) => bloc.add(InstitutionalPlaceTypeChanged(v ?? '')),
@@ -260,7 +267,7 @@ class _OutcomeFormFields extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-          
+
           ApiDropdown<String>(
             items: [
               l10n.select,
@@ -271,15 +278,16 @@ class _OutcomeFormFields extends StatelessWidget {
               'Relative TBA',
             ],
             getLabel: (s) => s,
-            value: state.conductedBy?.isEmpty ?? true ? l10n.select : state.conductedBy!,
+            value: (state.conductedBy == null ||
+                state.conductedBy!.isEmpty ||
+                ![l10n.select, 'ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative TBA'].contains(state.conductedBy))
+                ? l10n.select
+                : state.conductedBy!,
             onChanged: (v) => bloc.add(ConductedByChanged(v ?? '')),
             labelText: 'Who conducted the delivery?',
           ),
           const SizedBox(height: 8),
-
-          
-
-          const SizedBox(height: 8),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         ],
         
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
