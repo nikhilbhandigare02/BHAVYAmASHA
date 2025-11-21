@@ -341,6 +341,14 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
                     ..['phId'] = spousState.phId
                     ..['beneficiaryType'] = spousState.beneficiaryType
                     ..['isPregnant'] = spousState.isPregnant
+                    ..['familyPlanningCounseling'] = spousState.familyPlanningCounseling
+                    ..['fpMethod'] = spousState.fpMethod
+                    ..['removalDate'] = spousState.removalDate?.toIso8601String()
+                    ..['removalReason'] = spousState.removalReason
+                    ..['condomQuantity'] = spousState.condomQuantity
+                    ..['malaQuantity'] = spousState.malaQuantity
+                    ..['chhayaQuantity'] = spousState.chhayaQuantity
+                    ..['ecpQuantity'] = spousState.ecpQuantity
                     ..['maritalStatus'] = 'Married'
                     ..['relation_to_head'] = 'spouse'
                     ..addAll(childrenData);
@@ -544,6 +552,14 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
                   'phId': spousState.phId,
                   'beneficiaryType': spousState.beneficiaryType,
                   'isPregnant': spousState.isPregnant,
+                  'familyPlanningCounseling': spousState.familyPlanningCounseling,
+                  'fpMethod': spousState.fpMethod,
+                  'removalDate': spousState.removalDate?.toIso8601String(),
+                  'removalReason': spousState.removalReason,
+                  'condomQuantity': spousState.condomQuantity,
+                  'malaQuantity': spousState.malaQuantity,
+                  'chhayaQuantity': spousState.chhayaQuantity,
+                  'ecpQuantity': spousState.ecpQuantity,
                   'maritalStatus': 'Married',
                   'relation_to_head': 'spouse',
                   'isFamilyhead': false,

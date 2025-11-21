@@ -366,19 +366,45 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                             final String firstTabTitle = (st.memberType == 'Child')
                                 ? 'Child Details'
                                 : 'Member Details';
-                            if (hideFamilyTabs) {
-                              return TabBar(
-                                isScrollable: true,
-                                labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-                                tabs: [
-                                  Tab(text: firstTabTitle),
-                                ],
+                            Widget buildTabs(Widget tabBar) {
+                              return Container(
+                                color: AppColors.primary,
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(
+                                    indicatorColor: Colors.white,
+                                    splashColor: Colors.white24,
+                                  ),
+                                  child: tabBar,
+                                ),
                               );
                             }
-                            return TabBar(
-                              isScrollable: true,
-                              labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-                              onTap: (i) {
+
+                            if (hideFamilyTabs) {
+                              return buildTabs(
+                                TabBar(
+                                  isScrollable: true,
+                                  labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                  labelColor: Colors.white,
+                                  unselectedLabelColor: Colors.white70,
+                                  indicator: const UnderlineTabIndicator(
+                                    borderSide: BorderSide(color: Colors.white, width: 2),
+                                  ),
+                                  tabs: [
+                                    Tab(text: firstTabTitle),
+                                  ],
+                                ),
+                              );
+                            }
+                            return buildTabs(
+                              TabBar(
+                                isScrollable: true,
+                                labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                labelColor: Colors.white,
+                                unselectedLabelColor: Colors.white70,
+                                indicator: const UnderlineTabIndicator(
+                                  borderSide: BorderSide(color: Colors.white, width: 2),
+                                ),
+                                onTap: (i) {
                                 final ctrl = DefaultTabController.of(ctx);
                                 int target = i;
                                 if (i == 1 && !spouseAllowed) {
@@ -395,11 +421,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 setState(() { _currentStep = target; });
                                 ctrl?.animateTo(target);
                               },
-                              tabs: [
-                                Tab(text: firstTabTitle),
-                                Tab(child: Opacity(opacity: spouseAllowed ? 1.0 : 0.0, child: const Text('Spouse Details'))),
-                                Tab(child: Opacity(opacity: childrenAllowed ? 1.0 : 0.0, child: const Text('Children Details'))),
-                              ],
+                                tabs: [
+                                  Tab(text: firstTabTitle),
+                                  Tab(child: Opacity(opacity: spouseAllowed ? 1.0 : 0.0, child: const Text('Spouse Details'))),
+                                  Tab(child: Opacity(opacity: childrenAllowed ? 1.0 : 0.0, child: const Text('Children Details'))),
+                                ],
+                              ),
                             );
                           },
                         );
@@ -903,7 +930,29 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     labelText: '${l.dobLabel} *',
                                     hintText: l.dateHint,
                                     onDateChanged: (d) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateDob(d!)),
-                                    validator: (date) => _captureAnmError(Validations.validateDOB(l, date)),
+                                    validator: (date) {
+                                      // First run the existing generic DOB validation
+                                      final baseError = Validations.validateDOB(l, date);
+                                      if (baseError != null) {
+                                        return _captureAnmError(baseError);
+                                      }
+
+                                      // Additional rule for children: age must be between 1 day and 15 years
+                                      if (state.memberType == 'Child' && date != null) {
+                                        final now = DateTime.now();
+                                        final diffDays = now.difference(date).inDays;
+
+                                        // 1 day to 15 years (approx 15 * 365 days)
+                                        const int minDays = 1;
+                                        const int maxDays = 15 * 365;
+
+                                        if (diffDays < minDays || diffDays > maxDays) {
+                                          return _captureAnmError('For Child: Age should be between 1 day to 15 years.');
+                                        }
+                                      }
+
+                                      return null;
+                                    },
 
                                   ),
                                 )
@@ -928,7 +977,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           Expanded(
                                             child: CustomTextField(
                                               labelText: 'Years',
-                                              hintText: 'Years',
+                                              hintText: '0',
                                               initialValue: state.updateYear ?? '',
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateYearChanged(v.trim())),
@@ -936,18 +985,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           ),
 
                                           // --- Divider between Years & Months ---
-                                          Container(
-                                            width: 1,
-                                            height: 4.h,
-                                            color: Colors.grey.shade300,
-                                            margin: EdgeInsets.symmetric(horizontal: 1.w),
-                                          ),
+                                          // Container(
+                                          //   width: 1,
+                                          //   height: 4.h,
+                                          //   color: Colors.grey.shade300,
+                                          //   margin: EdgeInsets.symmetric(horizontal: 1.w),
+                                          // ),
 
                                           // --- Months ---
                                           Expanded(
                                             child: CustomTextField(
                                               labelText: 'Months',
-                                              hintText: 'Months',
+                                              hintText: '0',
                                               initialValue: state.updateMonth ?? '',
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateMonthChanged(v.trim())),
@@ -955,17 +1004,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           ),
 
                                           // --- Divider between Months & Days ---
-                                          Container(
-                                            width: 1,
-                                            height: 4.h,
-                                            color: Colors.grey.shade300,
-                                            margin: EdgeInsets.symmetric(horizontal: 1.w),
-                                          ),
+                                          // Container(
+                                          //   width: 1,
+                                          //   height: 4.h,
+                                          //   color: Colors.grey.shade300,
+                                          //   margin: EdgeInsets.symmetric(horizontal: 1.w),
+                                          // ),
 
                                           Expanded(
                                             child: CustomTextField(
                                               labelText: 'Days',
-                                              hintText: 'Days',
+                                              hintText: '0',
                                               initialValue: state.updateDay ?? '',
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateDayChanged(v.trim())),
@@ -1011,8 +1060,51 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 _section(
                                   CustomTextField(
                                     labelText: 'Weight (1.2-90)Kg',
+                                    hintText: 'Weight (1.2-90)Kg',
                                     keyboardType: TextInputType.number,
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(WeightChange(v.trim())),
+                                    validator: (value) {
+                                      if (value == null || value.trim().isEmpty) {
+                                        return _captureAnmError('Weight is required');
+                                      }
+
+                                      final parsed = double.tryParse(value.trim());
+                                      if (parsed == null) {
+                                        return _captureAnmError('Please enter a valid weight');
+                                      }
+
+                                      if (parsed < 1.2 || parsed > 90) {
+                                        return _captureAnmError('Weight must be between 1.2 and 90 Kg');
+                                      }
+
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                _section(
+                                  CustomTextField(
+                                    labelText: 'Birth Weight (1200-4000)gms',
+                                    hintText: 'Birth Weight (1200-4000)gms',
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(BirthWeightChange(v?.trim() ?? '')),
+                                    validator: (value) {
+                                      if (value == null || value.trim().isEmpty) {
+                                        return _captureAnmError('Birth weight is required');
+                                      }
+
+                                      final parsed = int.tryParse(value.trim());
+                                      if (parsed == null) {
+                                        return _captureAnmError('Please enter a valid birth weight');
+                                      }
+
+                                      if (parsed < 1200 || parsed > 4000) {
+                                        return _captureAnmError('Birth weight must be between 1200 and 4000 gms');
+                                      }
+
+                                      return null;
+                                    },
                                   ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),

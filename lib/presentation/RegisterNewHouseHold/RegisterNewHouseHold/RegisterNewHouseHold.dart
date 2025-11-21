@@ -310,6 +310,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                               'waterSource': amenitiesState.waterSource,
                               'electricity': amenitiesState.electricity,
                               'toilet': amenitiesState.toilet,
+                              'toiletType': amenitiesState.toiletType,
+                              'toiletPlace': amenitiesState.toiletPlace,
                             };
                             
 

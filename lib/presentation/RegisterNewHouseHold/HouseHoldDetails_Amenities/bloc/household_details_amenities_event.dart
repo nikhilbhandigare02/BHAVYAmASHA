@@ -59,4 +59,18 @@ class ToiletChange extends HouseholdDetailsAmenitiesEvent{
   List<Object> get props => [toilet];
 }
 
+class ToiletTypeChange extends HouseholdDetailsAmenitiesEvent{
+  final String toiletType;
+  const ToiletTypeChange({required this.toiletType});
+
+  List<Object> get props => [toiletType];
+}
+
+class ToiletPlaceChange extends HouseholdDetailsAmenitiesEvent{
+  final String toiletPlace;
+  const ToiletPlaceChange({required this.toiletPlace});
+
+  List<Object> get props => [toiletPlace];
+}
+
 class AddButton extends HouseholdDetailsAmenitiesEvent{}
