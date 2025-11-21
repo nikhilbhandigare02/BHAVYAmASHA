@@ -80,7 +80,7 @@ class _OutcomeFormView extends StatelessWidget {
           builder: (context, state) {
             return Column(
               children: [
-                // Header Section
+
                 _SectionHeader(title: l10n.deliveryOutcomeDetails),
 
                 // Submission Count Section

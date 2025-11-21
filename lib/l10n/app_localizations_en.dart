@@ -2637,22 +2637,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying constantly or urinating less than 6 times a day?*';
 
   @override
-  String get cryingSoftlyLabel => 'Is the baby crying softly?*';
+  String get cryingSoftlyLabel => 'Is the baby crying softly? *';
 
   @override
-  String get stoppedCryingLabel => 'Has the baby stopped crying?*';
+  String get stoppedCryingLabel => 'Has the baby stopped crying? *';
 
   @override
-  String get newbornReferredByAshaLabel => 'Has the child been referred by ASHA for the above symptoms?*';
+  String get newbornReferredByAshaLabel => 'Has the child been referred by ASHA for the above symptoms? *';
 
   @override
-  String get birthRegisteredLabel => 'Has the birth been registered?*';
+  String get birthRegisteredLabel => 'Has the birth been registered? *';
 
   @override
-  String get mcpCardAvailableLabel => 'Is \'Matra Child Protection (MCP)\' card available?*';
+  String get mcpCardAvailableLabel => 'Is \'Matra Child Protection (MCP)\' card available? *';
 
   @override
-  String get birthDoseVaccinationLabel => 'Has the baby received the birth dose vaccination?*';
+  String get birthDoseVaccinationLabel => 'Has the baby received the birth dose vaccination? *';
 
   @override
   String get homeVisitDayLabel => 'Home Visit Day *';
@@ -2661,16 +2661,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get highRisk => 'High-Risk Pregnancy List';
 
   @override
-  String get dateOfHomeVisitLabel => 'Date of home visit*';
+  String get dateOfHomeVisitLabel => 'Date of home visit *';
 
   @override
-  String get motherStatusLabel => 'Mother\'s status*';
+  String get motherStatusLabel => 'Mother\'s status *';
 
   @override
   String get mcpCardAvailableLabelMother => 'Is \'Matra Shishu Prakshyan (MCP)\' card available? *';
 
   @override
-  String get postDeliveryProblemsLabel => 'Does the mother have any problems after delivery?*';
+  String get postDeliveryProblemsLabel => 'Does the mother have any problems after delivery? *';
 
   @override
   String get postDeliveryProblemNone => 'None';
@@ -2694,31 +2694,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'Convulsions';
 
   @override
-  String get breastfeedingProblemsLabel => 'Is the mother having problems breastfeeding?*';
+  String get breastfeedingProblemsLabel => 'Is the mother having problems breastfeeding? *';
 
   @override
   String get mealsPerDayLabel => 'How many times does a mother take a full meal in 24 hours?';
 
   @override
-  String get padsPerDayLabel => 'How many pads are changed in a day for bleeding?*';
+  String get padsPerDayLabel => 'How many pads are changed in a day for bleeding? *';
 
   @override
-  String get mothersTemperatureLabel => 'Mother\'s temperature*';
+  String get mothersTemperatureLabel => 'Mother\'s temperature *';
 
   @override
-  String get foulDischargeHighFeverLabel => 'Foul-smelling discharge and fever 102°F (38.9°C)*';
+  String get foulDischargeHighFeverLabel => 'Foul-smelling discharge and fever 102°F (38.9°C) *';
 
   @override
-  String get abnormalSpeechOrSeizureLabel => 'Is the mother speaking abnormally or having seizures?*';
+  String get abnormalSpeechOrSeizureLabel => 'Is the mother speaking abnormally or having seizures? *';
 
   @override
-  String get counselingAdviceLabel => 'Counseling / Advice*';
+  String get counselingAdviceLabel => 'Counseling / Advice *';
 
   @override
-  String get milkNotProducingOrLessLabel => 'After delivery, is the mother not producing milk or does she feel milk is less?*';
+  String get milkNotProducingOrLessLabel => 'After delivery, is the mother not producing milk or does she feel milk is less? *';
 
   @override
-  String get nippleCracksPainOrEngorgedLabel => 'Does the mother have nipple cracks/pain and/or engorged breasts?*';
+  String get nippleCracksPainOrEngorgedLabel => 'Does the mother have nipple cracks/pain and/or engorged breasts? *';
 
   @override
   String get outcomeFormTitle => 'Delivery Outcome';

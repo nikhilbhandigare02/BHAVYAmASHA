@@ -5330,37 +5330,37 @@ abstract class AppLocalizations {
   /// No description provided for @cryingSoftlyLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the baby crying softly?*'**
+  /// **'Is the baby crying softly? *'**
   String get cryingSoftlyLabel;
 
   /// No description provided for @stoppedCryingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby stopped crying?*'**
+  /// **'Has the baby stopped crying? *'**
   String get stoppedCryingLabel;
 
   /// No description provided for @newbornReferredByAshaLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the child been referred by ASHA for the above symptoms?*'**
+  /// **'Has the child been referred by ASHA for the above symptoms? *'**
   String get newbornReferredByAshaLabel;
 
   /// No description provided for @birthRegisteredLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the birth been registered?*'**
+  /// **'Has the birth been registered? *'**
   String get birthRegisteredLabel;
 
   /// No description provided for @mcpCardAvailableLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is \'Matra Child Protection (MCP)\' card available?*'**
+  /// **'Is \'Matra Child Protection (MCP)\' card available? *'**
   String get mcpCardAvailableLabel;
 
   /// No description provided for @birthDoseVaccinationLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby received the birth dose vaccination?*'**
+  /// **'Has the baby received the birth dose vaccination? *'**
   String get birthDoseVaccinationLabel;
 
   /// No description provided for @homeVisitDayLabel.
@@ -5378,13 +5378,13 @@ abstract class AppLocalizations {
   /// No description provided for @dateOfHomeVisitLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of home visit*'**
+  /// **'Date of home visit *'**
   String get dateOfHomeVisitLabel;
 
   /// No description provided for @motherStatusLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mother\'s status*'**
+  /// **'Mother\'s status *'**
   String get motherStatusLabel;
 
   /// No description provided for @mcpCardAvailableLabelMother.
@@ -5396,7 +5396,7 @@ abstract class AppLocalizations {
   /// No description provided for @postDeliveryProblemsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Does the mother have any problems after delivery?*'**
+  /// **'Does the mother have any problems after delivery? *'**
   String get postDeliveryProblemsLabel;
 
   /// No description provided for @postDeliveryProblemNone.
@@ -5444,7 +5444,7 @@ abstract class AppLocalizations {
   /// No description provided for @breastfeedingProblemsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the mother having problems breastfeeding?*'**
+  /// **'Is the mother having problems breastfeeding? *'**
   String get breastfeedingProblemsLabel;
 
   /// No description provided for @mealsPerDayLabel.
@@ -5456,43 +5456,43 @@ abstract class AppLocalizations {
   /// No description provided for @padsPerDayLabel.
   ///
   /// In en, this message translates to:
-  /// **'How many pads are changed in a day for bleeding?*'**
+  /// **'How many pads are changed in a day for bleeding? *'**
   String get padsPerDayLabel;
 
   /// No description provided for @mothersTemperatureLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mother\'s temperature*'**
+  /// **'Mother\'s temperature *'**
   String get mothersTemperatureLabel;
 
   /// No description provided for @foulDischargeHighFeverLabel.
   ///
   /// In en, this message translates to:
-  /// **'Foul-smelling discharge and fever 102°F (38.9°C)*'**
+  /// **'Foul-smelling discharge and fever 102°F (38.9°C) *'**
   String get foulDischargeHighFeverLabel;
 
   /// No description provided for @abnormalSpeechOrSeizureLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the mother speaking abnormally or having seizures?*'**
+  /// **'Is the mother speaking abnormally or having seizures? *'**
   String get abnormalSpeechOrSeizureLabel;
 
   /// No description provided for @counselingAdviceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Counseling / Advice*'**
+  /// **'Counseling / Advice *'**
   String get counselingAdviceLabel;
 
   /// No description provided for @milkNotProducingOrLessLabel.
   ///
   /// In en, this message translates to:
-  /// **'After delivery, is the mother not producing milk or does she feel milk is less?*'**
+  /// **'After delivery, is the mother not producing milk or does she feel milk is less? *'**
   String get milkNotProducingOrLessLabel;
 
   /// No description provided for @nippleCracksPainOrEngorgedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Does the mother have nipple cracks/pain and/or engorged breasts?*'**
+  /// **'Does the mother have nipple cracks/pain and/or engorged breasts? *'**
   String get nippleCracksPainOrEngorgedLabel;
 
   /// No description provided for @outcomeFormTitle.
