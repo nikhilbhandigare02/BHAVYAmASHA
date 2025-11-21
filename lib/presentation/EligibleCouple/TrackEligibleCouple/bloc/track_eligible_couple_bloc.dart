@@ -108,6 +108,9 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
     on<BeneficiaryAbsentCHanged>((event, emit) {
       emit(state.copyWith(beneficiaryAbsentCHanged: event.value, status: state.isValid ? FormStatus.valid : FormStatus.initial, clearError: true));
     });
+    on<BeneficiaryAbsentReasonChanged>((event, emit) {
+      emit(state.copyWith(beneficiaryAbsentReason: event.reason, status: state.isValid ? FormStatus.valid : FormStatus.initial, clearError: true));
+    });
     on<RemovalDAteChange>((event, emit) {
       emit(state.copyWith(removalDAteChange: event.date, status: state.isValid ? FormStatus.valid : FormStatus.initial, clearError: true));
     });
@@ -217,6 +220,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
             'ecp_quantity': state.ecp,
             'removal_reason': state.removalReasonChanged,
             'beneficiary_absent': state.beneficiaryAbsentCHanged,
+            'beneficiary_absent_reason': state.beneficiaryAbsentReason,
             'antra_injection_date': state.antraInjectionDateChanged?.toIso8601String(),
             'removal_date': state.removalDAteChange?.toIso8601String(),
           },

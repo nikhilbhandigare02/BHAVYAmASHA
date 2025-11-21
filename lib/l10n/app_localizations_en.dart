@@ -2667,7 +2667,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherStatusLabel => 'Mother\'s status *';
 
   @override
-  String get mcpCardAvailableLabelMother => 'Is \'Matra Shishu Prakshyan (MCP)\' card available? *';
+  String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) *';
 
   @override
   String get postDeliveryProblemsLabel => 'Does the mother have any problems after delivery? *';
@@ -2706,10 +2706,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mothersTemperatureLabel => 'Mother\'s temperature *';
 
   @override
-  String get foulDischargeHighFeverLabel => 'Foul-smelling discharge and fever 102°F (38.9°C) *';
+  String get foulDischargeHighFeverLabel => 'Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) * (Temperatue of mother - Temperature more than 102 degree F(38.9 degree C)) *';
 
   @override
-  String get abnormalSpeechOrSeizureLabel => 'Is the mother speaking abnormally or having seizures? *';
+  String get abnormalSpeechOrSeizureLabel => 'Is the mother speaking abnormally or having fits? *';
 
   @override
   String get counselingAdviceLabel => 'Counseling / Advice *';

@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_bloc.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_event.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_state.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/Tabs/GeneralDetails.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/Tabs/MotherDetails.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/Tabs/ChildDetails.dart';
@@ -58,9 +59,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                 final t = AppLocalizations.of(context)!;
                 final first = state.validationErrors.first;
                 final localized = _mapErrorCodeToText(t, first);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(localized)),
-                );
+                showAppSnackBar(context, localized);
               }
               
               // Handle successful save

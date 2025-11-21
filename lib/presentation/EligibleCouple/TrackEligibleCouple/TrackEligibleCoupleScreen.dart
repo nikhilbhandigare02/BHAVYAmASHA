@@ -333,7 +333,6 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                 },
               ),
 
-              // ✅ Always show "Is Beneficiary Absent"
               BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
                 builder: (context, state) {
                   final t = AppLocalizations.of(context);
@@ -354,6 +353,20 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                           }
                         },
                       ),
+                      const Divider(thickness: 1, color: Colors.grey),
+
+                      if (state.beneficiaryAbsentCHanged == true) ...[
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          labelText: 'Reason for absent',
+                          hintText: 'Enter reason',
+                          onChanged: (val) {
+                            context
+                                .read<TrackEligibleCoupleBloc>()
+                                .add(BeneficiaryAbsentReasonChanged(val));
+                          },
+                        ),
+                      ],
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
                   );

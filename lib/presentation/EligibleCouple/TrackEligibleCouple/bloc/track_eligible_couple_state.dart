@@ -20,6 +20,7 @@ class TrackEligibleCoupleState extends Equatable {
   final String? condom;
   final String? mala;
   final String? removalReasonChanged;
+  final String? beneficiaryAbsentReason;
   final DateTime? fpAdoptionDate;
   final FormStatus status;
   final String? error;
@@ -45,6 +46,7 @@ class TrackEligibleCoupleState extends Equatable {
     this.fpAdoptionDate,
     this.status = FormStatus.initial,
     this.error,
+    this.beneficiaryAbsentReason,
   });
 
   factory TrackEligibleCoupleState.initial({
@@ -76,6 +78,7 @@ class TrackEligibleCoupleState extends Equatable {
         chhaya: formData['chhaya_quantity']?.toString(),
         ecp: formData['ecp_quantity']?.toString(),
         removalReasonChanged: formData['removal_reason']?.toString(),
+        beneficiaryAbsentReason: formData['beneficiary_absent_reason']?.toString(),
         fpAdoptionDate: formData['fp_adoption_date'] != null
             ? DateTime.parse(formData['fp_adoption_date'])
             : null,
@@ -126,6 +129,7 @@ class TrackEligibleCoupleState extends Equatable {
     String? condom,
     String? mala,
     String? removalReasonChanged,
+    String? beneficiaryAbsentReason,
     DateTime? fpAdoptionDate,
     FormStatus? status,
     String? error,
@@ -142,6 +146,7 @@ class TrackEligibleCoupleState extends Equatable {
       condom: condom ?? this.condom,
       mala: mala ?? this.mala,
       removalReasonChanged: removalReasonChanged ?? this.removalReasonChanged,
+      beneficiaryAbsentReason: beneficiaryAbsentReason ?? this.beneficiaryAbsentReason,
       removalDAteChange: removalDAteChange ?? this.removalDAteChange,
       beneficiaryAbsentCHanged: beneficiaryAbsentCHanged ?? this.beneficiaryAbsentCHanged,
       antraInjectionDateChanged: antraInjectionDateChanged ?? this.antraInjectionDateChanged,
@@ -174,6 +179,7 @@ class TrackEligibleCoupleState extends Equatable {
     fpAdopting,
     fpMethod,
     beneficiaryAbsentCHanged,
+    beneficiaryAbsentReason,
     fpAdoptionDate,
     status,
     removalReasonChanged,
