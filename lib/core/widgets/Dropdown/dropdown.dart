@@ -48,7 +48,7 @@ class ApiDropdown<T> extends StatelessWidget {
     return RichText(
       text: TextSpan(
         style: TextStyle(
-          fontSize: labelFontSize ?? 15.sp,
+          fontSize: labelFontSize ?? 14.sp,
           color: AppColors.onSurfaceVariant,
         ),
         children: [

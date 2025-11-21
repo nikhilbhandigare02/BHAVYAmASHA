@@ -72,5 +72,21 @@ class HouseholdDetailsAmenitiesBloc extends Bloc<HouseholdDetailsAmenitiesEvent,
       ));
       print('New state: ${state.toString()}');
     });
+
+    on<ToiletTypeChange>((event, emit) {
+      print('ToiletTypeChange: ${event.toiletType}');
+      emit(state.copyWith(
+        toiletType: event.toiletType.isNotEmpty ? event.toiletType : state.toiletType,
+      ));
+      print('New state: ${state.toString()}');
+    });
+
+    on<ToiletPlaceChange>((event, emit) {
+      print('ToiletPlaceChange: ${event.toiletPlace}');
+      emit(state.copyWith(
+        toiletPlace: event.toiletPlace.isNotEmpty ? event.toiletPlace : state.toiletPlace,
+      ));
+      print('New state: ${state.toString()}');
+    });
   }
 }

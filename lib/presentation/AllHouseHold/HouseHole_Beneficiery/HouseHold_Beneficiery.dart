@@ -465,7 +465,7 @@ class _HouseHold_BeneficiaryScreenState
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
 
-    // Get head and spouse info
+    // Get head and spouse info within this household
     final head = _beneficiaries.firstWhere(
       (b) => b['Relation'] == 'Head',
       orElse: () => {'Name': '', 'Gender': '', 'Mobileno.': '', 'Age|Gender': ''},
@@ -475,32 +475,50 @@ class _HouseHold_BeneficiaryScreenState
       orElse: () => {'Name': '', 'Gender': '', 'Age|Gender': ''},
     );
 
-    // Determine head's gender
+    // Determine head's gender from Age|Gender field
     final headGenderStr = head['Age|Gender']?.toString().toLowerCase() ?? '';
     final isHeadMale = headGenderStr.contains('male');
 
+    // Compute complete beneficiary ID from raw row (unique_key) if available
+    final Map<String, dynamic>? raw =
+        (data['_raw'] is Map<String, dynamic>) ? data['_raw'] as Map<String, dynamic> : null;
+    final String completeBeneficiaryId =
+        raw?['unique_key']?.toString() ?? data['BeneficiaryID']?.toString() ?? '';
+
     return InkWell(
-      onTap: () {
-        // Format gender to standard format (Male/Female/Other)
-        String formatGender(dynamic gender) {
-          if (gender == null) return 'Other';
-          final g = gender.toString().toLowerCase();
-          if (g == 'm' || g == 'male') return 'Male';
-          if (g == 'f' || g == 'female') return 'Female';
-          return 'Other';
-        }
-
-
-        final memberId = int.tryParse(widget.hhId ?? '0') ?? 0;
-
-        Navigator.pushNamed(
+      onTap: () async {
+        await Navigator.pushNamed(
           context,
-          Route_Names.updateMemberDetail,
+          Route_Names.addFamilyMember,
           arguments: {
-            'memberId': memberId, // Pass the parsed integer ID
-            'isEdit': true, // Set to true for editing existing member
+            'isBeneficiary': true,
+            'isEdit': true,
+            'beneficiaryId': completeBeneficiaryId,
+            'hhId': data['hhId']?.toString() ?? '',
+            // Use the overall head & spouse information for consistency
+            'headName': head['Name']?.toString() ?? '',
+            'headGender': isHeadMale ? 'Male' : 'Female',
+            'spouseName': spouse['Name']?.toString() ?? '',
+            'spouseGender': isHeadMale ? 'Female' : 'Male',
+            // Relation of the tapped member inside the household
+            'relation': data['Relation']?.toString() ?? '',
+            // Village & Tola/Mohalla from header (if available), otherwise from data
+            'village': _village?.toString() ?? '',
+            'tolaMohalla': _mohalla?.toString() ?? '',
+            // Raw card data for any additional use
+            'householdData': data,
           },
         );
+
+        debugPrint(' Navigation to AddFamilyMember:');
+        debugPrint('   HHID: ${data['hhId']}');
+        debugPrint('   Complete Beneficiary ID (from unique_key): $completeBeneficiaryId');
+
+        debugPrint('   Head Name: ${data['Name']}');
+        debugPrint('   Spouse Name: ${data['SpouseName']}');
+
+        await _loadBeneficiaries();
+        _onSearchChanged();
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),

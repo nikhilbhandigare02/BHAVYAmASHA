@@ -162,13 +162,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         ),
                       ),
 
-                      // --- Divider between Years & Months ---
-                      Container(
-                        width: 1,
-                        height: 4.h,
-                        color: Colors.grey.shade300,
-                        margin: EdgeInsets.symmetric(horizontal: 1.w),
-                      ),
+                      // // --- Divider between Years & Months ---
+                      // Container(
+                      //   width: 1,
+                      //   height: 4.h,
+                      //   color: Colors.grey.shade300,
+                      //   margin: EdgeInsets.symmetric(horizontal: 1.w),
+                      // ),
 
                       // --- Months ---
                       Expanded(
@@ -182,12 +182,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       ),
 
                       // --- Divider between Months & Days ---
-                      Container(
-                        width: 1,
-                        height: 4.h,
-                        color: Colors.grey.shade300,
-                        margin: EdgeInsets.symmetric(horizontal: 1.w),
-                      ),
+                      // Container(
+                      //   width: 1,
+                      //   height: 4.h,
+                      //   color: Colors.grey.shade300,
+                      //   margin: EdgeInsets.symmetric(horizontal: 1.w),
+                      // ),
 
                       // --- Days ---
                       Expanded(

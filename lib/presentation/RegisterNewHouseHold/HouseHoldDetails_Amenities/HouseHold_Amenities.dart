@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
@@ -44,41 +45,149 @@ class HouseHoldAmenities extends StatelessWidget {
                           onChanged: (v) => bloc.add(KitchenChange(houseKitchen: v ?? '')),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.8),
-                        ApiDropdown<String>(
-                          labelText: l.cookingFuelTypeLabel,
-                          items: const [
-                            'LPG',
-                            'Firewood',
-                            'Coal',
-                            'Kerosene',
-                            'Crop Residue',
-                            'Drug Cake',
-                            'Other'
-                          ],
-                          getLabel: (s) {
-                            switch (s) {
-                              case 'LPG':
-                                return l.fuelLpg;
-                              case 'Firewood':
-                                return l.fuelFirewood;
-                              case 'Coal':
-                                return l.fuelCoal;
-                              case 'Kerosene':
-                                return l.fuelKerosene;
-                              case 'Crop Residue':
-                                return l.fuelCropResidue;
-                              case 'Drug Cake':
-                                return l.fuelDungCake;
-                              case 'Other':
-                                return l.fuelOther;
-                              default:
-                                return s;
+                        // Type of fuel used for cooking (multi-select dropdown)
+                        Builder(
+                          builder: (context) {
+                            const options = <String>[
+                              'LPG',
+                              'Firewood',
+                              'Coal',
+                              'Kerosene',
+                              'Crop Residue',
+                              'Drug Cake',
+                              'Other',
+                            ];
+
+                            String labelFor(String s) {
+                              switch (s) {
+                                case 'LPG':
+                                  return l.fuelLpg;
+                                case 'Firewood':
+                                  return l.fuelFirewood;
+                                case 'Coal':
+                                  return l.fuelCoal;
+                                case 'Kerosene':
+                                  return l.fuelKerosene;
+                                case 'Crop Residue':
+                                  return l.fuelCropResidue;
+                                case 'Drug Cake':
+                                  return l.fuelDungCake;
+                                case 'Other':
+                                  return l.fuelOther;
+                                default:
+                                  return s;
+                              }
                             }
+
+                            final selected = state.cookingFuel
+                                .split(',')
+                                .map((e) => e.trim())
+                                .where((e) => e.isNotEmpty)
+                                .toSet();
+
+                            final displayText = selected.isEmpty
+                                ? l.select
+                                : selected.map(labelFor).join(', ');
+
+                            Future<void> openFuelDialog() async {
+                              final current = Set<String>.from(selected);
+                              await showDialog<void>(
+                                context: context,
+                                  builder: (ctx) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4), // 🔹 Border radius 4
+                                      ),
+                                      backgroundColor: Colors.white, // 🔹 Set background color to white
+                                      title: Text(l.cookingFuelTypeLabel),
+                                      content: SingleChildScrollView(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            for (final option in options)
+                                              StatefulBuilder(
+                                                builder: (ctx2, setStateDialog) {
+                                                  final isChecked = current.contains(option);
+                                                  return CheckboxListTile(
+                                                    dense: true,
+                                                    contentPadding: EdgeInsets.zero,
+                                                    title: Text(labelFor(option)),
+                                                    value: isChecked,
+                                                    onChanged: (checked) {
+                                                      setStateDialog(() {
+                                                        if (checked == true) {
+                                                          current.add(option);
+                                                        } else {
+                                                          current.remove(option);
+                                                        }
+                                                      });
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(ctx).pop(),
+                                          child: Text(l.cancel ?? 'Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            final joined = current.join(', ');
+                                            bloc.add(CookingFuelTypeChange(cookingFuel: joined));
+                                            Navigator.of(ctx).pop();
+                                          },
+                                          child: Text(l.ok ?? 'OK'),
+                                        ),
+                                      ],
+                                    );
+                                  }
+
+                              );
+                            }
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                                  child: Text(
+                                    l.cookingFuelTypeLabel,
+                                    style:  TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: openFuelDialog,
+                                  child: InputDecorator(
+                                    decoration: const InputDecoration(
+                                      border: InputBorder.none,
+                                      isDense: true,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            displayText,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const Icon(Icons.arrow_drop_down),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Divider(color: AppColors.divider, thickness: 0.8),
+                              ],
+                            );
                           },
-                          value: (state.cookingFuel!.isEmpty) ? null : state.cookingFuel,
-                          onChanged: (v) => bloc.add(CookingFuelTypeChange(cookingFuel: v ?? '')),
                         ),
-                        Divider(color: AppColors.divider, thickness: 0.8),
                         ApiDropdown<String>(
                           labelText: l.primaryWaterSourceLabel,
                           items: const [
@@ -169,6 +278,39 @@ class HouseHoldAmenities extends StatelessWidget {
                           onChanged: (v) => bloc.add(ToiletChange(toilet: v ?? '')),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.8),
+
+                        // Additional fields based on toilet availability
+                        if (state.toilet == 'Yes') ...[
+                          ApiDropdown<String>(
+                            labelText: 'Type of toilet',
+                            items: const [
+                              'Flush toilet',
+                              'Septic tank',
+                              'Pit latrine',
+                              'Shared toilet',
+                              'Other',
+                            ],
+                            getLabel: (s) => s,
+                            value: state.toiletType.isEmpty ? null : state.toiletType,
+                            onChanged: (v) => bloc.add(ToiletTypeChange(toiletType: v ?? '')),
+                          ),
+                          Divider(color: AppColors.divider, thickness: 0.8),
+                        ] else if (state.toilet == 'No') ...[
+                          ApiDropdown<String>(
+                            labelText: 'Where do you go for toilet',
+                            items: const [
+                              'Open defecation',
+                              'Community toilet',
+                              'Public toilet',
+                              'Neighbor\'s toilet',
+                              'Other',
+                            ],
+                            getLabel: (s) => s,
+                            value: state.toiletPlace.isEmpty ? null : state.toiletPlace,
+                            onChanged: (v) => bloc.add(ToiletPlaceChange(toiletPlace: v ?? '')),
+                          ),
+                          Divider(color: AppColors.divider, thickness: 0.8),
+                        ],
             ],
           ),
         );

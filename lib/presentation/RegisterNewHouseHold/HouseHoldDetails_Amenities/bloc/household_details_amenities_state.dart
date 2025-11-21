@@ -10,6 +10,8 @@ class HouseholdDetailsAmenitiesState extends Equatable {
     this.waterSource = '',
     this.electricity = '',
     this.toilet = '',
+    this.toiletType = '',
+    this.toiletPlace = '',
     this.error = '',
     this.postApiStatus = PostApiStatus.initial,
   });
@@ -22,6 +24,8 @@ class HouseholdDetailsAmenitiesState extends Equatable {
   final String waterSource;
   final String electricity;
   final String toilet;
+  final String toiletType;
+  final String toiletPlace;
   final String error;
   final PostApiStatus postApiStatus;
 
@@ -34,6 +38,8 @@ class HouseholdDetailsAmenitiesState extends Equatable {
      String? waterSource,
      String? electricity,
      String? toilet,
+     String? toiletType,
+     String? toiletPlace,
      String? error,
     PostApiStatus? postApiStatus,
 
@@ -47,6 +53,8 @@ class HouseholdDetailsAmenitiesState extends Equatable {
         waterSource: waterSource ?? this.waterSource,
         electricity: electricity ?? this.electricity,
         toilet: toilet ?? this.toilet,
+        toiletType: toiletType ?? this.toiletType,
+        toiletPlace: toiletPlace ?? this.toiletPlace,
         error: error ?? this.error,
         postApiStatus: postApiStatus ?? this.postApiStatus,
     );
@@ -61,6 +69,8 @@ class HouseholdDetailsAmenitiesState extends Equatable {
     waterSource,
     electricity,
     toilet,
+    toiletType,
+    toiletPlace,
     error,
     postApiStatus,
   ];

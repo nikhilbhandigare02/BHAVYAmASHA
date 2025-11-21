@@ -336,7 +336,7 @@ class UpdateMemberDetailBloc
       // Load member data from database
       final db = await databaseProvider.database;
       final member = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'id = ?',
         whereArgs: [event.memberId],
       );
@@ -445,7 +445,7 @@ class UpdateMemberDetailBloc
       
       // First get the existing beneficiary data
       final existingData = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'id = ?',
         whereArgs: [state.memberId],
       );
@@ -489,7 +489,7 @@ class UpdateMemberDetailBloc
       
       // Update the database
       await db.update(
-        'beneficiaries',
+        'beneficiaries_new',
         {
           'beneficiary_info': jsonEncode(beneficiaryInfo),
           'modified_date_time': DateTime.now().toIso8601String(),

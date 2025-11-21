@@ -115,6 +115,10 @@ class RegisterNewHouseholdBloc
               'Not Specified',
           'toilet': event.amenitiesData['toilet']?.toString().trim() ??
               'Not Specified',
+          'toiletType': event.amenitiesData['toiletType']?.toString().trim() ??
+              'Not Specified',
+          'toiletPlace': event.amenitiesData['toiletPlace']?.toString().trim() ??
+              'Not Specified',
           'lastUpdated': DateTime.now().toIso8601String(),
           'createdAt': DateTime.now().toIso8601String(),
           'appdetails': {
@@ -444,6 +448,8 @@ class RegisterNewHouseholdBloc
             'primary_source_of_water': storedInfo['waterSource'] ?? event.amenitiesData['waterSource'],
             'availability_of_electricity': storedInfo['electricity'] ?? event.amenitiesData['electricity'],
             'availability_of_toilet': storedInfo['toilet'] ?? event.amenitiesData['toilet'],
+            'type_of_toilet': storedInfo['toiletType'] ?? event.amenitiesData['toiletType'],
+            'where_do_you_go_for_toilet': storedInfo['toiletPlace'] ?? event.amenitiesData['toiletPlace'],
           }
         };
 

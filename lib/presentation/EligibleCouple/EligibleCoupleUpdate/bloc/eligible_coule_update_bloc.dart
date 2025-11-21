@@ -47,7 +47,8 @@ class EligibleCouleUpdateBloc
       final rchId = data['RichID']?.toString() ?? '';
       final ageGender = data['ageGender']?.toString() ?? '';
       final hhId = data['hhId']?.toString() ?? '';
-      final beneficiaryId = data['BeneficiaryID']?.toString() ?? '';
+      // Prefer the full unique beneficiary ID if available (unique_key / fullBeneficiaryId)
+      final beneficiaryId = (data['unique_key'] ?? data['fullBeneficiaryId'] ?? data['BeneficiaryID'])?.toString() ?? '';
 
       // Parse age from ageGender (format: "31 Y / Other")
       String currentAge = '';
@@ -93,11 +94,25 @@ class EligibleCouleUpdateBloc
 
       // Now query the database to get full beneficiary details
       final db = await DatabaseProvider.instance.database;
-      final rows = await db.query(
-        'beneficiaries_new',
-        where: 'household_ref_key LIKE ?',
-        whereArgs: ['%$hhId'],
-      );
+
+      List<Map<String, dynamic>> rows = [];
+
+      if (beneficiaryId.isNotEmpty) {
+        // Look up by unique_key when we have the exact beneficiary ID
+        rows = await db.query(
+          'beneficiaries_new',
+          where: 'unique_key = ?',
+          whereArgs: [beneficiaryId],
+          limit: 1,
+        );
+      } else if (hhId.isNotEmpty) {
+        // Fallback: look up by household_ref_key if beneficiaryId is not available
+        rows = await db.query(
+          'beneficiaries_new',
+          where: 'household_ref_key = ?',
+          whereArgs: [hhId],
+        );
+      }
 
       if (rows.isEmpty) {
         print('⚠️ No beneficiary found in database, using only passed data');
@@ -120,55 +135,10 @@ class EligibleCouleUpdateBloc
         return;
       }
 
-      print('✅ Found ${rows.length} potential household(s)');
+      print('✅ Found ${rows.length} potential record(s)');
 
-      // Find the matching row by name
-      Map<String, dynamic>? matchedRow;
-      for (final row in rows) {
-        try {
-          final beneficiaryInfoJson = row['beneficiary_info'] as String? ?? '{}';
-          final beneficiaryInfo = jsonDecode(beneficiaryInfoJson) as Map<String, dynamic>;
-          final headDetails = Map<String, dynamic>.from(beneficiaryInfo['head_details'] as Map? ?? {});
-          final spouseDetails = Map<String, dynamic>.from(beneficiaryInfo['spouse_details'] as Map? ??
-              headDetails['spousedetails'] as Map? ?? {});
-
-          final headName = headDetails['headName']?.toString() ?? headDetails['memberName']?.toString() ?? '';
-          final spouseName = spouseDetails['memberName']?.toString() ?? spouseDetails['spouseName']?.toString() ?? '';
-
-          // Check if name matches head or spouse
-          if (name.toLowerCase() == headName.toLowerCase() || name.toLowerCase() == spouseName.toLowerCase()) {
-            matchedRow = row;
-            print('✅ Found matching record for name: $name');
-            break;
-          }
-        } catch (e) {
-          print('⚠️ Error parsing row: $e');
-          continue;
-        }
-      }
-
-      if (matchedRow == null) {
-        print('⚠️ No matching beneficiary found in database, using only passed data');
-        // Use only the data passed from previous screen
-        emit(state.copyWith(
-          rchId: rchId,
-          womanName: name,
-          currentAge: currentAge,
-          mobileNo: mobile,
-          totalChildrenBorn: totalBorn,
-          totalLiveChildren: totalLive,
-          totalMaleChildren: totalMale,
-          totalFemaleChildren: totalFemale,
-          youngestChildAge: youngestAge,
-          youngestChildAgeUnit: youngestAgeUnit,
-          youngestChildGender: youngestGender,
-          beneficiaryName: name,
-          clearError: true,
-        ));
-        return;
-      }
-
-      final row = matchedRow;
+      // When we query by unique_key or exact household_ref_key, the first row is the match
+      final row = rows.first;
       print('✅ Found beneficiary record in database');
 
       // Store the database row ID and household_ref_key for later update
@@ -361,9 +331,8 @@ class EligibleCouleUpdateBloc
       // Get the database
       final db = await DatabaseProvider.instance.database;
 
-      // Fetch the current beneficiary record
       final rows = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'id = ?',
         whereArgs: [state.dbRowId],
         limit: 1,
@@ -383,7 +352,6 @@ class EligibleCouleUpdateBloc
 
       print('📦 Current beneficiary info: ${beneficiaryInfo.keys.join(', ')}');
 
-      // Update only the children_details section
       final updatedChildrenDetails = {
         'totalBorn': state.totalChildrenBorn,
         'totalLive': state.totalLiveChildren,
@@ -413,7 +381,7 @@ class EligibleCouleUpdateBloc
 
       // Update the database
       final updateCount = await db.update(
-        'beneficiaries',
+        'beneficiaries_new',
         {
           'beneficiary_info': updatedBeneficiaryInfoJson,
           'modified_date_time': DateTime.now().toIso8601String(),

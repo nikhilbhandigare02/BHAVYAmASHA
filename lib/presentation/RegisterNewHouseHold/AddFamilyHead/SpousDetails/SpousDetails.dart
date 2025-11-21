@@ -285,25 +285,25 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                             Expanded(
                               child: CustomTextField(
                                 labelText: l.years,
-                                hintText: l.yearsHint,
+                                hintText: '0',
                                 initialValue: state.UpdateYears ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateYearsChanged(v.trim())),
                               ),
                             ),
 
-                            Container(
-                              width: 1,
-                              height: 4.h,
-                              color: Colors.grey.shade300,
-                              margin: EdgeInsets.symmetric(horizontal: 1.w),
-                            ),
+                            // Container(
+                            //   width: 1,
+                            //   height: 4.h,
+                            //   color: Colors.grey.shade300,
+                            //   margin: EdgeInsets.symmetric(horizontal: 1.w),
+                            // ),
 
                             // --- Months ---
                             Expanded(
                               child: CustomTextField(
                                 labelText: l.months,
-                                hintText: l.monthsHint,
+                                hintText: '0',
                                 initialValue: state.UpdateMonths ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim())),
@@ -311,18 +311,18 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                             ),
 
                             // --- Divider between Months & Days ---
-                            Container(
-                              width: 1,
-                              height: 4.h,
-                              color: Colors.grey.shade300,
-                              margin: EdgeInsets.symmetric(horizontal: 1.w),
-                            ),
+                            // Container(
+                            //   width: 1,
+                            //   height: 4.h,
+                            //   color: Colors.grey.shade300,
+                            //   margin: EdgeInsets.symmetric(horizontal: 1.w),
+                            // ),
 
                             // --- Days ---
                             Expanded(
                               child: CustomTextField(
                                 labelText: l.days,
-                                hintText: l.daysHint,
+                                hintText: '0',
                                 initialValue: state.UpdateDays ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateDaysChanged(v.trim())),
@@ -779,7 +779,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ),
                   ),
                   SizedBox(height: 1.h),
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                  Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
                 SizedBox(height: 1.h),
 
                   if (state.isPregnant == 'Yes') ...[
@@ -801,7 +801,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           ),
                         ),
                       ),
+
                     ),
+                    Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
                     _section(
                       InkWell(
@@ -822,6 +824,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         ),
                       ),
                     ),
+                    Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
                   ],
                   
                   if (state.isPregnant == 'No') ...[

@@ -33,6 +33,12 @@ final class WeightChange extends AddnewfamilymemberEvent {
   @override
   List<Object> get props => [value];
 }
+final class BirthWeightChange extends AddnewfamilymemberEvent {
+  final String value;
+  const BirthWeightChange(this.value);
+  @override
+  List<Object> get props => [value];
+}
 final class BirthCertificateChange extends AddnewfamilymemberEvent {
   final String value;
   const BirthCertificateChange(this.value);
