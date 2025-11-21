@@ -151,6 +151,12 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
             hintStyle:
             inputStyle.copyWith(color: AppColors.onSurfaceVariant),
 
+            errorStyle: TextStyle(
+              fontSize: 13.sp,
+              height: 1.2,
+              color: Colors.red[700],
+            ),
+
 
             suffixIcon: widget.isEditable && !widget.readOnly
                 ? Padding(

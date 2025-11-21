@@ -2475,7 +2475,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whoseMobileNumberLabel => 'Whose mobile number is this';
 
   @override
-  String get mobileNumberLabel => 'mobile number *';
+  String get mobileNumberLabel => 'mobile number';
 
   @override
   String get mothersRchIdLabel => 'Mother\'s RCH ID number';

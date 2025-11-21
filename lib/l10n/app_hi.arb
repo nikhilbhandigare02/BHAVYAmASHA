@@ -791,7 +791,7 @@
                     "dateOfRegistrationLabel": "पंजीकरण तिथि *",
                     "childNameLabel": "बालक का नाम *",
                     "whoseMobileNumberLabel": "यह मोबाइल नंबर किसका है",
-                    "mobileNumberLabel": "मोबाइल नंबर *",
+                    "mobileNumberLabel": "मोबाइल नंबर ",
                     "mothersRchIdLabel": "माता का RCH आईडी नंबर",
                     "birthCertificateIssuedLabel": "क्या जन्म प्रमाणपत्र जारी किया गया है?",
                     "birthCertificateNumberLabel": "जन्म प्रमाणपत्र संख्या",

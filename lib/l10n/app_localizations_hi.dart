@@ -2475,7 +2475,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get whoseMobileNumberLabel => 'यह मोबाइल नंबर किसका है';
 
   @override
-  String get mobileNumberLabel => 'मोबाइल नंबर *';
+  String get mobileNumberLabel => 'मोबाइल नंबर ';
 
   @override
   String get mothersRchIdLabel => 'माता का RCH आईडी नंबर';

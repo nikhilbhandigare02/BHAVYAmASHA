@@ -13,6 +13,21 @@ import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import 'bloc/spous_bloc.dart';
 
+final GlobalKey<FormState> spousFormKey = GlobalKey<FormState>();
+
+String? spousLastFormError;
+
+void clearSpousFormError() {
+  spousLastFormError = null;
+}
+
+String? captureSpousError(String? message) {
+  if (message != null && spousLastFormError == null) {
+    spousLastFormError = message;
+  }
+  return message;
+}
+
 class Spousdetails extends StatefulWidget {
   final SpousState? initial;
   final String? headMobileOwner;
@@ -30,7 +45,7 @@ class Spousdetails extends StatefulWidget {
 }
 
 class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClientMixin {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = spousFormKey;
 
   Widget _section(Widget child) => Padding(
         padding: EdgeInsets.symmetric(vertical: 0.h),
@@ -172,7 +187,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     initialValue: state.memberName,
                     readOnly: false,
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMemberName(v.trim())),
-                    validator: (value) => Validations.validateNameofMember(l, value),
+                    validator: (value) => captureSpousError(Validations.validateNameofMember(l, value)),
                   ),
                 ),
                 SizedBox(height: 1.h),
@@ -198,7 +213,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     hintText: l.spouseNameHint,
                     initialValue: state.spouseName,
                     readOnly: false,
-                    validator: (value) => Validations.validateSpousName(l, value),
+                    validator: (value) => captureSpousError(Validations.validateSpousName(l, value)),
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
                   ),
                 ),
@@ -246,7 +261,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       hintText: l.dateHint,
                       initialDate: state.dob,
                       onDateChanged: (d) => context.read<SpousBloc>().add(SpUpdateDob(d)),
-                      validator: (date) => Validations.validateDOB(l, date),
+                      validator: (date) => captureSpousError(Validations.validateDOB(l, date)),
                     ),
                   )
                 else
@@ -612,7 +627,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         spBloc.add(const SpUpdateMobileNo(''));
                       }
                     },
-                    validator: (value) => Validations.validateWhoMobileNo(l, value),
+                    validator: (value) => captureSpousError(Validations.validateWhoMobileNo(l, value)),
                   ),
                 ),
                 SizedBox(height: 1.h),
@@ -635,17 +650,17 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       final headNo = widget.headMobileNo?.trim();
 
                       if (owner == null || owner.isEmpty) {
-                        return Validations.validateMobileNo(l, value);
+                        return captureSpousError(Validations.validateMobileNo(l, value));
                       }
 
                       final spouseSelectedFamilyHead = owner == 'Family Head';
                       final matchesHeadOwner = (spouseSelectedFamilyHead && headOwner == 'Self') || (headOwner != null && owner == headOwner);
 
                       if (matchesHeadOwner && (headNo == null || headNo.isEmpty)) {
-                        return 'Enter mobile number';
+                        return captureSpousError('Enter mobile number');
                       }
 
-                      return Validations.validateMobileNo(l, value);
+                      return captureSpousError(Validations.validateMobileNo(l, value));
                     },
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
@@ -757,7 +772,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       },
                       validator: (value) {
                         if (state.gender == 'Female') {
-                          return Validations.validateIsPregnant(l, value);
+                          return captureSpousError(Validations.validateIsPregnant(l, value));
                         }
                         return null;
                       },
@@ -808,6 +823,135 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       ),
                     ),
                   ],
+                  
+                  if (state.isPregnant == 'No') ...[
+                    ApiDropdown<String>(
+                      labelText: l.familyPlanningCounseling,
+                      items: const ['Select', 'Yes', 'No'],
+                      getLabel: (s) {
+                        switch (s) {
+                          case 'Yes':
+                            return l.yes;
+                          case 'No':
+                            return l.no;
+                          default:
+                            return s;
+                        }
+                      },
+                      value: state.familyPlanningCounseling ?? 'Select',
+                      onChanged: (v) {
+                        if (v == null) return;
+                        spBloc.add(FamilyPlanningCounselingChanged(v));
+                      },
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                    SizedBox(height: 1.h),
+                    if (state.familyPlanningCounseling == 'Yes') ...[
+                      const SizedBox(height: 8),
+                      ApiDropdown<String>(
+                        labelText: 'Family Planning Method',
+                        items: const [
+                          'Select',
+                          'Condom',
+                          'Mala -N (Daily Contraceptive pill)',
+                          'Atra injection',
+                          'Copper -T (IUCD)',
+                          'Chhaya (Weekly Contraceptive pill)',
+                          'ECP (Emergency Contraceptive pill)',
+                          'Male Sterilization',
+                          'Female Sterilization',
+                          'Any Other Specify'
+                        ],
+                        getLabel: (value) => value,
+                        value: state.fpMethod ?? 'Select',
+                        onChanged: (value) {
+                          if (value != null) {
+                            spBloc.add(FpMethodChanged(value));
+                          }
+                        },
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                      SizedBox(height: 1.h),
+                    ],
+
+                    if (state.fpMethod == 'Copper -T (IUCD)') ...[
+                      CustomDatePicker(
+                        labelText: 'Date of removal',
+                        initialDate: state.removalDate ?? DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2100),
+                        onDateChanged: (date) {
+                          if (date != null) {
+                            spBloc.add(RemovalDateChanged(date));
+                          }
+                        },
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                      SizedBox(height: 1.h),
+                      CustomTextField(
+                        labelText: 'Reason for Removal',
+                        hintText: 'Enter reason for removal',
+                        initialValue: state.removalReason,
+                        onChanged: (value) {
+                          spBloc.add(RemovalReasonChanged(value ?? ''));
+                        },
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                      SizedBox(height: 1.h),
+                    ],
+
+                    if (state.fpMethod == 'Condom') ...[
+                      CustomTextField(
+                        labelText: 'Quantity of Condoms',
+                        hintText: 'Enter quantity',
+                        keyboardType: TextInputType.number,
+                        initialValue: state.condomQuantity,
+                        onChanged: (value) {
+                          spBloc.add(CondomQuantityChanged(value ?? ''));
+                        },
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                      SizedBox(height: 1.h),                    ],
+
+                    if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)') ...[
+                      CustomTextField(
+                        labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
+                        hintText: 'Enter quantity',
+                        keyboardType: TextInputType.number,
+                        initialValue: state.malaQuantity,
+                        onChanged: (value) {
+                          spBloc.add(MalaQuantityChanged(value ?? ''));
+                        },
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                      SizedBox(height: 1.h),                    ],
+
+                    if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)') ...[
+                      CustomTextField(
+                        labelText: 'Chhaya (Weekly Contraceptive pill)',
+                        hintText: 'Enter quantity',
+                        keyboardType: TextInputType.number,
+                        initialValue: state.chhayaQuantity,
+                        onChanged: (value) {
+                          spBloc.add(ChhayaQuantityChanged(value ?? ''));
+                        },
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                      SizedBox(height: 1.h),                    ],
+
+                    if (state.fpMethod == 'ECP (Emergency Contraceptive pill)') ...[
+                      CustomTextField(
+                        labelText: 'ECP (Emergency Contraceptive pill)',
+                        hintText: 'Enter quantity',
+                        keyboardType: TextInputType.number,
+                        initialValue: state.ecpQuantity,
+                        onChanged: (value) {
+                          spBloc.add(ECPQuantityChanged(value ?? ''));
+                        },
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                      SizedBox(height: 1.h),                    ],
+                  ]
                 ],
               ],
             );

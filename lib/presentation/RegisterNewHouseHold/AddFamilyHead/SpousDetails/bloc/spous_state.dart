@@ -31,6 +31,14 @@ class SpousState extends Equatable {
     this.phId,
     this.beneficiaryType,
     this.isPregnant,
+    this.familyPlanningCounseling,
+    this.fpMethod,
+    this.removalDate,
+    this.removalReason,
+    this.condomQuantity,
+    this.malaQuantity,
+    this.chhayaQuantity,
+    this.ecpQuantity,
   });
 
   final String? relation;
@@ -62,6 +70,14 @@ class SpousState extends Equatable {
   final String? phId;
   final String? beneficiaryType;
   final String? isPregnant; // Yes/No
+  final String? familyPlanningCounseling; // Yes/No/Select
+  final String? fpMethod; // Selected FP method
+  final DateTime? removalDate;
+  final String? removalReason;
+  final String? condomQuantity;
+  final String? malaQuantity;
+  final String? chhayaQuantity;
+  final String? ecpQuantity;
 
   SpousState copyWith({
     String? relation,
@@ -93,6 +109,14 @@ class SpousState extends Equatable {
     String? phId,
     String? beneficiaryType,
     String? isPregnant,
+    String? familyPlanningCounseling,
+    String? fpMethod,
+    DateTime? removalDate,
+    String? removalReason,
+    String? condomQuantity,
+    String? malaQuantity,
+    String? chhayaQuantity,
+    String? ecpQuantity,
   }) {
     return SpousState(
       relation: relation ?? this.relation,
@@ -124,6 +148,15 @@ class SpousState extends Equatable {
       phId: phId ?? this.phId,
       beneficiaryType: beneficiaryType ?? this.beneficiaryType,
       isPregnant: isPregnant ?? this.isPregnant,
+      familyPlanningCounseling:
+          familyPlanningCounseling ?? this.familyPlanningCounseling,
+      fpMethod: fpMethod ?? this.fpMethod,
+      removalDate: removalDate ?? this.removalDate,
+      removalReason: removalReason ?? this.removalReason,
+      condomQuantity: condomQuantity ?? this.condomQuantity,
+      malaQuantity: malaQuantity ?? this.malaQuantity,
+      chhayaQuantity: chhayaQuantity ?? this.chhayaQuantity,
+      ecpQuantity: ecpQuantity ?? this.ecpQuantity,
     );
   }
 
@@ -156,6 +189,14 @@ class SpousState extends Equatable {
         phId,
         beneficiaryType,
         isPregnant,
+        familyPlanningCounseling,
+        fpMethod,
+        removalDate,
+        removalReason,
+        condomQuantity,
+        malaQuantity,
+        chhayaQuantity,
+        ecpQuantity,
       ];
 
   Map<String, dynamic> toJson() {
@@ -186,6 +227,14 @@ class SpousState extends Equatable {
       'phId': phId,
       'beneficiaryType': beneficiaryType,
       'isPregnant': isPregnant,
+      'familyPlanningCounseling': familyPlanningCounseling,
+      'fpMethod': fpMethod,
+      'removalDate': removalDate?.toIso8601String(),
+      'removalReason': removalReason,
+      'condomQuantity': condomQuantity,
+      'malaQuantity': malaQuantity,
+      'chhayaQuantity': chhayaQuantity,
+      'ecpQuantity': ecpQuantity,
     };
   }
 }
