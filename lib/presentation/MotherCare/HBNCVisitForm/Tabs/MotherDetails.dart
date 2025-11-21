@@ -225,7 +225,6 @@ class MotherDetailsTab extends StatelessWidget {
                   ),
                   const Divider(),
 
-                  // Pads changed per day
                   ApiDropdown<int>(
                     labelText: t.padsPerDayLabel,
                     items: const [0, 1, 2, 3, 4, 5, 6],
