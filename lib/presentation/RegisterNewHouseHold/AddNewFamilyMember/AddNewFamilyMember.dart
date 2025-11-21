@@ -661,7 +661,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               // Name
                               _section(
                                 CustomTextField(
-                                  key: ValueKey('member_name_${state.name ?? ''}'),
                                   labelText: '${l.nameOfMemberLabel} *',
                                   hintText: l.nameOfMemberHint,
                                   initialValue: state.name ?? '',
@@ -931,15 +930,22 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     hintText: l.dateHint,
                                     onDateChanged: (d) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateDob(d!)),
                                     validator: (date) {
-                                      // First run the existing generic DOB validation
-                                      final baseError = Validations.validateDOB(l, date);
-                                      if (baseError != null) {
-                                        return _captureAnmError(baseError);
+                                      if (date == null) {
+                                        return _captureAnmError('Date of birth is required');
                                       }
 
-                                      if (state.memberType == 'Child' && date != null) {
-                                        final now = DateTime.now();
-                                        final diffDays = now.difference(date).inDays;
+                                      final today = DateTime.now();
+                                      final dobDate = DateTime(date.year, date.month, date.day);
+                                      final todayDate = DateTime(today.year, today.month, today.day);
+
+                                      if (dobDate.isAfter(todayDate)) {
+                                        return _captureAnmError('Date of birth cannot be in the future');
+                                      }
+
+                                      // Apply the 1 day–15 years rule only when member type is Child
+                                      final memberType = (state.memberType ?? '').trim().toLowerCase();
+                                      if (memberType == 'child') {
+                                        final diffDays = todayDate.difference(dobDate).inDays;
 
                                         const int minDays = 1;
                                         const int maxDays = 15 * 365;
@@ -949,6 +955,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         }
                                       }
 
+                                      // For adults, no extra age-range restriction beyond not-future
                                       return null;
                                     },
 
@@ -1565,6 +1572,38 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         // Get current state
                                         final bloc = context.read<AddnewfamilymemberBloc>();
                                         final state = bloc.state;
+
+                                        // Extra DOB safety check using bloc state to
+                                        // ensure invalid DOB never passes even if the
+                                        // DOB field widget is not currently mounted.
+                                        if (state.useDob == true) {
+                                          if (state.dob == null) {
+                                            showAppSnackBar(context, 'Date of birth is required');
+                                            return;
+                                          }
+
+                                          final today = DateTime.now();
+                                          final dobDate = DateTime(state.dob!.year, state.dob!.month, state.dob!.day);
+                                          final todayDate = DateTime(today.year, today.month, today.day);
+
+                                          if (dobDate.isAfter(todayDate)) {
+                                            showAppSnackBar(context, 'Date of birth cannot be in the future');
+                                            return;
+                                          }
+
+                                          final memberType = (state.memberType ?? '').trim().toLowerCase();
+                                          if (memberType == 'child') {
+                                            final diffDays = todayDate.difference(dobDate).inDays;
+
+                                            const int minDays = 1;
+                                            const int maxDays = 15 * 365;
+
+                                            if (diffDays < minDays || diffDays > maxDays) {
+                                              showAppSnackBar(context, 'For Child: Age should be between 1 day to 15 years.');
+                                              return;
+                                            }
+                                          }
+                                        }
 
                                         final memberData = {
                                           'memberType': state.memberType,

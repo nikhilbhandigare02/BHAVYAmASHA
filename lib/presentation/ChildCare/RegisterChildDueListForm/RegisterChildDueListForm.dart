@@ -7,6 +7,7 @@ import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
 import 'bloc/register_child_form_bloc.dart';
@@ -94,6 +95,20 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
   bool _isLoading = true;
   BeneficiaryData? _beneficiaryData;
   final _formKey = GlobalKey<FormState>();
+
+  // Capture first validation error so we can also show it in a SnackBar
+  static String? _firstError;
+
+  static void _clearFirstError() {
+    _firstError = null;
+  }
+
+  static String? _captureError(String? message) {
+    if (message != null && _firstError == null) {
+      _firstError = message;
+    }
+    return message;
+  }
 
   @override
   void initState() {
@@ -395,14 +410,10 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
           child: BlocConsumer<RegisterChildFormBloc, RegisterChildFormState>(
             listener: (context, state) {
               if (state.error != null && state.error!.isNotEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.error!)),
-                );
+                showAppSnackBar(context, state.error!);
               }
               if (state.isSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n?.saveSuccess ?? 'Saved successfully')),
-                );
+                showAppSnackBar(context, l10n?.saveSuccess ?? 'Saved successfully');
                 // Pop with result after successful save
                 Future.delayed(const Duration(milliseconds: 500), () {
                   if (mounted) {
@@ -423,9 +434,11 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
 
                           const SizedBox(height: 5),
 
@@ -447,6 +460,12 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             labelText: l10n?.dateOfBirthLabel ?? 'Date of Birth *',
                             initialDate: state.dateOfBirth,
                             onDateChanged: (d) => bloc.add(DateOfBirthChanged(d)),
+                            validator: (date) {
+                              if (date == null) {
+                                return _captureError('Date of Birth is required');
+                              }
+                              return null;
+                            },
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -454,6 +473,12 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             labelText: l10n?.dateOfRegistrationLabel ?? 'Date of Registration *',
                             initialDate: state.dateOfRegistration,
                             onDateChanged: (d) => bloc.add(DateOfRegistrationChanged(d)),
+                            validator: (date) {
+                              if (date == null) {
+                                return _captureError('Date of Registration is required');
+                              }
+                              return null;
+                            },
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -462,27 +487,45 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             hintText: 'Enter full name of the child',
                             initialValue: state.childName,
                             onChanged: (v) => bloc.add(ChildNameChanged(v)),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return _captureError("Child's name is required");
+                              }
+                              return null;
+                            },
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4.0),
                             child: ApiDropdown<String>(
-                              labelText: l10n?.genderLabel ?? 'gender',
+                              labelText: "${l10n?.genderLabel} *" ?? 'gender',
                               items: [l10n?.male ?? 'Male', l10n?.female ?? 'Female', l10n?.other ?? 'Other'],
                               value: state.gender.isEmpty ? null : state.gender,
                               getLabel: (s) => s,
                               onChanged: (v) => bloc.add(GenderChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return _captureError('Gender is required');
+                                }
+                                return null;
+                              },
                             ),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           CustomTextField(
-                            labelText: l10n?.motherNameLabel ?? "Mother's name*",
+                            labelText: "${l10n?.motherNameLabel} *" ?? "Mother's name*",
                             hintText: 'Enter mother\'s  name',
                             initialValue: state.motherName,
                             onChanged: (v) => bloc.add(MotherNameChanged(v)),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return _captureError("Mother's name is required");
+                              }
+                              return null;
+                            },
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -495,11 +538,17 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           CustomTextField(
-                            labelText: l10n?.addressLabel ?? 'Address',
+                            labelText: "${l10n?.addressLabel} *" ?? 'Address',
                             hintText: 'Enter address ',
                             initialValue: state.address,
                             onChanged: (v) => bloc.add(AddressChanged(v)),
                             maxLines: 2,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return _captureError('Address is required');
+                              }
+                              return null;
+                            },
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -517,16 +566,33 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               getLabel: (s) => s,
                               onChanged: (v) => bloc.add(WhoseMobileNumberChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return _captureError('Whose mobile number is required');
+                                }
+                                return null;
+                              },
                             ),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                           CustomTextField(
-                            labelText: l10n?.mobileNumberLabel ?? 'Mobile number *',
+                            labelText:"${ l10n?.mobileNumberLabel} *" ?? 'Mobile number *',
                             hintText: 'Enter 10-digit mobile number',
                             initialValue: state.mobileNumber,
                             keyboardType: TextInputType.phone,
                             onChanged: (v) => bloc.add(MobileNumberChanged(v)),
+                            validator: (value) {
+                              final text = value?.trim() ?? '';
+                              if (text.isEmpty) {
+                                return _captureError('Mobile number is required');
+                              }
+                              final regex = RegExp(r'^[6-9]\d{9}$');
+                              if (!regex.hasMatch(text)) {
+                                return _captureError('Mobile no. must be 10 digits and start with 6-9');
+                              }
+                              return null;
+                            },
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -565,6 +631,24 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             initialValue: state.weightGrams,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(WeightGramsChanged(v)),
+                            validator: (value) {
+                              final text = value?.trim() ?? '';
+                              if (text.isEmpty) {
+                                // Not required
+                                return null;
+                              }
+
+                              final parsed = int.tryParse(text);
+                              if (parsed == null) {
+                                return _captureError('Please enter a valid weight in grams');
+                              }
+
+                              if (parsed < 500 || parsed > 12500) {
+                                return _captureError('Weight must be between 500 and 12500 grams');
+                              }
+
+                              return null;
+                            },
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -574,6 +658,24 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             initialValue: state.birthWeightGrams,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(BirthWeightGramsChanged(v)),
+                            validator: (value) {
+                              final text = value?.trim() ?? '';
+                              if (text.isEmpty) {
+                                // Not required
+                                return null;
+                              }
+
+                              final parsed = int.tryParse(text);
+                              if (parsed == null) {
+                                return _captureError('Please enter a valid birth weight in grams');
+                              }
+
+                              if (parsed < 1200 || parsed > 4000) {
+                                return _captureError('Birth weight must be between 1200 and 4000 grams');
+                              }
+
+                              return null;
+                            },
                           ),
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -618,6 +720,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                       ),
                     ),
                   ),
+                  ),
                   SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -628,6 +731,17 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                           color: AppColors.primary,
                           borderRadius: 8,
                           onPress: () {
+                            _clearFirstError();
+                            final form = _formKey.currentState;
+                            if (form == null) return;
+
+                            final isValid = form.validate();
+                            if (!isValid) {
+                              final msg = _firstError ?? 'Please correct the highlighted fields.';
+                              showAppSnackBar(context, msg);
+                              return;
+                            }
+
                             bloc.add(const SubmitPressed());
                           },
                           disabled: state.isSubmitting,

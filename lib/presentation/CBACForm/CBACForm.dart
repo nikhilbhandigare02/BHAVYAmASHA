@@ -12,6 +12,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import 'bloc/cbac_form_bloc.dart';
@@ -148,24 +149,15 @@ class _CbacformState extends State<Cbacform> {
                   }
                   return k;
                 }
-                final msg = '${l10n.cbacPleaseFill}: ' + state.missingKeys.map(labelForKey).join(', ');
-                ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(
-                    SnackBar(
-                      content: Text(msg),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+
+                // Show only the first missing field label in SnackBar
+                final firstKey = state.missingKeys.first;
+                final firstLabel = labelForKey(firstKey);
+                final msg = '${l10n.cbacPleaseFill}: $firstLabel';
+                showAppSnackBar(context, msg);
+
               } else if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
-                ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(
-                    SnackBar(
-                      content: Text(state.errorMessage!),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                showAppSnackBar(context, state.errorMessage!);
               }
             },
             builder: (context, state) {
@@ -653,6 +645,32 @@ class _PersonalInfoTab extends StatelessWidget {
           },
         ),
         const Divider(height: 0.5),
+        // Identification Number (shown only after Identification Type is selected)
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (previous, current) =>
+              previous.data['personal.idType'] != current.data['personal.idType'] ||
+              previous.data['personal.idNumber'] != current.data['personal.idNumber'],
+          builder: (context, state) {
+            final idType = (state.data['personal.idType'] ?? '').toString().trim();
+            if (idType.isEmpty) {
+              // Hide the field entirely until an ID type is chosen
+              return const SizedBox.shrink();
+            }
+
+            return Column(
+              children: [
+                CustomTextField(
+                  hintText: 'Identification Number',
+                  labelText: 'Identification Number',
+                  initialValue: state.data['personal.idNumber']?.toString() ?? '',
+                  onChanged: (v) =>
+                      bloc.add(CbacFieldChanged('personal.idNumber', v.trim())),
+                ),
+                const Divider(height: 0.5),
+              ],
+            );
+          },
+        ),
         BlocBuilder<CbacFormBloc, CbacFormState>(
           buildWhen: (previous, current) => previous.data['personal.hasConditions'] != current.data['personal.hasConditions'],
           builder: (context, state) {
@@ -736,7 +754,7 @@ class _PartATab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 300,
+                    width: 325,
                     child: ApiDropdown<String>(
                       labelText: question,
                       hintText: '',
@@ -891,7 +909,7 @@ class _PartBTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: 300,
+                width: 320,
                 child: BlocBuilder<CbacFormBloc, CbacFormState>(
                   buildWhen: (previous, current) => previous.data[keyPath] != current.data[keyPath],
                   builder: (context, state) {
@@ -920,21 +938,21 @@ class _PartBTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
       children: [
         chip(l10n.cbacPartB1),
-        ...qRow(l10n.cbacB_b1_breath, 'partB.b1.breath'),
-        ...qRow(l10n.cbacB_b1_cough2w, 'partB.b1.cough2w'),
-        ...qRow(l10n.cbacB_b1_bloodMucus, 'partB.b1.bloodMucus'),
-        ...qRow(l10n.cbacB_b1_fever2w, 'partB.b1.fever2w'),
-        ...qRow(l10n.cbacB_b1_weightLoss, 'partB.b1.weightLoss'),
-        ...qRow(l10n.cbacB_b1_nightSweat, 'partB.b1.nightSweat'),
+        ...qRow("${l10n.cbacB_b1_breath}", 'partB.b1.breath'),
+        ...qRow("${l10n.cbacB_b1_cough2w} *", 'partB.b1.cough2w'),
+        ...qRow("${l10n.cbacB_b1_bloodMucus} *", 'partB.b1.bloodMucus'),
+        ...qRow("${l10n.cbacB_b1_fever2w} *", 'partB.b1.fever2w'),
+        ...qRow("${l10n.cbacB_b1_weightLoss} *", 'partB.b1.weightLoss'),
+        ...qRow("${l10n.cbacB_b1_nightSweat} *", 'partB.b1.nightSweat'),
         ...qRow(l10n.cbacB_b1_seizures, 'partB.b1.seizures'),
         ...qRow(l10n.cbacB_b1_openMouth, 'partB.b1.openMouth'),
         ...qRow(l10n.cbacB_b1_ulcers, 'partB.b1.ulcers'),
         ...qRow(l10n.cbacB_b1_swellingMouth, 'partB.b1.swellingMouth'),
         ...qRow(l10n.cbacB_b1_rashMouth, 'partB.b1.rashMouth'),
-        ...qRow(l10n.cbacB_b1_chewPain, 'partB.b1.chewPain'),
-        ...qRow(l10n.cbacB_b1_druggs, 'partB.b1.druggs'),
-        ...qRow(l10n.cbacB_b1_tuberculosisFamily, 'partB.b1.Tuberculosis'),
-        ...qRow(l10n.cbacB_b1_history, 'partB.b1.history'),
+        ...qRow(l10n.cbacB_b1_chewPain, ' partB.b1.chewPain'),
+        ...qRow("${l10n.cbacB_b1_druggs} **", 'partB.b1.druggs'),
+        ...qRow("${l10n.cbacB_b1_tuberculosisFamily} **", 'partB.b1.Tuberculosis'),
+        ...qRow("${l10n.cbacB_b1_history} **", 'partB.b1.history'),
         ...qRow(l10n.cbacB_b1_palmsSores, 'partB.b1.palms'),
         ...qRow(l10n.cbacB_b1_tingling, 'partB.b1.tingling'),
 
@@ -985,7 +1003,15 @@ class _PartBTab extends StatelessWidget {
   }
 }
 
-class _PartCTab extends StatelessWidget {
+class _PartCTab extends StatefulWidget {
+  @override
+  State<_PartCTab> createState() => _PartCTabState();
+}
+
+class _PartCTabState extends State<_PartCTab> {
+  bool _fuelExpanded = false;
+  bool _businessExpanded = false;
+
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<CbacFormBloc>();
@@ -1013,61 +1039,202 @@ class _PartCTab extends StatelessWidget {
         ),
         const SizedBox(height: 8),
 
+        // Cooking fuel multi-select dropdown with checkboxes inside
         BlocBuilder<CbacFormBloc, CbacFormState>(
           buildWhen: (previous, current) => previous.data['partC.cookingFuel'] != current.data['partC.cookingFuel'],
           builder: (context, state) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            final allOptions = [
+              l10n.firewod,
+              l10n.cropResidues,
+              l10n.cowdung,
+              l10n.coal,
+              l10n.lpg,
+              l10n.cbacC_fuelKerosene,
+            ];
+
+            final raw = (state.data['partC.cookingFuel'] ?? '').toString();
+            final selected = raw.isEmpty
+                ? <String>{}
+                : raw.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
+
+            final summary = selected.isEmpty ? (l10n.choose) : selected.join(', ');
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: 300,
-                  child: ApiDropdown<String>(
-                    labelText: l10n.cbacC_fuelQ,
-                    hintText: '',
-                    labelFontSize: 15.sp,
-                    items: [l10n.firewod, l10n.cropResidues, l10n.cowdung, l10n.coal, l10n.lpg, l10n.cbacC_fuelKerosene],
-                    getLabel: (s) => s,
-                    value: state.data['partC.cookingFuel'],
-                    onChanged: (v) => bloc.add(CbacFieldChanged('partC.cookingFuel', v)),
-                    isExpanded: true,
+                Text(
+                  l10n.cbacC_fuelQ,
+                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 4),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _fuelExpanded = !_fuelExpanded;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: Colors.white,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            summary,
+                            style: const TextStyle(color: Colors.black87),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Icon(
+                          _fuelExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                          color: Colors.black54,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const Spacer(),
-                const SizedBox(width: 28), // Placeholder for alignment
+                if (_fuelExpanded) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Column(
+                      children: [
+                        ...allOptions.map((opt) {
+                          final checked = selected.contains(opt);
+                          return CheckboxListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            dense: true,
+                            title: Text(opt),
+                            value: checked,
+                            onChanged: (val) {
+                              final next = Set<String>.from(selected);
+                              if (val == true) {
+                                next.add(opt);
+                              } else {
+                                next.remove(opt);
+                              }
+                              final joined = next.join(', ');
+                              bloc.add(CbacFieldChanged('partC.cookingFuel', joined));
+                            },
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ],
+                const Divider(height: 0.5),
               ],
             );
           },
         ),
-        const SizedBox(height: 6),
-        const Divider(height: 0.5),
 
+        // Business/occupation risk multi-select dropdown with checkboxes inside
         BlocBuilder<CbacFormBloc, CbacFormState>(
           buildWhen: (previous, current) => previous.data['partC.businessRisk'] != current.data['partC.businessRisk'],
           builder: (context, state) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            final allOptions = [
+              l10n.cbacC_workingPollutedIndustries,
+              l10n.burningOfGrabage,
+              l10n.burningCrop,
+              l10n.cbacC_workingSmokeyFactory,
+            ];
+
+            final raw = (state.data['partC.businessRisk'] ?? '').toString();
+            final selected = raw.isEmpty
+                ? <String>{}
+                : raw.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
+
+            final summary = selected.isEmpty ? (l10n.choose) : selected.join(', ');
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: 300,
-                  child: ApiDropdown<String>(
-                    labelText: l10n.cbacC_businessRiskQ,
-                    hintText: '',
-                    labelFontSize: 15.sp,
-                    items: [l10n.cbacC_workingPollutedIndustries, l10n.burningOfGrabage, l10n.burningCrop, l10n.cbacC_workingSmokeyFactory],
-                    getLabel: (s) => s,
-                    value: state.data['partC.businessRisk'],
-                    onChanged: (v) => bloc.add(CbacFieldChanged('partC.businessRisk', v)),
-                    isExpanded: true,
+                Text(
+                  l10n.cbacC_businessRiskQ,
+                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 4),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _businessExpanded = !_businessExpanded;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: Colors.white,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            summary,
+                            style: const TextStyle(color: Colors.black87),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Icon(
+                          _businessExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                          color: Colors.black54,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const Spacer(),
-                const SizedBox(width: 28), // Placeholder for alignment
+                if (_businessExpanded) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          offset: const Offset(0, 2),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        ...allOptions.map((opt) {
+                          final checked = selected.contains(opt);
+                          return CheckboxListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            dense: true,
+                            title: Text(opt),
+                            value: checked,
+                            onChanged: (val) {
+                              final next = Set<String>.from(selected);
+                              if (val == true) {
+                                next.add(opt);
+                              } else {
+                                next.remove(opt);
+                              }
+                              final joined = next.join(', ');
+                              bloc.add(CbacFieldChanged('partC.businessRisk', joined));
+                            },
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ],
+                const Divider(height: 0.5),
               ],
             );
           },
         ),
-        const SizedBox(height: 4),
-        const Divider(height: 0.5),
       ],
     );
   }
