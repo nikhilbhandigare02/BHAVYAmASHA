@@ -18,11 +18,15 @@ class SpousState extends Equatable {
     this.approxAge,
     this.gender,
     this.occupation,
+    this.otherOccupation,
     this.education,
     this.religion,
+    this.otherReligion,
     this.category,
+    this.otherCategory,
     this.abhaAddress,
     this.mobileOwner,
+    this.mobileOwnerRelation,
     this.mobileNo,
     this.bankAcc,
     this.ifsc,
@@ -57,11 +61,15 @@ class SpousState extends Equatable {
   final String? approxAge;
   final String? gender;
   final String? occupation;
+  final String? otherOccupation;
   final String? education;
   final String? religion;
+  final String? otherReligion;
   final String? category;
+  final String? otherCategory;
   final String? abhaAddress;
   final String? mobileOwner;
+  final String? mobileOwnerRelation;
   final String? mobileNo;
   final String? bankAcc;
   final String? ifsc;
@@ -96,11 +104,15 @@ class SpousState extends Equatable {
     String? approxAge,
     String? gender,
     String? occupation,
+    String? otherOccupation,
     String? education,
     String? religion,
+    String? otherReligion,
     String? category,
+    String? otherCategory,
     String? abhaAddress,
     String? mobileOwner,
+    String? mobileOwnerRelation,
     String? mobileNo,
     String? bankAcc,
     String? ifsc,
@@ -135,11 +147,15 @@ class SpousState extends Equatable {
       approxAge: approxAge ?? this.approxAge,
       gender: gender ?? this.gender,
       occupation: occupation ?? this.occupation,
+      otherOccupation: otherOccupation ?? this.otherOccupation,
       education: education ?? this.education,
       religion: religion ?? this.religion,
+      otherReligion: otherReligion ?? this.otherReligion,
       category: category ?? this.category,
+      otherCategory: otherCategory ?? this.otherCategory,
       abhaAddress: abhaAddress ?? this.abhaAddress,
       mobileOwner: mobileOwner ?? this.mobileOwner,
+      mobileOwnerRelation: mobileOwnerRelation ?? this.mobileOwnerRelation,
       mobileNo: mobileNo ?? this.mobileNo,
       bankAcc: bankAcc ?? this.bankAcc,
       ifsc: ifsc ?? this.ifsc,
@@ -175,11 +191,15 @@ class SpousState extends Equatable {
         approxAge,
         gender,
         occupation,
+        otherOccupation,
         education,
         religion,
+        otherReligion,
         category,
+        otherCategory,
         abhaAddress,
         mobileOwner,
+        mobileOwnerRelation,
         RichIDChanged,
         mobileNo,
         bankAcc,
@@ -214,11 +234,15 @@ class SpousState extends Equatable {
       'approxAge': approxAge,
       'gender': gender,
       'occupation': occupation,
+      'otherOccupation': otherOccupation,
       'education': education,
       'religion': religion,
+      'otherReligion': otherReligion,
       'category': category,
+      'otherCategory': otherCategory,
       'abhaAddress': abhaAddress,
       'mobileOwner': mobileOwner,
+      'mobileOwnerRelation': mobileOwnerRelation,
       'mobileNo': mobileNo,
       'bankAcc': bankAcc,
       'ifsc': ifsc,

@@ -41,7 +41,7 @@ class NationalProgramsScreen extends StatelessWidget {
       },
       {
         'icon': 'assets/images/capsule2.png',
-        'title': AppLocalizations.of(context)!.filariaEradicationProgram,
+        'title': AppLocalizations.of(context)!.filariasisProgram,
         'route': (context) => FilariasisScreen(),
       },
       {

@@ -130,7 +130,23 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 hintText: l.dateHint,
                 initialDate: state.dob,
                 onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(d)),
-                validator: (date) => _captureError(Validations.validateDOB(l, date)),
+                validator: (date) {
+                  // Existing generic DOB validation
+                  final baseError = Validations.validateDOB(l, date);
+                  if (baseError != null) {
+                    return _captureError(baseError);
+                  }
+
+                  // if (date != null) {
+                  //   final now = DateTime.now();
+                  //   final ageYears = now.year - date.year - ((now.month < date.month || (now.month == date.month && now.day < date.day)) ? 1 : 0);
+                  //   if (ageYears < 15 || ageYears > 110) {
+                  //     return _captureError('Age must be between 15 and 110 years');
+                  //   }
+                  // }
+
+                  return null;
+                },
               ),
             )
           else
@@ -262,6 +278,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
+          if (state.occupation == 'Other')
+            _Section(
+              child: CustomTextField(
+                labelText: 'Enter Occupation',
+                hintText: 'Enter Occupation',
+                initialValue: state.otherOccupation,
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateOtherOccupation(v.trim())),
+              ),
+            ),
+          if (state.occupation == 'Other')
+            Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
           _Section(
             child: ApiDropdown<String>(
               labelText: l.educationLabel,
@@ -326,6 +354,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
+          if (state.religion == 'Other')
+            _Section(
+              child: CustomTextField(
+                labelText: 'Enter Religion',
+                hintText: 'Enter Religion',
+                initialValue: state.otherReligion,
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateOtherReligion(v.trim())),
+              ),
+            ),
+          if (state.religion == 'Other')
+            Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
           _Section(
             child: ApiDropdown<String>(
               labelText: l.categoryLabel,
@@ -361,6 +401,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
+          if (state.category == 'Other')
+            _Section(
+              child: CustomTextField(
+                labelText: 'Enter Category',
+                hintText: 'Enter Category',
+                initialValue: state.otherCategory,
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateOtherCategory(v.trim())),
+              ),
+            ),
+          if (state.category == 'Other')
+            Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
           _Section(
             child: Row(
               children: [
@@ -474,6 +526,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
+          if (state.mobileOwner == 'Other')
+            CustomTextField(
+              labelText: 'Relation with mobile holder *',
+              hintText: 'Enter relation with mobile holder',
+              onChanged: (v) =>
+                  context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileOwnerRelation(v.trim())),
+            ),
+          if (state.mobileOwner == 'Other')
+            Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           _Section(
             child: CustomTextField(
@@ -1180,8 +1242,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                         title: i < last
                                                             ? l.nextButton
                                                             : (isLoading
-                                                            ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
-                                                            : (widget.isEdit ? 'UPDATE' : l.addButton)),
+                                                                ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
+                                                                : (widget.isEdit ? 'UPDATE' : l.addButton)),
                                                         onPress: () {
                                                           if (i < last) {
                                                             bool canProceed = true;
@@ -1200,12 +1262,56 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                 canProceed = false;
                                                                 final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
                                                                 showAppSnackBar(context, msg);
+                                                              } else {
+                                                                // Extra safety: explicitly validate pregnancy field for female spouse
+                                                                final spState = context.read<SpousBloc>().state;
+                                                                if (spState.gender == 'Female') {
+                                                                  final pregError = Validations.validateIsPregnant(l, spState.isPregnant);
+                                                                  if (pregError != null) {
+                                                                    canProceed = false;
+                                                                    showAppSnackBar(context, pregError);
+                                                                  }
+                                                                }
                                                               }
                                                             }
                                                             if (!canProceed) return;
                                                             controller.animateTo(i + 1);
                                                           } else {
-                                                            // last tab → submit
+                                                            // last tab → submit (validate head + spouse before submit)
+                                                            bool isValid = true;
+
+                                                            // Always validate head form
+                                                            _clearFormError();
+                                                            final headForm = _formKey.currentState;
+                                                            if (headForm == null || !headForm.validate()) {
+                                                              isValid = false;
+                                                            }
+
+                                                            // If spouse tab is part of the flow, validate spouse form too
+                                                            clearSpousFormError();
+                                                            final spouseForm = spousFormKey.currentState;
+                                                            if (spouseForm != null && !spouseForm.validate()) {
+                                                              isValid = false;
+                                                            }
+
+                                                            // Extra safety: explicitly validate pregnancy field for female spouse
+                                                            try {
+                                                              final spState = context.read<SpousBloc>().state;
+                                                              if (spState.gender == 'Female') {
+                                                                final pregError = Validations.validateIsPregnant(l, spState.isPregnant);
+                                                                if (pregError != null) {
+                                                                  isValid = false;
+                                                                  spousLastFormError ??= pregError;
+                                                                }
+                                                              }
+                                                            } catch (_) {}
+
+                                                            if (!isValid) {
+                                                              final msg = _lastFormError ?? spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                                              showAppSnackBar(context, msg);
+                                                              return;
+                                                            }
+
                                                             context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
                                                           }
                                                         },

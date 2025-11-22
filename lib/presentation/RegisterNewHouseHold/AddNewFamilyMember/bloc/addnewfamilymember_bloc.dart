@@ -272,11 +272,16 @@ class AddnewfamilymemberBloc
     on<AnmUpdateOccupation>(
           (e, emit) => emit(state.copyWith(occupation: e.value)),
     );
+    on<AnmUpdateOtherOccupation>(
+          (e, emit) => emit(state.copyWith(otherOccupation: e.value)),
+    );
     on<AnmUpdateEducation>(
           (e, emit) => emit(state.copyWith(education: e.value)),
     );
     on<AnmUpdateReligion>((e, emit) => emit(state.copyWith(religion: e.value)));
+    on<AnmUpdateOtherReligion>((e, emit) => emit(state.copyWith(otherReligion: e.value)));
     on<AnmUpdateCategory>((e, emit) => emit(state.copyWith(category: e.value)));
+    on<AnmUpdateOtherCategory>((e, emit) => emit(state.copyWith(otherCategory: e.value)));
     on<WeightChange>((e, emit) => emit(state.copyWith(WeightChange: e.value)));
     on<ChildSchoolChange>(
           (e, emit) => emit(state.copyWith(ChildSchool: e.value)),
@@ -289,6 +294,9 @@ class AddnewfamilymemberBloc
     );
     on<AnmUpdateMobileOwner>(
           (e, emit) => emit(state.copyWith(mobileOwner: e.value)),
+    );
+    on<AnmUpdateMobileOwnerRelation>(
+          (e, emit) => emit(state.copyWith(mobileOwnerRelation: e.value)),
     );
     on<AnmUpdateMobileNo>((e, emit) => emit(state.copyWith(mobileNo: e.value)));
     on<AnmUpdateVoterId>((e, emit) => emit(state.copyWith(voterId: e.value)));

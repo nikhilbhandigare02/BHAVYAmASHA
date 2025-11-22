@@ -96,7 +96,7 @@ class _IncentivePortalState extends State<IncentivePortal>
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppHeader(
-        screenTitle: 'प्रोत्साहन पोर्टल',
+        screenTitle: l10n?.drawerIncentivePortal ?? 'Incentive Portal',
         showBack: false,
         icon1Image: 'assets/images/google-docs.png',
         onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.NationalProgramsScreen ),
@@ -148,16 +148,16 @@ class _IncentivePortalState extends State<IncentivePortal>
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _InfoCell(title: 'जिला', value: 'Patna'),
-                        _InfoCell(title: 'प्रखंड', value: 'Maner'),
+                        _InfoCell(title: l10n?.incentiveHeaderDistrict ?? 'District', value: 'Patna'),
+                        _InfoCell(title: l10n?.incentiveHeaderBlock ?? 'Block', value: 'Maner'),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _InfoCell(title:  'स्वास्थ्य उप केंद्र', value: 'HSC Baank'),
-                        _InfoCell(title:  'पंचायत', value: 'Baank'),
-                        _InfoCell(title:  'आंगनवाड़ी', value: 'Baank'),
+                        _InfoCell(title: l10n?.incentiveHeaderHsc ?? 'HSC', value: 'HSC Baank'),
+                        _InfoCell(title: l10n?.incentiveHeaderPanchayat ?? 'Panchayat', value: 'Baank'),
+                        _InfoCell(title: l10n?.incentiveHeaderAnganwadi ?? 'Anganwadi', value: 'Baank'),
                       ],
                     ),
                   ],
@@ -167,7 +167,7 @@ class _IncentivePortalState extends State<IncentivePortal>
 
             const SizedBox(height: 12),
             MarqueeText(
-              text:  'प्रत्येक महीने की दावा राशि के भुगतान फाइल अगले महीने की 28 से 30 तारीख के बीच जमा करें।',
+              text:  l10n?.incentiveNote ?? 'Submit monthly incentive claim files between 28th and 30th of next month.',
               style: TextStyle(color: AppColors.error, fontSize: 12),
               velocity: 50, // adjust speed
             ),
@@ -178,7 +178,7 @@ class _IncentivePortalState extends State<IncentivePortal>
               children: [
                 Expanded(
                   child: _LabeledDropdown<String>(
-                    label: 'वित्तीय वर्ष',
+                    label: l10n?.incentiveFinancialYear ?? 'Financial year',
                     value: _selectedYear,
                     items: _years.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                     onChanged: (v) => setState(() => _selectedYear = v ?? _selectedYear),
@@ -187,7 +187,7 @@ class _IncentivePortalState extends State<IncentivePortal>
                 const SizedBox(width: 12),
                 Expanded(
                   child: _LabeledDropdown<String>(
-                    label:  'वित्तीय महीना',
+                    label:  l10n?.incentiveFinancialMonth ?? 'Financial month',
                     value: _selectedMonth,
                     items: monthNames.map((month) {
                       return DropdownMenuItem<String>(
@@ -211,7 +211,7 @@ class _IncentivePortalState extends State<IncentivePortal>
               ),
               child: Center(
                 child: Text(
-                  'कुल राशि(दैनिक+मासिक) : ₹0',
+                  (l10n?.incentiveTotalAmount('0') ?? 'Total amount (daily + monthly): ₹0'),
                   style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp),
                 ),
               ),
@@ -230,9 +230,9 @@ class _IncentivePortalState extends State<IncentivePortal>
                 unselectedLabelColor: AppColors.onSurfaceVariant,
                 indicatorColor: AppColors.primary,
                 tabs: [
-                  Tab(text:  'दैनिक कार्य'),
-                  Tab(text:  'मासिक कार्य'),
-                  Tab(text: 'अंतिम रूप से'),
+                  Tab(text:  l10n?.incentiveTabDaily ?? 'Daily tasks'),
+                  Tab(text:  l10n?.incentiveTabMonthly ?? 'Monthly tasks'),
+                  Tab(text: l10n?.incentiveTabFinalize ?? 'Finalize'),
                 ],
               ),
             ),
@@ -241,10 +241,17 @@ class _IncentivePortalState extends State<IncentivePortal>
               height: 300,
               child: TabBarView(
                 controller: _tabController,
-                children: const [
-                  _SectionPlaceholder(title: 'Daily tasks content here'),
-                  MonthlyTasks(),
-                  // _SectionPlaceholder(title: 'Finalize content here'),
+                children: [
+                  _SectionPlaceholder(
+                    title: l10n?.incentiveDailyTabPlaceholder ?? 'Daily tasks content here',
+                  ),
+                  const MonthlyTasks(),
+                  // Placeholder for the "Finalize" tab. The actual navigation to
+                  // the FinalizeIncentivePage is handled via the TabController
+                  // listener in initState, so this child is rarely shown but is
+                  // required to keep the TabController length (3) in sync with
+                  // the number of TabBarView children.
+                  const SizedBox.shrink(),
                 ],
               ),
             ),

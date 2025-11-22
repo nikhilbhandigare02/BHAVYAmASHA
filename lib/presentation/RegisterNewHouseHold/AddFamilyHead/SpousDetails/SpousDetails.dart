@@ -155,13 +155,6 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
         child: BlocBuilder<SpousBloc, SpousState>(
           builder: (context, state) {
             final spBloc = context.read<SpousBloc>();
-            if (state.gender == 'Female' && state.isPregnant == 'Yes' && state.lmp == null) {
-              final now = DateTime.now();
-              final lmp = DateTime(now.year, now.month - 1, now.day);
-              final edd = DateTime(lmp.year, lmp.month + 9, lmp.day + 5);
-              spBloc.add(SpLMPChange(lmp));
-              spBloc.add(SpEDDChange(edd));
-            }
             return ListView(
               padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
               children: [
@@ -397,6 +390,20 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 SizedBox(height: 1.h),
 
+                if (state.occupation == 'Other')
+                  _section(
+                    CustomTextField(
+                      labelText: 'Enter Occupation',
+                      hintText: 'Enter Occupation',
+                      initialValue: state.otherOccupation,
+                      onChanged: (v) => context.read<SpousBloc>().add(SpUpdateOtherOccupation(v.trim())),
+                    ),
+                  ),
+                if (state.occupation == 'Other')
+                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                if (state.occupation == 'Other')
+                  SizedBox(height: 1.h),
+
                 _section(
                   ApiDropdown<String>(
                     labelText: l.educationLabel,
@@ -465,6 +472,20 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 SizedBox(height: 1.h),
 
+                if (state.religion == 'Other')
+                  _section(
+                    CustomTextField(
+                      labelText: 'Enter Religion',
+                      hintText: 'Enter Religion',
+                      initialValue: state.otherReligion,
+                      onChanged: (v) => context.read<SpousBloc>().add(SpUpdateOtherReligion(v.trim())),
+                    ),
+                  ),
+                if (state.religion == 'Other')
+                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                if (state.religion == 'Other')
+                  SizedBox(height: 1.h),
+
                 _section(
                   ApiDropdown<String>(
                     labelText: l.categoryLabel,
@@ -502,6 +523,20 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 SizedBox(height: 1.h),
+
+                if (state.category == 'Other')
+                  _section(
+                    CustomTextField(
+                      labelText: 'Enter Category',
+                      hintText: 'Enter Category',
+                      initialValue: state.otherCategory,
+                      onChanged: (v) => context.read<SpousBloc>().add(SpUpdateOtherCategory(v.trim())),
+                    ),
+                  ),
+                if (state.category == 'Other')
+                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                if (state.category == 'Other')
+                  SizedBox(height: 1.h),
 
                 _section(
                   Row(
@@ -633,6 +668,19 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 SizedBox(height: 1.h),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 SizedBox(height: 1.h),
+
+                if (state.mobileOwner == 'Other')
+                  CustomTextField(
+                    labelText: 'Relation with mobile holder *',
+                    hintText: 'Enter relation with mobile holder',
+                    initialValue: state.mobileOwnerRelation,
+                    onChanged: (v) =>
+                        context.read<SpousBloc>().add(SpUpdateMobileOwnerRelation(v.trim())),
+                  ),
+                if (state.mobileOwner == 'Other')
+                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                if (state.mobileOwner == 'Other')
+                  SizedBox(height: 1.h),
 
                 _section(
                   CustomTextField(
@@ -784,24 +832,19 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                   if (state.isPregnant == 'Yes') ...[
                     _section(
-                      InkWell(
-                        onTap: null,
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: '${l.lmpDateLabel} *',
-                            border: const UnderlineInputBorder(),
-                          ),
-                          child: Text(
-                            state.lmp != null
-                                ? '${state.lmp!.day.toString().padLeft(2, '0')}-${state.lmp!.month.toString().padLeft(2, '0')}-${state.lmp!.year}'
-                                : 'dd-mm-yyyy',
-                            style: TextStyle(
-                              color: state.lmp != null ? Colors.black : Colors.black45,
-                            ),
-                          ),
-                        ),
+                      CustomDatePicker(
+                        labelText: '${l.lmpDateLabel} *',
+                        hintText: l.dateHint,
+                        initialDate: state.lmp ?? DateTime.now(),
+                        firstDate: DateTime(DateTime.now().year, 1, 1),
+                        lastDate: DateTime(DateTime.now().year, 12, 31),
+                        onDateChanged: (d) {
+                          if (d != null) {
+                            context.read<SpousBloc>().add(SpLMPChange(d));
+                          }
+                        },
+                        validator: (date) => captureSpousError(Validations.validateLMP(l, date)),
                       ),
-
                     ),
                     Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 

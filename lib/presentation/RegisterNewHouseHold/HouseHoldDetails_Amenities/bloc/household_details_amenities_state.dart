@@ -3,12 +3,18 @@ part of 'household_details_amenities_bloc.dart';
 class HouseholdDetailsAmenitiesState extends Equatable {
   const HouseholdDetailsAmenitiesState({
     this.residentialArea = '',
+    this.otherResidentialArea = '',
     this.ownershipType = '',
+    this.otherOwnershipType = '',
     this.houseType = '',
+    this.otherHouseType = '',
     this.houseKitchen = '',
     this.cookingFuel = '',
+    this.otherCookingFuel = '',
     this.waterSource = '',
+    this.otherWaterSource = '',
     this.electricity = '',
+    this.otherElectricity = '',
     this.toilet = '',
     this.toiletType = '',
     this.toiletPlace = '',
@@ -17,12 +23,18 @@ class HouseholdDetailsAmenitiesState extends Equatable {
   });
   
   final String residentialArea;
+  final String otherResidentialArea;
   final String ownershipType;
+  final String otherOwnershipType;
   final String houseType;
+  final String otherHouseType;
   final String houseKitchen;
   final String cookingFuel;
+  final String otherCookingFuel;
   final String waterSource;
+  final String otherWaterSource;
   final String electricity;
+  final String otherElectricity;
   final String toilet;
   final String toiletType;
   final String toiletPlace;
@@ -31,12 +43,18 @@ class HouseholdDetailsAmenitiesState extends Equatable {
 
   HouseholdDetailsAmenitiesState copyWith({
      String? residentialArea,
+     String? otherResidentialArea,
      String? ownershipType,
+     String? otherOwnershipType,
      String? houseType,
+     String? otherHouseType,
      String? houseKitchen,
      String? cookingFuel,
+     String? otherCookingFuel,
      String? waterSource,
+     String? otherWaterSource,
      String? electricity,
+     String? otherElectricity,
      String? toilet,
      String? toiletType,
      String? toiletPlace,
@@ -46,12 +64,18 @@ class HouseholdDetailsAmenitiesState extends Equatable {
   }){
     return HouseholdDetailsAmenitiesState(
         residentialArea: residentialArea ?? this.residentialArea,
+        otherResidentialArea: otherResidentialArea ?? this.otherResidentialArea,
         ownershipType: ownershipType ?? this.ownershipType,
-      houseType: houseType ?? this.houseType,
+        otherOwnershipType: otherOwnershipType ?? this.otherOwnershipType,
+        houseType: houseType ?? this.houseType,
+        otherHouseType: otherHouseType ?? this.otherHouseType,
         houseKitchen: houseKitchen ?? this.houseKitchen,
         cookingFuel: cookingFuel ?? this.cookingFuel,
+        otherCookingFuel: otherCookingFuel ?? this.otherCookingFuel,
         waterSource: waterSource ?? this.waterSource,
+        otherWaterSource: otherWaterSource ?? this.otherWaterSource,
         electricity: electricity ?? this.electricity,
+        otherElectricity: otherElectricity ?? this.otherElectricity,
         toilet: toilet ?? this.toilet,
         toiletType: toiletType ?? this.toiletType,
         toiletPlace: toiletPlace ?? this.toiletPlace,
@@ -62,12 +86,18 @@ class HouseholdDetailsAmenitiesState extends Equatable {
   @override
   List<Object?> get props => [
     residentialArea,
+    otherResidentialArea,
     ownershipType,
+    otherOwnershipType,
     houseKitchen,
     houseType,
+    otherHouseType,
     cookingFuel,
+    otherCookingFuel,
     waterSource,
+    otherWaterSource,
     electricity,
+    otherElectricity,
     toilet,
     toiletType,
     toiletPlace,

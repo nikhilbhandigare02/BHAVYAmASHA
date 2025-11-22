@@ -16,6 +16,9 @@ class HouseholdDetailsAmenitiesBloc extends Bloc<HouseholdDetailsAmenitiesEvent,
       ));
       print('New state: ${state.toString()}');
     });
+    on<ResidentialAreaOtherChange>((event, emit) {
+      emit(state.copyWith(otherResidentialArea: event.otherResidentialArea));
+    });
     
     on<CookingFuelTypeChange>((event, emit) {
       print('CookingFuelTypeChange: ${event.cookingFuel}');
@@ -23,6 +26,9 @@ class HouseholdDetailsAmenitiesBloc extends Bloc<HouseholdDetailsAmenitiesEvent,
         cookingFuel: event.cookingFuel.isNotEmpty ? event.cookingFuel : state.cookingFuel
       ));
       print('New state: ${state.toString()}');
+    });
+    on<CookingFuelOtherChange>((event, emit) {
+      emit(state.copyWith(otherCookingFuel: event.otherCookingFuel));
     });
     
     on<KitchenChange>((event, emit) {
@@ -40,6 +46,9 @@ class HouseholdDetailsAmenitiesBloc extends Bloc<HouseholdDetailsAmenitiesEvent,
       ));
       print('New state: ${state.toString()}');
     });
+    on<OwnershipTypeOtherChange>((event, emit) {
+      emit(state.copyWith(otherOwnershipType: event.otherOwnershipType));
+    });
     
     on<HouseTypeChange>((event, emit) {
       print('HouseTypeChange: ${event.houseType}');
@@ -47,6 +56,9 @@ class HouseholdDetailsAmenitiesBloc extends Bloc<HouseholdDetailsAmenitiesEvent,
         houseType: event.houseType.isNotEmpty ? event.houseType : state.houseType
       ));
       print('New state: ${state.toString()}');
+    });
+    on<HouseTypeOtherChange>((event, emit) {
+      emit(state.copyWith(otherHouseType: event.otherHouseType));
     });
     
     on<WaterSourceChange>((event, emit) {
@@ -56,6 +68,9 @@ class HouseholdDetailsAmenitiesBloc extends Bloc<HouseholdDetailsAmenitiesEvent,
       ));
       print('New state: ${state.toString()}');
     });
+    on<WaterSourceOtherChange>((event, emit) {
+      emit(state.copyWith(otherWaterSource: event.otherWaterSource));
+    });
     
     on<ElectricityChange>((event, emit) {
       print('ElectricityChange: ${event.electricity}');
@@ -63,6 +78,9 @@ class HouseholdDetailsAmenitiesBloc extends Bloc<HouseholdDetailsAmenitiesEvent,
         electricity: event.electricity.isNotEmpty ? event.electricity : state.electricity
       ));
       print('New state: ${state.toString()}');
+    });
+    on<ElectricityOtherChange>((event, emit) {
+      emit(state.copyWith(otherElectricity: event.otherElectricity));
     });
     
     on<ToiletChange>((event, emit) {

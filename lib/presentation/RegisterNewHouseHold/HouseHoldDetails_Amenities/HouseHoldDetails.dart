@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
 import '../../../l10n/app_localizations.dart';
@@ -52,6 +53,16 @@ class HouseHoldDetails extends StatelessWidget {
                     .add(ResidentialAreaChange(residentialArea: v ?? '')),
               ),
               const Divider(color: AppColors.divider, thickness: 0.8),
+              if (state.residentialArea == 'Other')
+                CustomTextField(
+                  labelText: 'Enter type of residential area',
+                  hintText: 'Enter type of residential area',
+                  onChanged: (v) => context
+                      .read<HouseholdDetailsAmenitiesBloc>()
+                      .add(ResidentialAreaOtherChange(otherResidentialArea: v.trim())),
+                ),
+              if (state.residentialArea == 'Other')
+                const Divider(color: AppColors.divider, thickness: 0.8),
               ApiDropdown<String>(
                 labelText: l.houseTypeLabel,
                 items: const ['None', 'Kuchcha house', 'Semi Pucca house','Pucca house','Thrust house','other'],
@@ -79,6 +90,16 @@ class HouseHoldDetails extends StatelessWidget {
                     .add(HouseTypeChange(houseType: v ?? '')),
               ),
               const Divider(color: AppColors.divider, thickness: 0.8),
+              if (state.houseType == 'other')
+                CustomTextField(
+                  labelText: 'Enter type of house',
+                  hintText: 'Enter type of house',
+                  onChanged: (v) => context
+                      .read<HouseholdDetailsAmenitiesBloc>()
+                      .add(HouseTypeOtherChange(otherHouseType: v.trim())),
+                ),
+              if (state.houseType == 'other')
+                const Divider(color: AppColors.divider, thickness: 0.8),
               ApiDropdown<String>(
                 labelText: l.ownershipTypeLabel,
                 items: const ['Self', 'Rental', 'Sharing','Other'],
@@ -102,6 +123,16 @@ class HouseHoldDetails extends StatelessWidget {
                     .add(OwnershipTypeChange(ownershipType: v ?? '')),
               ),
               const Divider(color: AppColors.divider, thickness: 0.8),
+              if (state.ownershipType == 'Other')
+                CustomTextField(
+                  labelText: 'Enter type of ownership',
+                  hintText: 'Enter type of ownership',
+                  onChanged: (v) => context
+                      .read<HouseholdDetailsAmenitiesBloc>()
+                      .add(OwnershipTypeOtherChange(otherOwnershipType: v.trim())),
+                ),
+              if (state.ownershipType == 'Other')
+                const Divider(color: AppColors.divider, thickness: 0.8),
             ],
           ),
         );

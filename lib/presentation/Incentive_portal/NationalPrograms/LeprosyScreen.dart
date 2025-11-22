@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/widgets/TextField/TextField.dart';
@@ -28,6 +29,7 @@ class LeprosyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocProvider(
       create: (_) => LeprosyBloc(),
       child: BlocBuilder<LeprosyBloc, LeprosyState>(
@@ -37,19 +39,19 @@ class LeprosyScreen extends StatelessWidget {
           // ✅ Questions for Leprosy Screening
           final List<Map<String, dynamic>> questions = [
             {
-              'question': '1. Do you have any white or red patches on any part of your body?',
+              'question': l10n.leprosyQuestion1,
               'hint': 'Yes/No',
             },
             {
-              'question': '2. Do you feel numbness or tingling in any part of your body?',
+              'question': l10n.leprosyQuestion2,
               'hint': 'Yes/No',
             },
             {
-              'question': '3. Have you experienced weakness or paralysis in any limb?',
+              'question': l10n.leprosyQuestion3,
               'hint': 'Yes/No',
             },
             {
-              'question': '4. Has anyone in your family ever had leprosy?',
+              'question': l10n.leprosyQuestion4,
               'hint': 'Yes/No',
             },
           ];
@@ -63,7 +65,7 @@ class LeprosyScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'Leprosy Eradication program',
+              screenTitle: l10n.leprosyEradicationProgram,
               showBack: true,
             ),
             body: Padding(
@@ -173,13 +175,13 @@ class LeprosyScreen extends StatelessWidget {
                           onPress: () {
                             bloc.add(const SaveLeprosyData());
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Screening data saved successfully!'),
+                              SnackBar(
+                                content: Text(l10n.dataSavedSuccessfully),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           },
-                          title: 'Submit',
+                          title: l10n.saveButton,
                           isLoading: false,
                         ),
                       ),

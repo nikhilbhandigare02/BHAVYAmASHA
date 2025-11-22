@@ -1181,10 +1181,24 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     }
                                   },
                                   value: state.religion,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateReligion(v!)),
+                                  onChanged: (v) {
+                                    if (v == null) return;
+                                    context.read<AddnewfamilymemberBloc>().add(AnmUpdateReligion(v));
+                                  },
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                              if (state.religion == 'Other')
+                                _section(
+                                  CustomTextField(
+                                    labelText: 'Enter Religion',
+                                    hintText: 'Enter Religion',
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateOtherReligion(v.trim())),
+                                  ),
+                                ),
+                              if (state.religion == 'Other')
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               _section(
                                 ApiDropdown<String>(
                                   labelText: l.categoryLabel,
@@ -1216,10 +1230,25 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     }
                                   },
                                   value: state.category,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateCategory(v!)),
+                                  onChanged: (v) {
+                                    if (v == null) return;
+                                    context.read<AddnewfamilymemberBloc>().add(AnmUpdateCategory(v));
+                                  },
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),_section(
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                              if (state.category == 'Other')
+                                _section(
+                                  CustomTextField(
+                                    labelText: 'Enter Category',
+                                    hintText: 'Enter Category',
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateOtherCategory(v.trim())),
+                                  ),
+                                ),
+                              if (state.category == 'Other')
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              _section(
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/widgets/TextField/TextField.dart';
@@ -28,6 +29,8 @@ class MalariaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return BlocProvider(
       create: (_) => MalariaBloc(),
       child: BlocBuilder<MalariaBloc, MalariaState>(
@@ -37,11 +40,11 @@ class MalariaScreen extends StatelessWidget {
           // ✅ Questions for Malaria Screening
           final List<Map<String, dynamic>> questions = [
             {
-              'question': '1. For blood smear collection and testing of fever cases (per case)',
+              'question': l10n.malariaQuestion1,
               'hint': '0',
             },
             {
-              'question': '2. For complete treatment of positive cases (per case)',
+              'question': l10n.malariaQuestion2,
               'hint': '0',
             },
           ];
@@ -55,7 +58,7 @@ class MalariaScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'Malaria Eradication Program',
+              screenTitle: l10n.malariaEradicationProgram,
               showBack: true,
             ),
             body: Padding(
@@ -183,13 +186,13 @@ class MalariaScreen extends StatelessWidget {
                             onPress: () {
                               bloc.add(const SaveMalariaData());
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Screening data saved successfully!'),
+                                SnackBar(
+                                  content: Text(l10n.dataSavedSuccessfully),
                                   backgroundColor: Colors.green,
                                 ),
                               );
                             },
-                            title: 'Submit',
+                            title: l10n.saveButton,
                             isLoading: false,
                           ),
                         ),

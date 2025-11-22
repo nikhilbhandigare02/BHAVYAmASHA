@@ -114,7 +114,9 @@ import '../../l10n/app_localizations.dart';
         if (!mounted) return;
         final bloc = context.read<ProfileBloc>();
 
-         // Safely parse details
+        final username = userData['user_name']?.toString() ?? '';
+
+        // Safely parse details
         try {
           details = userData['details'] is String
               ? jsonDecode(userData['details'] as String)
@@ -233,7 +235,7 @@ import '../../l10n/app_localizations.dart';
           // Update form fields using individual events
           if (mounted) {
             // Update basic information
-            _profileBloc.add(AshaIdChanged(ashaId));
+            _profileBloc.add(AshaIdChanged(username));
             _profileBloc.add(AshaNameChanged(fullName));
             _profileBloc.add(FatherSpouseChanged(fatherSpouse));
             _profileBloc.add(MobileChanged(mobileNumber));
@@ -250,7 +252,6 @@ import '../../l10n/app_localizations.dart';
 
             // Update other fields
             _profileBloc.add(HscNameChanged(hscName));
-            _profileBloc.add(HwcNameChanged(hscHfrId));
             _profileBloc.add(AccountNumberChanged(accountNumber));
             _profileBloc.add(IfscChanged(ifscCode));
             _profileBloc.add(PopulationCoveredChanged(populationCovered));
