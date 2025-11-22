@@ -8,6 +8,7 @@ class AddnewfamilymemberState extends Equatable {
   final String? RichIDChanged;
   final String? BirthCertificateChange;
   final String? relation;
+  final String? otherRelation;
   final String? memberStatus;
   final DateTime? dateOfDeath;
   final String? deathReason;
@@ -62,6 +63,7 @@ class AddnewfamilymemberState extends Equatable {
     this.error = '',
     this.memberType = 'Adult',
     this.relation,
+    this.otherRelation,
     this.WeightChange,
     this.updateDay,
     this.updateMonth,
@@ -124,6 +126,7 @@ class AddnewfamilymemberState extends Equatable {
     String? updateMonth,
     String? updateDay,
     String? relation,
+    String? otherRelation,
     String? name,
     String? fatherName,
     String? motherName,
@@ -177,6 +180,7 @@ class AddnewfamilymemberState extends Equatable {
       ChildSchool: ChildSchool ?? this.ChildSchool,
       RichIDChanged: RichIDChanged ?? this.RichIDChanged,
       relation: relation ?? this.relation,
+      otherRelation: otherRelation ?? this.otherRelation,
       BirthCertificateChange: BirthCertificateChange ?? this.BirthCertificateChange,
       name: name ?? this.name,
       fatherName: fatherName ?? this.fatherName,
@@ -224,6 +228,7 @@ class AddnewfamilymemberState extends Equatable {
     error,
     memberType,
     relation,
+    otherRelation,
     WeightChange,
     birthWeight,
     name,
@@ -277,6 +282,7 @@ class AddnewfamilymemberState extends Equatable {
       'error': error,
       'memberType': memberType,
       'relation': relation,
+      'otherRelation': otherRelation,
       'name': name,
       'fatherName': fatherName,
       'motherName': motherName,

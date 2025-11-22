@@ -84,11 +84,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   late final SpousBloc _spousBloc;
   late final ChildrenBloc _childrenBloc;
   late final AddFamilyHeadBloc _dummyHeadBloc;
-  
+
   // Form controllers
   bool _isLoading = false;
   bool _isFirstLoad = true;
-  
+
   // Controllers for form fields
   final TextEditingController _memberTypeController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
@@ -119,7 +119,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     try {
       // Load beneficiary data through bloc
       _bloc.add(LoadBeneficiaryData(beneficiaryId));
-      
+
       // Show loading indicator
       if (mounted) {
         setState(() {
@@ -128,7 +128,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       }
 
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       // Hide loading indicator
       if (mounted) {
         setState(() {
@@ -151,7 +151,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     _spousBloc = SpousBloc();
     _childrenBloc = ChildrenBloc();
     _dummyHeadBloc = AddFamilyHeadBloc();
-    
+
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
 
     _fatherOption = 'Select';
@@ -161,7 +161,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     _headGender = widget.headGender;
     _spouseName = widget.spouseName;
     _spouseGender = widget.spouseGender;
-    
+
     print('=== RECEIVED HOUSEHOLD DATA ===');
     print('Head: $_headName ($_headGender)');
     print('Spouse: $_spouseName ($_spouseGender)');
@@ -169,13 +169,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      
+
       // Handle beneficiary data loading if in edit mode
       final args = ModalRoute.of(context)?.settings.arguments as Map?;
       if (args != null && args['isBeneficiary'] == true && args['beneficiaryId'] != null) {
         await _loadBeneficiaryData(args['beneficiaryId']);
       }
-      
+
       if (_fatherOption != 'Other') {
         _bloc.add(AnmUpdateFatherName(_fatherOption));
       }
@@ -184,13 +184,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       }
     });
   }
-  
-    
+
+
   void _updateParentNames(String relation) {
     // Determine father and mother based on head and spouse
     String? fatherName;
     String? motherName;
-    
+
     if (_headGender == 'Male' && _spouseGender == 'Female') {
       fatherName = _headName;
       motherName = _spouseName;
@@ -202,7 +202,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     } else if (_headGender == 'Female') {
       motherName = _headName;
     }
-  
+
     if (relation == 'Father' && fatherName != null) {
       setState(() {
         _fatherOption = fatherName!;
@@ -223,7 +223,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     _spousBloc.close();
     _childrenBloc.close();
     _dummyHeadBloc.close();
-    
+
     // Dispose all controllers
     _memberTypeController.dispose();
     _genderController.dispose();
@@ -235,7 +235,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     _beneficiaryTypeController.dispose();
     _relationController.dispose();
     _memberStatusController.dispose();
-    
+
     super.dispose();
   }
 
@@ -478,7 +478,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              
+                              if (state.mobileOwner == 'Other')
+                                _section(
+                                  CustomTextField(
+                                    labelText: 'Relation with mobile holder *',
+                                    hintText: 'Enter relation with mobile holder',
+                                    initialValue: state.mobileOwnerRelation ?? '',
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileOwnerRelation(v.trim())),
+                                  ),
+                                ),
+                              if (state.mobileOwner == 'Other')
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
                               // Member Status (only shown in edit mode)
                               if (_isEdit) ...[
                                 _section(
@@ -656,6 +667,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                                 ),
                               ),
+                              if (state.relation == 'Other')
+                                _section(
+                                  CustomTextField(
+                                    labelText: 'Enter Relation *',
+                                    hintText: 'Enter Relation',
+                                    initialValue: state.otherRelation ?? '',
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateOtherRelation(v.trim())),
+                                  ),
+                                ),
+                              if (state.relation == 'Other')
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                               // Name
@@ -694,7 +716,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         ];
                                         print('Mother dropdown items: $motherItems');
                                         print('Current mother option: $_motherOption');
-                                        
+
                                         return ApiDropdown<String>(
                                           labelText: "${l.motherNameLabel} ",
                                           hintText: "${l.motherNameLabel} ",
@@ -743,7 +765,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         ];
                                         print('Father dropdown items: $fatherItems');
                                         print('Current father option: $_fatherOption');
-                                        
+
                                         return ApiDropdown<String>(
                                           labelText: '${l.fatherGuardianNameLabel} ',
                                           items: fatherItems,
@@ -1037,7 +1059,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               _section(
                                 ApiDropdown<String>(
                                   labelText: l.birthOrderLabel,
-                                  items: const ['1', '2', '3', '4', '5+'],
+                                  items: const ['1', '2', '3', '4', '5','6','7','8','9','10'],
                                   getLabel: (s) {
                                     switch (s) {
                                       case '1':

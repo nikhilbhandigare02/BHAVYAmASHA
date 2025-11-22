@@ -176,6 +176,10 @@ class AddnewfamilymemberBloc
           otherDeathReason: allData['other_death_reason'] as String?,
           deathPlace: allData['death_place'] as String?,
         ));
+        emit(state.copyWith(
+          otherRelation: allData['otherRelation'] as String?,
+          mobileOwnerRelation: allData['mobileOwnerRelation'] as String?,
+        ));
       } else {
         emit(state.copyWith(
           errorMessage: 'Beneficiary not found',
@@ -224,6 +228,7 @@ class AddnewfamilymemberBloc
           (e, emit) => emit(state.copyWith(memberType: e.value)),
     );
     on<AnmUpdateRelation>((e, emit) => emit(state.copyWith(relation: e.value)));
+    on<AnmUpdateOtherRelation>((e, emit) => emit(state.copyWith(otherRelation: e.value)));
     on<AnmUpdateName>((e, emit) => emit(state.copyWith(name: e.value)));
     on<AnmUpdateFatherName>(
           (e, emit) => emit(state.copyWith(fatherName: e.value)),
@@ -346,6 +351,8 @@ class AddnewfamilymemberBloc
       final errors = <String>[];
       if (state.relation == null || state.relation!.trim().isEmpty)
         errors.add('Relation with family head is required');
+      if (state.relation == 'Other' && (state.otherRelation == null || state.otherRelation!.trim().isEmpty))
+        errors.add('Enter relation with family head');
       if (state.name == null || state.name!.trim().isEmpty)
         errors.add('Member name is required');
       if (state.useDob) {
@@ -356,6 +363,8 @@ class AddnewfamilymemberBloc
       }
       if (state.gender == null || state.gender!.isEmpty)
         errors.add('Gender required');
+      if (state.mobileOwner == 'Other' && (state.mobileOwnerRelation == null || state.mobileOwnerRelation!.trim().isEmpty))
+        errors.add('Enter relation with mobile holder');
       
       // Marital status is only required for Adults, not for Children
       if (state.memberType != 'Child') {
@@ -562,6 +571,7 @@ class AddnewfamilymemberBloc
           'beneficiary_info': jsonEncode({
             'memberType': state.memberType,
             'relation': state.relation,
+            'otherRelation': state.otherRelation,
             'name': state.name,
             'fatherName': state.fatherName,
             'motherName': state.motherName,
@@ -586,6 +596,7 @@ class AddnewfamilymemberBloc
           'birthWeight': state.birthWeight,
             'abhaAddress': state.abhaAddress,
             'mobileOwner': state.mobileOwner,
+            'mobileOwnerRelation': state.mobileOwnerRelation,
             'mobileNo': state.mobileNo,
             'voterId': state.voterId,
             'rationId': state.rationId,
@@ -1119,6 +1130,8 @@ class AddnewfamilymemberBloc
       final errors = <String>[];
       if (state.relation == null || state.relation!.trim().isEmpty)
         errors.add('Relation with family head is required');
+      if (state.relation == 'Other' && (state.otherRelation == null || state.otherRelation!.trim().isEmpty))
+        errors.add('Enter relation with family head');
       if (state.name == null || state.name!.trim().isEmpty)
         errors.add('Member name is required');
       if (state.gender == null || state.gender!.isEmpty)
@@ -1129,6 +1142,8 @@ class AddnewfamilymemberBloc
         if (state.approxAge == null || state.approxAge!.trim().isEmpty)
           errors.add('Approximate age is required');
       }
+      if (state.mobileOwner == 'Other' && (state.mobileOwnerRelation == null || state.mobileOwnerRelation!.trim().isEmpty))
+        errors.add('Enter relation with mobile holder');
 
       if (errors.isNotEmpty) {
         emit(
@@ -1330,6 +1345,7 @@ class AddnewfamilymemberBloc
         existingInfo
           ..['memberType'] = state.memberType
           ..['relation'] = state.relation
+          ..['otherRelation'] = state.otherRelation
           ..['name'] = state.name
           ..['memberName'] = state.name
           ..['headName'] = existingInfo.containsKey('headName') ? state.name : existingInfo['headName']
@@ -1355,6 +1371,7 @@ class AddnewfamilymemberBloc
           ..['birthCertificate'] = state.BirthCertificateChange
           ..['abhaAddress'] = state.abhaAddress
           ..['mobileOwner'] = state.mobileOwner
+          ..['mobileOwnerRelation'] = state.mobileOwnerRelation
           ..['mobileNo'] = state.mobileNo
           ..['voterId'] = state.voterId
           ..['rationId'] = state.rationId
