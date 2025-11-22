@@ -34,16 +34,29 @@ class _AncvisitformState extends State<Ancvisitform> {
   void initState() {
     super.initState();
 
-    final beneficiaryId = widget.beneficiaryData?['BeneficiaryID'] as String?;
-    final householdRefKey = widget.beneficiaryData?['hhId'] as String?;
+    String? beneficiaryId = widget.beneficiaryData?['BeneficiaryID'] as String?;
+    String? householdRefKey = widget.beneficiaryData?['hhId'] as String?;
 
-    if (beneficiaryId == null || householdRefKey == null) {
-      throw ArgumentError('Missing required parameters: beneficiaryId or householdRefKey');
+    if (beneficiaryId == null || beneficiaryId.isEmpty) {
+      beneficiaryId = widget.beneficiaryData?['unique_key']?.toString();
+      if (beneficiaryId == null || beneficiaryId.isEmpty) {
+        final raw = widget.beneficiaryData?['_rawRow'] as Map<String, dynamic>?;
+        beneficiaryId = raw?['unique_key']?.toString();
+      }
+    }
+
+    if (householdRefKey == null || householdRefKey.isEmpty) {
+      final raw = widget.beneficiaryData?['_rawRow'] as Map<String, dynamic>?;
+      householdRefKey = raw?['household_ref_key']?.toString();
+    }
+
+    if (beneficiaryId == null || beneficiaryId.isEmpty || householdRefKey == null || householdRefKey.isEmpty) {
+      print('⚠️ Missing parameters for ANC form. BeneficiaryID=$beneficiaryId, hhId=$householdRefKey');
     }
 
     _bloc = AnvvisitformBloc(
-      beneficiaryId: beneficiaryId,
-      householdRefKey: householdRefKey,
+      beneficiaryId: beneficiaryId ?? '',
+      householdRefKey: householdRefKey ?? '',
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -109,12 +122,37 @@ class _AncvisitformState extends State<Ancvisitform> {
 
     // Other fields
     _bloc.add(FolicAcidTabletsChanged(formData['folic_acid_tablets'] ?? ''));
-    _bloc.add(PreExistingDiseaseChanged(formData['pre_existing_disease'] ?? ''));
+
+    // Handle pre-existing diseases from form data
+    if (formData['pre_existing_diseases'] != null) {
+      final diseases = List<String>.from(formData['pre_existing_diseases']);
+      _bloc.add(PreExistingDiseasesChanged(diseases));
+
+      // If there's an 'Other' disease, set it
+      if (formData['other_disease'] != null) {
+        _bloc.add(OtherDiseaseChanged(formData['other_disease']));
+      }
+    }
   }
 
   Future<void> _initializeForm() async {
     final data = widget.beneficiaryData;
     String? houseNo;
+
+    // Set next visit number early from passed count to reflect in UI immediately
+    try {
+      final dynamic rawVisitCountEarly = data?['visitCount'];
+      int visitCountEarly = 0;
+      if (rawVisitCountEarly is int) {
+        visitCountEarly = rawVisitCountEarly;
+      } else if (rawVisitCountEarly is String) {
+        visitCountEarly = int.tryParse(rawVisitCountEarly) ?? 0;
+      }
+      final nextVisitEarly = (visitCountEarly + 1);
+      _bloc.add(VisitNumberChanged(nextVisitEarly.toString()));
+    } catch (e) {
+      print('⚠️ Early visit number setup failed: $e');
+    }
 
     // Set beneficiary ID in the bloc if available
     if (data != null) {
@@ -238,6 +276,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                 final lmpDate = DateTime.parse(info['lmp'].toString());
                 _bloc.add(LmpDateChanged(lmpDate));
                 print('📅 Set LMP date from beneficiary info: $lmpDate');
+                final today = DateTime.now();
+                final difference = today.difference(lmpDate).inDays;
+                final weeksOfPregnancy = (difference / 7).floor() + 1;
+                _bloc.add(WeeksOfPregnancyChanged(weeksOfPregnancy.toString()));
               } catch (e) {
                 print('⚠️ Error parsing LMP date: ${info['lmp']} - $e');
               }
@@ -387,7 +429,7 @@ class _AncvisitformState extends State<Ancvisitform> {
         print('ℹ️ No valid ID or BeneficiaryID provided for secure storage lookup');
       }
 
-      // Use visitCount passed from previous screen to determine next ANC visit number
+      // Use visitCount passed from previous screen to determine next ANC visit number (final confirmation)
       try {
         final dynamic rawVisitCount = data['visitCount'];
         int visitCount = 0;
@@ -398,7 +440,7 @@ class _AncvisitformState extends State<Ancvisitform> {
           visitCount = int.tryParse(rawVisitCount) ?? 0;
         }
 
-        final nextVisitNumber = visitCount + 1;
+        final nextVisitNumber = (visitCount + 1);
         print('🔢 visitCount from list screen: $visitCount, nextVisitNumber: $nextVisitNumber');
 
         _bloc.add(VisitNumberChanged(nextVisitNumber.toString()));
@@ -627,6 +669,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             CustomTextField(
+                              key: ValueKey('weeks_of_pregnancy_${state.weeksOfPregnancy}'),
                               labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
@@ -707,20 +750,60 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
 
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            ApiDropdown<String>(
-                              labelText: l10n?.preExistingDiseaseLabel ?? 'Pre - Existing disease',
+                            MultiSelect<String>(
                               items: [
-                                l10n?.diseaseNone ?? 'None',
-                                l10n?.diseaseDiabetes ?? 'Diabetes',
-                                l10n?.diseaseHypertension ?? 'Hypertension',
-                                l10n?.diseaseAnemia ?? 'Anemia',
-                                l10n?.diseaseOther ?? 'Other',
+                                MultiSelectItem(
+                                  label: l10n?.diseaseNone ?? 'None',
+                                  value: l10n?.diseaseNone ?? 'None',
+                                ),
+                                MultiSelectItem(
+                                  label: l10n?.diseaseDiabetes ?? 'Diabetes',
+                                  value: l10n?.diseaseDiabetes ?? 'Diabetes',
+                                ),
+                                MultiSelectItem(
+                                  label: l10n?.diseaseHypertension ?? 'Hypertension',
+                                  value: l10n?.diseaseHypertension ?? 'Hypertension',
+                                ),
+                                MultiSelectItem(
+                                  label: l10n?.diseaseAnemia ?? 'Anemia',
+                                  value: l10n?.diseaseAnemia ?? 'Anemia',
+                                ),
+                                MultiSelectItem(
+                                  label: l10n?.diseaseOther ?? 'Other',
+                                  value: l10n?.diseaseOther ?? 'Other',
+                                ),
                               ],
-                              value: state.preExistingDisease.isEmpty ? null : state.preExistingDisease,
-                              getLabel: (s) => s,
-                              onChanged: (v) => bloc.add(PreExistingDiseaseChanged(v ?? '')),
+                              selectedValues: state.selectedDiseases,
+                              labelText: l10n?.preExistingDiseaseLabel ?? 'Pre - Existing disease',
                               hintText: l10n?.select ?? 'Select',
+                              onSelectionChanged: (values) {
+                                final selected = List<String>.from(values);
+                                bloc.add(PreExistingDiseasesChanged(selected));
+
+                                // Clear other disease field if 'Other' is not selected
+                                if (!selected.contains(l10n?.diseaseOther ?? 'Other')) {
+                                  bloc.add(OtherDiseaseChanged(''));
+                                }
+                              },
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                            // Show other disease input if 'Other' is selected
+                            if (state.selectedDiseases.contains(l10n?.diseaseOther ?? 'Other'))
+                              CustomTextField(
+                                labelText: 'Please specify other disease',
+                                hintText:  'Please specify other disease',
+                                initialValue: state.otherDisease,
+                                onChanged: (v) => bloc.add(OtherDiseaseChanged(v)),
+                                validator: (value) {
+                                  if (state.selectedDiseases.contains(l10n?.diseaseOther ?? 'Other') &&
+                                      (value == null || value.isEmpty)) {
+                                    return l10n?.requiredField ?? 'This field is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+
 
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             CustomTextField(
@@ -788,6 +871,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   bloc.add(SelectedRisksChanged(List<String>.from(values)));
                                 },
                               ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               const SizedBox(height: 16),
                               ApiDropdown<String>(
                                 labelText: 'Any complication leading to abortion?',
@@ -797,6 +881,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 onChanged: (v) => bloc.add(HasAbortionComplicationChanged(v ?? '')),
                                 hintText: l10n?.select ?? 'Select',
                               ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               if (state.hasAbortionComplication == 'Yes') ...[
                                 const SizedBox(height: 16),
                                 CustomDatePicker(
@@ -1042,10 +1127,40 @@ class _AncvisitformState extends State<Ancvisitform> {
                               items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                               value: state.beneficiaryAbsent.isEmpty ? null : state.beneficiaryAbsent,
                               getLabel: (s) => s,
-                              onChanged: (v) => bloc.add(BeneficiaryAbsentChanged(v ?? '')),
+                              onChanged: (v) {
+                                bloc.add(BeneficiaryAbsentChanged(v ?? ''));
+                                // Clear absence reason when switching to 'No'
+                                if (v != (l10n?.yes ?? 'Yes')) {
+                                  bloc.add(AbsenceReasonChanged(''));
+                                }
+                              },
                               hintText: l10n?.select ?? 'Select',
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                            // Show reason field only if beneficiary is absent
+                            if (state.beneficiaryAbsent == (l10n?.yes ?? 'Yes'))
+                              Column(
+                                children: [
+                                  const SizedBox(height: 8),
+                                  CustomTextField(
+                                    labelText: 'Reason for Absence*',
+                                    hintText: 'Enter the reason for absence',
+                                    initialValue: state.absenceReason,
+                                    onChanged: (v) => bloc.add(AbsenceReasonChanged(v)),
+                                    validator: (value) {
+                                      if (state.beneficiaryAbsent == (l10n?.yes ?? 'Yes') && (value == null || value.isEmpty)) {
+                                        return 'Please enter the reason for absence';
+                                      }
+                                      return null;
+                                    },
+                                    maxLines: 3,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                ],
+
+                              ),
                           ],
                         ),
                       ),
@@ -1063,7 +1178,12 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   color: AppColors.primary,
                                   borderRadius: 8,
                                   onPress: () {
-                                    Navigator.pushNamed(context, Route_Names.Previousvisit);
+                                    final benId = widget.beneficiaryData?['BeneficiaryID']?.toString() ?? widget.beneficiaryData?['unique_key']?.toString() ?? '';
+                                    Navigator.pushNamed(
+                                      context,
+                                      Route_Names.Previousvisit,
+                                      arguments: {'beneficiaryId': benId},
+                                    );
                                   },
                                 ),
                               ),

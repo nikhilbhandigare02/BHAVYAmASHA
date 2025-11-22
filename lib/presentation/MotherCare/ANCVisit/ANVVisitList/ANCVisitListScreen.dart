@@ -338,7 +338,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         ? data['RegistrationDate']
         : l10n?.notAvailable ?? 'N/A';
 
-    final ageGender = '${data['Age']}/F';
+    final ageGender = '${data['Age']}Y';
 
     // Use COMPLETE IDs for functionality
     final uniqueKey = data['unique_key']?.toString() ?? '';

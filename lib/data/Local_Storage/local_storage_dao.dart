@@ -365,6 +365,39 @@ class LocalStorageDao {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getAncFormsByBeneficiaryId(String beneficiaryId) async {
+    try {
+      final db = await _db;
+      final result = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND beneficiary_ref_key = ?',
+        whereArgs: [
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
+          beneficiaryId,
+        ],
+        orderBy: 'created_date_time DESC',
+      );
+
+      return result.map((form) {
+        final row = Map<String, dynamic>.from(form);
+        try {
+          if (row['form_json'] != null) {
+            final decoded = jsonDecode(row['form_json']);
+            if (decoded is Map && decoded['form_data'] is Map) {
+              row['form_data'] = Map<String, dynamic>.from(decoded['form_data']);
+            } else {
+              row['form_data'] = decoded;
+            }
+          }
+        } catch (_) {}
+        return row;
+      }).toList();
+    } catch (e) {
+      print('Error getting ANC forms: $e');
+      return [];
+    }
+  }
+
   Future<Map<String, dynamic>?> getBeneficiaryByUniqueKey(String uniqueKey) async {
     try {
       final db = await _db;

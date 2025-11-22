@@ -2,20 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 
 class Previousvisit extends StatefulWidget {
-  const Previousvisit({super.key});
+  final String beneficiaryId;
+  const Previousvisit({super.key, required this.beneficiaryId});
 
   @override
   State<Previousvisit> createState() => _PreviousvisitState();
 }
 
 class _PreviousvisitState extends State<Previousvisit> {
-  // Replace with real data source
-  final List<Map<String, String>> _visits = [
-    {'date': '16-09-2025', 'week': '12', 'risk': 'No'},
-    {'date': '21-10-2025', 'week': '16', 'risk': 'Yes'},
-  ];
+  List<Map<String, String>> _visits = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVisits();
+  }
+
+  Future<void> _loadVisits() async {
+    final rows = await LocalStorageDao.instance.getAncFormsByBeneficiaryId(widget.beneficiaryId);
+    final list = <Map<String, String>>[];
+    for (final r in rows) {
+      final createdRaw = r['created_date_time']?.toString() ?? '';
+      String created = '-';
+      try {
+        final dt = DateTime.parse(createdRaw);
+        final d = dt.day.toString().padLeft(2, '0');
+        final m = dt.month.toString().padLeft(2, '0');
+        final y = dt.year.toString();
+        created = '$d-$m-$y';
+      } catch (_) {
+        created = createdRaw.isEmpty ? '-' : createdRaw;
+      }
+      final fd = r['form_data'] is Map<String, dynamic> ? (r['form_data'] as Map<String, dynamic>) : {};
+      final week = fd['weeks_of_pregnancy']?.toString() ?? '-';
+      final risk = fd['high_risk']?.toString() ?? '-';
+      list.add({'date': created, 'week': week, 'risk': risk});
+    }
+    setState(() {
+      _visits = list;
+      _loading = false;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,34 +83,36 @@ class _PreviousvisitState extends State<Previousvisit> {
               ),
             ),
             Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                itemBuilder: (context, index) {
-                  final row = _visits[index];
-                  return Material(
-                    elevation: 1,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.outlineVariant),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      child: Row(
-                        children: [
-                          Expanded(child: Text('${index + 1}', style: TextStyle(fontSize: 14.sp),)),
-                          Expanded(child: Text(row['date'] ?? '-',style: TextStyle(fontSize: 14.sp))),
-                          Expanded(child: Text(row['week'] ?? '-',style: TextStyle(fontSize: 14.sp))),
-                          Expanded(child: Text(row['risk'] ?? '-',style: TextStyle(fontSize: 14.sp))),
-                        ],
-                      ),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                      itemBuilder: (context, index) {
+                        final row = _visits[index];
+                        return Material(
+                          elevation: 1,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.outlineVariant),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            child: Row(
+                              children: [
+                                Expanded(child: Text('${index + 1}', style: TextStyle(fontSize: 14.sp))),
+                                Expanded(child: Text(row['date'] ?? '-', style: TextStyle(fontSize: 14.sp))),
+                                Expanded(child: Text(row['week'] ?? '-', style: TextStyle(fontSize: 14.sp))),
+                                Expanded(child: Text(row['risk'] ?? '-', style: TextStyle(fontSize: 14.sp))),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemCount: _visits.length,
                     ),
-                  );
-                },
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemCount: _visits.length,
-              ),
             ),
           ],
         ),

@@ -161,7 +161,11 @@ class Routes{
       case Route_Names.Ancvisitform:
         return MaterialPageRoute(builder: (context) => const Ancvisitform(),);
       case Route_Names.Previousvisit:
-        return MaterialPageRoute(builder: (context) => const Previousvisit(),);
+        final args = setting.arguments as Map<String, dynamic>?;
+        final beneficiaryId = args?['beneficiaryId']?.toString() ?? '';
+        return MaterialPageRoute(
+          builder: (context) => Previousvisit(beneficiaryId: beneficiaryId),
+        );
       case Route_Names.PreviousVisitsScreenHBYC:
         final args = setting.arguments as Map<String, dynamic>?;
         final beneficiaryId = args?['beneficiaryId'] as String? ?? '';
@@ -239,6 +243,7 @@ class Routes{
         return MaterialPageRoute(builder: (context) => const RegisterChildDueListFormScreen(),);
       case Route_Names.previousVisit:
         return MaterialPageRoute(builder: (context) => const PreviousVisitScreen(),);
+      
       case Route_Names.FamliyUpdate:
         return MaterialPageRoute(builder: (context) => const FamliyUpdate(),);
       case Route_Names.EligibleCoupleList:

@@ -229,14 +229,14 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         };
 
         List<Map<String, dynamic>> beneficiaryMaps = await db.query(
-          'beneficiaries',
+          'beneficiaries_new',
           where: 'unique_key LIKE ?',
           whereArgs: ['%${state.beneficiaryId}'],
         );
 
         if (beneficiaryMaps.isEmpty) {
           beneficiaryMaps = await db.query(
-            'beneficiaries',
+            'beneficiaries_new',
             where: 'id = ?',
             whereArgs: [int.tryParse(state.beneficiaryId) ?? 0],
           );
@@ -258,7 +258,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           try {
             // Get the beneficiary record
             final beneficiaryMaps = await db.query(
-              'beneficiaries',
+              'beneficiaries_new',
               where: 'unique_key = ?',
               whereArgs: [state.beneficiaryRefKey ?? state.beneficiaryId],
             );
@@ -280,7 +280,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               
               // Update the record in the database
               await db.update(
-                'beneficiaries',
+                'beneficiaries_new',
                 {
                   'beneficiary_info': jsonEncode(beneficiaryInfo),
                   'modified_date_time': nowIso,
@@ -484,7 +484,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
 
             try {
               await db.update(
-                'beneficiaries',
+                'beneficiaries_new',
                 {'is_family_planning': state.fpAdopting == true ? 1 : 0}, // 1 for true, 0 for false
                 where: 'unique_key LIKE ? OR id = ?',
                 whereArgs: ['%${state.beneficiaryId}', int.tryParse(state.beneficiaryId) ?? 0],

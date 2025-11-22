@@ -51,7 +51,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<Td2DateChanged>((e, emit) => emit(state.copyWith(td2Date: e.value)));
     on<TdBoosterDateChanged>((e, emit) => emit(state.copyWith(tdBoosterDate: e.value)));
     on<FolicAcidTabletsChanged>((e, emit) => emit(state.copyWith(folicAcidTablets: e.value)));
-    on<PreExistingDiseaseChanged>((e, emit) => emit(state.copyWith(preExistingDisease: e.value)));
+    on<PreExistingDiseasesChanged>((e, emit) => emit(state.copyWith(selectedDiseases: e.selectedDiseases)));
+    on<OtherDiseaseChanged>((e, emit) => emit(state.copyWith(otherDisease: e.value)));
     on<WeightChanged>((e, emit) => emit(state.copyWith(weight: e.value)));
     on<SystolicChanged>((e, emit) => emit(state.copyWith(systolic: e.value)));
     on<DiastolicChanged>((e, emit) => emit(state.copyWith(diastolic: e.value)));
@@ -61,7 +62,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<HasAbortionComplicationChanged>((e, emit) => emit(state.copyWith(hasAbortionComplication: e.value)));
     on<AbortionDateChanged>((e, emit) => emit(state.copyWith(abortionDate: e.value)));
     on<BeneficiaryAbsentChanged>((e, emit) => emit(state.copyWith(beneficiaryAbsent: e.value)));
-    on<BeneficiaryIdSet>((e, emit) => emit(state.copyWith(beneficiaryId: e.beneficiaryId)));
+    on<AbsenceReasonChanged>((e, emit) => emit(state.copyWith(absenceReason: e.value)));
     on<GivesBirthToBaby>((e, emit) => emit(state.copyWith(givesBirthToBaby: e.value)));
     on<DeliveryOutcomeChanged>((e, emit) => emit(state.copyWith(deliveryOutcome: e.value)));
     on<NumberOfChildrenChanged>((e, emit) {
@@ -149,7 +150,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'td2_date': state.td2Date?.toIso8601String(),
           'td_booster_date': state.tdBoosterDate?.toIso8601String(),
           'folic_acid_tablets': state.folicAcidTablets,
-          'pre_existing_disease': state.preExistingDisease,
+          'pre_existing_diseases': state.selectedDiseases,
+          'other_disease': state.otherDisease,
           'weight': state.weight,
           'systolic': state.systolic,
           'diastolic': state.diastolic,
@@ -254,10 +256,11 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'td2_date': state.td2Date?.toIso8601String(),
             'td_booster_date': state.tdBoosterDate?.toIso8601String(),
             'folic_acid_tablets': state.folicAcidTablets,
-             'selected_risks': state.selectedRisks,
-             'has_abortion_complication': state.hasAbortionComplication,
+            'selected_risks': state.selectedRisks,
+            'has_abortion_complication': state.hasAbortionComplication,
             'abortion_date': state.abortionDate?.toIso8601String(),
-            'pre_existing_disease': state.preExistingDisease,
+            'pre_existing_diseases': state.selectedDiseases,
+            'other_disease': state.otherDisease,
             'weight': state.weight,
             'systolic': state.systolic,
             'diastolic': state.diastolic,

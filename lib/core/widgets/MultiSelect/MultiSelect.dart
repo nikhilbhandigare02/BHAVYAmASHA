@@ -77,8 +77,9 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
           RichText(
             text: TextSpan(
               text: widget.labelText,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+
+              fontWeight: FontWeight.w400,
                     color: Theme.of(context).colorScheme.onSurface.withOpacity(0.87),
                   ),
               children: widget.isRequired
@@ -94,25 +95,16 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                   : [],
             ),
           ),
-          SizedBox(height: 0.5.h),
+          SizedBox(height: 0.2.h),
         ],
         InkWell(
           onTap: _showMultiSelect,
           child: InputDecorator(
             decoration: InputDecoration(
+              border: InputBorder.none,
               hintText: widget.hintText,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4.0),
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4.0),
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
+
+
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 12.0,
                 vertical: 14.0,
@@ -193,7 +185,8 @@ class _MultiSelectDialogState<T> extends State<MultiSelectDialog<T>> {
         child: Column(
           children: widget.items.map((item) {
             return CheckboxListTile(
-              title: Text(item.label),
+              title: Text(item.label,
+                  ),
               value: _selectedItems.contains(item.value),
               onChanged: (bool? selected) {
                 setState(() {

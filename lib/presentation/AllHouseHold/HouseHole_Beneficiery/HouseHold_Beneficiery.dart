@@ -46,6 +46,15 @@ class _HouseHold_BeneficiaryScreenState
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh data when screen is navigated to
+    if (ModalRoute.of(context)?.isCurrent ?? false) {
+      _loadBeneficiaries();
+    }
+  }
+
+  @override
   void dispose() {
     _searchCtrl.removeListener(_onSearchChanged);
     _searchCtrl.dispose();

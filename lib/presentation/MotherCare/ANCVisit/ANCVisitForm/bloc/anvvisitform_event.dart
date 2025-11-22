@@ -112,9 +112,20 @@ class FolicAcidTabletsChanged extends AnvvisitformEvent {
   const FolicAcidTabletsChanged(this.value);
 }
 
-class PreExistingDiseaseChanged extends AnvvisitformEvent {
+class PreExistingDiseasesChanged extends AnvvisitformEvent {
+  final List<String> selectedDiseases;
+  const PreExistingDiseasesChanged(this.selectedDiseases);
+  
+  @override
+  List<Object?> get props => [selectedDiseases];
+}
+
+class OtherDiseaseChanged extends AnvvisitformEvent {
   final String value;
-  const PreExistingDiseaseChanged(this.value);
+  const OtherDiseaseChanged(this.value);
+  
+  @override
+  List<Object?> get props => [value];
 }
 
 class WeightChanged extends AnvvisitformEvent {
@@ -168,6 +179,17 @@ class AbortionDateChanged extends AnvvisitformEvent {
 class BeneficiaryAbsentChanged extends AnvvisitformEvent {
   final String value;
   const BeneficiaryAbsentChanged(this.value);
+  
+  @override
+  List<Object?> get props => [value];
+}
+
+class AbsenceReasonChanged extends AnvvisitformEvent {
+  final String value;
+  const AbsenceReasonChanged(this.value);
+  
+  @override
+  List<Object?> get props => [value];
 }
 
 class GivesBirthToBaby extends AnvvisitformEvent {
