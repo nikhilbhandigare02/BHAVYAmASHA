@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
 import '../../../l10n/app_localizations.dart';
@@ -184,6 +185,14 @@ class HouseHoldAmenities extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Divider(color: AppColors.divider, thickness: 0.8),
+                                if (selected.contains('Other'))
+                                  CustomTextField(
+                                    labelText: 'Enter type of fuel for cooking',
+                                    hintText: 'Enter type of fuel for cooking',
+                                    onChanged: (v) => bloc.add(CookingFuelOtherChange(otherCookingFuel: v.trim())),
+                                  ),
+                                if (selected.contains('Other'))
+                                  const Divider(color: AppColors.divider, thickness: 0.8),
                               ],
                             );
                           },
@@ -232,6 +241,14 @@ class HouseHoldAmenities extends StatelessWidget {
                           onChanged: (v) => bloc.add(WaterSourceChange(waterSource: v ?? '')),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.8),
+                        if (state.waterSource == 'Other')
+                          CustomTextField(
+                            labelText: 'Enter primary source of water',
+                            hintText: 'Enter primary source of water',
+                            onChanged: (v) => bloc.add(WaterSourceOtherChange(otherWaterSource: v.trim())),
+                          ),
+                        if (state.waterSource == 'Other')
+                          Divider(color: AppColors.divider, thickness: 0.8),
                         ApiDropdown<String>(
                           labelText: l.electricityAvailabilityLabel,
                           items: const [
@@ -261,6 +278,14 @@ class HouseHoldAmenities extends StatelessWidget {
                           onChanged: (v) => bloc.add(ElectricityChange(electricity: v ?? '')),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.8),
+                        if (state.electricity == 'Other')
+                          CustomTextField(
+                            labelText: 'Enter availability of electricity',
+                            hintText: 'Enter availability of electricity',
+                            onChanged: (v) => bloc.add(ElectricityOtherChange(otherElectricity: v.trim())),
+                          ),
+                        if (state.electricity == 'Other')
+                          Divider(color: AppColors.divider, thickness: 0.8),
                         ApiDropdown<String>(
                           labelText: l.toiletAccessLabel,
                           items: const ['Yes', 'No'],

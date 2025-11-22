@@ -136,6 +136,13 @@ final class AnmUpdateOccupation extends AddnewfamilymemberEvent {
   List<Object> get props => [value];
 }
 
+final class AnmUpdateOtherOccupation extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmUpdateOtherOccupation(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
 final class AnmUpdateEducation extends AddnewfamilymemberEvent {
   final String value;
   const AnmUpdateEducation(this.value);
@@ -150,9 +157,23 @@ final class AnmUpdateReligion extends AddnewfamilymemberEvent {
   List<Object> get props => [value];
 }
 
+final class AnmUpdateOtherReligion extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmUpdateOtherReligion(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
 final class AnmUpdateCategory extends AddnewfamilymemberEvent {
   final String value;
   const AnmUpdateCategory(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmUpdateOtherCategory extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmUpdateOtherCategory(this.value);
   @override
   List<Object> get props => [value];
 }
@@ -167,6 +188,13 @@ final class AnmUpdateAbhaAddress extends AddnewfamilymemberEvent {
 final class AnmUpdateMobileOwner extends AddnewfamilymemberEvent {
   final String value;
   const AnmUpdateMobileOwner(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmUpdateMobileOwnerRelation extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmUpdateMobileOwnerRelation(this.value);
   @override
   List<Object> get props => [value];
 }

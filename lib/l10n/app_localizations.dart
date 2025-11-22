@@ -3074,19 +3074,151 @@ abstract class AppLocalizations {
   /// No description provided for @incentiveHeaderAnganwadi.
   ///
   /// In en, this message translates to:
-  /// **'आंगनवाड़ी'**
+  /// **'Anganwadi'**
   String get incentiveHeaderAnganwadi;
+
+  /// No description provided for @incentiveDailyTabPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily tasks content here'**
+  String get incentiveDailyTabPlaceholder;
+
+  /// No description provided for @incentiveFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Incentive Form'**
+  String get incentiveFormTitle;
+
+  /// No description provided for @incentiveFormWorkCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work code :'**
+  String get incentiveFormWorkCodeLabel;
+
+  /// No description provided for @incentiveFormWorkCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter work code'**
+  String get incentiveFormWorkCodeHint;
+
+  /// No description provided for @incentiveFormCategoryTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category type : [*]'**
+  String get incentiveFormCategoryTypeLabel;
+
+  /// No description provided for @incentiveFormCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work category : [*]'**
+  String get incentiveFormCategoryLabel;
+
+  /// No description provided for @incentiveFormWorkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work : [*]'**
+  String get incentiveFormWorkLabel;
+
+  /// No description provided for @incentiveFormWorkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select work'**
+  String get incentiveFormWorkHint;
+
+  /// No description provided for @incentiveFormBeneficiaryCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of beneficiaries : [*]'**
+  String get incentiveFormBeneficiaryCountLabel;
+
+  /// No description provided for @incentiveFormBeneficiaryCountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of beneficiaries'**
+  String get incentiveFormBeneficiaryCountHint;
+
+  /// No description provided for @incentiveFormWorkAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work amount : [*]'**
+  String get incentiveFormWorkAmountLabel;
+
+  /// No description provided for @incentiveFormWorkAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Work amount'**
+  String get incentiveFormWorkAmountHint;
+
+  /// No description provided for @incentiveFormClaimedAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed amount : [*]'**
+  String get incentiveFormClaimedAmountLabel;
+
+  /// No description provided for @incentiveFormClaimedAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed amount'**
+  String get incentiveFormClaimedAmountHint;
+
+  /// No description provided for @incentiveFormCompletionDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work completion date : [*]'**
+  String get incentiveFormCompletionDateLabel;
+
+  /// No description provided for @incentiveFormCompletionDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get incentiveFormCompletionDateHint;
+
+  /// No description provided for @incentiveFormRegisterNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Register name : [*]'**
+  String get incentiveFormRegisterNameLabel;
+
+  /// No description provided for @incentiveFormVolumeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume : [*]'**
+  String get incentiveFormVolumeLabel;
+
+  /// No description provided for @incentiveFormRegisterDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Register date : [*]'**
+  String get incentiveFormRegisterDateLabel;
+
+  /// No description provided for @incentiveFormRegisterDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get incentiveFormRegisterDateHint;
+
+  /// No description provided for @incentiveFormRemarkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remark : [*]'**
+  String get incentiveFormRemarkLabel;
+
+  /// No description provided for @incentiveFormRemarkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Remark'**
+  String get incentiveFormRemarkHint;
 
   /// No description provided for @incentiveHeaderBlock.
   ///
   /// In en, this message translates to:
-  /// **'प्रखंड'**
+  /// **'Block'**
   String get incentiveHeaderBlock;
 
   /// No description provided for @incentiveHeaderDistrict.
   ///
   /// In en, this message translates to:
-  /// **'जिला'**
+  /// **'District'**
   String get incentiveHeaderDistrict;
 
   /// No description provided for @incentiveHeaderHsc.
@@ -3098,37 +3230,37 @@ abstract class AppLocalizations {
   /// No description provided for @incentiveHeaderPanchayat.
   ///
   /// In en, this message translates to:
-  /// **'पंचायत'**
+  /// **'Panchayat'**
   String get incentiveHeaderPanchayat;
 
   /// No description provided for @incentiveNote.
   ///
   /// In en, this message translates to:
-  /// **'प्रत्येक महीने की दावा राशि के भुगतान फाइल अगले महीने की 28 से 30 तारीख के बीच जमा करें।'**
+  /// **'Submit monthly incentive claim files between 28th and 30th of next month.'**
   String get incentiveNote;
 
   /// No description provided for @incentiveTabDaily.
   ///
   /// In en, this message translates to:
-  /// **'दैनिक कार्य'**
+  /// **'Daily tasks'**
   String get incentiveTabDaily;
 
   /// No description provided for @incentiveTabFinalize.
   ///
   /// In en, this message translates to:
-  /// **'अंतिम रूप से'**
+  /// **'Finalize'**
   String get incentiveTabFinalize;
 
   /// No description provided for @incentiveTabMonthly.
   ///
   /// In en, this message translates to:
-  /// **'मासिक कार्य'**
+  /// **'Monthly tasks'**
   String get incentiveTabMonthly;
 
   /// No description provided for @incentiveTotalAmount.
   ///
   /// In en, this message translates to:
-  /// **'कुल राशि(दैनिक+मासिक): ₹{amount}'**
+  /// **'Total amount (daily + monthly): ₹{amount}'**
   String incentiveTotalAmount(Object amount);
 
   /// No description provided for @isPregnantLabel.
@@ -5840,7 +5972,7 @@ abstract class AppLocalizations {
   /// No description provided for @howWasBreastfedLabel.
   ///
   /// In en, this message translates to:
-  /// **'How was the baby breastfed?*'**
+  /// **'How was the baby breastfed? *'**
   String get howWasBreastfedLabel;
 
   /// No description provided for @firstFeedGivenAfterBirthLabel.
@@ -6251,11 +6383,59 @@ abstract class AppLocalizations {
   /// **'Tuberculosis Eradication Program'**
   String get tbEradicationProgram;
 
+  /// No description provided for @tbLabel1.
+  ///
+  /// In en, this message translates to:
+  /// **'First indicator activity/contact tracing campaign (for notifying new TB patients on lane)'**
+  String get tbLabel1;
+
+  /// No description provided for @tbLabel2.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment provider activity'**
+  String get tbLabel2;
+
+  /// No description provided for @tbLabel3.
+  ///
+  /// In en, this message translates to:
+  /// **'For each Drug Sensitive TB patient or each Shorter regimen Drug Resistant TB patient for administering medicine'**
+  String get tbLabel3;
+
+  /// No description provided for @tbLabel4.
+  ///
+  /// In en, this message translates to:
+  /// **'For administering medicine to a Conventional MDR treatment Drug Resistant TB patient (₹2000 - during Intensive Phase).'**
+  String get tbLabel4;
+
   /// No description provided for @leprosyEradicationProgram.
   ///
   /// In en, this message translates to:
   /// **'Leprosy Eradication Program'**
   String get leprosyEradicationProgram;
+
+  /// No description provided for @leprosyQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Do you have any white or red patches on any part of your body?'**
+  String get leprosyQuestion1;
+
+  /// No description provided for @leprosyQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Do you feel numbness or tingling in any part of your body?'**
+  String get leprosyQuestion2;
+
+  /// No description provided for @leprosyQuestion3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Have you experienced weakness or paralysis in any limb?'**
+  String get leprosyQuestion3;
+
+  /// No description provided for @leprosyQuestion4.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Has anyone in your family ever had leprosy?'**
+  String get leprosyQuestion4;
 
   /// No description provided for @kalaAzarEradicationProgram.
   ///
@@ -6269,11 +6449,17 @@ abstract class AppLocalizations {
   /// **'Malaria Eradication Program'**
   String get malariaEradicationProgram;
 
-  /// No description provided for @filariaEradicationProgram.
+  /// No description provided for @malariaQuestion1.
   ///
   /// In en, this message translates to:
-  /// **'Filaria Eradication Program'**
-  String get filariaEradicationProgram;
+  /// **'1. For blood smear collection and testing of fever cases (per case)'**
+  String get malariaQuestion1;
+
+  /// No description provided for @malariaQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. For complete treatment of positive cases (per case)'**
+  String get malariaQuestion2;
 
   /// No description provided for @aesJeEradicationProgram.
   ///

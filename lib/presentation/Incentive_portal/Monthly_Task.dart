@@ -25,10 +25,10 @@ class _MonthlyTasksState extends State<MonthlyTasks> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionTitle(title:  'State Contribution'),
+          _SectionTitle(title:  (l10n?.monthlySectionStateContribution ?? 'State Contribution')),
           _TaskItem(
             index: 1,
-            title:  'PC1.1 - वर्ष की शुरुआत में सभी घरों की प्रविष्टि बनाएं और प्रत्येक माह उसका अध्ययन करें',
+            title:  (l10n?.monthlyTaskPC11 ?? 'PC1.1 - At the beginning of the year, create household records and review them every month'),
             amountText: '₹300',
             amountColor: successColor,
             value: _checked['pc1.1'] ?? false,
@@ -36,22 +36,22 @@ class _MonthlyTasksState extends State<MonthlyTasks> {
           ),
           _TaskItem(
             index: 2,
-            title:  'PC1.10 - 6 और अधिकतम 35 लाभार्थियों तक',
+            title:  (l10n?.monthlyTaskPC110 ?? 'PC1.10 - 6 and up to 35 beneficiaries'),
             amountText: '₹10',
             amountColor: successColor,
             value: _checked['pc1.10'] ?? false,
             onChanged: (v) => setState(() => _checked['pc1.10'] = v ?? false),
           ),
-          _SectionTitle(title:  'Routine & Recurring'),
+          _SectionTitle(title:  (l10n?.monthlySectionRoutineRecurring ?? 'Routine & Recurring')),
           _TaskItem(
             index: 1,
-            title: 'PC2.1 - टीकाकरण: ड्यू लिस्ट से 90% दर्ज बच्चों का पूर्ण टीकाकरण सुनिश्चित करें',
+            title: (l10n?.monthlyTaskPC21 ?? 'PC2.1 - Immunization: From the Due List, ensure 90% of registered children get full immunization'),
             value: _checked['pc2.1'] ?? false,
             onChanged: (v) => setState(() => _checked['pc2.1'] = v ?? false),
           ),
           _TaskItem(
             index: 2,
-            title:'PC2.3 - मातृ स्वास्थ्य: सभी गर्भवती माताओं की लाइन लिस्टिंग और उनमें से 60% की चार एएनसी जाँच पूर्ण करें',
+            title:(l10n?.monthlyTaskPC23 ?? 'PC2.3 - Maternal Health: Line listing of all pregnant women and complete four ANC checkups for 60% of them'),
             value: _checked['pc2.3'] ?? false,
             onChanged: (v) => setState(() => _checked['pc2.3'] = v ?? false),
           ),

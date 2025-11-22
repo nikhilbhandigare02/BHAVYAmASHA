@@ -1420,7 +1420,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hindi => 'हिंदी';
 
   @override
-  String get homeTitle => 'भाव्या एम-आशा होम';
+  String get homeTitle => 'भव्य एमआशा होम';
 
   @override
   String get houseKachcha => 'कच्चा घर';
@@ -1510,6 +1510,72 @@ class AppLocalizationsHi extends AppLocalizations {
   String get incentiveHeaderAnganwadi => 'आंगनवाड़ी';
 
   @override
+  String get incentiveDailyTabPlaceholder => 'Daily tasks content here';
+
+  @override
+  String get incentiveFormTitle => 'Incentive Form';
+
+  @override
+  String get incentiveFormWorkCodeLabel => 'कार्य कोड :';
+
+  @override
+  String get incentiveFormWorkCodeHint => 'कार्य कोड डाले';
+
+  @override
+  String get incentiveFormCategoryTypeLabel => 'श्रेणी का प्रकार : [*]';
+
+  @override
+  String get incentiveFormCategoryLabel => 'कार्य की श्रेणी : [*]';
+
+  @override
+  String get incentiveFormWorkLabel => 'कार्य : [*]';
+
+  @override
+  String get incentiveFormWorkHint => 'कार्य चुनें';
+
+  @override
+  String get incentiveFormBeneficiaryCountLabel => 'लाभार्थी की संख्या : [*]';
+
+  @override
+  String get incentiveFormBeneficiaryCountHint => 'लाभार्थियों की संख्या';
+
+  @override
+  String get incentiveFormWorkAmountLabel => 'कार्य की राशि : [*]';
+
+  @override
+  String get incentiveFormWorkAmountHint => 'कार्य की राशि';
+
+  @override
+  String get incentiveFormClaimedAmountLabel => 'दावा की गई राशि : [*]';
+
+  @override
+  String get incentiveFormClaimedAmountHint => 'दावा की गई राशि';
+
+  @override
+  String get incentiveFormCompletionDateLabel => 'कार्य पूर्ण की तिथि : [*]';
+
+  @override
+  String get incentiveFormCompletionDateHint => 'तिथि चुनें';
+
+  @override
+  String get incentiveFormRegisterNameLabel => 'पंजी का नाम : [*]';
+
+  @override
+  String get incentiveFormVolumeLabel => 'खंड/Volume : [*]';
+
+  @override
+  String get incentiveFormRegisterDateLabel => 'पंजी की दिनांक : [*]';
+
+  @override
+  String get incentiveFormRegisterDateHint => 'दिनांक चुनें';
+
+  @override
+  String get incentiveFormRemarkLabel => 'अभियुक्ति/Remark : [*]';
+
+  @override
+  String get incentiveFormRemarkHint => 'अभियुक्ति/Remark';
+
+  @override
   String get incentiveHeaderBlock => 'प्रखंड';
 
   @override
@@ -1563,19 +1629,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get linkedSuccessfully => 'सफलतापूर्वक लिंक हो गया';
 
   @override
-  String get listANC => 'एएनसी सूची';
+  String get listANC => 'प्रसव पूर्व जाँच';
 
   @override
-  String get listEligibleCoupleDue => 'योग्य दंपत्ति देय सूची';
+  String get listEligibleCoupleDue => 'योग्य दम्पत्ती';
 
   @override
-  String get listFamilySurvey => 'परिवार सर्वे सूची';
+  String get listFamilySurvey => 'परिवार सर्वेक्षण सूची';
 
   @override
-  String get listHBNC => 'एचबीएनसी सूची';
+  String get listHBNC => 'एचबीएनसी जाँच';
 
   @override
-  String get listRoutineImmunization => 'नियमित टीकाकरण (RI)';
+  String get listRoutineImmunization => 'नियमित टीकाकरण (आरआय)';
 
   @override
   String get lmpDateLabel => 'एलएमपी की तिथि';
@@ -2181,10 +2247,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get thirdAncLabel => 'तीसरा एएनसी';
 
   @override
-  String get toDoVisits => 'करने के लिए विज़िट';
+  String get toDoVisits => 'दौरा करना';
 
   @override
-  String get todayWorkCompleted => 'पूर्ण विज़िट :';
+  String get todayWorkCompleted => 'पूर्ण दौरे';
 
   @override
   String get todayWorkPending => 'लंबित विज़िट :';
@@ -3099,7 +3165,31 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tbEradicationProgram => 'क्षय रोग उन्मूलन कार्यक्रम';
 
   @override
+  String get tbLabel1 => 'पहली संकेतक गतिविधि/संपर्क अनुरेखण अभियान (नए टीबी रोगियों को लेन के लिए सूचित करने के लिए)';
+
+  @override
+  String get tbLabel2 => 'उपचार प्रदाता गतिविधि';
+
+  @override
+  String get tbLabel3 => 'प्रत्येक दवा संवेदनशील टीबी रोगी या प्रत्येक छोटी अवधि के दवा प्रतिरोधी टीबी रोगी के लिए दवा प्रशासन के लिए';
+
+  @override
+  String get tbLabel4 => 'एक पारंपरिक एमडीआर उपचार दवा प्रतिरोधी टीबी रोगी को दवा प्रशासन के लिए (₹2000 - तीव्र चरण के दौरान)';
+
+  @override
   String get leprosyEradicationProgram => 'कुष्ठ उन्मूलन कार्यक्रम';
+
+  @override
+  String get leprosyQuestion1 => '1. क्या आपके शरीर के किसी हिस्से पर सफेद या लाल धब्बे हैं?';
+
+  @override
+  String get leprosyQuestion2 => '2. क्या आपको शरीर के किसी भाग में सुन्नता या झनझनाहट महसूस होती है?';
+
+  @override
+  String get leprosyQuestion3 => '3. क्या आपने किसी अंग में कमजोरी या लकवा जैसा अनुभव किया है?';
+
+  @override
+  String get leprosyQuestion4 => '4. क्या आपके परिवार में किसी को कभी कुष्ठ रोग हुआ है?';
 
   @override
   String get kalaAzarEradicationProgram => 'काला-अजार उन्मूलन कार्यक्रम';
@@ -3108,7 +3198,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get malariaEradicationProgram => 'मलेरिया उन्मूलन कार्यक्रम';
 
   @override
-  String get filariaEradicationProgram => 'फाइलेरिया उन्मूलन कार्यक्रम';
+  String get malariaQuestion1 => '1. बुखार के मामलों के लिए रक्त स्मीयर संग्रह और परीक्षण (प्रति मामला)';
+
+  @override
+  String get malariaQuestion2 => '2. पॉजिटिव मामलों के पूर्ण उपचार के लिए (प्रति मामला)';
 
   @override
   String get aesJeEradicationProgram => 'एईएस/जेई उन्मूलन कार्यक्रम';

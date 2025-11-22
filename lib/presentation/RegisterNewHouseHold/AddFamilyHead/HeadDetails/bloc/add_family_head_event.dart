@@ -81,6 +81,11 @@ final class AfhUpdateOccupation extends AddFamilyHeadEvent {
   AfhUpdateOccupation(this.value);
 }
 
+final class AfhUpdateOtherOccupation extends AddFamilyHeadEvent {
+  final String value;
+  AfhUpdateOtherOccupation(this.value);
+}
+
 final class AfhUpdateEducation extends AddFamilyHeadEvent {
   final String? value;
   AfhUpdateEducation(this.value);
@@ -91,14 +96,29 @@ final class AfhUpdateReligion extends AddFamilyHeadEvent {
   AfhUpdateReligion(this.value);
 }
 
+final class AfhUpdateOtherReligion extends AddFamilyHeadEvent {
+  final String value;
+  AfhUpdateOtherReligion(this.value);
+}
+
 final class AfhUpdateCategory extends AddFamilyHeadEvent {
   final String? value;
   AfhUpdateCategory(this.value);
 }
 
+final class AfhUpdateOtherCategory extends AddFamilyHeadEvent {
+  final String value;
+  AfhUpdateOtherCategory(this.value);
+}
+
 final class AfhUpdateMobileOwner extends AddFamilyHeadEvent {
   final String? value;
   AfhUpdateMobileOwner(this.value);
+}
+
+final class AfhUpdateMobileOwnerRelation extends AddFamilyHeadEvent {
+  final String value;
+  AfhUpdateMobileOwnerRelation(this.value);
 }
 
 final class AfhUpdateMobileNo extends AddFamilyHeadEvent {

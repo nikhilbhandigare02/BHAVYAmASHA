@@ -13,6 +13,14 @@ class ResidentialAreaChange extends HouseholdDetailsAmenitiesEvent{
 
   List<Object> get props => [residentialArea];
 }
+
+class ResidentialAreaOtherChange extends HouseholdDetailsAmenitiesEvent{
+  final String otherResidentialArea;
+  const ResidentialAreaOtherChange({required this.otherResidentialArea});
+
+  List<Object> get props => [otherResidentialArea];
+}
+
 class HouseTypeChange extends HouseholdDetailsAmenitiesEvent{
   final String houseType;
   const HouseTypeChange({required this.houseType});
@@ -20,6 +28,12 @@ class HouseTypeChange extends HouseholdDetailsAmenitiesEvent{
   List<Object> get props => [houseType];
 }
 
+class HouseTypeOtherChange extends HouseholdDetailsAmenitiesEvent{
+  final String otherHouseType;
+  const HouseTypeOtherChange({required this.otherHouseType});
+
+  List<Object> get props => [otherHouseType];
+}
 
 class OwnershipTypeChange extends HouseholdDetailsAmenitiesEvent{
   final String ownershipType;
@@ -28,30 +42,62 @@ class OwnershipTypeChange extends HouseholdDetailsAmenitiesEvent{
   List<Object> get props => [ownershipType];
 }
 
+class OwnershipTypeOtherChange extends HouseholdDetailsAmenitiesEvent{
+  final String otherOwnershipType;
+  const OwnershipTypeOtherChange({required this.otherOwnershipType});
+
+  List<Object> get props => [otherOwnershipType];
+}
+
 class KitchenChange extends HouseholdDetailsAmenitiesEvent{
   final String houseKitchen;
   const KitchenChange({required this.houseKitchen});
 
   List<Object> get props => [houseKitchen];
 }
+
 class CookingFuelTypeChange extends HouseholdDetailsAmenitiesEvent{
   final String cookingFuel;
   const CookingFuelTypeChange({required this.cookingFuel});
 
   List<Object> get props => [cookingFuel];
 }
+
+class CookingFuelOtherChange extends HouseholdDetailsAmenitiesEvent{
+  final String otherCookingFuel;
+  const CookingFuelOtherChange({required this.otherCookingFuel});
+
+  List<Object> get props => [otherCookingFuel];
+}
+
 class WaterSourceChange extends HouseholdDetailsAmenitiesEvent{
   final String waterSource;
   const WaterSourceChange({required this.waterSource});
 
   List<Object> get props => [waterSource];
 }
+
+class WaterSourceOtherChange extends HouseholdDetailsAmenitiesEvent{
+  final String otherWaterSource;
+  const WaterSourceOtherChange({required this.otherWaterSource});
+
+  List<Object> get props => [otherWaterSource];
+}
+
 class ElectricityChange extends HouseholdDetailsAmenitiesEvent{
   final String electricity;
   const ElectricityChange({required this.electricity});
 
   List<Object> get props => [electricity];
 }
+
+class ElectricityOtherChange extends HouseholdDetailsAmenitiesEvent{
+  final String otherElectricity;
+  const ElectricityOtherChange({required this.otherElectricity});
+
+  List<Object> get props => [otherElectricity];
+}
+
 class ToiletChange extends HouseholdDetailsAmenitiesEvent{
   final String toilet;
   const ToiletChange({required this.toilet});

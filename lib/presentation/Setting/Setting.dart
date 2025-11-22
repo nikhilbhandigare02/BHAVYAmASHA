@@ -83,53 +83,87 @@ class _SettingState extends State<Setting> {
         return StatefulBuilder(
           builder: (ctx, setStateDialog) {
             return AlertDialog(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-              content: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 180), // smaller width
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              title: Align(
+                alignment: Alignment.centerLeft,
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       l10n.settingsAppLanguage,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 12),
-                    RadioListTile<String>(
-                      contentPadding: EdgeInsets.zero,
-                      dense: true, // tighter layout
-                      value: 'en',
-                      groupValue: selected,
-                      title: Text(l10n.english, style: const TextStyle(fontSize: 16)),
-                      onChanged: (val) => setStateDialog(() => selected = val!),
-                    ),
-                    RadioListTile<String>(
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      value: 'hi',
-                      groupValue: selected,
-                      title: const Text('हिंदी', style: TextStyle(fontSize: 16)),
-                      onChanged: (val) => setStateDialog(() => selected = val!),
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 12),
-
+                    const Divider(height: 10),
                   ],
                 ),
               ),
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 240),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      RadioListTile<String>(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        value: 'en',
+                        groupValue: selected,
+                        title: Text(l10n.english, style: const TextStyle(fontSize: 16)),
+                        onChanged: (val) => setStateDialog(() => selected = val!),
+                        visualDensity: const VisualDensity(vertical: -4),
+                      ),
+                      RadioListTile<String>(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        value: 'hi',
+                        groupValue: selected,
+                        title: Text(l10n.hindi, style: const TextStyle(fontSize: 16)),
+                        onChanged: (val) => setStateDialog(() => selected = val!),
+                        visualDensity: const VisualDensity(vertical: -4),
+                      ),
+                    ],
+                  ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    if (selected != currentCode) {
-                      context.read<LocaleBloc>().add(ChangeLocale(selected));
-                    }
-                    Navigator.pop(ctx);
-                  },
-                  child: const Text('OK', style: TextStyle(fontSize: 16)),
+              ),
+              actions: [
+                const Divider(height: 0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: Text(
+                        'CANCEL',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (selected != currentCode) {
+                          context.read<LocaleBloc>().add(ChangeLocale(selected));
+                        }
+                        Navigator.pop(ctx);
+                      },
+                      child: Text(
+                        'OK',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             );

@@ -54,7 +54,7 @@ class _IncentiveFormState extends State<IncentiveForm> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppHeader(
-        screenTitle: 'Incentive Form',
+        screenTitle: l10n?.incentiveFormTitle ?? 'Incentive Form',
         showBack: true,
       ),
       body: SafeArea(
@@ -66,17 +66,29 @@ class _IncentiveFormState extends State<IncentiveForm> {
               Row(
                 children: [
                   Expanded(
-                    child: _infoBox('वित्तीय वर्ष:', '2024-2025'),
+                    child: _infoBox(
+                      (l10n?.incentiveFinancialYear ?? 'वित्तीय वर्ष:'),
+                      '2024-2025',
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _infoBox('वित्तीय महीना:', 'June'),
+                    child: _infoBox(
+                      (l10n?.incentiveFinancialMonth ?? 'वित्तीय महीना:'),
+                      'June',
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
         
-              _labelField('कार्य कोड :', _textField('कार्य कोड डाले', workCodeController)),
+              _labelField(
+                l10n?.incentiveFormWorkCodeLabel ?? 'कार्य कोड :',
+                _textField(
+                  l10n?.incentiveFormWorkCodeHint ?? 'कार्य कोड डाले',
+                  workCodeController,
+                ),
+              ),
               const SizedBox(height: 16),
         
               Container(
@@ -91,7 +103,7 @@ class _IncentiveFormState extends State<IncentiveForm> {
                       children: [
                         Expanded(
                           child: _dropdownField(
-                              'श्रेणी का प्रकार : [*]', categoryTypes, selectedCategoryType,
+                              l10n?.incentiveFormCategoryTypeLabel ?? 'श्रेणी का प्रकार : [*]', categoryTypes, selectedCategoryType,
                                   (val) {
                                 setState(() {
                                   selectedCategoryType = val;
@@ -101,7 +113,7 @@ class _IncentiveFormState extends State<IncentiveForm> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: _dropdownField(
-                              'कार्य की श्रेणी : [*]', categories, selectedCategory,
+                              l10n?.incentiveFormCategoryLabel ?? 'कार्य की श्रेणी : [*]', categories, selectedCategory,
                                   (val) {
                                 setState(() {
                                   selectedCategory = val;
@@ -111,34 +123,56 @@ class _IncentiveFormState extends State<IncentiveForm> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _labelField('कार्य : [*]',
-                        _textField('कार्य चुनें', workController)),
+                    _labelField(
+                      l10n?.incentiveFormWorkLabel ?? 'कार्य : [*]',
+                      _textField(
+                        l10n?.incentiveFormWorkHint ?? 'कार्य चुनें',
+                        workController,
+                      ),
+                    ),
                     const SizedBox(height: 12),
-                    _labelField('लाभार्थी की संख्या : [*]',
-                        _textField('लाभार्थियों की संख्या', beneficiaryCountController)),
+                    _labelField(
+                      l10n?.incentiveFormBeneficiaryCountLabel ?? 'लाभार्थी की संख्या : [*]',
+                      _textField(
+                        l10n?.incentiveFormBeneficiaryCountHint ?? 'लाभार्थियों की संख्या',
+                        beneficiaryCountController,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
-                          child: _labelField('कार्य की राशि : [*]',
-                              _textField('कार्य की राशि', workAmountController)),
+                          child: _labelField(
+                            l10n?.incentiveFormWorkAmountLabel ?? 'कार्य की राशि : [*]',
+                            _textField(
+                              l10n?.incentiveFormWorkAmountHint ?? 'कार्य की राशि',
+                              workAmountController,
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: _labelField('दावा की गई राशि : [*]',
-                              _textField('दावा की गई राशि', claimedAmountController)),
+                          child: _labelField(
+                            l10n?.incentiveFormClaimedAmountLabel ?? 'दावा की गई राशि : [*]',
+                            _textField(
+                              l10n?.incentiveFormClaimedAmountHint ?? 'दावा की गई राशि',
+                              claimedAmountController,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     _labelField(
-                      'कार्य पूर्ण की तिथि : [*]',
+                      l10n?.incentiveFormCompletionDateLabel ?? 'कार्य पूर्ण की तिथि : [*]',
                       GestureDetector(
                         onTap: () =>
                             _selectDate(context, completionDateController),
                         child: AbsorbPointer(
                           child: _textField(
-                              'तिथि चुनें', completionDateController),
+                              l10n?.incentiveFormCompletionDateHint ?? 'तिथि चुनें',
+                              completionDateController,
+                            ),
                         ),
                       ),
                     ),
@@ -158,7 +192,8 @@ class _IncentiveFormState extends State<IncentiveForm> {
                     Row(
                       children: [
                         Expanded(
-                          child: _dropdownField('पंजी का नाम : [*]', registerNames,
+                          child: _dropdownField(
+                              l10n?.incentiveFormRegisterNameLabel ?? 'पंजी का नाम : [*]', registerNames,
                               selectedRegisterName, (val) {
                                 setState(() {
                                   selectedRegisterName = val;
@@ -167,7 +202,8 @@ class _IncentiveFormState extends State<IncentiveForm> {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: _dropdownField('खंड/Volume : [*]', volumes,
+                          child: _dropdownField(
+                              l10n?.incentiveFormVolumeLabel ?? 'खंड/Volume : [*]', volumes,
                               selectedVolume, (val) {
                                 setState(() {
                                   selectedVolume = val;
@@ -178,18 +214,25 @@ class _IncentiveFormState extends State<IncentiveForm> {
                     ),
                     const SizedBox(height: 12),
                     _labelField(
-                      'पंजी की दिनांक : [*]',
+                      l10n?.incentiveFormRegisterDateLabel ?? 'पंजी की दिनांक : [*]',
                       GestureDetector(
                         onTap: () => _selectDate(context, registerDateController),
                         child: AbsorbPointer(
                           child: _textField(
-                              'दिनांक चुनें', registerDateController),
+                              l10n?.incentiveFormRegisterDateHint ?? 'दिनांक चुनें',
+                              registerDateController,
+                            ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _labelField('अभियुक्ति/Remark : [*]',
-                        _textField('अभियुक्ति/Remark', remarkController)),
+                    _labelField(
+                      l10n?.incentiveFormRemarkLabel ?? 'अभियुक्ति/Remark : [*]',
+                      _textField(
+                        l10n?.incentiveFormRemarkHint ?? 'अभियुक्ति/Remark',
+                        remarkController,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -203,9 +246,9 @@ class _IncentiveFormState extends State<IncentiveForm> {
                     backgroundColor: AppColors.primary,
                   ),
                   onPressed: () {},
-                  child: const Text(
-                    'संरक्षित करे',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  child: Text(
+                    l10n?.finalizeSave ?? 'संरक्षित करे',
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),

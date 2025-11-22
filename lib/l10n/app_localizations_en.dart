@@ -1507,35 +1507,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String get incentiveFinancialYear => 'Financial year';
 
   @override
-  String get incentiveHeaderAnganwadi => 'आंगनवाड़ी';
+  String get incentiveHeaderAnganwadi => 'Anganwadi';
 
   @override
-  String get incentiveHeaderBlock => 'प्रखंड';
+  String get incentiveDailyTabPlaceholder => 'Daily tasks content here';
 
   @override
-  String get incentiveHeaderDistrict => 'जिला';
+  String get incentiveFormTitle => 'Incentive Form';
+
+  @override
+  String get incentiveFormWorkCodeLabel => 'Work code :';
+
+  @override
+  String get incentiveFormWorkCodeHint => 'Enter work code';
+
+  @override
+  String get incentiveFormCategoryTypeLabel => 'Category type : [*]';
+
+  @override
+  String get incentiveFormCategoryLabel => 'Work category : [*]';
+
+  @override
+  String get incentiveFormWorkLabel => 'Work : [*]';
+
+  @override
+  String get incentiveFormWorkHint => 'Select work';
+
+  @override
+  String get incentiveFormBeneficiaryCountLabel => 'Number of beneficiaries : [*]';
+
+  @override
+  String get incentiveFormBeneficiaryCountHint => 'Number of beneficiaries';
+
+  @override
+  String get incentiveFormWorkAmountLabel => 'Work amount : [*]';
+
+  @override
+  String get incentiveFormWorkAmountHint => 'Work amount';
+
+  @override
+  String get incentiveFormClaimedAmountLabel => 'Claimed amount : [*]';
+
+  @override
+  String get incentiveFormClaimedAmountHint => 'Claimed amount';
+
+  @override
+  String get incentiveFormCompletionDateLabel => 'Work completion date : [*]';
+
+  @override
+  String get incentiveFormCompletionDateHint => 'Select date';
+
+  @override
+  String get incentiveFormRegisterNameLabel => 'Register name : [*]';
+
+  @override
+  String get incentiveFormVolumeLabel => 'Volume : [*]';
+
+  @override
+  String get incentiveFormRegisterDateLabel => 'Register date : [*]';
+
+  @override
+  String get incentiveFormRegisterDateHint => 'Select date';
+
+  @override
+  String get incentiveFormRemarkLabel => 'Remark : [*]';
+
+  @override
+  String get incentiveFormRemarkHint => 'Remark';
+
+  @override
+  String get incentiveHeaderBlock => 'Block';
+
+  @override
+  String get incentiveHeaderDistrict => 'District';
 
   @override
   String get incentiveHeaderHsc => 'HSC';
 
   @override
-  String get incentiveHeaderPanchayat => 'पंचायत';
+  String get incentiveHeaderPanchayat => 'Panchayat';
 
   @override
-  String get incentiveNote => 'प्रत्येक महीने की दावा राशि के भुगतान फाइल अगले महीने की 28 से 30 तारीख के बीच जमा करें।';
+  String get incentiveNote => 'Submit monthly incentive claim files between 28th and 30th of next month.';
 
   @override
-  String get incentiveTabDaily => 'दैनिक कार्य';
+  String get incentiveTabDaily => 'Daily tasks';
 
   @override
-  String get incentiveTabFinalize => 'अंतिम रूप से';
+  String get incentiveTabFinalize => 'Finalize';
 
   @override
-  String get incentiveTabMonthly => 'मासिक कार्य';
+  String get incentiveTabMonthly => 'Monthly tasks';
 
   @override
   String incentiveTotalAmount(Object amount) {
-    return 'कुल राशि(दैनिक+मासिक): ₹$amount';
+    return 'Total amount (daily + monthly): ₹$amount';
   }
 
   @override
@@ -2892,7 +2958,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get firstBreastfeedTimingLabel => 'When was the first breastfeed given to the baby? *';
 
   @override
-  String get howWasBreastfedLabel => 'How was the baby breastfed?*';
+  String get howWasBreastfedLabel => 'How was the baby breastfed? *';
 
   @override
   String get firstFeedGivenAfterBirthLabel => 'What was given to the baby as the first feed after birth? *';
@@ -3099,7 +3165,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tbEradicationProgram => 'Tuberculosis Eradication Program';
 
   @override
+  String get tbLabel1 => 'First indicator activity/contact tracing campaign (for notifying new TB patients on lane)';
+
+  @override
+  String get tbLabel2 => 'Treatment provider activity';
+
+  @override
+  String get tbLabel3 => 'For each Drug Sensitive TB patient or each Shorter regimen Drug Resistant TB patient for administering medicine';
+
+  @override
+  String get tbLabel4 => 'For administering medicine to a Conventional MDR treatment Drug Resistant TB patient (₹2000 - during Intensive Phase).';
+
+  @override
   String get leprosyEradicationProgram => 'Leprosy Eradication Program';
+
+  @override
+  String get leprosyQuestion1 => '1. Do you have any white or red patches on any part of your body?';
+
+  @override
+  String get leprosyQuestion2 => '2. Do you feel numbness or tingling in any part of your body?';
+
+  @override
+  String get leprosyQuestion3 => '3. Have you experienced weakness or paralysis in any limb?';
+
+  @override
+  String get leprosyQuestion4 => '4. Has anyone in your family ever had leprosy?';
 
   @override
   String get kalaAzarEradicationProgram => 'Kala-azar Eradication Program';
@@ -3108,7 +3198,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get malariaEradicationProgram => 'Malaria Eradication Program';
 
   @override
-  String get filariaEradicationProgram => 'Filaria Eradication Program';
+  String get malariaQuestion1 => '1. For blood smear collection and testing of fever cases (per case)';
+
+  @override
+  String get malariaQuestion2 => '2. For complete treatment of positive cases (per case)';
 
   @override
   String get aesJeEradicationProgram => 'AES/JE Eradication Program';

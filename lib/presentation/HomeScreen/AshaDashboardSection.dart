@@ -120,6 +120,8 @@ class AshaDashboardSection extends StatelessWidget {
                                     width: 7.w,
                                     height: 7.w,
                                     fit: BoxFit.contain,
+                                    // Make the plus icon for "Register New Household" use primary color
+                                    color: index == 0 ? AppColors.primary : null,
                                   ),
                                   SizedBox(height: 1.h),
                                   Expanded(

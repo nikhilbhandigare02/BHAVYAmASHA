@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/widgets/TextField/TextField.dart';
@@ -28,6 +29,8 @@ class TbProgramScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return BlocProvider(
       create: (_) => TbBloc(),
       child: BlocBuilder<TbBloc, TbState>(
@@ -36,10 +39,10 @@ class TbProgramScreen extends StatelessWidget {
 
           // ✅ Only label text (no numbering inside)
           final List<String> labels = [
-            'First indicator activity/contact tracing campaign (for notifying new TB patients on lane)',
-            'Treatment provider activity',
-            'For each Drug Sensitive TB patient or each Shorter regimen Drug Resistant TB patient for administering medicine',
-            'For administering medicine to a Conventional MDR treatment Drug Resistant TB patient (₹2000 - during Intensive Phase).',
+            l10n.tbLabel1,
+            l10n.tbLabel2,
+            l10n.tbLabel3,
+            l10n.tbLabel4,
           ];
 
           // ✅ Date setup
@@ -51,7 +54,7 @@ class TbProgramScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: 'Tuberculosis Eradication Program',
+              screenTitle: l10n.tbEradicationProgram,
               showBack: true,
             ),
             body: Padding(
@@ -162,12 +165,12 @@ class TbProgramScreen extends StatelessWidget {
                               alignment: Alignment.centerRight,
                               child: RoundButton(
                                 width: 14.h,
-                                title: 'Save',
+                                title: l10n.saveButton,
                                 onPress: () {
                                   bloc.add(SaveTbData());
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Data saved successfully'),
+                                    SnackBar(
+                                      content: Text(l10n.dataSavedSuccessfully),
                                       backgroundColor: Colors.green,
                                     ),
                                   );
