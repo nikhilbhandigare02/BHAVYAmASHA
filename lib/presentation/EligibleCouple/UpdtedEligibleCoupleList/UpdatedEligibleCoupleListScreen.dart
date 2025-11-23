@@ -349,7 +349,7 @@ class _UpdatedEligibleCoupleListScreenState
       appBar: AppHeader(
         screenTitle: t?.updatedEligibleCoupleListTitle ?? 'Updated Eligible Couple List',
         showBack: true,
-      ),
+      ), 
       body: SafeArea(
         child: Column(
           children: [

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -75,6 +76,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   String? _headGender;
   String? _spouseName;
   String? _spouseGender;
+
+  List<String> _maleAdultNames = [];
+  List<String> _femaleAdultNames = [];
 
   int _ageFromDob(DateTime dob) => DateTime.now().year - dob.year;
 
@@ -170,6 +174,52 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
+      try {
+        final hh = widget.hhId?.toString() ?? '';
+        if (hh.isNotEmpty) {
+          final rows = await LocalStorageDao.instance.getBeneficiariesByHousehold(hh);
+          final male = <String>{};
+          final female = <String>{};
+          for (final row in rows) {
+            final isAdult = (row['is_adult'] is num) ? (row['is_adult'] as num).toInt() == 1 : false;
+            if (!isAdult) continue;
+            dynamic infoRaw = row['beneficiary_info'];
+            Map<String, dynamic> info;
+            if (infoRaw is Map<String, dynamic>) {
+              info = infoRaw;
+            } else if (infoRaw is String && infoRaw.isNotEmpty) {
+              try {
+                info = Map<String, dynamic>.from(jsonDecode(infoRaw));
+              } catch (_) {
+                info = {};
+              }
+            } else {
+              info = {};
+            }
+            final g = _formatGender(info['gender']?.toString());
+            final name = (info['memberName'] ?? info['headName'] ?? info['name'] ?? '').toString().trim();
+            if (name.isEmpty) continue;
+            if (g == 'Male') {
+              male.add(name);
+            } else if (g == 'Female') {
+              female.add(name);
+            }
+          }
+          setState(() {
+            _maleAdultNames = male.toList();
+            _femaleAdultNames = female.toList();
+            if ((_headName == null || _headName!.isEmpty) && _maleAdultNames.isNotEmpty) {
+              _headName = _maleAdultNames.first;
+              _headGender = 'Male';
+            }
+            if ((_spouseName == null || _spouseName!.isEmpty) && _femaleAdultNames.isNotEmpty) {
+              _spouseName = _femaleAdultNames.first;
+              _spouseGender = 'Female';
+            }
+          });
+        }
+      } catch (_) {}
+
       // Handle beneficiary data loading if in edit mode
       final args = ModalRoute.of(context)?.settings.arguments as Map?;
       if (args != null && args['isBeneficiary'] == true && args['beneficiaryId'] != null) {
@@ -191,16 +241,25 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     String? fatherName;
     String? motherName;
 
-    if (_headGender == 'Male' && _spouseGender == 'Female') {
-      fatherName = _headName;
-      motherName = _spouseName;
-    } else if (_headGender == 'Female' && _spouseGender == 'Male') {
-      fatherName = _spouseName;
-      motherName = _headName;
-    } else if (_headGender == 'Male') {
-      fatherName = _headName;
-    } else if (_headGender == 'Female') {
-      motherName = _headName;
+    if (_maleAdultNames.isNotEmpty) {
+      fatherName = _maleAdultNames.first;
+    }
+    if (_femaleAdultNames.isNotEmpty) {
+      motherName = _femaleAdultNames.first;
+    }
+    if (fatherName == null) {
+      if (_headGender == 'Male') {
+        fatherName = _headName;
+      } else if (_spouseGender == 'Male') {
+        fatherName = _spouseName;
+      }
+    }
+    if (motherName == null) {
+      if (_headGender == 'Female') {
+        motherName = _headName;
+      } else if (_spouseGender == 'Female') {
+        motherName = _spouseName;
+      }
     }
 
     if (relation == 'Father' && fatherName != null) {
@@ -706,12 +765,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Builder(
-                                      builder: (context) {
+                                      Builder(
+                                        builder: (context) {
                                         final motherItems = [
                                           'Select',
-                                          if (_headGender == 'Female' && _headName != null) _headName!,
-                                          if (_spouseGender == 'Female' && _spouseName != null) _spouseName!,
+                                          ..._femaleAdultNames,
                                           'Other',
                                         ];
                                         print('Mother dropdown items: $motherItems');
@@ -736,7 +794,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           },
                                         );
                                       },
-                                    ),
+                                      ),
                                     if (_motherOption == 'Other')
                                       Padding(
                                         padding: const EdgeInsets.only(top: 8),
@@ -755,12 +813,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Builder(
-                                      builder: (context) {
+                                      Builder(
+                                        builder: (context) {
                                         final fatherItems = [
                                           'Select',
-                                          if (_headGender == 'Male' && _headName != null) _headName!,
-                                          if (_spouseGender == 'Male' && _spouseName != null) _spouseName!,
+                                          ..._maleAdultNames,
                                           'Other',
                                         ];
                                         print('Father dropdown items: $fatherItems');
@@ -1731,6 +1788,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
               ),
             ),
             )
-      ))));
+      )
+      )));
   }
 }
