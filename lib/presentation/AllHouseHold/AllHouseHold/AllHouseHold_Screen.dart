@@ -224,8 +224,10 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         }
         final int childrenTarget = declaredChildren;
 
-        // How many child members already exist in DB for this household.
-        int childrenAdded = 0;
+        // How many members are already in DB for this household,
+        // excluding the configured head and (if present) one spouse.
+        int baseMembers = 1; // head
+        bool hasSpouse = false;
         for (final m in membersForHousehold) {
           try {
             final rawInfo = m['beneficiary_info'];
@@ -238,22 +240,26 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               minfo = <String, dynamic>{};
             }
 
-            final type = (minfo['Type'] ?? minfo['type'] ?? '').toString();
-            final relation = (minfo['relation'] ?? minfo['relation_to_head'] ?? '').toString();
-
-            final isChildByType = type == 'Child' || type == 'Infant';
-            final isChildByRelation =
-                relation == 'Son' || relation == 'Daughter';
-
-            if (isChildByType || isChildByRelation) {
-              childrenAdded++;
+            final relation =
+                (minfo['relation_to_head'] ?? minfo['relation'] ?? '').toString().toLowerCase();
+            if (relation == 'spouse') {
+              hasSpouse = true;
+              break;
             }
           } catch (_) {}
         }
+        if (hasSpouse) {
+          baseMembers = 2; // head + spouse
+        }
+
+        final int nonHeadSpouseMembers =
+            membersForHousehold.length > baseMembers
+                ? membersForHousehold.length - baseMembers
+                : 0;
 
         final int remainingChildren =
             childrenTarget > 0
-                ? (childrenTarget - childrenAdded).clamp(0, 9999)
+                ? (childrenTarget - nonHeadSpouseMembers).clamp(0, 9999)
                 : 0;
         final bool hasChildrenTarget = childrenTarget > 0;
 
