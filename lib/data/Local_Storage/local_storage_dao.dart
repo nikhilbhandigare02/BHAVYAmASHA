@@ -531,6 +531,51 @@ class LocalStorageDao {
     }
   }
 
+  Future<int> updateHouseholdByUniqueKey(Map<String, dynamic> data) async {
+    try {
+      final db = await _db;
+      final householdInfo = data['household_info'];
+
+      final row = <String, dynamic>{
+        'server_id': data['server_id'],
+        'address': data['address'] is String ? data['address'] : jsonEncode(data['address'] ?? {}),
+        'geo_location': data['geo_location'] is String ? data['geo_location'] : jsonEncode(data['geo_location'] ?? {}),
+        'head_id': data['head_id'],
+        'household_info': householdInfo is String
+            ? householdInfo
+            : jsonEncode(householdInfo ?? {}),
+        'device_details': data['device_details'] is String
+            ? data['device_details']
+            : jsonEncode(data['device_details'] ?? {}),
+        'app_details': data['app_details'] is String
+            ? data['app_details']
+            : jsonEncode(data['app_details'] ?? {}),
+        'parent_user': data['parent_user'] is String
+            ? data['parent_user']
+            : jsonEncode(data['parent_user'] ?? {}),
+        'current_user_key': data['current_user_key'],
+        'facility_id': data['facility_id'],
+        // Keep original created_date_time in DB; only update modified_date_time
+        'modified_date_time': data['modified_date_time'],
+        'is_synced': data['is_synced'] ?? 0,
+        'is_deleted': data['is_deleted'] ?? 0,
+      };
+
+      final changes = await db.update(
+        'households',
+        row,
+        where: 'unique_key = ?',
+        whereArgs: [data['unique_key']],
+      );
+      return changes;
+    } catch (e, stackTrace) {
+      print('Error updating household by unique_key:');
+      print('   Error: $e');
+      print('   Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
   Future<int> updateHouseholdServerIdByUniqueKey({required String uniqueKey, required String serverId}) async {
     try {
       final db = await _db;

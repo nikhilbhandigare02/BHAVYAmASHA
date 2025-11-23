@@ -1544,18 +1544,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 state.postApiStatus == PostApiStatus.loading;
 
                             return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: _isEdit
+                                  ? MainAxisAlignment.end
+                                  : MainAxisAlignment.spaceBetween,
                               children: [
                                 if (!_isEdit) ...[
                                   if (_currentStep > 0)
                                     SizedBox(
                                       width: 120,
-                                      height: 44,
+                                      height: 4.8.h,
                                       child: RoundButton(
-                                        title: 'Previous',
+                                        title: l.previousButton,
                                         color: AppColors.primary,
                                         borderRadius: 8,
-                                        height: 44,
+                                        height: 4.9.h,
                                         isLoading: false,
                                         onPress: () {
                                           if (_currentStep > 0) {
@@ -1571,7 +1573,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ],
                                 SizedBox(
                                   width: 120,
-                                  height: 44,
+                                  height: 4.9.h,
                                   child: RoundButton(
                                     title: () {
                                       if (isLoading) return (_isEdit ? 'UPDATING...' : l.addingButton);

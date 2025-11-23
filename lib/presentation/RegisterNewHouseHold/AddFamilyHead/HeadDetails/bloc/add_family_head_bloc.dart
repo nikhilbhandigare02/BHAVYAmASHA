@@ -72,8 +72,8 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
     on<AfhUpdateMobileOwner>(
           (event, emit) => emit(state.copyWith(mobileOwner: event.value)),
     );
-    on<AfhUpdateMobileOwnerRelation>(
-          (event, emit) => emit(state.copyWith(mobileOwnerRelation: event.value)),
+    on<AfhUpdateMobileOwnerOtherRelation>(
+          (event, emit) => emit(state.copyWith(mobileOwnerOtherRelation: event.value)),
     );
     on<AfhUpdateMobileNo>(
           (event, emit) => emit(state.copyWith(mobileNo: event.value)),
@@ -206,7 +206,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         emit(
           state.copyWith(
             postApiStatus: PostApiStatus.error,
-            errorMessage: errors.join('\n'),
+            errorMessage: errors.first,
           ),
         );
         return;
@@ -261,17 +261,13 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
               ..['approxAge'] = state.approxAge
               ..['mobileNo'] = state.mobileNo
               ..['mobileOwner'] = state.mobileOwner
-              ..['mobileOwnerRelation'] = state.mobileOwnerRelation
               ..['maritalStatus'] = state.maritalStatus
               ..['ageAtMarriage'] = state.ageAtMarriage
               ..['spouseName'] = state.spouseName
               ..['education'] = state.education
               ..['occupation'] = state.occupation
-              ..['otherOccupation'] = state.otherOccupation
               ..['religion'] = state.religion
-              ..['otherReligion'] = state.otherReligion
               ..['category'] = state.category
-              ..['otherCategory'] = state.otherCategory
               ..['hasChildren'] = state.hasChildren
               ..['isPregnant'] = state.isPregnant
               ..['lmp'] = state.lmp?.toIso8601String()
@@ -349,7 +345,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
                     ..['category'] = spousState.category
                     ..['abhaAddress'] = spousState.abhaAddress
                     ..['mobileOwner'] = spousState.mobileOwner
-                    ..['mobileOwnerRelation'] = spousState.mobileOwnerRelation
                     ..['mobileNo'] = spousState.mobileNo
                     ..['bankAcc'] = spousState.bankAcc
                     ..['ifsc'] = spousState.ifsc
@@ -423,17 +418,13 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
               'approxAge': state.approxAge,
               'mobileNo': state.mobileNo,
               'mobileOwner': state.mobileOwner,
-              'mobileOwnerRelation': state.mobileOwnerRelation,
               'maritalStatus': state.maritalStatus,
               'ageAtMarriage': state.ageAtMarriage,
               'spouseName': state.spouseName,
               'education': state.education,
               'occupation': state.occupation,
-              'otherOccupation': state.otherOccupation,
               'religion': state.religion,
-              'otherReligion': state.otherReligion,
               'category': state.category,
-              'otherCategory': state.otherCategory,
               'hasChildren': state.hasChildren,
               'isPregnant': state.isPregnant,
               'lmp': state.lmp?.toIso8601String(),
@@ -565,7 +556,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
                   'category': spousState.category,
                   'abhaAddress': spousState.abhaAddress,
                   'mobileOwner': spousState.mobileOwner,
-                  'mobileOwnerRelation': spousState.mobileOwnerRelation,
                   'mobileNo': spousState.mobileNo,
                   'bankAcc': spousState.bankAcc,
                   'ifsc': spousState.ifsc,

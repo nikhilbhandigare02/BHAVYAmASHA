@@ -79,7 +79,7 @@ class SpUpdateOccupation extends SpousEvent {
 }
 
 class SpUpdateOtherOccupation extends SpousEvent {
-  final String value;
+  final String? value;
   const SpUpdateOtherOccupation(this.value);
   @override
   List<Object?> get props => [value];
@@ -100,7 +100,7 @@ class SpUpdateReligion extends SpousEvent {
 }
 
 class SpUpdateOtherReligion extends SpousEvent {
-  final String value;
+  final String? value;
   const SpUpdateOtherReligion(this.value);
   @override
   List<Object?> get props => [value];
@@ -114,7 +114,7 @@ class SpUpdateCategory extends SpousEvent {
 }
 
 class SpUpdateOtherCategory extends SpousEvent {
-  final String value;
+  final String? value;
   const SpUpdateOtherCategory(this.value);
   @override
   List<Object?> get props => [value];
@@ -134,9 +134,9 @@ class SpUpdateMobileOwner extends SpousEvent {
   List<Object?> get props => [value];
 }
 
-class SpUpdateMobileOwnerRelation extends SpousEvent {
-  final String value;
-  const SpUpdateMobileOwnerRelation(this.value);
+class SpUpdateMobileOwnerOtherRelation extends SpousEvent {
+  final String? value;
+  const SpUpdateMobileOwnerOtherRelation(this.value);
   @override
   List<Object?> get props => [value];
 }

@@ -294,7 +294,20 @@ class RegisterNewHouseholdBloc
         };
 
         print('Saving household with payload: ${jsonEncode(householdPayload)}');
-        await LocalStorageDao.instance.insertHousehold(householdPayload);
+
+        final existingHousehold =
+            await LocalStorageDao.instance.getHouseholdByUniqueKey(uniqueKey);
+        final bool isUpdate =
+            existingHousehold != null && existingHousehold.isNotEmpty;
+
+        if (isUpdate) {
+          print('Updating existing household for unique_key=$uniqueKey');
+          await LocalStorageDao.instance
+              .updateHouseholdByUniqueKey(householdPayload);
+        } else {
+          print('Inserting new household for unique_key=$uniqueKey');
+          await LocalStorageDao.instance.insertHousehold(householdPayload);
+        }
 
         Map<String, dynamic>? matchedHousehold;
         try {

@@ -192,6 +192,71 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         final eligibleCouples = maritalStatus == 'Married' ? 1 : 0;
         final elderly = elderlyCountMap[householdRefKey] ?? 0;
 
+        // Children remaining to be added (mirror RegisterNewHouseHold logic,
+        // but using DB members instead of in-memory _members list).
+        final child0to1 = child0to1Map[householdRefKey] ?? 0;
+        final child1to2 = child1to2Map[householdRefKey] ?? 0;
+        final child2to5 = child2to5Map[householdRefKey] ?? 0;
+
+        // How many children the head declared in the registration form.
+        // Children details are stored via _childrenData:
+        //  - children: list of child entries (preferred source)
+        //  - totalBorn / total_children: numeric aggregates
+        int declaredChildren = 0;
+
+        final dynamic childrenField = info['children'];
+        if (childrenField is List) {
+          declaredChildren = childrenField.length;
+        } else if (childrenField is num) {
+          declaredChildren = childrenField.toInt();
+        } else if (childrenField is String && childrenField.trim().isNotEmpty) {
+          declaredChildren = int.tryParse(childrenField.trim()) ?? 0;
+        }
+
+        if (declaredChildren == 0) {
+          final dynamic totalBornField =
+              info['totalBorn'] ?? info['total_children'];
+          if (totalBornField is num) {
+            declaredChildren = totalBornField.toInt();
+          } else if (totalBornField is String && totalBornField.trim().isNotEmpty) {
+            declaredChildren = int.tryParse(totalBornField.trim()) ?? 0;
+          }
+        }
+        final int childrenTarget = declaredChildren;
+
+        // How many child members already exist in DB for this household.
+        int childrenAdded = 0;
+        for (final m in membersForHousehold) {
+          try {
+            final rawInfo = m['beneficiary_info'];
+            Map<String, dynamic> minfo;
+            if (rawInfo is Map) {
+              minfo = Map<String, dynamic>.from(rawInfo as Map);
+            } else if (rawInfo is String && rawInfo.isNotEmpty) {
+              minfo = Map<String, dynamic>.from(jsonDecode(rawInfo));
+            } else {
+              minfo = <String, dynamic>{};
+            }
+
+            final type = (minfo['Type'] ?? minfo['type'] ?? '').toString();
+            final relation = (minfo['relation'] ?? minfo['relation_to_head'] ?? '').toString();
+
+            final isChildByType = type == 'Child' || type == 'Infant';
+            final isChildByRelation =
+                relation == 'Son' || relation == 'Daughter';
+
+            if (isChildByType || isChildByRelation) {
+              childrenAdded++;
+            }
+          } catch (_) {}
+        }
+
+        final int remainingChildren =
+            childrenTarget > 0
+                ? (childrenTarget - childrenAdded).clamp(0, 9999)
+                : 0;
+        final bool hasChildrenTarget = childrenTarget > 0;
+
         return {
           'name': name,
           'mobile': mobile,
@@ -201,9 +266,11 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           'eligibleCouples': eligibleCouples,
           'elderly': elderly,
           'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
-          'child0to1': child0to1Map[householdRefKey] ?? 0,
-          'child1to2': child1to2Map[householdRefKey] ?? 0,
-          'child2to5': child2to5Map[householdRefKey] ?? 0,
+          'child0to1': child0to1,
+          'child1to2': child1to2,
+          'child2to5': child2to5,
+          'hasChildrenTarget': hasChildrenTarget,
+          'remainingChildren': remainingChildren > 0 ? remainingChildren : 0,
           '_raw': r,
         };
       }).toList();
@@ -309,58 +376,30 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                             return _householdCard(context, data);
                           },
                         ),
-
                 ),
-            //     Builder(builder: (_) {
-            //       final int childrenTarget = int.tryParse((_headForm?['children'] ?? '').toString()) ?? 0;
-            //       final int childrenAdded = _members.where((m) {
-            //         final t = (m['Type'] ?? '');
-            //         final r = (m['Relation'] ?? '');
-            //         return t == 'Child' || t == 'Infant' || r == 'Son' || r == 'Daughter';
-            //       }).length;
-            //       final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
-            //       if (childrenTarget <= 0) return const SizedBox.shrink();
-            //       return Padding(
-            //         padding: EdgeInsets.all(2.w),
-            //         child: Container(
-            //           color: AppColors.background,
-            //           child: Row(
-            //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //             children: [
-            //               Text(
-            //                 "${l10n!.memberRemainsToAdd} :",
-            //                 style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.warning, fontSize: 17.sp),
-            //               ),
-            //               Text(
-            //                 '$remaining ',
-            //                 style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 17.sp),
-            //               ),
-            //             ],
-            //           ),
-            //         ),
-            //       );
-            //     }),          SafeArea(
-            // child: Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-            //   child: SizedBox(
-            //     width: double.infinity,
-            //     height: 35,
-            //     child: RoundButton(
-            //       title: l10n?.gridRegisterNewHousehold.toUpperCase() ?? 'NEW HOUSEHOLD REGISTRATION',
-            //       color: AppColors.primary,
-            //       borderRadius: 8,
-            //       height: 6.h,
-            //       onPress: () {
-            //         Navigator.pushNamed(context, Route_Names.RegisterNewHousehold);
-            //         },
-            //     ),
-            //   ),
-            // ),
-          // ),
-        ], 
-      ),
-    );
-  }
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 35,
+                      child: RoundButton(
+                        title: l10n?.gridRegisterNewHousehold.toUpperCase() ?? 'NEW HOUSEHOLD REGISTRATION',
+                        color: AppColors.primary,
+                        borderRadius: 8,
+                        height: 6.h,
+                        onPress: () {
+                          Navigator.pushNamed(context, Route_Names.RegisterNewHousehold);
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ], 
+            ),
+          );
+
+      }
 
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
@@ -630,8 +669,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             ),
 
 
-            if (data['hasChildrenTarget'] == true &&
-                data['remainingChildren'] > 0)
+            if (data['hasChildrenTarget'] == true)
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -644,14 +682,20 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                 ),
                 padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                child: Text(
-                  '${l10n?.memberRemainsToAdd ?? 'Remaining to add'}: '
-                      '${data['remainingChildren']} '
-                      'member${data['remainingChildren'] > 1 ? 's' : ''}',
-                  style: TextStyle(
-                      color: AppColors.warning,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13.sp),
+                child: Row(
+
+                  children: [
+                    Text(
+                      '${l10n?.memberRemainsToAdd ?? 'Remaining to add'}: ',
+                      style: TextStyle(
+                          color: AppColors.warning,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13.sp),
+                    ),
+                    SizedBox(width: 15.w,),
+                    Text( '${data['remainingChildren']} '
+                        '${data['remainingChildren'] > 1 ? '' : ''}',)
+                  ],
                 ),
               ),
           ],

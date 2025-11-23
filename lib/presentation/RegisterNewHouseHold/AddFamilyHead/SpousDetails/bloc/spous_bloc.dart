@@ -22,15 +22,19 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
     on<SpUpdateApproxAge>((event, emit) => emit(state.copyWith(approxAge: event.value)));
     on<SpUpdateGender>((event, emit) => emit(state.copyWith(gender: event.value)));
     on<SpUpdateOccupation>((event, emit) => emit(state.copyWith(occupation: event.value)));
-    on<SpUpdateOtherOccupation>((event, emit) => emit(state.copyWith(otherOccupation: event.value)));
+    on<SpUpdateOtherOccupation>((event, emit) =>
+        emit(state.copyWith(otherOccupation: event.value)));
     on<SpUpdateEducation>((event, emit) => emit(state.copyWith(education: event.value)));
     on<SpUpdateReligion>((event, emit) => emit(state.copyWith(religion: event.value)));
-    on<SpUpdateOtherReligion>((event, emit) => emit(state.copyWith(otherReligion: event.value)));
+    on<SpUpdateOtherReligion>((event, emit) =>
+        emit(state.copyWith(otherReligion: event.value)));
     on<SpUpdateCategory>((event, emit) => emit(state.copyWith(category: event.value)));
-    on<SpUpdateOtherCategory>((event, emit) => emit(state.copyWith(otherCategory: event.value)));
+    on<SpUpdateOtherCategory>((event, emit) =>
+        emit(state.copyWith(otherCategory: event.value)));
     on<SpUpdateAbhaAddress>((event, emit) => emit(state.copyWith(abhaAddress: event.value)));
     on<SpUpdateMobileOwner>((event, emit) => emit(state.copyWith(mobileOwner: event.value)));
-    on<SpUpdateMobileOwnerRelation>((event, emit) => emit(state.copyWith(mobileOwnerRelation: event.value)));
+    on<SpUpdateMobileOwnerOtherRelation>((event, emit) =>
+        emit(state.copyWith(mobileOwnerOtherRelation: event.value)));
     on<SpUpdateMobileNo>((event, emit) => emit(state.copyWith(mobileNo: event.value)));
     on<SpUpdateBankAcc>((event, emit) => emit(state.copyWith(bankAcc: event.value)));
     on<SpUpdateIfsc>((event, emit) => emit(state.copyWith(ifsc: event.value)));
@@ -43,12 +47,7 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
 
     on<SpLMPChange>((event, emit) {
       final lmp = event.value;
-      DateTime? edd;
-      if (lmp != null) {
-        // Same logic as in SpousDetails: 9 months + 5 days from LMP
-        final lmpPlusNineMonths = DateTime(lmp.year, lmp.month + 9, lmp.day);
-        edd = lmpPlusNineMonths.add(const Duration(days: 5));
-      }
+      final edd = lmp != null ? lmp.add(const Duration(days: 5)) : null;
       emit(state.copyWith(lmp: lmp, edd: edd));
     });
 

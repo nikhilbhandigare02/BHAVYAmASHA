@@ -58,6 +58,38 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     return DateTime.now().year - dob.year;
   }
 
+  String? _validateYoungestChild(ChildrenState s, AppLocalizations l) {
+    final raw = s.youngestAge ?? '';
+    if (raw.trim().isEmpty) {
+      return null;
+    }
+
+    final unit = s.ageUnit;
+    final value = int.tryParse(raw.trim());
+    if (value == null) {
+      return 'Enter valid number';
+    }
+    if (unit == null || unit.isEmpty) {
+      return 'Select age unit';
+    }
+
+    if (unit == l.days) {
+      if (value < 1 || value > 30) {
+        return '${l.days}: 1-30';
+      }
+    } else if (unit == l.months) {
+      if (value < 1 || value > 11) {
+        return '${l.months}: 1-11';
+      }
+    } else if (unit == l.years) {
+      if (value < 1 || value > 90) {
+        return '${l.years}: 1-90';
+      }
+    }
+
+    return null;
+  }
+
   Widget _Section({required Widget child}) {
     return child;
   }
@@ -130,23 +162,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 hintText: l.dateHint,
                 initialDate: state.dob,
                 onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(d)),
-                validator: (date) {
-                  // Existing generic DOB validation
-                  final baseError = Validations.validateDOB(l, date);
-                  if (baseError != null) {
-                    return _captureError(baseError);
-                  }
-
-                  // if (date != null) {
-                  //   final now = DateTime.now();
-                  //   final ageYears = now.year - date.year - ((now.month < date.month || (now.month == date.month && now.day < date.day)) ? 1 : 0);
-                  //   if (ageYears < 15 || ageYears > 110) {
-                  //     return _captureError('Age must be between 15 and 110 years');
-                  //   }
-                  // }
-
-                  return null;
-                },
+                validator: (date) => _captureError(Validations.validateDOB(l, date)),
               ),
             )
           else
@@ -281,10 +297,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           if (state.occupation == 'Other')
             _Section(
               child: CustomTextField(
-                labelText: 'Enter Occupation',
-                hintText: 'Enter Occupation',
+                labelText: 'Enter occupation',
+                hintText: 'Enter occupation',
                 initialValue: state.otherOccupation,
-                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateOtherOccupation(v.trim())),
+                onChanged: (v) => context
+                    .read<AddFamilyHeadBloc>()
+                    .add(AfhUpdateOtherOccupation(v.trim())),
               ),
             ),
           if (state.occupation == 'Other')
@@ -360,7 +378,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 labelText: 'Enter Religion',
                 hintText: 'Enter Religion',
                 initialValue: state.otherReligion,
-                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateOtherReligion(v.trim())),
+                onChanged: (v) => context
+                    .read<AddFamilyHeadBloc>()
+                    .add(AfhUpdateOtherReligion(v.trim())),
               ),
             ),
           if (state.religion == 'Other')
@@ -408,7 +428,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 labelText: 'Enter Category',
                 hintText: 'Enter Category',
                 initialValue: state.otherCategory,
-                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateOtherCategory(v.trim())),
+                onChanged: (v) => context
+                    .read<AddFamilyHeadBloc>()
+                    .add(AfhUpdateOtherCategory(v.trim())),
               ),
             ),
           if (state.category == 'Other')
@@ -528,11 +550,22 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           if (state.mobileOwner == 'Other')
-            CustomTextField(
-              labelText: 'Relation with mobile holder *',
-              hintText: 'Enter relation with mobile holder',
-              onChanged: (v) =>
-                  context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileOwnerRelation(v.trim())),
+            _Section(
+              child: CustomTextField(
+                labelText: 'Relation with mobile no. holder *',
+                hintText: 'Relation with mobile no. holder',
+                initialValue: state.mobileOwnerOtherRelation,
+                onChanged: (v) => context
+                    .read<AddFamilyHeadBloc>()
+                    .add(AfhUpdateMobileOwnerOtherRelation(v.trim())),
+                validator: (value) => state.mobileOwner == 'Other'
+                    ? _captureError(
+                        (value == null || value.trim().isEmpty)
+                            ? 'Relation with mobile no. holder is required'
+                            : null,
+                      )
+                    : null,
+              ),
             ),
           if (state.mobileOwner == 'Other')
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -770,8 +803,19 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     labelText: '${l.lmpDateLabel} *',
                     hintText: l.dateHint,
                     initialDate: state.lmp,
-                    onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(LMPChange(d)),
+                    onDateChanged: (d) {
+                      final bloc = context.read<AddFamilyHeadBloc>();
+                      bloc.add(LMPChange(d));
+                      if (d != null) {
+                        final edd = DateTime(d.year, d.month + 9, d.day + 5);
+                        bloc.add(EDDChange(edd));
+                      } else {
+                        bloc.add(EDDChange(null));
+                      }
+                    },
                     validator: (date) => _captureError(Validations.validateLMP(l, date)),
+                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                    lastDate: DateTime.now(),
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -963,6 +1007,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               try {
                 final sp = context.read<SpousBloc>().state;
                 result['spousedetails'] = sp.toJson();
+                result['spouseUseDob'] = sp.useDob;
+                result['spouseDob'] = sp.dob?.toIso8601String();
+                result['spouseApproxAge'] = sp.approxAge;
               } catch (_) {}
               try {
                 final ch = context.read<ChildrenBloc>().state;
@@ -1013,8 +1060,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         child: RegisterNewHouseHoldScreen(
                           initialMembers: members,
                           headAddedInit: true,
-                          hideAddMemberButton: true,
-                          showSuccessOnSave: false, // update flow: no popup
+                          // Show Add Member button so that table, remaining count,
+                          // and add-member action are all available together.
+                          hideAddMemberButton: false,
                         ),
                       ),
                     ),
@@ -1205,9 +1253,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                               children: [
                                                 if (i > 0)
                                                   SizedBox(
-                                                      height: 5.5.h,
+                                                      height: 4.8.h,
                                                       child:SizedBox(
-                                                        height: 5.5.h,
+                                                        height: 4.8.h,
                                                         child: OutlinedButton(
                                                           style: OutlinedButton.styleFrom(
                                                             minimumSize: const Size(120, 44),
@@ -1235,15 +1283,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                 else
                                                   const SizedBox.shrink(),
                                                 SizedBox(
-                                                    height: 44,
+                                                    height: 4.9.h,
                                                     child:SizedBox(
-                                                      height: 5.5.h,
+                                                      height: 5.h,
                                                       child: RoundButton(
                                                         title: i < last
                                                             ? l.nextButton
                                                             : (isLoading
-                                                                ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
-                                                                : (widget.isEdit ? 'UPDATE' : l.addButton)),
+                                                            ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
+                                                            : (widget.isEdit ? 'UPDATE' : l.addButton)),
                                                         onPress: () {
                                                           if (i < last) {
                                                             bool canProceed = true;
@@ -1262,57 +1310,51 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                 canProceed = false;
                                                                 final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
                                                                 showAppSnackBar(context, msg);
-                                                              } else {
-                                                                // Extra safety: explicitly validate pregnancy field for female spouse
-                                                                final spState = context.read<SpousBloc>().state;
-                                                                if (spState.gender == 'Female') {
-                                                                  final pregError = Validations.validateIsPregnant(l, spState.isPregnant);
-                                                                  if (pregError != null) {
-                                                                    canProceed = false;
-                                                                    showAppSnackBar(context, pregError);
-                                                                  }
-                                                                }
                                                               }
                                                             }
                                                             if (!canProceed) return;
                                                             controller.animateTo(i + 1);
                                                           } else {
-                                                            // last tab → submit (validate head + spouse before submit)
-                                                            bool isValid = true;
+                                                            // last tab → submit (may be spouse or children)
 
-                                                            // Always validate head form
-                                                            _clearFormError();
-                                                            final headForm = _formKey.currentState;
-                                                            if (headForm == null || !headForm.validate()) {
-                                                              isValid = false;
-                                                            }
-
-                                                            // If spouse tab is part of the flow, validate spouse form too
-                                                            clearSpousFormError();
-                                                            final spouseForm = spousFormKey.currentState;
-                                                            if (spouseForm != null && !spouseForm.validate()) {
-                                                              isValid = false;
-                                                            }
-
-                                                            // Extra safety: explicitly validate pregnancy field for female spouse
-                                                            try {
-                                                              final spState = context.read<SpousBloc>().state;
-                                                              if (spState.gender == 'Female') {
-                                                                final pregError = Validations.validateIsPregnant(l, spState.isPregnant);
-                                                                if (pregError != null) {
-                                                                  isValid = false;
-                                                                  spousLastFormError ??= pregError;
-                                                                }
+                                                            // If we have only Head + Spouse (no Children),
+                                                            // run spouse form validation here as well.
+                                                            if (last == 1) {
+                                                              clearSpousFormError();
+                                                              final spouseForm = spousFormKey.currentState;
+                                                              if (spouseForm == null || !spouseForm.validate()) {
+                                                                final msg = spousLastFormError ??
+                                                                    'Please correct the highlighted errors before continuing.';
+                                                                showAppSnackBar(context, msg);
+                                                                return;
                                                               }
-                                                            } catch (_) {}
-
-                                                            if (!isValid) {
-                                                              final msg = _lastFormError ?? spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
-                                                              showAppSnackBar(context, msg);
-                                                              return;
                                                             }
 
-                                                            context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
+                                                            if (last == 2) {
+                                                              // Children tab present, validate children details
+                                                              try {
+                                                                final ch = context.read<ChildrenBloc>().state;
+
+                                                                if (ch.totalLive > 0 &&
+                                                                    (ch.totalMale + ch.totalFemale) !=
+                                                                        ch.totalLive) {
+                                                                  showAppSnackBar(
+                                                                      context, l.malePlusFemaleError);
+                                                                  return;
+                                                                }
+
+                                                                final youngestErr =
+                                                                    _validateYoungestChild(ch, l);
+                                                                if (youngestErr != null) {
+                                                                  showAppSnackBar(context, youngestErr);
+                                                                  return;
+                                                                }
+                                                              } catch (_) {}
+                                                            }
+
+                                                            context
+                                                                .read<AddFamilyHeadBloc>()
+                                                                .add(AfhSubmit(context: context));
                                                           }
                                                         },
                                                         color: AppColors.primary,

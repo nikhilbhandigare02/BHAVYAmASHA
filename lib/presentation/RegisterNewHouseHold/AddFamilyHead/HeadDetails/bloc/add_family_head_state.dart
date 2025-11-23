@@ -17,14 +17,14 @@ class AddFamilyHeadState extends Equatable {
   final String? days;
   final String? gender;
   final String? occupation;
-  final String? otherOccupation;
   final String? education;
   final String? religion;
-  final String? otherReligion;
   final String? category;
-  final String? otherCategory;
   final String? mobileOwner;
-  final String? mobileOwnerRelation;
+  final String? otherOccupation;
+  final String? otherReligion;
+  final String? otherCategory;
+  final String? mobileOwnerOtherRelation;
   final String? mobileNo;
   final String? village;
   final String? ward;
@@ -89,14 +89,14 @@ class AddFamilyHeadState extends Equatable {
     this.days,
     this.gender,
     this.occupation,
-    this.otherOccupation,
     this.education,
     this.religion,
-    this.otherReligion,
     this.category,
+    this.otherOccupation,
+    this.otherReligion,
     this.otherCategory,
+    this.mobileOwnerOtherRelation,
     this.mobileOwner,
-    this.mobileOwnerRelation,
     this.mobileNo,
     this.village,
     this.ward,
@@ -159,14 +159,14 @@ class AddFamilyHeadState extends Equatable {
     String? days,
     String? gender,
     String? occupation,
-    String? otherOccupation,
     String? education,
     String? religion,
-    String? otherReligion,
     String? category,
+    String? otherOccupation,
+    String? otherReligion,
     String? otherCategory,
+    String? mobileOwnerOtherRelation,
     String? mobileOwner,
-    String? mobileOwnerRelation,
     String? mobileNo,
     String? village,
     String? ward,
@@ -229,14 +229,15 @@ class AddFamilyHeadState extends Equatable {
       days: days ?? this.days,
       gender: gender ?? this.gender,
       occupation: occupation ?? this.occupation,
-      otherOccupation: otherOccupation ?? this.otherOccupation,
       education: education ?? this.education,
       religion: religion ?? this.religion,
-      otherReligion: otherReligion ?? this.otherReligion,
       category: category ?? this.category,
+      otherOccupation: otherOccupation ?? this.otherOccupation,
+      otherReligion: otherReligion ?? this.otherReligion,
       otherCategory: otherCategory ?? this.otherCategory,
+      mobileOwnerOtherRelation:
+          mobileOwnerOtherRelation ?? this.mobileOwnerOtherRelation,
       mobileOwner: mobileOwner ?? this.mobileOwner,
-      mobileOwnerRelation: mobileOwnerRelation ?? this.mobileOwnerRelation,
       mobileNo: mobileNo ?? this.mobileNo,
       village: village ?? this.village,
       ward: ward ?? this.ward,
@@ -302,14 +303,14 @@ class AddFamilyHeadState extends Equatable {
     days,
     gender,
     occupation,
-    otherOccupation,
     education,
     religion,
-    otherReligion,
     category,
+    otherOccupation,
+    otherReligion,
     otherCategory,
+    mobileOwnerOtherRelation,
     mobileOwner,
-    mobileOwnerRelation,
     mobileNo,
     village,
     ward,
@@ -369,14 +370,14 @@ class AddFamilyHeadState extends Equatable {
       'approxAge': approxAge,
       'gender': gender,
       'occupation': occupation,
-      'otherOccupation': otherOccupation,
       'education': education,
       'religion': religion,
-      'otherReligion': otherReligion,
       'category': category,
+      'otherOccupation': otherOccupation,
+      'otherReligion': otherReligion,
       'otherCategory': otherCategory,
+      'mobileOwnerOtherRelation': mobileOwnerOtherRelation,
       'mobileOwner': mobileOwner,
-      'mobileOwnerRelation': mobileOwnerRelation,
       'mobileNo': mobileNo,
       'village': village,
       'ward': ward,
