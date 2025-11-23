@@ -53,7 +53,6 @@ class BeneficiaryRepository {
           },
         );
       } catch (_) {
-        // Fallback 2: GET with query param _id
         response = await _api.getApi(
           Endpoints.getBeneficiary,
           headers: headers,
