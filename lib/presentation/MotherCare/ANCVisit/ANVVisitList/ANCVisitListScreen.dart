@@ -677,7 +677,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           ),
           const SizedBox(height: 2),
           Text(
-            '${_formatDate(startDate)}\n${_formatDate(endDate)}',
+            '${_formatDate(startDate)}\nTO\n${_formatDate(endDate)}',
             style: TextStyle(
               color: AppColors.background,
               fontSize: 12.sp,
