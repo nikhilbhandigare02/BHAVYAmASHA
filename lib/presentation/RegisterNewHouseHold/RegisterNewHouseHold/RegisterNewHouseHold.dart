@@ -303,18 +303,12 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             // Create a map with all the amenities data
                             final amenitiesData = {
                               'residentialArea': amenitiesState.residentialArea,
-                              'otherResidentialArea': amenitiesState.otherResidentialArea,
                               'ownershipType': amenitiesState.ownershipType,
-                              'otherOwnershipType': amenitiesState.otherOwnershipType,
                               'houseType': amenitiesState.houseType,
-                              'otherHouseType': amenitiesState.otherHouseType,
                               'houseKitchen': amenitiesState.houseKitchen,
                               'cookingFuel': amenitiesState.cookingFuel,
-                              'otherCookingFuel': amenitiesState.otherCookingFuel,
                               'waterSource': amenitiesState.waterSource,
-                              'otherWaterSource': amenitiesState.otherWaterSource,
                               'electricity': amenitiesState.electricity,
-                              'otherElectricity': amenitiesState.otherElectricity,
                               'toilet': amenitiesState.toilet,
                               'toiletType': amenitiesState.toiletType,
                               'toiletPlace': amenitiesState.toiletPlace,

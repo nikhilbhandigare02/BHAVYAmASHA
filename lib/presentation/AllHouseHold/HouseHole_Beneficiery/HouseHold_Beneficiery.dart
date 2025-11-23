@@ -458,7 +458,6 @@ class _HouseHold_BeneficiaryScreenState
                         'headGender': formatGender(head['Gender']),
                         'spouseName': spouse['Name']?.toString() ?? '',
                         'spouseGender': formatGender(spouse['Gender']),
-                        'isAddMember': true,
                       },
                     );
                   },

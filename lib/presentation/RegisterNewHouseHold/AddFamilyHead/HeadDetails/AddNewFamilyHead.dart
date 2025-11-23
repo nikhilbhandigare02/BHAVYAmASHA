@@ -1239,17 +1239,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                         }
                                                         return;
                                                       }
-
-                                                      // No spouse/children tabs: head-only flow.
-                                                      // After successful validation, return the
-                                                      // collected head state to the caller so
-                                                      // RegisterNewHouseholdBloc.SaveHousehold
-                                                      // can perform all persistence.
-                                                      final bloc = context.read<AddFamilyHeadBloc>();
-                                                      final currentState = bloc.state;
-                                                      final Map<String, dynamic> result = currentState.toJson();
-
-                                                      Navigator.of(context).pop(result);
+                                                      context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
                                                     },
                                                   ),
                                                 ),
@@ -1362,19 +1352,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               } catch (_) {}
                                                             }
 
-                                                            // All local validation passed. Instead of
-                                                            // dispatching AfhSubmit (which used to
-                                                            // save to DB/API), just return the
-                                                            // collected form data to the caller.
-                                                            final bloc = context.read<AddFamilyHeadBloc>();
-                                                            final currentState = bloc.state;
-
-                                                            // Build the result map from state, including
-                                                            // spouse and children JSON (already attached
-                                                            // in state.toJson via listeners elsewhere).
-                                                            final Map<String, dynamic> result = currentState.toJson();
-
-                                                            Navigator.of(context).pop(result);
+                                                            context
+                                                                .read<AddFamilyHeadBloc>()
+                                                                .add(AfhSubmit(context: context));
                                                           }
                                                         },
                                                         color: AppColors.primary,

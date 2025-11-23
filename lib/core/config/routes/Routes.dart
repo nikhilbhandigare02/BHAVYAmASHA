@@ -315,7 +315,6 @@ class Routes{
             child: AddNewFamilyMemberScreen(
               hhId: args?['hhId'],
               isEdit: args?['isEdit'] ?? false,
-              isAddMember: args?['isAddMember'] ?? false,
             ),
           ),
         );

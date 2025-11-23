@@ -31,7 +31,6 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
   final String? headGender;
   final String? spouseName;
   final String? spouseGender;
-  final bool isAddMember;
 
   const AddNewFamilyMemberScreen({
     super.key,
@@ -41,7 +40,6 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
     this.headGender,
     this.spouseName,
     this.spouseGender,
-    this.isAddMember = false,
   });
 
   @override
@@ -1709,15 +1707,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         }
 
                                         if (_isEdit) {
-                                          // Edit flow: update existing beneficiary in DB/API
+                                          // In edit mode, trigger update flow
                                           bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
-                                        } else if (widget.isAddMember) {
-                                          // Add-member flow from existing household screen:
-                                          // save immediately via bloc (DB + API)
-                                          bloc.add(AnmSubmit(context, hhid: widget.hhId));
                                         } else {
-                                          // RegisterNewHousehold flow: just return form data
-                                          Navigator.of(context).pop(memberData);
+                                          // Normal add flow
+                                          bloc.add(AnmSubmit(context, hhid: widget.hhId));
                                         }
                                       } catch (e) {
                                         print('Error preparing member data: $e');
