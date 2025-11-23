@@ -199,6 +199,13 @@ final class AnmUpdateMobileOwnerRelation extends AddnewfamilymemberEvent {
   List<Object> get props => [value];
 }
 
+final class AnmUpdateOtherRelation extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmUpdateOtherRelation(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
 final class AnmUpdateMobileNo extends AddnewfamilymemberEvent {
   final String value;
   const AnmUpdateMobileNo(this.value);

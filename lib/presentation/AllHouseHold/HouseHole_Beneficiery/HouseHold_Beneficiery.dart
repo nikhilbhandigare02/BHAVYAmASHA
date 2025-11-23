@@ -605,11 +605,11 @@ class _HouseHold_BeneficiaryScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    children: [
-                      Expanded(child: _rowText('Registration Date', data['RegitrationDate'] ?? '')),
-                      const SizedBox(width: 12),
+                    children: [Expanded(
+                        child: _rowText('Registration Date', (data['RegitrationDate']?.toString() ?? '').split(' ')[0]),
+                      ),                      const SizedBox(width: 12),
                       Expanded(child: _rowText('Registration Type', 
-                        (data['_memberData']?['memberType']?.toString().toLowerCase() == 'child') 
+                        (data['_memberData']?['memberType']?.toString().toLowerCase() == 'child')
                             ? 'Child' 
                             : (data['RegitrationType'] ?? '')
                       )),
