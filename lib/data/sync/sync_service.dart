@@ -560,7 +560,7 @@ class SyncService {
   Future<void> fetchBeneficiariesFromServer() async {
     try {
       final lastId = await _dao.getLatestBeneficiaryServerId();
-      final useLast = (lastId.isEmpty) ? '0' : lastId;
+      final useLast = (lastId.isEmpty) ? '' : lastId;
       print('Beneficiary Pull: Fetching from server with last_id=$useLast');
       final result = await _beneficiaryPullRepo.fetchAndStoreBeneficiaries(lastId: useLast);
       final inserted = result['inserted'];

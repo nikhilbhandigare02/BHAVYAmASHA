@@ -1075,8 +1075,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         child: RegisterNewHouseHoldScreen(
                           initialMembers: members,
                           headAddedInit: true,
-                          // Show Add Member button so that table, remaining count,
-                          // and add-member action are all available together.
+
                           hideAddMemberButton: false,
                           isEdit: widget.isEdit,
                           // For update flows we do not want to show the

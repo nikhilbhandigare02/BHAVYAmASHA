@@ -100,6 +100,10 @@ class RegisterNewHouseholdBloc
             .toString();
         final bool isEdit = existingHeadKey.isNotEmpty;
 
+        // Will hold the newly generated household key for this save operation
+        // so we can reuse it later when inserting/updating the households table.
+        String? newHouseholdKey;
+
         if (headForm.isNotEmpty) {
           try {
             final currentUser = await UserInfo.getCurrentUser();
@@ -121,7 +125,19 @@ class RegisterNewHouseholdBloc
 
             if (!isEdit) {
               final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
+              // Remember this generated household key so it can be used
+              // directly as households.unique_key later in the flow.
+              newHouseholdKey = uniqueKey;
               final headId = await IdGenerator.generateUniqueId(deviceInfo);
+
+              final bool hasSpouse = (headForm['maritalStatus'] == 'Married') &&
+                  (headForm['spouseName'] != null &&
+                      headForm['spouseName'].toString().trim().isNotEmpty);
+
+              String? spouseKey;
+              if (hasSpouse) {
+                spouseKey = await IdGenerator.generateUniqueId(deviceInfo);
+              }
 
               final headInfo = <String, dynamic>{
               'houseNo': headForm['houseNo'],
@@ -201,7 +217,7 @@ class RegisterNewHouseholdBloc
                 'pregnancy_count': 0,
                 'beneficiary_info': jsonEncode(headInfo),
                 'geo_location': geoLocationJson,
-                'spouse_key': null,
+                'spouse_key': spouseKey,
                 'mother_key': null,
                 'father_key': null,
                 'is_family_planning': 0,
@@ -255,13 +271,8 @@ class RegisterNewHouseholdBloc
               );
 
               // --- INSERT SPOUSE BENEFICIARY IF MARRIED & SPOUSE NAME PRESENT ---
-              if ((headForm['maritalStatus'] == 'Married') &&
-                  (headForm['spouseName'] != null &&
-                      headForm['spouseName'].toString().trim().isNotEmpty)) {
+              if (hasSpouse && spouseKey != null) {
                 try {
-                  final spouseKey =
-                      await IdGenerator.generateUniqueId(deviceInfo);
-
                   final spouseInfo = <String, dynamic>{
                   'relation': headForm['sp_relation'] ?? 'spouse',
                   'memberName': headForm['sp_memberName'] ??
@@ -632,9 +643,12 @@ class RegisterNewHouseholdBloc
         }
         final latestBeneficiary = beneficiaries.first;
 
+        // Prefer the newly generated household key when creating a new record,
+        // otherwise fall back to existingHhKey (edit) or the latest beneficiary's
+        // stored household_ref_key.
         final String uniqueKey = isEdit && existingHhKey.isNotEmpty
             ? existingHhKey
-            : (latestBeneficiary['household_ref_key'] ?? '').toString();
+            : (newHouseholdKey ?? (latestBeneficiary['household_ref_key'] ?? '')).toString();
 
         final String headId = isEdit && existingHeadKey.isNotEmpty
             ? existingHeadKey
@@ -1023,7 +1037,6 @@ class RegisterNewHouseholdBloc
             }
           }
 
-          // If no explicit head, and we have Wife/Husband, pick the opposite spouse as head
           if (picked == null) {
             final byKey = {
               for (final b in related)

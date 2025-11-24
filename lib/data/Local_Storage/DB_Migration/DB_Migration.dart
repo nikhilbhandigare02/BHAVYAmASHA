@@ -526,6 +526,4 @@ class DbMigration {
       print("❌ Migration error: $e");
     }
   }
-
-
 }

@@ -69,7 +69,19 @@ class _EligibleCoupleIdentifiedScreenState
 
       for (final member in household) {
         final info = _toStringMap(member['beneficiary_info']);
-        final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+        final rawRelation =
+            (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+
+        // Normalize relation values from various possible labels
+        final relation = () {
+          if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
+            return 'self';
+          }
+          if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') {
+            return 'spouse';
+          }
+          return rawRelation;
+        }();
 
         if (relation == 'self') {
           head = info;
@@ -81,7 +93,7 @@ class _EligibleCoupleIdentifiedScreenState
       }
 
       // Check if head is eligible female
-      if (head != null && _isEligibleFemale(head)) {
+      if (head != null && _isEligibleFemale(head, head: head)) {
         couples.add(_formatCoupleData(
             head['_row'] ?? {},
             head,
@@ -91,7 +103,7 @@ class _EligibleCoupleIdentifiedScreenState
       }
 
       // Check if spouse is eligible female
-      if (spouse != null && _isEligibleFemale(spouse)) {
+      if (spouse != null && _isEligibleFemale(spouse, head: head)) {
         couples.add(_formatCoupleData(
             spouse['_row'] ?? {},
             spouse,
@@ -107,17 +119,20 @@ class _EligibleCoupleIdentifiedScreenState
     });
   }
 
-  bool _isEligibleFemale(Map<String, dynamic> person) {
+  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     if (person.isEmpty) return false;
 
     // Check gender (case-insensitive)
-    final gender = person['gender']?.toString().toLowerCase();
-    final isFemale = gender == 'f' || gender == 'female';
+    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
+    final isFemale = genderRaw == 'f' || genderRaw == 'female';
     if (!isFemale) return false;
 
-    // Check marital status (case-insensitive)
-    final maritalStatus = person['maritalStatus']?.toString().toLowerCase();
-    if (maritalStatus != 'married') return false;
+    // Prefer woman's own marital status, fall back to head's if missing
+    final maritalStatusRaw =
+        person['maritalStatus']?.toString().toLowerCase() ??
+        head?['maritalStatus']?.toString().toLowerCase() ?? '';
+    final isMarried = maritalStatusRaw == 'married';
+    if (!isMarried) return false;
 
     // Check age between 15-49
     final dob = person['dob'];

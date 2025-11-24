@@ -125,11 +125,22 @@ class _UpdatedEligibleCoupleListScreenState
           }
 
           final dynamic infoRaw = member['beneficiary_info'];
-          final Map<String, dynamic> info = infoRaw is String 
-              ? jsonDecode(infoRaw) 
+          final Map<String, dynamic> info = infoRaw is String
+              ? jsonDecode(infoRaw)
               : Map<String, dynamic>.from(infoRaw ?? {});
-              
-          final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+
+          final rawRelation =
+              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+          final relation = () {
+            if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
+              return 'self';
+            }
+            if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') {
+              return 'spouse';
+            }
+            return rawRelation;
+          }();
+
           print('👥 Processing member: ${info['memberName'] ?? info['headName']} (Relation: $relation)');
 
           if (relation == 'self') {

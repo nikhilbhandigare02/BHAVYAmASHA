@@ -141,7 +141,6 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
         whereArgs: [hhId],
       );
 
-      // If no results, try to find by ID directly
       if (results.isEmpty) {
         results = await db.query(
           'beneficiaries_new',
