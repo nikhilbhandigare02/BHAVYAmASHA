@@ -32,9 +32,45 @@ class _AboutusState extends State<Aboutus> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  l10n?.aboutUsP1Title ?? '',
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.onSurface),
+                Builder(
+                  builder: (context) {
+                    final text = l10n?.aboutUsP1Title ?? '';
+                    const target = 'ASHA';
+                    final index = text.indexOf(target);
+
+                    if (index == -1) {
+                      return Text(
+                        text,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: AppColors.onSurface,
+                        ),
+                      );
+                    }
+
+                    final before = text.substring(0, index);
+                    final after = text.substring(index + target.length);
+
+                    return RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: AppColors.onSurface,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        children: [
+                          if (before.isNotEmpty)
+                            TextSpan(text: before),
+                          TextSpan(
+                            text: target,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          if (after.isNotEmpty)
+                            TextSpan(text: after),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
                 Text(
