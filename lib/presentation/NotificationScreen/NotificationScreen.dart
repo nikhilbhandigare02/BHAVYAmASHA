@@ -83,12 +83,10 @@ class _NotificationscreenState extends State<Notificationscreen> {
             final allNotifications = snapshot.data ?? [];
             final now = DateTime.now();
 
-            // Filter notifications by announcement_start_period and announcement_end_period
             final notifications = allNotifications.where((n) {
               final start = _parseDate(n['announcement_start_period']);
               final end = _parseDate(n['announcement_end_period']);
 
-              // Show only if current time is between start and end (inclusive of bounds)
               final isAfterStart = !now.isBefore(start);
               final isBeforeEnd = !now.isAfter(end);
               return isAfterStart && isBeforeEnd;

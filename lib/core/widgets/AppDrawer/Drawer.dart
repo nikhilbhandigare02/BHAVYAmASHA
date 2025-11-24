@@ -9,6 +9,8 @@ import '../ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:convert';
+import 'package:medixcel_new/data/sync/sync_service.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
@@ -20,6 +22,7 @@ class CustomDrawer extends StatefulWidget {
 class _CustomDrawerState extends State<CustomDrawer> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
+  bool isSyncing = false;
 
   @override
   void initState() {
@@ -196,7 +199,33 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   _buildMenuItem(context, 'assets/images/rupee.png', l10n.drawerIncentivePortal, onTap: () {
                     Navigator.pushNamed(context, Route_Names.incentivePortal);
                   }),
-                  _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () {}),
+                  _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () async {
+                    if (isSyncing) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Sync already in progress')),
+                      );
+                      return;
+                    }
+                    setState(() {
+                      isSyncing = true;
+                    });
+                    try {
+                      await SyncService.instance.runFullSyncOnce();
+                      if (!mounted) return;
+                      showAppSnackBar(context, 'Data is being fetched');
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Sync failed: $e')),
+                      );
+                    } finally {
+                      if (mounted) {
+                        setState(() {
+                          isSyncing = false;
+                        });
+                      }
+                    }
+                  }),
                   _buildMenuItem(context, 'assets/images/refresh-button.png', l10n.drawerSyncedData, onTap: () {
                     Navigator.pushNamed(context, Route_Names.SyncStatusScreen);
                   }),

@@ -49,7 +49,8 @@ class ApiDropdown<T> extends StatelessWidget {
       text: TextSpan(
         style: TextStyle(
           fontSize: labelFontSize ?? 14.sp,
-          color: AppColors.onSurfaceVariant,
+          color: AppColors.onSurface,
+          fontWeight: FontWeight.w500,
         ),
         children: [
           TextSpan(text: base),
@@ -67,10 +68,11 @@ class ApiDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Slightly lighter color for selected value text, darker for labels
     final TextStyle inputStyle = TextStyle(
       fontSize: 15.sp,
       fontWeight: FontWeight.w500,
-      color: AppColors.onSurface,
+      color: AppColors.onSurfaceVariant,
       height: 1.5,
     );
 
@@ -84,7 +86,10 @@ class ApiDropdown<T> extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             GestureDetector(
-              onTap: () => _showSelectDialog(context, field),
+              onTap: () {
+                FocusScope.of(context).unfocus();
+                _showSelectDialog(context, field);
+              },
               child: AbsorbPointer(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -103,7 +108,7 @@ class ApiDropdown<T> extends StatelessWidget {
                               DefaultTextStyle(
                                 style: TextStyle(
                                   fontSize: labelFontSize ?? 14.sp,
-                                  color: AppColors.onSurfaceVariant,
+                                  color: AppColors.onSurface,
                                   fontWeight: FontWeight.w500,
                                   height: 1.2,
                                 ),

@@ -2675,6 +2675,12 @@ abstract class AppLocalizations {
   /// **'Register New Household'**
   String get gridRegisterNewHousehold;
 
+  /// No description provided for @gridNewHouseholdRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'New Household Registration'**
+  String get gridNewHouseholdRegister;
+
   /// No description provided for @gridTraining.
   ///
   /// In en, this message translates to:

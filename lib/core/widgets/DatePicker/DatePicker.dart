@@ -103,8 +103,8 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
       text: TextSpan(
         style: TextStyle(
           fontSize: 14.sp,
-          color: AppColors.onSurfaceVariant,
-          //fontWeight: FontWeight.w500,
+          color: AppColors.onSurface,
+          fontWeight: FontWeight.w500,
         ),
         children: [
           TextSpan(text: base),
@@ -126,6 +126,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+    // Slightly lighter color for selected date text, darker for labels
     final TextStyle inputStyle = TextStyle(
       fontSize: 15.sp,
       fontWeight: FontWeight.w500,

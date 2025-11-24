@@ -1309,6 +1309,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gridRegisterNewHousehold => 'नया पंजीकरण';
 
   @override
+  String get gridNewHouseholdRegister => 'नया पंजीकरण';
+
+  @override
   String get gridTraining => 'प्रशिक्षण';
 
   @override

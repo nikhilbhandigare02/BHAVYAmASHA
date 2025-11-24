@@ -54,11 +54,18 @@ class _HbycFormView extends StatefulWidget {
 class _HbycFormViewState extends State<_HbycFormView> {
   final _formKey = GlobalKey<FormState>();
 
- final _yesNoOptions = const [
+  final _yesNoOptions = const [
     'Yes',
     'No',
   ];
 
+  final _hbycVisitMonthOptions = const [
+    '3 months',
+    '6 months',
+    '9 months',
+    '12 months',
+    '15 months',
+  ];
 
   // Controllers for additional input fields
   final _additionalInfoController = TextEditingController();
@@ -113,7 +120,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('is Beneficiary absent', style: TextStyle(fontSize: 14.sp),),
+                            Text('Is Beneficiary Absent?', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -130,12 +137,12 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                 key: const ValueKey('beneficiaryAbsentReason'),
                                 hintText: 'Enter reason for absence',
                                 onChanged: (value) => context.read<HbycChildCareBloc>().add(BeneficiaryAbsentReasonChanged(value)),
-                                validator: (value) {
-                                  if (state.beneficiaryAbsent == 'Yes' && (value == null || value.isEmpty)) {
-                                    return 'Please enter reason for absence';
-                                  }
-                                  return null;
-                                },
+                                // validator: (value) {
+                                //   if (state.beneficiaryAbsent == 'Yes' && (value == null || value.isEmpty)) {
+                                //     return 'Please enter reason for absence';
+                                //   }
+                                //   return null;
+                                // },
                               ),
                             ],
                           ],
@@ -147,12 +154,30 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     const SizedBox(height: 1),
                     BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                       builder: (context, state) {
+                        final label = AppLocalizations.of(context)!.hbycBhramanLabel;
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycBhramanLabel, style: TextStyle(fontSize: 14.sp),),
+                            RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: Colors.black,
+                                ),
+                                children: [
+                                  TextSpan(text: label.replaceAll(' *', '')),
+                                  const TextSpan(
+                                    text: ' *',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             ApiDropdown<String>(
-                              items: _yesNoOptions,
+                              items: _hbycVisitMonthOptions,
                               getLabel: (s) => s,
                               value: state.hbycBhraman.isNotEmpty ? state.hbycBhraman : null,
                               hintText: AppLocalizations.of(context)!.select,
@@ -181,10 +206,21 @@ class _HbycFormViewState extends State<_HbycFormView> {
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (state.isChildSick == 'Yes')
-                              CustomTextField(
-                                controller: _sicknessDetailsController,
-                                hintText: 'Child referred to health facility?',
-                                maxLines: 3,
+                              Column(
+                                children: [
+                                  Text('Child referred to health facility?', style: TextStyle(fontSize: 14.sp)),
+                                  ApiDropdown<String>(
+                                    items: _yesNoOptions,
+                                    getLabel: (s) => s,
+                                    value: _yesNoOptions.contains(_sicknessDetailsController.text)
+                                      ? _sicknessDetailsController.text
+                                      : null,
+                                    hintText: AppLocalizations.of(context)!.select,
+                                    onChanged: (v) {
+                                      _sicknessDetailsController.text = v ?? '';
+                                    },
+                                  ),
+                                ],
                               ),
 
                           ],
@@ -218,7 +254,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Complementary Food is given', style: TextStyle(fontSize: 14.sp)),
+                            Text('Complementary food given?', style: TextStyle(fontSize: 14.sp)),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -317,7 +353,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Recording of weight-for-length/height by Anganwadi Worker', style: TextStyle(fontSize: 14.sp),),
+                            Text('Recording of weight-for-length/height by Anganwadi Worker', style: TextStyle(fontSize: 14.sp)),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -412,7 +448,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Immunization status checked as per MCP card? ', style: TextStyle(fontSize: 14.sp),),
+                            Text('Immunization status checked as per MCP card?', style: TextStyle(fontSize: 14.sp)),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,
@@ -602,6 +638,30 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         );
                       },
                     ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Counsel for exclusive breastfeeding?', style: TextStyle(fontSize: 14.sp)),
+                            ApiDropdown<String>(
+                              items: _yesNoOptions,
+                              getLabel: (s) => s,
+                              value: state.counselingExclusiveBf6m.isNotEmpty
+                                  ? state.counselingExclusiveBf6m
+                                  : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context
+                                  .read<HbycChildCareBloc>()
+                                  .add(CounselingExclusiveBf6mChanged(v ?? '')),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                     BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                       builder: (context, state) {
@@ -665,7 +725,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Counsel for family planning?', style: TextStyle(fontSize: 14.sp),),
+                            Text('family planning Counselling?', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _yesNoOptions,
                               getLabel: (s) => s,

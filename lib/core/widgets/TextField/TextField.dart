@@ -109,6 +109,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
+    // Slightly lighter color for entered text, darker for labels
     final TextStyle inputStyle = TextStyle(
       fontSize: 15.sp,
       color: AppColors.onSurfaceVariant,
@@ -155,7 +156,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
           child: RichText(
             text: TextSpan(
               children: _buildLabelTextSpans(widget.labelText!),
-              style: inputStyle,
+              style: inputStyle.copyWith(
+                color: AppColors.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             softWrap: true,
             maxLines: widget.labelMaxLines,
@@ -163,8 +167,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
           ),
         )
             : null,
-        labelStyle: inputStyle,
-        floatingLabelStyle: inputStyle,
+        labelStyle: inputStyle.copyWith(
+          color: AppColors.onSurface,
+          fontWeight: FontWeight.w500,
+        ),
+        floatingLabelStyle: inputStyle.copyWith(
+          color: AppColors.onSurface,
+          fontWeight: FontWeight.w500,
+        ),
         floatingLabelBehavior: FloatingLabelBehavior.always,
         hintText: widget.hintText,
         hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),

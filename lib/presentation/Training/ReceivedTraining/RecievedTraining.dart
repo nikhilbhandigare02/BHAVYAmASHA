@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:sizer/sizer.dart';
 
@@ -47,13 +48,24 @@ class _TrainingReceivedState extends State<TrainingReceived> {
           final rawDate = data['training_date']?.toString();
           String dateStr = '';
           if (rawDate != null && rawDate.isNotEmpty) {
-            dateStr = rawDate.contains('T')
-                ? rawDate.split('T').first
-                : rawDate;
+            try {
+              final parsedDate = DateTime.tryParse(rawDate);
+              if (parsedDate != null) {
+                dateStr = DateFormat('dd/MM/yyyy').format(parsedDate);
+              } else {
+                dateStr = rawDate;
+              }
+            } catch (_) {
+              dateStr = rawDate;
+            }
           }
 
+          final hhIdRaw = (row['household_ref_key'] ?? '').toString();
+          final hhId = hhIdRaw.isNotEmpty ? hhIdRaw : 'N/A';
+          final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
+
           parsed.add({
-            'hhId': 'N/A',
+            'hhId': displayHhId,
             'trainingName': trainingName,
             'Date': dateStr,
           });

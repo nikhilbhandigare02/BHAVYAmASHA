@@ -136,7 +136,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         child:  Scaffold(
           appBar:  AppHeader(
             screenTitle:
-            l10n?.gridRegisterNewHousehold ?? 'Register New Household',
+            l10n?.gridNewHouseholdRegister ?? 'Register New Household',
             showBack: true,
           ),
 

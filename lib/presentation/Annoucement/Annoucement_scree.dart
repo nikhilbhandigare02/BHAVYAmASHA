@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
+import '../../core/config/themes/CustomColors.dart';
 import '../Annoucement/bloc/annoucement_bloc.dart';
 
 class AnnoucementScree extends StatefulWidget {
@@ -63,7 +64,7 @@ class _AnnoucementScreeState extends State<AnnoucementScree> {
                     ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(10),
-                      onTap: () => context.read<AnnoucementBloc>().add(AnToggleExpand(index)),
+                      onTap: null,
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                         child: Column(
@@ -98,9 +99,16 @@ class _AnnoucementScreeState extends State<AnnoucementScree> {
                             const SizedBox(height: 8),
                             Align(
                               alignment: Alignment.centerRight,
-                              child: Text(
-                                expanded ? (l10n?.readLess ?? 'Read less') : (l10n?.readMore ?? 'Read more'),
-                                style:  TextStyle(color: Colors.black54, fontWeight: FontWeight.w600, fontSize: 14.sp),
+                              child: GestureDetector(
+                                onTap: () => context.read<AnnoucementBloc>().add(AnToggleExpand(index)),
+                                child: Text(
+                                  expanded ? (l10n?.readLess ?? 'Read less') : (l10n?.readMore ?? 'Read more'),
+                                  style: TextStyle(
+                                    color: AppColors.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
                               ),
                             ),
                           ],

@@ -1,13 +1,18 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:medixcel_new/data/repositories/Auth_Repository/auth_repository.dart';
 import '../../../core/utils/enums.dart';
 
 part 'reset_password_event.dart';
 part 'reset_password_state.dart';
 
 class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
-  ResetPasswordBloc() : super(const ResetPasswordState()) {
+  final AuthRepository _authRepository;
+
+  ResetPasswordBloc({required AuthRepository authRepository})
+      : _authRepository = authRepository,
+        super(const ResetPasswordState()) {
     on<UsernameChanged>(_onUsernameChange);
     on<CurrentPasswordChange>(_onCurrentPassChange);
     on<NewPasswordChange>(_onNewPassChange);
@@ -37,17 +42,22 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
 
   Future<void> _onResetPassButton(
       ResetPasswordButton event, Emitter<ResetPasswordState> emit) async {
-    emit(state.copyWith(postApiStatus: PostApiStatus.loading));
+    emit(state.copyWith(postApiStatus: PostApiStatus.loading, error: ''));
 
     try {
-      const validUsername = 'A10000555';
-      const validCurrentPassword = 'Temp@123';
-      const validNewPassword = 'Temp@1234';
+      final response = await _authRepository.changePassword(
+        username: state.username,
+        currentPassword: state.currentPassword,
+        newPassword: state.newPasswordPassword,
+        confirmNewPassword: state.reEnterPassword,
+      );
 
-      await Future.delayed(const Duration(seconds: 1));
+      debugPrint('Change Password API Response: $response');
 
-      if (state.username.trim() == validUsername &&
-          state.currentPassword.trim() == validCurrentPassword && state.currentPassword.trim() == validNewPassword) {
+      final success = response['success'] == true;
+      final message = (response['msg'] ?? response['message'] ?? '').toString();
+
+      if (success) {
         emit(state.copyWith(
           postApiStatus: PostApiStatus.success,
           error: '',
@@ -55,13 +65,13 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
       } else {
         emit(state.copyWith(
           postApiStatus: PostApiStatus.error,
-          error: 'Invalid username or password',
+          error: message.isNotEmpty ? message : 'Failed to change password',
         ));
       }
     } catch (e) {
       emit(state.copyWith(
         postApiStatus: PostApiStatus.error,
-        error: 'Something went wrong',
+        error: e.toString(),
       ));
     }
   }
