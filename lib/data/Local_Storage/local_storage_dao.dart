@@ -1163,7 +1163,7 @@ class LocalStorageDao {
       final db = await _db;
       final rows = await db.query(
         'beneficiaries_new',
-        where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 0)',
+        where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 1)',
         orderBy: 'created_date_time ASC',
       );
       return rows.map((row) {
@@ -1388,9 +1388,9 @@ class LocalStorageDao {
         'households',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
         where:
-              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-2 minutes')",
+        "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-50 minutes')",
 
-        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        orderBy: "CAST(server_id AS INTEGER) DESC",
         limit: 1,
       );
       if (rows.isEmpty) return '';
@@ -1769,7 +1769,7 @@ class LocalStorageDao {
         'beneficiaries_new',
         columns: ['server_id'],
         where:
-            "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-2 minutes')",
+            "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-50 minutes')",
 
         orderBy: "CAST(server_id AS INTEGER) DESC",
         limit: 1,

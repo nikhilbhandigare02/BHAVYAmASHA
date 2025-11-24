@@ -100,8 +100,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               
           final householdRefKey = (row['household_ref_key'] ?? '').toString();
           
-          // Count pregnant women
-          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes' || 
+          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes' ||
                            info['isPregnant'] == true;
           if (isPregnant) {
             pregnantCountMap[householdRefKey] = (pregnantCountMap[householdRefKey] ?? 0) + 1;
@@ -199,9 +198,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         final child2to5 = child2to5Map[householdRefKey] ?? 0;
 
         // How many children the head declared in the registration form.
-        // Children details are stored via _childrenData:
-        //  - children: list of child entries (preferred source)
-        //  - totalBorn / total_children: numeric aggregates
+
         int declaredChildren = 0;
 
         final dynamic childrenField = info['children'];
@@ -224,7 +221,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         }
         final int childrenTarget = declaredChildren;
 
-        // How many child members already exist in DB for this household.
         int childrenAdded = 0;
         for (final m in membersForHousehold) {
           try {

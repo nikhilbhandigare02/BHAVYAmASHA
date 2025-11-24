@@ -259,10 +259,42 @@ class _HomeScreenState extends State<HomeScreen> {
       // Use households table count directly so the dashboard value
       // matches the total number of household records shown in the
       // All Household screen.
-      final count = await LocalStorageDao.instance.getHouseholdCount();
+      // Mirror AllHouseholdScreen logic so that the dashboard count is
+      // based on the same derived family-head list.
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final households = await LocalStorageDao.instance.getAllHouseholds();
+
+      final headKeyByHousehold = <String, String>{};
+      for (final hh in households) {
+        try {
+          final hhRefKey = (hh['unique_key'] ?? '').toString();
+          final headId = (hh['head_id'] ?? '').toString();
+          if (hhRefKey.isEmpty || headId.isEmpty) continue;
+          headKeyByHousehold[hhRefKey] = headId;
+        } catch (_) {}
+      }
+
+      final familyHeads = rows.where((r) {
+        try {
+          final householdRefKey = (r['household_ref_key'] ?? '').toString();
+          final uniqueKey = (r['unique_key'] ?? '').toString();
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+          if (configuredHeadKey == null || configuredHeadKey.isEmpty) return false;
+
+          final isDeath = r['is_death'] == 1;
+          final isMigrated = r['is_migrated'] == 1;
+
+          return configuredHeadKey == uniqueKey && !isDeath && !isMigrated;
+        } catch (_) {
+          return false;
+        }
+      }).toList();
+
       if (mounted) {
         setState(() {
-          householdCount = count;
+          householdCount = familyHeads.length;
         });
       }
     } catch (e) {

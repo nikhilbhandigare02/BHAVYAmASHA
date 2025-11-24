@@ -58,7 +58,6 @@ class UserInfo {
         return null;
       }
       
-      // Get the most recently added/updated user
       final result = await db.query(
         'users',
         where: 'is_deleted = 0',
@@ -71,10 +70,8 @@ class UserInfo {
         return null;
       }
       
-      // Convert the result to a proper map
       final user = Map<String, dynamic>.from(result.first);
       
-      // Parse the details if it's a string
       if (user['details'] is String) {
         try {
           user['details'] = jsonDecode(user['details']);
