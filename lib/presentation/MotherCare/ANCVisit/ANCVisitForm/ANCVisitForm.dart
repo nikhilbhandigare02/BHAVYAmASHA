@@ -135,11 +135,88 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
+  // Calculate weeks of pregnancy from LMP date to current date
+  int _calculateWeeksOfPregnancy(DateTime? lmpDate) {
+    if (lmpDate == null) return 0;
+    final today = DateTime.now();
+    final difference = today.difference(lmpDate).inDays;
+    // Add 1 to account for the first week of pregnancy
+    return (difference / 7).floor() + 1;
+  }
+
   Future<void> _initializeForm() async {
     final data = widget.beneficiaryData;
     String? houseNo;
 
+    // Extract LMP and EDD from beneficiary data
+    try {
+      // Try to get beneficiary info from different possible locations
+      Map<String, dynamic>? beneficiaryInfo = {};
 
+      // First try to get from beneficiary_info field
+      if (data?['beneficiary_info'] is String) {
+        try {
+          beneficiaryInfo = jsonDecode(data!['beneficiary_info']);
+        } catch (e) {
+          print('Error parsing beneficiary_info JSON: $e');
+        }
+      } else if (data?['beneficiary_info'] is Map) {
+        beneficiaryInfo = Map<String, dynamic>.from(data!['beneficiary_info']);
+      }
+
+      // If not found in beneficiary_info, try _rawRow
+      if ((beneficiaryInfo == null || beneficiaryInfo.isEmpty) && data?['_rawRow'] != null) {
+        final rawRow = data!['_rawRow'];
+        if (rawRow is String) {
+          try {
+            final rawData = jsonDecode(rawRow);
+            beneficiaryInfo = rawData['beneficiary_info'] is Map
+                ? Map<String, dynamic>.from(rawData['beneficiary_info'])
+                : {};
+          } catch (e) {
+            print('Error parsing _rawRow JSON: $e');
+          }
+        } else if (rawRow is Map) {
+          beneficiaryInfo = rawRow['beneficiary_info'] is Map
+              ? Map<String, dynamic>.from(rawRow['beneficiary_info'])
+              : {};
+        }
+      }
+
+      // Process LMP date
+      final lmpDateStr = beneficiaryInfo?['lmp']?.toString();
+      if (lmpDateStr != null && lmpDateStr.isNotEmpty) {
+        try {
+          final lmpDate = DateTime.parse(lmpDateStr);
+          _bloc.add(LmpDateChanged(lmpDate));
+
+          // Calculate and set weeks of pregnancy
+          final weeksPregnant = _calculateWeeksOfPregnancy(lmpDate);
+          _bloc.add(WeeksOfPregnancyChanged(weeksPregnant.toString()));
+
+          print('✅ Set LMP date from beneficiary data: $lmpDate');
+          print('✅ Calculated weeks of pregnancy: $weeksPregnant');
+        } catch (e) {
+          print('Error parsing LMP date "$lmpDateStr": $e');
+        }
+      }
+
+      // Process EDD date
+      final eddDateStr = beneficiaryInfo?['edd']?.toString();
+      if (eddDateStr != null && eddDateStr.isNotEmpty) {
+        try {
+          final eddDate = DateTime.parse(eddDateStr);
+          _bloc.add(EddDateChanged(eddDate));
+          print('✅ Set EDD date from beneficiary data: $eddDate');
+        } catch (e) {
+          print('Error parsing EDD date "$eddDateStr": $e');
+        }
+      }
+    } catch (e) {
+      print('⚠️ Error processing beneficiary data: $e');
+    }
+
+    // Set visit number
     try {
       final dynamic rawVisitCountEarly = data?['visitCount'];
       int visitCountEarly = 0;
@@ -642,6 +719,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 labelText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
                                 hintText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
                                 initialDate: state.lmpDate ?? DateTime.now(),
+                                readOnly: true,
                                 onDateChanged: (d) {
                                   if (d != null) {
                                     bloc.add(LmpDateChanged(d));
@@ -664,6 +742,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
                               hintText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
                               initialDate: state.eddDate,
+                              readOnly: true,
                               onDateChanged: (d) => bloc.add(EddDateChanged(d)),
                             ),
 
@@ -686,20 +765,24 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    _qtyButton(icon: Icons.remove, onTap: () => bloc.add(const GravidaDecremented())),
+                                    _qtyButton(
+                                      icon: Icons.remove,
+                                      onTap: state.gravida > 1 ? () => bloc.add(const GravidaDecremented()) : null,
+                                      enabled: state.gravida > 1,
+                                    ),
                                     const SizedBox(width: 6),
                                     Container(
-                                      width: 40,
+                                      width: 44,
                                       height: 32,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         border: Border.all(color: AppColors.outlineVariant),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: Text('${state.gravida}'),
+                                      child: Text('${state.gravida > 0 ? state.gravida : 1}'),
                                     ),
                                     const SizedBox(width: 6),
-                                    _qtyButton(icon: Icons.add, onTap: () => bloc.add(const GravidaIncremented())),
+                                    _qtyButton(icon: Icons.add, onTap: () => bloc.add(const GravidaIncremented()), enabled: true),
                                   ],
                                 ),
                               ],
@@ -894,7 +977,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ],
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (int.tryParse(state.weeksOfPregnancy) != null &&
-                                int.parse(state.weeksOfPregnancy) < 3) ...[
+                                int.parse(state.weeksOfPregnancy) > 30) ...[
                               ApiDropdown<String>(
                                 labelText: 'Did the pregnant woman give birth to a baby?',
                                 items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
@@ -1227,19 +1310,22 @@ class _AncvisitformState extends State<Ancvisitform> {
   }
 }
 
-Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
+Widget _qtyButton({required IconData icon, required VoidCallback? onTap, required bool enabled}) {
   return InkWell(
     onTap: onTap,
     borderRadius: BorderRadius.circular(4),
     child: Container(
       width: 32,
       height: 32,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: AppColors.outlineVariant),
+        color: enabled ? Colors.white : AppColors.outlineVariant.withOpacity(0.5),
+        border: Border.all(
+          color: enabled ? AppColors.outlineVariant : Colors.grey.withOpacity(0.5),
+        ),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Icon(icon, size: 18, color: Colors.black87),
+      child: Icon(icon, size: 18, color: enabled ? Colors.black87 : Colors.grey),
     ),
   );
 }

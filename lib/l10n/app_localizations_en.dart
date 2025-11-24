@@ -884,13 +884,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get childRegisteredBeneficiaryListTitle => 'Registered Child\nBeneficiary list';
+  String get childRegisteredBeneficiaryListTitle => 'Registered Child Beneficiary list';
 
   @override
-  String get childRegisteredDueListTitle => 'Child Registered\nDue List';
+  String get childRegisteredDueListTitle => 'Child Registered Due List';
 
   @override
-  String get childTrackingDueListTitle => 'Child Tracking\nDue List';
+  String get childTrackingDueListTitle => 'Child Tracking Due List';
 
   @override
   String get searchHintchildTrackingDueListTitle => 'Search Child Tracking Due';
@@ -2136,6 +2136,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchEligibleCouple => 'Search Eligible Couple';
 
   @override
+  String get searchDelOutcome => 'Delivery Outcome Search';
+
+  @override
   String get searchHintRegisterChildDueList => 'Child Registered Due Search';
 
   @override
@@ -2155,6 +2158,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placeLabel => 'Place';
+
+  @override
+  String get searchHBNC => 'search HBNC';
 
   @override
   String get secondAncLabel => 'Second ANC';

@@ -1832,19 +1832,19 @@ abstract class AppLocalizations {
   /// No description provided for @childRegisteredBeneficiaryListTitle.
   ///
   /// In en, this message translates to:
-  /// **'Registered Child\nBeneficiary list'**
+  /// **'Registered Child Beneficiary list'**
   String get childRegisteredBeneficiaryListTitle;
 
   /// No description provided for @childRegisteredDueListTitle.
   ///
   /// In en, this message translates to:
-  /// **'Child Registered\nDue List'**
+  /// **'Child Registered Due List'**
   String get childRegisteredDueListTitle;
 
   /// No description provided for @childTrackingDueListTitle.
   ///
   /// In en, this message translates to:
-  /// **'Child Tracking\nDue List'**
+  /// **'Child Tracking Due List'**
   String get childTrackingDueListTitle;
 
   /// No description provided for @searchHintchildTrackingDueListTitle.
@@ -4325,6 +4325,12 @@ abstract class AppLocalizations {
   /// **'Search Eligible Couple'**
   String get searchEligibleCouple;
 
+  /// No description provided for @searchDelOutcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Outcome Search'**
+  String get searchDelOutcome;
+
   /// No description provided for @searchHintRegisterChildDueList.
   ///
   /// In en, this message translates to:
@@ -4366,6 +4372,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Place'**
   String get placeLabel;
+
+  /// No description provided for @searchHBNC.
+  ///
+  /// In en, this message translates to:
+  /// **'search HBNC'**
+  String get searchHBNC;
 
   /// No description provided for @secondAncLabel.
   ///

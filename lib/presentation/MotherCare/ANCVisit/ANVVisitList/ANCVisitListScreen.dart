@@ -234,16 +234,20 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     }
   }
 
-  Future<int> _getVisitCount(String beneficiaryId) async {
+  Future<Map<String, dynamic>> _getVisitCount(String beneficiaryId) async {
     try {
-      if (beneficiaryId.isEmpty) return 0;
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiary ID provided to _getVisitCount');
+        return {'count': 0, 'isHighRisk': false};
+      }
 
-      final count = await LocalStorageDao.instance.getANCVisitCount(beneficiaryId);
-      print('✅ Visit count for $beneficiaryId: $count');
-      return count;
+      print('🔍 Fetching visit count and high-risk status for beneficiary: $beneficiaryId');
+      final result = await LocalStorageDao.instance.getANCVisitCount(beneficiaryId);
+      print('✅ Visit details for $beneficiaryId: $result');
+      return result;
     } catch (e) {
-      print('❌ Error getting visit count: $e');
-      return 0;
+      print('❌ Error in _getVisitCount for $beneficiaryId: $e');
+      return {'count': 0, 'isHighRisk': false};
     }
   }
 
@@ -356,21 +360,20 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () async {
-        // Get the visit count before navigating
-        final visitCount = await (beneficiaryId.isNotEmpty
+        // Get the visit count and high risk status before navigating
+        final visitData = await (beneficiaryId.isNotEmpty
             ? _getVisitCount(beneficiaryId)
-            : Future.value(0));
+            : Future.value({'count': 0, 'isHighRisk': false}));
 
         final formData = Map<String, dynamic>.from(data);
 
         formData['hhId'] = hhId;
         formData['BeneficiaryID'] = beneficiaryId;
         formData['unique_key'] = uniqueKey;
+        formData['visitCount'] = visitData['count'] ?? 0;
+        formData['isHighRisk'] = visitData['isHighRisk'] ?? false;
 
-        formData['visitCount'] = visitCount;
-
-        print('Passing visitCount to form: $visitCount');
-
+        print('Passing visit data to form: $visitData');
 
         Navigator.push(
           context,
@@ -422,10 +425,10 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  FutureBuilder<int>(
+                  FutureBuilder<Map<String, dynamic>>(
                     future: beneficiaryId.isNotEmpty
                         ? _getVisitCount(beneficiaryId)
-                        : Future.value(0),
+                        : Future.value({'count': 0, 'isHighRisk': false}),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Text(
@@ -439,7 +442,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                       }
 
                       if (snapshot.hasError) {
-                        print('❌ Error fetching visit count: ${snapshot.error}');
+                        print('❌ Error fetching visit details: ${snapshot.error}');
                         return Text(
                           '${l10n?.visitsLabel ?? 'Visits :'} ?',
                           style: TextStyle(
@@ -450,14 +453,42 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         );
                       }
 
-                      final count = snapshot.data ?? 0;
-                      return Text(
-                        '${l10n?.visitsLabel ?? 'Visits :'} $count',
-                        style: TextStyle(
-                          color: primary,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14.sp,
-                        ),
+                      final count = snapshot.data?['count'] ?? 0;
+                      final isHighRisk = snapshot.data?['isHighRisk'] == true;
+
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isHighRisk) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.redAccent.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'HRP',
+                                style: TextStyle(
+                                  color: Colors.red[600],
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ),
+                          ],
+
+
+                          Text(
+                            '${l10n?.visitsLabel ?? 'Visits :'} $count',
+                            style: TextStyle(
+                              color: primary,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+
+                        ],
                       );
                     },
                   ),
@@ -533,12 +564,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
                   const SizedBox(height: 12),
 
-                  FutureBuilder<int>(
+                  FutureBuilder<Map<String, dynamic>>(
                     future: beneficiaryId.isNotEmpty
                         ? _getVisitCount(beneficiaryId)
-                        : Future.value(0),
+                        : Future.value({'count': 0, 'isHighRisk': false}),
                     builder: (context, snapshot) {
-                      final visitCount = snapshot.data ?? 0;
+                      final visitCount = snapshot.data?['count'] ?? 0;
+                      final isHighRisk = snapshot.data?['isHighRisk'] == true;
 
                        DateTime? lmpDate;
                       try {
@@ -589,6 +621,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+
                           _ancDateBox(
                             'First ANC',
                             ancRanges['1st_anc_start']!,

@@ -94,7 +94,6 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         if (memberType.toLowerCase() == 'child') {
           debugPrint('✅ Found Child member');
 
-          // Get name from multiple possible fields
           final name = memberData['memberName']?.toString() ??
               memberData['name']?.toString() ??
               memberData['member_name']?.toString() ??
@@ -108,7 +107,6 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             continue;
           }
 
-          // Check if this child is already registered
           final isAlreadyRegistered = await _isChildRegistered(db, rowHhId, name);
 
           if (isAlreadyRegistered) {
@@ -118,19 +116,14 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
 
           debugPrint('✅ Child NOT registered yet: $name - ADDING TO LIST');
 
-          // Get father's name
           final fatherName = memberData['fatherName']?.toString() ?? '';
 
-          // Get mother's name
           final motherName = memberData['motherName']?.toString() ?? '';
 
-          // Get mobile number
           final mobileNo = memberData['mobileNo']?.toString() ?? '';
 
-          // Get RCH ID
           final richId = memberData['RichIDChanged']?.toString() ?? '';
 
-          // Get beneficiary ID
           final beneficiaryId = row['unique_key']?.toString() ?? '';
 
           final card = <String, dynamic>{
@@ -415,43 +408,51 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     final Color primary = Theme.of(context).primaryColor;
 
     return InkWell(
-      onTap:  () {
-        final name = data['Name'] ?? '';
-        final ageGender = data['Age|Gender']?.toString().split(' | ') ?? [];
-        final gender = ageGender.length > 1 ? ageGender[1] : '';
-        final mobile = data['Mobileno.'] ?? '';
-        final hhId = data['hhId']?.toString() ?? '';
-        final rchId = data['R chID'] ?? '';
-        final fatherName = data['FatherName'] ?? '';
-        final beneficiaryId = (data['_raw'] is Map && (data['_raw']['unique_key'] != null))
-            ? data['_raw']['unique_key'].toString()
-            : (data['BeneficiaryID']?.toString() ?? '');
+        onTap: () async {
+          final name = data['Name'] ?? '';
+          final ageGender = data['Age|Gender']?.toString().split(' | ') ?? [];
+          final gender = ageGender.length > 1 ? ageGender[1] : '';
+          final mobile = data['Mobileno.'] ?? '';
+          final hhId = data['hhId']?.toString() ?? '';
+          final rchId = data['R chID'] ?? '';
+          final fatherName = data['FatherName'] ?? '';
+          final beneficiaryId = (data['_raw'] is Map && (data['_raw']['unique_key'] != null))
+              ? data['_raw']['unique_key'].toString()
+              : (data['BeneficiaryID']?.toString() ?? '');
 
-        final args = <String, dynamic>{
-          'hhId': hhId,
-          'name': name,
-          'gender': gender,
-          'mobile': mobile,
-          'rchId': rchId,
-          'fatherName': fatherName,
-          'beneficiaryId': beneficiaryId,
-          'beneficiary_ref_key': beneficiaryId,
-        };
+          final args = <String, dynamic>{
+            'hhId': hhId,
+            'name': name,
+            'gender': gender,
+            'mobile': mobile,
+            'rchId': rchId,
+            'fatherName': fatherName,
+            'beneficiaryId': beneficiaryId,
+            'beneficiary_ref_key': beneficiaryId,
+          };
 
-        final route = RegisterChildDueListFormScreen.route(
-          RouteSettings(
-            name: Route_Names.RegisterChildDueListFormScreen,
-            arguments: args,
-          ),
-        );
-        Navigator.push(context, route).then((result) {
-          if (result != null && result is Map<String, dynamic>) {
+          // Use async/await pattern instead of .then()
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RegisterChildDueListFormScreen(
+                arguments: args,
+              ),
+            ),
+          );
+
+          // This will run after the form is closed
+          if (mounted && result != null && result is Map<String, dynamic>) {
             if (result['saved'] == true) {
-              _loadChildBeneficiaries();
+              // Use a post-frame callback to ensure we're not in build phase
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _loadChildBeneficiaries();
+                }
+              });
             }
           }
-        });
-      },
+        },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         height: 180,

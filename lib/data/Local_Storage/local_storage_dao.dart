@@ -348,20 +348,77 @@ class LocalStorageDao {
     }
   }
 
-  Future<int> getANCVisitCount(String beneficiaryId) async {
+  Future<Map<String, dynamic>> getANCVisitCount(String beneficiaryId) async {
     try {
       final db = await _db;
-      final result = await db.rawQuery('''
-        SELECT COUNT(*) as count 
-        FROM ${FollowupFormDataTable.table} 
-        WHERE beneficiary_ref_key = ? 
-        AND forms_ref_key = ?
-      ''', [beneficiaryId, FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration]]);
+      bool isHighRisk = false;
 
-      return result.first['count'] as int? ?? 0;
+      // Get visit count
+      final countResult = await db.rawQuery('''
+      SELECT COUNT(*) as count 
+      FROM ${FollowupFormDataTable.table} 
+      WHERE beneficiary_ref_key = ? 
+      AND forms_ref_key = ?
+    ''', [beneficiaryId, FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration]]);
+
+      final riskResult = await db.rawQuery('''
+      SELECT form_json
+      FROM ${FollowupFormDataTable.table} 
+      WHERE beneficiary_ref_key = ? 
+      AND forms_ref_key = ?
+      ORDER BY created_date_time DESC
+      LIMIT 1
+    ''', [beneficiaryId, FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration]]);
+
+      print('🔍 Risk query for $beneficiaryId returned ${riskResult.length} rows');
+      if (riskResult.isNotEmpty) {
+        final formJson = riskResult.first['form_json'] as String?;
+        print('🔍 Form JSON for $beneficiaryId: $formJson');
+        if (formJson != null) {
+          try {
+            final formData = jsonDecode(formJson) as Map<String, dynamic>;
+            print('🔍 Parsed form data: $formData');
+
+            // Check if form_data exists and has high_risk field
+            if (formData['form_data'] != null &&
+                formData['form_data'] is Map &&
+                formData['form_data']['high_risk'] != null) {
+
+              final highRiskValue = formData['form_data']['high_risk'].toString().toLowerCase();
+              print('🔍 Found high_risk in form_data: $highRiskValue');
+
+              isHighRisk = highRiskValue == 'yes' ||
+                  highRiskValue == 'true' ||
+                  highRiskValue == '1' ||
+                  highRiskValue == 'yes';
+            } else {
+              print('⚠️ high_risk field not found in form_data');
+            }
+
+            // Also check top level for backward compatibility
+            if (!isHighRisk && formData['high_risk'] != null) {
+              final highRiskValue = formData['high_risk'].toString().toLowerCase();
+              print('🔍 Found high_risk at top level: $highRiskValue');
+              isHighRisk = highRiskValue == 'yes' ||
+                  highRiskValue == 'true' ||
+                  highRiskValue == '1' ||
+                  highRiskValue == 'yes';
+            }
+
+            print('🔍 Final high risk status for $beneficiaryId: $isHighRisk');
+          } catch (e) {
+            print('❌ Error parsing form_json for $beneficiaryId: $e');
+          }
+        }
+      }
+
+      return {
+        'count': countResult.first['count'] as int? ?? 0,
+        'isHighRisk': isHighRisk,
+      };
     } catch (e) {
-      print('Error getting ANC visit count: $e');
-      return 0;
+      print('❌ Error in getANCVisitCount for $beneficiaryId: $e');
+      return {'count': 0, 'isHighRisk': false};
     }
   }
 

@@ -379,8 +379,9 @@ import '../../l10n/app_localizations.dart';
                         items: countries,
                         value: selectedCountry,
                         getLabel: (country) => country.name,
+
                          hintText: l10n.selectArea,
-                        // Setting onChanged to null makes the dropdown read-only
+
                         onChanged: null,
                         // onChanged: (value) {
                         //   setState(() => selectedCountry = value);
@@ -762,16 +763,15 @@ import '../../l10n/app_localizations.dart';
                       Divider(color: AppColors.divider, thickness: 0.5),
                       const SizedBox(height: 12),
                       BlocBuilder<ProfileBloc, ProfileState>(
-                        buildWhen: (previous, current) => previous.populationCovered != current.populationCovered,
                         builder: (context, state) {
                           return CustomTextField(
-                            key: ValueKey('population_covered_field_${state.populationCovered}'),
+                            key: const ValueKey('population_covered_field'),
                             labelText: l10n.populationCoveredLabel,
                             hintText: l10n.populationCoveredHint,
                             initialValue: state.populationCovered,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(PopulationCoveredChanged(v)),
-
+                            autofocus: true,
                           );
                         },
                       ),

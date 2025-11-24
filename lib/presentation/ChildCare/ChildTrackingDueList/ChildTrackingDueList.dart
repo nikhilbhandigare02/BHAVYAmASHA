@@ -94,7 +94,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           debugPrint('Form type found: $formType');
           debugPrint('Forms ref key: $formsRefKey');
 
-          // Skip if not a child registration or child tracking due form
+
           final isChildRegistration = formType == FollowupFormDataTable.childRegistrationDue;
           final isChildTracking = formsRefKey == '30bycxe4gv7fqnt6' || formType == FollowupFormDataTable.childTrackingDue;
           
@@ -302,7 +302,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.childTrackingDueListTitle ?? 'Child Tracking\nDue List',
+        screenTitle: l10n?.childTrackingDueListTitle ?? 'Child Tracking Due List',
         showBack: true,
       ),
       drawer: const CustomDrawer(),
