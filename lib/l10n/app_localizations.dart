@@ -4085,6 +4085,66 @@ abstract class AppLocalizations {
   /// **'Spouse'**
   String get relationSpouse;
 
+  /// No description provided for @relationNephew.
+  ///
+  /// In en, this message translates to:
+  /// **'Nephew'**
+  String get relationNephew;
+
+  /// No description provided for @relationNiece.
+  ///
+  /// In en, this message translates to:
+  /// **'Niece'**
+  String get relationNiece;
+
+  /// No description provided for @relationGrandFather.
+  ///
+  /// In en, this message translates to:
+  /// **'Grand Father'**
+  String get relationGrandFather;
+
+  /// No description provided for @relationGrandMother.
+  ///
+  /// In en, this message translates to:
+  /// **'Grand Mother'**
+  String get relationGrandMother;
+
+  /// No description provided for @relationFatherInLaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Father In Law'**
+  String get relationFatherInLaw;
+
+  /// No description provided for @relationMotherInLaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother In Law'**
+  String get relationMotherInLaw;
+
+  /// No description provided for @relationGrandSon.
+  ///
+  /// In en, this message translates to:
+  /// **'Grand Son'**
+  String get relationGrandSon;
+
+  /// No description provided for @relationGrandDaughter.
+  ///
+  /// In en, this message translates to:
+  /// **'Grand Daughter'**
+  String get relationGrandDaughter;
+
+  /// No description provided for @relationSonInLaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Son In Law'**
+  String get relationSonInLaw;
+
+  /// No description provided for @relationDaughterInLaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Daughter In Law'**
+  String get relationDaughterInLaw;
+
   /// No description provided for @relationWithHeadLabel.
   ///
   /// In en, this message translates to:

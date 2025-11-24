@@ -2016,6 +2016,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get relationSpouse => 'Spouse';
 
   @override
+  String get relationNephew => 'Nephew';
+
+  @override
+  String get relationNiece => 'Niece';
+
+  @override
+  String get relationGrandFather => 'Grand Father';
+
+  @override
+  String get relationGrandMother => 'Grand Mother';
+
+  @override
+  String get relationFatherInLaw => 'Father In Law';
+
+  @override
+  String get relationMotherInLaw => 'Mother In Law';
+
+  @override
+  String get relationGrandSon => 'Grand Son';
+
+  @override
+  String get relationGrandDaughter => 'Grand Daughter';
+
+  @override
+  String get relationSonInLaw => 'Son In Law';
+
+  @override
+  String get relationDaughterInLaw => 'Daughter In Law';
+
+  @override
   String get relationWithHeadLabel => 'Relation with the family head';
 
   @override
