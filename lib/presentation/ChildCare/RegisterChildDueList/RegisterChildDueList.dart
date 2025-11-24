@@ -120,13 +120,10 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
 
           final motherName = memberData['motherName']?.toString() ?? '';
 
-          // Get mobile number
           final mobileNo = memberData['mobileNo']?.toString() ?? '';
 
-          // Get RCH ID
           final richId = memberData['RichIDChanged']?.toString() ?? '';
 
-          // Get beneficiary ID
           final beneficiaryId = row['unique_key']?.toString() ?? '';
 
           final card = <String, dynamic>{
