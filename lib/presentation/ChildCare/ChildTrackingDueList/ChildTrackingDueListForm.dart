@@ -1122,10 +1122,11 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _infoRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+        const SizedBox(height: 4),
         Text(value, style: const TextStyle(fontSize: 16)),
       ],
     );
@@ -1198,23 +1199,9 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
               child: ListView(
                 children: [
-                  const SizedBox(height: 8),
-                  _infoRow('Date of visit', '30-10-2025'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Weight (1.2–90)kg',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter weight',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
+
+                  const SizedBox(height: 4),
+
                   _buildNineMonthDoseTable(),
                   const SizedBox(height: 16),
                   Column(

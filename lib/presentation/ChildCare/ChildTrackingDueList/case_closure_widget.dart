@@ -52,20 +52,20 @@ class CaseClosureWidget extends StatefulWidget {
 
 class _CaseClosureWidgetState extends State<CaseClosureWidget> {
   final List<String> _closureReasons = [
-    'Select',
+
     'Death',
     'Migrated out',
     'Other',
   ];
 
   final List<String> _migrationTypes = [
-    'Select',
+
     'Temporary',
     'Permanent'
   ];
 
   final List<String> _probableCauses = [
-    'Select',
+
     'Measles',
     'Low birth weight',
     'High fever',
@@ -75,7 +75,7 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
   ];
 
   final List<String> _deathPlaces = [
-    'Select',
+'Migrated Out',
     'Home',
     'On the way',
     'Facility',
@@ -83,7 +83,7 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
   ];
 
   final List<String> _deathReasons = [
-    'Select',
+
     'PH',
     'PPH',
     'Severe Anaemia',

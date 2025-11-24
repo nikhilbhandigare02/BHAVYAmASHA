@@ -10,7 +10,7 @@ class HelpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final phones = const [
-      '+91 7620593008',
+      '+91 8809331888',
       '+91 8809581888',
       '+91 8809624888',
       '+91 8809104888',
@@ -85,7 +85,7 @@ Divider(),
                   const Expanded(
                     child: Text(
                       'helpdesk.bhavya@bihar.gov.in',
-                      style: TextStyle(color: Colors.black87),
+                      style: TextStyle(color: Colors.black87,fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],

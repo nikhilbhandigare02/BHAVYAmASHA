@@ -228,41 +228,67 @@ class _DeseasedListState extends State<DeseasedList> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _filtered.isEmpty
-          ? const Center(child: Text('No deceased children found'))
           : _buildMainContent(),
     );
   }
 
   Widget _buildMainContent() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText: 'Search by name, ID, or mobile',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(4.0),
-                ),
+    return Column(
+      children: [
+        // Search Box (always visible)
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TextField(
+            controller: _searchCtrl,
+            decoration: InputDecoration(
+              hintText: 'Search by name, ID, or mobile',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4.0),
               ),
             ),
           ),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: _filtered.length,
-            itemBuilder: (context, index) {
-              final data = _filtered[index];
-              return _deceasedCard(context, data);
-            },
-          ),
-        ],
-      ),
+        ),
+        
+        // Content Area
+        Expanded(
+          child: _filtered.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.search_off,
+                        size: 48,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _deceasedList.isEmpty
+                            ? 'No deceased children found'
+                            : 'No matching records found',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: _filtered.length,
+                    itemBuilder: (context, index) {
+                      final data = _filtered[index];
+                      return _deceasedCard(context, data);
+                    },
+                  ),
+                ),
+        ),
+      ],
     );
   }
 

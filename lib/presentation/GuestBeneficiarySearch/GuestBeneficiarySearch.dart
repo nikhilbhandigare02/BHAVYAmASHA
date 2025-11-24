@@ -9,6 +9,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/repositories/GuestBeneficiaryRepository.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import '../../core/utils/enums.dart';
+import '../myBeneficiary/Beneficiaries/GuestBeneficiaries.dart';
 import 'bloc/guest_beneficiary_search_bloc.dart';
 import 'bloc/guest_beneficiary_search_event.dart';
 import 'bloc/guest_beneficiary_search_state.dart';
@@ -21,10 +22,10 @@ class GuestBeneficiarySearch extends StatefulWidget {
 }
 
 class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
-  final List<String> districts = const ['Patna', 'Maner', 'Baank'];
-  final List<String> categories = const ['General', 'OBC', 'SC', 'ST'];
-  final List<String> genders = const ['Male', 'Female', 'Other'];
-  final List<String> blocks = const ['Block A', 'Block B', 'Block C'];
+  final List<String> districts = const ['Patna', 'Maner'];
+  final List<String> categories = const ['ANC', 'PNC', 'RI',];
+  final List<String> genders = const ['Male', 'Female', 'Transgender'];
+  final List<String> blocks = const [];
 
   // Build search results widget
   Widget _buildSearchResults(BuildContext context, Map<String, dynamic> data) {
@@ -106,8 +107,16 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
             }
             // Handle success state
             else if (state.status == GbsStatus.success) {
-              // You can add any success message or navigation here
               log('✅ Search completed successfully');
+              // Navigate to GuestBeneficiaries screen after a short delay to show success state
+              Future.delayed(const Duration(milliseconds: 500), () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Guestbeneficiaries(),
+                  ),
+                );
+              });
             }
           },
           child:

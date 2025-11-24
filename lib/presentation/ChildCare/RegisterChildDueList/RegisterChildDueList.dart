@@ -51,7 +51,8 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries_new',
         where: 'beneficiary_state = ?',
-        whereArgs: [ 'registration_due'],
+        whereArgs: ['registration_due'],
+        orderBy: 'created_date_time DESC',
       );
 
       debugPrint('🎯 Found ${rows.length} beneficiaries with registration_due status');
@@ -187,7 +188,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         return false;
       }
 
-      for (int i = 0; i < results.length; i++) {
+      for (int i = 0; i <results.length; i++) {
         final row = results[i];
         try {
           final formJson = row['form_json'] as String?;
@@ -408,13 +409,13 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     final Color primary = Theme.of(context).primaryColor;
 
     return InkWell(
-        onTap: () async {
+        onTap: () {
           final name = data['Name'] ?? '';
           final ageGender = data['Age|Gender']?.toString().split(' | ') ?? [];
           final gender = ageGender.length > 1 ? ageGender[1] : '';
           final mobile = data['Mobileno.'] ?? '';
           final hhId = data['hhId']?.toString() ?? '';
-          final rchId = data['R chID'] ?? '';
+
           final fatherName = data['FatherName'] ?? '';
           final beneficiaryId = (data['_raw'] is Map && (data['_raw']['unique_key'] != null))
               ? data['_raw']['unique_key'].toString()
@@ -425,33 +426,37 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             'name': name,
             'gender': gender,
             'mobile': mobile,
-            'rchId': rchId,
+
             'fatherName': fatherName,
             'beneficiaryId': beneficiaryId,
             'beneficiary_ref_key': beneficiaryId,
           };
 
-          // Use async/await pattern instead of .then()
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RegisterChildDueListFormScreen(
-                arguments: args,
+          // Schedule the navigation for after the current build
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            if (!mounted) return;
+            
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RegisterChildDueListFormScreen(
+                  arguments: args,
+                ),
               ),
-            ),
-          );
+            );
 
-          // This will run after the form is closed
-          if (mounted && result != null && result is Map<String, dynamic>) {
-            if (result['saved'] == true) {
-              // Use a post-frame callback to ensure we're not in build phase
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) {
-                  _loadChildBeneficiaries();
-                }
-              });
+            // Handle the result after navigation
+            if (mounted && result != null && result is Map<String, dynamic>) {
+              if (result['saved'] == true) {
+                // Schedule the refresh after the current frame
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    _loadChildBeneficiaries();
+                  }
+                });
+              }
             }
-          }
+          });
         },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
@@ -551,7 +556,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                           data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 140),
                       Expanded(
                         child: _rowText(
                           l10n?.fatherNameLabel ?? 'Father\'s Name',

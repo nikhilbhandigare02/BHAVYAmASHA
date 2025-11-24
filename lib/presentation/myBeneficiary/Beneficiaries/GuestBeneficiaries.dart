@@ -47,7 +47,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
     try {
       final db = await DatabaseProvider.instance.database;
       final results = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'is_guest = 1 AND is_deleted = 0',
         orderBy: 'created_date_time DESC',
       );

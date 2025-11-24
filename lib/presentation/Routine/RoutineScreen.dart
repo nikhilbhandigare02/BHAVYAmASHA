@@ -138,7 +138,7 @@ class _RoutinescreenState extends State<Routinescreen> {
           pregnantWomen.add({
             'name': name,
             'age': age,
-            'gender': 'महिला',
+            'gender': 'Female',
             'mobile': mobile,
             'id': row['unique_key']?.toString() ?? '',
             'ancDates': ancDates ,
@@ -150,8 +150,26 @@ class _RoutinescreenState extends State<Routinescreen> {
         }
       }
 
+      // Group by name and mobile to find unique women
+      final Map<String, Map<String, dynamic>> uniqueWomen = {};
+      
+      for (final woman in pregnantWomen) {
+        final key = '${woman['name']}_${woman['mobile']}';
+        final existing = uniqueWomen[key];
+        
+        // If no record exists for this woman, or if current record is newer, keep it
+        if (existing == null || 
+            (woman['nextVisit'] != 'N/A' && 
+             existing['nextVisit'] == 'N/A') ||
+            (woman['nextVisit'] != 'N/A' && 
+             existing['nextVisit'] != 'N/A' &&
+             woman['nextVisit'].compareTo(existing['nextVisit']) > 0)) {
+          uniqueWomen[key] = woman;
+        }
+      }
+
       setState(() {
-        _pwList = pregnantWomen;
+        _pwList = uniqueWomen.values.toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -261,7 +279,7 @@ class _RoutinescreenState extends State<Routinescreen> {
     }
   }
 
-// Helper method to update child list
+
   void _updateChildList(List<Map<String, dynamic>> targetList, List<Map<String, dynamic>> sourceRows, String logName) {
     setState(() {
       targetList.clear();
@@ -270,7 +288,7 @@ class _RoutinescreenState extends State<Routinescreen> {
     });
   }
 
-// Helper method to add form data to list
+
   void _addFormDataToList(List<Map<String, dynamic>> targetList, List<Map<String, dynamic>> sourceRows) {
     for (var row in sourceRows) {
       final formData = row['form_json'];
@@ -349,7 +367,7 @@ class _RoutinescreenState extends State<Routinescreen> {
 
      final ancWindows = [
       {'key': '1st_anc_start', 'label': '1st ANC'},
-      {'key': '2nd_anc_start', 'label': '2nd ANC'},
+      {'key': '2nd_anc_start', 'label': ''},
       {'key': '3rd_anc_start', 'label': '3rd ANC'},
       {'key': '4th_anc_start', 'label': '4th ANC'},
       {'key': 'pmsma_start', 'label': 'PMSMA'},
@@ -577,7 +595,7 @@ class _RoutinescreenState extends State<Routinescreen> {
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Text(
-                    item['badge']?.toString() ?? 'ANC',
+                    item['badge']?.toString() ?? 'Child Tracking',
                     style:  TextStyle(color: Color(0xFF0E7C3A), fontWeight: FontWeight.w600, fontSize: 14.sp),
                   ),
                 ),
@@ -609,17 +627,19 @@ class _RoutinescreenState extends State<Routinescreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            '${item['age'] ?? '-'} सा | ${item['gender'] ?? '-'}',
+                            '${item['age'] ?? '-'} Y | ${item['gender'] ?? '-'}',
                             style:  TextStyle(color: Colors.white, fontSize: 14.sp),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${l10n!.antenatal} ${item['nextVisit'] ?? '-'}',
+                            item['badge'] == 'ANC'
+                              ? '${l10n!.antenatal} ${item['nextVisit'] ?? '-'}'
+                              : '${'Next Visits'} ${item['nextVisit'] ?? '-'}',
                             style:  TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${l10n.mobileLabel} ${item['mobile'] ?? '-'}',
+                            '${l10n?.mobileLabel} ${item['mobile'] ?? '-'}',
                             style:  TextStyle(color: Colors.white, fontSize: 14.sp),
                           ),
                         ],
@@ -646,7 +666,9 @@ class _RoutinescreenState extends State<Routinescreen> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Image.asset('assets/images/hrp.png'),
+                            child: item['badge'] == 'ANC'
+                              ? Image.asset('assets/images/hrp.png')
+                              : Image.asset('assets/images/capsule2.png'),
                           ),
                         ),
                       ],
