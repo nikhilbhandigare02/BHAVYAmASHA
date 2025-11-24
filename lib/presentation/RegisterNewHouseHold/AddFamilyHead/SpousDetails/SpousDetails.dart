@@ -73,16 +73,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
         spBloc.add(SpUpdateGender(oppositeGender));
       }
       
-      final memberName = head.spouseName?.trim();
-      final spouseName = head.headName?.trim();
-      final currMember = curr.memberName ?? '';
-      if (memberName != null && memberName.isNotEmpty &&
-          (currMember.isEmpty || (memberName.length > currMember.length && memberName.startsWith(currMember)))) {
+      final memberName = head.spouseName?.trim() ?? '';
+      final spouseName = head.headName?.trim() ?? '';
+      final currMember = curr.memberName?.trim() ?? '';
+      if (memberName != currMember) {
         spBloc.add(SpUpdateMemberName(memberName));
       }
-      final currSpouse = curr.spouseName ?? '';
-      if (spouseName != null && spouseName.isNotEmpty &&
-          (currSpouse.isEmpty || (spouseName.length > currSpouse.length && spouseName.startsWith(currSpouse)))) {
+      final currSpouse = curr.spouseName?.trim() ?? '';
+      if (spouseName != currSpouse) {
         spBloc.add(SpUpdateSpouseName(spouseName));
       }
       
@@ -136,17 +134,15 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
           }
         }
         
-        // Update names
-        final memberName = st.spouseName?.trim();
-        final spouseName = st.headName?.trim();
-        final currMember = curr.memberName ?? '';
-        if (memberName != null && memberName.isNotEmpty &&
-            (currMember.isEmpty || (memberName.length > currMember.length && memberName.startsWith(currMember)))) {
+        // Update names: always reflect latest head spouse/head name
+        final memberName = st.spouseName?.trim() ?? '';
+        final spouseName = st.headName?.trim() ?? '';
+        final currMember = curr.memberName?.trim() ?? '';
+        if (memberName != currMember) {
           spBloc.add(SpUpdateMemberName(memberName));
         }
-        final currSpouse = curr.spouseName ?? '';
-        if (spouseName != null && spouseName.isNotEmpty &&
-            (currSpouse.isEmpty || (spouseName.length > currSpouse.length && spouseName.startsWith(currSpouse)))) {
+        final currSpouse = curr.spouseName?.trim() ?? '';
+        if (spouseName != currSpouse) {
           spBloc.add(SpUpdateSpouseName(spouseName));
         }
       },

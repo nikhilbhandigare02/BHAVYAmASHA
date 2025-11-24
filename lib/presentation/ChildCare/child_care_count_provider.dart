@@ -19,7 +19,7 @@ class ChildCareCountProvider {
       final tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
       developer.log('Available tables: ${tables.map((e) => e['name']).toList()}', name: 'ChildCareCountProvider');
 
-      final beneficiariesTable = tables.any((t) => t['name'] == 'beneficiaries');
+      final beneficiariesTable = tables.any((t) => t['name'] == 'beneficiaries_new');
       if (!beneficiariesTable) {
         developer.log('Beneficiaries table does not exist', name: 'ChildCareCountProvider');
         return 0;

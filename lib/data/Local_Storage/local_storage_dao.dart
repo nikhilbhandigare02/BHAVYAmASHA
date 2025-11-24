@@ -814,11 +814,7 @@ class LocalStorageDao {
   Future<int> getHouseholdCount() async {
     final db = await _db;
 
-    // Count "effective" households in the same way as the AllHousehold screen:
-    //  - household itself is not deleted
-    //  - has at least one beneficiary marked as head for that household
-    //  - that head beneficiary is not deleted, not migrated, and not marked as death
-    // This aligns the dashboard count with the cards shown in AllHouseHold_Screen.
+
     final count = Sqflite.firstIntValue(await db.rawQuery('''
       SELECT COUNT(DISTINCT h.unique_key) AS household_count
       FROM households h
@@ -1392,7 +1388,7 @@ class LocalStorageDao {
         'households',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
         where:
-              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-2 minutes')",
 
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
@@ -1773,7 +1769,7 @@ class LocalStorageDao {
         'beneficiaries_new',
         columns: ['server_id'],
         where:
-            "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+            "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-2 minutes')",
 
         orderBy: "CAST(server_id AS INTEGER) DESC",
         limit: 1,
