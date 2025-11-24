@@ -11,6 +11,7 @@ import '../../core/utils/enums.dart';
 import '../../core/widgets/RoundButton/RoundButton.dart';
 import '../../core/widgets/TextField/TextField.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:medixcel_new/data/repositories/Auth_Repository/auth_repository.dart';
 
 class Resetpassword extends StatefulWidget {
   const Resetpassword({super.key});
@@ -27,7 +28,7 @@ class _ResetpasswordState extends State<Resetpassword> {
     final l10n = AppLocalizations.of(context)!;
 
     return BlocProvider(
-      create: (_) => ResetPasswordBloc(),
+      create: (_) => ResetPasswordBloc(authRepository: AuthRepository()),
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppHeader(screenTitle: l10n.resetCreateNewPasswordTitle, showBack: true),

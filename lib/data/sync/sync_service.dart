@@ -361,6 +361,11 @@ class SyncService {
     _timer?.cancel();
     _timer = null;
   }
+  
+  Future<void> runFullSyncOnce() async {
+    await _triggerOnce();
+  }
+
   Future<void> _triggerOnce() async {
     if (_running) {
       print('SyncService: previous run still in progress, skipping this tick');

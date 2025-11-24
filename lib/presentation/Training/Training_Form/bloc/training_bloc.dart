@@ -56,6 +56,14 @@ class TrainingBloc extends Bloc<TrainingEvent, TrainingState> {
       ));
     });
 
+    on<TrainingHouseholdChanged>((event, emit) {
+      emit(state.copyWith(
+        householdNumber: event.householdNumber,
+        status: state.isValid ? FormStatus.valid : FormStatus.initial,
+        clearError: true,
+      ));
+    });
+
     on<SubmitTraining>(_onSubmitTraining);
   }
 
@@ -79,6 +87,18 @@ class TrainingBloc extends Bloc<TrainingEvent, TrainingState> {
 
       final now = DateTime.now().toIso8601String();
 
+      // Pick a random household number (unique_key) from households table
+      String randomHouseholdKey = '';
+      try {
+        final rows = await db.rawQuery(
+          "SELECT unique_key FROM households WHERE is_deleted = 0 ORDER BY RANDOM() LIMIT 1",
+        );
+        if (rows.isNotEmpty) {
+          final val = rows.first['unique_key'];
+          randomHouseholdKey = val?.toString() ?? '';
+        }
+      } catch (_) {}
+
       final formData = {
         'form_name': formName,
         'form_data': {
@@ -97,7 +117,7 @@ class TrainingBloc extends Bloc<TrainingEvent, TrainingState> {
       final formDataForDb = {
         'server_id': '',
         'forms_ref_key': formRefKey,
-        'household_ref_key': '',
+        'household_ref_key': randomHouseholdKey,
         'beneficiary_ref_key': '',
         'mother_key': '',
         'father_key': '',

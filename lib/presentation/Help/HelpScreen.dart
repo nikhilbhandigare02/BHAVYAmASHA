@@ -79,16 +79,19 @@ class HelpScreen extends StatelessWidget {
               ),
 
 Divider(),
-              Row(
-                children: [
-                  Text(l10n.emailLabel + '  ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                  const Expanded(
-                    child: Text(
-                      'helpdesk.bhavya@bihar.gov.in',
-                      style: TextStyle(color: Colors.black87),
+              InkWell(
+                onTap: () => _sendEmail(context, 'helpdesk.bhavya@bihar.gov.in'),
+                child: Row(
+                  children: [
+                    Text(l10n.emailLabel + '  ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                    const Expanded(
+                      child: Text(
+                        'helpdesk.bhavya@bihar.gov.in',
+                        style: TextStyle(color: Colors.black87, decoration: TextDecoration.underline),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -100,21 +103,39 @@ Divider(),
 
 
 Future<void> _callNumber(BuildContext context, String number) async {
-  final raw = number.replaceAll(' ', '');
-  final candidates = <Uri>[
-    Uri(scheme: 'tel', path: raw),
-    Uri(scheme: 'tel', path: raw.replaceAll('+', '')), // some platforms reject '+' in path
-  ];
+  final raw = number.replaceAll(' ', '').replaceAll('+', '');
+  final uri = Uri(scheme: 'tel', path: raw);
 
-  for (final uri in candidates) {
-    if (await canLaunchUrl(uri)) {
-      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (ok) return;
+  try {
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open dialer on this device.')),
+      );
     }
+  } catch (_) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Unable to open dialer on this device.')),
+    );
   }
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Unable to open dialer on this device.')),
-  );
 }
 
+Future<void> _sendEmail(BuildContext context, String email) async {
+  final uri = Uri(
+    scheme: 'mailto',
+    path: email,
+  );
+
+  try {
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open email app on this device.')),
+      );
+    }
+  } catch (_) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Unable to open email app on this device.')),
+    );
+  }
+}

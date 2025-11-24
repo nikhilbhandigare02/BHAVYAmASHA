@@ -41,6 +41,13 @@ class TrainingDaysChanged extends TrainingEvent {
   List<Object?> get props => [days];
 }
 
+class TrainingHouseholdChanged extends TrainingEvent {
+  final String householdNumber;
+  const TrainingHouseholdChanged(this.householdNumber);
+  @override
+  List<Object?> get props => [householdNumber];
+}
+
 class SubmitTraining extends TrainingEvent {
   const SubmitTraining();
 }

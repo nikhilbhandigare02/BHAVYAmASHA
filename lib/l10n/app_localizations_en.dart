@@ -1309,6 +1309,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gridRegisterNewHousehold => 'Register New Household';
 
   @override
+  String get gridNewHouseholdRegister => 'New Household Registration';
+
+  @override
   String get gridTraining => 'Training';
 
   @override

@@ -110,4 +110,63 @@ class AuthRepository {
     }
   }
 
+  Future<Map<String, dynamic>> changePassword({
+    required String username,
+    required String currentPassword,
+    required String newPassword,
+    required String confirmNewPassword,
+  }) async {
+    try {
+      final currentUser = await UserInfo.getCurrentUser();
+      final userDetails = currentUser?['details'] is String
+          ? jsonDecode(currentUser?['details'] ?? '{}')
+          : currentUser?['details'] ?? {};
+
+      String? token = await SecureStorageService.getToken();
+      if ((token == null || token.isEmpty) && userDetails is Map) {
+        try {
+          token = userDetails['token']?.toString();
+        } catch (_) {}
+      }
+
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      };
+
+      final requestBody = {
+        'username': username.trim(),
+        'password': currentPassword.trim(),
+        'change_password': newPassword.trim(),
+        'confirm_new_password': confirmNewPassword.trim(),
+      };
+
+      print('Change Password Request: ${Endpoints.changePassword}');
+      print('Request Body: ${jsonEncode(requestBody)}');
+
+      final response = await _apiService.postApi(
+        Endpoints.changePassword,
+        requestBody,
+        headers: headers,
+      );
+
+      print('Raw Change Password Response (Type: ${response.runtimeType}): $response');
+
+      final responseData = response is Map<String, dynamic>
+          ? response
+          : (response is String ? jsonDecode(response) : <String, dynamic>{});
+
+      print('Processed Change Password Response: $responseData');
+
+      return responseData is Map<String, dynamic>
+          ? responseData
+          : <String, dynamic>{};
+    } on AppExceptions {
+      rethrow;
+    } catch (e) {
+      throw AppExceptions('An error occurred while changing password. Please try again.');
+    }
+  }
+
 }

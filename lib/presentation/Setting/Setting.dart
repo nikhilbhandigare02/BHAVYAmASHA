@@ -8,6 +8,7 @@ import 'package:medixcel_new/core/locale/bloc/locale_event.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 
 class Setting extends StatefulWidget {
   const Setting({super.key});
@@ -61,7 +62,9 @@ class _SettingState extends State<Setting> {
                   child: RoundButton(
                     title: l10n.settingsCheck,
                     color: AppColors.primary,
-                    onPress: () {},
+                    onPress: () {
+                      showAppSnackBar(context, 'Your Bhavya m-ASHA application is up to date.');
+                    },
                   ),
                 ),
               ],

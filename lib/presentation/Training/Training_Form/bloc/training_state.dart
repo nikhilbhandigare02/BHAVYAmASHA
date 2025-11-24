@@ -6,6 +6,7 @@ class TrainingState extends Equatable {
   final List<String> trainingNames;
   final String? trainingType;
   final String? trainingName;
+  final String? householdNumber;
   final DateTime? date;
   final String? place;
   final String? days;
@@ -17,6 +18,7 @@ class TrainingState extends Equatable {
     required this.trainingNames,
     this.trainingType,
     this.trainingName,
+    this.householdNumber,
     this.date,
     this.place,
     this.days,
@@ -29,6 +31,7 @@ class TrainingState extends Equatable {
         trainingNames: const ['ASHA module 1', 'ASHA module 2','ASHA module 3','ASHA module 4','ASHA module 5,6 & 7','NCD', 'HBNC', 'HBYC', 'ASHA Facilitator training','Induction Training','MAA(Mothers Absolute Affection)','IDCF(Integrated Diarrhoea Control Fortnight)','Other Training'],
         trainingType: null,
         trainingName: null,
+        householdNumber: null,
         date: null,
         place: null,
         days: null,
@@ -50,6 +53,7 @@ class TrainingState extends Equatable {
     List<String>? trainingNames,
     String? trainingType,
     String? trainingName,
+    String? householdNumber,
     DateTime? date,
     String? place,
     String? days,
@@ -62,6 +66,7 @@ class TrainingState extends Equatable {
       trainingNames: trainingNames ?? this.trainingNames,
       trainingType: trainingType ?? this.trainingType,
       trainingName: trainingName ?? this.trainingName,
+      householdNumber: householdNumber ?? this.householdNumber,
       date: date ?? this.date,
       place: place ?? this.place,
       days: days ?? this.days,
@@ -76,6 +81,7 @@ class TrainingState extends Equatable {
         trainingNames,
         trainingType,
         trainingName,
+        householdNumber,
         date,
         place,
         days,

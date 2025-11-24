@@ -336,17 +336,13 @@ import '../../l10n/app_localizations.dart';
             backgroundColor: AppColors.surface,
             appBar: AppHeader(
               screenTitle: l10n.ashaProfile,
-
-              showBack: loginFlag == 1 ? true : false,
-
-              onBackTap: widget.fromLogin
-                  ? () {
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        Route_Names.homeScreen,
-                        (route) => false,
-                      );
-                    }
-                  : null,
+              showBack: true,
+              onBackTap: () {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  Route_Names.homeScreen,
+                  (route) => false,
+                );
+              },
             ),
           body: SafeArea(
             child: BlocConsumer<ProfileBloc, ProfileState>(
@@ -374,21 +370,11 @@ import '../../l10n/app_localizations.dart';
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      ApiDropdown<Country>(
+                      CustomTextField(
                         labelText: l10n.areaOfWorking,
-                        items: countries,
-                        value: selectedCountry,
-                        getLabel: (country) => country.name,
-
-                         hintText: l10n.selectArea,
-
-                        onChanged: null,
-                        // onChanged: (value) {
-                        //   setState(() => selectedCountry = value);
-                        //   if (value != null) {
-                        //     bloc.add(AreaOfWorkingChanged(value.name));
-                        //   }
-                        // },
+                        hintText: l10n.selectArea,
+                        initialValue: selectedCountry?.name ?? '',
+                        readOnly: true,
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5),
                       BlocBuilder<ProfileBloc, ProfileState>(

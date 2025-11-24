@@ -70,6 +70,22 @@ class LocalStorageDao {
     }
   }
 
+  Future<int> getHouseholdTotalCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM households WHERE is_deleted = 0',
+    ));
+    return count ?? 0;
+  }
+
+  Future<int> getHouseholdSyncedCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM households WHERE is_deleted = 0 AND is_synced = 1',
+    ));
+    return count ?? 0;
+  }
+
   Future<List<Map<String, dynamic>>> getChildTrackingDueFor9Year() async {
     print('Executing getChildTrackingDueFor9Year query...');
     try {
@@ -614,7 +630,8 @@ class LocalStorageDao {
         'facility_id': data['facility_id'],
         // Keep original created_date_time in DB; only update modified_date_time
         'modified_date_time': data['modified_date_time'],
-        'is_synced': data['is_synced'] ?? 0,
+        // Any local update should mark record as needing re-sync
+        'is_synced': 0,
         'is_deleted': data['is_deleted'] ?? 0,
       };
 
@@ -735,6 +752,22 @@ class LocalStorageDao {
     return db.insert('beneficiaries_new', row);
   }
 
+  Future<int> getBeneficiaryTotalCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM beneficiaries_new WHERE is_deleted = 0',
+    ));
+    return count ?? 0;
+  }
+
+  Future<int> getBeneficiarySyncedCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM beneficiaries_new WHERE is_deleted = 0 AND is_synced = 1',
+    ));
+    return count ?? 0;
+  }
+
   Future<int> insertEligibleCoupleActivity(Map<String, dynamic> data) async {
     final db = await _db;
     final row = <String, dynamic>{
@@ -753,6 +786,22 @@ class LocalStorageDao {
       'is_deleted': data['is_deleted'] ?? 0,
     };
     return db.insert('eligible_couple_activities', row);
+  }
+
+  Future<int> getEligibleCoupleTotalCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM eligible_couple_activities WHERE is_deleted = 0',
+    ));
+    return count ?? 0;
+  }
+
+  Future<int> getEligibleCoupleSyncedCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM eligible_couple_activities WHERE is_deleted = 0 AND is_synced = 1',
+    ));
+    return count ?? 0;
   }
 
   Future<int> insertMotherCareActivity(Map<String, dynamic> data) async {
@@ -775,6 +824,22 @@ class LocalStorageDao {
     return db.insert('mother_care_activities', row);
   }
 
+  Future<int> getMotherCareTotalCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM mother_care_activities WHERE is_deleted = 0',
+    ));
+    return count ?? 0;
+  }
+
+  Future<int> getMotherCareSyncedCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM mother_care_activities WHERE is_deleted = 0 AND is_synced = 1',
+    ));
+    return count ?? 0;
+  }
+
   Future<int> insertChildCareActivity(Map<String, dynamic> data) async {
     final db = await _db;
     final row = <String, dynamic>{
@@ -795,6 +860,22 @@ class LocalStorageDao {
       'is_deleted': data['is_deleted'] ?? 0,
     };
     return db.insert('child_care_activities', row);
+  }
+
+  Future<int> getChildCareTotalCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM child_care_activities WHERE is_deleted = 0',
+    ));
+    return count ?? 0;
+  }
+
+  Future<int> getChildCareSyncedCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM child_care_activities WHERE is_deleted = 0 AND is_synced = 1',
+    ));
+    return count ?? 0;
   }
 
   Future<List<Map<String, dynamic>>> getUnsyncedMotherCareAncForms() async {
@@ -866,6 +947,22 @@ class LocalStorageDao {
 
     final id = await db.insert('followup_form_data', row);
     return id;
+  }
+
+  Future<int> getFollowupTotalCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM followup_form_data WHERE is_deleted = 0',
+    ));
+    return count ?? 0;
+  }
+
+  Future<int> getFollowupSyncedCountLocal() async {
+    final db = await _db;
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM followup_form_data WHERE is_deleted = 0 AND is_synced = 1',
+    ));
+    return count ?? 0;
   }
 
   Future<int> getHouseholdCount() async {
@@ -1177,6 +1274,8 @@ class LocalStorageDao {
       }
 
       row['modified_date_time'] = DateTime.now().toIso8601String();
+      // Any local update should mark record as needing re-sync
+      row['is_synced'] = 0;
 
       return await db.update(
         'beneficiaries_new',
@@ -1818,7 +1917,7 @@ class LocalStorageDao {
   }
 }
 
-   extension LocalStorageDaoReads on LocalStorageDao {
+extension LocalStorageDaoReads on LocalStorageDao {
   Future<String> getLatestBeneficiaryServerId() async {
     try {
       final db = await _db;

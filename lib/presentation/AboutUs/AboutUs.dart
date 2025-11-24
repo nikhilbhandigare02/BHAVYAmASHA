@@ -35,8 +35,18 @@ class _AboutusState extends State<Aboutus> {
                 Builder(
                   builder: (context) {
                     final text = l10n?.aboutUsP1Title ?? '';
-                    const target = 'ASHA';
-                    final index = text.indexOf(target);
+
+                    const targetEn = 'ASHA';
+                    const targetHi = 'आशा';
+
+                    // Prefer Hindi match if present, else English, else plain text
+                    int index = text.indexOf(targetHi);
+                    String target = targetHi;
+
+                    if (index == -1) {
+                      index = text.indexOf(targetEn);
+                      target = targetEn;
+                    }
 
                     if (index == -1) {
                       return Text(
