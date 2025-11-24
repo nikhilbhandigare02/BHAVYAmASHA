@@ -1003,6 +1003,21 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             }
             if (state.postApiStatus == PostApiStatus.success) {
               final Map<String, dynamic> result = state.toJson();
+
+              // Preserve technical keys from initial map (used for updates)
+              if (widget.initial != null) {
+                for (final key in [
+                  'hh_unique_key',
+                  'head_unique_key',
+                  'spouse_unique_key',
+                  'head_id_pk',
+                  'spouse_id_pk',
+                ]) {
+                  if (widget.initial![key] != null && !result.containsKey(key)) {
+                    result[key] = widget.initial![key];
+                  }
+                }
+              }
               // Attach spouse and children details JSON if available
               try {
                 final sp = context.read<SpousBloc>().state;
@@ -1063,6 +1078,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           // Show Add Member button so that table, remaining count,
                           // and add-member action are all available together.
                           hideAddMemberButton: false,
+                          isEdit: widget.isEdit,
+                          // For update flows we do not want to show the
+                          // "successfully added new household" popup again.
+                          showSuccessOnSave: false,
+                          initialHeadForm: result,
                         ),
                       ),
                     ),
@@ -1290,8 +1310,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                         title: i < last
                                                             ? l.nextButton
                                                             : (isLoading
-                                                            ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
-                                                            : (widget.isEdit ? 'UPDATE' : l.addButton)),
+                                                                ? l.addingButton
+                                                                : l.addButton),
                                                         onPress: () {
                                                           if (i < last) {
                                                             bool canProceed = true;

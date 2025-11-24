@@ -65,7 +65,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     });
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadData   () async {
     if (mounted) {
       setState(() {
         _isLoading = true;

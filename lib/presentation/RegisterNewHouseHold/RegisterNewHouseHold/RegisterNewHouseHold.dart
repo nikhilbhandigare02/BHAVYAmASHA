@@ -26,12 +26,20 @@ class RegisterNewHouseHoldScreen extends StatefulWidget {
   final bool hideAddMemberButton;
   // If false, do not show success popup when saving (used for update flows)
   final bool showSuccessOnSave;
+  // Flag to indicate whether we are editing an existing household
+  final bool isEdit;
+  // Optional initial head form, used in edit flows so that SaveHousehold
+  // can see the existing keys (hh_unique_key, head_unique_key, etc.).
+  final Map<String, dynamic>? initialHeadForm;
+
   const RegisterNewHouseHoldScreen({
     super.key,
     this.initialMembers,
     this.headAddedInit = false,
     this.hideAddMemberButton = false,
     this.showSuccessOnSave = true,
+    this.isEdit = false,
+    this.initialHeadForm,
   });
 
   @override
@@ -66,6 +74,15 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       _members.addAll(widget.initialMembers!
           .map((m) => Map<String, String>.from(m)));
       totalMembers = _members.length;
+    }
+
+    // When coming from an edit flow (AllHouseHold or Today's Programme),
+    // we receive the original head form including technical keys like
+    // hh_unique_key and head_unique_key. Store it so SaveHousehold can
+    // detect isEdit and update instead of inserting.
+    if (widget.initialHeadForm != null) {
+      _headForm = Map<String, dynamic>.from(widget.initialHeadForm!);
+      headAdded = true;
     }
   }
 
@@ -221,12 +238,12 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               builder: (context) {
                 final idx = _tabController.index;
                 final bool disableNext = idx == 0 && !headAdded;
+
                 String rightTitle;
                 if (idx == 2) {
-                  // Last tab: use SAVE for add flow, UPDATE for update flow
-                  rightTitle = widget.showSuccessOnSave
-                      ? (l10n?.saveButton ?? 'SAVE')
-                      : (l10n?.updateButton ?? 'UPDATE');
+                  rightTitle = widget.isEdit
+                      ? (l10n?.updateButton ?? 'UPDATE')
+                      : (l10n?.saveButton ?? 'SAVE');
                 } else {
                   rightTitle = (l10n?.nextButton ?? 'NEXT');
                 }
@@ -364,8 +381,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       setState(() {
         _headForm = Map<String, dynamic>.from(result);
 
-        // Flatten spouse JSON details (if any) into sp_*-prefixed keys so
-        // AddNewFamilyHeadScreen can hydrate SpousBloc on reopen.
+
         try {
           final spRaw = result['spousedetails'];
           Map<String, dynamic>? spMap;
@@ -798,6 +814,21 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                           initial[key] = value.toString();
                         }
                       });
+
+                      // Also propagate technical keys used for update flows when editing
+                      // inside the household screen.
+                      for (final key in [
+                        'hh_unique_key',
+                        'head_unique_key',
+                        'spouse_unique_key',
+                        'head_id_pk',
+                        'spouse_id_pk',
+                      ]) {
+                        final v = _headForm![key];
+                        if (v != null && !initial.containsKey(key)) {
+                          initial[key] = v.toString();
+                        }
+                      }
 
                       final result = await Navigator.of(context).push<Map<String, dynamic>>(
                         MaterialPageRoute(
