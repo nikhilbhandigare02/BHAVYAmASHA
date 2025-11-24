@@ -69,10 +69,13 @@ class _EligibleCoupleIdentifiedScreenState
 
       for (final member in household) {
         final info = _toStringMap(member['beneficiary_info']);
-        final rawRelation =
+        String rawRelation =
             (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+        rawRelation = rawRelation.replaceAll('_', ' ');
+        if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+          rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+        }
 
-        // Normalize relation values from various possible labels
         final relation = () {
           if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
             return 'self';
@@ -92,23 +95,70 @@ class _EligibleCoupleIdentifiedScreenState
         }
       }
 
-      // Check if head is eligible female
-      if (head != null && _isEligibleFemale(head, head: head)) {
-        couples.add(_formatCoupleData(
-            head['_row'] ?? {},
-            head,
-            spouse ?? {},
-            isHead: true
-        ));
-      }
+      const allowedRelations = <String>{
+        'self',
+        'spouse',
+        'husband',
+        'son',
+        'daughter',
+        'father',
+        'mother',
+        'brother',
+        'sister',
+        'wife',
+        'nephew',
+        'niece',
+        'grand father',
+        'grand mother',
+        'father in law',
+        'mother in low',
+        'grand son',
+        'grand daughter',
+        'son in law',
+        'daughter in law',
+        'other',
+      };
 
-      // Check if spouse is eligible female
-      if (spouse != null && _isEligibleFemale(spouse, head: head)) {
+      for (final member in household) {
+        final info = _toStringMap(member['beneficiary_info']);
+        String rawRelation =
+            (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+        rawRelation = rawRelation.replaceAll('_', ' ');
+        if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+          rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+        }
+
+        if (!allowedRelations.contains(rawRelation)) {
+          continue;
+        }
+
+        // Only consider females 15-49 and married
+        if (!_isEligibleFemale(info, head: head)) {
+          continue;
+        }
+
+        // Decide counterpart and isHead flag
+        final bool isHeadRelation =
+            rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head';
+        final bool isSpouseRelation =
+            rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband';
+
+        final counterpart = () {
+          if (isHeadRelation) {
+            return spouse ?? <String, dynamic>{};
+          }
+          if (isSpouseRelation) {
+            return head ?? <String, dynamic>{};
+          }
+          // For other relations, use head as counterpart if available
+          return head ?? <String, dynamic>{};
+        }();
+
         couples.add(_formatCoupleData(
-            spouse['_row'] ?? {},
-            spouse,
-            head ?? {},
-            isHead: false
+          _toStringMap(member),
+          info,
+          counterpart,
+          isHead: isHeadRelation,
         ));
       }
     }

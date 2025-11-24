@@ -699,14 +699,40 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ApiDropdown<String>(
                                   labelText: '${l.relationWithHeadLabel} *',
                                   items: state.memberType == 'Child'
-                                      ? const ['Father', 'Mother', 'Brother', 'Sister', 'Other']
-                                      : const ['Self','Spouse', 'Son', 'Daughter', 'Father', 'Mother', 'Brother', 'Sister', 'Other'],
+                                      ? const ['Father', 'Mother', 'Brother', 'Sister','Grand Father','Grand Mother', 'Other']
+                                      : const [
+                                    'Self',
+                                    'Spouse',
+                                    'Husband',
+                                    'Son',
+                                    'Daughter',
+                                    'Father',
+                                    'Mother',
+                                    'Brother',
+                                    'Sister',
+                                    'Wife',
+                                    'Nephew',
+                                    'Niece',
+                                    'Grand Father',
+                                    'Grand Mother',
+                                    'Father In Law',
+                                    'Mother In Low',
+                                    'Grand Son',
+                                    'Grand Daughter',
+                                    'Son In Law',
+                                    'Daughter In Law',
+                                    'Other',
+                                  ],
                                   getLabel: (s) {
                                     switch (s) {
                                       case 'Self':
                                         return l.self;
                                       case 'Spouse':
                                         return l.relationSpouse;
+                                      case 'Husband':
+                                        return l.husbandLabel;
+                                      case 'Wife':
+                                        return l.wife;
                                       case 'Son':
                                         return l.relationSon;
                                       case 'Daughter':
@@ -719,12 +745,33 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         return l.relationBrother;
                                       case 'Sister':
                                         return l.relationSister;
+                                      case 'Nephew':
+                                        return l.relationNephew;
+                                      case 'Niece':
+                                        return l.relationNiece;
+                                      case 'Grand Father':
+                                        return l.relationGrandFather;
+                                      case 'Grand Mother':
+                                        return l.relationGrandMother;
+                                      case 'Father In Law':
+                                        return l.relationFatherInLaw;
+                                      case 'Mother In Low': // check spelling Low → Law
+                                        return l.relationMotherInLaw;
+                                      case 'Grand Son':
+                                        return l.relationGrandSon;
+                                      case 'Grand Daughter':
+                                        return l.relationGrandDaughter;
+                                      case 'Son In Law':
+                                        return l.relationSonInLaw;
+                                      case 'Daughter In Law':
+                                        return l.relationDaughterInLaw;
                                       case 'Other':
                                         return l.relationOther;
                                       default:
                                         return s;
                                     }
                                   },
+
                                   value: state.relation,
                                   onChanged: (v) {
                                     context.read<AddnewfamilymemberBloc>().add(AnmUpdateRelation(v ?? ''));

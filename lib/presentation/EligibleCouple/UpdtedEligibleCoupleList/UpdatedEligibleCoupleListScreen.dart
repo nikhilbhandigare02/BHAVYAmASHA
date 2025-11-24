@@ -107,30 +107,27 @@ class _UpdatedEligibleCoupleListScreenState
     }
     print('🏠 Households found: ${households.length}');
 
-    // Process each household
+    // Process each household using same relation logic as EligibleCoupleIdentifiedScreen
     int eligibleCount = 0;
     for (final household in households.values) {
-      // Find head and spouse
       Map<String, dynamic>? head;
       Map<String, dynamic>? spouse;
 
+      // First pass: identify head and spouse for context
       for (final member in household) {
         try {
-          // Handle both String and Map types for beneficiary_info
-          final memberUniqueKey = member['unique_key']?.toString() ?? '';
-          if (memberUniqueKey.isNotEmpty &&
-              pregnantBeneficiaries.contains(memberUniqueKey)) {
-            // Skip ECs that are already marked pregnant in tracking form
-            continue;
-          }
-
           final dynamic infoRaw = member['beneficiary_info'];
           final Map<String, dynamic> info = infoRaw is String
               ? jsonDecode(infoRaw)
               : Map<String, dynamic>.from(infoRaw ?? {});
 
-          final rawRelation =
+          String rawRelation =
               (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+          rawRelation = rawRelation.replaceAll('_', ' ');
+          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+          }
+
           final relation = () {
             if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
               return 'self';
@@ -160,46 +157,98 @@ class _UpdatedEligibleCoupleListScreenState
         }
       }
 
-      // Check if head is eligible female
-      if (head != null && _isEligibleFemale(head)) {
-        final isFp = head['_row']?['is_family_planning'] == true ||
-                   head['_row']?['is_family_planning'] == 1 ||
-                   head['_row']?['is_family_planning']?.toString().toLowerCase() == 'yes';
-        print('  ✅ Eligible head: ${head['memberName'] ?? head['headName']} (FP: $isFp)');
-        final coupleData = _formatData(
-          head['_row'] ?? {},
-          head,
-          spouse ?? {},
-          isHead: true,
-          isFamilyPlanning: isFp,
-        );
-        print('  📝 Added couple data: ${coupleData['Name']} (Protected: ${coupleData['is_family_planning']})');
-        couples.add(coupleData);
-        eligibleCount++;
-      } else if (head != null) {
-        print('  ❌ Ineligible head: ${head['memberName'] ?? head['headName']}');
-        print('     Gender: ${head['gender']}, Marital: ${head['maritalStatus']}');
-      }
+      // Allowed relations to consider for EC identification (same as Identified screen)
+      const allowedRelations = <String>{
+        'self',
+        'spouse',
+        'husband',
+        'son',
+        'daughter',
+        'father',
+        'mother',
+        'brother',
+        'sister',
+        'wife',
+        'nephew',
+        'niece',
+        'grand father',
+        'grand mother',
+        'father in law',
+        'mother in low',
+        'grand son',
+        'grand daughter',
+        'son in law',
+        'daughter in law',
+        'other',
+      };
 
-      // Check if spouse is eligible female
-      if (spouse != null && _isEligibleFemale(spouse)) {
-        final isFp = spouse['_row']?['is_family_planning'] == true ||
-                   spouse['_row']?['is_family_planning'] == 1 ||
-                   spouse['_row']?['is_family_planning']?.toString().toLowerCase() == 'yes';
-        print('  ✅ Eligible spouse: ${spouse['memberName'] ?? spouse['headName']} (FP: $isFp)');
-        final coupleData = _formatData(
-          spouse['_row'] ?? {},
-          spouse,
-          head ?? {},
-          isHead: false,
-          isFamilyPlanning: isFp,
-        );
-        print('  📝 Added couple data: ${coupleData['Name']} (Protected: ${coupleData['is_family_planning']})');
-        couples.add(coupleData);
-        eligibleCount++;
-      } else if (spouse != null) {
-        print('  ❌ Ineligible spouse: ${spouse['memberName'] ?? spouse['headName']}');
-        print('     Gender: ${spouse['gender']}, Marital: ${spouse['maritalStatus']}');
+      // Second pass: consider every member whose relation is in the allowed list
+      for (final member in household) {
+        try {
+          final memberUniqueKey = member['unique_key']?.toString() ?? '';
+          if (memberUniqueKey.isNotEmpty &&
+              pregnantBeneficiaries.contains(memberUniqueKey)) {
+            // Skip ECs that are already marked pregnant in tracking form
+            continue;
+          }
+
+          final dynamic infoRaw = member['beneficiary_info'];
+          final Map<String, dynamic> info = infoRaw is String
+              ? jsonDecode(infoRaw)
+              : Map<String, dynamic>.from(infoRaw ?? {});
+
+          String rawRelation =
+              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+          rawRelation = rawRelation.replaceAll('_', ' ');
+          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+          }
+
+          if (!allowedRelations.contains(rawRelation)) {
+            continue;
+          }
+
+          // Only consider females 15-49 and married
+          if (!_isEligibleFemale(info, head: head)) {
+            continue;
+          }
+
+          final bool isHeadRelation =
+              rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head';
+          final bool isSpouseRelation =
+              rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband';
+
+          final counterpart = () {
+            if (isHeadRelation) {
+              return spouse ?? <String, dynamic>{};
+            }
+            if (isSpouseRelation) {
+              return head ?? <String, dynamic>{};
+            }
+            return head ?? <String, dynamic>{};
+          }();
+
+          final isFp = member['is_family_planning'] == true ||
+              member['is_family_planning'] == 1 ||
+              member['is_family_planning']?.toString().toLowerCase() == 'yes';
+
+          final coupleData = _formatData(
+            Map<String, dynamic>.from(member),
+            info,
+            counterpart,
+            isHead: isHeadRelation,
+            isFamilyPlanning: isFp,
+          );
+
+          print('  📝 Added couple data: ${coupleData['Name']} (Protected: ${coupleData['is_family_planning']})');
+          couples.add(coupleData);
+          eligibleCount++;
+        } catch (e) {
+          print('❌ Error processing EC member: $e');
+          if (e is Error) {
+            print('Stack trace: ${e.stackTrace}');
+          }
+        }
       }
     }
     print('🏁 Finished processing. Found $eligibleCount eligible couples out of ${rows.length} beneficiaries');

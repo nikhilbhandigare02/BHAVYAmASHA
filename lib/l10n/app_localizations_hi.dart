@@ -2016,6 +2016,36 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relationSpouse => 'पति/पत्नी';
 
   @override
+  String get relationNephew => 'भतीजा / भानजा';
+
+  @override
+  String get relationNiece => 'भतीजी / भानजी';
+
+  @override
+  String get relationGrandFather => 'दादा / नाना';
+
+  @override
+  String get relationGrandMother => 'दादी / नानी';
+
+  @override
+  String get relationFatherInLaw => 'ससुर';
+
+  @override
+  String get relationMotherInLaw => 'सास';
+
+  @override
+  String get relationGrandSon => 'पोता / नाती';
+
+  @override
+  String get relationGrandDaughter => 'पोती / नातिन';
+
+  @override
+  String get relationSonInLaw => 'दामाद';
+
+  @override
+  String get relationDaughterInLaw => 'बहू';
+
+  @override
   String get relationWithHeadLabel => 'परिवार प्रमुख से संबंध';
 
   @override
