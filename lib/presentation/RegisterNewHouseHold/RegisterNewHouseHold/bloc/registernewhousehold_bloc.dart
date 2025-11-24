@@ -119,9 +119,6 @@ class RegisterNewHouseholdBloc
             }
             final geoLocationJson = jsonEncode(locationData);
 
-            // For new households (isEdit == false), insert a fresh head and spouse
-            // beneficiary records. For edits, skip inserts here and rely solely on
-            // the update logic below that modifies the existing records by key.
             if (!isEdit) {
               final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
               final headId = await IdGenerator.generateUniqueId(deviceInfo);
@@ -635,9 +632,6 @@ class RegisterNewHouseholdBloc
         }
         final latestBeneficiary = beneficiaries.first;
 
-        // For new households, derive keys from latest beneficiary; for edits,
-        // reuse the keys we passed in (hh_unique_key/head_unique_key) so we
-        // update the same records that were opened.
         final String uniqueKey = isEdit && existingHhKey.isNotEmpty
             ? existingHhKey
             : (latestBeneficiary['household_ref_key'] ?? '').toString();

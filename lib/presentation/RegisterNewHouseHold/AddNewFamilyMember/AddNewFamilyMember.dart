@@ -51,6 +51,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isEdit = false;
   bool _argsHandled = false;
+  // When true, this screen was opened directly from AllBeneficiary or
+  // HouseHold_Beneficiery and member details should be saved/updated
+  // immediately on the Add button. When false, data is returned to the
+  // RegisterNewHouseHold flow and persisted on its final Save button.
+  bool _isMemberDetails = false;
   String _fatherOption = 'Select';
   String _motherOption = 'Select';
   int _currentStep = 0; // 0: member, 1: spouse, 2: children
@@ -308,6 +313,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
         final dynamic flagB = args['isEdit'];
         final dynamic flagC = args['edit'];
         _isEdit = (flagA == true) || (flagB == true) || (flagC == true);
+
+        // Standalone member details flow (from AllBeneficiary or
+        // HouseHold_Beneficiery) sets this flag so we save immediately
+        // on Add button.
+        final dynamic memberFlag = args['isMemberDetails'];
+        _isMemberDetails = memberFlag == true;
 
         // Use relation passed from previous screen to prefill relation dropdown.
         final relArg = args['relation']?.toString().trim();
@@ -1750,6 +1761,23 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
 
                                         print('Submitting member data: ${jsonEncode(memberData)}');
+
+                                        // If this screen was opened as standalone member
+                                        // details (from AllBeneficiary / HouseHold_Beneficiery)
+                                        // OR in edit mode, always save immediately using the
+                                        // AddNewFamilyMemberBloc submit events.
+                                        if (_isMemberDetails || _isEdit) {
+                                          if (_isEdit) {
+                                            bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
+                                          } else {
+                                            bloc.add(AnmSubmit(context, hhid: widget.hhId));
+                                          }
+                                          return;
+                                        }
+
+                                        // Household registration flow (isMemberDetails == false):
+                                        // advance through tabs and, on the last step, pop the
+                                        // collected memberData back to RegisterNewHouseHold.
                                         if (!_isEdit) {
                                           final showSpouse = !_isEdit && state.memberType != 'Child' && state.maritalStatus == 'Married';
                                           final showChildren = !_isEdit && showSpouse && state.hasChildren == 'Yes';
@@ -1761,14 +1789,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                             ctrl?.animateTo(_currentStep);
                                             return;
                                           }
-                                        }
 
-                                        if (_isEdit) {
-                                          // In edit mode, trigger update flow
-                                          bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
-                                        } else {
-                                          // Normal add flow
-                                          bloc.add(AnmSubmit(context, hhid: widget.hhId));
+                                          // We are already on the last step: close this screen
+                                          // and return the prepared memberData to the caller.
+                                          Navigator.of(context).pop(memberData);
+                                          return;
                                         }
                                       } catch (e) {
                                         print('Error preparing member data: $e');

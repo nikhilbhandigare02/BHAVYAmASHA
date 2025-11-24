@@ -669,7 +669,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             ),
 
 
-            if (data['hasChildrenTarget'] == true)
+            if (data['hasChildrenTarget'] == true &&
+                ((data['remainingChildren'] ?? 0) as int) > 0)
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
