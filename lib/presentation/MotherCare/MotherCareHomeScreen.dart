@@ -162,7 +162,7 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
           }
 
           final beneficiaryResults = await db.query(
-            'beneficiaries',
+            'beneficiaries_new',
             where: 'unique_key = ? AND is_deleted = 0',
             whereArgs: [beneficiaryRefKey],
           );

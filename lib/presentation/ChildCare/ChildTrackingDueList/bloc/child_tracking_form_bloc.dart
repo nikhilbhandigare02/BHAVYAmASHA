@@ -210,14 +210,14 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
       if (householdRefKey.isEmpty && state.formData['household_id'] != null) {
         final householdId = state.formData['household_id'].toString();
         List<Map<String, dynamic>> beneficiaryMaps = await db.query(
-          'beneficiaries',
+          'beneficiaries_new ',
           where: 'household_ref_key = ?',
           whereArgs: [householdId],
         );
 
         if (beneficiaryMaps.isEmpty) {
           beneficiaryMaps = await db.query(
-            'beneficiaries',
+            'beneficiaries_new ',
             where: 'id = ?',
             whereArgs: [int.tryParse(householdId) ?? 0],
           );
@@ -359,7 +359,7 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
 
       // Query beneficiary by unique_key
       List<Map<String, dynamic>> beneficiaryRecords = await db.query(
-        'beneficiaries',
+        'beneficiaries_new ',
         where: 'unique_key = ?',
         whereArgs: [beneficiaryRefKey],
       );
@@ -372,9 +372,8 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
       final beneficiary = beneficiaryRecords.first;
       final beneficiaryId = beneficiary['id'];
 
-      // Update the beneficiary record with death information
       await db.update(
-        'beneficiaries',
+        'beneficiaries_new ',
         {
           'is_death': 1,
           'death_details': jsonEncode(deathDetails),
