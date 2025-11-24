@@ -459,7 +459,7 @@ class _HBNCListScreenState
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: l10n?.searchEligibleCouple ?? 'search Eligible Couple',
+                hintText: l10n?.searchHBNC ?? 'search Eligible Couple',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,

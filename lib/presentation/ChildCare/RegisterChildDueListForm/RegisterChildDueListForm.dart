@@ -136,7 +136,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
       // First, try to find by household reference key
       var results = await db.query(
-        'beneficiaries',
+        'beneficiaries_new',
         where: 'household_ref_key = ?',
         whereArgs: [hhId],
       );
@@ -144,7 +144,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       // If no results, try to find by ID directly
       if (results.isEmpty) {
         results = await db.query(
-          'beneficiaries',
+          'beneficiaries_new',
           where: 'id = ?',
           whereArgs: [hhId],
         );

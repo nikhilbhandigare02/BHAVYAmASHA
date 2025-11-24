@@ -2106,6 +2106,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get searchEligibleCouple => 'योग्य दम्पति की खोज';
 
   @override
+  String get searchDelOutcome => 'डिलीवरी परिणाम खोज';
+
+  @override
   String get searchHintRegisterChildDueList => 'देय पंजीकरण खोजें';
 
   @override
@@ -2125,6 +2128,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get placeLabel => 'स्थान';
+
+  @override
+  String get searchHBNC => 'खोज HBNC';
 
   @override
   String get secondAncLabel => 'दूसरा एएनसी';

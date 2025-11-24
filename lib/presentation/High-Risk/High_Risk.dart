@@ -37,17 +37,59 @@ class _EligibleCoupleListState extends State<HighRisk> {
         _isLoading = true;
         _error = '';
       });
-      // 1) Primary source: ANC followup forms stored in local DB
+
+      // Get all high risk visits
       final dbForms = await LocalStorageDao.instance.getHighRiskANCVisits();
 
-      final List<ANCVisitModel> highRiskVisits = [];
+      // Group visits by beneficiary ID
+      final Map<String, Map<String, dynamic>> latestVisits = {};
 
       for (final row in dbForms) {
         try {
           final formData = Map<String, dynamic>.from(row['form_data'] as Map);
+          final beneficiaryKey = row['beneficiary_ref_key']?.toString() ?? '';
+
+          // Skip if no beneficiary key
+          if (beneficiaryKey.isEmpty) continue;
+
+          // Get the created date of this entry
+          final createdDateStr = row['created_date_time']?.toString();
+          if (createdDateStr == null) continue;
+
+          final createdDate = DateTime.tryParse(createdDateStr);
+          if (createdDate == null) continue;
+
+          // If we already have this beneficiary, check if this is a newer entry
+          if (latestVisits.containsKey(beneficiaryKey)) {
+            final existingDateStr = latestVisits[beneficiaryKey]!['created_date_time']?.toString() ?? '';
+            final existingDate = DateTime.tryParse(existingDateStr) ?? DateTime(1970);
+
+            // Skip if existing entry is newer
+            if (existingDate.isAfter(createdDate)) {
+              continue;
+            }
+          }
+
+          // Store this as the latest entry for this beneficiary
+          latestVisits[beneficiaryKey] = {
+            ...row,
+            'form_data': formData,
+            'created_date_time': createdDateStr,
+          };
+        } catch (e) {
+          print('Error processing high-risk ANC row: $e');
+        }
+      }
+
+      // Now process only the latest entries
+      final List<ANCVisitModel> highRiskVisits = [];
+
+      for (final entry in latestVisits.values) {
+        try {
+          final formData = Map<String, dynamic>.from(entry['form_data'] as Map);
+          final beneficiaryKey = entry['beneficiary_ref_key']?.toString() ?? '';
 
           // Fetch beneficiary to get DOB
-          final String beneficiaryKey = row['beneficiary_ref_key']?.toString() ?? '';
           String? dobStr;
           if (beneficiaryKey.isNotEmpty) {
             try {
@@ -69,7 +111,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
             }
           }
 
-          final rawHhId = row['household_ref_key']?.toString() ?? '';
+          final rawHhId = entry['household_ref_key']?.toString() ?? '';
           final trimmedHhId = rawHhId.length > 11
               ? rawHhId.substring(rawHhId.length - 11)
               : rawHhId;
@@ -97,40 +139,18 @@ class _EligibleCoupleListState extends State<HighRisk> {
 
           highRiskVisits.add(ANCVisitModel.fromJson(visitData));
         } catch (e) {
-          print('Error mapping high-risk ANC DB row: $e');
+          print('Error mapping high-risk ANC entry: $e');
         }
       }
-
-      // If no DB-backed high-risk records, show empty state
-      if (highRiskVisits.isEmpty) {
-        setState(() {
-          _ancVisits = [];
-          _filteredVisits = [];
-          _isLoading = false;
-          _error = 'No high-risk ANC visits found';
-        });
-        return;
-      }
-
-      // Sort and update state for DB-backed records
-      highRiskVisits.sort((a, b) {
-        if (a.dateOfInspection == null) return 1;
-        if (b.dateOfInspection == null) return -1;
-        return b.dateOfInspection!.compareTo(a.dateOfInspection!);
-      });
 
       setState(() {
         _ancVisits = highRiskVisits;
-        _filteredVisits = List.from(_ancVisits);
         _isLoading = false;
-        if (_ancVisits.isEmpty) {
-          _error = 'No high-risk ANC visits found';
-        }
       });
     } catch (e) {
-      print('Error loading ANC visits: $e');
+      print('Error loading high-risk ANC visits: $e');
       setState(() {
-        _error = 'Failed to load ANC visits: $e';
+        _error = 'Failed to load high-risk ANC visits';
         _isLoading = false;
       });
     }
@@ -347,23 +367,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
     );
   }
 
-  // Widget _buildInfoRow(IconData icon, String text) {
-  //   return Row(
-  //     children: [
-  //       Icon(icon, size: 16, color: Colors.grey[600]),
-  //       const SizedBox(width: 4),
-  //       Text(
-  //         text,
-  //         style: TextStyle(
-  //           fontSize: 13,
-  //           color: Colors.grey[800],
-  //         ),
-  //         maxLines: 1,
-  //         overflow: TextOverflow.ellipsis,
-  //       ),
-  //     ],
-  //   );
-  // }
+
 
   Widget _infoRow(String title, String value,
       {bool isWrappable = false, TextStyle? textStyle}) {

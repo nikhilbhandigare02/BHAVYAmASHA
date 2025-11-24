@@ -302,7 +302,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.childTrackingDueListTitle ?? 'Child Tracking\nDue List',
+        screenTitle: l10n?.childTrackingDueListTitle ?? 'Child Tracking Due List',
         showBack: true,
       ),
       drawer: const CustomDrawer(),

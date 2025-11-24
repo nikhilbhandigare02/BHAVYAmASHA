@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -89,6 +88,8 @@ class _DeliveryOutcomeScreenState
       // Process each form
       final List<Map<String, dynamic>> processedData = [];
 
+      // In _loadPregnancyOutcomeeCouples method, update the form processing loop:
+
       for (final form in ancForms) {
         try {
           // Get beneficiary details
@@ -98,8 +99,47 @@ class _DeliveryOutcomeScreenState
             continue;
           }
 
-          // Format the data for display
-          final formattedData = _formatCoupleData(form, {}, {}, isHead: true);
+          Map<String, dynamic>? beneficiaryRow;
+          try {
+            // First try to get from beneficiaries_new table
+            beneficiaryRow = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryRefKey);
+
+            // If not found, try the old beneficiaries table (without _new suffix)
+            if (beneficiaryRow == null) {
+              print('ℹ️ Beneficiary not found in beneficiaries_new, trying beneficiaries table');
+              final db = await DatabaseProvider.instance.database;
+              final results = await db.query(
+                'beneficiaries_new',
+                where: 'unique_key = ? AND is_deleted = 0',
+                whereArgs: [beneficiaryRefKey],
+                limit: 1,
+              );
+
+              if (results.isNotEmpty) {
+                beneficiaryRow = Map<String, dynamic>.from(results.first);
+                // Parse the JSON fields
+                beneficiaryRow['beneficiary_info'] = jsonDecode(beneficiaryRow['beneficiary_info'] ?? '{}');
+                beneficiaryRow['geo_location'] = jsonDecode(beneficiaryRow['geo_location'] ?? '{}');
+                beneficiaryRow['death_details'] = jsonDecode(beneficiaryRow['death_details'] ?? '{}');
+              }
+            }
+
+            if (beneficiaryRow != null) {
+              print('✅ Found beneficiary data: ${beneficiaryRow['beneficiary_info']}');
+            } else {
+              print('⚠️ Could not find beneficiary with unique_key=$beneficiaryRefKey in any table');
+            }
+          } catch (e) {
+            print('⚠️ Error fetching beneficiary by unique_key=$beneficiaryRefKey: $e');
+          }
+
+          final formattedData = _formatCoupleData(
+            form,
+            {},
+            {},
+            isHead: true,
+            beneficiaryRow: beneficiaryRow,
+          );
           processedData.add(formattedData);
 
         } catch (e) {
@@ -146,7 +186,7 @@ class _DeliveryOutcomeScreenState
     return gender && maritalStatus && age >= 15 && age <= 49;
   }
 
-  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
+  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, Map<String, dynamic>? beneficiaryRow}) {
     try {
       print('🔄 Formatting couple data for row: $row');
 
@@ -176,7 +216,7 @@ class _DeliveryOutcomeScreenState
       // Keep full household ID for data passing, will be truncated for display only
       final hhId = hhRefKey;
 
-      // Calculate age from EDD or LMP if available
+      // Calculate pregnancy weeks display from EDD/LMP
       int age = 0;
       String displayAge = '';
 
@@ -198,34 +238,59 @@ class _DeliveryOutcomeScreenState
         displayAge = '$weeksOfPregnancy weeks';
       }
 
-      // Format the data for display
+      String registrationDateDisplay = _formatDate(createdAt);
+      String mobileFromBeneficiary = mobileNo;
+      String gender = '';
+      String ageYearsDisplay = '';
+
+      if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
+        try {
+          final createdDt = beneficiaryRow['created_date_time']?.toString() ?? '';
+          if (createdDt.isNotEmpty) {
+            registrationDateDisplay = _formatDate(createdDt);
+          }
+
+          final info = beneficiaryRow['beneficiary_info'] is Map
+              ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
+              : <String, dynamic>{};
+
+          final dob = info['dob']?.toString();
+          final ageYears = _calculateAge(dob);
+          ageYearsDisplay = ageYears.toString();
+
+          gender = (info['gender']?.toString() ?? '').trim();
+          if (gender.isNotEmpty) {
+            final g = gender.toLowerCase();
+            gender = g.startsWith('f') ? 'F' : (g.startsWith('m') ? 'M' : gender);
+          }
+          final m = (info['mobileNo']?.toString() ?? info['mobile']?.toString() ?? info['phone']?.toString() ?? '').trim();
+          if (m.isNotEmpty) {
+            mobileFromBeneficiary = m;
+          }
+        } catch (e) {
+          print('⚠️ Error extracting beneficiary_info for $beneficiaryRefKey: $e');
+        }
+      }
+
+      final ageGenderCombined = (ageYearsDisplay.isNotEmpty || gender.isNotEmpty)
+          ? '${ageYearsDisplay.isNotEmpty ? ageYearsDisplay : 'N/A'} | ${gender.isNotEmpty ? gender : 'N/A'}'
+          : 'N/A';
+
       final formattedData = {
         'hhId': hhId.isNotEmpty ? hhId : 'N/A',
-        'household_id': hhRefKey, // Keep full household ID for data passing
-        'RegistrationDate': _formatDate(createdAt),
-        'RegistrationType': 'General',
+        'household_id': hhRefKey,
+        'RegistrationDate': registrationDateDisplay.isNotEmpty ? registrationDateDisplay : 'N/A',
         'BeneficiaryID': beneficiaryRefKey,
         'Name': womanName,
-        'age': displayAge.isNotEmpty ? displayAge : 'N/A',
+        'ageGender': ageGenderCombined,
         'RichID': rchNumber.isNotEmpty ? rchNumber : 'N/A',
-        'mobileno': mobileNo.isNotEmpty ? mobileNo : 'N/A',
+        'mobileno': mobileFromBeneficiary.isNotEmpty ? mobileFromBeneficiary : 'N/A',
         'HusbandName': husbandName,
         'weeksOfPregnancy': weeksOfPregnancy.isNotEmpty ? weeksOfPregnancy : 'N/A',
         'eddDate': _formatDate(eddDate).isNotEmpty ? _formatDate(eddDate) : 'N/A',
         'lmpDate': _formatDate(lmpDate).isNotEmpty ? _formatDate(lmpDate) : 'N/A',
         'houseNumber': houseNumber.isNotEmpty ? houseNumber : 'N/A',
         '_rawRow': row,
-        'beneficiary_info': {
-          'head_details': {
-            'name': womanName,
-            'mobile': mobileNo,
-            'age': age,
-            'rch_number': rchNumber,
-          },
-          'spouse_details': {
-            'name': husbandName,
-          },
-        },
       };
 
       print('✅ Formatted data for $womanName:');
@@ -233,7 +298,7 @@ class _DeliveryOutcomeScreenState
       print('   - Registration Date: ${formattedData['RegistrationDate']}');
       print('   - Beneficiary ID: $beneficiaryRefKey');
       print('   - Name: $womanName');
-      print('   - Mobile: $mobileNo');
+      print('   - Mobile: ${formattedData['mobileno']}');
 
       return formattedData;
     } catch (e) {
@@ -318,7 +383,7 @@ class _DeliveryOutcomeScreenState
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: l10n?.searchEligibleCouple ?? 'search Eligible Couple',
+                hintText: l10n?.searchDelOutcome?? 'search Eligible Couple',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -377,7 +442,7 @@ class _DeliveryOutcomeScreenState
     final registrationType = data['RegistrationType']?.toString() ?? 'General';
     final beneficiaryId = data['BeneficiaryID']?.toString() ?? 'N/A';
     final name = data['Name']?.toString() ?? 'N/A';
-    final age = data['age']?.toString() ?? 'N/A';
+    final ageGender = data['ageGender']?.toString() ?? 'N/A';
     final richId = data['RichID']?.toString() ?? 'N/A';
     final mobileNo = data['mobileno']?.toString() ?? 'N/A';
     final husbandName = data['HusbandName']?.toString() ?? 'N/A';
@@ -509,19 +574,9 @@ class _DeliveryOutcomeScreenState
                     children: [
                       Row(
                         children: [
-                          Expanded(child: _rowText('EDD Date', eddDate)),
-                          const SizedBox(width: 12),
-                          Expanded(child: _rowText('Registration Type', registrationType)),
+                          Expanded(child: _rowText('Registration Date', registrationDate)),
                           const SizedBox(width: 12),
                           Expanded(child: _rowText('Beneficiary ID', beneficiaryId)),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(child: _rowText('Name', name)),
-                          const SizedBox(width: 12),
-                          Expanded(child: _rowText('Age', age)),
                           const SizedBox(width: 12),
                           Expanded(child: _rowText('RCH ID', richId)),
                         ],
@@ -529,11 +584,17 @@ class _DeliveryOutcomeScreenState
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Expanded(
-                              child: _rowText('Mobile No.', mobileNo)),
+                          Expanded(child: _rowText('Name', name)),
                           const SizedBox(width: 12),
-                          Expanded(
-                              child: _rowText('Husband Name', husbandName)),
+                          Expanded(child: _rowText('Age | Gender', ageGender)),
+                          const SizedBox(width: 12),
+                          Expanded(child: _rowText('Mobile No.', mobileNo)),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(child: _rowText('Husband Name', husbandName)),
                         ],
                       ),
                     ],
@@ -576,4 +637,5 @@ class _DeliveryOutcomeScreenState
       ],
     );
   }
+
 }

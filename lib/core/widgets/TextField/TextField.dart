@@ -20,6 +20,7 @@ class CustomTextField extends StatefulWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
+  final bool autofocus;
 
   const CustomTextField({
     super.key,
@@ -39,6 +40,7 @@ class CustomTextField extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.textInputAction,
+    this.autofocus = false,
   });
 
   @override
@@ -143,6 +145,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       cursorColor: AppColors.primary,
       focusNode: widget.focusNode,
       textInputAction: widget.textInputAction,
+      autofocus: widget.autofocus,
       decoration: InputDecoration(
         alignLabelWithHint: true,
         isDense: true,

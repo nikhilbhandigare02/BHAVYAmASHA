@@ -3,7 +3,7 @@ import 'package:sizer/sizer.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final String screenTitle;
-  final bool? showBack; // ✅ Made nullable
+  final bool? showBack;
   final VoidCallback? onBackTap;
   final VoidCallback? onMenuTap;
 
@@ -28,7 +28,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   const AppHeader({
     super.key,
     required this.screenTitle,
-    this.showBack, // ✅ Nullable now
+    this.showBack,
     this.onBackTap,
     this.onMenuTap,
     this.icon1,
@@ -81,6 +81,10 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
     return const SizedBox.shrink();
   }
 
+  bool get _hasIcon1 => icon1 != null || icon1Image != null || icon1Widget != null;
+  bool get _hasIcon2 => icon2 != null || icon2Image != null || icon2Widget != null;
+  bool get _hasIcon3 => icon3 != null || icon3Image != null || icon3Widget != null;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -90,7 +94,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
         padding: EdgeInsets.only(top: 3.5.h),
         child: Row(
           children: [
-            // ✅ If showBack == true, show back button; if false or null, show menu
+            // Back / Menu
             (showBack ?? false)
                 ? IconButton(
               icon: Icon(
@@ -113,6 +117,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
 
             SizedBox(width: 1.w),
 
+            // *** TITLE: FULL WIDTH, NO WRAP, NO TRIM WHEN SPACE AVAILABLE ***
             Expanded(
               child: Text(
                 screenTitle,
@@ -121,32 +126,39 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                   fontWeight: FontWeight.w500,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
+                maxLines: 1,
+                softWrap: false,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
 
-            // ✅ Icon 1, 2, 3 (now with image & widget support)
-            _buildIcon(
-              icon: icon1,
-              imagePath: icon1Image,
-              widget: icon1Widget,
-              onTap: onIcon1Tap,
-              context: context,
-            ),
-            _buildIcon(
-              icon: icon2,
-              imagePath: icon2Image,
-              widget: icon2Widget,
-              onTap: onIcon2Tap,
-              context: context,
-            ),
-            _buildIcon(
-              icon: icon3,
-              imagePath: icon3Image,
-              widget: icon3Widget,
-              onTap: onIcon3Tap,
-              context: context,
-            ),
+            // *** ICONS (Only shown if exist — else ZERO width) ***
+            if (_hasIcon1)
+              _buildIcon(
+                icon: icon1,
+                imagePath: icon1Image,
+                widget: icon1Widget,
+                onTap: onIcon1Tap,
+                context: context,
+              ),
+
+            if (_hasIcon2)
+              _buildIcon(
+                icon: icon2,
+                imagePath: icon2Image,
+                widget: icon2Widget,
+                onTap: onIcon2Tap,
+                context: context,
+              ),
+
+            if (_hasIcon3)
+              _buildIcon(
+                icon: icon3,
+                imagePath: icon3Image,
+                widget: icon3Widget,
+                onTap: onIcon3Tap,
+                context: context,
+              ),
           ],
         ),
       ),
