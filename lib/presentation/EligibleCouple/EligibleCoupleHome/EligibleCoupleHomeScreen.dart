@@ -47,14 +47,55 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         identifiedHouseholds.putIfAbsent(hhKey, () => []).add(row);
       }
 
+      const allowedRelations = <String>{
+        'self',
+        'spouse',
+        'husband',
+        'son',
+        'daughter',
+        'father',
+        'mother',
+        'brother',
+        'sister',
+        'wife',
+        'nephew',
+        'niece',
+        'grand father',
+        'grand mother',
+        'father in law',
+        'mother in low',
+        'grand son',
+        'grand daughter',
+        'son in law',
+        'daughter in law',
+        'other',
+      };
+
       int totalIdentified = 0;
       for (final household in identifiedHouseholds.values) {
         Map<String, dynamic>? head;
         Map<String, dynamic>? spouse;
 
+        // First pass: find head and spouse
         for (final member in household) {
           final info = _toStringMap(member['beneficiary_info']);
-          final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+          String rawRelation =
+              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+          rawRelation = rawRelation.replaceAll('_', ' ');
+          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+          }
+
+          final relation = () {
+            if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
+              return 'self';
+            }
+            if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') {
+              return 'spouse';
+            }
+            return rawRelation;
+          }();
+
           if (relation == 'self') {
             head = info;
           } else if (relation == 'spouse') {
@@ -62,10 +103,19 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
           }
         }
 
-        if (head != null && _isIdentifiedEligibleFemale(head)) {
-          totalIdentified++;
-        }
-        if (spouse != null && _isIdentifiedEligibleFemale(spouse)) {
+        // Second pass: count all eligible females with allowed relations
+        for (final member in household) {
+          final info = _toStringMap(member['beneficiary_info']);
+          String rawRelation =
+              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+          rawRelation = rawRelation.replaceAll('_', ' ');
+          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+          }
+
+          if (!allowedRelations.contains(rawRelation)) continue;
+          if (!_isIdentifiedEligibleFemale(info, head: head)) continue;
+
           totalIdentified++;
         }
       }
@@ -115,6 +165,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         Map<String, dynamic>? head;
         Map<String, dynamic>? spouse;
 
+        // First pass: find head and spouse
         for (final member in household) {
           try {
             final memberUniqueKey = member['unique_key']?.toString() ?? '';
@@ -127,7 +178,23 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
             final Map<String, dynamic> info = infoRaw is String
                 ? jsonDecode(infoRaw)
                 : Map<String, dynamic>.from(infoRaw ?? {});
-            final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+            String rawRelation =
+                (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+            rawRelation = rawRelation.replaceAll('_', ' ');
+            if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+              rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+            }
+
+            final relation = () {
+              if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
+                return 'self';
+              }
+              if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') {
+                return 'spouse';
+              }
+              return rawRelation;
+            }();
+
             if (relation == 'self') {
               head = info;
             } else if (relation == 'spouse') {
@@ -138,11 +205,36 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
           }
         }
 
-        if (head != null && _isUpdatedEligibleFemale(head, head: head)) {
-          totalUpdatedEligible++;
-        }
-        if (spouse != null && _isUpdatedEligibleFemale(spouse, head: head)) {
-          totalUpdatedEligible++;
+        // Second pass: count all updated eligible females with allowed relations
+        for (final member in household) {
+          try {
+            final memberUniqueKey = member['unique_key']?.toString() ?? '';
+            if (memberUniqueKey.isNotEmpty &&
+                pregnantBeneficiaries.contains(memberUniqueKey)) {
+              // Skip ECs already marked pregnant in tracking form,
+              // same as UpdatedEligibleCoupleListScreen
+              continue;
+            }
+
+            final dynamic infoRaw = member['beneficiary_info'];
+            final Map<String, dynamic> info = infoRaw is String
+                ? jsonDecode(infoRaw)
+                : Map<String, dynamic>.from(infoRaw ?? {});
+
+            String rawRelation =
+                (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+            rawRelation = rawRelation.replaceAll('_', ' ');
+            if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+              rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+            }
+
+            if (!allowedRelations.contains(rawRelation)) continue;
+            if (!_isUpdatedEligibleFemale(info, head: head)) continue;
+
+            totalUpdatedEligible++;
+          } catch (e) {
+            print('Error processing member for updated count (second pass): $e');
+          }
         }
       }
 
@@ -172,15 +264,18 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     return {};
   }
 
-  bool _isIdentifiedEligibleFemale(Map<String, dynamic> person) {
+  bool _isIdentifiedEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     if (person.isEmpty) return false;
 
-    final gender = person['gender']?.toString().toLowerCase();
-    final isFemale = gender == 'f' || gender == 'female';
+    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
+    final isFemale = genderRaw == 'f' || genderRaw == 'female';
     if (!isFemale) return false;
 
-    final maritalStatus = person['maritalStatus']?.toString().toLowerCase();
-    if (maritalStatus != 'married') return false;
+    final maritalStatusRaw =
+        person['maritalStatus']?.toString().toLowerCase() ??
+        head?['maritalStatus']?.toString().toLowerCase() ?? '';
+    final isMarried = maritalStatusRaw == 'married';
+    if (!isMarried) return false;
 
     final dob = person['dob'];
     final age = _calculateAge(dob);
@@ -323,13 +418,16 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
                           image: item['image']!,
                           count: item['count']!,
                           title: item['title']!,
-                          onTap: () => Navigator.pushNamed(context, item['route']!),
+                          onTap: () async {
+                            final result = await Navigator.pushNamed(context, item['route']!);
+                            if (result == true && mounted) {
+                              await _loadCounts();
+                            }
+                          },
                         ),
                       );
                     }).toList(),
                   );
-
-
                 },
               ),
             ),

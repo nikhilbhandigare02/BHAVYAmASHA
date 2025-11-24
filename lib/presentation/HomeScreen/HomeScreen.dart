@@ -11,6 +11,8 @@ import '../../core/widgets/AppDrawer/Drawer.dart';
 import '../../core/widgets/AppHeader/AppHeader.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../data/Local_Storage/local_storage_dao.dart';
+import '../../data/Local_Storage/database_provider.dart';
+import '../../data/Local_Storage/tables/followup_form_data_table.dart' as ffd;
 import '../../data/SecureStorage/SecureStorage.dart';
 
 import '../ChildCare/child_care_count_provider.dart';
@@ -59,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int childRegisteredCount = 0;
   int highRiskCount = 0;
   int notificationCount = 0;
+  int ncdCount = 0;
 
   final ChildCareCountProvider _childCareCountProvider = ChildCareCountProvider();
 
@@ -75,6 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadChildRegisteredCount();
     _loadHighRiskCount();
     _loadNotificationCount();
+    _loadNcdCount();
     _fetchTimeStamp();
     _fetchAbhaCreated();
     _fetchExistingAbhaCreated();
@@ -92,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _loadChildRegisteredCount();
           _loadHighRiskCount();
           _loadNotificationCount();
+          _loadNcdCount();
         }
       } catch (e) {
         print('HomeScreen: error pulling followup forms on init -> $e');
@@ -304,7 +309,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadBeneficiariesCount() async {
     try {
-      final count = await LocalStorageDao.instance.getBeneficiariesDashboardCount();
+      // Use the same source as AllBeneficiaryScreen so the
+      // dashboard count matches what the user actually sees.
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final count = rows.length;
       if (mounted) {
         setState(() {
           beneficiariesCount = count;
@@ -323,8 +331,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadEligibleCouplesCount() async {
     try {
-      // Mirror EligibleCoupleIdentifiedScreen logic so the dashboard
-      // Eligible Couple tile matches the identified list
+      // Mirror EligibleCoupleHomeScreen identified logic so the dashboard
+      // Eligible Couple tile matches the identified count
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final households = <String, List<Map<String, dynamic>>>{};
 
@@ -334,14 +342,55 @@ class _HomeScreenState extends State<HomeScreen> {
         households.putIfAbsent(hhKey, () => []).add(row);
       }
 
+      const allowedRelations = <String>{
+        'self',
+        'spouse',
+        'husband',
+        'son',
+        'daughter',
+        'father',
+        'mother',
+        'brother',
+        'sister',
+        'wife',
+        'nephew',
+        'niece',
+        'grand father',
+        'grand mother',
+        'father in law',
+        'mother in low',
+        'grand son',
+        'grand daughter',
+        'son in law',
+        'daughter in law',
+        'other',
+      };
+
       int totalIdentified = 0;
       for (final household in households.values) {
         Map<String, dynamic>? head;
         Map<String, dynamic>? spouse;
 
+        // First pass: find head and spouse
         for (final member in household) {
           final info = _toStringMapEc(member['beneficiary_info']);
-          final relation = (info['relation_to_head'] as String?)?.toLowerCase() ?? '';
+          String rawRelation =
+              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+          rawRelation = rawRelation.replaceAll('_', ' ');
+          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+          }
+
+          final relation = () {
+            if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
+              return 'self';
+            }
+            if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') {
+              return 'spouse';
+            }
+            return rawRelation;
+          }();
+
           if (relation == 'self') {
             head = info;
           } else if (relation == 'spouse') {
@@ -349,10 +398,19 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         }
 
-        if (head != null && _isIdentifiedEcFemale(head)) {
-          totalIdentified++;
-        }
-        if (spouse != null && _isIdentifiedEcFemale(spouse)) {
+        // Second pass: count all eligible females with allowed relations
+        for (final member in household) {
+          final info = _toStringMapEc(member['beneficiary_info']);
+          String rawRelation =
+              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+          rawRelation = rawRelation.replaceAll('_', ' ');
+          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+          }
+
+          if (!allowedRelations.contains(rawRelation)) continue;
+          if (!_isIdentifiedEcFemale(info, head: head)) continue;
+
           totalIdentified++;
         }
       }
@@ -376,15 +434,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return {};
   }
 
-  bool _isIdentifiedEcFemale(Map<String, dynamic> person) {
+  bool _isIdentifiedEcFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     if (person.isEmpty) return false;
 
-    final gender = person['gender']?.toString().toLowerCase();
-    final isFemale = gender == 'f' || gender == 'female';
+    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
+    final isFemale = genderRaw == 'f' || genderRaw == 'female';
     if (!isFemale) return false;
 
-    final maritalStatus = person['maritalStatus']?.toString().toLowerCase();
-    if (maritalStatus != 'married') return false;
+    final maritalStatusRaw =
+        person['maritalStatus']?.toString().toLowerCase() ??
+        head?['maritalStatus']?.toString().toLowerCase() ?? '';
+    final isMarried = maritalStatusRaw == 'married';
+    if (!isMarried) return false;
 
     final dob = person['dob'];
     final age = _calculateEcAge(dob);
@@ -577,6 +638,28 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       print('Error loading high-risk ANC visit count: $e');
+    }
+  }
+
+  Future<void> _loadNcdCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final List<Map<String, dynamic>> result = await db.query(
+        ffd.FollowupFormDataTable.table,
+        where: 'forms_ref_key = ?',
+        whereArgs: [
+          ffd.FollowupFormDataTable
+              .formUniqueKeys[ffd.FollowupFormDataTable.cbac],
+        ],
+      );
+
+      if (mounted) {
+        setState(() {
+          ncdCount = result.length;
+        });
+      }
+    } catch (e) {
+      print('Error loading NCD (CBAC) forms count: $e');
     }
   }
 
@@ -811,6 +894,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     selectedGridIndex: selectedGridIndex,
                     onGridTap: (index) =>
                         setState(() => selectedGridIndex = index),
+                    mainGridActions: [
+                      null, 
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      () async { // 7: Mother Care
+                        final result = await Navigator.pushNamed(
+                            context, Route_Names.Mothercarehomescreen);
+                        if (result == true && mounted) {
+                          await _loadAncVisitCount();
+                        }
+                      },
+                    ],
                   ),
                 ),
               ),

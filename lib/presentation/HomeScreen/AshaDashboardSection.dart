@@ -20,6 +20,7 @@ class AshaDashboardSection extends StatelessWidget {
   final int? ancVisitCount;
   final int? childRegisteredCount;
   final int? highRiskCount;
+  final int? ncdCount;
 
   const AshaDashboardSection({
     super.key,
@@ -36,6 +37,7 @@ class AshaDashboardSection extends StatelessWidget {
     this.ancVisitCount,
     this.childRegisteredCount,
     this.highRiskCount,
+    this.ncdCount,
   });
 
   @override
@@ -65,7 +67,7 @@ class AshaDashboardSection extends StatelessWidget {
     final List<Map<String, dynamic>> bottomGridItems = [
       {"image": 'assets/images/announcement.png', "label": l10n.announcements},
       {"image": 'assets/images/help-icon.png', "label": '${l10n.help}\nनियम'},
-      {"image": 'assets/images/autoimmune-disease.png', "label": l10n.ncd, "count": 7},
+      {"image": 'assets/images/autoimmune-disease.png', "label": l10n.ncd, "count": ncdCount ?? 0},
     ];
 
 

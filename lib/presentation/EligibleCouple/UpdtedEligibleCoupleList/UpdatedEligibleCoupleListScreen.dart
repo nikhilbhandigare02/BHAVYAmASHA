@@ -404,105 +404,110 @@ class _UpdatedEligibleCoupleListScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final t = AppLocalizations.of(context);
-
-    return Scaffold(
-      appBar: AppHeader(
-        screenTitle: t?.updatedEligibleCoupleListTitle ?? 'Updated Eligible Couple List',
-        showBack: true,
-      ), 
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 🔍 Search Box
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _search,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  hintText: t?.updatedEligibleCoupleSearchHint ?? 'Search Updated Eligible Couple',
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: AppColors.background,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.outlineVariant),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                    BorderSide(color: Theme.of(context).primaryColor),
-                  ),
-                ),
-              ),
-            ),
-
-            // 🟦 Tabs
-            Padding(
-              padding:  EdgeInsets.only(left: 12.0, right: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _TabChip(
-                    label: '${t?.tabAll ?? 'ALL'} (${_households.length})',
-                    selected: _tab == 0,
-                    onTap: () => setState(() => _tab = 0),
-                  ),
-                  _TabChip(
-                    label: '${t?.tabProtected ?? 'PROTECTED'} (${_protectedList.length})',
-                    selected: _tab == 1,
-                    onTap: () => setState(() => _tab = 1),
-                  ),
-                  _TabChip(
-                    label: '${t?.tabUnprotected ?? 'UNPROTECTED'} (${_unprotectedList.length})',
-                    selected: _tab == 2,
-                    onTap: () => setState(() => _tab = 2),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Expanded(
-              child: _filtered.isNotEmpty
-                  ? ListView.builder(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                itemCount: _filtered.length,
-                itemBuilder: (context, index) {
-                  final data = _filtered[index];
-                  return _householdCard(context, data);
-                },
-              )
-                  : Center(
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 40, horizontal: 16),
-                  child: Text(
-                    t?.noRecordFound ?? 'No Record Found.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(color: Colors.black54),
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context, true);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppHeader(
+          screenTitle: t?.updatedEligibleCoupleListTitle ?? 'Updated Eligible Couple List',
+          showBack: true,
+        ), 
+        body: SafeArea(
+          child: Column(
+            children: [
+              // 🔍 Search Box
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _search,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    hintText: t?.updatedEligibleCoupleSearchHint ?? 'Search Updated Eligible Couple',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: AppColors.background,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: AppColors.outlineVariant),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide:
+                      BorderSide(color: Theme.of(context).primaryColor),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+
+              // 🟦 Tabs
+              Padding(
+                padding:  EdgeInsets.only(left: 12.0, right: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _TabChip(
+                      label: '${t?.tabAll ?? 'ALL'} (${_households.length})',
+                      selected: _tab == 0,
+                      onTap: () => setState(() => _tab = 0),
+                    ),
+                    _TabChip(
+                      label: '${t?.tabProtected ?? 'PROTECTED'} (${_protectedList.length})',
+                      selected: _tab == 1,
+                      onTap: () => setState(() => _tab = 1),
+                    ),
+                    _TabChip(
+                      label: '${t?.tabUnprotected ?? 'UNPROTECTED'} (${_unprotectedList.length})',
+                      selected: _tab == 2,
+                      onTap: () => setState(() => _tab = 2),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Expanded(
+                child: _filtered.isNotEmpty
+                    ? ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  itemCount: _filtered.length,
+                  itemBuilder: (context, index) {
+                    final data = _filtered[index];
+                    return _householdCard(context, data);
+                  },
+                )
+                    : Center(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 40, horizontal: 16),
+                    child: Text(
+                      t?.noRecordFound ?? 'No Record Found.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(color: Colors.black54),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
