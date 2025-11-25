@@ -42,7 +42,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
     
     try {
       final db = await DatabaseProvider.instance.database;
-      final allBeneficiaries = await db.query('beneficiaries');
+      final allBeneficiaries = await db.query('beneficiaries_new');
       final pregnantList = <Map<String, dynamic>>[];
       
       for (final row in allBeneficiaries) {

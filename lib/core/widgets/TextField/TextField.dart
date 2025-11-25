@@ -121,6 +121,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       autovalidateMode: AutovalidateMode.onUserInteraction,
       initialValue: null,
       textAlignVertical: TextAlignVertical.center, // ✅ Keeps text & icon centered
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       onChanged: (value) {
         if (!_isDirty && value.isNotEmpty) {
           setState(() {

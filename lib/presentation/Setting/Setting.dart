@@ -53,7 +53,7 @@ class _SettingState extends State<Setting> {
                 Expanded(
                   child: Text(
                     l10n.settingsCheckForUpdates,
-                    style: const TextStyle(fontSize: 14),
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
                 SizedBox(

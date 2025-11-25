@@ -372,6 +372,31 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         formData['unique_key'] = uniqueKey;
         formData['visitCount'] = visitData['count'] ?? 0;
         formData['isHighRisk'] = visitData['isHighRisk'] ?? false;
+        formData['woman_name'] = data['Name']?.toString() ?? '';
+        formData['husband_name'] = data['Husband']?.toString() ?? '';
+
+        try {
+          if (beneficiaryId.isNotEmpty) {
+            final ancForms = await LocalStorageDao.instance.getAncFormsByBeneficiaryId(beneficiaryId);
+            if (ancForms.isNotEmpty) {
+              final latest = ancForms.first;
+              Map<String, dynamic> fd = {};
+              if (latest['form_data'] is Map) {
+                fd = Map<String, dynamic>.from(latest['form_data'] as Map);
+              } else if (latest['form_json'] is String && (latest['form_json'] as String).isNotEmpty) {
+                try {
+                  final decoded = jsonDecode(latest['form_json'] as String);
+                  if (decoded is Map && decoded['form_data'] is Map) {
+                    fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
+                  }
+                } catch (_) {}
+              }
+              if (fd.isNotEmpty) {
+                formData['prefill'] = fd;
+              }
+            }
+          }
+        } catch (_) {}
 
         print('Passing visit data to form: $visitData');
 

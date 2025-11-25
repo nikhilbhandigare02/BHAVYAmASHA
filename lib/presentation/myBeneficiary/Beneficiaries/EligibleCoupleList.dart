@@ -31,12 +31,10 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
 
   Future<void> _loadEligibleCouples() async {
     final db = await DatabaseProvider.instance.database;
-    
-    // First, get all households
+
     final households = <String, List<Map<String, dynamic>>>{};
-    
-    // Get all beneficiaries and group by household
-    final allBeneficiaries = await db.query('beneficiaries');
+
+    final allBeneficiaries = await db.query('beneficiaries_new');
     
     for (final row in allBeneficiaries) {
       try {

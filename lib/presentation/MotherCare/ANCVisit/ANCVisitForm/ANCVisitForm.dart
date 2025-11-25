@@ -31,6 +31,7 @@ class _AncvisitformState extends State<Ancvisitform> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
+  @override
   void initState() {
     super.initState();
 
@@ -59,6 +60,7 @@ class _AncvisitformState extends State<Ancvisitform> {
       householdRefKey: householdRefKey ?? '',
     );
 
+    // Initialize form with a post-frame callback to ensure widgets are built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _initializeForm();
@@ -111,8 +113,20 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
 
     if (formData['high_risk'] != null) {
-      final isHighRisk = formData['high_risk'] == true || formData['high_risk'] == 'true';
-      _bloc.add(HighRiskChanged(isHighRisk ? 'Yes' : 'No'));
+      final v = formData['high_risk'];
+      final s = v.toString().toLowerCase();
+      final yesNo = (v == true || s == 'yes' || s == 'true' || s == '1') ? 'Yes' : 'No';
+      _bloc.add(HighRiskChanged(yesNo));
+    }
+
+    if (formData['selected_risks'] is List) {
+      final risks = List<String>.from((formData['selected_risks'] as List).map((e) => e.toString()));
+      final hr = formData['high_risk'];
+      final hrStr = (hr?.toString() ?? '').toLowerCase();
+      final isHigh = hr == true || hrStr == 'yes' || hrStr == 'true' || hrStr == '1';
+      if (isHigh) {
+        _bloc.add(SelectedRisksChanged(risks));
+      }
     }
 
     // TD Vaccination dates
@@ -133,6 +147,48 @@ class _AncvisitformState extends State<Ancvisitform> {
         _bloc.add(OtherDiseaseChanged(formData['other_disease']));
       }
     }
+
+    if (formData['gives_birth_to_baby'] != null) {
+      _bloc.add(GivesBirthToBaby(formData['gives_birth_to_baby'].toString()));
+    }
+
+    if (formData['delivery_outcome'] != null) {
+      _bloc.add(DeliveryOutcomeChanged(formData['delivery_outcome'].toString()));
+    }
+
+    if (formData['number_of_children'] != null) {
+      _bloc.add(NumberOfChildrenChanged(formData['number_of_children'].toString()));
+    }
+
+    if (formData['baby1_name'] != null) {
+      _bloc.add(Baby1NameChanged(formData['baby1_name'].toString()));
+    }
+    if (formData['baby1_gender'] != null) {
+      _bloc.add(Baby1GenderChanged(formData['baby1_gender'].toString()));
+    }
+    if (formData['baby1_weight'] != null) {
+      _bloc.add(Baby1WeightChanged(formData['baby1_weight'].toString()));
+    }
+
+    if (formData['baby2_name'] != null) {
+      _bloc.add(Baby2NameChanged(formData['baby2_name'].toString()));
+    }
+    if (formData['baby2_gender'] != null) {
+      _bloc.add(Baby2GenderChanged(formData['baby2_gender'].toString()));
+    }
+    if (formData['baby2_weight'] != null) {
+      _bloc.add(Baby2WeightChanged(formData['baby2_weight'].toString()));
+    }
+
+    if (formData['baby3_name'] != null) {
+      _bloc.add(Baby3NameChanged(formData['baby3_name'].toString()));
+    }
+    if (formData['baby3_gender'] != null) {
+      _bloc.add(Baby3GenderChanged(formData['baby3_gender'].toString()));
+    }
+    if (formData['baby3_weight'] != null) {
+      _bloc.add(Baby3WeightChanged(formData['baby3_weight'].toString()));
+    }
   }
 
   // Calculate weeks of pregnancy from LMP date to current date
@@ -146,6 +202,29 @@ class _AncvisitformState extends State<Ancvisitform> {
 
   Future<void> _initializeForm() async {
     final data = widget.beneficiaryData;
+    if (data == null) return;
+
+    // 1. First try to get names directly from the passed data
+    final womanName = data['Name']?.toString();
+    final husbandName = data['Husband']?.toString() ?? data['husbandName']?.toString();
+    
+    if (womanName != null && womanName.isNotEmpty) {
+      _bloc.add(WomanNameChanged(womanName));
+    }
+    
+    if (husbandName != null && husbandName.isNotEmpty) {
+      _bloc.add(HusbandNameChanged(husbandName));
+    }
+
+    // 2. Process prefill data if available
+    if (data['prefill'] is Map) {
+      try {
+        _updateFormWithData(Map<String, dynamic>.from(data['prefill'] as Map));
+      } catch (e) {
+        print('Error updating form with prefill data: $e');
+      }
+    }
+    
     String? houseNo;
 
     // Extract LMP and EDD from beneficiary data
@@ -239,6 +318,26 @@ class _AncvisitformState extends State<Ancvisitform> {
         print('  $key: $value (${value.runtimeType})');
       });
 
+      // If we still don't have the woman's name, try to get it from other fields
+      if (_bloc.state.womanName == null || _bloc.state.womanName!.isEmpty) {
+        final nameFromData = data['memberName']?.toString() ?? 
+                           data['headName']?.toString() ??
+                           data['name']?.toString();
+        if (nameFromData != null && nameFromData.isNotEmpty) {
+          _bloc.add(WomanNameChanged(nameFromData));
+        }
+      }
+      
+      // If we still don't have the husband's name, try to get it from other fields
+      if (_bloc.state.husbandName == null || _bloc.state.husbandName!.isEmpty) {
+        final spouseName = data['spouseName']?.toString() ?? 
+                          data['headName']?.toString() ??
+                          data['husbandName']?.toString();
+        if (spouseName != null && spouseName.isNotEmpty) {
+          _bloc.add(HusbandNameChanged(spouseName));
+        }
+      }
+
       // Extract and ensure full IDs are used - preserve original values without modification
       final dataId = data['id']?.toString() ?? '';
       final dataBeneficiaryId = data['BeneficiaryID']?.toString() ?? '';
@@ -311,7 +410,30 @@ class _AncvisitformState extends State<Ancvisitform> {
             }
           }
         } else {
-          print('ℹ️ No existing ANC forms found for this beneficiary');
+          print('ℹ️ No existing ANC forms found for this beneficiary using household+beneficiary. Trying beneficiary-only fallback.');
+          try {
+            final byBeneficiary = await localStorageDao.getAncFormsByBeneficiaryId(
+              dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey,
+            );
+
+            if (byBeneficiary.isNotEmpty) {
+              final latest = byBeneficiary.first;
+
+              // Fixed: Proper conditional expression with type casting
+              final fd = latest['form_data'] is Map
+                  ? Map<String, dynamic>.from(latest['form_data'] as Map)
+                  : (latest['form_json'] != null
+                  ? ((jsonDecode(latest['form_json'] as String) as Map<String, dynamic>?)?['form_data'] as Map<String, dynamic>?) ?? {}
+                  : <String, dynamic>{});
+
+              print('📝 Loaded fallback ANC form data: $fd');
+              _updateFormWithData(fd);
+            } else {
+              print('ℹ️ No ANC forms found in beneficiary-only lookup');
+            }
+          } catch (e) {
+            print('⚠️ Error in beneficiary-only ANC lookup: $e');
+          }
         }
       } catch (e) {
         print('⚠️ Error loading existing forms: $e');
@@ -690,6 +812,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             CustomTextField(
                               labelText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
                               hintText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
+                              key: ValueKey('woman_name_${state.womanName}'),
                               initialValue: state.womanName,
                               onChanged: (v) => bloc.add(WomanNameChanged(v)),
                             ),
@@ -697,6 +820,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             CustomTextField(
                               labelText: l10n?.husbandNameLabel ?? "Husband's name",
                               hintText: l10n?.husbandNameLabel ?? "Husband's name",
+                              key: ValueKey('husband_name_${state.husbandName}'),
                               initialValue: state.husbandName,
                               onChanged: (v) => bloc.add(HusbandNameChanged(v)),
                             ),
@@ -870,8 +994,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               },
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                            // Show other disease input if 'Other' is selected
+ 
                             if (state.selectedDiseases.contains(l10n?.diseaseOther ?? 'Other'))
                               CustomTextField(
                                 labelText: 'Please specify other disease',

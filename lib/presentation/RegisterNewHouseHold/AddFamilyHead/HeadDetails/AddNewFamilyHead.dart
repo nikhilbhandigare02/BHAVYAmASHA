@@ -1078,8 +1078,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                           hideAddMemberButton: false,
                           isEdit: widget.isEdit,
-                          // For update flows we do not want to show the
-                          // "successfully added new household" popup again.
+
                           showSuccessOnSave: false,
                           initialHeadForm: result,
                         ),
