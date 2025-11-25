@@ -13,7 +13,9 @@ import 'package:medixcel_new/data/sync/sync_service.dart';
 import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 
 class CustomDrawer extends StatefulWidget {
-  const CustomDrawer({super.key});
+  final VoidCallback? onSyncCompleted;
+
+  const CustomDrawer({super.key, this.onSyncCompleted});
 
   @override
   State<CustomDrawer> createState() => _CustomDrawerState();
@@ -200,9 +202,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     Navigator.pushNamed(context, Route_Names.incentivePortal);
                   }),
                   _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () async {
+                    final onCompleted = widget.onSyncCompleted;
                     if (isSyncing) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Sync already in progress')),
+                        const SnackBar(content: Text('Sync already in progress')),
                       );
                       return;
                     }
@@ -210,14 +213,50 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       isSyncing = true;
                     });
                     try {
+                      // Show a long-lived snackbar while sync is in progress
+                      if (mounted) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                              content: Text('Data is being fetched...'),
+                              duration: Duration(hours: 1),
+                            ),
+                          );
+                      }
+
                       await SyncService.instance.runFullSyncOnce();
-                      if (!mounted) return;
-                      showAppSnackBar(context, 'Data is being fetched');
+                      // UI feedback only if drawer context is still mounted
+                      if (mounted) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                              content: Text('Data sync completed'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+
+                        // Close drawer only if it is still open
+                        final scaffoldState = Scaffold.maybeOf(context);
+                        if (scaffoldState != null && scaffoldState.isDrawerOpen) {
+                          Navigator.pop(context);
+                        }
+                      }
+
+                      // Always notify parent (HomeScreen) even if drawer was closed manually
+                      onCompleted?.call();
                     } catch (e) {
                       if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Sync failed: $e')),
-                      );
+                      // Replace any in-progress snackbar with an error message
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          SnackBar(
+                            content: Text('Sync failed: $e'),
+                            duration: const Duration(seconds: 4),
+                          ),
+                        );
                     } finally {
                       if (mounted) {
                         setState(() {

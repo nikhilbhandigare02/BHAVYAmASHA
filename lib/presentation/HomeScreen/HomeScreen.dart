@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
@@ -64,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int ncdCount = 0;
 
   final ChildCareCountProvider _childCareCountProvider = ChildCareCountProvider();
+  Timer? _uiRefreshTimer;
 
   @override
   void initState() {
@@ -83,6 +85,34 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchAbhaCreated();
     _fetchExistingAbhaCreated();
     SyncService.instance.start(interval: const Duration(minutes: 5));
+    // After the scheduler's first sync run, refresh counts once more so
+    // that newly fetched DB data is reflected on the dashboard shortly
+    // after first login.
+    Future.delayed(const Duration(seconds: 5), () async {
+      if (!mounted) return;
+      await _loadHouseholdCount();
+      await _loadBeneficiariesCount();
+      await _loadEligibleCouplesCount();
+      await _loadPregnantWomenCount();
+      await _loadAncVisitCount();
+      await _loadChildRegisteredCount();
+      await _loadHighRiskCount();
+      await _loadNotificationCount();
+      await _loadNcdCount();
+    });
+    _uiRefreshTimer?.cancel();
+    _uiRefreshTimer = Timer.periodic(const Duration(minutes: 5), (_) async {
+      if (!mounted) return;
+      await _loadHouseholdCount();
+      await _loadBeneficiariesCount();
+      await _loadEligibleCouplesCount();
+      await _loadPregnantWomenCount();
+      await _loadAncVisitCount();
+      await _loadChildRegisteredCount();
+      await _loadHighRiskCount();
+      await _loadNotificationCount();
+      await _loadNcdCount();
+    });
     Future.microtask(() async {
       try {
         await SyncService.instance.fetchFollowupFormsFromServer();
@@ -102,6 +132,12 @@ class _HomeScreenState extends State<HomeScreen> {
         print('HomeScreen: error pulling followup forms on init -> $e');
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _uiRefreshTimer?.cancel();
+    super.dispose();
   }
   final ExistingAbhaCreatedRepository _repositoryABHA = ExistingAbhaCreatedRepository();
   ExistingAbhaCreated? _existingAbhaData;
@@ -775,7 +811,19 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          drawer: CustomDrawer(),
+          drawer: CustomDrawer(
+            onSyncCompleted: () async {
+              await _loadHouseholdCount();
+              await _loadBeneficiariesCount();
+              await _loadEligibleCouplesCount();
+              await _loadPregnantWomenCount();
+              await _loadAncVisitCount();
+              await _loadChildRegisteredCount();
+              await _loadHighRiskCount();
+              await _loadNotificationCount();
+              await _loadNcdCount();
+            },
+          ),
           body: Column(
             children: [
               // Tabs

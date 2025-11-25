@@ -56,10 +56,23 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         _filtered = List<Map<String, dynamic>>.from(_items);
       } else {
         _filtered = _items.where((e) {
-          return (e['hhId'] as String).toLowerCase().contains(q) ||
-              (e['houseNo'] as String).toLowerCase().contains(q) ||
-              (e['name'] as String).toLowerCase().contains(q) ||
-              (e['mobile'] as String).toLowerCase().contains(q);
+          final hhId = (e['hhId'] ?? '').toString().toLowerCase();
+          final houseNo = (e['houseNo'] ?? '').toString().toLowerCase();
+          final name = (e['name'] ?? '').toString().toLowerCase();
+          final mobile = (e['mobile'] ?? '').toString().toLowerCase();
+
+          // Also search by the household_ref_key as shown on the card
+          final raw = (e['_raw'] as Map<String, dynamic>? ?? const {});
+          final fullHhRef = (raw['household_ref_key'] ?? '').toString();
+          final searchHhRef = fullHhRef.length > 11
+              ? fullHhRef.substring(fullHhRef.length - 11).toLowerCase()
+              : fullHhRef.toLowerCase();
+
+          return hhId.contains(q) ||
+              houseNo.contains(q) ||
+              name.contains(q) ||
+              mobile.contains(q) ||
+              searchHhRef.contains(q);
         }).toList();
       }
     });
@@ -355,6 +368,20 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                     ),
                   ),
                 ),
+
+                // Padding(
+                //   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                //   child: Align(
+                //     alignment: Alignment.centerLeft,
+                //     child: Text(
+                //       'Total Households: ${_items.length}',
+                //       style: const TextStyle(
+                //         fontWeight: FontWeight.w600,
+                //         color: Colors.black87,
+                //       ),
+                //     ),
+                //   ),
+                // ),
 
                 Expanded(
                   child: _filtered.isEmpty

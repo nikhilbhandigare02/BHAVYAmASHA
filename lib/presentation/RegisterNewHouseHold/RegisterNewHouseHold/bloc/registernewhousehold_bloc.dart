@@ -11,6 +11,7 @@ import 'package:medixcel_new/core/utils/id_generator_utils.dart';
 import 'package:medixcel_new/data/Database/User_Info.dart';
 import 'package:medixcel_new/data/repositories/HousholdRepository/household_repository.dart';
 import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryRepository.dart';
+import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryApiHelper.dart';
 
 import '../../../../data/Database/local_storage_dao.dart';
 import '../../HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
@@ -263,12 +264,6 @@ class RegisterNewHouseholdBloc
                   jsonEncode(headPayload));
               await LocalStorageDao.instance.insertBeneficiary(headPayload);
 
-              // Sync newly inserted head beneficiary with backend
-              await _syncBeneficiaryByUniqueKey(
-                uniqueKey: headId,
-                deviceInfo: deviceInfo,
-                ts: ts,
-              );
 
               // --- INSERT SPOUSE BENEFICIARY IF MARRIED & SPOUSE NAME PRESENT ---
               if (hasSpouse && spouseKey != null) {
@@ -377,12 +372,6 @@ class RegisterNewHouseholdBloc
                   await LocalStorageDao.instance
                       .insertBeneficiary(spousePayload);
 
-                  // Sync newly inserted spouse beneficiary with backend
-                  await _syncBeneficiaryByUniqueKey(
-                    uniqueKey: spouseKey,
-                    deviceInfo: deviceInfo,
-                    ts: ts,
-                  );
                 } catch (e) {
                   print(
                       'Error inserting spouse beneficiary from headForm: $e');
@@ -556,19 +545,6 @@ class RegisterNewHouseholdBloc
                 }
               }
 
-              // SYNC updated head + spouse
-              await _syncBeneficiaryByUniqueKey(
-                uniqueKey: existingHeadKey,
-                deviceInfo: deviceInfo,
-                ts: ts,
-              );
-              if (existingSpouseKey.isNotEmpty) {
-                await _syncBeneficiaryByUniqueKey(
-                  uniqueKey: existingSpouseKey,
-                  deviceInfo: deviceInfo,
-                  ts: ts,
-                );
-              }
             }
           } catch (e) {
             print('Error inserting head beneficiary from headForm: $e');
@@ -804,11 +780,6 @@ class RegisterNewHouseholdBloc
                 await LocalStorageDao.instance
                     .insertBeneficiary(memberPayload);
 
-                await _syncBeneficiaryByUniqueKey(
-                  uniqueKey: memberId,
-                  deviceInfo: deviceInfo,
-                  ts: ts,
-                );
               } catch (e) {
                 print('Error inserting additional member: $e');
               }
@@ -1250,44 +1221,6 @@ class RegisterNewHouseholdBloc
         print(
             ' Household and all members saved locally, proceeding to background sync.');
         emit(state.saved());
-
-        () async {
-          print('📡 Posting add_household: ' + jsonEncode(cleanedPayload));
-          try {
-            final apiResp = await _householdRepository.addHousehold(
-                cleanedPayload);
-            print('✅ add_household response: $apiResp');
-            try {
-              if (apiResp is Map && (apiResp['success'] == true) &&
-                  apiResp['data'] is List) {
-                final List dataList = apiResp['data'] as List;
-                for (final item in dataList) {
-                  if (item is Map) {
-                    final serverId = (item['_id'] ?? item['id'] ?? '')
-                        .toString();
-                    final respUniqueKey = (item['unique_key'] ?? apiUniqueKey)
-                        .toString();
-                    if (serverId.isNotEmpty && respUniqueKey.isNotEmpty) {
-                      final updated = await LocalStorageDao.instance
-                          .updateHouseholdServerIdByUniqueKey(
-                        uniqueKey: respUniqueKey,
-                        serverId: serverId,
-                      );
-                      print(
-                          '🗄️ Updated $updated row(s) with server_id=$serverId for unique_key=$respUniqueKey');
-                    }
-                  }
-                }
-              }
-            } catch (e) {
-              print('Error updating local household with server id: $e');
-            }
-          } catch (apiError) {
-            print(
-                '⚠️ add_household API failed, continuing with local save: $apiError');
-          }
-        }
-        ();
       } catch (e, stackTrace) {
         print('❌ Error saving household data: $e');
         print('Stack trace: $stackTrace');
@@ -1336,63 +1269,12 @@ class RegisterNewHouseholdBloc
     required dynamic deviceInfo,
     required String ts,
   }) async {
-    final saved = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(
-        uniqueKey);
-    if (saved == null) return;
-
-    final currentUser = await UserInfo.getCurrentUser();
-    final userDetails = currentUser?['details'] is String
-        ? jsonDecode(currentUser?['details'] ?? '{}')
-        : currentUser?['details'] ?? {};
-    final working = userDetails['working_location'] ?? {};
-    final facilityId = working['asha_associated_with_facility_id'] ??
-        userDetails['asha_associated_with_facility_id'] ?? 0;
-    final ashaUniqueKey = userDetails['unique_key'] ?? {};
-
-    final payload = _buildBeneficiaryApiPayload(
-      Map<String, dynamic>.from(saved),
-      Map<String, dynamic>.from(userDetails is Map ? userDetails : {}),
-      Map<String, dynamic>.from(working is Map ? working : {}),
-      deviceInfo,
-      ts,
-      ashaUniqueKey,
-      facilityId,
+    final helper = AddBeneficiaryApiHelper();
+    await helper.syncBeneficiaryByUniqueKey(
+      uniqueKey: uniqueKey,
+      deviceInfo: deviceInfo,
+      ts: ts,
     );
-
-    try {
-      final repo = AddBeneficiaryRepository();
-      final reqUniqueKey = (saved['unique_key'] ?? '').toString();
-      final resp = await repo.addBeneficiary(payload);
-      try {
-        if (resp is Map && (resp['success'] == true)) {
-          if (resp['data'] is List && (resp['data'] as List).isNotEmpty) {
-            final first = resp['data'][0];
-            if (first is Map) {
-              final sid = (first['_id'] ?? first['id'] ?? '').toString();
-              if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
-                final updated = await LocalStorageDao.instance
-                    .updateBeneficiaryServerIdByUniqueKey(
-                    uniqueKey: reqUniqueKey, serverId: sid);
-                print('Updated beneficiary with server_id=$sid rows=$updated');
-              }
-            }
-          } else if (resp['data'] is Map) {
-            final map = Map<String, dynamic>.from(resp['data']);
-            final sid = (map['_id'] ?? map['id'] ?? '').toString();
-            if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
-              final updated = await LocalStorageDao.instance
-                  .updateBeneficiaryServerIdByUniqueKey(
-                  uniqueKey: reqUniqueKey, serverId: sid);
-              print('Updated beneficiary with server_id=$sid rows=$updated');
-            }
-          }
-        }
-      } catch (e) {
-        print('Error updating local beneficiary after API: $e');
-      }
-    } catch (apiErr) {
-      print('add_beneficiary API failed, will sync later: $apiErr');
-    }
   }
 
   Map<String, dynamic> _buildBeneficiaryApiPayload(Map<String, dynamic> row,

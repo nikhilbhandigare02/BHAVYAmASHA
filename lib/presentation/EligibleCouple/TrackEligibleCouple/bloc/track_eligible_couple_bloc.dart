@@ -439,47 +439,9 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
                   },
                 ];
 
-                try {
-                  final repo = EligibleCoupleRepository();
-                  final apiResp = await repo.trackEligibleCouple(ecPayloadList);
-                  try {
-                    if (apiResp is Map && apiResp['success'] == true && apiResp['data'] is List) {
-                      final List data = apiResp['data'];
-                      Map? tracking = data.cast<Map>().firstWhere(
-                        (e) => (e['eligible_couple_type']?.toString() ?? '') == 'tracking_due',
-                        orElse: () => {},
-                      );
-                      final serverId = (tracking?['_id'] ?? '').toString();
-                      if (serverId.isNotEmpty) {
-                        final reqUniqueKey = beneficiaryRefKey;
-                        final updated = await db.update(
-                          FollowupFormDataTable.table,
-                          {
-                            'server_id': serverId,
-                            'modified_date_time': nowIso,
-                          },
-                          where: 'beneficiary_ref_key = ? AND forms_ref_key = ?',
-                          whereArgs: [reqUniqueKey, formsRefKey],
-                        );
-                        print('Updated followup_form_data (by req unique_key) server_id=$serverId rows=$updated');
-                      }
-                    }
-                  } catch (e) {
-                    print('Error updating followup_form_data with EC server_id: $e');
-                  }
-                } catch (e) {
-                  print('EC API call failed: $e');
-                }
               }
             } catch (e) {
               print('Error reading saved followup_form_data to build EC payload: $e');
-            }
-            try {
-              // Send generic followup form payload to add_followup_forms1
-              final followupRepo = FollowupFormsRepository();
-              await followupRepo.addFollowupFormsFromDb(formId);
-            } catch (e) {
-              print('Error calling add_followup_forms1 for followup_form_data id=$formId -> $e');
             }
 
             try {

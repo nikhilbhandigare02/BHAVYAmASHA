@@ -1544,7 +1544,7 @@ class LocalStorageDao {
         'households',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
         where:
-        "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-50 minutes')",
+        "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-10 minutes')",
 
         orderBy: "CAST(server_id AS INTEGER) DESC",
         limit: 1,
@@ -1925,7 +1925,8 @@ extension LocalStorageDaoReads on LocalStorageDao {
         'beneficiaries_new',
         columns: ['server_id'],
         where:
-            "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-50 minutes')",
+            "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','"
+                "-10 minutes')",
 
         orderBy: "CAST(server_id AS INTEGER) DESC",
         limit: 1,

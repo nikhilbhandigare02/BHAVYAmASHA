@@ -14,6 +14,7 @@ import '../../core/widgets/RoundButton/RoundButton.dart';
 import '../../core/widgets/TextField/TextField.dart';
 import '../../l10n/app_localizations.dart';
 import 'bloc/login_bloc.dart';
+import 'package:medixcel_new/data/sync/sync_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -315,7 +316,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                             ),
                                           );
                                           
-                                          Future.delayed(const Duration(milliseconds: 500), () {
+                                          Future.delayed(const Duration(milliseconds: 500), () async {
                                             if (state.isNewUser) {
                                               Navigator.pushNamedAndRemoveUntil(
                                                 context,
@@ -324,6 +325,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                               );
 
                                             } else {
+                                              try {
+                                                await SyncService.instance.runFullSyncOnce();
+                                              } catch (_) {}
+                                              if (!mounted) return;
 
                                               Navigator.pushNamedAndRemoveUntil(
                                                 context,

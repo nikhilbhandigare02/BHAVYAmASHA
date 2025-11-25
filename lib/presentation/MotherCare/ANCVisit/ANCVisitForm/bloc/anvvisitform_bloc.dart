@@ -334,70 +334,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             final dbHouseholdRefKey = (saved['household_ref_key'] ?? householdRefKey).toString();
             final dbBeneficiaryRefKey = (saved['beneficiary_ref_key'] ?? beneficiaryId).toString();
 
-            final motherCarePayload = [
-              {
-                'unique_key': dbHouseholdRefKey,
-                'beneficiaries_registration_ref_key': dbBeneficiaryRefKey,
-                'mother_care_type': 'anc_due',
-                'user_id': userId,
-                'facility_id': facility,
-                'is_deleted': 0,
-                'created_by': userId,
-                'created_date_time': createdAt,
-                'modified_by': userId,
-                'modified_date_time': modifiedAt,
-                'parent_added_by': userId,
-                'parent_facility_id': int.tryParse(facility) ?? facility,
-                'app_role_id': appRoleId,
-                'is_guest': 0,
-                'pregnancy_count': 1,
-                'device_details': {
-                  'device_id': deviceJson['id'] ?? deviceJson['device_id'],
-                  'device_plateform': deviceJson['platform'] ?? deviceJson['device_plateform'],
-                  'device_plateform_version': deviceJson['version'] ?? deviceJson['device_plateform_version'],
-                },
-                'app_details': {
-                  'app_version': appJson['app_version'],
-                  'app_name': appJson['app_name'],
-                },
-                'geolocation_details': {
-                  'latitude': geoJson['lat']?.toString() ?? '',
-                  'longitude': geoJson['long']?.toString() ?? '',
-                },
-              },
-            ];
-
-            try {
-              final repo = MotherCareRepository();
-              final apiResp = await repo.addMotherCareActivity(motherCarePayload);
-
-              try {
-                if (apiResp is Map && apiResp['success'] == true && apiResp['data'] is List) {
-                  final List data = apiResp['data'];
-                  Map? rec = data.cast<Map>().firstWhere(
-                    (e) => (e['mother_care_type']?.toString() ?? '') == 'anc_due',
-                    orElse: () => {},
-                  );
-                  final serverId = (rec?['_id'] ?? '').toString();
-                  if (serverId.isNotEmpty) {
-                    final updated = await db.update(
-                      FollowupFormDataTable.table,
-                      {
-                        'server_id': serverId,
-                        // keep modified_date_time as stored in DB, no new timestamp
-                      },
-                      where: 'id = ?',
-                      whereArgs: [formId],
-                    );
-                    print('Updated followup_form_data with mother care server_id=$serverId rows=$updated');
-                  }
-                }
-              } catch (e) {
-                print('Error updating followup_form_data with mother care server_id: $e');
-              }
-            } catch (e) {
-              print('Mother care API call failed: $e');
-            }
+            // Mother care API call removed from here; it will be handled by sync/scheduler.
           }
         } catch (e) {
           print('Error reading saved followup_form_data to build mother care payload: $e');

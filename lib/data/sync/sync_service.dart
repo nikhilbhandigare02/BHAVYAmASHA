@@ -10,6 +10,7 @@ import 'package:medixcel_new/data/Database/User_Info.dart';
 
 import '../repositories/ChildCareRepository/ChildCareRepository.dart';
 import '../repositories/EligibleCoupleRepository/EligibleCoupleRepository.dart';
+import '../repositories/EligibleCoupleRepository/EligibleCoupleApiHelper.dart';
 import '../repositories/FollowupFormsRepository/FollowupFormsRepository.dart';
 import '../repositories/MotherCareRepository/MotherCareRepository.dart';
 import '../repositories/NotificationRepository/Notification_Repository.dart';
@@ -347,6 +348,10 @@ class SyncService {
         final id = r['id'] as int? ?? 0;
         if (id <= 0) continue;
         try {
+          final ecHelper = EligibleCoupleApiHelper();
+          await ecHelper.syncTrackingDueFromFollowupRow(id);
+
+          // Then, push the generic followup form via the repository
           await _followupRepo.addFollowupFormsFromDb(id);
         } catch (e) {
           print('FollowupForms Push: error syncing followup_form_data id=$id -> $e');
