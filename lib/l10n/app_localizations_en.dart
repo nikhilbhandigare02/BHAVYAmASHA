@@ -48,7 +48,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get abhaOtpGeneratedSuccess => 'OTP generated successfully';
 
   @override
-  String get aboutUsP1Title => 'ASHA (ACCREDITED SOCIAL HEALTH ACTIVIST) App, is an application to help ASHA front-line workers to do their everyday work related the population immunization, eligible couple tracking, mother and child care, and different more programs run by the health society.';
+  String get aboutUsP1Title => 'ASHA (ACCREDITED SOCIAL HEALTH ACTIVIST)';
+
+  @override
+  String get aboutUsP1Part2 => 'App, is an application to help ASHA front-line workers to do their everyday work related to population immunization, eligible couple tracking, mother and child care and different more programs run by the health society.';
 
   @override
   String get aboutUsP2 => 'The ASHA can do the family immunization, and from there, the beneficiary can be added. Once the family members get added, tracking of the eligible couple and family planning can be done. This app aims to support offline functionality for remote villages where a stable network is a challenge.';
@@ -1345,19 +1348,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbycAdvicePreparingAdministeringOrsLabel => 'Assisted mother on Steps to prepare ORS at home and serve to child';
 
   @override
-  String get hbycBhramanLabel => 'HBYC home visit*';
+  String get hbycBhramanLabel => 'HBYC home visit';
 
   @override
   String get hbycBhramanRequired => 'HBYC home visit';
 
   @override
-  String get hbycBreastfeedingContinuingLabel => 'Is breastfeeding continuing?';
+  String get hbycBreastfeedingContinuingLabel => 'Breastfeeding continuing?';
 
   @override
   String get hbycCompleteDietProvidedLabel => 'Was a complete diet provided?';
 
   @override
-  String get hbycCompletionDateLabel => 'Completion date of activities';
+  String get hbycCompletionDateLabel => 'Date of completion of HBYC visit activities';
 
   @override
   String get hbycCounselingExclusiveBf6mLabel => 'Counseling on exclusive breastfeeding for 6 months';
@@ -1372,10 +1375,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbycFullyVaccinatedLabel => 'Fully vaccinated as per MCP card?';
 
   @override
-  String get hbycIronFolicSyrupAvailableLabel => 'Is iron folic acid syrup available at home?';
+  String get hbycIronFolicSyrupAvailableLabel => ' iron folic acid syrup available at home?';
 
   @override
-  String get hbycIsChildSickLabel => 'Is the child sick?';
+  String get hbycIsChildSickLabel => 'Whether child is sick?';
 
   @override
   String get hbycLengthHeightRecordedLabel => 'Has the length/height been recorded based on weight by AWW?';
@@ -1384,22 +1387,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbycListTitle => 'HBYC List';
 
   @override
-  String get hbycMeaslesVaccineGivenLabel => 'Measles vaccine given (MCP card)?';
+  String get hbycMeaslesVaccineGivenLabel => 'Measles vaccine given?';
 
   @override
-  String get hbycOrsPacketAvailableLabel => 'Is ORS packet available at home?';
+  String get hbycOrsPacketAvailableLabel => ' ORS available at home?';
 
   @override
   String get hbycTitleDetails => 'Details';
 
   @override
-  String get hbycVitaminADosageGivenLabel => 'Vitamin A dosage given (MCP card)?';
+  String get hbycVitaminADosageGivenLabel => 'Vitamin A  given?';
 
   @override
-  String get hbycWeighedByAwwLabel => 'Has the child been weighed by the Anganwadi worker based on age?';
+  String get hbycWeighedByAwwLabel => 'Recording of weight for-age by Anganwadi Worker?';
 
   @override
-  String get hbycWeightLessThan3sdLabel => 'Weight < 3 SD referred as per MCP card?';
+  String get hbycWeightLessThan3sdLabel => 'Child with <3SD weight-for-length/height referred?';
 
   @override
   String get healthWorkerLabel => 'Health Worker';

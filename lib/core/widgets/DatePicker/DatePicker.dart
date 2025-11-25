@@ -65,7 +65,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
   void _updateControllerText() {
     if (_selectedDate != null) {
-      _controller.text = DateFormat('dd/MM/yyyy').format(_selectedDate!);
+      _controller.text = DateFormat('dd-MM-yyyy').format(_selectedDate!);
     } else {
       _controller.clear();
     }
@@ -148,7 +148,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
             label: _labelWidget,
 
-            hintText: widget.hintText ?? 'dd/MM/yyyy',
+            hintText: widget.hintText ?? 'dd-MM-yyyy',
             hintStyle:
             inputStyle.copyWith(color: AppColors.onSurfaceVariant),
 

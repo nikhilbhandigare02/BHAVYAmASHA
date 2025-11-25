@@ -176,8 +176,14 @@ abstract class AppLocalizations {
   /// No description provided for @aboutUsP1Title.
   ///
   /// In en, this message translates to:
-  /// **'ASHA (ACCREDITED SOCIAL HEALTH ACTIVIST) App, is an application to help ASHA front-line workers to do their everyday work related the population immunization, eligible couple tracking, mother and child care, and different more programs run by the health society.'**
+  /// **'ASHA (ACCREDITED SOCIAL HEALTH ACTIVIST)'**
   String get aboutUsP1Title;
+
+  /// No description provided for @aboutUsP1Part2.
+  ///
+  /// In en, this message translates to:
+  /// **'App, is an application to help ASHA front-line workers to do their everyday work related to population immunization, eligible couple tracking, mother and child care and different more programs run by the health society.'**
+  String get aboutUsP1Part2;
 
   /// No description provided for @aboutUsP2.
   ///
@@ -2750,7 +2756,7 @@ abstract class AppLocalizations {
   /// No description provided for @hbycBhramanLabel.
   ///
   /// In en, this message translates to:
-  /// **'HBYC home visit*'**
+  /// **'HBYC home visit'**
   String get hbycBhramanLabel;
 
   /// No description provided for @hbycBhramanRequired.
@@ -2762,7 +2768,7 @@ abstract class AppLocalizations {
   /// No description provided for @hbycBreastfeedingContinuingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is breastfeeding continuing?'**
+  /// **'Breastfeeding continuing?'**
   String get hbycBreastfeedingContinuingLabel;
 
   /// No description provided for @hbycCompleteDietProvidedLabel.
@@ -2774,7 +2780,7 @@ abstract class AppLocalizations {
   /// No description provided for @hbycCompletionDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Completion date of activities'**
+  /// **'Date of completion of HBYC visit activities'**
   String get hbycCompletionDateLabel;
 
   /// No description provided for @hbycCounselingExclusiveBf6mLabel.
@@ -2804,13 +2810,13 @@ abstract class AppLocalizations {
   /// No description provided for @hbycIronFolicSyrupAvailableLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is iron folic acid syrup available at home?'**
+  /// **' iron folic acid syrup available at home?'**
   String get hbycIronFolicSyrupAvailableLabel;
 
   /// No description provided for @hbycIsChildSickLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the child sick?'**
+  /// **'Whether child is sick?'**
   String get hbycIsChildSickLabel;
 
   /// No description provided for @hbycLengthHeightRecordedLabel.
@@ -2828,13 +2834,13 @@ abstract class AppLocalizations {
   /// No description provided for @hbycMeaslesVaccineGivenLabel.
   ///
   /// In en, this message translates to:
-  /// **'Measles vaccine given (MCP card)?'**
+  /// **'Measles vaccine given?'**
   String get hbycMeaslesVaccineGivenLabel;
 
   /// No description provided for @hbycOrsPacketAvailableLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is ORS packet available at home?'**
+  /// **' ORS available at home?'**
   String get hbycOrsPacketAvailableLabel;
 
   /// No description provided for @hbycTitleDetails.
@@ -2846,19 +2852,19 @@ abstract class AppLocalizations {
   /// No description provided for @hbycVitaminADosageGivenLabel.
   ///
   /// In en, this message translates to:
-  /// **'Vitamin A dosage given (MCP card)?'**
+  /// **'Vitamin A  given?'**
   String get hbycVitaminADosageGivenLabel;
 
   /// No description provided for @hbycWeighedByAwwLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the child been weighed by the Anganwadi worker based on age?'**
+  /// **'Recording of weight for-age by Anganwadi Worker?'**
   String get hbycWeighedByAwwLabel;
 
   /// No description provided for @hbycWeightLessThan3sdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Weight < 3 SD referred as per MCP card?'**
+  /// **'Child with <3SD weight-for-length/height referred?'**
   String get hbycWeightLessThan3sdLabel;
 
   /// No description provided for @healthWorkerLabel.

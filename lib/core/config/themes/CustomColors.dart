@@ -31,7 +31,6 @@ class AppColors {
   static const Color errorContainer = Color(0xFFF9DEDC);
   static const Color onErrorContainer = Color(0xFF410E0B);
 
-  // Neutrals / Surfaces
   static const Color background = Colors.white;
   static const Color onBackground = Color(0xFF1C1B1F);
   static const Color surface = Color(0xFFFFFBFE);
@@ -46,7 +45,6 @@ class AppColors {
   static const Color onInverseSurface = Color(0xFFF4EFF4);
   static const Color inversePrimary = Color(0xFFD0BCFF);
 
-  // Utility / Status
   static const Color success = Color(0xFF2E7D32);
   static const Color warning = Color(0xFFF57C00);
   static const Color info = Color(0xFF0288D1);
