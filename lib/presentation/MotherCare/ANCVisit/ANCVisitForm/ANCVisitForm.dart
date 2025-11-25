@@ -311,7 +311,30 @@ class _AncvisitformState extends State<Ancvisitform> {
             }
           }
         } else {
-          print('ℹ️ No existing ANC forms found for this beneficiary');
+          print('ℹ️ No existing ANC forms found for this beneficiary using household+beneficiary. Trying beneficiary-only fallback.');
+          try {
+            final byBeneficiary = await localStorageDao.getAncFormsByBeneficiaryId(
+              dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey,
+            );
+
+            if (byBeneficiary.isNotEmpty) {
+              final latest = byBeneficiary.first;
+
+              // Fixed: Proper conditional expression with type casting
+              final fd = latest['form_data'] is Map
+                  ? Map<String, dynamic>.from(latest['form_data'] as Map)
+                  : (latest['form_json'] != null
+                  ? ((jsonDecode(latest['form_json'] as String) as Map<String, dynamic>?)?['form_data'] as Map<String, dynamic>?) ?? {}
+                  : <String, dynamic>{});
+
+              print('📝 Loaded fallback ANC form data: $fd');
+              _updateFormWithData(fd);
+            } else {
+              print('ℹ️ No ANC forms found in beneficiary-only lookup');
+            }
+          } catch (e) {
+            print('⚠️ Error in beneficiary-only ANC lookup: $e');
+          }
         }
       } catch (e) {
         print('⚠️ Error loading existing forms: $e');
@@ -690,6 +713,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             CustomTextField(
                               labelText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
                               hintText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
+                              key: ValueKey('woman_name_${state.womanName}'),
                               initialValue: state.womanName,
                               onChanged: (v) => bloc.add(WomanNameChanged(v)),
                             ),
@@ -697,6 +721,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             CustomTextField(
                               labelText: l10n?.husbandNameLabel ?? "Husband's name",
                               hintText: l10n?.husbandNameLabel ?? "Husband's name",
+                              key: ValueKey('husband_name_${state.husbandName}'),
                               initialValue: state.husbandName,
                               onChanged: (v) => bloc.add(HusbandNameChanged(v)),
                             ),
