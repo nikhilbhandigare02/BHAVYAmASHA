@@ -8,8 +8,8 @@ import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_vis
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_state.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_event.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 import 'dart:convert';
 
 class GeneralDetailsTab extends StatelessWidget {

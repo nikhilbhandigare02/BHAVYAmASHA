@@ -10,7 +10,7 @@ import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../HomeScreen/HomeScreen.dart';
-import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../data/Database/local_storage_dao.dart';
 import '../EligibleCoupleUpdate/EligibleCoupleUpdateScreen.dart';
 
 class EligibleCoupleIdentifiedScreen extends StatefulWidget {

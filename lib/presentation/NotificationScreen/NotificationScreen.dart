@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/config/themes/CustomColors.dart';
-import '../../data/Local_Storage/local_storage_dao.dart';
+import '../../data/Database/local_storage_dao.dart';
 import '../../data/repositories/NotificationRepository/Notification_Repository.dart';
 
 class Notificationscreen extends StatefulWidget {

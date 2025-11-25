@@ -12,8 +12,8 @@ import 'dart:convert';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
-import '../../../../data/Local_Storage/local_storage_dao.dart';
-import '../../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../../../data/Database/local_storage_dao.dart';
+import '../../../../data/Database/tables/followup_form_data_table.dart';
 import 'bloc/anvvisitform_bloc.dart';
 import 'package:medixcel_new/core/widgets/MultiSelect/MultiSelect.dart';
 

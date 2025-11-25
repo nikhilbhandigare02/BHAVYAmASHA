@@ -10,7 +10,7 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
-import '../../data/Local_Storage/local_storage_dao.dart';
+import '../../data/Database/local_storage_dao.dart';
 import '../HomeScreen/HomeScreen.dart';
 
 extension StringExtension on String {

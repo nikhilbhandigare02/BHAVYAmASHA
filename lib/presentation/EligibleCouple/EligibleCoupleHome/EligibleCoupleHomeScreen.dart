@@ -2,14 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/widgets/AppHeader/AppHeader.dart' show AppHeader;
-import '../../../data/Local_Storage/local_storage_dao.dart';
-import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../../data/Database/local_storage_dao.dart';
+import '../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../data/repositories/EligibleCoupleRepository/EligibleCoupleRepository.dart';
 import '../../HomeScreen/HomeScreen.dart';
 

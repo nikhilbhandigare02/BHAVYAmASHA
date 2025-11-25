@@ -3,9 +3,9 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/utils/enums.dart';
-import '../../../../data/Local_Storage/database_provider.dart';
-import '../../../../data/Local_Storage/local_storage_dao.dart';
-import '../../../../data/Local_Storage/tables/training_data_table.dart';
+import '../../../../data/Database/database_provider.dart';
+import '../../../../data/Database/local_storage_dao.dart';
+import '../../../../data/Database/tables/training_data_table.dart';
 
 part 'training_event.dart';
 part 'training_state.dart';

@@ -6,10 +6,10 @@ import 'package:meta/meta.dart';
 
 import '../../../../../core/utils/device_info_utils.dart';
 import '../../../../../core/utils/enums.dart';
-import '../../../../../data/Local_Storage/User_Info.dart';
-import '../../../../../data/Local_Storage/database_provider.dart';
-import '../../../../../data/Local_Storage/local_storage_dao.dart';
-import '../../../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../../../../data/Database/User_Info.dart';
+import '../../../../../data/Database/database_provider.dart';
+import '../../../../../data/Database/local_storage_dao.dart';
+import '../../../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../../../data/SecureStorage/SecureStorage.dart';
 import '../../../../../data/repositories/MotherCareRepository/MotherCareRepository.dart';
 

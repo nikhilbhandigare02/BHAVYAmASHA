@@ -3,8 +3,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 
 part 'hbyc_child_care_event.dart';
 part 'hbyc_child_care_state.dart';

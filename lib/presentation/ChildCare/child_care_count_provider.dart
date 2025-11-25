@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:developer' as developer;
 

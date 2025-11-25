@@ -4,8 +4,8 @@ import 'package:medixcel_new/data/NetworkAPIServices/APIs_Urls/Endpoints.dart';
 import 'package:medixcel_new/data/NetworkAPIServices/api_services/network_services_API.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
-import '../../Local_Storage/User_Info.dart';
-import '../../Local_Storage/local_storage_dao.dart';
+import '../../Database/User_Info.dart';
+import '../../Database/local_storage_dao.dart';
 
 class HouseholdRepository {
   final NetworkServiceApi _api = NetworkServiceApi();

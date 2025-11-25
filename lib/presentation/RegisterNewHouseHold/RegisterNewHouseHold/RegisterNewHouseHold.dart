@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 import 'dart:io' show Platform;
 import 'dart:convert';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
-import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';

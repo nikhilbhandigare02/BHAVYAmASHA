@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/data/models/guest_beneficiary/search_beneficiary_response.dart';
 import 'package:medixcel_new/data/repositories/GuestBeneficiaryRepository.dart';
 import '../../../core/utils/enums.dart' show GbsStatus;
-import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../data/Database/local_storage_dao.dart';
 import '../../../data/models/guest_beneficiary/guest_beneficiary_model.dart';
 import 'guest_beneficiary_search_event.dart';
 import 'guest_beneficiary_search_state.dart';

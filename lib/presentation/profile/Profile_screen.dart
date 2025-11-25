@@ -4,7 +4,7 @@
   import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
   import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
   import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-  import 'package:medixcel_new/data/Local_Storage/User_Info.dart';
+  import 'package:medixcel_new/data/Database/User_Info.dart';
   import '../../core/config/routes/Route_Name.dart';
   import '../../core/widgets/Dropdown/Dropdown.dart';
   import '../../core/widgets/Dropdown/dropdown.dart' hide ApiDropdown;

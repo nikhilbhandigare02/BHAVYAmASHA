@@ -8,7 +8,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../core/widgets/Loader/Loader.dart';
 import '../../core/widgets/RoundButton/RoundButton.dart';
-import '../../data/Local_Storage/local_storage_dao.dart';
+import '../../data/Database/local_storage_dao.dart';
 import '../HomeScreen/HomeScreen.dart';
 import '../RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 

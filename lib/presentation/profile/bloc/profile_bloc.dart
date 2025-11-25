@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import '../../../data/Local_Storage/User_Info.dart';
+import '../../../data/Database/User_Info.dart';
 part 'profile_event.dart';
 part 'profile_state.dart';
 

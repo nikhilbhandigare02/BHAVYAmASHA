@@ -3,7 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:medixcel_new/core/extensions/string_extensions.dart';
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
 
 part 'eligible_coule_update_event.dart';
 part 'eligible_coule_update_state.dart';

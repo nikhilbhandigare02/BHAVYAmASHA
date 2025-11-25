@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/data/NetworkAPIServices/APIs_Urls/Endpoints.dart';
 import 'package:medixcel_new/data/NetworkAPIServices/api_services/network_services_API.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
-import '../../Local_Storage/User_Info.dart';
-import '../../Local_Storage/local_storage_dao.dart';
+import '../../Database/User_Info.dart';
+import '../../Database/local_storage_dao.dart';
 
 
 class FollowupFormsRepository {

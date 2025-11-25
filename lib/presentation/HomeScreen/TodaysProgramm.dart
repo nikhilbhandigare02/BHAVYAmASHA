@@ -6,9 +6,9 @@ import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Hea
 import 'package:sizer/sizer.dart';
 import 'package:sqflite/sqflite.dart' show Database;
 import 'package:url_launcher/url_launcher.dart';
-import '../../data/Local_Storage/local_storage_dao.dart';
-import '../../data/Local_Storage/database_provider.dart';
-import '../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../data/Database/local_storage_dao.dart';
+import '../../data/Database/database_provider.dart';
+import '../../data/Database/tables/followup_form_data_table.dart';
 import '../../data/SecureStorage/SecureStorage.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../l10n/app_localizations.dart';

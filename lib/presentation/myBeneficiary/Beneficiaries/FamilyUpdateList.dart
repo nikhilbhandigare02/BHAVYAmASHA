@@ -9,8 +9,8 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
-import '../../../data/Local_Storage/database_provider.dart';
-import '../../../data/Local_Storage/local_storage_dao.dart';
+import '../../../data/Database/database_provider.dart';
+import '../../../data/Database/local_storage_dao.dart';
 import '../../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
 
 class FamliyUpdate extends StatefulWidget {
