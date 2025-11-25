@@ -44,12 +44,12 @@ class _CustomDrawerState extends State<CustomDrawer> {
     if (mounted) {
       setState(() => isLoading = true);
     }
-    
+
     try {
       developer.log('Loading user data from secure storage...', name: 'Drawer');
       final data = await SecureStorageService.getCurrentUserData();
       developer.log('User data loaded: ${data != null}', name: 'Drawer');
-      
+
       if (data == null || data.isEmpty) {
         developer.log('No user data found in secure storage, trying legacy format...', name: 'Drawer');
         // Try to get legacy format data
@@ -71,7 +71,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           }
         }
       }
-      
+
       if (mounted) {
         setState(() {
           userData = data;
@@ -152,6 +152,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     return Drawer(
       backgroundColor: Colors.white,
       child: SafeArea(
+        bottom: true,
         child: Column(
           children: [
             // 🔹 Top Logo
@@ -250,26 +251,26 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       children: [
                         if (isLoading)
                           _buildLoadingState()
-                        else if (userData != null && userData!.isNotEmpty) 
+                        else if (userData != null && userData!.isNotEmpty)
                           ...[
                             _UserInfoRow(
-                              label: l10n.userNameLabel, 
+                              label: l10n.userNameLabel,
                               value: _getFullName(),
                             ),
                             _UserInfoRow(
-                              label: l10n.userRoleLabel, 
+                              label: l10n.userRoleLabel,
                               value: userData!['role_name']?.toString() ?? 'ASHA Worker',
                             ),
                             _UserInfoRow(
-                              label: l10n.userVillageLabel, 
+                              label: l10n.userVillageLabel,
                               value: _getWorkingLocation('village'),
                             ),
                             _UserInfoRow(
-                              label: l10n.userHscLabel, 
+                              label: l10n.userHscLabel,
                               value: _getWorkingLocation('hsc_name'),
                             ),
                             _UserInfoRow(
-                              label: l10n.userHfrIdLabel, 
+                              label: l10n.userHfrIdLabel,
                               value: _getWorkingLocation('hsc_hfr_id'),
                             ),
                           ]

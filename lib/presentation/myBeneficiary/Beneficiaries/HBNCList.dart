@@ -36,7 +36,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
   }
 
   void _onSearchChanged() {
-    // Implement search functionality if needed
+
   }
 
   Future<int> _getVisitCount(String beneficiaryId) async {
@@ -142,7 +142,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
 
           final db = await DatabaseProvider.instance.database;
           final beneficiaryResults = await db.query(
-            'beneficiaries',
+            'beneficiaries_new',
             where: 'unique_key = ? AND is_deleted = 0',
             whereArgs: [beneficiaryRefKey],
           );

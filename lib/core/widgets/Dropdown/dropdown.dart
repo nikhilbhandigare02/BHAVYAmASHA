@@ -87,7 +87,9 @@ class ApiDropdown<T> extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
+                FocusManager.instance.primaryFocus?.unfocus();
                 FocusScope.of(context).unfocus();
+                FocusScope.of(context).requestFocus(FocusNode());
                 _showSelectDialog(context, field);
               },
               child: AbsorbPointer(
@@ -225,7 +227,12 @@ class ApiDropdown<T> extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    FocusScope.of(context).unfocus();
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    Navigator.pop(context);
+                  },
                   child: Text(
                     'CANCEL',
                     style: TextStyle(
@@ -241,6 +248,9 @@ class ApiDropdown<T> extends StatelessWidget {
                       onChanged!(tempValue);
                       field.didChange(tempValue);
                     }
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    FocusScope.of(context).unfocus();
+                    FocusScope.of(context).requestFocus(FocusNode());
                     Navigator.pop(context);
                   },
                   child: Text(
@@ -258,6 +268,9 @@ class ApiDropdown<T> extends StatelessWidget {
         ),
       ),
     );
+    FocusManager.instance.primaryFocus?.unfocus();
+    FocusScope.of(context).unfocus();
+    FocusScope.of(context).requestFocus(FocusNode());
   }
 
   Future<void> _showMultiSelectDialog(
@@ -321,7 +334,12 @@ class ApiDropdown<T> extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    FocusScope.of(context).unfocus();
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    Navigator.pop(context);
+                  },
                   child: Text(
                     'CANCEL',
                     style: TextStyle(
@@ -334,6 +352,9 @@ class ApiDropdown<T> extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     onMultiChanged?.call(tempValues);
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    FocusScope.of(context).unfocus();
+                    FocusScope.of(context).requestFocus(FocusNode());
                     Navigator.pop(context);
                   },
                   child: Text(
@@ -351,5 +372,8 @@ class ApiDropdown<T> extends StatelessWidget {
         ),
       ),
     );
+    FocusManager.instance.primaryFocus?.unfocus();
+    FocusScope.of(context).unfocus();
+    FocusScope.of(context).requestFocus(FocusNode());
   }
 }
