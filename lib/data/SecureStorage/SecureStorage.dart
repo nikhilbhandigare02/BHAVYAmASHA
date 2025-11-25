@@ -7,6 +7,7 @@ class SecureStorageService {
   static const _keyRefreshToken = 'refresh_token';
   static const _keyUserData = 'user_data';
   static const _keyIsLoggedIn = 'is_logged_in';
+  static const _keyAbhaFetched = 'abha_fetch_done';
   static const _keyCurrentUser = 'current_user_id';
   static const String _keyAncVisits = 'anc_visits';
   static const String _keydelivery_outcome = 'delivery_outcome';
@@ -331,6 +332,15 @@ class SecureStorageService {
   static Future<int> getLoginFlag() async {
     final value = await _storage.read(key: _keyIsLoggedIn);
     return int.tryParse(value ?? '0') ?? 0;
+  }
+
+  static Future<bool> isAbhaFetched() async {
+    final value = await _storage.read(key: _keyAbhaFetched);
+    return value == '1';
+  }
+
+  static Future<void> setAbhaFetched() async {
+    await _storage.write(key: _keyAbhaFetched, value: '1');
   }
 
   // Save user data with unique key

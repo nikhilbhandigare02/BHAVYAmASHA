@@ -153,12 +153,33 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
 
           final configuredHeadKey = headKeyByHousehold[householdRefKey];
-          if (configuredHeadKey == null || configuredHeadKey.isEmpty) return false;
 
           final isDeath = r['is_death'] == 1;
           final isMigrated = r['is_migrated'] == 1;
+          if (isDeath || isMigrated) return false;
 
-          return configuredHeadKey == uniqueKey && !isDeath && !isMigrated;
+          bool isConfiguredHead = false;
+          if (configuredHeadKey != null && configuredHeadKey.isNotEmpty) {
+            isConfiguredHead = configuredHeadKey == uniqueKey;
+          }
+
+          bool isHeadByRelation = false;
+          final rawInfo = r['beneficiary_info'];
+          Map<String, dynamic> info;
+          if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo as Map);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            info = <String, dynamic>{};
+          }
+
+          final relation = (info['relation_to_head'] ?? info['relation'] ?? '')
+              .toString()
+              .toLowerCase();
+          isHeadByRelation = relation == 'head';
+
+          return isConfiguredHead || isHeadByRelation;
         } catch (_) {
           return false;
         }
