@@ -876,6 +876,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         initialDate: state.edd,
                         onDateChanged: (d) => context.read<SpousBloc>().add(SpEDDChange(d)),
                         validator: (date) => captureSpousError(Validations.validateEDD(l, date)),
+                        readOnly: true,
                       ),
                     ),
                     Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),

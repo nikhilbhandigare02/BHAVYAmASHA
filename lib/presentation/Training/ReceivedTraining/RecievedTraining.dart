@@ -51,7 +51,7 @@ class _TrainingReceivedState extends State<TrainingReceived> {
             try {
               final parsedDate = DateTime.tryParse(rawDate);
               if (parsedDate != null) {
-                dateStr = DateFormat('dd/MM/yyyy').format(parsedDate);
+                dateStr = DateFormat('dd-MM-yyyy').format(parsedDate);
               } else {
                 dateStr = rawDate;
               }

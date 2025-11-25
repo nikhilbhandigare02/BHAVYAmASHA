@@ -1350,16 +1350,11 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 children: [
                                   const SizedBox(height: 8),
                                   CustomTextField(
-                                    labelText: 'Reason for Absence*',
+                                    labelText: 'Reason for Absence',
                                     hintText: 'Enter the reason for absence',
                                     initialValue: state.absenceReason,
                                     onChanged: (v) => bloc.add(AbsenceReasonChanged(v)),
-                                    validator: (value) {
-                                      if (state.beneficiaryAbsent == (l10n?.yes ?? 'Yes') && (value == null || value.isEmpty)) {
-                                        return 'Please enter the reason for absence';
-                                      }
-                                      return null;
-                                    },
+                                    validator: null, // Made non-mandatory as requested
                                     maxLines: 3,
                                   ),
                                   const SizedBox(height: 8),

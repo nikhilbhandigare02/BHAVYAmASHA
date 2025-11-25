@@ -89,7 +89,15 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
          byBeneficiary[key] = item;
       }
 
+      // Convert to list and sort by registration date (newest first)
       final dedupedList = byBeneficiary.values.toList();
+      dedupedList.sort((a, b) {
+        final dateA = DateTime.tryParse(a['_rawRow']?['created_date_time']?.toString() ?? '');
+        final dateB = DateTime.tryParse(b['_rawRow']?['created_date_time']?.toString() ?? '');
+        
+        if (dateA == null || dateB == null) return 0;
+        return dateB.compareTo(dateA); // Descending order (newest first)
+      });
 
       setState(() {
         _allData = dedupedList;

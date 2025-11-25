@@ -44,13 +44,11 @@ class AppColors {
   static const Color inverseSurface = Color(0xFF313033);
   static const Color onInverseSurface = Color(0xFFF4EFF4);
   static const Color inversePrimary = Color(0xFFD0BCFF);
-
   static const Color success = Color(0xFF2E7D32);
   static const Color warning = Color(0xFFF57C00);
   static const Color info = Color(0xFF0288D1);
   static const Color green = Color(0xFF28A745);
   static const Color blue = Color(0xFF4CBEE5);
-
   static const Color onGreen = Colors.white;
   static const Color greenContainer = Color(0xFFDFF5E1);
   static const Color onGreenContainer = Color(0xFF1E4620);
@@ -77,7 +75,6 @@ class AppColors {
   static const Color bgColorScreen = Color.fromRGBO(248, 249, 254, 1.0);
 }
 
-/// Dark mode colors. Keep brand hues consistent while adjusting luminance.
 class AppColorsDark {
   AppColorsDark._();
 
