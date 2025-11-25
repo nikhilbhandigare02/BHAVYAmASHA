@@ -28,6 +28,23 @@ class LocalStorageDao {
     }
   }
 
+  Future<Map<String, dynamic>?> getCurrentUserFromDb() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'users',
+        where: 'is_deleted = 0',
+        orderBy: 'id DESC',
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      return Map<String, dynamic>.from(rows.first);
+    } catch (e) {
+      print('Error fetching current user from users table: $e');
+      return null;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getChildTrackingDueFor16Year() async {
     print('Executing getChildTrackingDueFor16Year query...');
     try {

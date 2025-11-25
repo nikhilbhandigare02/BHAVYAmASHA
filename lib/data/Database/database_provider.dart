@@ -66,13 +66,13 @@ class DatabaseProvider {
 
   Future<void> runMigration(Database db) async {
     try {
-      DbMigration.runUserTableMigration(db);
-      DbMigration.runBeneficiaryTableMigration(db);
-      DbMigration.runHouseholdTableMigration(db);
-      DbMigration.runFollowUpTableMigration(db);
-      DbMigration.runEligileCoupleTableMigration(db);
-      DbMigration.runMotherCareTableMigration(db);
-      // DbMigration.runEligibleChildTableMigration(db);
+      await DbMigration.runUserTableMigration(db);
+      await DbMigration.runBeneficiaryTableMigration(db);
+      await DbMigration.runHouseholdTableMigration(db);
+      await DbMigration.runFollowUpTableMigration(db);
+      await DbMigration.runEligileCoupleTableMigration(db);
+      await DbMigration.runMotherCareTableMigration(db);
+      // await DbMigration.runEligibleChildTableMigration(db);
 
     } catch (e) {
       print("❌ Migration error: $e");

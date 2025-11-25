@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -11,12 +13,47 @@ import '../../core/config/routes/Route_Name.dart';
 import '../../core/widgets/MarqeeText/MarqeeText.dart';
 import '../HomeScreen/HomeScreen.dart';
 import 'IncentiveForm.dart';
+import '../../data/Database/local_storage_dao.dart';
 
 class IncentivePortal extends StatefulWidget {
   const IncentivePortal({super.key});
 
   @override
   State<IncentivePortal> createState() => _IncentivePortalState();
+}
+
+String _safeText(dynamic v) => v?.toString().trim().isNotEmpty == true ? v.toString() : '-';
+
+extension on _IncentivePortalState {
+  String _buildFullName() {
+    if (_userData == null || _userData!.isEmpty) return '-';
+    try {
+      final details = _userData!['details'] is String
+          ? (jsonDecode(_userData!['details']) as Map<String, dynamic>)
+          : (_userData!['details'] as Map<String, dynamic>? ?? const {});
+      final name = details['data']?['name'] ?? details['name'] ?? {};
+      final first = _safeText(name['first_name']);
+      final middle = _safeText(name['middle_name']);
+      final last = _safeText(name['last_name']);
+      final parts = [first, middle, last].where((p) => p != '-' && p.isNotEmpty).toList();
+      return parts.isEmpty ? '-' : parts.join(' ');
+    } catch (_) {
+      return '-';
+    }
+  }
+
+  String _getWorkingField(String key) {
+    if (_userData == null || _userData!.isEmpty) return '-';
+    try {
+      final details = _userData!['details'] is String
+          ? (jsonDecode(_userData!['details']) as Map<String, dynamic>)
+          : (_userData!['details'] as Map<String, dynamic>? ?? const {});
+      final working = details['data']?['working_location'] ?? details['working_location'] ?? {};
+      return _safeText(working[key]);
+    } catch (_) {
+      return '-';
+    }
+  }
 }
 
 class _IncentivePortalState extends State<IncentivePortal>
@@ -34,6 +71,25 @@ class _IncentivePortalState extends State<IncentivePortal>
   late String _selectedYear;
   late String _selectedMonth;
   bool _isFirstBuild = true;
+
+  Map<String, dynamic>? _userData;
+  bool _isUserLoading = true;
+
+  Future<void> _loadUserData() async {
+    try {
+      final data = await LocalStorageDao.instance.getCurrentUserFromDb();
+      if (!mounted) return;
+      setState(() {
+        _userData = data;
+        _isUserLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isUserLoading = false;
+      });
+    }
+  }
 
   List<String> _getMonthNames(AppLocalizations? l10n) => [
     l10n?.monthJanuary ?? 'January',
@@ -55,6 +111,7 @@ class _IncentivePortalState extends State<IncentivePortal>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _selectedYear = _years[2]; // default sample like screenshot
+    _loadUserData();
 
     _tabController.addListener(() async {
       if (_navigatingFinalize) return;
@@ -139,8 +196,8 @@ class _IncentivePortalState extends State<IncentivePortal>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                     Text(
-                      'Rohit Chavan',
+                    Text(
+                      _buildFullName(),
                       style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 4),
@@ -148,16 +205,16 @@ class _IncentivePortalState extends State<IncentivePortal>
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _InfoCell(title: l10n?.incentiveHeaderDistrict ?? 'District', value: 'Patna'),
-                        _InfoCell(title: l10n?.incentiveHeaderBlock ?? 'Block', value: 'Maner'),
+                        _InfoCell(title: l10n?.incentiveHeaderDistrict ?? 'District', value: _getWorkingField('district')),
+                        _InfoCell(title: l10n?.incentiveHeaderBlock ?? 'Block', value: _getWorkingField('block')),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _InfoCell(title: l10n?.incentiveHeaderHsc ?? 'HSC', value: 'HSC Baank'),
-                        _InfoCell(title: l10n?.incentiveHeaderPanchayat ?? 'Panchayat', value: 'Baank'),
-                        _InfoCell(title: l10n?.incentiveHeaderAnganwadi ?? 'Anganwadi', value: 'Baank'),
+                        _InfoCell(title: l10n?.incentiveHeaderHsc ?? 'HSC', value: _getWorkingField('hsc_name')),
+                        _InfoCell(title: l10n?.incentiveHeaderPanchayat ?? 'Panchayat', value: _getWorkingField('panchayat')),
+                        _InfoCell(title: l10n?.incentiveHeaderAnganwadi ?? 'Anganwadi', value: _getWorkingField('anganwadi')),
                       ],
                     ),
                   ],

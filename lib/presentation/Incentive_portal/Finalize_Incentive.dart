@@ -1,12 +1,117 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 
-class FinalizeIncentivePage extends StatelessWidget {
+class FinalizeIncentivePage extends StatefulWidget {
   const FinalizeIncentivePage({super.key});
+
+  @override
+  State<FinalizeIncentivePage> createState() => _FinalizeIncentivePageState();
+}
+
+String _safeText(dynamic v) => v?.toString().trim().isNotEmpty == true ? v.toString() : '-';
+
+class _FinalizeIncentivePageState extends State<FinalizeIncentivePage> {
+  Map<String, dynamic>? _userRow;
+  bool _isUserLoading = true;
+  late String _financialYear;
+  late String _financialMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    _computeFinancialPeriod();
+    _loadUser();
+  }
+
+  void _computeFinancialPeriod() {
+    final now = DateTime.now();
+    final int year = now.year;
+    final int month = now.month;
+    if (month >= 4) {
+      _financialYear = '${year}-${year + 1}';
+    } else {
+      _financialYear = '${year - 1}-${year}';
+    }
+    _financialMonth = _monthName(month);
+  }
+
+  String _monthName(int month) {
+    switch (month) {
+      case 1:
+        return 'January';
+      case 2:
+        return 'February';
+      case 3:
+        return 'March';
+      case 4:
+        return 'April';
+      case 5:
+        return 'May';
+      case 6:
+        return 'June';
+      case 7:
+        return 'July';
+      case 8:
+        return 'August';
+      case 9:
+        return 'September';
+      case 10:
+        return 'October';
+      case 11:
+        return 'November';
+      case 12:
+        return 'December';
+      default:
+        return '-';
+    }
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      final row = await LocalStorageDao.instance.getCurrentUserFromDb();
+      if (!mounted) return;
+      setState(() {
+        _userRow = row;
+        _isUserLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isUserLoading = false;
+      });
+    }
+  }
+
+  Map<String, dynamic> _detailsJson() {
+    if (_userRow == null || !_userRow!.containsKey('details')) return const {};
+    final raw = _userRow!['details'];
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is String && raw.isNotEmpty) {
+      try {
+        return jsonDecode(raw) as Map<String, dynamic>;
+      } catch (_) {
+        return const {};
+      }
+    }
+    return const {};
+  }
+
+  String _getWorkingField(String key) {
+    try {
+      final details = _detailsJson();
+      final working = details['data']?['working_location'] ?? details['working_location'] ?? {};
+      return _safeText(working[key]);
+    } catch (_) {
+      return '-';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +133,7 @@ class FinalizeIncentivePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Card(
-                color: AppColors.surface,
+                color: Colors.blue[50],
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -40,19 +145,19 @@ class FinalizeIncentivePage extends StatelessWidget {
                     children: [
                       _RowTwo(
                         leftTitle:  (l10n?.incentiveFinancialYear ?? 'Financial year'),
-                        leftValue: '2024-2025',
+                        leftValue: _financialYear,
                         rightTitle:  (l10n?.incentiveFinancialMonth ?? 'Financial month'),
-                        rightValue: 'June',
+                        rightValue: _financialMonth,
                       ),
                       const SizedBox(height: 4),
                       Divider(height: 1, color: AppColors.divider),
                       const SizedBox(height: 4),
                       _RowThree(
-                        t1: (l10n?.incentiveHeaderDistrict ?? 'District'), v1: 'Patna',
-                        t2:  (l10n?.incentiveHeaderBlock ?? 'Block'), v2: 'Maner',
-                        t3: (l10n?.incentiveHeaderHsc ?? 'HSC'), v3: 'HSC Baank',
-                        t4:  (l10n?.incentiveHeaderPanchayat ?? 'Panchayat'), v4: 'Baank',
-                        t5:  (l10n?.incentiveHeaderAnganwadi ?? 'Anganwadi'), v5: 'Baank',
+                        t1: (l10n?.incentiveHeaderDistrict ?? 'District'), v1: _getWorkingField('district'),
+                        t2:  (l10n?.incentiveHeaderBlock ?? 'Block'), v2: _getWorkingField('block'),
+                        t3: (l10n?.incentiveHeaderHsc ?? 'HSC'), v3: _getWorkingField('hsc_name'),
+                        t4:  (l10n?.incentiveHeaderPanchayat ?? 'Panchayat'), v4: _getWorkingField('panchayat'),
+                        t5:  (l10n?.incentiveHeaderAnganwadi ?? 'Anganwadi'), v5: _getWorkingField('anganwadi'),
                       ),
                     ],
                   ),

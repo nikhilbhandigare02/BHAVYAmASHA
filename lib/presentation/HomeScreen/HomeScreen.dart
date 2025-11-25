@@ -82,12 +82,18 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadNotificationCount();
     _loadNcdCount();
     _fetchTimeStamp();
-    _fetchAbhaCreated();
-    _fetchExistingAbhaCreated();
+    Future.microtask(() async {
+      try {
+        final alreadyFetched = await SecureStorageService.isAbhaFetched();
+        if (!alreadyFetched) {
+          await _fetchAbhaCreated();
+          await _fetchExistingAbhaCreated();
+          await SecureStorageService.setAbhaFetched();
+        }
+      } catch (_) {}
+    });
     SyncService.instance.start(interval: const Duration(minutes: 5));
-    // After the scheduler's first sync run, refresh counts once more so
-    // that newly fetched DB data is reflected on the dashboard shortly
-    // after first login.
+
     Future.delayed(const Duration(seconds: 5), () async {
       if (!mounted) return;
       await _loadHouseholdCount();
