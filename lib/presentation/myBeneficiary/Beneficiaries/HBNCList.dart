@@ -167,8 +167,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
           final hhId = beneficiary['household_ref_key']?.toString() ?? 'N/A';
           
           final visitCount = await _getVisitCount(beneficiaryRefKey);
-          
-          // Get last 11 digits of hhId or use full if shorter
+
           final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
           
           formattedData.add({
