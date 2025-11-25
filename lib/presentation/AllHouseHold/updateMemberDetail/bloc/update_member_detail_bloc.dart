@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/beneficiaries_table.dart';
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Database/tables/beneficiaries_table.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
 
 part 'update_member_detail_event.dart';
 part 'update_member_detail_state.dart';

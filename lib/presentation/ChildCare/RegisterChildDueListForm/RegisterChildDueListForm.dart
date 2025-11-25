@@ -9,7 +9,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'bloc/register_child_form_bloc.dart';
 
 class BeneficiaryData {

@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 

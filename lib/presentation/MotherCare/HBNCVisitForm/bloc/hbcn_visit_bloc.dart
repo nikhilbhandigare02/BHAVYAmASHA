@@ -4,10 +4,10 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sqflite/sqflite.dart';
 import '../../../../core/utils/device_info_utils.dart';
-import '../../../../data/Local_Storage/User_Info.dart';
-import '../../../../data/Local_Storage/database_provider.dart';
+import '../../../../data/Database/User_Info.dart';
+import '../../../../data/Database/database_provider.dart';
 
-import '../../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../../data/SecureStorage/SecureStorage.dart';
 
 import 'hbcn_visit_event.dart';

@@ -8,7 +8,7 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-import '../../../data/Local_Storage/database_provider.dart';
+import '../../../data/Database/database_provider.dart';
 
 class RegisterChildScreen extends StatefulWidget {
   const RegisterChildScreen({super.key});

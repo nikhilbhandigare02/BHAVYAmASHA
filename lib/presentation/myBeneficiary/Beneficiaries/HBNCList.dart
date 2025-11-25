@@ -6,8 +6,8 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:sizer/sizer.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/config/themes/CustomColors.dart';
-import '../../../data/Local_Storage/database_provider.dart';
-import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../../data/Database/database_provider.dart';
+import '../../../data/Database/tables/followup_form_data_table.dart';
 
 class HBNCListBeneficiaries extends StatefulWidget {
   const HBNCListBeneficiaries({super.key});

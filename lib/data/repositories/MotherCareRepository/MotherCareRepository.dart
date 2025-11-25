@@ -4,9 +4,9 @@ import 'package:medixcel_new/data/NetworkAPIServices/APIs_Urls/Endpoints.dart';
 import 'package:medixcel_new/data/NetworkAPIServices/api_services/network_services_API.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
-import '../../Local_Storage/User_Info.dart';
-import '../../Local_Storage/database_provider.dart';
-import '../../Local_Storage/tables/mother_care_activities_table.dart';
+import '../../Database/User_Info.dart';
+import '../../Database/database_provider.dart';
+import '../../Database/tables/mother_care_activities_table.dart';
 
 class MotherCareRepository {
   final NetworkServiceApi _api = NetworkServiceApi();

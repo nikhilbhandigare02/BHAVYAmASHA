@@ -1,6 +1,6 @@
 import 'package:medixcel_new/data/NetworkAPIServices/APIs_Urls/Endpoints.dart';
 import 'package:medixcel_new/data/NetworkAPIServices/api_services/network_services_API.dart';
-import '../../Local_Storage/local_storage_dao.dart';
+import '../../Database/local_storage_dao.dart';
 import '../../SecureStorage/SecureStorage.dart';
 import '../../models/Notification/Notification_anouncement_responce.dart';
 

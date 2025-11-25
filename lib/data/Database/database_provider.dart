@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:medixcel_new/data/Local_Storage/tables/notification_table.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/training_data_table.dart';
+import 'package:medixcel_new/data/Database/tables/notification_table.dart';
+import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';

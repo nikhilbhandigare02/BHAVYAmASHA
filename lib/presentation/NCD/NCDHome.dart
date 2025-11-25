@@ -5,8 +5,8 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-import 'package:medixcel_new/data/Local_Storage/database_provider.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart' as ffd;
+import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart' as ffd;
 import 'package:sizer/sizer.dart';
 
 import 'NCDList.dart';

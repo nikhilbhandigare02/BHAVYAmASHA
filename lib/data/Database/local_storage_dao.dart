@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:medixcel_new/data/Local_Storage/tables/beneficiaries_table.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/followup_form_data_table.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/notification_table.dart';
-import 'package:medixcel_new/data/Local_Storage/tables/training_data_table.dart';
+import 'package:medixcel_new/data/Database/tables/beneficiaries_table.dart';
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Database/tables/notification_table.dart';
+import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/guest_beneficiary/guest_beneficiary_model.dart';

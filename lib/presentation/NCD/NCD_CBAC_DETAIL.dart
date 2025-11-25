@@ -6,8 +6,8 @@ import 'package:medixcel_new/core/widgets/Loader/Loader.dart';
 import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
 
-import '../../data/Local_Storage/database_provider.dart';
-import '../../data/Local_Storage/tables/followup_form_data_table.dart' as ffd;
+import '../../data/Database/database_provider.dart';
+import '../../data/Database/tables/followup_form_data_table.dart' as ffd;
 
 class CBACDetailScreen extends StatefulWidget {
   final int formId;

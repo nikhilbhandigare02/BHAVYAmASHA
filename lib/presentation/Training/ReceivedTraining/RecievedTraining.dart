@@ -7,7 +7,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-import 'package:medixcel_new/data/Local_Storage/local_storage_dao.dart';
+import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 
 class TrainingReceived extends StatefulWidget {
   const TrainingReceived({super.key});

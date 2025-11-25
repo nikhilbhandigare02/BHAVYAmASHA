@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-import '../../../data/Local_Storage/database_provider.dart';
+import '../../../data/Database/database_provider.dart';
 
 class HBYCList extends StatefulWidget {
   const HBYCList({super.key});

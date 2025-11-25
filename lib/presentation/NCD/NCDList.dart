@@ -11,9 +11,9 @@ import 'package:intl/intl.dart';
 
 import '../../core/widgets/Loader/Loader.dart';
 import '../../core/widgets/RoundButton/RoundButton.dart';
-import '../../data/Local_Storage/database_provider.dart';
-import '../../data/Local_Storage/local_storage_dao.dart';
-import '../../data/Local_Storage/tables/followup_form_data_table.dart' as ffd;
+import '../../data/Database/database_provider.dart';
+import '../../data/Database/local_storage_dao.dart';
+import '../../data/Database/tables/followup_form_data_table.dart' as ffd;
 import '../HomeScreen/HomeScreen.dart';
 import 'NCD_CBAC_DETAIL.dart';
 

@@ -8,8 +8,8 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
-import '../../../data/Local_Storage/database_provider.dart';
-import '../../../data/Local_Storage/tables/followup_form_data_table.dart';
+import '../../../data/Database/database_provider.dart';
+import '../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../HomeScreen/HomeScreen.dart';
 
