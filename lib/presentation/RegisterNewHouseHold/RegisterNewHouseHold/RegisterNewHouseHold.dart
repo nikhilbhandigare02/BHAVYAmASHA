@@ -803,13 +803,11 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 ),
               ],
               rows: _members.map((m) {
-                // Prefer numeric children count from head form when available
-                String totalChildrenText = '';
-                if (_headForm != null && _headForm!['children'] != null &&
-                    _headForm!['children'].toString().isNotEmpty) {
-                  totalChildrenText = _headForm!['children'].toString();
-                } else {
-                  totalChildrenText = m['Total Children'] ?? '';
+
+                // Use per-row children count; default to '0' when empty
+                String totalChildrenText = m['Total Children'] ?? '';
+                if (totalChildrenText.isEmpty) {
+                  totalChildrenText = '0';
                 }
 
                 return DataRow(

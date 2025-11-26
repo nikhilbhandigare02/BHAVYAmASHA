@@ -475,6 +475,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       final weight = (data['weight'] ?? '') as String;
       if (weight.isNotEmpty) b.add(WeightChange(weight));
 
+      final birthWeight = (data['birthWeight'] ?? '') as String;
+      if (birthWeight.isNotEmpty) b.add(BirthWeightChange(birthWeight));
+
       final school = (data['school'] ?? '') as String;
       if (school.isNotEmpty) b.add(ChildSchoolChange(school));
 
@@ -1529,6 +1532,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     labelText: 'Weight (1.2-90)Kg',
                                     hintText: 'Weight (1.2-90)Kg',
                                     keyboardType: TextInputType.number,
+                                    initialValue: state.WeightChange ?? '',
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(WeightChange(v.trim())),
                                     validator: (value) {
                                       if (value == null || value.trim().isEmpty) {
@@ -1555,6 +1559,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     labelText: 'Birth Weight (1200-4000)gms',
                                     hintText: 'Birth Weight (1200-4000)gms',
                                     keyboardType: TextInputType.number,
+                                    initialValue: state.BirthWeightChange ?? '',
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(BirthWeightChange(v?.trim() ?? '')),
                                     validator: (value) {
                                       if (value == null || value.trim().isEmpty) {
@@ -1608,7 +1613,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           return s;
                                       }
                                     },
-                                    value: state.occupation,
+                                    value: state.ChildSchool,
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(ChildSchoolChange(v!)),
                                   ),
                                 ),
@@ -2129,6 +2134,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           'richId': state.RichIDChanged,
                                           'birthCertificate': state.BirthCertificateChange,
                                           'weight': state.WeightChange,
+                                          'birthWeight': state.BirthWeightChange,
                                           'school': state.ChildSchool,
                                           'hasChildren': state.hasChildren,
                                           'isPregnant': state.isPregnant,
