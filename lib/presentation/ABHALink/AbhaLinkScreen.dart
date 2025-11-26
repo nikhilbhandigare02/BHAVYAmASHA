@@ -79,14 +79,40 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
   }
 }
 
-class _AbhaInput extends StatelessWidget {
+class _AbhaInput extends StatefulWidget {
   final String address;
   const _AbhaInput({required this.address});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = TextEditingController(text: address);
+  State<_AbhaInput> createState() => _AbhaInputState();
+}
 
+class _AbhaInputState extends State<_AbhaInput> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.address);
+  }
+
+  @override
+  void didUpdateWidget(_AbhaInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only update if the address changed from external source (not from user typing)
+    if (widget.address != oldWidget.address && widget.address != _controller.text) {
+      _controller.text = widget.address;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -105,7 +131,7 @@ class _AbhaInput extends StatelessWidget {
         children: [
           Expanded(
             child: TextField(
-              controller: controller,
+              controller: _controller,
               onChanged: (v) => context
                   .read<AbhalinkBloc>()
                   .add(AbhaAddressChanged(v.trim())),

@@ -4,6 +4,8 @@ import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Database/tables/beneficiaries_table.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:convert';
 import '../../l10n/app_localizations.dart';
@@ -22,6 +24,13 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
   int familyUpdateCount = 0;
   int eligibleCoupleCount = 0;
   int pregnantWomenCount = 0;
+  int pregnancyOutcomeCount = 0;
+  int hbcnCount = 0;
+  int lbwReferredCount = 0;
+  int abortionListCount = 0;
+  int deathRegisterCount = 0;
+  int migratedOutCount = 0;
+  int guestBeneficiaryCount = 0;
   bool isLoading = true;
 
   @override
@@ -33,7 +42,7 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
   Future<void> _loadCounts() async {
     try {
       final db = await DatabaseProvider.instance.database;
-      final allBeneficiaries = await db.query('beneficiaries');
+      final allBeneficiaries = await db.query(BeneficiariesTable.table);
 
       final households = <String, List<Map<String, dynamic>>>{};
       for (final row in allBeneficiaries) {
@@ -97,12 +106,27 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
         }
       }
 
+      final poCount = await _getPregnancyOutcomeCount();
+      final hbnc = await _getHBNCCount();
+      final lbw = await _getLBWReferredCount();
+      final abortion = await _getAbortionListCount();
+      final death = await _getDeathRegisterCount();
+      final migrated = await _getMigratedOutCount();
+      final guest = await _getGuestBeneficiaryCount();
+
       // Update state
       if (mounted) {
         setState(() {
           familyUpdateCount = familyCount;
           eligibleCoupleCount = coupleCount;
           pregnantWomenCount = pregnantCount;
+          pregnancyOutcomeCount = poCount;
+          hbcnCount = hbnc;
+          lbwReferredCount = lbw;
+          abortionListCount = abortion;
+          deathRegisterCount = death;
+          migratedOutCount = migrated;
+          guestBeneficiaryCount = guest;
           isLoading = false;
         });
       }
@@ -134,6 +158,125 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
     }
   }
 
+  Future<int> _getPregnancyOutcomeCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final ancRefKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+      if (ancRefKey.isEmpty) return 0;
+      final result = await db.rawQuery(
+        'SELECT COUNT(DISTINCT beneficiary_ref_key) as c FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND form_json LIKE ? AND is_deleted = 0',
+        [ancRefKey, '%"gives_birth_to_baby":"Yes"%'],
+      );
+      final row = result.isNotEmpty ? result.first : null;
+      final v = row?['c'];
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<int> _getHBNCCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final deliveryKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome] ?? '';
+      if (deliveryKey.isEmpty) return 0;
+      final result = await db.rawQuery(
+        'SELECT COUNT(DISTINCT beneficiary_ref_key) as c FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND is_deleted = 0',
+        [deliveryKey],
+      );
+      final row = result.isNotEmpty ? result.first : null;
+      final v = row?['c'];
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<int> _getLBWReferredCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final childRegKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childRegistrationDue] ?? '';
+      if (childRegKey.isEmpty) return 0;
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND is_deleted = 0',
+        whereArgs: [childRegKey],
+      );
+      int c = 0;
+      for (final r in rows) {
+        try {
+          final s = r['form_json']?.toString() ?? '';
+          if (s.isEmpty) continue;
+          final decoded = jsonDecode(s);
+          if (decoded is! Map) continue;
+          final fd = decoded['form_data'] is Map ? Map<String, dynamic>.from(decoded['form_data']) : <String, dynamic>{};
+          final wStr = fd['weight_grams']?.toString() ?? '';
+          final bwStr = fd['birth_weight_grams']?.toString() ?? '';
+          final w = double.tryParse(wStr);
+          final bw = double.tryParse(bwStr);
+          final isLbw = (w != null && w < 1600) || (bw != null && bw < 1600);
+          if (isLbw) c++;
+        } catch (_) {}
+      }
+      return c;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<int> _getAbortionListCount() async {
+    try {
+      final forms = await LocalStorageDao.instance.getHighRiskANCVisits();
+      int c = 0;
+      for (final row in forms) {
+        try {
+          final fd = Map<String, dynamic>.from(row['form_data'] as Map);
+          final v = fd['has_abortion_complication'];
+          final s = v?.toString().toLowerCase() ?? '';
+          if (s == 'yes') c++;
+        } catch (_) {}
+      }
+      return c;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<int> _getDeathRegisterCount() async {
+    try {
+      final rows = await LocalStorageDao.instance.getDeathRecords();
+      return rows.length;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<int> _getMigratedOutCount() async {
+    try {
+      final rows = await LocalStorageDao.instance.getMigratedBeneficiaries();
+      return rows.length;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<int> _getGuestBeneficiaryCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        BeneficiariesTable.table,
+        where: 'is_guest = 1 AND is_deleted = 0',
+      );
+      return rows.length;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -157,37 +300,37 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
       _BeneficiaryTileData(
         title: l10n.pregnancyOutcome,
         asset: 'assets/images/mother.png',
-        count: 0,
+        count: isLoading ? 0 : pregnancyOutcomeCount,
       ),
       _BeneficiaryTileData(
         title: l10n.hbcnList,
         asset: 'assets/images/pnc-mother.png',
-        count: 0,
+        count: isLoading ? 0 : hbcnCount,
       ),
       _BeneficiaryTileData(
         title: l10n.lbwReferred,
         asset: 'assets/images/lbw.png',
-        count: 0,
+        count: isLoading ? 0 : lbwReferredCount,
       ),
       _BeneficiaryTileData(
         title: l10n.abortionList,
         asset: 'assets/images/npcb-refer.png',
-        count: 0,
+        count: isLoading ? 0 : abortionListCount,
       ),
       _BeneficiaryTileData(
         title: l10n.deathRegister,
         asset: 'assets/images/death2.png',
-        count: 0,
+        count: isLoading ? 0 : deathRegisterCount,
       ),
       _BeneficiaryTileData(
         title: l10n.migratedOut,
         asset: 'assets/images/lbw.png',
-        count: 0,
+        count: isLoading ? 0 : migratedOutCount,
       ),
       _BeneficiaryTileData(
         title: l10n.guestBeneficiaryList,
         asset: 'assets/images/beneficiaries.png',
-        count: 6,
+        count: isLoading ? 0 : guestBeneficiaryCount,
       ),
     ];
     

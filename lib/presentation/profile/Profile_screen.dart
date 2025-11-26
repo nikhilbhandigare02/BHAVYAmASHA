@@ -27,10 +27,18 @@ import '../../l10n/app_localizations.dart';
     State<ProfileScreen> createState() => _ProfileScreenState();
   }
 
+  String _toTitleCase(String? text) {
+    if (text == null || text.isEmpty) return '';
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return '';
+      return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+    }).join(' ');
+  }
+
   class _ProfileScreenState extends State<ProfileScreen> {
     List<Country> countries = [
-      Country(id: 1, name: 'rural'),
-      Country(id: 2, name: 'urban'),
+      Country(id: 1, name: 'Rural'),
+      Country(id: 2, name: 'Urban'),
     ];
     Country? selectedCountry;
     String _userFullName = '';
@@ -370,11 +378,12 @@ import '../../l10n/app_localizations.dart';
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      CustomTextField(
-                        labelText: l10n.areaOfWorking,
-                        hintText: l10n.selectArea,
-                        initialValue: selectedCountry?.name ?? '',
-                        readOnly: true,
+                      BlocBuilder<ProfileBloc, ProfileState>(
+                        buildWhen: (previous, current) => previous.areaOfWorking != current.areaOfWorking,
+                        builder: (context, state) {
+                          return CustomTextField(
+                              labelText: l10n.areaOfWorking, hintText: l10n.selectArea, initialValue: state.areaOfWorking, readOnly: true);
+                        },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5),
                       BlocBuilder<ProfileBloc, ProfileState>(
@@ -384,7 +393,7 @@ import '../../l10n/app_localizations.dart';
                             key: ValueKey('asha_id_field_${state.ashaId}'),
                             labelText: l10n.ashaIdLabel,
                             hintText: l10n.ashaIdHint,
-                            initialValue: state.ashaId,
+                            initialValue: _toTitleCase(state.ashaId),
                             onChanged: (v) => bloc.add(AshaIdChanged(v)),
                             readOnly: true,
                           );
@@ -398,7 +407,7 @@ import '../../l10n/app_localizations.dart';
                             key: ValueKey('asha_name_field_$_userFullName'),
                             labelText: l10n.ashaNameLabel,
                             hintText: l10n.ashaNameHint,
-                            initialValue: _userFullName,
+                            initialValue: _toTitleCase(_userFullName),
                             onChanged: (v) {
                               _userFullName = v;
                               bloc.add(AshaNameChanged(v));
@@ -439,7 +448,7 @@ import '../../l10n/app_localizations.dart';
                           final ageText = dob != null ? _calculateAge(dob) : '';
                           return CustomTextField(
                             labelText: l10n.ageLabel,
-                            hintText: ageText,
+                            hintText: _toTitleCase(ageText),
                             readOnly: true,
                           );
                         },

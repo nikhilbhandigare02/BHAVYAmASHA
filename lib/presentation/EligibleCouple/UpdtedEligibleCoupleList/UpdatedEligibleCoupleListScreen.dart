@@ -42,14 +42,14 @@ class _UpdatedEligibleCoupleListScreenState
 
   void _processInitialData() {
     if (_initialData == null) return;
-    
+
     print('🔍 Processing initial data: ${_initialData?.keys}');
 
-    
+
     if (_initialData?['searchTerm'] != null) {
       _search.text = _initialData!['searchTerm'].toString();
     }
-    
+
     // If you need to select a specific tab based on the data
     if (_initialData?['status'] == 'Protected') {
       _tab = 1;
@@ -107,13 +107,12 @@ class _UpdatedEligibleCoupleListScreenState
     }
     print('🏠 Households found: ${households.length}');
 
-    // Process each household using same relation logic as EligibleCoupleIdentifiedScreen
     int eligibleCount = 0;
     for (final household in households.values) {
       Map<String, dynamic>? head;
       Map<String, dynamic>? spouse;
 
-      // First pass: identify head and spouse for context
+      //  
       for (final member in household) {
         try {
           final dynamic infoRaw = member['beneficiary_info'];
@@ -254,7 +253,7 @@ class _UpdatedEligibleCoupleListScreenState
     print('📋 Total couples: ${couples.length}');
     print('🔒 Protected: ${couples.where((c) => c['is_family_planning'] == true).length}');
     print('🔓 Unprotected: ${couples.where((c) => c['is_family_planning'] != true).length}');
-    
+
     if (mounted) {
       setState(() {
         _households = couples;
@@ -285,6 +284,8 @@ class _UpdatedEligibleCoupleListScreenState
     final beneficiary_ref = (row['unique_key']?.toString() ?? '');
     final uniqueKey = (row['unique_key']?.toString() ?? '');
     final createdDate = row['created_date_time']?.toString() ?? '';
+
+    // Extract female member info
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
     final age = _calculateAge(female['dob']);
     final gender = (female['gender']?.toString().toLowerCase() ?? '');
@@ -292,9 +293,34 @@ class _UpdatedEligibleCoupleListScreenState
         ? '$age Y / ${gender == 'f' || gender == 'female' ? 'Female' : gender == 'm' || gender == 'male' ? 'Male' : 'Other'}'
         : 'N/A';
     final mobile = female['mobileNo']?.toString() ?? '';
-    final husbandName = isHead
-        ? (counterpart['memberName']?.toString() ?? counterpart['spouseName']?.toString() ?? '')
-        : (counterpart['headName']?.toString() ?? counterpart['memberName']?.toString() ?? '');
+
+
+    String? spouseName;
+    if (counterpart['_row'] != null) {
+      try {
+        final rowData = Map<String, dynamic>.from(counterpart['_row']);
+        final infoRaw = rowData['beneficiary_info'];
+        if (infoRaw is String) {
+          final info = jsonDecode(infoRaw);
+          if (info is Map) {
+            spouseName = info['spouseName']?.toString() ??
+                        info['memberName']?.toString() ??
+                        info['headName']?.toString();
+          }
+        } else if (infoRaw is Map) {
+          spouseName = infoRaw['spouseName']?.toString() ??
+                      infoRaw['memberName']?.toString() ??
+                      infoRaw['headName']?.toString();
+        }
+      } catch (e) {
+        print('Error extracting spouse name: $e');
+      }
+    }
+
+    final husbandName = spouseName ??
+                       (isHead
+                           ? (counterpart['memberName']?.toString() ?? counterpart['spouseName']?.toString() ?? '')
+                           : (counterpart['headName']?.toString() ?? counterpart['memberName']?.toString() ?? ''));
 
     String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
 
@@ -308,7 +334,7 @@ class _UpdatedEligibleCoupleListScreenState
       'age': displayAgeGender,
       'RichID': female['RichID']?.toString() ?? '',
       'mobileno': mobile,
-      'HusbandName': husbandName,
+      'spouseName': spouseName ?? husbandName,
       'status': isFamilyPlanning ? 'Protected' : 'Unprotected',
       'is_family_planning': isFamilyPlanning,
     };
@@ -338,16 +364,16 @@ class _UpdatedEligibleCoupleListScreenState
 
   bool _isProtected(Map<String, dynamic> data) {
     // Check is_family_planning flag (1 = true, 0 = false)
-    if (data['is_family_planning'] == true || 
-        data['is_family_planning'] == 1 || 
+    if (data['is_family_planning'] == true ||
+        data['is_family_planning'] == 1 ||
         data['is_family_planning']?.toString().toLowerCase() == 'yes') {
       return true;
     }
-    
+
 
     final status = data['status']?.toString().toLowerCase();
     if (status == 'protected') return true;
-    
+
 
     final dynamic raw = data['ProtectionStatus'] ??
         data['Protection'] ??
@@ -389,7 +415,7 @@ class _UpdatedEligibleCoupleListScreenState
     return base
         .where((data) =>
             (data['Name']?.toString().toLowerCase().contains(q) ?? false) ||
-            (data['HusbandName']?.toString().toLowerCase().contains(q) ?? false))
+            (data['spouseName']?.toString().toLowerCase().contains(q) ?? false))
         .toList();
   }
 
@@ -412,7 +438,7 @@ class _UpdatedEligibleCoupleListScreenState
         appBar: AppHeader(
           screenTitle: t?.updatedEligibleCoupleListTitle ?? 'Updated Eligible Couple List',
           showBack: true,
-        ), 
+        ),
         body: SafeArea(
           child: Column(
             children: [
@@ -527,7 +553,7 @@ class _UpdatedEligibleCoupleListScreenState
             beneficiaryRefKey: data['beneficiary_ref']?.toString(),
           ),
         );
-        
+
         if (result == true && mounted) {
           await _loadCouples();
         }
@@ -575,16 +601,16 @@ class _UpdatedEligibleCoupleListScreenState
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: (data['status']?.toString().toLowerCase() == 'protected' 
-                          ? Colors.green.withOpacity(0.15) 
+                      color: (data['status']?.toString().toLowerCase() == 'protected'
+                          ? Colors.green.withOpacity(0.15)
                           : Colors.redAccent.withOpacity(0.15)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       data['status'] ?? '',
                       style:  TextStyle(
-                        color: (data['status']?.toString().toLowerCase() == 'protected' 
-                            ? Colors.green 
+                        color: (data['status']?.toString().toLowerCase() == 'protected'
+                            ? Colors.green
                             : Colors.red),
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,
@@ -638,7 +664,7 @@ class _UpdatedEligibleCoupleListScreenState
                     children: [
                       Expanded(child: _rowText(t?.mobileLabelSimple ?? 'Mobile No.', data['mobileno']?.toString() ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(t?.spouseNameLabel ?? 'Husband Name', data['HusbandName']?.toString() ?? '')),
+                      Expanded(child: _rowText(t?.spouseNameLabel ?? 'Husband Name', data['spouseName']?.toString() ?? '')),
                     ],
                   ),
                 ],
