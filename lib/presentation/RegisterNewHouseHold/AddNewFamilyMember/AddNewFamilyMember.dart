@@ -71,6 +71,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   int _currentStep = 0; // 0: member, 1: spouse, 2: children
   bool _tabListenerAttached = false;
   bool _syncingGender = false;
+  bool _syncingSpouseName = false;
 
   // Collects the first validation error message for the member step
   // so the Next/Add button can show it in a SnackBar.
@@ -433,6 +434,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       final approxAge = (data['approxAge'] ?? '') as String;
       if (approxAge.isNotEmpty) b.add(AnmUpdateApproxAge(approxAge));
 
+      // Children count for this member (used in members table summary)
+      final children = (data['children'] ?? '') as String;
+      if (children.isNotEmpty) b.add(ChildrenChanged(children));
+
       // Education / occupation / socio-demographic
       final education = (data['education'] ?? '') as String;
       if (education.isNotEmpty) b.add(AnmUpdateEducation(education));
@@ -480,6 +485,35 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
       final school = (data['school'] ?? '') as String;
       if (school.isNotEmpty) b.add(ChildSchoolChange(school));
+
+      // Hydrate ChildrenBloc from any saved childrendetails summary so that
+      // reopening a member via the children tab shows the same counters
+      // (totalBorn, totalLive, etc.) that were captured when the member
+      // was first added.
+      try {
+        final chRaw = data['childrendetails'];
+        Map<String, dynamic>? chMap;
+        if (chRaw is Map) {
+          chMap = Map<String, dynamic>.from(chRaw as Map);
+        } else if (chRaw is String && chRaw.isNotEmpty) {
+          chMap = Map<String, dynamic>.from(jsonDecode(chRaw));
+        }
+        if (chMap != null) {
+          int _parseInt(String? v) => int.tryParse(v ?? '') ?? 0;
+
+          final chState = ChildrenState(
+            totalBorn: _parseInt(chMap['totalBorn']?.toString()),
+            totalLive: _parseInt(chMap['totalLive']?.toString()),
+            totalMale: _parseInt(chMap['totalMale']?.toString()),
+            totalFemale: _parseInt(chMap['totalFemale']?.toString()),
+            youngestAge: chMap['youngestAge']?.toString(),
+            ageUnit: chMap['ageUnit']?.toString(),
+            youngestGender: chMap['youngestGender']?.toString(),
+          );
+
+          _childrenBloc.emit(chState);
+        }
+      } catch (_) {}
 
       // Birth order
       final birthOrder = (data['birthOrder'] ?? '') as String;
@@ -616,8 +650,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
             spBloc.add(SpToggleUseDob());
           }
 
-          // Hydrate LMP and EDD so that pregnancy dates
-          // are visible when reopening spouse details.
           final spLmpStr = (spMap['lmp'] ?? '') as String;
           if (spLmpStr.isNotEmpty) {
             final d = DateTime.tryParse(spLmpStr);
@@ -705,6 +737,41 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                       }
                     },
                   ),
+                  // When names are edited on the spouse tab, keep the
+                  // main member form in sync:
+                  //   - Spous.memberName  -> member.spouseName
+                  //   - Spous.spouseName -> member.name
+                  BlocListener<SpousBloc, SpousState>(
+                    listenWhen: (p, c) =>
+                        p.memberName != c.memberName || p.spouseName != c.spouseName,
+                    listener: (context, sp) {
+                      if (_syncingSpouseName) return;
+                      _syncingSpouseName = true;
+                      try {
+                        final mb = context.read<AddnewfamilymemberBloc>();
+
+                        // Spouse tab "Name of Member" (memberName) should
+                        // update the member form's spouseName.
+                        final memberNameFromSpouse = (sp.memberName ?? '').trim();
+                        if (memberNameFromSpouse.isNotEmpty &&
+                            (mb.state.spouseName ?? '').trim() != memberNameFromSpouse) {
+                          mb.add(AnmUpdateSpouseName(memberNameFromSpouse));
+                        }
+
+                        // Spouse tab "Spouse Name" should update the
+                        // member form's own name field.
+                        final spouseNameFromSpouse = (sp.spouseName ?? '').trim();
+                        if (spouseNameFromSpouse.isNotEmpty &&
+                            (mb.state.name ?? '').trim() != spouseNameFromSpouse) {
+                          mb.add(AnmUpdateName(spouseNameFromSpouse));
+                        }
+                      } finally {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _syncingSpouseName = false;
+                        });
+                      }
+                    },
+                  ),
                   BlocListener<AddnewfamilymemberBloc, AddnewfamilymemberState>(
                     // When either the member's own name or their spouse name
                     // changes on the member form, keep the spouse details
@@ -714,6 +781,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                     listenWhen: (p, c) =>
                         p.name != c.name || p.spouseName != c.spouseName,
                     listener: (context, st) {
+                      if (_syncingSpouseName) {
+                        // Change originated from spouse tab; avoid loop.
+                        return;
+                      }
                       final spBloc = context.read<SpousBloc>();
 
                       // Member screen "name" should appear as spouse's
@@ -1009,7 +1080,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                               borderRadius: 8,
                                               fontSize: 12,
                                               onPress: () {
-                                                Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+                                                // Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
                                               },
                                             ),
                                           ),
@@ -1348,6 +1419,25 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              if (state.mobileOwner == 'Other')
+                                _section(
+                                  CustomTextField(
+                                    labelText: 'Enter relation with mobile no. holder *',
+                                    hintText: 'Enter relation with mobile no. holder',
+                                    onChanged: (v) => context
+                                        .read<AddnewfamilymemberBloc>()
+                                        .add(AnmUpdateMobileOwnerRelation(v.trim())),
+                                    validator: (value) => state.mobileOwner == 'Other'
+                                        ? _captureAnmError(
+                                            (value == null || value.trim().isEmpty)
+                                                ? 'Relation with mobile no. holder is required'
+                                                : null,
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                              if (state.mobileOwner == 'Other')
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               _section(
                                 CustomTextField(
                                   key: ValueKey('member_mobile_${state.mobileOwner ?? ''}'),
@@ -1448,9 +1538,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                             child: CustomTextField(
                                               labelText: 'Years',
                                               hintText: '0',
+                                              maxLength: 3,
                                               initialValue: state.updateYear ?? '',
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateYearChanged(v.trim())),
+                                              validator: (value) => _captureAnmError(
+                                                Validations.validateApproxAge(
+                                                  l,
+                                                  value,
+                                                  state.updateMonth,
+                                                  state.updateDay,
+                                                ),
+                                              ),
                                             ),
                                           ),
 
@@ -1467,9 +1566,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                             child: CustomTextField(
                                               labelText: 'Months',
                                               hintText: '0',
+                                              maxLength: 2,
                                               initialValue: state.updateMonth ?? '',
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateMonthChanged(v.trim())),
+                                              validator: (value) => _captureAnmError(
+                                                Validations.validateApproxAge(
+                                                  l,
+                                                  state.updateYear,
+                                                  value,
+                                                  state.updateDay,
+                                                ),
+                                              ),
                                             ),
                                           ),
 
@@ -1485,9 +1593,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                             child: CustomTextField(
                                               labelText: 'Days',
                                               hintText: '0',
+                                              maxLength: 2,
                                               initialValue: state.updateDay ?? '',
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateDayChanged(v.trim())),
+                                              validator: (value) => _captureAnmError(
+                                                Validations.validateApproxAge(
+                                                  l,
+                                                  state.updateYear,
+                                                  state.updateMonth,
+                                                  value,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -1808,6 +1925,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                if (state.occupation == 'Other')
+                                  _section(
+                                    CustomTextField(
+                                      labelText: 'Enter occupation',
+                                      hintText: 'Enter occupation',
+                                      onChanged: (v) => context
+                                          .read<AddnewfamilymemberBloc>()
+                                          .add(AnmUpdateOtherOccupation(v.trim())),
+                                    ),
+                                  ),
+                                if (state.occupation == 'Other')
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                 _section(
                                   ApiDropdown<String>(
                                     labelText: l.educationLabel,
@@ -1909,7 +2038,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
 
                               // Spouse/Children conditional sections
-                              if (!_isEdit && state.maritalStatus == 'Married') ...[
+                              if (state.maritalStatus == 'Married') ...[
                                 _section(
                                   CustomTextField(
                                     labelText: l.ageAtMarriageLabel,
@@ -1921,7 +2050,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                                if (!widget.isEdit) _section(
+                                _section(
                                   CustomTextField(
                                     labelText: '${l.spouseNameLabel} *',
                                     hintText: l.spouseNameHint,
@@ -2047,8 +2176,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   height: 4.9.h,
                                   child: RoundButton(
                                     title: () {
-                                      if (isLoading) return (_isEdit ? 'UPDATING...' : l.addingButton);
-                                      if (_isEdit) return 'UPDATE';
+                                      // Use the _isEdit flag (driven by widget.isEdit and
+                                      // route args) to decide whether this is an update
+                                      // context. inlineEdit still controls behavior (pop
+                                      // vs DB save) but not the label.
+                                      final bool isUpdateContext = _isEdit;
+
+                                      if (isLoading) {
+                                        return isUpdateContext ? 'UPDATING...' : l.addingButton;
+                                      }
+
+                                      if (isUpdateContext) {
+                                        return 'UPDATE';
+                                      }
+
                                       final bool showSpouse = !_isEdit && state.memberType != 'Child' && state.maritalStatus == 'Married';
                                       final bool showChildren = !_isEdit && showSpouse && state.hasChildren == 'Yes';
                                       final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
@@ -2114,8 +2255,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           'fatherName': state.fatherName,
                                           'motherName': state.motherName,
                                           'gender': state.gender,
+                                          'useDob': state.useDob,
                                           'dob': state.dob?.toIso8601String(),
                                           'approxAge': state.approxAge,
+                                          'children': state.children,
                                           'birthOrder': state.birthOrder,
                                           'maritalStatus': state.maritalStatus,
                                           'mobileNo': state.mobileNo,
@@ -2143,6 +2286,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           'createdAt': DateTime.now().toIso8601String(),
                                         };
 
+                                        // Attach children details snapshot so that
+                                        // reopening via the children tab can restore
+                                        // the same counters in ChildrenBloc.
+                                        try {
+                                          final ch = _childrenBloc.state;
+                                          memberData['childrendetails'] = ch.toJson();
+                                        } catch (_) {}
+
 
                                         print('Submitting member data: ${jsonEncode(memberData)}');
 
@@ -2168,21 +2319,22 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                             return;
                                           }
 
-                                          // We are already on the last step: close this screen
-                                          // and return the prepared memberData to the caller.
-                                          // Attach spouse details snapshot so that reopening
-                                          // via the spouse row can restore the same data.
+
                                           try {
                                             final spState = _spousBloc.state;
                                             final spJson = spState.toJson();
-                                            // Only attach when there is at least one
-                                            // non-null, non-empty field.
+
+
                                             final hasSpouseData = spJson.values.any((v) {
                                               if (v == null) return false;
                                               if (v is String) return v.trim().isNotEmpty;
                                               return true;
                                             });
                                             if (hasSpouseData) {
+                                              memberData['spouseUseDob'] = spState.useDob;
+                                              memberData['spouseDob'] = spState.dob?.toIso8601String();
+                                              memberData['spouseApproxAge'] = spState.approxAge;
+
                                               // Store as JSON string so that it
                                               // is compatible with memberData's
                                               // String-valued fields. Inline edit

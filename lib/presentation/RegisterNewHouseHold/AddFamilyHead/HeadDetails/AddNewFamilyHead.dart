@@ -46,6 +46,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
 
+  // Guard to avoid infinite loops when syncing names between
+  // head form and spouse details tab.
+  bool _syncingNames = false;
+
 
   static String? _lastFormError;
 
@@ -1197,25 +1201,57 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           }
                           tabs.add( Tab(text: l.spousDetails));
                           views.add(
-                            BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
-                              listenWhen: (prev, curr) => prev.headName != curr.headName || prev.spouseName != curr.spouseName,
-                              listener: (ctx, st) {
-                                final spBloc = ctx.read<SpousBloc>();
-                                final memberName = st.spouseName?.trim();
-                                final spouseName = st.headName?.trim();
-                                if (memberName != null && memberName.isNotEmpty) {
-                                  spBloc.add(SpUpdateMemberName(memberName));
-                                }
-                                if (spouseName != null && spouseName.isNotEmpty) {
-                                  spBloc.add(SpUpdateSpouseName(spouseName));
-                                }
-                              },
-                              child: Spousdetails(
-                                key: ValueKey(state.gender ?? 'none'),
-                                headMobileOwner: state.mobileOwner,
-                                headMobileNo: state.mobileNo,
+                            MultiBlocListener(
+                              listeners: [
+                                // Head -> Spouse: keep spouse tab prefilled
+                                BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
+                                  listenWhen: (prev, curr) =>
+                                      prev.headName != curr.headName ||
+                                      prev.spouseName != curr.spouseName,
+                                  listener: (ctx, st) {
+                                    if (_syncingNames) return;
+                                    final spBloc = ctx.read<SpousBloc>();
+                                    final memberName = st.spouseName?.trim();
+                                    final spouseName = st.headName?.trim();
+                                    if (memberName != null && memberName.isNotEmpty) {
+                                      spBloc.add(SpUpdateMemberName(memberName));
+                                    }
+                                    if (spouseName != null && spouseName.isNotEmpty) {
+                                      spBloc.add(SpUpdateSpouseName(spouseName));
+                                    }
+                                  },
+                                ),
+                                // Spouse -> Head: when names are edited on
+                                // spouse tab, push them back to head form.
+                                BlocListener<SpousBloc, SpousState>(
+                                  listenWhen: (p, c) =>
+                                      p.memberName != c.memberName ||
+                                      p.spouseName != c.spouseName,
+                                  listener: (ctx, sp) {
+                                    if (_syncingNames) return;
+                                    _syncingNames = true;
+                                    try {
+                                      final headBloc = ctx.read<AddFamilyHeadBloc>();
+                                      final newSpouseName = (sp.memberName ?? '').trim();
+                                      final newHeadName = (sp.spouseName ?? '').trim();
 
-                              ),
+                                      if (newSpouseName.isNotEmpty &&
+                                          (headBloc.state.spouseName ?? '').trim() != newSpouseName) {
+                                        headBloc.add(AfhUpdateSpouseName(newSpouseName));
+                                      }
+                                      if (newHeadName.isNotEmpty &&
+                                          (headBloc.state.headName ?? '').trim() != newHeadName) {
+                                        headBloc.add(AfhUpdateHeadName(newHeadName));
+                                      }
+                                    } finally {
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        _syncingNames = false;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ],
+                              child: const Spousdetails(syncFromHead: true),
                             ),
                           );
                         }

@@ -648,12 +648,30 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         ),
         SizedBox(height: 2.h),
         Builder(builder: (_) {
-          final int childrenTarget = int.tryParse((_headForm?['children'] ?? '').toString()) ?? 0;
+          // Total children expected in this household =
+          //   head's own children count + sum of children counts
+          //   declared on each member form.
+          final int headChildren = int.tryParse((_headForm?['children'] ?? '').toString()) ?? 0;
+
+          int memberChildren = 0;
+          for (final form in _memberForms) {
+            final dynamic rawChildren = form['children'];
+            final int val = int.tryParse(rawChildren?.toString() ?? '') ?? 0;
+            if (val > 0) {
+              memberChildren += val;
+            }
+          }
+
+          final int childrenTarget = headChildren + memberChildren;
+
+          // Children already added as individual rows in the table.
           final int childrenAdded = _members.where((m) {
             final t = (m['Type'] ?? '');
             final r = (m['Relation'] ?? '');
             return t == 'Child' || t == 'Infant' || r == 'Son' || r == 'Daughter';
           }).length;
+
+          // Remaining children to be added.
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
           if (childrenTarget <= 0) return const SizedBox.shrink();
           return Padding(
@@ -842,6 +860,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             spouseName: _headForm?['spouseName']?.toString(),
                             spouseGender: _headForm?['spouseGender']?.toString(),
                             inlineEdit: true,
+                            isEdit: true,
                             initial: initialMember,
                             initialStep: initialStep,
                           ),
@@ -997,10 +1016,14 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                       final relation = (m['Relation'] ?? '').toString();
                       final int initialTab = (relation == 'Wife' || relation == 'Spouse') ? 1 : 0;
 
+                      // Open head form in "inline edit" mode for this
+                      // household screen: we want to get the updated head
+                      // form back via Navigator.pop(result) and update the
+                      // existing table, not recreate a new screen.
                       final result = await Navigator.of(context).push<Map<String, dynamic>>(
                         MaterialPageRoute(
                           builder: (_) => AddNewFamilyHeadScreen(
-                            isEdit: true,
+                            isEdit: false,
                             initial: initial,
                             initialTab: initialTab,
                           ),

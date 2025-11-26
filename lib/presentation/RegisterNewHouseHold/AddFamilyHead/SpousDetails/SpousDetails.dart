@@ -298,6 +298,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               child: CustomTextField(
                                 labelText: l.years,
                                 hintText: '0',
+                                maxLength: 3,
                                 initialValue: state.UpdateYears ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateYearsChanged(v.trim())),
@@ -324,6 +325,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               child: CustomTextField(
                                 labelText: l.months,
                                 hintText: '0',
+                                maxLength: 2,
                                 initialValue: state.UpdateMonths ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim())),
@@ -351,6 +353,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               child: CustomTextField(
                                 labelText: l.days,
                                 hintText: '0',
+                                maxLength: 2,
                                 initialValue: state.UpdateDays ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateDaysChanged(v.trim())),

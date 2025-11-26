@@ -8,7 +8,8 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import 'bloc/children_bloc.dart';
-import '../HeadDetails/bloc/add_family_head_bloc.dart';
+import '../HeadDetails/bloc/add_family_head_bloc.dart' as head_bloc;
+import '../../AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart' as member_bloc;
 
 class Childrendetaills extends StatefulWidget {
   const Childrendetaills({super.key});
@@ -70,8 +71,14 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
     final l = AppLocalizations.of(context)!;
     return BlocListener<ChildrenBloc, ChildrenState>(
       listener: (context, state) {
+        // Propagate children count to both head and member flows when available.
         try {
-          context.read<AddFamilyHeadBloc>().add(ChildrenChanged(state.totalLive.toString()));
+          context.read<head_bloc.AddFamilyHeadBloc>()
+              .add(head_bloc.ChildrenChanged(state.totalLive.toString()));
+        } catch (_) {}
+        try {
+          context.read<member_bloc.AddnewfamilymemberBloc>()
+              .add(member_bloc.ChildrenChanged(state.totalLive.toString()));
         } catch (_) {}
       },
       child: BlocBuilder<ChildrenBloc, ChildrenState>(
