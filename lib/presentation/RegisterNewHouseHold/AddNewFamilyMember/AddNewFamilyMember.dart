@@ -1559,7 +1559,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     labelText: 'Birth Weight (1200-4000)gms',
                                     hintText: 'Birth Weight (1200-4000)gms',
                                     keyboardType: TextInputType.number,
-                                    initialValue: state.BirthWeightChange ?? '',
+                                    initialValue: state.birthWeight ?? '',
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(BirthWeightChange(v?.trim() ?? '')),
                                     validator: (value) {
                                       if (value == null || value.trim().isEmpty) {
@@ -2134,7 +2134,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           'richId': state.RichIDChanged,
                                           'birthCertificate': state.BirthCertificateChange,
                                           'weight': state.WeightChange,
-                                          'birthWeight': state.BirthWeightChange,
+                                          'birthWeight': state.birthWeight,
                                           'school': state.ChildSchool,
                                           'hasChildren': state.hasChildren,
                                           'isPregnant': state.isPregnant,
@@ -2146,10 +2146,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                                         print('Submitting member data: ${jsonEncode(memberData)}');
 
-                                        // If this screen was opened as standalone member
-                                        // details (from AllBeneficiary / HouseHold_Beneficiery)
-                                        // OR in edit mode, always save immediately using the
-                                        // AddNewFamilyMemberBloc submit events.
+
                                         if (_isMemberDetails || _isEdit) {
                                           if (_isEdit) {
                                             bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
@@ -2159,9 +2156,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           return;
                                         }
 
-                                        // Household registration flow (isMemberDetails == false):
-                                        // advance through tabs and, on the last step, pop the
-                                        // collected memberData back to RegisterNewHouseHold.
                                         if (!_isEdit) {
                                           final showSpouse = !_isEdit && state.memberType != 'Child' && state.maritalStatus == 'Married';
                                           final showChildren = !_isEdit && showSpouse && state.hasChildren == 'Yes';

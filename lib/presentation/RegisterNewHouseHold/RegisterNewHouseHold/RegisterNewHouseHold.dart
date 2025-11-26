@@ -874,15 +874,94 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                                   ? result['children'].toString()
                                   : '0'
                               : '0';
+                          final String maritalStatus = (result['maritalStatus'] ?? '').toString();
 
-                          m['Type'] = type;
-                          m['Name'] = name;
-                          m['Age'] = age;
-                          m['Gender'] = gender;
-                          m['Relation'] = relation;
-                          m['Father'] = father;
-                          m['Spouse'] = spouse;
-                          m['Total Children'] = totalChildren;
+                          // Identify both the primary member row and (optional) spouse row
+                          final String formIndexKey = formIndexStr.toString();
+                          final int primaryIndex = _members.indexWhere((row) =>
+                              (row['formIndex'] ?? '') == formIndexKey &&
+                              (row['isSpouseRow'] ?? '0') == '0');
+                          final int spouseIndex = _members.indexWhere((row) =>
+                              (row['formIndex'] ?? '') == formIndexKey &&
+                              (row['isSpouseRow'] ?? '0') == '1');
+
+                          // Update primary member summary row
+                          if (primaryIndex != -1) {
+                            final primary = _members[primaryIndex];
+                            primary['Type'] = type;
+                            primary['Name'] = name;
+                            primary['Age'] = age;
+                            primary['Gender'] = gender;
+                            primary['Relation'] = relation;
+                            primary['Father'] = father;
+                            primary['Spouse'] = spouse;
+                            primary['Total Children'] = totalChildren;
+                          }
+
+                          // Maintain spouse summary row in sync with member details
+                          if (maritalStatus == 'Married' && spouse.isNotEmpty) {
+                            // Derive spouse gender and age from member details
+                            final String spouseGender = (gender == 'Male')
+                                ? 'Female'
+                                : (gender == 'Female')
+                                    ? 'Male'
+                                    : '';
+
+                            String spouseAge = '';
+                            final bool spouseUseDob = (result['spouseUseDob'] == true);
+                            final String? spouseDobIso = result['spouseDob'] as String?;
+                            if (spouseUseDob && spouseDobIso != null && spouseDobIso.isNotEmpty) {
+                              final spouseDob = DateTime.tryParse(spouseDobIso);
+                              if (spouseDob != null) {
+                                final today = DateTime.now();
+                                int years = today.year - spouseDob.year;
+                                if (today.month < spouseDob.month ||
+                                    (today.month == spouseDob.month && today.day < spouseDob.day)) {
+                                  years--;
+                                }
+                                spouseAge = years.toString();
+                              } else {
+                                spouseAge = (result['spouseApproxAge'] ?? '').toString();
+                              }
+                            } else {
+                              spouseAge = (result['spouseApproxAge'] ?? '').toString();
+                            }
+
+                            if (spouseIndex != -1) {
+                              // Update existing spouse summary row
+                              final spouseRow = _members[spouseIndex];
+                              spouseRow['Type'] = 'Adult';
+                              spouseRow['Name'] = spouse;
+                              spouseRow['Age'] = spouseAge;
+                              spouseRow['Gender'] = spouseGender;
+                              spouseRow['Relation'] = 'Spouse';
+                              spouseRow['Father'] = '';
+                              spouseRow['Spouse'] = name;
+                              spouseRow['Total Children'] = totalChildren;
+                            } else {
+                              // Create spouse summary row if it does not yet exist
+                              _members.add({
+                                '#': '${_members.length + 1}',
+                                'Type': 'Adult',
+                                'Name': spouse,
+                                'Age': spouseAge,
+                                'Gender': spouseGender,
+                                'Relation': 'Spouse',
+                                'Father': '',
+                                'Spouse': name,
+                                'Total Children': totalChildren,
+                                'formIndex': formIndexKey,
+                                'isSpouseRow': '1',
+                              });
+                              totalMembers = totalMembers + 1;
+                            }
+                          } else {
+                            // If no longer married or spouse cleared, remove spouse summary row
+                            if (spouseIndex != -1) {
+                              _members.removeAt(spouseIndex);
+                              totalMembers = (totalMembers - 1).clamp(0, 9999);
+                            }
+                          }
                         });
                       }
                       return;
