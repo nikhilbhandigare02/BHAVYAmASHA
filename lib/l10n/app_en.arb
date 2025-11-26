@@ -3,6 +3,7 @@
   "aadhaarNumberLabel": "Aadhaar Number",
   "abhaAadhaarNumberLabel": "Aadhaar Number",
   "abhaAddressLabel": "ABHA Address",
+  "methodOfContra": "Method of contraception",
   "abhaConsent1": "I am voluntarily sharing my Aadhaar Number / Virtual ID issued by the Unique Identification Authority of India (\"UIDAI\"), and my demographic information for the purpose of creating an Ayushman Bharat Health Account number (\"ABHA number\") and Ayushman Bharat Health Account address (\"ABHA Address\"). I authorize NHA to use my Aadhaar number / Virtual ID for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I understand that UIDAI will share my e-KYC details, or response of \"Yes\" with NHA upon successful authentication.",
   "abhaConsent2": "I intend to create Ayushman Bharat Health Account Number (\"ABHA number\") and Ayushman Bharat Health Account address (\"ABHA Address\") using document other than Aadhaar.",
   "abhaConsent3": "I consent to usage of my ABHA address and ABHA number for linking of my legacy (past) government health records and those which will be generated during this encounter.",

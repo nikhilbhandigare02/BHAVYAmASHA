@@ -101,6 +101,29 @@ class Validations {
 
     return null; // ✅ valid
   }
+  static String? validateApproxAge(AppLocalizations l10n, String? years, String? months, String? days) {
+    final y = int.tryParse((years ?? '').trim());
+    final m = int.tryParse((months ?? '').trim());
+    final d = int.tryParse((days ?? '').trim());
+
+    if ((y == null || y == 0) && (m == null || m == 0) && (d == null || d == 0)) {
+      return 'Approximate age is required';
+    }
+
+    if (y != null && (y < 0 || y > 110)) {
+      return 'Years must be between 0 and 110';
+    }
+
+    if (m != null && (m < 0 || m > 11)) {
+      return 'Months must be between 0 and 11';
+    }
+
+    if (d != null && (d < 0 || d > 30)) {
+      return 'Days must be between 0 and 30';
+    }
+
+    return null;
+  }
   static String? validateLMP(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
       return 'LMP is required'; // or l10n.dobRequired
@@ -109,6 +132,13 @@ class Validations {
 
 
     return null; // ✅ valid
+  }
+  static String? validateAntra(AppLocalizations l10n, String? antra) {
+    if (antra == null || antra.trim().isEmpty || antra == 'Select') {
+      return 'Method of contraception is required';
+    }
+
+    return null; // ✅ valid when a concrete method is chosen
   }
   static String? validateEDD(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
@@ -120,11 +150,9 @@ class Validations {
     return null; // ✅ valid
   }
   static String? validateAdoptingPlan(AppLocalizations l10n, String? dob) {
-    if (dob == null) {
-      return 'family adopting planning is required';
+    if (dob == null || dob.trim().isEmpty || dob == 'Select') {
+      return 'Are you/your partner adopting family planning is required';
     }
-
-
 
     return null; // ✅ valid
   }

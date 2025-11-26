@@ -6,6 +6,7 @@ class HouseholdDetailsAmenitiesState extends Equatable {
     this.otherResidentialArea = '',
     this.ownershipType = '',
     this.otherOwnershipType = '',
+    this.typeOfToilet = '',
     this.houseType = '',
     this.otherHouseType = '',
     this.houseKitchen = '',
@@ -27,6 +28,7 @@ class HouseholdDetailsAmenitiesState extends Equatable {
   final String ownershipType;
   final String otherOwnershipType;
   final String houseType;
+  final String typeOfToilet;
   final String otherHouseType;
   final String houseKitchen;
   final String cookingFuel;
@@ -49,6 +51,7 @@ class HouseholdDetailsAmenitiesState extends Equatable {
      String? houseType,
      String? otherHouseType,
      String? houseKitchen,
+     String? typeOfToilet,
      String? cookingFuel,
      String? otherCookingFuel,
      String? waterSource,
@@ -70,6 +73,7 @@ class HouseholdDetailsAmenitiesState extends Equatable {
         houseType: houseType ?? this.houseType,
         otherHouseType: otherHouseType ?? this.otherHouseType,
         houseKitchen: houseKitchen ?? this.houseKitchen,
+      typeOfToilet: typeOfToilet ?? this.typeOfToilet,
         cookingFuel: cookingFuel ?? this.cookingFuel,
         otherCookingFuel: otherCookingFuel ?? this.otherCookingFuel,
         waterSource: waterSource ?? this.waterSource,
@@ -88,6 +92,7 @@ class HouseholdDetailsAmenitiesState extends Equatable {
     residentialArea,
     otherResidentialArea,
     ownershipType,
+    typeOfToilet,
     otherOwnershipType,
     houseKitchen,
     houseType,

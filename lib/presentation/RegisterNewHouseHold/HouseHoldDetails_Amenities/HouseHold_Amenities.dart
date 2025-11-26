@@ -304,7 +304,6 @@ class HouseHoldAmenities extends StatelessWidget {
                         ),
                         Divider(color: AppColors.divider, thickness: 0.8),
 
-                        // Additional fields based on toilet availability
                         if (state.toilet == 'Yes') ...[
                           ApiDropdown<String>(
                             labelText: 'Type of toilet',
@@ -320,15 +319,21 @@ class HouseHoldAmenities extends StatelessWidget {
                             onChanged: (v) => bloc.add(ToiletTypeChange(toiletType: v ?? '')),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.8),
+                          if(state.toilet == 'Other') ... [
+                            CustomTextField(
+                              labelText: 'Enter Type of toilet',
+                              hintText: 'Enter Type of toilet',
+                              onChanged: (v) => bloc.add(TypeOfToilet(TypeToilet: v.trim())),
+                            ),
+
+                          ]
                         ] else if (state.toilet == 'No') ...[
                           ApiDropdown<String>(
-                            labelText: 'Where do you go for toilet',
+                            labelText: 'Where do you go for toilet?',
                             items: const [
-                              'Open defecation',
                               'Community toilet',
-                              'Public toilet',
-                              'Neighbor\'s toilet',
-                              'Other',
+                              'Friend/Relative toilet',
+                              'Open space',
                             ],
                             getLabel: (s) => s,
                             value: state.toiletPlace.isEmpty ? null : state.toiletPlace,

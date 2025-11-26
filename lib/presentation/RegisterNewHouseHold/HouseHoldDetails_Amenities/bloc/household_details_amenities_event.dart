@@ -97,6 +97,12 @@ class ElectricityOtherChange extends HouseholdDetailsAmenitiesEvent{
 
   List<Object> get props => [otherElectricity];
 }
+class TypeOfToilet extends HouseholdDetailsAmenitiesEvent{
+  final String TypeToilet;
+  const TypeOfToilet({required this.TypeToilet});
+
+  List<Object> get props => [TypeToilet];
+}
 
 class ToiletChange extends HouseholdDetailsAmenitiesEvent{
   final String toilet;

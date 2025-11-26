@@ -32,12 +32,17 @@ class Spousdetails extends StatefulWidget {
   final SpousState? initial;
   final String? headMobileOwner;
   final String? headMobileNo;
+  // When true, this widget listens to AddFamilyHeadBloc and mirrors
+  // head form fields into SpousBloc. For member flows we set this to
+  // false so that only member-specific spouse data is shown.
+  final bool syncFromHead;
   
   const Spousdetails({
     super.key, 
     this.initial, 
     this.headMobileOwner, 
     this.headMobileNo,
+    this.syncFromHead = true,
   });
 
   @override
@@ -55,105 +60,123 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
   @override
   void initState() {
     super.initState();
-    // Prefill once on first mount using current AddHead state to avoid first-time partial sync.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final headBloc = context.read<AddFamilyHeadBloc>();
-      final head = headBloc.state;
-      final spBloc = context.read<SpousBloc>();
-      final curr = spBloc.state;
-      
-      // Set relation and opposite gender based on head's gender
-      if (head.gender != null) {
-        final isMale = head.gender == 'Male';
-        final relation = isMale ? 'Wife' : 'Husband';
-        final oppositeGender = isMale ? 'Female' : 'Male';
+    // Prefill once on first mount using current AddHead state to avoid
+    // first-time partial sync. This is only needed when used inside the
+    // head form; for member flows we skip it.
+    if (widget.syncFromHead) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final headBloc = context.read<AddFamilyHeadBloc>();
+        final head = headBloc.state;
+        final spBloc = context.read<SpousBloc>();
+        final curr = spBloc.state;
         
-        spBloc.add(SpUpdateRelation(relation));
-        spBloc.add(SpUpdateGender(oppositeGender));
-      }
-      
-      final memberName = head.spouseName?.trim() ?? '';
-      final spouseName = head.headName?.trim() ?? '';
-      final currMember = curr.memberName?.trim() ?? '';
-      if (memberName != currMember) {
-        spBloc.add(SpUpdateMemberName(memberName));
-      }
-      final currSpouse = curr.spouseName?.trim() ?? '';
-      if (spouseName != currSpouse) {
-        spBloc.add(SpUpdateSpouseName(spouseName));
-      }
-      
-      // Auto-fill mobile number if head's mobile is available and mobile owner is 'Family Head'
-      if (head.mobileNo != null && head.mobileNo!.isNotEmpty) {
-        if (widget.headMobileOwner == 'Family Head' || curr.mobileOwner == 'Family Head') {
-          spBloc.add(SpUpdateMobileNo(head.mobileNo!));
-          spBloc.add(SpUpdateMobileOwner('Family Head'));
+        // Set relation and opposite gender based on head's gender
+        if (head.gender != null) {
+          final isMale = head.gender == 'Male';
+          final relation = isMale ? 'Wife' : 'Husband';
+          final oppositeGender = isMale ? 'Female' : 'Male';
+          
+          spBloc.add(SpUpdateRelation(relation));
+          spBloc.add(SpUpdateGender(oppositeGender));
         }
-      }
-    });
+        
+        final memberName = head.spouseName?.trim() ?? '';
+        final spouseName = head.headName?.trim() ?? '';
+        final currMember = curr.memberName?.trim() ?? '';
+        // Only overwrite existing values when the new value is non-empty.
+        if (memberName.isNotEmpty && memberName != currMember) {
+          spBloc.add(SpUpdateMemberName(memberName));
+        }
+        final currSpouse = curr.spouseName?.trim() ?? '';
+        if (spouseName.isNotEmpty && spouseName != currSpouse) {
+          spBloc.add(SpUpdateSpouseName(spouseName));
+        }
+        
+        // Auto-fill mobile number if head's mobile is available and mobile owner is 'Family Head'
+        if (head.mobileNo != null && head.mobileNo!.isNotEmpty) {
+          if (widget.headMobileOwner == 'Family Head' || curr.mobileOwner == 'Family Head') {
+            spBloc.add(SpUpdateMobileNo(head.mobileNo!));
+            spBloc.add(SpUpdateMobileOwner('Family Head'));
+          }
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final l = AppLocalizations.of(context)!;
-    return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
-      listenWhen: (previous, current) => previous.headName != current.headName || 
-                                      previous.spouseName != current.spouseName ||
-                                      previous.gender != current.gender ||
-                                      previous.mobileNo != current.mobileNo ||
-                                      previous.mobileOwner != current.mobileOwner,
-      listener: (ctx, st) {
-        final spBloc = ctx.read<SpousBloc>();
-        final curr = spBloc.state;
-        
-        // Update gender and relation when head's gender changes
-        if (st.gender != null) {
-          final isMale = st.gender == 'Male';
-          final relation = isMale ? 'Wife' : 'Husband';
-          final oppositeGender = isMale ? 'Female' : 'Male';
-          
-          // Only update if the gender is actually changing
-          if (curr.relation != relation) {
-            spBloc.add(SpUpdateRelation(relation));
+    // When used inside AddNewFamilyHeadScreen we wrap the form in a
+    // BlocListener to mirror head changes. For member flows we just
+    // return the plain form driven by SpousBloc.
+    if (widget.syncFromHead) {
+      return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
+        listenWhen: (previous, current) =>
+            previous.headName != current.headName ||
+            previous.spouseName != current.spouseName ||
+            previous.gender != current.gender ||
+            previous.mobileNo != current.mobileNo ||
+            previous.mobileOwner != current.mobileOwner,
+        listener: (ctx, st) {
+          final spBloc = ctx.read<SpousBloc>();
+          final curr = spBloc.state;
+
+          // Update gender and relation when head's gender changes
+          if (st.gender != null) {
+            final isMale = st.gender == 'Male';
+            final relation = isMale ? 'Wife' : 'Husband';
+            final oppositeGender = isMale ? 'Female' : 'Male';
+
+            if (curr.relation != relation) {
+              spBloc.add(SpUpdateRelation(relation));
+            }
+            if (curr.gender != oppositeGender) {
+              spBloc.add(SpUpdateGender(oppositeGender));
+            }
           }
-          if (curr.gender != oppositeGender) {
-            spBloc.add(SpUpdateGender(oppositeGender));
+
+          final previous = context.read<AddFamilyHeadBloc>().state;
+          if ((st.mobileNo != null && st.mobileNo != previous.mobileNo) ||
+              (st.mobileOwner != null && st.mobileOwner != previous.mobileOwner)) {
+            if (st.mobileOwner == 'Family Head' && st.mobileNo != null && st.mobileNo!.isNotEmpty) {
+              spBloc.add(SpUpdateMobileNo(st.mobileNo!));
+              spBloc.add(SpUpdateMobileOwner('Family Head'));
+            } else if (st.mobileOwner != 'Family Head' && curr.mobileOwner == 'Family Head') {
+              spBloc.add(SpUpdateMobileNo(''));
+            }
           }
-        }
-        
-        final previous = context.read<AddFamilyHeadBloc>().state;
-        if ((st.mobileNo != null && st.mobileNo != previous.mobileNo) ||
-            (st.mobileOwner != null && st.mobileOwner != previous.mobileOwner)) {
-          if (st.mobileOwner == 'Family Head' && st.mobileNo != null && st.mobileNo!.isNotEmpty) {
-            spBloc.add(SpUpdateMobileNo(st.mobileNo!));
-            spBloc.add(SpUpdateMobileOwner('Family Head'));
-          } else if (st.mobileOwner != 'Family Head' && curr.mobileOwner == 'Family Head') {
-            spBloc.add(SpUpdateMobileNo(''));
+
+          // Update names from head form only when non-empty, so that
+          // member-flow prefilled values are not wiped out by blanks.
+          final memberName = st.spouseName?.trim() ?? '';
+          final spouseName = st.headName?.trim() ?? '';
+          final currMember = curr.memberName?.trim() ?? '';
+          if (memberName.isNotEmpty && memberName != currMember) {
+            spBloc.add(SpUpdateMemberName(memberName));
           }
-        }
-        
-        // Update names: always reflect latest head spouse/head name
-        final memberName = st.spouseName?.trim() ?? '';
-        final spouseName = st.headName?.trim() ?? '';
-        final currMember = curr.memberName?.trim() ?? '';
-        if (memberName != currMember) {
-          spBloc.add(SpUpdateMemberName(memberName));
-        }
-        final currSpouse = curr.spouseName?.trim() ?? '';
-        if (spouseName != currSpouse) {
-          spBloc.add(SpUpdateSpouseName(spouseName));
-        }
-      },
-      child: Form(
-        key: _formKey,
-        child: BlocBuilder<SpousBloc, SpousState>(
-          builder: (context, state) {
-            final spBloc = context.read<SpousBloc>();
-            return ListView(
-              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
-              children: [
+          final currSpouse = curr.spouseName?.trim() ?? '';
+          if (spouseName.isNotEmpty && spouseName != currSpouse) {
+            spBloc.add(SpUpdateSpouseName(spouseName));
+          }
+        },
+        child: _buildForm(l),
+      );
+    }
+
+    return _buildForm(l);
+  }
+
+  Widget _buildForm(AppLocalizations l) {
+    return Form(
+      key: _formKey,
+      child: BlocBuilder<SpousBloc, SpousState>(
+        builder: (context, state) {
+          final spBloc = context.read<SpousBloc>();
+          return ListView(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+            children: [
                 _section(
                   ApiDropdown<String>(
                     labelText: l.relationWithFamilyHead,
@@ -278,6 +301,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                                 initialValue: state.UpdateYears ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateYearsChanged(v.trim())),
+                                validator: (value) => captureSpousError(
+                                  Validations.validateApproxAge(
+                                    l,
+                                    value,
+                                    state.UpdateMonths,
+                                    state.UpdateDays,
+                                  ),
+                                ),
                               ),
                             ),
 
@@ -296,6 +327,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                                 initialValue: state.UpdateMonths ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim())),
+                                validator: (value) => captureSpousError(
+                                  Validations.validateApproxAge(
+                                    l,
+                                    state.UpdateYears,
+                                    value,
+                                    state.UpdateDays,
+                                  ),
+                                ),
                               ),
                             ),
 
@@ -315,6 +354,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                                 initialValue: state.UpdateDays ?? '',
                                 keyboardType: TextInputType.number,
                                 onChanged: (v) => context.read<SpousBloc>().add(UpdateDaysChanged(v.trim())),
+                                validator: (value) => captureSpousError(
+                                  Validations.validateApproxAge(
+                                    l,
+                                    state.UpdateYears,
+                                    state.UpdateMonths,
+                                    value,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -885,7 +932,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   
                   if (state.isPregnant == 'No') ...[
                     ApiDropdown<String>(
-                      labelText: l.familyPlanningCounseling,
+                      labelText: 'Are you/your partner adopting family planning? *',
                       items: const ['Select', 'Yes', 'No'],
                       getLabel: (s) {
                         switch (s) {
@@ -902,18 +949,21 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         if (v == null) return;
                         spBloc.add(FamilyPlanningCounselingChanged(v));
                       },
+                      validator: (value) => captureSpousError(
+                        Validations.validateAdoptingPlan(l, value),
+                      ),
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                     SizedBox(height: 1.h),
                     if (state.familyPlanningCounseling == 'Yes') ...[
                       const SizedBox(height: 8),
                       ApiDropdown<String>(
-                        labelText: 'Family Planning Method',
+                        labelText: '${l.methodOfContra} *',
                         items: const [
                           'Select',
                           'Condom',
                           'Mala -N (Daily Contraceptive pill)',
-                          'Atra injection',
+                          'Antra injection',
                           'Copper -T (IUCD)',
                           'Chhaya (Weekly Contraceptive pill)',
                           'ECP (Emergency Contraceptive pill)',
@@ -928,14 +978,31 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                             spBloc.add(FpMethodChanged(value));
                           }
                         },
+                        validator: (value) => captureSpousError(Validations.validateAntra(l, value)),
+
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                       SizedBox(height: 1.h),
                     ],
 
+
+                    if(state.fpMethod == 'Antra injection') ...[
+                      CustomDatePicker(
+                        labelText: 'Date of Antra',
+                        initialDate: state.antraDate ?? DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2100),
+                        onDateChanged: (date) {
+                          if (date != null) {
+                            spBloc.add(DateofAntraChanged(date));
+                          }
+                        },
+
+                      ),
+                    ],
                     if (state.fpMethod == 'Copper -T (IUCD)') ...[
                       CustomDatePicker(
-                        labelText: 'Date of removal',
+                        labelText: 'Removal Date',
                         initialDate: state.removalDate ?? DateTime.now(),
                         firstDate: DateTime(1900),
                         lastDate: DateTime(2100),
@@ -948,8 +1015,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                       SizedBox(height: 1.h),
                       CustomTextField(
-                        labelText: 'Reason for Removal',
-                        hintText: 'Enter reason for removal',
+                        labelText: 'Reason',
+                        hintText: 'reason ',
                         initialValue: state.removalReason,
                         onChanged: (value) {
                           spBloc.add(RemovalReasonChanged(value ?? ''));
@@ -962,7 +1029,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     if (state.fpMethod == 'Condom') ...[
                       CustomTextField(
                         labelText: 'Quantity of Condoms',
-                        hintText: 'Enter quantity',
+                        hintText: 'Quantity of Condoms',
                         keyboardType: TextInputType.number,
                         initialValue: state.condomQuantity,
                         onChanged: (value) {
@@ -975,7 +1042,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)') ...[
                       CustomTextField(
                         labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
-                        hintText: 'Enter quantity',
+                        hintText: 'Quantity of Mala -N (Daily Contraceptive pill)',
                         keyboardType: TextInputType.number,
                         initialValue: state.malaQuantity,
                         onChanged: (value) {
@@ -987,8 +1054,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                     if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)') ...[
                       CustomTextField(
-                        labelText: 'Chhaya (Weekly Contraceptive pill)',
-                        hintText: 'Enter quantity',
+                        labelText: 'Quantity of Chhaya (Weekly Contraceptive pill)',
+                        hintText: 'Quantity of quantity',
                         keyboardType: TextInputType.number,
                         initialValue: state.chhayaQuantity,
                         onChanged: (value) {
@@ -1000,8 +1067,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                     if (state.fpMethod == 'ECP (Emergency Contraceptive pill)') ...[
                       CustomTextField(
-                        labelText: 'ECP (Emergency Contraceptive pill)',
-                        hintText: 'Enter quantity',
+                        labelText: 'Quantity of ECP (Emergency Contraceptive pill)',
+                        hintText: 'Quantity of ECP (Emergency Contraceptive pill)',
                         keyboardType: TextInputType.number,
                         initialValue: state.ecpQuantity,
                         onChanged: (value) {
@@ -1009,14 +1076,15 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                      SizedBox(height: 1.h),                    ],
+                      SizedBox(height: 1.h),
+                    ],
                   ]
                 ],
               ],
             );
         },
       ),
-    ));
+    );
   }
 
   @override

@@ -49,6 +49,9 @@ class HouseholdDetailsAmenitiesBloc extends Bloc<HouseholdDetailsAmenitiesEvent,
     on<OwnershipTypeOtherChange>((event, emit) {
       emit(state.copyWith(otherOwnershipType: event.otherOwnershipType));
     });
+    on<TypeOfToilet>((event, emit) {
+      emit(state.copyWith(toiletType: event.TypeToilet));
+    });
     
     on<HouseTypeChange>((event, emit) {
       print('HouseTypeChange: ${event.houseType}');

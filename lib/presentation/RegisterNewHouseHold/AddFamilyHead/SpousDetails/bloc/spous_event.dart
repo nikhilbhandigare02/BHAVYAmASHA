@@ -217,6 +217,12 @@ class RemovalDateChanged extends SpousEvent {
   @override
   List<Object?> get props => [value];
 }
+class DateofAntraChanged extends SpousEvent {
+  final DateTime value;
+  const DateofAntraChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
 
 class RemovalReasonChanged extends SpousEvent {
   final String value;

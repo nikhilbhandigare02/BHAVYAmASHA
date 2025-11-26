@@ -13,6 +13,7 @@ class SpousState extends Equatable {
     this.fatherName,
     this.useDob = true,
     this.dob,
+    this.antraDate,
     this.edd,
     this.lmp,
     this.approxAge,
@@ -56,6 +57,7 @@ class SpousState extends Equatable {
   final String? fatherName;
   final bool useDob;
   final DateTime? dob;
+  final DateTime? antraDate;
   final DateTime? edd;
   final DateTime? lmp;
   final String? approxAge;
@@ -100,6 +102,7 @@ class SpousState extends Equatable {
     bool? useDob,
     DateTime? dob,
     DateTime? edd,
+    DateTime? antraDate,
     DateTime? lmp,
     String? approxAge,
     String? gender,
@@ -143,6 +146,7 @@ class SpousState extends Equatable {
       RichIDChanged: RichIDChanged ?? this.RichIDChanged,
       dob: dob ?? this.dob,
       edd: edd ?? this.edd,
+      antraDate: antraDate ?? this.antraDate,
       lmp: lmp ?? this.lmp,
       approxAge: approxAge ?? this.approxAge,
       gender: gender ?? this.gender,
@@ -188,6 +192,7 @@ class SpousState extends Equatable {
         dob,
         UpdateYears,
         lmp,
+    antraDate,
         edd,
         approxAge,
         gender,
