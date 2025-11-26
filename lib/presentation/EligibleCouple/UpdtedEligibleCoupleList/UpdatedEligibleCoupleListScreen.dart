@@ -62,7 +62,7 @@ class _UpdatedEligibleCoupleListScreenState
     setState(() { _isLoading = true; });
     print('🔍 Starting to load couples...');
 
-    // Collect beneficiaries whose tracking form marks them as pregnant
+
     final db = await DatabaseProvider.instance.database;
     final trackingFormKey =
         FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
@@ -157,7 +157,7 @@ class _UpdatedEligibleCoupleListScreenState
         }
       }
 
-      // Allowed relations to consider for EC identification (same as Identified screen)
+
       const allowedRelations = <String>{
         'self',
         'spouse',
@@ -182,7 +182,6 @@ class _UpdatedEligibleCoupleListScreenState
         'other',
       };
 
-      // Second pass: consider every member whose relation is in the allowed list
       for (final member in household) {
         try {
           final memberUniqueKey = member['unique_key']?.toString() ?? '';
@@ -345,11 +344,11 @@ class _UpdatedEligibleCoupleListScreenState
       return true;
     }
     
-    // Check status field
+
     final status = data['status']?.toString().toLowerCase();
     if (status == 'protected') return true;
     
-    // For backward compatibility, check other common protection status fields
+
     final dynamic raw = data['ProtectionStatus'] ??
         data['Protection'] ??
         data['protected'] ??
@@ -576,13 +575,17 @@ class _UpdatedEligibleCoupleListScreenState
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.redAccent.withOpacity(0.15),
+                      color: (data['status']?.toString().toLowerCase() == 'protected' 
+                          ? Colors.green.withOpacity(0.15) 
+                          : Colors.redAccent.withOpacity(0.15)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       data['status'] ?? '',
                       style:  TextStyle(
-                        color: Colors.red,
+                        color: (data['status']?.toString().toLowerCase() == 'protected' 
+                            ? Colors.green 
+                            : Colors.red),
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,
                       ),

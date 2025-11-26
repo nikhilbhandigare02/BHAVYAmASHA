@@ -4,7 +4,7 @@ class TrackEligibleCoupleState extends Equatable {
   final String beneficiaryId;
   final String? beneficiaryRefKey;
   final DateTime? visitDate;
-  final DateTime? removalDAteChange;
+  final DateTime? removalDate;
   final DateTime? antraInjectionDateChanged;
   final String financialYear; // derived from visitDate
   final bool? isPregnant; // null = not chosen
@@ -29,7 +29,7 @@ class TrackEligibleCoupleState extends Equatable {
     required this.beneficiaryId,
     this.beneficiaryRefKey,
     this.visitDate,
-    this.removalDAteChange,
+    this.removalDate,
     this.antraInjectionDateChanged,
     this.beneficiaryAbsentCHanged,
     this.financialYear = '',
@@ -115,7 +115,7 @@ class TrackEligibleCoupleState extends Equatable {
     String? beneficiaryId,
     String? beneficiaryRefKey,
     DateTime? visitDate,
-    DateTime? removalDAteChange,
+    DateTime? removalDate,
     DateTime? antraInjectionDateChanged,
     String? financialYear,
     bool? isPregnant,
@@ -147,7 +147,7 @@ class TrackEligibleCoupleState extends Equatable {
       mala: mala ?? this.mala,
       removalReasonChanged: removalReasonChanged ?? this.removalReasonChanged,
       beneficiaryAbsentReason: beneficiaryAbsentReason ?? this.beneficiaryAbsentReason,
-      removalDAteChange: removalDAteChange ?? this.removalDAteChange,
+      removalDate: removalDate ?? this.removalDate,
       beneficiaryAbsentCHanged: beneficiaryAbsentCHanged ?? this.beneficiaryAbsentCHanged,
       antraInjectionDateChanged: antraInjectionDateChanged ?? this.antraInjectionDateChanged,
       financialYear: financialYear ?? this.financialYear,
@@ -166,7 +166,7 @@ class TrackEligibleCoupleState extends Equatable {
   List<Object?> get props => [
     beneficiaryId,
     visitDate,
-    removalDAteChange,
+    removalDate,
     financialYear,
     isPregnant,
     antraInjectionDateChanged,
