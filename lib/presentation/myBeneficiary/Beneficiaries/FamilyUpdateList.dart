@@ -34,7 +34,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
   Future<void> _loadHeads() async {
     final db = await DatabaseProvider.instance.database;
     final rows = await db.query(
-      'beneficiaries',
+      'beneficiaries_new',
       where: 'beneficiary_info LIKE ?',
       whereArgs: ['%"relation":"Head"%'],
     );

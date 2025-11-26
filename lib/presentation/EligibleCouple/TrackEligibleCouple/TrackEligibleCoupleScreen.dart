@@ -78,7 +78,9 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
 class _TrackEligibleCoupleView extends StatelessWidget {
   final String beneficiaryId;
 
+
   const _TrackEligibleCoupleView({required this.beneficiaryId});
+
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +155,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
             const Divider(thickness: 1, color: Colors.grey),
             const SizedBox(height: 8),
 
-            // Conditional Sections
+            // Conditional Sections for Pregnant
             BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
               builder: (context, state) {
                 if (state.isPregnant == true) {
@@ -193,142 +195,148 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
                   );
-                } else if (state.isPregnant == false) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ApiDropdown<bool>(
-                        labelText: t?.fpAdoptingLabel ??
-                            'क्या आप/आपका साथी परिवार नियोजन अपना रहे हैं?',
-                        items: [true, false],
-                        getLabel: (value) =>
-                        value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
-                        value: state.fpAdopting,
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+
+            // Family Planning Adopting Question - ALWAYS VISIBLE
+            BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
+              builder: (context, state) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ApiDropdown<bool>(
+                      labelText: t?.fpAdoptingLabel ??
+                          'क्या आप/आपका साथी परिवार नियोजन अपना रहे हैं?',
+                      items: [true, false],
+                      getLabel: (value) =>
+                      value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
+                      value: state.fpAdopting,
+                      onChanged: (value) {
+                        if (value != null) {
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(FpAdoptingChanged(value));
+                        }
+                      },
+                    ),
+                    const Divider(thickness: 1, color: Colors.grey),
+                    const SizedBox(height: 8),
+
+                    // Dependent questions for family planning
+                    if (state.fpAdopting == true) ...[
+                      ApiDropdown<String>(
+                        labelText: t?.fpMethodLabel ?? 'गर्भनिरोधक का तरीका',
+                        items: const [
+                          'Condom',
+                          'Mala -N (Daily Contraceptive pill)',
+                          'Atra injection',
+                          'Copper -T (IUCD)',
+                          'Chhaya (Weekly Contraceptive pill)',
+                          'ECP (Emergency Contraceptive pill)',
+                          'Male Sterilization',
+                          'Female Sterilization',
+                          'Any Other Specify'
+                        ],
+                        getLabel: (value) => value,
+                        value: state.fpMethod,
                         onChanged: (value) {
                           if (value != null) {
                             context
                                 .read<TrackEligibleCoupleBloc>()
-                                .add(FpAdoptingChanged(value));
+                                .add(FpMethodChanged(value));
                           }
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
-                      const SizedBox(height: 8),
-
-                      if (state.fpAdopting == true) ...[
-                        ApiDropdown<String>(
-                          labelText: t?.fpMethodLabel ?? 'गर्भनिरोधक का तरीका',
-                          items: const [
-                            'Condom',
-                            'Mala -N (Daily Contraceptive pill)',
-                            'Atra injection',
-                            'Copper -T (IUCD)',
-                            'Chhaya (Weekly Contraceptive pill)',
-                            'ECP (Emergency Contraceptive pill)',
-                            'Male Sterilization',
-                            'Female Sterilization',
-                            'Any Other Specify'
-                          ],
-                          getLabel: (value) => value,
-                          value: state.fpMethod,
-                          onChanged: (value) {
-                            if (value != null) {
-                              context
-                                  .read<TrackEligibleCoupleBloc>()
-                                  .add(FpMethodChanged(value));
-                            }
-                          },
-                        ),
-                        const Divider(thickness: 1, color: Colors.grey),
-                      ],
-
-                      if (state.fpMethod == 'Copper -T (IUCD)') ...[
-                        CustomDatePicker(
-                          labelText: 'Date of removal',
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime(2100),
-                          onDateChanged: (date) {
-                            if (date != null) {
-                              context
-                                  .read<TrackEligibleCoupleBloc>()
-                                  .add(RemovalDAteChange(date));
-                            }
-                          },
-                        ),
-                        const Divider(thickness: 1, color: Colors.grey),
-                        CustomTextField(
-                          labelText: 'Reason for Removal',
-                          hintText: 'Enter reason for removal',
-                          onChanged: (value) {
-                            context
-                                .read<TrackEligibleCoupleBloc>()
-                                .add(RemovalReasonChanged(value));
-                          },
-                        ),
-                        const Divider(thickness: 1, color: Colors.grey),
-                      ],
-
-                      if (state.fpMethod == 'Condom') ...[
-                        CustomTextField(
-                          labelText: 'Quantity of Condoms',
-                          hintText: 'Enter quantity',
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            context
-                                .read<TrackEligibleCoupleBloc>()
-                                .add(CondomQuantity(value));
-                          },
-                        ),
-                        const Divider(thickness: 1, color: Colors.grey),
-                      ],
-                      if (state.fpMethod ==
-                          'Mala -N (Daily Contraceptive pill)') ...[
-                        CustomTextField(
-                          labelText:
-                          'Quantity of Mala -N (Daily Contraceptive pill)',
-                          hintText: 'Enter quantity',
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            context
-                                .read<TrackEligibleCoupleBloc>()
-                                .add(MalaQuantity(value));
-                          },
-                        ),
-                        const Divider(thickness: 1, color: Colors.grey),
-                      ],
-                      if (state.fpMethod ==
-                          'Chhaya (Weekly Contraceptive pill)') ...[
-                        CustomTextField(
-                          labelText: 'Chhaya (Weekly Contraceptive pill)',
-                          hintText: 'Enter quantity',
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            context
-                                .read<TrackEligibleCoupleBloc>()
-                                .add(ChayaQuantity(value));
-                          },
-                        ),
-                        const Divider(thickness: 1, color: Colors.grey),
-                      ],
-                      if (state.fpMethod ==
-                          'ECP (Emergency Contraceptive pill)') ...[
-                        CustomTextField(
-                          labelText: 'ECP (Emergency Contraceptive pill)',
-                          hintText: 'Enter quantity',
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            context
-                                .read<TrackEligibleCoupleBloc>()
-                                .add(ECPQuantity(value));
-                          },
-                        ),
-                        const Divider(thickness: 1, color: Colors.grey),
-                      ],
                     ],
-                  );
-                }
-                return const SizedBox.shrink();
+
+                    if (state.fpMethod == 'Copper -T (IUCD)') ...[
+                      CustomDatePicker(
+                        labelText: 'Date of removal',
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2100),
+                        onDateChanged: (date) {
+                          if (date != null) {
+                            context
+                                .read<TrackEligibleCoupleBloc>()
+                                .add(RemovalDAteChange(date));
+                          }
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                      CustomTextField(
+                        labelText: 'Reason for Removal',
+                        hintText: 'Enter reason for removal',
+                        onChanged: (value) {
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(RemovalReasonChanged(value));
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+
+                    if (state.fpMethod == 'Condom') ...[
+                      CustomTextField(
+                        labelText: 'Quantity of Condoms',
+                        hintText: 'Enter quantity',
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(CondomQuantity(value));
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+                    if (state.fpMethod ==
+                        'Mala -N (Daily Contraceptive pill)') ...[
+                      CustomTextField(
+                        labelText:
+                        'Quantity of Mala -N (Daily Contraceptive pill)',
+                        hintText: 'Enter quantity',
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(MalaQuantity(value));
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+                    if (state.fpMethod ==
+                        'Chhaya (Weekly Contraceptive pill)') ...[
+                      CustomTextField(
+                        labelText: 'Chhaya (Weekly Contraceptive pill)',
+                        hintText: 'Enter quantity',
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(ChayaQuantity(value));
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+                    if (state.fpMethod ==
+                        'ECP (Emergency Contraceptive pill)') ...[
+                      CustomTextField(
+                        labelText: 'ECP (Emergency Contraceptive pill)',
+                        hintText: 'Enter quantity',
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(ECPQuantity(value));
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+                  ],
+                );
               },
             ),
 
@@ -365,8 +373,9 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                               .add(BeneficiaryAbsentReasonChanged(val));
                         },
                       ),
+                      const Divider(thickness: 1, color: Colors.grey),
                     ],
-                    const Divider(thickness: 1, color: Colors.grey),
+
                   ],
                 );
               },

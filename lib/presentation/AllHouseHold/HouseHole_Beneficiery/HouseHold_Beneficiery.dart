@@ -69,10 +69,10 @@ class _HouseHold_BeneficiaryScreenState
     try {
       final db = await DatabaseProvider.instance.database;
       
-      // First, get all records with the same household_ref_key
+
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries_new',
-        where: widget.hhId != null ? 'household_ref_key = ?' : null,
+        where: widget.hhId != null ? 'household_ref_key = ? AND is_migrated = 0' : 'is_migrated = 0',
         whereArgs: widget.hhId != null ? [widget.hhId] : null,
       );
       
@@ -192,8 +192,8 @@ class _HouseHold_BeneficiaryScreenState
           'MotherName': info['motherName']?.toString() ?? 
                        info['mother_name']?.toString() ??
                        '',
-          '_raw': row,  // Keep the raw row data for reference
-          '_memberData': info,  // Store the full member data
+          '_raw': row,
+          '_memberData': info,
         };
 
         // Add RICH ID for females
@@ -240,7 +240,7 @@ class _HouseHold_BeneficiaryScreenState
         if (dob == null) {
           final timestamp = int.tryParse(dateStr);
           if (timestamp != null && timestamp > 0) {
-            // If the number is too large, it's probably in milliseconds, otherwise seconds
+
             dob = DateTime.fromMillisecondsSinceEpoch(
               timestamp > 1000000000000 ? timestamp : timestamp * 1000,
               isUtc: true,

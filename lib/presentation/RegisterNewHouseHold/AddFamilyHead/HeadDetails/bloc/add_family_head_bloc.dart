@@ -409,9 +409,6 @@ extension _AddFamilyHeadBlocHelpers on AddFamilyHeadBloc {
         'pincode': working['pincode'] ?? userDetails['pincode'],
       }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
 
-      // Additional flags/fields expected by backend sample schema.
-      // We map from existing local keys where available and otherwise
-      // default to safe values.
       'is_abha_verified': info['is_abha_verified'] ?? false,
       'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
       'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,

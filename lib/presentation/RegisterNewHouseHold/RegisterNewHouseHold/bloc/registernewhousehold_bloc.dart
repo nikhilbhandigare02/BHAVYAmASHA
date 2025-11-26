@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
@@ -193,7 +194,7 @@ class RegisterNewHouseholdBloc
               'migrantRemarks': headForm['migrantRemarks'],
               'AfhABHAChange': headForm['AfhABHAChange'],
               'AfhRichIdChange': headForm['AfhRichIdChange'],
-              // Children summary (flattened from childrendetails in _headForm)
+
               'totalBorn': headForm['totalBorn'],
               'totalLive': headForm['totalLive'],
               'totalMale': headForm['totalMale'],
@@ -277,7 +278,7 @@ class RegisterNewHouseholdBloc
                   'RichIDChanged': headForm['sp_RichIDChanged'],
                   'spouseName': headForm['sp_spouseName'] ??
                       headForm['headName'],
-                  'fatherName': headForm['sp_fatherName'],
+                  'fatherName': headForm['sp_fat3 = {map entry} "useDob" -> "true"herName'],
                   'useDob': headForm['sp_useDob'],
                   'dob': headForm['sp_dob'],
                   'edd': headForm['sp_edd'],
@@ -304,6 +305,7 @@ class RegisterNewHouseholdBloc
                   'beneficiaryType': headForm['sp_beneficiaryType'],
                   'isPregnant': headForm['sp_isPregnant'],
                   'familyPlanningCounseling': headForm['sp_familyPlanningCounseling'],
+                  'is_family_planning': (headForm['sp_familyPlanningCounseling']?.toString().toLowerCase() == 'yes') ? 1 : 0,
                   'fpMethod': headForm['sp_fpMethod'],
                   'removalDate': headForm['sp_removalDate'],
                   'removalReason': headForm['sp_removalReason'],
@@ -339,7 +341,7 @@ class RegisterNewHouseholdBloc
                     'spouse_key': headId,
                     'mother_key': null,
                     'father_key': null,
-                    'is_family_planning': 0,
+                    'is_family_planning': (headForm['sp_familyPlanningCounseling']?.toString().toLowerCase() == 'yes') ? 1 : 0,
                     'is_adult': 1,
                     'is_guest': 0,
                     'is_death': 0,

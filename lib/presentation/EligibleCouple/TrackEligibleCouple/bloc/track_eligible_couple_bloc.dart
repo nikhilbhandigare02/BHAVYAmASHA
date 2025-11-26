@@ -43,8 +43,8 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
 
     on<IsPregnantChanged>((event, emit) {
       if (event.isPregnant == true) {
-        final lmp = state.lmpDate ?? DateTime.now();
-        final edd = _calculateEddFromLmp(lmp);
+        final lmp = state.lmpDate;
+        final edd = lmp != null ? _calculateEddFromLmp(lmp) : null;
         emit(state.copyWith(
           isPregnant: true,
           lmpDate: lmp,
@@ -112,7 +112,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
       emit(state.copyWith(beneficiaryAbsentReason: event.reason, status: state.isValid ? FormStatus.valid : FormStatus.initial, clearError: true));
     });
     on<RemovalDAteChange>((event, emit) {
-      emit(state.copyWith(removalDAteChange: event.date, status: state.isValid ? FormStatus.valid : FormStatus.initial, clearError: true));
+      emit(state.copyWith(removalDate: event.date, status: state.isValid ? FormStatus.valid : FormStatus.initial, clearError: true));
     });
     on<RemovalReasonChanged>((event, emit) {
       emit(state.copyWith(removalReasonChanged: event.method, status: state.isValid ? FormStatus.valid : FormStatus.initial, clearError: true));
@@ -222,7 +222,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
             'beneficiary_absent': state.beneficiaryAbsentCHanged,
             'beneficiary_absent_reason': state.beneficiaryAbsentReason,
             'antra_injection_date': state.antraInjectionDateChanged?.toIso8601String(),
-            'removal_date': state.removalDAteChange?.toIso8601String(),
+            'removal_date': state.removalDate?.toIso8601String(),
           },
           'created_at': nowIso,
           'updated_at': nowIso,
