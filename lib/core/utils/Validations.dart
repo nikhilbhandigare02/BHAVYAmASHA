@@ -102,24 +102,49 @@ class Validations {
     return null; // ✅ valid
   }
   static String? validateApproxAge(AppLocalizations l10n, String? years, String? months, String? days) {
+    const int minAgeYears = 15;
+    const int maxAgeYears = 110;
+
     final y = int.tryParse((years ?? '').trim());
     final m = int.tryParse((months ?? '').trim());
     final d = int.tryParse((days ?? '').trim());
 
-    if ((y == null || y == 0) && (m == null || m == 0) && (d == null || d == 0)) {
-      return 'Approximate age is required';
+    final yy = y ?? 0;
+    final mm = m ?? 0;
+    final dd = d ?? 0;
+
+    if (yy == 0 && mm == 0 && dd == 0) {
+      return 'Please enter the age between 15 to 110 year';
     }
 
-    if (y != null && (y < 0 || y > 110)) {
-      return 'Years must be between 0 and 110';
+    final totalYears = yy + (mm / 12.0) + (dd / 365.0);
+
+    if (totalYears < minAgeYears || totalYears > maxAgeYears) {
+      return 'Enter age between $minAgeYears to $maxAgeYears';
+    }
+    return null;
+  }
+
+  static String? validateApproxAgeChild(AppLocalizations l10n, String? years, String? months, String? days) {
+    const double minAgeYears = 1.0 / 365.0;
+    const int maxAgeYears = 15;
+
+    final y = int.tryParse((years ?? '').trim());
+    final m = int.tryParse((months ?? '').trim());
+    final d = int.tryParse((days ?? '').trim());
+
+    final yy = y ?? 0;
+    final mm = m ?? 0;
+    final dd = d ?? 0;
+
+    if (yy == 0 && mm == 0 && dd == 0) {
+      return 'Please enter the age between 1 day to 15 year';
     }
 
-    if (m != null && (m < 0 || m > 11)) {
-      return 'Months must be between 0 and 11';
-    }
+    final totalYears = yy + (mm / 12.0) + (dd / 365.0);
 
-    if (d != null && (d < 0 || d > 30)) {
-      return 'Days must be between 0 and 30';
+    if (totalYears < minAgeYears || totalYears > maxAgeYears) {
+      return 'Please enter the age between 1 day to 15 year';
     }
 
     return null;
@@ -138,7 +163,7 @@ class Validations {
       return 'Method of contraception is required';
     }
 
-    return null; // ✅ valid when a concrete method is chosen
+    return null;
   }
   static String? validateEDD(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {

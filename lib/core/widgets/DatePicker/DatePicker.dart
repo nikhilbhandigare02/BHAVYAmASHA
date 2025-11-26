@@ -74,11 +74,21 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   Future<void> _pickDate(BuildContext context) async {
     if (!widget.isEditable || widget.readOnly) return;
 
+    final firstDate = widget.firstDate ?? DateTime(1900);
+    final lastDate = widget.lastDate ?? DateTime(2100);
+
+    DateTime initial = _selectedDate ?? DateTime.now();
+    if (initial.isBefore(firstDate)) {
+      initial = firstDate;
+    } else if (initial.isAfter(lastDate)) {
+      initial = lastDate;
+    }
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: widget.firstDate ?? DateTime(1900),
-      lastDate: widget.lastDate ?? DateTime(2100),
+      initialDate: initial,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
 
     if (picked != null) {

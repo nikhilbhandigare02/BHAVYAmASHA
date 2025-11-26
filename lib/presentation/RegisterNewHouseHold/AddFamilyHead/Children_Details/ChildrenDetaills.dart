@@ -34,7 +34,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: Text(label, style: TextStyle(fontSize: 14.sp),)),
+          Expanded(child: Text(label, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),)),
           Row(
             children: [
               SizedBox(
@@ -181,8 +181,8 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                     ),
                     const SizedBox(width: 12),
                     SizedBox(
-                      width: 50,
-                      height: 50,
+                      width: 52,
+                      height: 36,
                       child: TextField(
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
@@ -192,11 +192,11 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                           contentPadding: EdgeInsets.zero,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
-                            borderSide: const BorderSide(color: Colors.grey),
+                            borderSide: const BorderSide(color: AppColors.divider),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
-                            borderSide: const BorderSide(color: Colors.grey),
+                            borderSide: const BorderSide(color: AppColors.divider),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
