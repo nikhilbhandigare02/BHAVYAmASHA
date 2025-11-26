@@ -272,6 +272,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       labelText: '${l.dobLabel} *',
                       hintText: l.dateHint,
                       initialDate: state.dob,
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now().subtract(const Duration(days: 15 * 365)),
                       onDateChanged: (d) => context.read<SpousBloc>().add(SpUpdateDob(d)),
                       validator: (date) => captureSpousError(Validations.validateDOB(l, date)),
                     ),
