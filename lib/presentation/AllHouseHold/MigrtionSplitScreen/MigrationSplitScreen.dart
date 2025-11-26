@@ -35,7 +35,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   // Design Constants
   static const double _labelFontSize = 14.0;
   static const double _inputFontSize = 14.0;
-  static const double _buttonFontSize = 14.0;
+  static const double _buttonFontSize = 13.0;
   static const double _radioFontSize = 14.0;
   static const double _verticalSpacing = 16.0;
   static const double _smallVerticalSpacing = 8.0;

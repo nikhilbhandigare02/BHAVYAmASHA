@@ -93,7 +93,8 @@ class TrackEligibleCoupleState extends Equatable {
       beneficiaryRefKey: beneficiaryRefKey,
       visitDate: now,
       financialYear: financialYear,
-      fpAdopting: isProtected,
+      isPregnant: false,
+      fpAdopting: isProtected ? true : null,
     );
   }
 

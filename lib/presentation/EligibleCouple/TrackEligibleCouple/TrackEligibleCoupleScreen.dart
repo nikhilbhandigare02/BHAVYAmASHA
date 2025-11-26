@@ -159,7 +159,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
             BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
               builder: (context, state) {
                 if (state.isPregnant == true) {
-                  final lmp = state.lmpDate ?? DateTime.now();
+                  final lmp = state.lmpDate;
                   final edd = state.eddDate;
 
                   String formatDate(DateTime? d) {
@@ -172,6 +172,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     children: [
                       CustomDatePicker(
                         labelText: '${t?.lmpDateLabel ?? 'एलएमपी की तिथि'} *',
+                        hintText: t?.dateHint,
                         initialDate: lmp,
                         onDateChanged: (date) {
                           if (date != null) {
@@ -200,9 +201,12 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               },
             ),
 
-            // Family Planning Adopting Question - ALWAYS VISIBLE
+            // Family Planning section (hidden when pregnant)
             BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
               builder: (context, state) {
+                if (state.isPregnant == true) {
+                  return const SizedBox.shrink();
+                }
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -213,6 +217,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       getLabel: (value) =>
                       value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
                       value: state.fpAdopting,
+                      hintText: t?.select ?? 'Select',
                       onChanged: (value) {
                         if (value != null) {
                           context

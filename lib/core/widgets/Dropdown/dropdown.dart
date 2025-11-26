@@ -8,6 +8,7 @@ class ApiDropdown<T> extends StatelessWidget {
   final String? labelText;
   final List<T> items;
   final String Function(T) getLabel;
+  final bool convertToTitleCase;
   final T? value;
   final Function(T?)? onChanged;
   final bool isExpanded;
@@ -19,6 +20,14 @@ class ApiDropdown<T> extends StatelessWidget {
   final Function(List<T>)? onMultiChanged;
 
   final double? labelFontSize;
+
+  String _toTitleCase(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return '';
+      return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+    }).join(' ');
+  }
 
   const ApiDropdown({
     super.key,
@@ -35,6 +44,7 @@ class ApiDropdown<T> extends StatelessWidget {
     this.selectedValues = const [],
     this.onMultiChanged,
     this.labelFontSize,
+    this.convertToTitleCase = true,
   });
 
   Widget? get _labelWidget {
@@ -207,7 +217,7 @@ class ApiDropdown<T> extends StatelessWidget {
                 children: items.map((item) {
                   return RadioListTile<T>(
                     title: Text(
-                      getLabel(item),
+                      convertToTitleCase ? _toTitleCase(getLabel(item)) : getLabel(item),
                       style: TextStyle(fontSize: labelFontSize ?? 15.sp),
                     ),
                     value: item,
@@ -307,7 +317,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   final bool isSelected = tempValues.contains(item);
                   return CheckboxListTile(
                     title: Text(
-                      getLabel(item),
+                      convertToTitleCase ? _toTitleCase(getLabel(item)) : getLabel(item),
                       style: TextStyle(fontSize: labelFontSize ?? 15.sp),
                     ),
                     value: isSelected,

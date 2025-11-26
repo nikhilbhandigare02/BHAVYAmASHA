@@ -32,40 +32,51 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
   }
 
   Future<void> _loadHeads() async {
-    final db = await DatabaseProvider.instance.database;
-    final rows = await db.query(
-      'beneficiaries_new',
-      where: 'beneficiary_info LIKE ?',
-      whereArgs: ['%"relation":"Head"%'],
-    );
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final households = await LocalStorageDao.instance.getAllHouseholds();
 
-    final heads = <Map<String, dynamic>>[];
-    for (final row in rows) {
-      try {
-        final info = row['beneficiary_info'] is String
-            ? jsonDecode(row['beneficiary_info'] as String)
-            : row['beneficiary_info'];
-            
-        if (info is! Map) continue;
-        
-        heads.add({
-          'hhId': row['household_ref_key']?.toString() ?? '',
-          'name': info['headName']?.toString() ?? info['memberName']?.toString() ?? '',
-          'mobile': info['mobileNo']?.toString() ?? '',
-          'mohalla': info['mohalla']?.toString() ?? '',
-          'village': info['village']?.toString() ?? '',
-          'unique_key': row['unique_key']?.toString() ?? '',
-          '_raw': row,  // Store the raw row data
-        });
-      } catch (e) {
-        print('Error parsing beneficiary: $e');
+      final heads = <Map<String, dynamic>>[];
+      
+      // Create a map of household_ref_key to household data
+      final householdMap = {
+        for (var hh in households) 
+          hh['household_ref_key']: hh
+      };
+
+      for (final row in rows) {
+        try {
+          final info = row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : row['beneficiary_info'];
+              
+          if (info is! Map) continue;
+          
+          final householdRefKey = row['household_ref_key']?.toString() ?? '';
+          final householdData = householdMap[householdRefKey] ?? {};
+          
+          heads.add({
+            'hhId': householdRefKey,
+            'name': info['headName']?.toString() ?? info['memberName']?.toString() ?? '',
+            'mobile': info['mobileNo']?.toString() ?? '',
+            'mohalla': info['mohalla']?.toString() ?? '',
+            'village': info['village']?.toString() ?? '',
+            'unique_key': row['unique_key']?.toString() ?? '',
+            '_raw': row,  // Store the raw row data
+            'household': householdData, // Store household data
+          });
+        } catch (e) {
+          print('Error parsing beneficiary: $e');
+        }
       }
-    }
-    
-    if (mounted) {
-      setState(() {
-        _filtered = heads;
-      });
+      
+      if (mounted) {
+        setState(() {
+          _filtered = heads;
+        });
+      }
+    } catch (e) {
+      print('Error loading beneficiaries: $e');
     }
   }
 
