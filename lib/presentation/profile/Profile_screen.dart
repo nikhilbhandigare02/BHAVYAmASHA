@@ -384,8 +384,18 @@
                       BlocBuilder<ProfileBloc, ProfileState>(
                         buildWhen: (previous, current) => previous.areaOfWorking != current.areaOfWorking,
                         builder: (context, state) {
+                          String displayValue = '';
+                          if (state.areaOfWorking?.toLowerCase() == 'urban' || state.areaOfWorking?.toLowerCase() == 'rural') {
+                            displayValue = state.areaOfWorking![0].toUpperCase() + state.areaOfWorking!.substring(1).toLowerCase();
+                          } else {
+                            displayValue = _toCamelCase(state.areaOfWorking);
+                          }
                           return CustomTextField(
-                              labelText: l10n.areaOfWorking, hintText: l10n.selectArea, initialValue: _toCamelCase(state.areaOfWorking), readOnly: true);
+                            labelText: l10n.areaOfWorking, 
+                            hintText: l10n.selectArea, 
+                            initialValue: displayValue, 
+                            readOnly: true
+                          );
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5),
