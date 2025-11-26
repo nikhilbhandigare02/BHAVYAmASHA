@@ -773,11 +773,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                     },
                   ),
                   BlocListener<AddnewfamilymemberBloc, AddnewfamilymemberState>(
-                    // When either the member's own name or their spouse name
-                    // changes on the member form, keep the spouse details
-                    // screen in sync using a cross-mapping:
-                    //   - Spous.memberName  <- member.spouseName
-                    //   - Spous.spouseName <- member.name
+
                     listenWhen: (p, c) =>
                         p.name != c.name || p.spouseName != c.spouseName,
                     listener: (context, st) {
@@ -787,8 +783,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                       }
                       final spBloc = context.read<SpousBloc>();
 
-                      // Member screen "name" should appear as spouse's
-                      // "spouseName" in the Spousdetails form.
                       final memberName = (st.name ?? '').trim();
                       if (memberName.isNotEmpty &&
                           (spBloc.state.spouseName ?? '').trim() != memberName) {
@@ -1481,6 +1475,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 _section(
                                   CustomDatePicker(
                                     initialDate: state.dob,
+                                    firstDate: (state.memberType.toLowerCase() == 'child')
+                                        ? DateTime.now().subtract(const Duration(days: 15 * 365))
+                                        : DateTime(1900),
+                                    lastDate: (state.memberType.toLowerCase() == 'child')
+                                        ? DateTime.now()
+                                        : DateTime.now().subtract(const Duration(days: 15 * 365)),
                                     labelText: '${l.dobLabel} *',
                                     hintText: l.dateHint,
                                     onDateChanged: (d) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateDob(d!)),
@@ -1543,12 +1543,19 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateYearChanged(v.trim())),
                                               validator: (value) => _captureAnmError(
-                                                Validations.validateApproxAge(
-                                                  l,
-                                                  value,
-                                                  state.updateMonth,
-                                                  state.updateDay,
-                                                ),
+                                                (state.memberType.toLowerCase() == 'child')
+                                                    ? Validations.validateApproxAgeChild(
+                                                        l,
+                                                        value,
+                                                        state.updateMonth,
+                                                        state.updateDay,
+                                                      )
+                                                    : Validations.validateApproxAge(
+                                                        l,
+                                                        value,
+                                                        state.updateMonth,
+                                                        state.updateDay,
+                                                      ),
                                               ),
                                             ),
                                           ),
@@ -1571,12 +1578,19 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateMonthChanged(v.trim())),
                                               validator: (value) => _captureAnmError(
-                                                Validations.validateApproxAge(
-                                                  l,
-                                                  state.updateYear,
-                                                  value,
-                                                  state.updateDay,
-                                                ),
+                                                (state.memberType.toLowerCase() == 'child')
+                                                    ? Validations.validateApproxAgeChild(
+                                                        l,
+                                                        state.updateYear,
+                                                        value,
+                                                        state.updateDay,
+                                                      )
+                                                    : Validations.validateApproxAge(
+                                                        l,
+                                                        state.updateYear,
+                                                        value,
+                                                        state.updateDay,
+                                                      ),
                                               ),
                                             ),
                                           ),
@@ -1598,12 +1612,19 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(UpdateDayChanged(v.trim())),
                                               validator: (value) => _captureAnmError(
-                                                Validations.validateApproxAge(
-                                                  l,
-                                                  state.updateYear,
-                                                  state.updateMonth,
-                                                  value,
-                                                ),
+                                                (state.memberType.toLowerCase() == 'child')
+                                                    ? Validations.validateApproxAgeChild(
+                                                        l,
+                                                        state.updateYear,
+                                                        state.updateMonth,
+                                                        value,
+                                                      )
+                                                    : Validations.validateApproxAge(
+                                                        l,
+                                                        state.updateYear,
+                                                        state.updateMonth,
+                                                        value,
+                                                      ),
                                               ),
                                             ),
                                           ),
@@ -1652,11 +1673,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     initialValue: state.WeightChange ?? '',
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(WeightChange(v.trim())),
                                     validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
-                                        return _captureAnmError('Weight is required');
+                                      final trimmed = value?.trim() ?? '';
+                                      if (trimmed.isEmpty) {
+                                        return null; // optional field
                                       }
 
-                                      final parsed = double.tryParse(value.trim());
+                                      final parsed = double.tryParse(trimmed);
                                       if (parsed == null) {
                                         return _captureAnmError('Please enter a valid weight');
                                       }
@@ -1670,33 +1692,48 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                // Show birth weight if child age is from birth up to 15 months
+                                if (() {
+                                  final yy = int.tryParse(state.updateYear ?? '0') ?? 0;
+                                  final mm = int.tryParse(state.updateMonth ?? '0') ?? 0;
+                                  final dd = int.tryParse(state.updateDay ?? '0') ?? 0;
 
-                                _section(
-                                  CustomTextField(
-                                    labelText: 'Birth Weight (1200-4000)gms',
-                                    hintText: 'Birth Weight (1200-4000)gms',
-                                    keyboardType: TextInputType.number,
-                                    initialValue: state.birthWeight ?? '',
-                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(BirthWeightChange(v?.trim() ?? '')),
-                                    validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
-                                        return _captureAnmError('Birth weight is required');
-                                      }
+                                  // If no age entered at all, hide the field
+                                  if (yy == 0 && mm == 0 && dd == 0) {
+                                    return false;
+                                  }
 
-                                      final parsed = int.tryParse(value.trim());
-                                      if (parsed == null) {
-                                        return _captureAnmError('Please enter a valid birth weight');
-                                      }
+                                  final totalMonths = yy * 12 + mm;
+                                  return totalMonths <= 15;
+                                }())...[
+                                  _section(
+                                    CustomTextField(
+                                      labelText: 'Birth Weight (1200-4000)gms',
+                                      hintText: 'Birth Weight (1200-4000)gms',
+                                      keyboardType: TextInputType.number,
+                                      initialValue: state.birthWeight ?? '',
+                                      onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(BirthWeightChange(v?.trim() ?? '')),
+                                      validator: (value) {
+                                        final trimmed = value?.trim() ?? '';
+                                        if (trimmed.isEmpty) {
+                                          return null; // optional field
+                                        }
 
-                                      if (parsed < 1200 || parsed > 4000) {
-                                        return _captureAnmError('Birth weight must be between 1200 and 4000 gms');
-                                      }
+                                        final parsed = int.tryParse(trimmed);
+                                        if (parsed == null) {
+                                          return _captureAnmError('Please enter a valid birth weight');
+                                        }
 
-                                      return null;
-                                    },
+                                        if (parsed < 1200 || parsed > 4000) {
+                                          return _captureAnmError('Birth weight must be between 1200 and 4000 gms');
+                                        }
+
+                                        return null;
+                                      },
+                                    ),
                                   ),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                ],
                                 _section(
                                   ApiDropdown<String>(
                                     labelText: 'is birth certificate issued?',

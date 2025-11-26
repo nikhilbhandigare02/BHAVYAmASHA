@@ -170,18 +170,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               child: CustomDatePicker(
                 labelText: '${l.dobLabel} *',
                 hintText: l.dateHint,
-
-
-                initialDate: state.dob ??
-                    DateTime.now().subtract(const Duration(days: 15 * 365)),
-
+                initialDate: state.dob,
                 firstDate: DateTime(1900),
-
                 lastDate: DateTime.now().subtract(const Duration(days: 15 * 365)),
-
                 onDateChanged: (d) =>
                     context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(d)),
-
                 validator: (date) =>
                     _captureError(Validations.validateDOB(l, date)),
               ),
@@ -1298,15 +1291,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                               return Align(
                                                 alignment: Alignment.centerRight,
                                                 child: SizedBox(
-                                                  width: 25.w,
-                                                  height: 8.w,
+                                                  width: 25.5.w,
+                                                  height: 4.5.h,
                                                   child: RoundButton(
                                                     title: isLoading
                                                         ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
                                                         : (widget.isEdit ? 'UPDATE' : l.addButton),
                                                     color: AppColors.primary,
-                                                    borderRadius: 1.h,
-                                                    height: 5.5.h,
+                                                    borderRadius: 4,
+                                                    height: 4.5.h,
                                                     isLoading: isLoading,
                                                     onPress: () {
                                                       _clearFormError();
@@ -1332,9 +1325,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
                                                 if (i > 0)
-                                                  SizedBox( // No need for nested SizedBox
+                                                  SizedBox(
                                                       height: 4.5.h,
-                                                      width: 25.w,
+                                                      width: 25.5.w,
                                                       child: OutlinedButton(
                                                           style: OutlinedButton.styleFrom(
                                                             minimumSize: Size(25.w, 4.5.h),
@@ -1351,9 +1344,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                           onPressed: () => controller.animateTo(i - 1),
                                                           child: Text(
                                                             l.previousButton,
-                                                            style: const TextStyle(
+                                                            style:  TextStyle(
                                                               fontWeight: FontWeight.w600,
                                                               letterSpacing: 0.5,
+                                                              fontSize: 14.sp
                                                             ),
                                                           ),
                                                         )
@@ -1362,7 +1356,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                   const SizedBox.shrink(),
                                                 SizedBox(
                                                   height: 4.5.h,
-                                                  width: 25.w,
+                                                  width: 25.5.w,
                                                   child: RoundButton(
                                                     title: i < last
                                                         ? l.nextButton
@@ -1392,10 +1386,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                         if (!canProceed) return;
                                                         controller.animateTo(i + 1);
                                                       } else {
-                                                        // last tab → submit (may be spouse or children)
 
-                                                        // If we have only Head + Spouse (no Children),
-                                                        // run spouse form validation here as well.
                                                         if (last == 1) {
                                                           clearSpousFormError();
                                                           final spouseForm = spousFormKey.currentState;

@@ -215,12 +215,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             children: [
               if (_tabController.index > 0)
                 SizedBox(
-                  width: 120,
-                  height: 44,
+                  width: 25.5.w,
+                  height: 4.5.h,
                   child: RoundButton(
                     title: l10n?.previousButton ?? 'PREVIOUS',
                     color: AppColors.primary,
-                    borderRadius: 8,
+                    fontSize: 14.sp,
+                    borderRadius: 4,
                     height: 44,
                     onPress: () {
                       final prev = (_tabController.index - 1).clamp(0, 2);
@@ -232,8 +233,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 const SizedBox(width: 120, height: 44),
 
           SizedBox(
-            width: 30.w,
-            height: 5.h,
+            width: 25.5.w,
+            height: 4.5.h,
             child: Builder(
               builder: (context) {
                 final idx = _tabController.index;

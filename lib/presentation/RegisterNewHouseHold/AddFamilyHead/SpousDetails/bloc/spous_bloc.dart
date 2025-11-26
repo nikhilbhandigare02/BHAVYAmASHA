@@ -6,19 +6,165 @@ part 'spous_event.dart';
 part 'spous_state.dart';
 
 class SpousBloc extends Bloc<SpousEvent, SpousState> {
+  int _daysInMonth(int year, int month) {
+    if (month == 12) {
+      return DateTime(year + 1, 1, 0).day;
+    }
+    return DateTime(year, month + 1, 0).day;
+  }
+
+  Map<String, int> _agePartsFromDob(DateTime dob) {
+    final today = DateTime.now();
+    int years = today.year - dob.year;
+    int months = today.month - dob.month;
+    int days = today.day - dob.day;
+
+    if (days < 0) {
+      months -= 1;
+      final prevMonth = today.month == 1 ? 12 : today.month - 1;
+      final prevYear = prevMonth == 12 ? today.year - 1 : today.year;
+      days += _daysInMonth(prevYear, prevMonth);
+    }
+
+    if (months < 0) {
+      years -= 1;
+      months += 12;
+    }
+
+    if (years < 0) {
+      years = 0;
+      months = 0;
+      days = 0;
+    }
+
+    return {
+      'years': years,
+      'months': months,
+      'days': days,
+    };
+  }
+
+  DateTime? _dobFromAgeParts(int years, int months, int days) {
+    if (years < 0 || months < 0 || days < 0) return null;
+    if (years == 0 && months == 0 && days == 0) return null;
+
+    final today = DateTime.now();
+    int y = today.year - years;
+    int m = today.month - months;
+    int d = today.day - days;
+
+    while (d <= 0) {
+      m -= 1;
+      if (m <= 0) {
+        m += 12;
+        y -= 1;
+      }
+      d += _daysInMonth(y, m);
+    }
+
+    while (m <= 0) {
+      m += 12;
+      y -= 1;
+    }
+
+    if (y < 1900) {
+      y = 1900;
+    }
+
+    return DateTime(y, m, d);
+  }
+
   SpousBloc({SpousState? initial}) : super(initial ?? const SpousState()) {
     on<SpHydrate>((event, emit) => emit(event.value));
     on<SpToggleUseDob>((event, emit) => emit(state.copyWith(useDob: !state.useDob)));
 
     on<SpUpdateRelation>((event, emit) => emit(state.copyWith(relation: event.value)));
-    on<UpdateYearsChanged>((event, emit) => emit(state.copyWith(UpdateYears: event.value)));
-    on<UpdateMonthsChanged>((event, emit) => emit(state.copyWith(UpdateMonths: event.value)));
-    on<UpdateDaysChanged>((event, emit) => emit(state.copyWith(UpdateDays: event.value)));
+    on<UpdateYearsChanged>((event, emit) {
+      final yearsStr = event.value ?? '';
+      final monthsStr = state.UpdateMonths ?? '0';
+      final daysStr = state.UpdateDays ?? '0';
+
+      final years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
+      final months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
+      final days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+
+      final dob = _dobFromAgeParts(years, months, days);
+      final approx = '$years years $months months $days days'.trim();
+      emit(
+        state.copyWith(
+          UpdateYears: yearsStr,
+          approxAge: approx,
+          dob: dob ?? state.dob,
+        ),
+      );
+    });
+    on<UpdateMonthsChanged>((event, emit) {
+      final monthsStr = event.value ?? '';
+      final yearsStr = state.UpdateYears ?? '0';
+      final daysStr = state.UpdateDays ?? '0';
+
+      final years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
+      final months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
+      final days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+
+      final dob = _dobFromAgeParts(years, months, days);
+      final approx = '$years years $months months $days days'.trim();
+
+      emit(
+        state.copyWith(
+          UpdateMonths: monthsStr,
+          approxAge: approx,
+          dob: dob ?? state.dob,
+        ),
+      );
+    });
+    on<UpdateDaysChanged>((event, emit) {
+      final daysStr = event.value ?? '';
+      final yearsStr = state.UpdateYears ?? '0';
+      final monthsStr = state.UpdateMonths ?? '0';
+
+      final years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
+      final months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
+      final days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+
+      final dob = _dobFromAgeParts(years, months, days);
+      final approx = '$years years $months months $days days'.trim();
+
+      emit(
+        state.copyWith(
+          UpdateDays: daysStr,
+          approxAge: approx,
+          dob: dob ?? state.dob,
+        ),
+      );
+    });
     on<SpUpdateMemberName>((event, emit) => emit(state.copyWith(memberName: event.value)));
     on<SpUpdateAgeAtMarriage>((event, emit) => emit(state.copyWith(ageAtMarriage: event.value)));
     on<SpUpdateSpouseName>((event, emit) => emit(state.copyWith(spouseName: event.value)));
     on<SpUpdateFatherName>((event, emit) => emit(state.copyWith(fatherName: event.value)));
-    on<SpUpdateDob>((event, emit) => emit(state.copyWith(dob: event.value)));
+    on<SpUpdateDob>((event, emit) {
+      final dob = event.value;
+      if (dob == null) {
+        emit(state.copyWith(dob: null));
+        return;
+      }
+
+      final parts = _agePartsFromDob(dob);
+      final years = parts['years'] ?? 0;
+      final months = parts['months'] ?? 0;
+      final days = parts['days'] ?? 0;
+      final approx = '$years years $months months $days days'.trim();
+
+      emit(
+        state.copyWith(
+          dob: dob,
+          UpdateYears: years.toString(),
+          UpdateMonths: months.toString(),
+          UpdateDays: days.toString(),
+          approxAge: approx,
+        ),
+      );
+    });
     on<SpUpdateApproxAge>((event, emit) => emit(state.copyWith(approxAge: event.value)));
     on<SpUpdateGender>((event, emit) => emit(state.copyWith(gender: event.value)));
     on<SpUpdateOccupation>((event, emit) => emit(state.copyWith(occupation: event.value)));

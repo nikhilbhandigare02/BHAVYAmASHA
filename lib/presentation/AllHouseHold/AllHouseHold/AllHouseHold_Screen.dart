@@ -255,30 +255,12 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         }
         final int childrenTarget = declaredChildren;
 
-        int childrenAdded = 0;
-        for (final m in membersForHousehold) {
-          try {
-            final rawInfo = m['beneficiary_info'];
-            Map<String, dynamic> minfo;
-            if (rawInfo is Map) {
-              minfo = Map<String, dynamic>.from(rawInfo as Map);
-            } else if (rawInfo is String && rawInfo.isNotEmpty) {
-              minfo = Map<String, dynamic>.from(jsonDecode(rawInfo));
-            } else {
-              minfo = <String, dynamic>{};
-            }
-
-            final type = (minfo['Type'] ?? minfo['type'] ?? '').toString();
-            final relation = (minfo['relation'] ?? minfo['relation_to_head'] ?? '').toString();
-
-            final isChildByType = type == 'Child' || type == 'Infant';
-            final isChildByRelation =
-                relation == 'Son' || relation == 'Daughter';
-
-            if (isChildByType || isChildByRelation) {
-              childrenAdded++;
-            }
-          } catch (_) {}
+        // Any additional member for this household (beyond the head) counts
+        // towards fulfilling the declared children target.
+        // So childrenAdded is simply (total members - 1 head), min 0.
+        int childrenAdded = membersForHousehold.length - 1;
+        if (childrenAdded < 0) {
+          childrenAdded = 0;
         }
 
         final int remainingChildren =
@@ -451,8 +433,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     final Color primary = Theme.of(context).primaryColor;
 
     return InkWell( 
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => HouseHold_BeneficiaryScreen(
@@ -461,6 +443,12 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             ),
           ),
         );
+
+        // When returning from the beneficiary screen, reload data from DB
+        // so that remainingChildren and the message are updated.
+        if (mounted) {
+          _loadData();
+        }
       },
       borderRadius: BorderRadius.circular(8),
       child: Container(

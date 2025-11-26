@@ -24,6 +24,74 @@ class AddnewfamilymemberBloc
     extends Bloc<AddnewfamilymemberEvent, AddnewfamilymemberState> {
   final LocalStorageDao _localStorageDao = LocalStorageDao();
 
+  int _daysInMonth(int year, int month) {
+    if (month == 12) {
+      return DateTime(year + 1, 1, 0).day;
+    }
+    return DateTime(year, month + 1, 0).day;
+  }
+
+  Map<String, int> _agePartsFromDob(DateTime dob) {
+    final today = DateTime.now();
+    int years = today.year - dob.year;
+    int months = today.month - dob.month;
+    int days = today.day - dob.day;
+
+    if (days < 0) {
+      months -= 1;
+      final prevMonth = today.month == 1 ? 12 : today.month - 1;
+      final prevYear = prevMonth == 12 ? today.year - 1 : today.year;
+      days += _daysInMonth(prevYear, prevMonth);
+    }
+
+    if (months < 0) {
+      years -= 1;
+      months += 12;
+    }
+
+    if (years < 0) {
+      years = 0;
+      months = 0;
+      days = 0;
+    }
+
+    return {
+      'years': years,
+      'months': months,
+      'days': days,
+    };
+  }
+
+  DateTime? _dobFromAgeParts(int years, int months, int days) {
+    if (years < 0 || months < 0 || days < 0) return null;
+    if (years == 0 && months == 0 && days == 0) return null;
+
+    final today = DateTime.now();
+    int y = today.year - years;
+    int m = today.month - months;
+    int d = today.day - days;
+
+    while (d <= 0) {
+      m -= 1;
+      if (m <= 0) {
+        m += 12;
+        y -= 1;
+      }
+      d += _daysInMonth(y, m);
+    }
+
+    while (m <= 0) {
+      m += 12;
+      y -= 1;
+    }
+
+    if (y < 1900) {
+      y = 1900;
+    }
+
+    return DateTime(y, m, d);
+  }
+
   // Keep track of the beneficiary being edited (for update flow)
   String? _editingBeneficiaryKey;
   int? _editingBeneficiaryRowId;
@@ -247,23 +315,91 @@ class AddnewfamilymemberBloc
       );
     });
     on<AnmUpdateDob>((e, emit) {
+      final dob = e.value;
+      if (dob == null) {
+        emit(state.copyWith(dob: null));
+        return;
+      }
+
+      final parts = _agePartsFromDob(dob);
+      final years = parts['years'] ?? 0;
+      final months = parts['months'] ?? 0;
+      final days = parts['days'] ?? 0;
+      final approx = '$years years $months months $days days'.trim();
+
       emit(
         state.copyWith(
-          dob: e.value,
-          approxAge: e.value != null ? null : state.approxAge,
+          dob: dob,
+          updateYear: years.toString(),
+          updateMonth: months.toString(),
+          updateDay: days.toString(),
+          approxAge: approx,
         ),
       );
     });
     on<AnmUpdateApproxAge>(
           (e, emit) => emit(state.copyWith(approxAge: e.value)),
     );
-    on<UpdateDayChanged>((e, emit) => emit(state.copyWith(updateDay: e.value)));
-    on<UpdateMonthChanged>(
-          (e, emit) => emit(state.copyWith(updateMonth: e.value)),
-    );
-    on<UpdateYearChanged>(
-          (e, emit) => emit(state.copyWith(updateYear: e.value)),
-    );
+    on<UpdateDayChanged>((e, emit) {
+      final dayStr = e.value;
+      final yearStr = state.updateYear ?? '0';
+      final monthStr = state.updateMonth ?? '0';
+
+      final years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
+      final months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
+      final days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
+
+      final dob = _dobFromAgeParts(years, months, days);
+      final approx = '$years years $months months $days days'.trim();
+
+      emit(
+        state.copyWith(
+          updateDay: dayStr,
+          approxAge: approx,
+          dob: dob ?? state.dob,
+        ),
+      );
+    });
+    on<UpdateMonthChanged>((e, emit) {
+      final monthStr = e.value;
+      final yearStr = state.updateYear ?? '0';
+      final dayStr = state.updateDay ?? '0';
+
+      final years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
+      final months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
+      final days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
+
+      final dob = _dobFromAgeParts(years, months, days);
+      final approx = '$years years $months months $days days'.trim();
+
+      emit(
+        state.copyWith(
+          updateMonth: monthStr,
+          approxAge: approx,
+          dob: dob ?? state.dob,
+        ),
+      );
+    });
+    on<UpdateYearChanged>((e, emit) {
+      final yearStr = e.value;
+      final monthStr = state.updateMonth ?? '0';
+      final dayStr = state.updateDay ?? '0';
+
+      final years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
+      final months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
+      final days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
+
+      final dob = _dobFromAgeParts(years, months, days);
+      final approx = '$years years $months months $days days'.trim();
+
+      emit(
+        state.copyWith(
+          updateYear: yearStr,
+          approxAge: approx,
+          dob: dob ?? state.dob,
+        ),
+      );
+    });
     on<ChildrenChanged>((e, emit) => emit(state.copyWith(children: e.value)));
     on<AnmUpdateBirthOrder>(
           (e, emit) => emit(state.copyWith(birthOrder: e.value)),
