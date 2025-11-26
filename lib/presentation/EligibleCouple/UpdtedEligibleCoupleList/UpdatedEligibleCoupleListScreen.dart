@@ -206,7 +206,7 @@ class _UpdatedEligibleCoupleListScreenState
             continue;
           }
 
-          // Only consider females 15-49 and married
+
           if (!_isEligibleFemale(info, head: head)) {
             continue;
           }
@@ -290,30 +290,32 @@ class _UpdatedEligibleCoupleListScreenState
     final age = _calculateAge(female['dob']);
     final gender = (female['gender']?.toString().toLowerCase() ?? '');
     final displayAgeGender = age > 0
-        ? '$age Y / ${gender == 'f' || gender == 'female' ? 'Female' : gender == 'm' || gender == 'male' ? 'Male' : 'Other'}'
+        ? '$age Y | ${gender == 'f' || gender == 'female' ? 'Female' : gender == 'm' || gender == 'male' ? 'Male' : 'Other'}'
         : 'N/A';
     final mobile = female['mobileNo']?.toString() ?? '';
 
 
-    String? spouseName;
-    if (counterpart['_row'] != null) {
-      try {
-        final rowData = Map<String, dynamic>.from(counterpart['_row']);
-        final infoRaw = rowData['beneficiary_info'];
-        if (infoRaw is String) {
-          final info = jsonDecode(infoRaw);
-          if (info is Map) {
-            spouseName = info['spouseName']?.toString() ??
-                        info['memberName']?.toString() ??
-                        info['headName']?.toString();
+    String? spouseName = female['spouseName']?.toString();
+    if (spouseName == null || spouseName.isEmpty) {
+      if (counterpart['_row'] != null) {
+        try {
+          final rowData = Map<String, dynamic>.from(counterpart['_row']);
+          final infoRaw = rowData['beneficiary_info'];
+          if (infoRaw is String) {
+            final info = jsonDecode(infoRaw);
+            if (info is Map) {
+              spouseName = info['spouseName']?.toString() ??
+                          info['memberName']?.toString() ??
+                          info['headName']?.toString();
+            }
+          } else if (infoRaw is Map) {
+            spouseName = infoRaw['spouseName']?.toString() ??
+                        infoRaw['memberName']?.toString() ??
+                        infoRaw['headName']?.toString();
           }
-        } else if (infoRaw is Map) {
-          spouseName = infoRaw['spouseName']?.toString() ??
-                      infoRaw['memberName']?.toString() ??
-                      infoRaw['headName']?.toString();
+        } catch (e) {
+          print('Error extracting spouse name: $e');
         }
-      } catch (e) {
-        print('Error extracting spouse name: $e');
       }
     }
 
@@ -334,7 +336,7 @@ class _UpdatedEligibleCoupleListScreenState
       'age': displayAgeGender,
       'RichID': female['RichID']?.toString() ?? '',
       'mobileno': mobile,
-      'spouseName': spouseName ?? husbandName,
+      'spouseName': spouseName,
       'status': isFamilyPlanning ? 'Protected' : 'Unprotected',
       'is_family_planning': isFamilyPlanning,
     };
@@ -663,8 +665,9 @@ class _UpdatedEligibleCoupleListScreenState
                   Row(
                     children: [
                       Expanded(child: _rowText(t?.mobileLabelSimple ?? 'Mobile No.', data['mobileno']?.toString() ?? '')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _rowText(t?.spouseNameLabel ?? 'Husband Name', data['spouseName']?.toString() ?? '')),
+                      const SizedBox(width: 150
+                      ),
+                      Expanded(child: _rowText(t?.husbandLabel?? 'Husband Name', data['spouseName']?.toString() ?? '')),
                     ],
                   ),
                 ],

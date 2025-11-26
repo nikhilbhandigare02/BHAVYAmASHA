@@ -308,10 +308,10 @@ class HouseHoldAmenities extends StatelessWidget {
                           ApiDropdown<String>(
                             labelText: 'Type of toilet',
                             items: const [
-                              'Flush toilet',
-                              'Septic tank',
-                              'Pit latrine',
-                              'Shared toilet',
+                              'Flush toilet with running water ',
+                              'Flush Toilet Without Water',
+                              'Pit toilet with running water',
+                              'Pit toilet without  water supply',
                               'Other',
                             ],
                             getLabel: (s) => s,
@@ -319,13 +319,13 @@ class HouseHoldAmenities extends StatelessWidget {
                             onChanged: (v) => bloc.add(ToiletTypeChange(toiletType: v ?? '')),
                           ),
                           Divider(color: AppColors.divider, thickness: 0.8),
-                          if(state.toilet == 'Other') ... [
+                          if(state.toiletType == 'Other') ... [
                             CustomTextField(
                               labelText: 'Enter Type of toilet',
                               hintText: 'Enter Type of toilet',
                               onChanged: (v) => bloc.add(TypeOfToilet(TypeToilet: v.trim())),
                             ),
-
+                            Divider(color: AppColors.divider, thickness: 0.8),
                           ]
                         ] else if (state.toilet == 'No') ...[
                           ApiDropdown<String>(

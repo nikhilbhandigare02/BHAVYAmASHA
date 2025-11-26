@@ -9,7 +9,7 @@
   import '../../core/widgets/Dropdown/Dropdown.dart';
   import '../../core/widgets/Dropdown/dropdown.dart' hide ApiDropdown;
   import '../../data/SecureStorage/SecureStorage.dart';
-import '../../l10n/app_localizations.dart';
+  import '../../l10n/app_localizations.dart';
   import 'package:flutter_bloc/flutter_bloc.dart';
   import 'bloc/profile_bloc.dart';
   import '../../core/widgets/DatePicker/DatePicker.dart';
@@ -33,6 +33,13 @@ import '../../l10n/app_localizations.dart';
       if (word.isEmpty) return '';
       return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
     }).join(' ');
+  }
+
+  String _toCamelCase(String? text) {
+    if (text == null || text.isEmpty) return '';
+    final words = text.toLowerCase().split(RegExp(r'[\s_]+'));
+    if (words.isEmpty) return '';
+    return words.first + words.skip(1).map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '').join('');
   }
 
   class _ProfileScreenState extends State<ProfileScreen> {
@@ -105,7 +112,6 @@ import '../../l10n/app_localizations.dart';
     Future<void> _loadUserData() async {
       try {
 
-        print('\n=== COMPLETE USERS TABLE ===');
         await UserInfo.printUserData();
         print('=== END USERS TABLE ===\n');
 
@@ -144,7 +150,7 @@ import '../../l10n/app_localizations.dart';
             ? Map<String, dynamic>.from(actualUserData['contact_info'])
             : <String, dynamic>{};
 
-        final areaOfWorking = actualUserData['area_of_working']?.toString().toLowerCase().trim() ?? '';
+        final areaOfWorking = _toCamelCase(actualUserData['area_of_working']?.toString().trim() ?? '');
 
         if (mounted) {
           setState(() {
@@ -177,7 +183,6 @@ import '../../l10n/app_localizations.dart';
               .where((part) => part.isNotEmpty)
               .join(' ');
 
-          // Update the BLoC state with the full name
           bloc.add(AshaNameChanged(fullName));
 
           final fatherSpouse = actualUserData['father_or_spouse_name']?.toString() ?? '';
@@ -187,16 +192,14 @@ import '../../l10n/app_localizations.dart';
           final altMobileNumber = contactInfo['alternate_mobile_number']?.toString() ?? '';
 
 
-          final state = workingLocation['state']?.toString() ?? '';
-          final division = workingLocation['division']?.toString() ?? '';
-          final district = workingLocation['district']?.toString() ?? '';
-          final block = workingLocation['block']?.toString() ?? '';
-          final panchayat = workingLocation['panchayat']?.toString() ?? '';
-          final village = workingLocation['village']?.toString() ?? '';
-          final tola = workingLocation['tola']?.toString() ?? '';
+          final state = _toCamelCase(workingLocation['state']?.toString().trim() ?? '');
+          final division = _toCamelCase(workingLocation['division']?.toString().trim() ?? '');
+          final district = _toCamelCase(workingLocation['district']?.toString().trim() ?? '');
+          final block = _toCamelCase(workingLocation['block']?.toString().trim() ?? '');
+          final panchayat = _toCamelCase(workingLocation['panchayat']?.toString().trim() ?? '');
+          final village = _toCamelCase(workingLocation['village']?.toString().trim() ?? '');
+          final tola = _toCamelCase(workingLocation['tola']?.toString().trim() ?? '');
 
-
-          // HSC Information
           final hscName = workingLocation['hsc_name']?.toString() ?? '';
           final hscHfrId = workingLocation['hsc_hfr_id']?.toString() ?? '';
 
@@ -382,7 +385,7 @@ import '../../l10n/app_localizations.dart';
                         buildWhen: (previous, current) => previous.areaOfWorking != current.areaOfWorking,
                         builder: (context, state) {
                           return CustomTextField(
-                              labelText: l10n.areaOfWorking, hintText: l10n.selectArea, initialValue: state.areaOfWorking, readOnly: true);
+                              labelText: l10n.areaOfWorking, hintText: l10n.selectArea, initialValue: _toCamelCase(state.areaOfWorking), readOnly: true);
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5),
@@ -393,7 +396,7 @@ import '../../l10n/app_localizations.dart';
                             key: ValueKey('asha_id_field_${state.ashaId}'),
                             labelText: l10n.ashaIdLabel,
                             hintText: l10n.ashaIdHint,
-                            initialValue: _toTitleCase(state.ashaId),
+                            initialValue: state.ashaId != null ? _toTitleCase(state.ashaId!.trim()) : '',
                             onChanged: (v) => bloc.add(AshaIdChanged(v)),
                             readOnly: true,
                           );
@@ -407,7 +410,7 @@ import '../../l10n/app_localizations.dart';
                             key: ValueKey('asha_name_field_$_userFullName'),
                             labelText: l10n.ashaNameLabel,
                             hintText: l10n.ashaNameHint,
-                            initialValue: _toTitleCase(_userFullName),
+                            initialValue: state.ashaName != null ? _toTitleCase(state.ashaName!.trim()) : '',
                             onChanged: (v) {
                               _userFullName = v;
                               bloc.add(AshaNameChanged(v));
@@ -491,7 +494,7 @@ import '../../l10n/app_localizations.dart';
                             key: ValueKey('father_spouse_field_${state.fatherSpouse}'),
                             labelText: l10n.fatherSpouseLabel,
                             hintText: l10n.fatherSpouseHint,
-                            initialValue: state.fatherSpouse,
+                            initialValue: state.fatherSpouse != null ? _toTitleCase(state.fatherSpouse!.trim()) : '',
                             onChanged: (v) => bloc.add(FatherSpouseChanged(v)),
                             readOnly: true,
                           );
@@ -766,7 +769,6 @@ import '../../l10n/app_localizations.dart';
                             initialValue: state.populationCovered,
                             keyboardType: TextInputType.number,
                             onChanged: (v) => bloc.add(PopulationCoveredChanged(v)),
-                            autofocus: true,
                           );
                         },
                       ),

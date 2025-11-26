@@ -3,6 +3,36 @@ import 'package:flutter/services.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 
+// Custom TextInputFormatter for Title Case
+class TitleCaseTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    // Convert to title case
+    final titleCaseText = _toTitleCase(newValue.text);
+
+    return TextEditingValue(
+      text: titleCaseText,
+      selection: newValue.selection,
+    );
+  }
+
+  String _toTitleCase(String text) {
+    if (text.isEmpty) return text;
+
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+}
+
 class CustomTextField extends StatefulWidget {
   final String? labelText;
   final String? hintText;
@@ -21,6 +51,7 @@ class CustomTextField extends StatefulWidget {
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
   final bool autofocus;
+  final bool enableTitleCase; // New parameter to enable/disable title case
 
   const CustomTextField({
     super.key,
@@ -41,6 +72,7 @@ class CustomTextField extends StatefulWidget {
     this.focusNode,
     this.textInputAction,
     this.autofocus = false,
+    this.enableTitleCase = false, // Default is false for backward compatibility
   });
 
   @override
@@ -67,11 +99,25 @@ class _CustomTextFieldState extends State<CustomTextField> {
     ];
   }
 
+  String _toTitleCase(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+
   @override
   void initState() {
     super.initState();
     _isObscure = widget.obscureText;
-    _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
+
+    // Apply title case to initial value if enabled
+    final initialText = widget.enableTitleCase && widget.initialValue != null
+        ? _toTitleCase(widget.initialValue!)
+        : widget.initialValue ?? '';
+
+    _controller = widget.controller ?? TextEditingController(text: initialText);
     _isDirty = widget.initialValue?.isNotEmpty ?? false;
   }
 
@@ -81,12 +127,20 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
     if (widget.controller != oldWidget.controller) {
       _controller?.dispose();
-      _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
+
+      final initialText = widget.enableTitleCase && widget.initialValue != null
+          ? _toTitleCase(widget.initialValue!)
+          : widget.initialValue ?? '';
+
+      _controller = widget.controller ?? TextEditingController(text: initialText);
     }
 
     if (widget.controller == null) {
       _controller ??= TextEditingController();
-      final newText = widget.initialValue ?? '';
+      final newText = widget.enableTitleCase && widget.initialValue != null
+          ? _toTitleCase(widget.initialValue!)
+          : widget.initialValue ?? '';
+
       final oldInit = oldWidget.initialValue ?? '';
       final currText = _controller!.text;
       final shouldUpdate =
@@ -109,18 +163,23 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
-    // Slightly lighter color for entered text, darker for labels
     final TextStyle inputStyle = TextStyle(
       fontSize: 15.sp,
       color: AppColors.onSurfaceVariant,
       height: 1.5,
     );
 
+    // Build input formatters list
+    final List<TextInputFormatter> formatters = [
+      ...?widget.inputFormatters,
+      if (widget.enableTitleCase) TitleCaseTextInputFormatter(),
+    ];
+
     return TextFormField(
       controller: _controller,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       initialValue: null,
-      textAlignVertical: TextAlignVertical.center, // ✅ Keeps text & icon centered
+      textAlignVertical: TextAlignVertical.center,
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       onChanged: (value) {
         if (!_isDirty && value.isNotEmpty) {
@@ -143,7 +202,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       maxLines: widget.maxLines,
       readOnly: widget.readOnly,
       maxLength: widget.maxLength,
-      inputFormatters: widget.inputFormatters,
+      inputFormatters: formatters,
       cursorColor: AppColors.primary,
       focusNode: widget.focusNode,
       textInputAction: widget.textInputAction,
@@ -180,7 +239,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
         hintText: widget.hintText,
         hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
 
-        // ✅ Properly aligned prefix icon
         prefixIcon: widget.prefixIcon != null
             ? Padding(
           padding: EdgeInsets.only(left: 3.w, right: 2.w),
@@ -196,7 +254,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
           minHeight: 4.h,
         ),
 
-        // ✅ Suffix for password toggle
         suffixIcon: widget.obscureText
             ? IconButton(
           icon: Icon(
