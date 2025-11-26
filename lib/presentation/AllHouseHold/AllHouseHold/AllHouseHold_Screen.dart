@@ -428,7 +428,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                       width: double.infinity,
                       height: 35,
                       child: RoundButton(
-                        title: l10n?.gridRegisterNewHousehold.toUpperCase() ?? 'NEW HOUSEHOLD REGISTRATION',
+                        title:  'NEW HOUSEHOLD REGISTRATION',
                         color: AppColors.primary,
                         borderRadius: 8,
                         height: 6.h,

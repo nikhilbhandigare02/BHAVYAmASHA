@@ -32,6 +32,13 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
   final String? headGender;
   final String? spouseName;
   final String? spouseGender;
+  // When true, this screen is used for inline edit inside
+  // RegisterNewHouseHold and should not trigger DB save via bloc.
+  final bool inlineEdit;
+  // Full member data map used to prefill fields during inline edit.
+  final Map<String, dynamic>? initial;
+  // Initial tab index for the DefaultTabController: 0 = member, 1 = spouse, 2 = children.
+  final int initialStep;
 
   const AddNewFamilyMemberScreen({
     super.key,
@@ -41,6 +48,9 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
     this.headGender,
     this.spouseName,
     this.spouseGender,
+    this.inlineEdit = false,
+    this.initial,
+    this.initialStep = 0,
   });
 
   @override
@@ -97,6 +107,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   // Form controllers
   bool _isLoading = false;
   bool _isFirstLoad = true;
+  // Ensure inline initial data is applied only once.
+  bool _initialApplied = false;
 
   // Controllers for form fields
   final TextEditingController _memberTypeController = TextEditingController();
@@ -338,9 +350,300 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       }
       _argsHandled = true;
     }
-    _isEdit = _isEdit || widget.isEdit;
+    // On first build, honor the initialStep requested by the caller so that
+    // we can open directly on Spouse/Children tabs when needed.
+    if (_isFirstLoad) {
+      _isFirstLoad = false;
+      // tabCount is computed below as either 1 or 3; clamp will be applied again
+      // just before creating DefaultTabController.
+      _currentStep = widget.initialStep;
+    }
+    // Inline edit inside RegisterNewHouseHold: hydrate member + spouse blocs
+    // once from the initial map stored in RegisterNewHouseHold._memberForms.
+    if (widget.inlineEdit && !_initialApplied && widget.initial != null) {
+      final data = widget.initial!;
+      final b = _bloc;
+
+      // Basic identity and relation fields
+      final memberType = (data['memberType'] ?? '') as String;
+      if (memberType.isNotEmpty) b.add(AnmUpdateMemberType(memberType));
+
+      final name = (data['name'] ?? '') as String;
+      if (name.isNotEmpty) b.add(AnmUpdateName(name));
+
+      final relation = (data['relation'] ?? '') as String;
+      if (relation.isNotEmpty) b.add(AnmUpdateRelation(relation));
+
+      final fatherName = (data['fatherName'] ?? '') as String;
+      if (fatherName.isNotEmpty) b.add(AnmUpdateFatherName(fatherName));
+
+      // Align father dropdown selection with stored fatherName so that
+      // reopening shows the correct option or 'Other' + text field.
+      if (fatherName.isNotEmpty) {
+        if (_maleAdultNames.contains(fatherName)) {
+          _fatherOption = fatherName;
+        } else {
+          _fatherOption = 'Other';
+        }
+      }
+
+      final motherName = (data['motherName'] ?? '') as String;
+      if (motherName.isNotEmpty) b.add(AnmUpdateMotherName(motherName));
+
+      // Align mother dropdown selection with stored motherName so that
+      // reopening shows the correct option or 'Other' + text field.
+      if (motherName.isNotEmpty) {
+        if (_femaleAdultNames.contains(motherName)) {
+          _motherOption = motherName;
+        } else {
+          _motherOption = 'Other';
+        }
+      }
+
+      final gender = (data['gender'] ?? '') as String;
+      if (gender.isNotEmpty) b.add(AnmUpdateGender(gender));
+
+      final mobileNo = (data['mobileNo'] ?? '') as String;
+      if (mobileNo.isNotEmpty) b.add(AnmUpdateMobileNo(mobileNo));
+
+      // Whose mobile number ("whose mobile no.")
+      final mobileOwner = (data['mobileOwner'] ?? '') as String;
+      if (mobileOwner.isNotEmpty) b.add(AnmUpdateMobileOwner(mobileOwner));
+
+      final maritalStatus = (data['maritalStatus'] ?? '') as String;
+      if (maritalStatus.isNotEmpty) b.add(AnmUpdateMaritalStatus(maritalStatus));
+
+      final hasChildren = (data['hasChildren'] ?? '') as String;
+      if (hasChildren.isNotEmpty) b.add(AnmUpdateHasChildren(hasChildren));
+
+      // Pregnancy status (used for eligible-couple type flows)
+      final isPregnant = (data['isPregnant'] ?? '') as String;
+      if (isPregnant.isNotEmpty) b.add(AnmUpdateIsPregnant(isPregnant));
+
+      final spouseName = (data['spouseName'] ?? '') as String;
+      if (spouseName.isNotEmpty) b.add(AnmUpdateSpouseName(spouseName));
+
+      // Age: restore both DOB and approxAge when available
+      final dobIso = (data['dob'] ?? '') as String;
+      if (dobIso.isNotEmpty) {
+        final dob = DateTime.tryParse(dobIso);
+        if (dob != null) b.add(AnmUpdateDob(dob));
+      }
+
+      final approxAge = (data['approxAge'] ?? '') as String;
+      if (approxAge.isNotEmpty) b.add(AnmUpdateApproxAge(approxAge));
+
+      // Education / occupation / socio-demographic
+      final education = (data['education'] ?? '') as String;
+      if (education.isNotEmpty) b.add(AnmUpdateEducation(education));
+
+      final occupation = (data['occupation'] ?? '') as String;
+      if (occupation.isNotEmpty) b.add(AnmUpdateOccupation(occupation));
+
+      final religion = (data['religion'] ?? '') as String;
+      if (religion.isNotEmpty) b.add(AnmUpdateReligion(religion));
+
+      final category = (data['category'] ?? '') as String;
+      if (category.isNotEmpty) b.add(AnmUpdateCategory(category));
+
+      // Banking / IDs / ABHA
+      final bankAcc = (data['bankAcc'] ?? '') as String;
+      if (bankAcc.isNotEmpty) b.add(AnmUpdateBankAcc(bankAcc));
+
+      final ifsc = (data['ifsc'] ?? '') as String;
+      if (ifsc.isNotEmpty) b.add(AnmUpdateIfsc(ifsc));
+
+      final voterId = (data['voterId'] ?? '') as String;
+      if (voterId.isNotEmpty) b.add(AnmUpdateVoterId(voterId));
+
+      final rationId = (data['rationId'] ?? '') as String;
+      if (rationId.isNotEmpty) b.add(AnmUpdateRationId(rationId));
+
+      final phId = (data['phId'] ?? '') as String;
+      if (phId.isNotEmpty) b.add(AnmUpdatePhId(phId));
+
+      final abhaAddress = (data['abhaAddress'] ?? '') as String;
+      if (abhaAddress.isNotEmpty) b.add(AnmUpdateAbhaAddress(abhaAddress));
+
+      // Children-specific extras (best-effort)
+      final richId = (data['richId'] ?? '') as String;
+      if (richId.isNotEmpty) b.add(RichIDChanged(richId));
+
+      final birthCert = (data['birthCertificate'] ?? '') as String;
+      if (birthCert.isNotEmpty) b.add(BirthCertificateChange(birthCert));
+
+      final weight = (data['weight'] ?? '') as String;
+      if (weight.isNotEmpty) b.add(WeightChange(weight));
+
+      final birthWeight = (data['birthWeight'] ?? '') as String;
+      if (birthWeight.isNotEmpty) b.add(BirthWeightChange(birthWeight));
+
+      final school = (data['school'] ?? '') as String;
+      if (school.isNotEmpty) b.add(ChildSchoolChange(school));
+
+      // Birth order
+      final birthOrder = (data['birthOrder'] ?? '') as String;
+      if (birthOrder.isNotEmpty) b.add(AnmUpdateBirthOrder(birthOrder));
+
+      // Type of beneficiary
+      final benType = (data['beneficiaryType'] ?? '') as String;
+      if (benType.isNotEmpty) b.add(AnmUpdateBeneficiaryType(benType));
+
+      // Age at marriage and spouse name (member side)
+      final ageAtMarriage = (data['ageAtMarriage'] ?? '') as String;
+      if (ageAtMarriage.isNotEmpty) b.add(AnmUpdateAgeAtMarriage(ageAtMarriage));
+
+      // Prefill spouse LMP/EDD in member spouse form
+      final spLmpIso = (data['spouseLmp'] ?? '') as String;
+      if (spLmpIso.isNotEmpty) {
+        final spLmp = DateTime.tryParse(spLmpIso);
+        if (spLmp != null) _spousBloc.add(SpLMPChange(spLmp));
+      }
+
+      final spEddIso = (data['spouseEdd'] ?? '') as String;
+      if (spEddIso.isNotEmpty) {
+        final spEdd = DateTime.tryParse(spEddIso);
+        if (spEdd != null) _spousBloc.add(SpEDDChange(spEdd));
+      }
+
+      // Hydrate spouse details bloc from any saved spousedetails map so that
+      // reopening a member via the spouse row shows the same spouse data
+      // that was entered when the member was first added.
+      try {
+        final spRaw = data['spousedetails'];
+        Map<String, dynamic>? spMap;
+        if (spRaw is Map) {
+          spMap = Map<String, dynamic>.from(spRaw as Map);
+        } else if (spRaw is String && spRaw.isNotEmpty) {
+          spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
+        }
+        if (spMap != null) {
+          final spBloc = _spousBloc;
+
+          final rel = (spMap['relation'] ?? '') as String;
+          if (rel.isNotEmpty) spBloc.add(SpUpdateRelation(rel));
+
+          final spMemberName = (spMap['memberName'] ?? '') as String;
+          if (spMemberName.isNotEmpty) spBloc.add(SpUpdateMemberName(spMemberName));
+
+          final spSpouseName = (spMap['spouseName'] ?? '') as String;
+          if (spSpouseName.isNotEmpty) spBloc.add(SpUpdateSpouseName(spSpouseName));
+
+          final spAgeAtMarriage = (spMap['ageAtMarriage'] ?? '') as String;
+          if (spAgeAtMarriage.isNotEmpty) spBloc.add(SpUpdateAgeAtMarriage(spAgeAtMarriage));
+
+          final spFatherName = (spMap['fatherName'] ?? '') as String;
+          if (spFatherName.isNotEmpty) spBloc.add(SpUpdateFatherName(spFatherName));
+
+          final spGender = (spMap['gender'] ?? '') as String;
+          if (spGender.isNotEmpty) spBloc.add(SpUpdateGender(spGender));
+
+          final spOcc = (spMap['occupation'] ?? '') as String;
+          if (spOcc.isNotEmpty) spBloc.add(SpUpdateOccupation(spOcc));
+
+          final spEdu = (spMap['education'] ?? '') as String;
+          if (spEdu.isNotEmpty) spBloc.add(SpUpdateEducation(spEdu));
+
+          final spRelig = (spMap['religion'] ?? '') as String;
+          if (spRelig.isNotEmpty) spBloc.add(SpUpdateReligion(spRelig));
+
+          final spCat = (spMap['category'] ?? '') as String;
+          if (spCat.isNotEmpty) spBloc.add(SpUpdateCategory(spCat));
+
+          final spAbha = (spMap['abhaAddress'] ?? '') as String;
+          if (spAbha.isNotEmpty) spBloc.add(SpUpdateAbhaAddress(spAbha));
+
+          final spMobOwner = (spMap['mobileOwner'] ?? '') as String;
+          if (spMobOwner.isNotEmpty) spBloc.add(SpUpdateMobileOwner(spMobOwner));
+
+          final spMobOwnerRel = (spMap['mobileOwnerOtherRelation'] ?? '') as String;
+          if (spMobOwnerRel.isNotEmpty) {
+            spBloc.add(SpUpdateMobileOwnerOtherRelation(spMobOwnerRel));
+          }
+
+          final spMobile = (spMap['mobileNo'] ?? '') as String;
+          if (spMobile.isNotEmpty) spBloc.add(SpUpdateMobileNo(spMobile));
+
+          final spBank = (spMap['bankAcc'] ?? '') as String;
+          if (spBank.isNotEmpty) spBloc.add(SpUpdateBankAcc(spBank));
+
+          final spIfsc = (spMap['ifsc'] ?? '') as String;
+          if (spIfsc.isNotEmpty) spBloc.add(SpUpdateIfsc(spIfsc));
+
+          final spVoter = (spMap['voterId'] ?? '') as String;
+          if (spVoter.isNotEmpty) spBloc.add(SpUpdateVoterId(spVoter));
+
+          final spRation = (spMap['rationId'] ?? '') as String;
+          if (spRation.isNotEmpty) spBloc.add(SpUpdateRationId(spRation));
+
+          final spPhId = (spMap['phId'] ?? '') as String;
+          if (spPhId.isNotEmpty) spBloc.add(SpUpdatePhId(spPhId));
+
+          final spBen = (spMap['beneficiaryType'] ?? '') as String;
+          if (spBen.isNotEmpty) spBloc.add(SpUpdateBeneficiaryType(spBen));
+
+          final spPreg = (spMap['isPregnant'] ?? '') as String;
+          if (spPreg.isNotEmpty) spBloc.add(SpUpdateIsPregnant(spPreg));
+
+          final spFpCounsel = (spMap['familyPlanningCounseling'] ?? '') as String;
+          if (spFpCounsel.isNotEmpty) {
+            spBloc.add(FamilyPlanningCounselingChanged(spFpCounsel));
+          }
+
+          final spFpMethod = (spMap['fpMethod'] ?? '') as String;
+          if (spFpMethod.isNotEmpty) spBloc.add(FpMethodChanged(spFpMethod));
+
+          final spRelApprox = (spMap['approxAge'] ?? '') as String;
+          if (spRelApprox.isNotEmpty) spBloc.add(SpUpdateApproxAge(spRelApprox));
+
+          final spYears = (spMap['UpdateYears'] ?? '') as String;
+          if (spYears.isNotEmpty) spBloc.add(UpdateYearsChanged(spYears));
+
+          final spMonths = (spMap['UpdateMonths'] ?? '') as String;
+          if (spMonths.isNotEmpty) spBloc.add(UpdateMonthsChanged(spMonths));
+
+          final spDays = (spMap['UpdateDays'] ?? '') as String;
+          if (spDays.isNotEmpty) spBloc.add(UpdateDaysChanged(spDays));
+
+          final spDobStr = (spMap['dob'] ?? '') as String;
+          if (spDobStr.isNotEmpty) {
+            final d = DateTime.tryParse(spDobStr);
+            if (d != null) spBloc.add(SpUpdateDob(d));
+          }
+
+          final spUseDob = spMap['useDob'];
+          if (spUseDob is bool && spUseDob != spBloc.state.useDob) {
+            spBloc.add(SpToggleUseDob());
+          }
+
+          // Hydrate LMP and EDD so that pregnancy dates
+          // are visible when reopening spouse details.
+          final spLmpStr = (spMap['lmp'] ?? '') as String;
+          if (spLmpStr.isNotEmpty) {
+            final d = DateTime.tryParse(spLmpStr);
+            if (d != null) spBloc.add(SpLMPChange(d));
+          }
+
+          final spEddStr = (spMap['edd'] ?? '') as String;
+          if (spEddStr.isNotEmpty) {
+            final d = DateTime.tryParse(spEddStr);
+            if (d != null) spBloc.add(SpEDDChange(d));
+          }
+        }
+      } catch (_) {}
+
+      _initialApplied = true;
+    }
+    // For inline edit inside RegisterNewHouseHold we keep _isEdit false
+    // so that the flow behaves like the household registration flow and
+    // returns data to the caller instead of triggering DB save.
+    if (!widget.inlineEdit) {
+      _isEdit = _isEdit || widget.isEdit;
+    }
     final bool hideFamilyTabs = _isEdit;
     final int tabCount = hideFamilyTabs ? 1 : 3;
+    // Ensure currentStep is always within valid range of available tabs.
+    _currentStep = _currentStep.clamp(0, tabCount - 1);
     return DefaultTabController(
       length: tabCount,
       initialIndex: _currentStep.clamp(0, tabCount - 1),
@@ -403,13 +706,30 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                     },
                   ),
                   BlocListener<AddnewfamilymemberBloc, AddnewfamilymemberState>(
-                    listenWhen: (p, c) => p.spouseName != c.spouseName,
+                    // When either the member's own name or their spouse name
+                    // changes on the member form, keep the spouse details
+                    // screen in sync using a cross-mapping:
+                    //   - Spous.memberName  <- member.spouseName
+                    //   - Spous.spouseName <- member.name
+                    listenWhen: (p, c) =>
+                        p.name != c.name || p.spouseName != c.spouseName,
                     listener: (context, st) {
-                      final name = (st.spouseName ?? '').trim();
-                      if (name.isEmpty) return;
                       final spBloc = context.read<SpousBloc>();
-                      if ((spBloc.state.memberName ?? '') != name) {
-                        spBloc.add(SpUpdateMemberName(name));
+
+                      // Member screen "name" should appear as spouse's
+                      // "spouseName" in the Spousdetails form.
+                      final memberName = (st.name ?? '').trim();
+                      if (memberName.isNotEmpty &&
+                          (spBloc.state.spouseName ?? '').trim() != memberName) {
+                        spBloc.add(SpUpdateSpouseName(memberName));
+                      }
+
+                      // Member screen "spouseName" should appear as spouse's
+                      // "memberName" in the Spousdetails form.
+                      final spouseName = (st.spouseName ?? '').trim();
+                      if (spouseName.isNotEmpty &&
+                          (spBloc.state.memberName ?? '').trim() != spouseName) {
+                        spBloc.add(SpUpdateMemberName(spouseName));
                       }
                     },
                   ),
@@ -509,7 +829,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                       child: BlocBuilder<AddnewfamilymemberBloc, AddnewfamilymemberState>(
                         builder: (context, state) {
                           if (_currentStep == 1) {
-                            return SizedBox.expand(child: Spousdetails());
+                            // In the member flow we do not want Spousdetails to
+                            // mirror AddFamilyHeadBloc (head form). Instead it
+                            // should rely purely on its own SpousBloc state,
+                            // which we hydrate from member data.
+                            return const SizedBox.expand(
+                              child: Spousdetails(syncFromHead: false),
+                            );
                           }
                           if (_currentStep == 2) {
                             return SizedBox.expand(child: Childrendetaills());
@@ -819,14 +1145,61 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              _section(
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                      Builder(
+                                        builder: (context) {
+                                        final motherItems = [
+                                          'Select',
+                                          ..._femaleAdultNames,
+                                          'Other',
+                                        ];
+                                        print('Mother dropdown items: $motherItems');
+                                        print('Current mother option: $_motherOption');
 
+                                        return ApiDropdown<String>(
+                                          labelText: "${l.motherNameLabel} ",
+                                          hintText: "${l.motherNameLabel} ",
+                                          items: motherItems,
+                                          getLabel: (s) => s,
+                                          value: _motherOption,
+                                          onChanged: (v) {
+                                            if (v == null) return;
+                                            setState(() {
+                                              _motherOption = v;
+                                            });
+                                            if (v != 'Select' && v != 'Other') {
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v));
+                                            } else {
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(''));
+                                            }
+                                          },
+                                        );
+                                      },
+                                      ),
+                                    if (_motherOption == 'Other')
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8),
+                                        child: CustomTextField(
+                                          labelText: l.motherNameLabel,
+                                          hintText: l.motherNameLabel,
+                                          initialValue: state.motherName ?? '',
+                                          onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v.trim())),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                               _section(
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Builder(
-                                      builder: (context) {
+                                      Builder(
+                                        builder: (context) {
                                         final fatherItems = [
                                           'Select',
                                           ..._maleAdultNames,
@@ -860,6 +1233,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         child: CustomTextField(
                                           labelText: l.fatherGuardianNameLabel,
                                           hintText: l.fatherGuardianNameLabel,
+                                          initialValue: state.fatherName ?? '',
                                           onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v.trim())),
                                         ),
                                       ),
@@ -867,54 +1241,132 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              // Gender
                               _section(
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Builder(
-                                      builder: (context) {
-                                        final motherItems = [
-                                          'Select',
-                                          ..._femaleAdultNames,
-                                          'Other',
-                                        ];
-                                        print('Mother dropdown items: $motherItems');
-                                        print('Current mother option: $_motherOption');
+                                ApiDropdown<String>(
+                                  labelText: '${l.genderLabel} *',
+                                  items: const ['Male', 'Female', 'Transgender'],
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Male':
+                                        return l.genderMale;
+                                      case 'Female':
+                                        return l.genderFemale;
+                                      case 'Transgender':
+                                        return l.transgender;
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.gender,
+                                  onChanged: (v) {
+                                    if (v == null) return;
+                                    final memberGender = v;
+                                    context.read<AddnewfamilymemberBloc>().add(AnmUpdateGender(memberGender));
+                                    // Auto set spouse gender opposite
+                                    try {
+                                      if (_syncingGender) return;
+                                      _syncingGender = true;
+                                      final opposite = _oppositeGender(memberGender);
+                                      final spBloc = context.read<SpousBloc>();
+                                      if (spBloc.state.gender != opposite) {
+                                        spBloc.add(SpUpdateGender(opposite));
+                                      }
+                                    } finally {
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        _syncingGender = false;
+                                      });
+                                    }
+                                  },
+                                  validator: (value) => _captureAnmError(Validations.validateGender(l, value)),
 
-                                        return ApiDropdown<String>(
-                                          labelText: "${l.motherNameLabel} ",
-                                          hintText: "${l.motherNameLabel} ",
-                                          items: motherItems,
-                                          getLabel: (s) => s,
-                                          value: _motherOption,
-                                          onChanged: (v) {
-                                            if (v == null) return;
-                                            setState(() {
-                                              _motherOption = v;
-                                            });
-                                            if (v != 'Select' && v != 'Other') {
-                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v));
-                                            } else {
-                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(''));
-                                            }
-                                          },
-                                        );
-                                      },
-                                    ),
-                                    if (_motherOption == 'Other')
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 8),
-                                        child: CustomTextField(
-                                          labelText: l.motherNameLabel,
-                                          hintText: l.motherNameLabel,
-                                          onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v.trim())),
-                                        ),
-                                      ),
+                                ),
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              // Mobile
+                              _section(
+                                ApiDropdown<String>(
+                                  labelText: '${l.whoseMobileLabel} *',
+                                  items: const [
+                                    'Self',
+                                    'Family Head',
+                                    'Wife',
+                                    'Father',
+                                    'Mother',
+                                    'Son',
+                                    'Daughter',
+                                    'Father in Law',
+                                    'Mother in Law',
+                                    'Neighbour',
+                                    'Relative',
+                                    'Other',
+                                  ],
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Self':
+                                        return l.self;
+                                      case 'Family Head':
+                                        return l.headOfFamily;
+                                      case 'Wife':
+                                        return l.wife;
+                                      case 'Father':
+                                        return l.father;
+                                      case 'Mother':
+                                        return l.mother;
+                                      case 'Son':
+                                        return l.son;
+                                      case 'Daughter':
+                                        return l.daughter;
+                                      case 'Father in Law':
+                                        return l.fatherInLaw;
+                                      case 'Mother in Law':
+                                        return l.motherInLaw;
+                                      case 'Neighbour':
+                                        return l.neighbour;
+                                      case 'Relative':
+                                        return l.relative;
+                                      case 'Other':
+                                        return l.other;
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.mobileOwner,
+                                  onChanged: (v) {
+                                    if (v == null) return;
+                                    final bloc = context.read<AddnewfamilymemberBloc>();
+                                    bloc.add(AnmUpdateMobileOwner(v));
+                                    if (v      == 'Family Head') {
+                                      // final headNo = widget. ?? '';
+                                      // if (headNo.isNotEmpty) {
+                                      //   bloc.add(AnmUpdateMobileNo(headNo));
+                                      // }
+                                    }
+                                  },
+                                  validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
+
+                                ),
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              _section(
+                                CustomTextField(
+                                  key: ValueKey('member_mobile_${state.mobileOwner ?? ''}'),
+                                  controller: TextEditingController(text: state.mobileNo ?? '')
+                                    ..selection = TextSelection.collapsed(offset: state.mobileNo?.length ?? 0),
+                                  labelText: '${l.mobileLabel} *',
+                                  hintText: '${l.mobileLabel} *',
+                                  keyboardType: TextInputType.number,
+                                  maxLength: 10,
+                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(v.trim())),
+                                  validator: (value) => _captureAnmError(Validations.validateMobileNo(l, value)),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(10),
                                   ],
                                 ),
                               ),
-
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Row(
@@ -1046,134 +1498,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                              // Gender
-                              _section(
-                                ApiDropdown<String>(
-                                  labelText: '${l.genderLabel} *',
-                                  items: const ['Male', 'Female', 'Transgender'],
-                                  getLabel: (s) {
-                                    switch (s) {
-                                      case 'Male':
-                                        return l.genderMale;
-                                      case 'Female':
-                                        return l.genderFemale;
-                                      case 'Transgender':
-                                        return l.transgender;
-                                      default:
-                                        return s;
-                                    }
-                                  },
-                                  value: state.gender,
-                                  onChanged: (v) {
-                                    if (v == null) return;
-                                    final memberGender = v;
-                                    context.read<AddnewfamilymemberBloc>().add(AnmUpdateGender(memberGender));
-                                    // Auto set spouse gender opposite
-                                    try {
-                                      if (_syncingGender) return;
-                                      _syncingGender = true;
-                                      final opposite = _oppositeGender(memberGender);
-                                      final spBloc = context.read<SpousBloc>();
-                                      if (spBloc.state.gender != opposite) {
-                                        spBloc.add(SpUpdateGender(opposite));
-                                      }
-                                    } finally {
-                                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                                        _syncingGender = false;
-                                      });
-                                    }
-                                  },
-                                  validator: (value) => _captureAnmError(Validations.validateGender(l, value)),
-
-                                ),
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              // Mobile
-                              _section(
-                                ApiDropdown<String>(
-                                  labelText: '${l.whoseMobileLabel} *',
-                                  items: const [
-                                    'Self',
-                                    'Family Head',
-                                    'Wife',
-                                    'Father',
-                                    'Mother',
-                                    'Son',
-                                    'Daughter',
-                                    'Father in Law',
-                                    'Mother in Law',
-                                    'Neighbour',
-                                    'Relative',
-                                    'Other',
-                                  ],
-                                  getLabel: (s) {
-                                    switch (s) {
-                                      case 'Self':
-                                        return l.self;
-                                      case 'Family Head':
-                                        return l.headOfFamily;
-                                      case 'Wife':
-                                        return l.wife;
-                                      case 'Father':
-                                        return l.father;
-                                      case 'Mother':
-                                        return l.mother;
-                                      case 'Son':
-                                        return l.son;
-                                      case 'Daughter':
-                                        return l.daughter;
-                                      case 'Father in Law':
-                                        return l.fatherInLaw;
-                                      case 'Mother in Law':
-                                        return l.motherInLaw;
-                                      case 'Neighbour':
-                                        return l.neighbour;
-                                      case 'Relative':
-                                        return l.relative;
-                                      case 'Other':
-                                        return l.other;
-                                      default:
-                                        return s;
-                                    }
-                                  },
-                                  value: state.mobileOwner,
-                                  onChanged: (v) {
-                                    if (v == null) return;
-                                    final bloc = context.read<AddnewfamilymemberBloc>();
-                                    bloc.add(AnmUpdateMobileOwner(v));
-                                    if (v      == 'Family Head') {
-                                      // final headNo = widget. ?? '';
-                                      // if (headNo.isNotEmpty) {
-                                      //   bloc.add(AnmUpdateMobileNo(headNo));
-                                      // }
-                                    }
-                                  },
-                                  validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
-
-                                ),
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              _section(
-                                CustomTextField(
-                                  key: ValueKey('member_mobile_${state.mobileOwner ?? ''}'),
-                                  controller: TextEditingController(text: state.mobileNo ?? '')
-                                    ..selection = TextSelection.collapsed(offset: state.mobileNo?.length ?? 0),
-                                  labelText: '${l.mobileLabel} *',
-                                  hintText: '${l.mobileLabel} *',
-                                  keyboardType: TextInputType.number,
-                                  maxLength: 10,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(v.trim())),
-                                  validator: (value) => _captureAnmError(Validations.validateMobileNo(l, value)),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                    LengthLimitingTextInputFormatter(10),
-                                  ],
-                                ),
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
-
 
                               _section(
                                 ApiDropdown<String>(
@@ -1208,6 +1532,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     labelText: 'Weight (1.2-90)Kg',
                                     hintText: 'Weight (1.2-90)Kg',
                                     keyboardType: TextInputType.number,
+                                    initialValue: state.WeightChange ?? '',
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(WeightChange(v.trim())),
                                     validator: (value) {
                                       if (value == null || value.trim().isEmpty) {
@@ -1234,6 +1559,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     labelText: 'Birth Weight (1200-4000)gms',
                                     hintText: 'Birth Weight (1200-4000)gms',
                                     keyboardType: TextInputType.number,
+                                    initialValue: state. birthWeight ?? '',
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(BirthWeightChange(v?.trim() ?? '')),
                                     validator: (value) {
                                       if (value == null || value.trim().isEmpty) {
@@ -1287,7 +1613,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           return s;
                                       }
                                     },
-                                    value: state.occupation,
+                                    value: state.ChildSchool,
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(ChildSchoolChange(v!)),
                                   ),
                                 ),
@@ -1434,6 +1760,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   labelText: l.accountNumberLabel,
                                   hintText: l.accountNumberLabel,
                                   keyboardType: TextInputType.number,
+                                  initialValue: state.bankAcc,
                                   onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateBankAcc(v.trim())),
                                 ),
                               ),
@@ -1442,6 +1769,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 CustomTextField(
                                   labelText: l.ifscLabel,
                                   hintText: l.ifscLabel,
+                                  initialValue: state.ifsc,
                                   onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateIfsc(v.trim())),
                                 ),
                               ),
@@ -1512,11 +1840,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               ],
 
                               // IDs
-                              _section(CustomTextField(labelText: l.voterIdLabel,hintText: l.voterIdLabel, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateVoterId(v.trim())),)),
+                              _section(CustomTextField(labelText: l.voterIdLabel,hintText: l.voterIdLabel, initialValue: state.voterId, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateVoterId(v.trim())),)),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              _section(CustomTextField(labelText: l.rationCardIdLabel, hintText: l.rationCardIdLabel,onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateRationId(v.trim())),)),
+                              _section(CustomTextField(labelText: l.rationCardIdLabel, hintText: l.rationCardIdLabel, initialValue: state.rationId, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateRationId(v.trim())),)),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              _section(CustomTextField(labelText: l.personalHealthIdLabel,hintText: l.personalHealthIdLabel, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdatePhId(v.trim())),)),
+                              _section(CustomTextField(labelText: l.personalHealthIdLabel,hintText: l.personalHealthIdLabel, initialValue: state.phId, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdatePhId(v.trim())),)),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                               _section(
@@ -1587,6 +1915,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     labelText: l.ageAtMarriageLabel,
                                     hintText: l.ageAtMarriageHint,
                                     keyboardType: TextInputType.number,
+                                    initialValue: state.ageAtMarriage,
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateAgeAtMarriage(v)),
                                   ),
                                 ),
@@ -1596,6 +1925,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   CustomTextField(
                                     labelText: '${l.spouseNameLabel} *',
                                     hintText: l.spouseNameHint,
+                                    initialValue: state.spouseName,
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateSpouseName(v.trim())),
                                     validator: (value) => _captureAnmError(Validations.validateSpousName(l, value)),
                                   ),
@@ -1786,6 +2116,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           'gender': state.gender,
                                           'dob': state.dob?.toIso8601String(),
                                           'approxAge': state.approxAge,
+                                          'birthOrder': state.birthOrder,
                                           'maritalStatus': state.maritalStatus,
                                           'mobileNo': state.mobileNo,
                                           'mobileOwner': state.mobileOwner,
@@ -1798,10 +2129,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           'voterId': state.voterId,
                                           'rationId': state.rationId,
                                           'phId': state.phId,
+                                          'beneficiaryType': state.beneficiaryType,
                                           'abhaAddress': state.abhaAddress,
                                           'richId': state.RichIDChanged,
                                           'birthCertificate': state.BirthCertificateChange,
                                           'weight': state.WeightChange,
+                                          'birthWeight': state.birthWeight,
                                           'school': state.ChildSchool,
                                           'hasChildren': state.hasChildren,
                                           'isPregnant': state.isPregnant,
@@ -1843,6 +2176,28 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                                           // We are already on the last step: close this screen
                                           // and return the prepared memberData to the caller.
+                                          // Attach spouse details snapshot so that reopening
+                                          // via the spouse row can restore the same data.
+                                          try {
+                                            final spState = _spousBloc.state;
+                                            final spJson = spState.toJson();
+                                            // Only attach when there is at least one
+                                            // non-null, non-empty field.
+                                            final hasSpouseData = spJson.values.any((v) {
+                                              if (v == null) return false;
+                                              if (v is String) return v.trim().isNotEmpty;
+                                              return true;
+                                            });
+                                            if (hasSpouseData) {
+                                              // Store as JSON string so that it
+                                              // is compatible with memberData's
+                                              // String-valued fields. Inline edit
+                                              // hydration already supports both
+                                              // Map and String for spousedetails.
+                                              memberData['spousedetails'] = jsonEncode(spJson);
+                                            }
+                                          } catch (_) {}
+
                                           Navigator.of(context).pop(memberData);
                                           return;
                                         }

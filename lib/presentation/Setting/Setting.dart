@@ -126,7 +126,7 @@ class _SettingState extends State<Setting> {
                         dense: true,
                         value: 'hi',
                         groupValue: selected,
-                        title: Text(l10n.hindi, style: const TextStyle(fontSize: 16)),
+                        title: Text('हिंदी', style: const TextStyle(fontSize: 16)),
                         onChanged: (val) => setStateDialog(() => selected = val!),
                         visualDensity: const VisualDensity(vertical: -4),
                       ),

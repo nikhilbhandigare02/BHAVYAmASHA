@@ -113,6 +113,12 @@ abstract class AppLocalizations {
   /// **'ABHA Address'**
   String get abhaAddressLabel;
 
+  /// No description provided for @methodOfContra.
+  ///
+  /// In en, this message translates to:
+  /// **'Method of contraception'**
+  String get methodOfContra;
+
   /// No description provided for @abhaConsent1.
   ///
   /// In en, this message translates to:

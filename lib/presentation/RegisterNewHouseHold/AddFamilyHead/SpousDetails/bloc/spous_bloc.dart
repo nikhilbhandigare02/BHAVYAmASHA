@@ -58,6 +58,7 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
         (event, emit) => emit(state.copyWith(familyPlanningCounseling: event.value)));
     on<FpMethodChanged>((event, emit) => emit(state.copyWith(fpMethod: event.value)));
     on<RemovalDateChanged>((event, emit) => emit(state.copyWith(removalDate: event.value)));
+    on<DateofAntraChanged>((event, emit) => emit(state.copyWith(antraDate: event.value)));
     on<RemovalReasonChanged>((event, emit) => emit(state.copyWith(removalReason: event.value)));
     on<CondomQuantityChanged>((event, emit) => emit(state.copyWith(condomQuantity: event.value)));
     on<MalaQuantityChanged>((event, emit) => emit(state.copyWith(malaQuantity: event.value)));

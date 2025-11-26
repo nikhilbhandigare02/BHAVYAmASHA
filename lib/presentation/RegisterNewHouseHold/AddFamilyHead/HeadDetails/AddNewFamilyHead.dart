@@ -29,7 +29,14 @@ import 'bloc/add_family_head_bloc.dart';
 class AddNewFamilyHeadScreen extends StatefulWidget {
   final bool isEdit;
   final Map<String, String>? initial;
-  const AddNewFamilyHeadScreen({super.key, this.isEdit = false, this.initial});
+  final int initialTab;
+
+  const AddNewFamilyHeadScreen({
+    super.key,
+    this.isEdit = false,
+    this.initial,
+    this.initialTab = 0,
+  });
 
   @override
   State<AddNewFamilyHeadScreen> createState() => _AddNewFamilyHeadScreenState();
@@ -458,6 +465,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   child: CustomTextField(
                     labelText: l.abhaAddressLabel,
                     hintText: l.abhaAddressLabel,
+                    initialValue: state.AfhABHAChange,
                     onChanged: (v) =>
                         context.read<AddFamilyHeadBloc>().add(AfhABHAChange(v.trim())),
                   ),
@@ -606,6 +614,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: CustomTextField(
               labelText: l.villageNameLabel,
               hintText: l.villageNameLabel,
+              initialValue: state.village,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVillage(v.trim())),
             ),
           ),
@@ -615,6 +624,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: CustomTextField(
               labelText: l.wardNoLabel,
               hintText: l.wardNoLabel,
+              initialValue: state.ward,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateWard(v.trim())),
             ),
           ),
@@ -624,6 +634,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: CustomTextField(
               labelText: l.mohallaTolaNameLabel,
               hintText: l.mohallaTolaNameLabel,
+              initialValue: state.mohalla,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMohalla(v.trim())),
             ),
           ),
@@ -643,6 +654,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       hintText: l.accountNumberLabel,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      initialValue: state.bankAcc,
                       onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(v.trim())),
                     ),
                   ),
@@ -660,6 +672,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: CustomTextField(
               labelText: l.ifscLabel,
               hintText:l.ifscLabel,
+              initialValue: state.ifsc,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateIfsc(v.trim())),
             ),
           ),
@@ -669,6 +682,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: CustomTextField(
               labelText: l.voterIdLabel,
               hintText: l.voterIdLabel,
+              initialValue: state.voterId,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVoterId(v.trim())),
             ),
           ),
@@ -678,6 +692,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: CustomTextField(
               labelText: l.rationCardIdLabel,
               hintText: l.rationCardIdLabel,
+              initialValue: state.rationId,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateRationId(v.trim())),
             ),
           ),
@@ -687,6 +702,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: CustomTextField(
               labelText: l.personalHealthIdLabel,
               hintText:  l.personalHealthIdLabel,
+              initialValue: state.phId,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdatePhId(v.trim())),
             ),
           ),
@@ -1157,24 +1173,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                             final g = (state.gender == 'Male')
                                 ? 'Female'
                                 : (state.gender == 'Female')
-                                ? 'Male'
-                                : null;
+                                    ? 'Male'
+                                    : null;
+                            // Hydrate only minimal shared fields so spouse
+                            // record stays independent from head record.
                             spBloc.add(SpHydrate(SpousState(
                               relation: 'Spouse',
                               memberName: state.spouseName,
                               ageAtMarriage: state.ageAtMarriage,
                               spouseName: state.headName,
                               gender: g,
-                              religion: state.religion,
-                              category: state.category,
-                              abhaAddress: state.AfhABHAChange,
-                              bankAcc: state.bankAcc,
-                              ifsc: state.ifsc,
-                              voterId: state.voterId,
-                              rationId: state.rationId,
-                              phId: state.phId,
-                              beneficiaryType: state.beneficiaryType,
-                              RichIDChanged: state.AfhRichIdChange,
                             )));
                           } else {
                             final current = spBloc.state;
@@ -1216,9 +1224,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           views.add(const Childrendetaills());
                         }
 
+                        final int safeInitialIndex = widget.initialTab.clamp(0, tabs.length - 1);
+
                         return DefaultTabController(
                           key: ValueKey<int>(tabs.length),
                           length: tabs.length,
+                          initialIndex: widget.initialTab.clamp(0, tabs.length - 1),
                           child: Column(
                             children: [
                               Container(

@@ -515,6 +515,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       if (result != null) {
         setState(() {
           _memberForms.add(Map<String, dynamic>.from(result));
+          final int formIndex = _memberForms.length - 1;
           totalMembers = totalMembers + 1;
           final String type = (result['memberType'] ?? 'Adult').toString();
           final String name = (result['name'] ?? '').toString();
@@ -547,6 +548,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             'Father': father,
             'Spouse': spouse,
             'Total Children': totalChildren,
+            'formIndex': formIndex.toString(),
+            // This is the primary member row for this form entry.
+            'isSpouseRow': '0',
           });
 
           // Add spouse row similar to head flow when married
@@ -586,6 +590,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               'Father': '',
               'Spouse': name,
               'Total Children': totalChildren,
+              'formIndex': formIndex.toString(),
+              // Mark this as the auto-generated spouse summary row.
+              'isSpouseRow': '1',
             });
             totalMembers = totalMembers + 1;
           }
@@ -796,18 +803,93 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 ),
               ],
               rows: _members.map((m) {
-                // Prefer numeric children count from head form when available
-                String totalChildrenText = '';
-                if (_headForm != null && _headForm!['children'] != null &&
-                    _headForm!['children'].toString().isNotEmpty) {
-                  totalChildrenText = _headForm!['children'].toString();
-                } else {
-                  totalChildrenText = m['Total Children'] ?? '';
+
+                // Use per-row children count; default to '0' when empty
+                String totalChildrenText = m['Total Children'] ?? '';
+                if (totalChildrenText.isEmpty) {
+                  totalChildrenText = '0';
                 }
 
                 return DataRow(
                   onSelectChanged: (selected) async {
-                    if (selected == true && _headForm != null) {
+                    if (selected != true) return;
+
+                    final formIndexStr = m['formIndex'];
+                    // Inline member/child row edit when formIndex is present
+                    if (formIndexStr != null && formIndexStr.toString().isNotEmpty) {
+                      final idx = int.tryParse(formIndexStr.toString());
+                      if (idx == null || idx < 0 || idx >= _memberForms.length) {
+                        return;
+                      }
+
+                      final initialMember = Map<String, dynamic>.from(_memberForms[idx]);
+
+                      // Decide which tab to open initially inside AddNewFamilyMemberScreen
+                      // based on whether this is the auto-generated spouse summary row.
+                      // We use the explicit isSpouseRow flag so that even if a member
+                      // has Relation == 'Spouse', their own row still opens on the
+                      // Member Details tab, and only the extra spouse row opens on
+                      // the Spouse Details tab.
+                      final isSpouseRow = (m['isSpouseRow'] ?? '0').toString() == '1';
+                      final int initialStep = isSpouseRow ? 1 : 0;
+
+                      final result = await Navigator.of(context).push<Map<String, dynamic>>(
+                        MaterialPageRoute(
+                          builder: (_) => AddNewFamilyMemberScreen(
+                            hhId: _headForm?['hh_unique_key']?.toString(),
+                            headName: _headForm?['headName']?.toString(),
+                            headGender: _headForm?['gender']?.toString(),
+                            spouseName: _headForm?['spouseName']?.toString(),
+                            spouseGender: _headForm?['spouseGender']?.toString(),
+                            inlineEdit: true,
+                            initial: initialMember,
+                            initialStep: initialStep,
+                          ),
+                        ),
+                      );
+
+                      if (result != null) {
+                        setState(() {
+                          _memberForms[idx] = Map<String, dynamic>.from(result);
+
+                          final String type = (result['memberType'] ?? 'Adult').toString();
+                          final String name = (result['name'] ?? '').toString();
+                          final bool useDob = (result['useDob'] == true);
+                          final String? dobIso = result['dob'] as String?;
+                          String age = '';
+                          if (useDob && dobIso != null && dobIso.isNotEmpty) {
+                            final dob = DateTime.tryParse(dobIso);
+                            age = dob != null
+                                ? (DateTime.now().year - dob.year).toString()
+                                : (result['approxAge'] ?? '').toString();
+                          } else {
+                            age = (result['approxAge'] ?? '').toString();
+                          }
+                          final String gender = (result['gender'] ?? '').toString();
+                          final String relation = (result['relation'] ?? '').toString();
+                          final String father = (result['fatherName'] ?? '').toString();
+                          final String spouse = (result['spouseName'] ?? '').toString();
+                          final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
+                              ? (int.tryParse(result['children'].toString()) ?? 0) > 0
+                                  ? result['children'].toString()
+                                  : '0'
+                              : '0';
+
+                          m['Type'] = type;
+                          m['Name'] = name;
+                          m['Age'] = age;
+                          m['Gender'] = gender;
+                          m['Relation'] = relation;
+                          m['Father'] = father;
+                          m['Spouse'] = spouse;
+                          m['Total Children'] = totalChildren;
+                        });
+                      }
+                      return;
+                    }
+
+                    // Head/spouse summary rows: open AddNewFamilyHeadScreen edit
+                    if (_headForm != null) {
                       final initial = <String, String>{};
                       _headForm!.forEach((key, value) {
                         if (value != null) {
@@ -830,11 +912,18 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                         }
                       }
 
+                      // Decide initial tab based on which summary row was tapped.
+                      // Head row (Relation == 'Self') -> tab 0 (Head)
+                      // Spouse summary row (Relation == 'Wife'/'Spouse') -> tab 1 (Spouse)
+                      final relation = (m['Relation'] ?? '').toString();
+                      final int initialTab = (relation == 'Wife' || relation == 'Spouse') ? 1 : 0;
+
                       final result = await Navigator.of(context).push<Map<String, dynamic>>(
                         MaterialPageRoute(
                           builder: (_) => AddNewFamilyHeadScreen(
                             isEdit: true,
                             initial: initial,
+                            initialTab: initialTab,
                           ),
                         ),
                       );
@@ -843,10 +932,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                         setState(() {
                           _headForm = Map<String, dynamic>.from(result);
 
-                          // Re-flatten spouse JSON details into sp_*-prefixed keys
-                          // so SpousBloc is hydrated when reopening the form.
-                          try {
-                            final spRaw = result['spousedetails'];
+
+                          try {final spRaw = result['spousedetails'];
                             Map<String, dynamic>? spMap;
                             if (spRaw is Map) {
                               spMap = Map<String, dynamic>.from(spRaw);
