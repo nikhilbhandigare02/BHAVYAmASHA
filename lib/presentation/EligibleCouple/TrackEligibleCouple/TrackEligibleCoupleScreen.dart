@@ -176,7 +176,14 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         initialDate: lmp,
                         onDateChanged: (date) {
                           if (date != null) {
-                            context.read<TrackEligibleCoupleBloc>().add(LmpDateChanged(date));
+                            final edd = DateTime(date.year, date.month + 9, date.day + 5);
+                            context.read<TrackEligibleCoupleBloc>()
+                              ..add(LmpDateChanged(date))
+                              ..add(EddDateChanged(edd));
+                          } else {
+                            context.read<TrackEligibleCoupleBloc>()
+                              ..add(const LmpDateChanged(null))
+                              ..add(const EddDateChanged(null));
                           }
                         },
                         isEditable: true,

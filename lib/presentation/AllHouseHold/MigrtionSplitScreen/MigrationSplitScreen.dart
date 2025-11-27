@@ -1012,14 +1012,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Text(
-                              'Select Adult Member(s)',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
+
                           ),
                           if (_adultNames.isEmpty)
                             Row(
