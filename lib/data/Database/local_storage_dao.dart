@@ -50,7 +50,6 @@ class LocalStorageDao {
     try {
       final db = await _db;
 
-      // Query to get the latest entry for each beneficiary
       final rows = await db.rawQuery('''
       WITH LatestEntries AS (
         SELECT 
@@ -108,7 +107,6 @@ class LocalStorageDao {
     try {
       final db = await _db;
 
-      // Query to get the latest entry for each beneficiary
       final rows = await db.rawQuery('''
       WITH LatestEntries AS (
         SELECT 
@@ -164,7 +162,6 @@ class LocalStorageDao {
     }
   }
 
-  // Add these methods to LocalStorageDao class
 
   Future<List<Map<String, dynamic>>> getChildTrackingForBirthDose() async {
     return _getChildTrackingForAgeGroup('"current_tab"%Birth dose%', 'Birth dose');
@@ -175,9 +172,8 @@ class LocalStorageDao {
   }
 
   Future<List<Map<String, dynamic>>> getChildTrackingFor10Weeks() async {
-    // Try different patterns to match the data
     final patterns = [
-      '"current_tab":"10 WEEK"',  // with quotes and colon
+      '"current_tab":"10 WEEK"',
       '"current_tab" : "10 WEEK"', // with spaces around colon
       'current_tab":"10 WEEK',    // missing first quote
       '10 WEEK'                   // just the value
@@ -194,7 +190,7 @@ class LocalStorageDao {
         print('Error with pattern $pattern: $e');
       }
     }
-    return []; // Return empty if no records found with any pattern
+    return [];
   }
 
   Future<List<Map<String, dynamic>>> getChildTrackingFor14Weeks() async {
@@ -209,7 +205,6 @@ class LocalStorageDao {
     return _getChildTrackingForAgeGroup('"current_tab"%5-6 YEAR%', '5-6 YEARS');
   }
 
-  // Helper method to avoid code duplication
   Future<List<Map<String, dynamic>>> _getChildTrackingForAgeGroup(String likePattern, String logName) async {
     print('Executing query for $logName with pattern: $likePattern');
     try {
@@ -232,7 +227,7 @@ class LocalStorageDao {
       WHERE f.forms_ref_key = '30bycxe4gv7fqnt6'
         AND f.form_json LIKE ?
       ORDER BY f.created_date_time DESC
-    ''', ['%$likePattern%', '%$likePattern%']);  // Added % around the pattern
+    ''', ['%$likePattern%', '%$likePattern%']);
 
       print('Found ${rows.length} latest entries for $logName tracking forms');
       if (rows.isNotEmpty) {
