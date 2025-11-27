@@ -117,7 +117,7 @@ class _SettingState extends State<Setting> {
                         dense: true,
                         value: 'en',
                         groupValue: selected,
-                        title: Text(l10n.english, style: const TextStyle(fontSize: 16)),
+                        title: Text('English', style: const TextStyle(fontSize: 16)),
                         onChanged: (val) => setStateDialog(() => selected = val!),
                         visualDensity: const VisualDensity(vertical: -4),
                       ),

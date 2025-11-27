@@ -195,8 +195,8 @@ class AddnewfamilymemberBloc
           }
         } catch (_) {}
 
-        // Derive approx age parts from DOB when missing so direct edit
-        // can prefill approximate age fields.
+        // Derive approx age parts so direct edit can prefill
+        // approximate age fields.
         DateTime? loadedDob = allData['dob'] != null
             ? DateTime.tryParse(allData['dob'])
             : null;
@@ -205,6 +205,7 @@ class AddnewfamilymemberBloc
         String? loadedUpdateMonth = allData['updateMonth']?.toString();
         String? loadedUpdateDay = allData['updateDay']?.toString();
 
+        // Case 1: only DOB is present (older records) -> compute approxAge + Y/M/D
         if (loadedDob != null &&
             (loadedApproxAge == null || loadedApproxAge.trim().isEmpty) &&
             (loadedUpdateYear == null || loadedUpdateYear.trim().isEmpty) &&
@@ -218,6 +219,25 @@ class AddnewfamilymemberBloc
           loadedUpdateYear = years.toString();
           loadedUpdateMonth = months.toString();
           loadedUpdateDay = days.toString();
+        }
+
+        // Case 2: approxAge string exists but split fields are missing ->
+        // derive updateYear/updateMonth/updateDay from approxAge.
+        if (loadedApproxAge != null && loadedApproxAge.trim().isNotEmpty &&
+            (loadedUpdateYear == null || loadedUpdateYear.trim().isEmpty) &&
+            (loadedUpdateMonth == null || loadedUpdateMonth.trim().isEmpty) &&
+            (loadedUpdateDay == null || loadedUpdateDay.trim().isEmpty)) {
+          final matches = RegExp(r'\d+').allMatches(loadedApproxAge).toList();
+          String _part(int index) =>
+              matches.length > index ? (matches[index].group(0) ?? '') : '';
+
+          final y = _part(0);
+          final m = _part(1);
+          final d = _part(2);
+
+          if (y.isNotEmpty) loadedUpdateYear = y;
+          if (m.isNotEmpty) loadedUpdateMonth = m;
+          if (d.isNotEmpty) loadedUpdateDay = d;
         }
 
         // Update the state with all the data
@@ -542,7 +562,9 @@ class AddnewfamilymemberBloc
         emit(
           state.copyWith(
             postApiStatus: PostApiStatus.error,
-            errorMessage: errors.join('\n'),
+            // Show only the first validation error message instead of
+            // grouping multiple messages together.
+            errorMessage: errors.first,
           ),
         );
         return;

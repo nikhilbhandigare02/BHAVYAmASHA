@@ -46,7 +46,6 @@ class HouseHoldAmenities extends StatelessWidget {
                           onChanged: (v) => bloc.add(KitchenChange(houseKitchen: v ?? '')),
                         ),
                         Divider(color: AppColors.divider, thickness: 0.8),
-                        // Type of fuel used for cooking (multi-select dropdown)
                         Builder(
                           builder: (context) {
                             const options = <String>[
@@ -92,60 +91,97 @@ class HouseHoldAmenities extends StatelessWidget {
 
                             Future<void> openFuelDialog() async {
                               final current = Set<String>.from(selected);
+
                               await showDialog<void>(
                                 context: context,
-                                  builder: (ctx) {
-                                    return AlertDialog(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(4), // 🔹 Border radius 4
-                                      ),
-                                      backgroundColor: Colors.white, // 🔹 Set background color to white
-                                      title: Text(l.cookingFuelTypeLabel),
-                                      content: SingleChildScrollView(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            for (final option in options)
-                                              StatefulBuilder(
-                                                builder: (ctx2, setStateDialog) {
-                                                  final isChecked = current.contains(option);
-                                                  return CheckboxListTile(
-                                                    dense: true,
-                                                    contentPadding: EdgeInsets.zero,
-                                                    title: Text(labelFor(option)),
-                                                    value: isChecked,
-                                                    onChanged: (checked) {
-                                                      setStateDialog(() {
-                                                        if (checked == true) {
-                                                          current.add(option);
-                                                        } else {
-                                                          current.remove(option);
-                                                        }
-                                                      });
-                                                    },
-                                                  );
-                                                },
-                                              ),
-                                          ],
+                                builder: (ctx) {
+                                  return AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    backgroundColor: Colors.white,
+
+                                    // ---------- TITLE WITH LINE ----------
+                                    title: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          l.cookingFuelTypeLabel,
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 13,
+                                          ),
                                         ),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.of(ctx).pop(),
-                                          child: Text(l.cancel ?? 'Cancel'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            final joined = current.join(', ');
-                                            bloc.add(CookingFuelTypeChange(cookingFuel: joined));
-                                            Navigator.of(ctx).pop();
-                                          },
-                                          child: Text(l.ok ?? 'OK'),
+                                        const SizedBox(height: 6),
+                                        Divider(
+                                          color: Colors.grey.shade400,
+                                          thickness: 0.8,
+                                          height: 0,
                                         ),
                                       ],
-                                    );
-                                  }
+                                    ),
+                                    // -------------------------------------
 
+                                    content: SingleChildScrollView(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          for (final option in options)
+                                            StatefulBuilder(
+                                              builder: (ctx2, setStateDialog) {
+                                                final isChecked = current.contains(option);
+
+                                                return Padding(
+                                                  padding: const EdgeInsets.only(left: 6.0),
+                                                  child: Transform.scale(
+                                                    scale: 1.0, // checkbox size
+                                                    child: CheckboxListTile(
+                                                      dense: true,
+                                                      visualDensity: const VisualDensity(
+                                                        vertical: -2,  // reduces height between items
+                                                      ),
+                                                      contentPadding: EdgeInsets.zero,
+                                                      title: Text(
+                                                        labelFor(option),
+                                                        style: const TextStyle(fontSize: 12.5), // option size
+                                                      ),
+                                                      value: isChecked,
+                                                      controlAffinity: ListTileControlAffinity.leading,
+                                                      onChanged: (checked) {
+                                                        setStateDialog(() {
+                                                          if (checked == true) {
+                                                            current.add(option);
+                                                          } else {
+                                                            current.remove(option);
+                                                          }
+                                                        });
+                                                      },
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(ctx).pop(),
+                                        child: Text(l.cancel ?? 'Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          final joined = current.join(', ');
+                                          bloc.add(CookingFuelTypeChange(cookingFuel: joined));
+                                          Navigator.of(ctx).pop();
+                                        },
+                                        child: Text(l.ok ?? 'OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                             }
 
@@ -153,12 +189,12 @@ class HouseHoldAmenities extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                                  padding: const EdgeInsets.only(top: 4.0),
                                   child: Text(
                                     l.cookingFuelTypeLabel,
                                     style:  TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ),
@@ -176,14 +212,17 @@ class HouseHoldAmenities extends StatelessWidget {
                                           child: Text(
                                             displayText,
                                             overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(fontSize: 12.5),
                                           ),
                                         ),
-                                        const Icon(Icons.arrow_drop_down),
+                                         Padding(
+                                           padding: const EdgeInsets.only(right: 4.0),
+                                           child: Icon(Icons.arrow_drop_down, color: Colors.blueGrey[400] ,),
+                                         ),
                                       ],
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
                                 Divider(color: AppColors.divider, thickness: 0.8),
                                 if (selected.contains('Other'))
                                   CustomTextField(

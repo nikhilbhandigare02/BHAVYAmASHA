@@ -269,50 +269,67 @@ class RegisterNewHouseholdBloc
               // --- INSERT SPOUSE BENEFICIARY IF MARRIED & SPOUSE NAME PRESENT ---
               if (hasSpouse && spouseKey != null) {
                 try {
+                  // Prefer the full spouse payload from SpousBloc (spousedetails)
+                  // when available (edit flow), otherwise fall back to sp_* keys
+                  // from headForm (new registration flow).
+                  Map<String, dynamic> spDetails = {};
+                  final spRaw = headForm['spousedetails'];
+                  if (spRaw is Map) {
+                    spDetails = Map<String, dynamic>.from(spRaw as Map);
+                  } else if (spRaw is String && spRaw.isNotEmpty) {
+                    try {
+                      spDetails = Map<String, dynamic>.from(jsonDecode(spRaw));
+                    } catch (_) {}
+                  }
+
                   final spouseInfo = <String, dynamic>{
-                  'relation': headForm['sp_relation'] ?? 'spouse',
-                  'memberName': headForm['sp_memberName'] ??
+                  'relation': spDetails['relation'] ?? headForm['sp_relation'] ?? 'spouse',
+                  'memberName': spDetails['memberName'] ?? headForm['sp_memberName'] ??
                       headForm['spouseName'],
-                  'ageAtMarriage': headForm['sp_ageAtMarriage'] ??
+                  'ageAtMarriage': spDetails['ageAtMarriage'] ?? headForm['sp_ageAtMarriage'] ??
                       headForm['ageAtMarriage'],
-                  'RichIDChanged': headForm['sp_RichIDChanged'],
-                  'spouseName': headForm['sp_spouseName'] ??
+                  'RichIDChanged': spDetails['RichIDChanged'] ?? headForm['sp_RichIDChanged'],
+                  'spouseName': spDetails['spouseName'] ?? headForm['sp_spouseName'] ??
                       headForm['headName'],
-                  'fatherName': headForm['sp_fat3 = {map entry} "useDob" -> "true"herName'],
-                  'useDob': headForm['sp_useDob'],
-                  'dob': headForm['sp_dob'],
-                  'edd': headForm['sp_edd'],
-                  'lmp': headForm['sp_lmp'],
-                  'approxAge': headForm['sp_approxAge'],
-                  'gender': headForm['sp_gender'] ??
+                  'fatherName': spDetails['fatherName'] ?? headForm['sp_fatherName'],
+                  'useDob': spDetails['useDob'] ?? headForm['sp_useDob'],
+                  'dob': spDetails['dob'] ?? headForm['sp_dob'],
+                  'edd': spDetails['edd'] ?? headForm['sp_edd'],
+                  'lmp': spDetails['lmp'] ?? headForm['sp_lmp'],
+                  'approxAge': spDetails['approxAge'] ?? headForm['sp_approxAge'],
+                  'gender': spDetails['gender'] ?? headForm['sp_gender'] ??
                       ((headForm['gender'] == 'Male')
                           ? 'Female'
                           : (headForm['gender'] == 'Female')
                           ? 'Male'
                           : null),
-                  'occupation': headForm['sp_occupation'],
-                  'education': headForm['sp_education'],
-                  'religion': headForm['sp_religion'],
-                  'category': headForm['sp_category'],
-                  'abhaAddress': headForm['sp_abhaAddress'],
-                  'mobileOwner': headForm['sp_mobileOwner'],
-                  'mobileNo': headForm['sp_mobileNo'],
-                  'bankAcc': headForm['sp_bankAcc'],
-                  'ifsc': headForm['sp_ifsc'],
-                  'voterId': headForm['sp_voterId'],
-                  'rationId': headForm['sp_rationId'],
-                  'phId': headForm['sp_phId'],
-                  'beneficiaryType': headForm['sp_beneficiaryType'],
-                  'isPregnant': headForm['sp_isPregnant'],
-                  'familyPlanningCounseling': headForm['sp_familyPlanningCounseling'],
-                  'is_family_planning': (headForm['sp_familyPlanningCounseling']?.toString().toLowerCase() == 'yes') ? 1 : 0,
-                  'fpMethod': headForm['sp_fpMethod'],
-                  'removalDate': headForm['sp_removalDate'],
-                  'removalReason': headForm['sp_removalReason'],
-                  'condomQuantity': headForm['sp_condomQuantity'],
-                  'malaQuantity': headForm['sp_malaQuantity'],
-                  'chhayaQuantity': headForm['sp_chhayaQuantity'],
-                  'ecpQuantity': headForm['sp_ecpQuantity'],
+                  'occupation': spDetails['occupation'] ?? headForm['sp_occupation'],
+                  'education': spDetails['education'] ?? headForm['sp_education'],
+                  'religion': spDetails['religion'] ?? headForm['sp_religion'],
+                  'category': spDetails['category'] ?? headForm['sp_category'],
+                  'abhaAddress': spDetails['abhaAddress'] ?? headForm['sp_abhaAddress'],
+                  'mobileOwner': spDetails['mobileOwner'] ?? headForm['sp_mobileOwner'],
+                  'mobileNo': spDetails['mobileNo'] ?? headForm['sp_mobileNo'],
+                  'bankAcc': spDetails['bankAcc'] ?? headForm['sp_bankAcc'],
+                  'ifsc': spDetails['ifsc'] ?? headForm['sp_ifsc'],
+                  'voterId': spDetails['voterId'] ?? headForm['sp_voterId'],
+                  'rationId': spDetails['rationId'] ?? headForm['sp_rationId'],
+                  'phId': spDetails['phId'] ?? headForm['sp_phId'],
+                  'beneficiaryType': spDetails['beneficiaryType'] ?? headForm['sp_beneficiaryType'],
+                  'isPregnant': spDetails['isPregnant'] ?? headForm['sp_isPregnant'],
+                  'familyPlanningCounseling': spDetails['familyPlanningCounseling'] ?? headForm['sp_familyPlanningCounseling'],
+                  'is_family_planning': ((spDetails['familyPlanningCounseling'] ?? headForm['sp_familyPlanningCounseling'])
+                          ?.toString()
+                          .toLowerCase() == 'yes')
+                      ? 1
+                      : 0,
+                  'fpMethod': spDetails['fpMethod'] ?? headForm['sp_fpMethod'],
+                  'removalDate': spDetails['removalDate'] ?? headForm['sp_removalDate'],
+                  'removalReason': spDetails['removalReason'] ?? headForm['sp_removalReason'],
+                  'condomQuantity': spDetails['condomQuantity'] ?? headForm['sp_condomQuantity'],
+                  'malaQuantity': spDetails['malaQuantity'] ?? headForm['sp_malaQuantity'],
+                  'chhayaQuantity': spDetails['chhayaQuantity'] ?? headForm['sp_chhayaQuantity'],
+                  'ecpQuantity': spDetails['ecpQuantity'] ?? headForm['sp_ecpQuantity'],
                   'maritalStatus': 'Married',
                   'relation_to_head': 'spouse',
                   // Children summary mirrored for spouse as in AddFamilyHeadBloc
@@ -460,7 +477,8 @@ class RegisterNewHouseholdBloc
                   ..['children'] = headForm['children'];
 
                 final updatedHead = Map<String, dynamic>.from(existingHead);
-                updatedHead['beneficiary_info'] = headInfo;
+                // Store beneficiary_info consistently as JSON string, same as insert path
+                updatedHead['beneficiary_info'] = jsonEncode(headInfo);
                 updatedHead['geo_location'] =
                     existingHead['geo_location'] ?? geoLocationJson;
 
@@ -482,49 +500,61 @@ class RegisterNewHouseholdBloc
                       ? Map<String, dynamic>.from(jsonDecode(spInfoRaw))
                       : <String, dynamic>{};
 
+                  // Prefer updated details from SpousBloc (spousedetails) when
+                  // available in headForm, otherwise fall back to sp_* keys.
+                  Map<String, dynamic> spDetails = {};
+                  final spRaw = headForm['spousedetails'];
+                  if (spRaw is Map) {
+                    spDetails = Map<String, dynamic>.from(spRaw as Map);
+                  } else if (spRaw is String && spRaw.isNotEmpty) {
+                    try {
+                      spDetails = Map<String, dynamic>.from(jsonDecode(spRaw));
+                    } catch (_) {}
+                  }
+
                   spInfo
-                    ..['relation'] = headForm['sp_relation'] ?? 'spouse'
-                    ..['memberName'] = headForm['sp_memberName'] ??
+                    ..['relation'] = spDetails['relation'] ?? headForm['sp_relation'] ?? 'spouse'
+                    ..['memberName'] = spDetails['memberName'] ?? headForm['sp_memberName'] ??
                         headForm['spouseName']
-                    ..['ageAtMarriage'] = headForm['sp_ageAtMarriage'] ??
+                    ..['ageAtMarriage'] = spDetails['ageAtMarriage'] ?? headForm['sp_ageAtMarriage'] ??
                         headForm['ageAtMarriage']
-                    ..['RichIDChanged'] = headForm['sp_RichIDChanged']
-                    ..['spouseName'] = headForm['sp_spouseName'] ??
+                    ..['RichIDChanged'] = spDetails['RichIDChanged'] ?? headForm['sp_RichIDChanged']
+                    ..['spouseName'] = spDetails['spouseName'] ?? headForm['sp_spouseName'] ??
                         headForm['headName']
-                    ..['fatherName'] = headForm['sp_fatherName']
-                    ..['useDob'] = headForm['sp_useDob']
-                    ..['dob'] = headForm['sp_dob']
-                    ..['edd'] = headForm['sp_edd']
-                    ..['lmp'] = headForm['sp_lmp']
-                    ..['approxAge'] = headForm['sp_approxAge']
-                    ..['gender'] = headForm['sp_gender'] ??
+                    ..['fatherName'] = spDetails['fatherName'] ?? headForm['sp_fatherName']
+                    ..['useDob'] = spDetails['useDob'] ?? headForm['sp_useDob']
+                    ..['dob'] = spDetails['dob'] ?? headForm['sp_dob']
+                    ..['edd'] = spDetails['edd'] ?? headForm['sp_edd']
+                    ..['lmp'] = spDetails['lmp'] ?? headForm['sp_lmp']
+                    ..['approxAge'] = spDetails['approxAge'] ?? headForm['sp_approxAge']
+                    ..['gender'] = spDetails['gender'] ?? headForm['sp_gender'] ??
                         ((headForm['gender'] == 'Male')
                             ? 'Female'
                             : (headForm['gender'] == 'Female')
                             ? 'Male'
                             : null)
-                    ..['occupation'] = headForm['sp_occupation']
-                    ..['education'] = headForm['sp_education']
-                    ..['religion'] = headForm['sp_religion']
-                    ..['category'] = headForm['sp_category']
-                    ..['abhaAddress'] = headForm['sp_abhaAddress']
-                    ..['mobileOwner'] = headForm['sp_mobileOwner']
-                    ..['mobileNo'] = headForm['sp_mobileNo']
-                    ..['bankAcc'] = headForm['sp_bankAcc']
-                    ..['ifsc'] = headForm['sp_ifsc']
-                    ..['voterId'] = headForm['sp_voterId']
-                    ..['rationId'] = headForm['sp_rationId']
-                    ..['phId'] = headForm['sp_phId']
-                    ..['beneficiaryType'] = headForm['sp_beneficiaryType']
-                    ..['isPregnant'] = headForm['sp_isPregnant']
-                    ..['familyPlanningCounseling'] = headForm['sp_familyPlanningCounseling']
-                    ..['fpMethod'] = headForm['sp_fpMethod']
-                    ..['removalDate'] = headForm['sp_removalDate']
-                    ..['removalReason'] = headForm['sp_removalReason']
-                    ..['condomQuantity'] = headForm['sp_condomQuantity']
-                    ..['malaQuantity'] = headForm['sp_malaQuantity']
-                    ..['chhayaQuantity'] = headForm['sp_chhayaQuantity']
-                    ..['ecpQuantity'] = headForm['sp_ecpQuantity']
+                    ..['occupation'] = spDetails['occupation'] ?? headForm['sp_occupation']
+                    ..['education'] = spDetails['education'] ?? headForm['sp_education']
+                    ..['religion'] = spDetails['religion'] ?? headForm['sp_religion']
+                    ..['category'] = spDetails['category'] ?? headForm['sp_category']
+                    ..['abhaAddress'] = spDetails['abhaAddress'] ?? headForm['sp_abhaAddress']
+                    ..['mobileOwner'] = spDetails['mobileOwner'] ?? headForm['sp_mobileOwner']
+                    ..['mobileNo'] = spDetails['mobileNo'] ?? headForm['sp_mobileNo']
+                    ..['bankAcc'] = spDetails['bankAcc'] ?? headForm['sp_bankAcc']
+                    ..['ifsc'] = spDetails['ifsc'] ?? headForm['sp_ifsc']
+                    ..['voterId'] = spDetails['voterId'] ?? headForm['sp_voterId']
+                    ..['rationId'] = spDetails['rationId'] ?? headForm['sp_rationId']
+                    ..['phId'] = spDetails['phId'] ?? headForm['sp_phId']
+                    ..['beneficiaryType'] = spDetails['beneficiaryType'] ?? headForm['sp_beneficiaryType']
+                    ..['isPregnant'] = spDetails['isPregnant'] ?? headForm['sp_isPregnant']
+                    ..['familyPlanningCounseling'] = spDetails['familyPlanningCounseling'] ?? headForm['sp_familyPlanningCounseling']
+                    ..['fpMethod'] = spDetails['fpMethod'] ?? headForm['sp_fpMethod']
+                    ..['removalDate'] = spDetails['removalDate'] ?? headForm['sp_removalDate']
+                    ..['removalReason'] = spDetails['removalReason'] ?? headForm['sp_removalReason']
+                    ..['condomQuantity'] = spDetails['condomQuantity'] ?? headForm['sp_condomQuantity']
+                    ..['malaQuantity'] = spDetails['malaQuantity'] ?? headForm['sp_malaQuantity']
+                    ..['chhayaQuantity'] = spDetails['chhayaQuantity'] ?? headForm['sp_chhayaQuantity']
+                    ..['ecpQuantity'] = spDetails['ecpQuantity'] ?? headForm['sp_ecpQuantity']
                     ..['maritalStatus'] = 'Married'
                     ..['relation_to_head'] = 'spouse'
                     ..['totalBorn'] = headForm['totalBorn']
@@ -536,9 +566,9 @@ class RegisterNewHouseholdBloc
                     ..['youngestGender'] = headForm['youngestGender']
                     ..['children'] = headForm['children'];
 
-                  final updatedSpouse = Map<String, dynamic>.from(
-                      existingSpouse);
-                  updatedSpouse['beneficiary_info'] = spInfo;
+                  final updatedSpouse = Map<String, dynamic>.from(existingSpouse);
+                  // Store spouse beneficiary_info as JSON string for consistency
+                  updatedSpouse['beneficiary_info'] = jsonEncode(spInfo);
                   updatedSpouse['geo_location'] =
                       existingSpouse['geo_location'] ?? geoLocationJson;
 
