@@ -75,8 +75,7 @@ class _HouseHold_BeneficiaryScreenState
         where: widget.hhId != null ? 'household_ref_key = ? AND is_migrated = 0' : 'is_migrated = 0',
         whereArgs: widget.hhId != null ? [widget.hhId] : null,
       );
-      
-      // Log all records with the same household_ref_key
+
       if (widget.hhId != null) {
         print('=== ALL RECORDS FOR HOUSEHOLD ${widget.hhId} ===');
         for (var row in rows) {
@@ -106,7 +105,6 @@ class _HouseHold_BeneficiaryScreenState
         print('=== TOTAL RECORDS: ${rows.length} ===');
       }
 
-      // Log all records for this household
       if (widget.hhId != null) {
         print('=== HOUSEHOLD RECORDS FOR HH_ID: ${widget.hhId} ===');
         for (var row in rows) {
@@ -472,6 +470,46 @@ class _HouseHold_BeneficiaryScreenState
     );
   }
 
+  String _formatDate(String dateString) {
+    if (dateString.isEmpty) return '';
+    
+    try {
+      // First try parsing ISO format (yyyy-mm-dd)
+      DateTime? date = DateTime.tryParse(dateString);
+      
+      // If that fails, try parsing other common formats
+      if (date == null && dateString.contains('-')) {
+        final parts = dateString.split(' ');
+        final datePart = parts[0]; // Get just the date part
+        final dateSegments = datePart.split('-');
+        
+        if (dateSegments.length == 3) {
+          // If it's already in dd-mm-yyyy format, just return it as is
+          if (dateSegments[0].length == 2 && dateSegments[2].length == 4) {
+            return datePart;
+          }
+          // If it's in yyyy-mm-dd format, reformat it
+          else if (dateSegments[0].length == 4 && dateSegments[2].length == 2) {
+            return '${dateSegments[2]}-${dateSegments[1]}-${dateSegments[0]}';
+          }
+        }
+      }
+      
+      // If we have a valid date, format it
+      if (date != null) {
+        final day = date.day.toString().padLeft(2, '0');
+        final month = date.month.toString().padLeft(2, '0');
+        final year = date.year.toString();
+        return '$day-$month-$year';
+      }
+      
+      // If all else fails, return the original string
+      return dateString;
+    } catch (e) {
+      return dateString; // Return original if parsing/formatting fails
+    }
+  }
+
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
@@ -608,7 +646,7 @@ class _HouseHold_BeneficiaryScreenState
                 children: [
                   Row(
                     children: [Expanded(
-                        child: _rowText('Registration Date', (data['RegitrationDate']?.toString() ?? '').split(' ')[0]),
+                        child: _rowText('Registration Date', _formatDate(data['RegitrationDate']?.toString() ?? '')),
                       ),                      const SizedBox(width: 12),
                       Expanded(child: _rowText('Registration Type', 
                         (data['_memberData']?['memberType']?.toString().toLowerCase() == 'child')

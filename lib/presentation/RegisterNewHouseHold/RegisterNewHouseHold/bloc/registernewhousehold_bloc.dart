@@ -632,9 +632,7 @@ class RegisterNewHouseholdBloc
             ? existingHeadKey
             : (latestBeneficiary['unique_key'] ?? '').toString();
 
-        // ============================================
-        // INSERT ADDITIONAL MEMBERS FROM memberForms
-        // ============================================
+
         if (event.memberForms.isNotEmpty) {
           try {
             final currentUser = await UserInfo.getCurrentUser();
@@ -668,9 +666,6 @@ class RegisterNewHouseholdBloc
                 final String memberId =
                     await IdGenerator.generateUniqueId(deviceInfo);
 
-                // Decide if this member has an inline spouse captured from
-                // AddNewFamilyMember's spouse tab. When present, we will
-                // also create a separate spouse beneficiary row.
                 final String maritalStatus =
                     (member['maritalStatus'] ?? '').toString();
                 final dynamic spRaw = member['spousedetails'];
@@ -682,7 +677,6 @@ class RegisterNewHouseholdBloc
                   memberSpouseKey = await IdGenerator.generateUniqueId(deviceInfo);
                 }
 
-                // Very small helper logic for state/adult flags
                 final String beneficiaryState =
                     memberType.toLowerCase() == 'child'
                         ? 'registration_due'
