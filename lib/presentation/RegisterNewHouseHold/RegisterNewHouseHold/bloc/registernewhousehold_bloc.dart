@@ -668,6 +668,20 @@ class RegisterNewHouseholdBloc
                 final String memberId =
                     await IdGenerator.generateUniqueId(deviceInfo);
 
+                // Decide if this member has an inline spouse captured from
+                // AddNewFamilyMember's spouse tab. When present, we will
+                // also create a separate spouse beneficiary row.
+                final String maritalStatus =
+                    (member['maritalStatus'] ?? '').toString();
+                final dynamic spRaw = member['spousedetails'];
+                final bool hasInlineSpouse =
+                    maritalStatus == 'Married' && spRaw != null;
+
+                String? memberSpouseKey;
+                if (hasInlineSpouse) {
+                  memberSpouseKey = await IdGenerator.generateUniqueId(deviceInfo);
+                }
+
                 // Very small helper logic for state/adult flags
                 final String beneficiaryState =
                     memberType.toLowerCase() == 'child'
@@ -730,6 +744,14 @@ class RegisterNewHouseholdBloc
                   'spouseName': member['spouseName'],
                   'hasChildren': member['hasChildren'],
                   'isPregnant': member['isPregnant'],
+
+                  // Inline member spouse details captured in AddNewFamilyMember
+                  // so they are not lost when saving the household.
+                  'spousedetails': member['spousedetails'],
+                  'spouseUseDob': member['spouseUseDob'],
+                  'spouseDob': member['spouseDob'],
+                  'spouseApproxAge': member['spouseApproxAge'],
+
                   'memberStatus': memberStatus,
                   'relation_to_head': relation,
                   'isFamilyhead': false,
@@ -746,8 +768,8 @@ class RegisterNewHouseholdBloc
                   'pregnancy_count': 0,
                   'beneficiary_info': jsonEncode(memberInfo),
                   'geo_location': geoLocationJson,
-                  // For now, do not auto-create spouse rows for members here.
-                  'spouse_key': null,
+                  // Link to inline spouse row when available.
+                  'spouse_key': memberSpouseKey,
                   'mother_key': null,
                   'father_key': null,
                   'is_family_planning': 0,
@@ -781,6 +803,136 @@ class RegisterNewHouseholdBloc
                     '${jsonEncode(memberPayload)}');
                 await LocalStorageDao.instance
                     .insertBeneficiary(memberPayload);
+
+                // ----------------------------------------
+                // INSERT INLINE SPOUSE FOR THIS MEMBER
+                // ----------------------------------------
+                if (hasInlineSpouse && memberSpouseKey != null) {
+                  try {
+                    Map<String, dynamic>? spMap;
+                    if (spRaw is Map) {
+                      spMap = Map<String, dynamic>.from(spRaw as Map);
+                    } else if (spRaw is String && spRaw.isNotEmpty) {
+                      spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
+                    }
+
+                    if (spMap != null) {
+                      final String spouseName =
+                          (spMap['memberName'] ?? spMap['spouseName'] ?? '')
+                              .toString();
+                      if (spouseName.isNotEmpty) {
+                        final String spouseGender =
+                            (spMap['gender'] ?? '').toString().isNotEmpty
+                                ? spMap['gender'].toString()
+                                : ((member['gender'] == 'Male')
+                                    ? 'Female'
+                                    : (member['gender'] == 'Female')
+                                        ? 'Male'
+                                        : '');
+
+                        final spouseInfo = <String, dynamic>{
+                          'relation': spMap['relation'] ?? 'spouse',
+                          'memberName': spouseName,
+                          'ageAtMarriage': spMap['ageAtMarriage'] ??
+                              member['ageAtMarriage'],
+                          'RichIDChanged': spMap['RichIDChanged'],
+                          'spouseName': spMap['spouseName'] ?? name,
+                          'fatherName': spMap['fatherName'],
+                          'useDob': spMap['useDob'],
+                          'dob': spMap['dob'],
+                          'edd': spMap['edd'],
+                          'lmp': spMap['lmp'],
+                          'approxAge': spMap['approxAge'],
+                          'gender': spouseGender,
+                          'occupation': spMap['occupation'],
+                          'education': spMap['education'],
+                          'religion': spMap['religion'],
+                          'category': spMap['category'],
+                          'abhaAddress': spMap['abhaAddress'],
+                          'mobileOwner': spMap['mobileOwner'],
+                          'mobileNo': spMap['mobileNo'],
+                          'bankAcc': spMap['bankAcc'],
+                          'ifsc': spMap['ifsc'],
+                          'voterId': spMap['voterId'],
+                          'rationId': spMap['rationId'],
+                          'phId': spMap['phId'],
+                          'beneficiaryType': spMap['beneficiaryType'],
+                          'isPregnant': spMap['isPregnant'],
+                          'familyPlanningCounseling':
+                              spMap['familyPlanningCounseling'],
+                          'is_family_planning':
+                              (spMap['familyPlanningCounseling']
+                                              ?.toString()
+                                              .toLowerCase() ==
+                                          'yes')
+                                  ? 1
+                                  : 0,
+                          'fpMethod': spMap['fpMethod'],
+                          'removalDate': spMap['removalDate'],
+                          'removalReason': spMap['removalReason'],
+                          'condomQuantity': spMap['condomQuantity'],
+                          'malaQuantity': spMap['malaQuantity'],
+                          'chhayaQuantity': spMap['chhayaQuantity'],
+                          'ecpQuantity': spMap['ecpQuantity'],
+                          'maritalStatus': 'Married',
+                          'relation_to_head': 'spouse',
+                          'isFamilyhead': false,
+                          'isFamilyheadWife': false,
+                        }
+                          ..removeWhere((k, v) =>
+                              v == null || (v is String && v.trim().isEmpty));
+
+                        final spousePayload = {
+                          'server_id': null,
+                          'household_ref_key': uniqueKey,
+                          'unique_key': memberSpouseKey,
+                          'beneficiary_state': 'active',
+                          'pregnancy_count': 0,
+                          'beneficiary_info': jsonEncode(spouseInfo),
+                          'geo_location': geoLocationJson,
+                          'spouse_key': memberId,
+                          'mother_key': null,
+                          'father_key': null,
+                          'is_family_planning':
+                              spouseInfo['is_family_planning'] ?? 0,
+                          'is_adult': 1,
+                          'is_guest': 0,
+                          'is_death': 0,
+                          'death_details': jsonEncode({}),
+                          'is_migrated': 0,
+                          'is_separated': 0,
+                          'device_details': jsonEncode({
+                            'id': deviceInfo.deviceId,
+                            'platform': deviceInfo.platform,
+                            'version': deviceInfo.osVersion,
+                          }),
+                          'app_details': jsonEncode({
+                            'app_version':
+                                deviceInfo.appVersion.split('+').first,
+                            'app_name': deviceInfo.appName,
+                            'build_number': deviceInfo.buildNumber,
+                            'package_name': deviceInfo.packageName,
+                          }),
+                          'parent_user': jsonEncode({}),
+                          'current_user_key': ashaUniqueKey,
+                          'facility_id': facilityId,
+                          'created_date_time': ts,
+                          'modified_date_time': ts,
+                          'is_synced': 0,
+                          'is_deleted': 0,
+                        };
+
+                        print(
+                            '🧑‍🤝‍🧑 Inserting inline spouse beneficiary for member: '
+                            '${jsonEncode(spousePayload)}');
+                        await LocalStorageDao.instance
+                            .insertBeneficiary(spousePayload);
+                      }
+                    }
+                  } catch (e) {
+                    print('Error inserting inline member spouse: $e');
+                  }
+                }
 
               } catch (e) {
                 print('Error inserting additional member: $e');
