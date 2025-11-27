@@ -57,6 +57,14 @@ class AddnewfamilymemberState extends Equatable {
   final String? isPregnant;  // 'Yes' | 'No'
   final String? isFamilyPlanning; // 'Yes' | 'No' | 'Select'
   final String? familyPlanningMethod;
+  final String? fpMethod;
+  final DateTime? antraDate;
+  final DateTime? removalDate;
+  final String? removalReason;
+  final String? condomQuantity;
+  final String? malaQuantity;
+  final String? chhayaQuantity;
+  final String? ecpQuantity;
   final DateTime? lmp;       // Last Menstrual Period date
   final DateTime? edd;       // Expected Delivery Date
   final String? errorMessage;
@@ -108,6 +116,14 @@ class AddnewfamilymemberState extends Equatable {
     this.isPregnant,
     this.isFamilyPlanning,
     this.familyPlanningMethod,
+    this.fpMethod,
+    this.antraDate,
+    this.removalDate,
+    this.removalReason,
+    this.condomQuantity,
+    this.malaQuantity,
+    this.chhayaQuantity,
+    this.ecpQuantity,
     this.lmp,
     this.edd,
     this.dateOfDeath,
@@ -166,6 +182,14 @@ class AddnewfamilymemberState extends Equatable {
     String? isPregnant,
     String? isFamilyPlanning,
     String? familyPlanningMethod,
+    String? fpMethod,
+    DateTime? antraDate,
+    DateTime? removalDate,
+    String? removalReason,
+    String? condomQuantity,
+    String? malaQuantity,
+    String? chhayaQuantity,
+    String? ecpQuantity,
     DateTime? lmp,
     DateTime? edd,
     bool clearDob = false,
@@ -225,6 +249,14 @@ class AddnewfamilymemberState extends Equatable {
       isPregnant: isPregnant ?? this.isPregnant,
       isFamilyPlanning: isFamilyPlanning ?? this.isFamilyPlanning,
       familyPlanningMethod: familyPlanningMethod ?? this.familyPlanningMethod,
+      fpMethod: fpMethod ?? this.fpMethod,
+      antraDate: antraDate ?? this.antraDate,
+      removalDate: removalDate ?? this.removalDate,
+      removalReason: removalReason ?? this.removalReason,
+      condomQuantity: condomQuantity ?? this.condomQuantity,
+      malaQuantity: malaQuantity ?? this.malaQuantity,
+      chhayaQuantity: chhayaQuantity ?? this.chhayaQuantity,
+      ecpQuantity: ecpQuantity ?? this.ecpQuantity,
       lmp: lmp ?? this.lmp,
       edd: edd ?? this.edd,
       deathReason: deathReason ?? this.deathReason,
@@ -285,12 +317,20 @@ class AddnewfamilymemberState extends Equatable {
     spouseName,
     hasChildren,
     isFamilyPlanning,
+    fpMethod,
     deathPlace,
     dateOfDeath,
     deathReason,
     memberStatus,
     isPregnant,
     familyPlanningMethod,
+    antraDate,
+    removalDate,
+    removalReason,
+    condomQuantity,
+    malaQuantity,
+    chhayaQuantity,
+    ecpQuantity,
     lmp,
     edd,
   ];
@@ -334,6 +374,14 @@ class AddnewfamilymemberState extends Equatable {
       'isPregnant': isPregnant,
       'isFamilyPlanning': isFamilyPlanning,
       'familyPlanningMethod': familyPlanningMethod,
+      'fpMethod': fpMethod,
+      'antraDate': antraDate?.toIso8601String(),
+      'removalDate': removalDate?.toIso8601String(),
+      'removalReason': removalReason,
+      'condomQuantity': condomQuantity,
+      'malaQuantity': malaQuantity,
+      'chhayaQuantity': chhayaQuantity,
+      'ecpQuantity': ecpQuantity,
       'memberStatus': memberStatus,
       'dateOfDeath': dateOfDeath,
       'deathReason': deathReason,
