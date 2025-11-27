@@ -122,6 +122,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   final TextEditingController _beneficiaryTypeController = TextEditingController();
   final TextEditingController _relationController = TextEditingController();
   final TextEditingController _memberStatusController = TextEditingController();
+  final TextEditingController _familyPlanningMethodController = TextEditingController();
 
   String _formatGender(String? gender) {
     if (gender == null) return 'Other';
@@ -312,7 +313,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     _beneficiaryTypeController.dispose();
     _relationController.dispose();
     _memberStatusController.dispose();
-
+    _familyPlanningMethodController.dispose();
     super.dispose();
   }
 
@@ -327,9 +328,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
         final dynamic flagC = args['edit'];
         _isEdit = (flagA == true) || (flagB == true) || (flagC == true);
 
-        // Standalone member details flow (from AllBeneficiary or
-        // HouseHold_Beneficiery) sets this flag so we save immediately
-        // on Add button.
+
         final dynamic memberFlag = args['isMemberDetails'];
         _isMemberDetails = memberFlag == true;
 
@@ -557,6 +556,24 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       // Birth order
       final birthOrder = (data['birthOrder'] ?? '') as String;
       if (birthOrder.isNotEmpty) b.add(AnmUpdateBirthOrder(birthOrder));
+
+      final fpFlagRaw = data['isFamilyPlanning'] ?? data['is_family_planning'];
+      if (fpFlagRaw != null) {
+        String fpVal;
+        if (fpFlagRaw is String) {
+          fpVal = fpFlagRaw;
+        } else if (fpFlagRaw is num) {
+          fpVal = (fpFlagRaw == 1) ? 'Yes' : 'No';
+        } else if (fpFlagRaw is bool) {
+          fpVal = fpFlagRaw ? 'Yes' : 'No';
+        } else {
+          fpVal = fpFlagRaw.toString();
+        }
+        if (fpVal.isNotEmpty) b.add(AnmUpdateFamilyPlanning(fpVal));
+      }
+
+      final fpMethod = (data['familyPlanningMethod'] ?? '') as String;
+      if (fpMethod.isNotEmpty) b.add(AnmUpdateFamilyPlanningMethod(fpMethod));
 
       // Type of beneficiary
       final benType = (data['beneficiaryType'] ?? '') as String;
@@ -1227,9 +1244,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               if (state.relation == 'Other')
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-
-
-                              // Name
                               _section(
                                 CustomTextField(
                                   labelText: '${l.nameOfMemberLabel} *',
@@ -2377,6 +2391,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
+
                               ]
                               else if (!_isEdit && state.maritalStatus != null &&
                                   ['Widowed', 'Separated', 'Divorced']
@@ -2392,9 +2407,127 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       }
                                     },
 
+
+
+
                                   ),
                                 ),
-                              ],]
+
+
+                              ],
+
+// Replace the existing code with this:
+                              if (state.memberType == 'Adult' &&
+                                  state.maritalStatus == 'Married' &&
+                                  state.gender == 'Female') ...[
+                                // Is Woman Pregnant?
+                                _section(
+                                  ApiDropdown<String>(
+                                    key: ValueKey('is_pregnant_${state.gender}_${state.isPregnant ?? ''}'),
+                                    labelText: '${l.isWomanPregnantQuestion} *',
+                                    items: const ['Yes', 'No'],
+                                    getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                                    value: state.isPregnant,
+                                    onChanged: (v) {
+                                      final bloc = context.read<AddnewfamilymemberBloc>();
+                                      bloc.add(AnmUpdateIsPregnant(v!));
+                                      if (v == 'No') {
+                                        bloc.add(const AnmLMPChange(null));
+                                        bloc.add(const AnmEDDChange(null));
+                                      }
+                                    },
+                                    validator: (value) {
+                                      if (state.gender == 'Female') {
+                                        return Validations.validateIsPregnant(l, value);
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                if (state.isPregnant == 'Yes') ...[
+                                  _section(
+                                    CustomDatePicker(
+                                      key: const ValueKey('lmp_date_picker'),
+                                      labelText: '${l.lmpDateLabel} *',
+                                      hintText: l.dateHint,
+                                      initialDate: state.lmp,
+                                      onDateChanged: (d) {
+                                        final bloc = context.read<AddnewfamilymemberBloc>();
+                                        bloc.add(AnmLMPChange(d));
+                                        if (d != null) {
+                                          // Calculate EDD: LMP + 9 months + 5 days (Naegele's rule)
+                                          final edd = DateTime(d.year, d.month + 9, d.day + 5);
+                                          bloc.add(AnmEDDChange(edd));
+                                        } else {
+                                          bloc.add(const AnmEDDChange(null));
+                                        }
+                                      },
+                                      validator: (date) => Validations.validateLMP(l, date),
+                                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                                      lastDate: DateTime.now(),
+                                    ),
+                                  ),
+                                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  _section(
+                                    CustomDatePicker(
+                                      key: const ValueKey('edd_date_picker'),
+                                      labelText: '${l.eddDateLabel} *',
+                                      hintText: l.dateHint,
+                                      initialDate: state.edd,
+                                      onDateChanged: (d) => 
+                                          context.read<AddnewfamilymemberBloc>().add(AnmEDDChange(d)),
+                                      validator: (date) => Validations.validateEDD(l, date),
+                                      readOnly: true,
+                                    ),
+                                  ),
+                                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                ],
+                                
+                                if (state.isPregnant == 'No') ...[
+                                  _section(
+                                    ApiDropdown<String>(
+                                      key: const ValueKey('family_planning'),
+                                      labelText: 'Are you/your partner adopting family planning? *',
+                                      items: const ['Select', 'Yes', 'No'],
+                                      getLabel: (item) => item,
+                                      value: state.isFamilyPlanning,
+                                      onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(
+                                          AnmUpdateFamilyPlanning(v ?? '')),
+                                      validator: (value) {
+                                        if (value == null || value == 'Select') {
+                                          return 'Please select family planning status';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  
+                                  if (state.isFamilyPlanning == 'Yes')
+                                    _section(
+                                      CustomTextField(
+                                        key: const ValueKey('family_planning_method'),
+                                        labelText: 'Which family planning method? *',
+                                        hintText: 'Enter family planning method',
+                                        controller: _familyPlanningMethodController,
+                                        onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(
+                                            AnmUpdateFamilyPlanningMethod(v)),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Please enter family planning method';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                ],
+                              ],
+
+
+                            ]
 
                           );
                         },

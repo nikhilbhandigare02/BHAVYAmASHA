@@ -506,6 +506,12 @@ class AddnewfamilymemberBloc
     on<AnmUpdateIsPregnant>(
           (e, emit) => emit(state.copyWith(isPregnant: e.value)),
     );
+    on<AnmUpdateFamilyPlanning>(
+          (e, emit) => emit(state.copyWith(isFamilyPlanning: e.value)),
+    );
+    on<AnmUpdateFamilyPlanningMethod>(
+          (e, emit) => emit(state.copyWith(familyPlanningMethod: e.value)),
+    );
     on<UpdateIsMemberStatus>(
           (e, emit) => emit(state.copyWith(memberStatus: e.value)),
     );
@@ -790,6 +796,8 @@ class AddnewfamilymemberBloc
             'spouseName': state.spouseName,
             'hasChildren': state.hasChildren,
             'isPregnant': state.isPregnant,
+            'isFamilyPlanning': state.isFamilyPlanning,
+            'familyPlanningMethod': state.familyPlanningMethod,
             'memberStatus': state.memberStatus,
             'relation_to_head': state.relation,
             'isFamilyhead': false,
@@ -800,7 +808,7 @@ class AddnewfamilymemberBloc
           'spouse_key': state.maritalStatus == 'Married' ? spousKey : null,
           'mother_key': resolvedMotherKey,
           'father_key': resolvedFatherKey,
-          'is_family_planning': 0,
+          'is_family_planning': (state.isFamilyPlanning?.toLowerCase() == 'yes') ? 1 : 0,
           'is_adult': isAdult,
           'is_guest': 0,
           'is_death': isDeath,

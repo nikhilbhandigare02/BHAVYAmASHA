@@ -285,6 +285,20 @@ final class AnmUpdateIsPregnant extends AddnewfamilymemberEvent {
   @override
   List<Object> get props => [value];
 }
+
+final class AnmLMPChange extends AddnewfamilymemberEvent {
+  final DateTime? date;
+  const AnmLMPChange(this.date);
+  @override
+  List<Object> get props => [date ?? DateTime(0)];
+}
+
+final class AnmEDDChange extends AddnewfamilymemberEvent {
+  final DateTime? date;
+  const AnmEDDChange(this.date);
+  @override
+  List<Object> get props => [date ?? DateTime(0)];
+}
 final class UpdateYearChanged extends AddnewfamilymemberEvent {
   final String value; // 'Yes' | 'No'
   const UpdateYearChanged(this.value);
@@ -300,6 +314,20 @@ final class UpdateMonthChanged extends AddnewfamilymemberEvent {
 final class UpdateDayChanged extends AddnewfamilymemberEvent {
   final String value; // 'Yes' | 'No'
   const UpdateDayChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmUpdateFamilyPlanning extends AddnewfamilymemberEvent {
+  final String value; // 'Yes' | 'No' | 'Select'
+  const AnmUpdateFamilyPlanning(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmUpdateFamilyPlanningMethod extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmUpdateFamilyPlanningMethod(this.value);
   @override
   List<Object> get props => [value];
 }

@@ -55,6 +55,10 @@ class AddnewfamilymemberState extends Equatable {
   final String? spouseName;
   final String? hasChildren; // 'Yes' | 'No'
   final String? isPregnant;  // 'Yes' | 'No'
+  final String? isFamilyPlanning; // 'Yes' | 'No' | 'Select'
+  final String? familyPlanningMethod;
+  final DateTime? lmp;       // Last Menstrual Period date
+  final DateTime? edd;       // Expected Delivery Date
   final String? errorMessage;
 
 
@@ -102,6 +106,10 @@ class AddnewfamilymemberState extends Equatable {
     this.spouseName,
     this.hasChildren,
     this.isPregnant,
+    this.isFamilyPlanning,
+    this.familyPlanningMethod,
+    this.lmp,
+    this.edd,
     this.dateOfDeath,
     this.deathPlace,
     this.deathReason,
@@ -109,7 +117,6 @@ class AddnewfamilymemberState extends Equatable {
     this.memberStatus,
     this.birthWeight,
     this.errorMessage,
-
   });
 
   AddnewfamilymemberState copyWith({
@@ -157,6 +164,10 @@ class AddnewfamilymemberState extends Equatable {
     String? spouseName,
     String? hasChildren,
     String? isPregnant,
+    String? isFamilyPlanning,
+    String? familyPlanningMethod,
+    DateTime? lmp,
+    DateTime? edd,
     bool clearDob = false,
     bool clearError = false,
     final String? memberStatus,
@@ -212,6 +223,10 @@ class AddnewfamilymemberState extends Equatable {
       spouseName: spouseName ?? this.spouseName,
       hasChildren: hasChildren ?? this.hasChildren,
       isPregnant: isPregnant ?? this.isPregnant,
+      isFamilyPlanning: isFamilyPlanning ?? this.isFamilyPlanning,
+      familyPlanningMethod: familyPlanningMethod ?? this.familyPlanningMethod,
+      lmp: lmp ?? this.lmp,
+      edd: edd ?? this.edd,
       deathReason: deathReason ?? this.deathReason,
       otherDeathReason: otherDeathReason ?? this.otherDeathReason,
       deathPlace: deathPlace ?? this.deathPlace,
@@ -269,11 +284,15 @@ class AddnewfamilymemberState extends Equatable {
     ageAtMarriage,
     spouseName,
     hasChildren,
+    isFamilyPlanning,
     deathPlace,
     dateOfDeath,
     deathReason,
     memberStatus,
     isPregnant,
+    familyPlanningMethod,
+    lmp,
+    edd,
   ];
 
   Map<String, dynamic> toJson() {
@@ -313,6 +332,8 @@ class AddnewfamilymemberState extends Equatable {
       'spouseName': spouseName,
       'hasChildren': hasChildren,
       'isPregnant': isPregnant,
+      'isFamilyPlanning': isFamilyPlanning,
+      'familyPlanningMethod': familyPlanningMethod,
       'memberStatus': memberStatus,
       'dateOfDeath': dateOfDeath,
       'deathReason': deathReason,

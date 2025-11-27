@@ -51,7 +51,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   static const double _buttonFontSize = 13.0;
   static const double _radioFontSize = 14.0;
   static const double _verticalSpacing = 16.0;
-  static const double _smallVerticalSpacing = 8.0;
+  static const double _smallVerticalSpacing = 6.0;
   static const double _horizontalPadding = 12.0;
   static const double _verticalPadding = 16.0;
   static const double _borderRadius = 4.0;
@@ -859,68 +859,108 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
     final localSelectedChildren = Set<String>.from(_selectedChildren);
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => StatefulBuilder(
         builder: (dialogContext, setDialogState) {
           return AlertDialog(
             backgroundColor: Colors.white,
-            content: Container(
-              width: double.maxFinite,
-              child: _isLoadingMembers
-                  ? const SizedBox(
-                height: 48,
-                child: Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              )
-                  : SingleChildScrollView(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _childNames.length,
-                  itemBuilder: (context, index) {
-                    final name = _childNames[index];
-                    return CheckboxListTile(
-                      title: Text(
-                        name,
-                        style: const TextStyle(
-                          fontSize: _labelFontSize,
-                        ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0.5.h),
+            ),
+            title: Align(
+              alignment: Alignment.centerLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Select Child',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                  const Divider(height: 10),
+                ],
+              ),
+            ),
+            content: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 40.h),
+              child: SingleChildScrollView(
+                child: _isLoadingMembers
+                    ? const SizedBox(
+                        height: 48,
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: _childNames.map((name) {
+                          final selected = localSelectedChildren.contains(name);
+                          return CheckboxListTile(
+                            title: Text(
+                              name,
+                              style: TextStyle(fontSize: 15.sp),
+                            ),
+                            value: selected,
+                            onChanged: (bool? value) {
+                              setDialogState(() {
+                                if ((value ?? false)) {
+                                  localSelectedChildren.add(name);
+                                } else {
+                                  localSelectedChildren.remove(name);
+                                }
+                              });
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,
+                            contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
+                            dense: true,
+                            visualDensity: const VisualDensity(vertical: -4),
+                          );
+                        }).toList(),
                       ),
-                      value: localSelectedChildren.contains(name),
-                      onChanged: (bool? value) {
-                        setDialogState(() {
-                          if ((value ?? false)) {
-                            localSelectedChildren.add(name);
-                          } else {
-                            localSelectedChildren.remove(name);
-                          }
-                        });
-                      },
-                      controlAffinity: ListTileControlAffinity.leading,
-                    );
-                  },
-                ),
               ),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(fontSize: _buttonFontSize),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _selectedChildren = localSelectedChildren.toList();
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Text(
-                  'OK',
-                  style: TextStyle(fontSize: _buttonFontSize),
-                ),
+              const Divider(height: 0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      FocusScope.of(context).unfocus();
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'CANCEL',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedChildren = localSelectedChildren.toList();
+                      });
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      FocusScope.of(context).unfocus();
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'OK',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           );
@@ -934,129 +974,166 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => StatefulBuilder(
         builder: (dialogContext, setDialogState) {
           return AlertDialog(
             backgroundColor: Colors.white,
-            content: Container(
-              width: double.maxFinite,
-              child: _isLoadingMembers
-
-                  ? const SizedBox(
-                height: 48,
-                child: Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              )
-                  : SingleChildScrollView(
-                child: Column(
-                  spacing: 10,
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 8.0),
-                      child: Text(
-                        'Select Adult Member(s)',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: _labelFontSize,
-                        ),
-                      ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0.5.h),
+            ),
+            title: Align(
+              alignment: Alignment.centerLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Select Member Type',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.onSurfaceVariant,
                     ),
-                    if (_adultNames.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row(
-                          children: [
-                            const Expanded(
-                              child: Text(
-                                'No adult members found for this household',
-                                style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: _labelFontSize,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () async {
-                                setDialogState(() {});
-                                await _loadHouseholdMembers();
-                                if (mounted) setState(() {});
-                              },
-                              icon: const Icon(Icons.refresh),
-                              tooltip: 'Refresh',
-                            ),
-                          ],
-                        ),
+                  ),
+                  const Divider(height: 10),
+                ],
+              ),
+            ),
+            content: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 40.h),
+              child: SingleChildScrollView(
+                child: _isLoadingMembers
+                    ? const SizedBox(
+                        height: 48,
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
                       )
-                    else
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _adultNames.length,
-                        itemBuilder: (context, index) {
-                          final name = _adultNames[index];
-                          final isDisabled = _disabledAdultNames.contains(name) || index == 0;
-                          return CheckboxListTile(
-                            title: Text(
-                              isDisabled ? '$name (Head)' : name,
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              'Select Adult Member(s)',
                               style: TextStyle(
-                                color: isDisabled ? Colors.black54 : Colors.black,
-                                fontSize: _labelFontSize,
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
                               ),
                             ),
-                            value: localSelectedAdults.contains(name),
-                            onChanged: isDisabled
-                                ? null
-                                : (bool? value) {
-                              setDialogState(() {
-                                if ((value ?? false)) {
-                                  localSelectedAdults.add(name);
-                                } else {
-                                  localSelectedAdults.remove(name);
-                                }
-                              });
-                            },
-                            controlAffinity: ListTileControlAffinity.leading,
-                          );
-                        },
+                          ),
+                          if (_adultNames.isEmpty)
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'No adult members found for this household',
+                                    style: TextStyle(
+                                      fontSize: 15.sp,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () async {
+                                    setDialogState(() {});
+                                    await _loadHouseholdMembers();
+                                    if (mounted) setState(() {});
+                                  },
+                                  icon: const Icon(Icons.refresh),
+                                  tooltip: 'Refresh',
+                                ),
+                              ],
+                            )
+                          else
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(_adultNames.length, (index) {
+                                final name = _adultNames[index];
+                                final isDisabled = _disabledAdultNames.contains(name) || index == 0;
+                                return CheckboxListTile(
+                                  title: Text(
+                                    isDisabled ? '$name (Head)' : name,
+                                    style: TextStyle(
+                                      fontSize: 15.sp,
+                                      color: isDisabled ? Colors.black54 : Colors.black,
+                                    ),
+                                  ),
+                                  value: localSelectedAdults.contains(name),
+                                  onChanged: isDisabled
+                                      ? null
+                                      : (bool? value) {
+                                          setDialogState(() {
+                                            if ((value ?? false)) {
+                                              localSelectedAdults.add(name);
+                                            } else {
+                                              localSelectedAdults.remove(name);
+                                            }
+                                          });
+                                        },
+                                  controlAffinity: ListTileControlAffinity.leading,
+                                  contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
+                                  dense: true,
+                                  visualDensity: const VisualDensity(vertical: -4),
+                                );
+                              }),
+                            ),
+                        ],
                       ),
-                  ],
-                ),
               ),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(fontSize: _buttonFontSize),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _selectedAdults = localSelectedAdults
-                        .where((n) => !_disabledAdultNames.contains(n))
-                        .toList();
-                    final vaIndex = _memberTypes.indexWhere((t) => t['value'] == 'va');
-                    if (vaIndex != -1) {
-                      _memberTypes[vaIndex]['selected'] = _selectedAdults.isNotEmpty;
-                    }
-                    _selectedMemberType = _selectedAdults.isNotEmpty ? 'va' : null;
-                    if (_selectedAdults.isEmpty) {
-                      _selectedChild = null;
-                      _selectedFamilyHead = null;
-                      _houseNoController.clear();
-                    }
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Text(
-                  'OK',
-                  style: TextStyle(fontSize: _buttonFontSize),
-                ),
+              const Divider(height: 0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      FocusScope.of(context).unfocus();
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'CANCEL',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedAdults = localSelectedAdults
+                            .where((n) => !_disabledAdultNames.contains(n))
+                            .toList();
+                        final vaIndex = _memberTypes.indexWhere((t) => t['value'] == 'va');
+                        if (vaIndex != -1) {
+                          _memberTypes[vaIndex]['selected'] = _selectedAdults.isNotEmpty;
+                        }
+                        _selectedMemberType = _selectedAdults.isNotEmpty ? 'va' : null;
+                        if (_selectedAdults.isEmpty) {
+                          _selectedChild = null;
+                          _selectedFamilyHead = null;
+                          _houseNoController.clear();
+                        }
+                      });
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      FocusScope.of(context).unfocus();
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'OK',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           );
