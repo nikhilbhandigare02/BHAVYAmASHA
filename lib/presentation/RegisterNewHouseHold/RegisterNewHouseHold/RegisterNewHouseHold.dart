@@ -107,6 +107,21 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     return out;
   }
 
+  // Extract only the year part from an approximate age string, e.g.
+  // "15 years 2 months" -> "15". If no number is found, returns the
+  // original string (or empty if null).
+  String _extractYearsFromApprox(dynamic approx) {
+    if (approx == null) return '';
+    final s = approx.toString().trim();
+    if (s.isEmpty) return '';
+
+    final match = RegExp(r'\d+').firstMatch(s);
+    if (match != null) {
+      return match.group(0) ?? '';
+    }
+    return s;
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -427,9 +442,11 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         String age = '';
         if (useDob && dobIso != null && dobIso.isNotEmpty) {
           final dob = DateTime.tryParse(dobIso);
-          age = dob != null ? (DateTime.now().year - dob.year).toString() : (result['approxAge'] ?? '').toString();
+          age = dob != null
+              ? (DateTime.now().year - dob.year).toString()
+              : _extractYearsFromApprox(result['approxAge']);
         } else {
-          age = (result['approxAge'] ?? '').toString();
+          age = _extractYearsFromApprox(result['approxAge']);
         }
         final String gender = (result['gender'] ?? '').toString();
         final String father = (result['fatherName'] ?? '').toString();
@@ -475,10 +492,10 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               }
               spouseAge = years.toString();
             } else {
-              spouseAge = (result['spouseApproxAge'] ?? '').toString();
+              spouseAge = _extractYearsFromApprox(result['spouseApproxAge']);
             }
           } else {
-            spouseAge = (result['spouseApproxAge'] ?? '').toString();
+            spouseAge = _extractYearsFromApprox(result['spouseApproxAge']);
           }
           _members.add({
             '#': '${_members.length + 1}',
@@ -525,9 +542,11 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           String age = '';
           if (useDob && dobIso != null && dobIso.isNotEmpty) {
             final dob = DateTime.tryParse(dobIso);
-            age = dob != null ? (DateTime.now().year - dob.year).toString() : (result['approxAge'] ?? '').toString();
+            age = dob != null
+                ? (DateTime.now().year - dob.year).toString()
+                : _extractYearsFromApprox(result['approxAge']);
           } else {
-            age = (result['approxAge'] ?? '').toString();
+            age = _extractYearsFromApprox(result['approxAge']);
           }
           final String gender = (result['gender'] ?? '').toString();
           final String relation = (result['relation'] ?? '').toString();
@@ -576,10 +595,10 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 }
                 spouseAge = years.toString();
               } else {
-                spouseAge = (result['spouseApproxAge'] ?? '').toString();
+                spouseAge = _extractYearsFromApprox(result['spouseApproxAge']);
               }
             } else {
-              spouseAge = (result['spouseApproxAge'] ?? '').toString();
+              spouseAge = _extractYearsFromApprox(result['spouseApproxAge']);
             }
             _members.add({
               '#': '${_members.length + 1}',

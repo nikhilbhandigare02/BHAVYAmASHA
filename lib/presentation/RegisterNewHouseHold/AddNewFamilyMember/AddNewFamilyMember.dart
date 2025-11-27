@@ -424,7 +424,22 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       final spouseName = (data['spouseName'] ?? '') as String;
       if (spouseName.isNotEmpty) b.add(AnmUpdateSpouseName(spouseName));
 
-      // Age: restore both DOB and approxAge when available
+      // Age: restore useDob, DOB and approxAge when available
+      final useDobVal = data['useDob'];
+      bool? useDobBool;
+      if (useDobVal is bool) {
+        useDobBool = useDobVal;
+      } else if (useDobVal is String) {
+        final s = useDobVal.toLowerCase();
+        if (s == 'true' || s == '1') useDobBool = true;
+        if (s == 'false' || s == '0') useDobBool = false;
+      }
+      if (useDobBool != null && useDobBool != b.state.useDob) {
+        // Toggle once so bloc state matches stored preference
+        b.add(AnmToggleUseDob());
+      }
+
+      // DOB
       final dobIso = (data['dob'] ?? '') as String;
       if (dobIso.isNotEmpty) {
         final dob = DateTime.tryParse(dobIso);
@@ -433,6 +448,30 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
       final approxAge = (data['approxAge'] ?? '') as String;
       if (approxAge.isNotEmpty) b.add(AnmUpdateApproxAge(approxAge));
+
+      // Prefer explicit saved year/month/day fields when present
+      final updYear  = (data['updateYear']  ?? '') as String;
+      final updMonth = (data['updateMonth'] ?? '') as String;
+      final updDay   = (data['updateDay']   ?? '') as String;
+
+      if (updYear.isNotEmpty)  b.add(UpdateYearChanged(updYear));
+      if (updMonth.isNotEmpty) b.add(UpdateMonthChanged(updMonth));
+      if (updDay.isNotEmpty)   b.add(UpdateDayChanged(updDay));
+
+      // If split fields are missing but approxAge string exists, derive them
+      if (updYear.isEmpty && updMonth.isEmpty && updDay.isEmpty && approxAge.isNotEmpty) {
+        final matches = RegExp(r'\d+').allMatches(approxAge).toList();
+        String _part(int index) =>
+            matches.length > index ? (matches[index].group(0) ?? '') : '';
+
+        final y = _part(0);
+        final m = _part(1);
+        final d = _part(2);
+
+        if (y.isNotEmpty) b.add(UpdateYearChanged(y));
+        if (m.isNotEmpty) b.add(UpdateMonthChanged(m));
+        if (d.isNotEmpty) b.add(UpdateDayChanged(d));
+      }
 
       // Children count for this member (used in members table summary)
       final children = (data['children'] ?? '') as String;

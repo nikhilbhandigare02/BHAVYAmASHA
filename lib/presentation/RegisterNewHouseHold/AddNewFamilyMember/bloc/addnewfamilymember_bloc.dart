@@ -195,6 +195,31 @@ class AddnewfamilymemberBloc
           }
         } catch (_) {}
 
+        // Derive approx age parts from DOB when missing so direct edit
+        // can prefill approximate age fields.
+        DateTime? loadedDob = allData['dob'] != null
+            ? DateTime.tryParse(allData['dob'])
+            : null;
+        String? loadedApproxAge = allData['approxAge']?.toString();
+        String? loadedUpdateYear = allData['updateYear']?.toString();
+        String? loadedUpdateMonth = allData['updateMonth']?.toString();
+        String? loadedUpdateDay = allData['updateDay']?.toString();
+
+        if (loadedDob != null &&
+            (loadedApproxAge == null || loadedApproxAge.trim().isEmpty) &&
+            (loadedUpdateYear == null || loadedUpdateYear.trim().isEmpty) &&
+            (loadedUpdateMonth == null || loadedUpdateMonth.trim().isEmpty) &&
+            (loadedUpdateDay == null || loadedUpdateDay.trim().isEmpty)) {
+          final parts = _agePartsFromDob(loadedDob);
+          final years = parts['years'] ?? 0;
+          final months = parts['months'] ?? 0;
+          final days = parts['days'] ?? 0;
+          loadedApproxAge = '$years years $months months $days days'.trim();
+          loadedUpdateYear = years.toString();
+          loadedUpdateMonth = months.toString();
+          loadedUpdateDay = days.toString();
+        }
+
         // Update the state with all the data
         emit(state.copyWith(
           // Map all the fields to the state
@@ -204,8 +229,8 @@ class AddnewfamilymemberBloc
           memberType: allData['memberType'] as String? ?? 'Adult',
           relation: primaryRelation,
           useDob: allData['useDob'] as bool? ?? true,
-          dob: allData['dob'] != null ? DateTime.tryParse(allData['dob']) : null,
-          approxAge: allData['approxAge']?.toString(),
+          dob: loadedDob,
+          approxAge: loadedApproxAge,
           children: allData['children']?.toString(),
           birthOrder: allData['birthOrder']?.toString(),
           gender: allData['gender'] as String?,
@@ -227,9 +252,9 @@ class AddnewfamilymemberBloc
           spouseName: allData['spouseName'] as String?,
           hasChildren: allData['hasChildren'] as String?,
           isPregnant: allData['isPregnant'] as String?,
-          updateDay: allData['updateDay']?.toString(),
-          updateMonth: allData['updateMonth']?.toString(),
-          updateYear: allData['updateYear']?.toString(),
+          updateDay: loadedUpdateDay,
+          updateMonth: loadedUpdateMonth,
+          updateYear: loadedUpdateYear,
           WeightChange: allData['weight'] as String?,
           ChildSchool: allData['childSchool'] as String?,
           BirthCertificateChange: allData['birthCertificate'] as String?,

@@ -908,7 +908,25 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           final b = AddFamilyHeadBloc();
           final m = widget.initial;
           if (m != null && m.isNotEmpty) {
-            DateTime? _parseDate(String? iso) => (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
+            DateTime? _parseDate(String? iso) =>
+                (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
+
+            // Extract years, months, days from stored approximate age string, e.g.
+            // "35 years 2 months 10 days" -> ("35","2","10")
+            String? _approxPart(String? approx, int index) {
+              if (approx == null) return null;
+              final s = approx.trim();
+              if (s.isEmpty) return null;
+              final matches = RegExp(r'\d+').allMatches(s).toList();
+              if (matches.length <= index) return null;
+              return matches[index].group(0);
+            }
+
+            final approx = m['approxAge'] as String?;
+            final years = _approxPart(approx, 0);
+            final months = _approxPart(approx, 1);
+            final days = _approxPart(approx, 2);
+
             b.add(
               AfhHydrate(
                 AddFamilyHeadState(
@@ -921,7 +939,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   dob: _parseDate(m['dob'] as String?),
                   edd: _parseDate(m['edd'] as String?),
                   lmp: _parseDate(m['lmp'] as String?),
-                  approxAge: m['approxAge'],
+                  approxAge: approx,
+                  years: years,
+                  months: months,
+                  days: days,
                   gender: m['gender'],
                   occupation: m['occupation'],
                   education: m['education'],
@@ -960,6 +981,22 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           DateTime? _parseDate(String? iso) =>
               (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
 
+          // Extract years, months, days from stored approximate age string, e.g.
+          // "15 years 2 months 10 days" -> ("15","2","10")
+          String? _approxPart(String? approx, int index) {
+            if (approx == null) return null;
+            final s = approx.trim();
+            if (s.isEmpty) return null;
+            final matches = RegExp(r'\d+').allMatches(s).toList();
+            if (matches.length <= index) return null;
+            return matches[index].group(0);
+          }
+
+          final approx = m['sp_approxAge'];
+          final updateYears = _approxPart(approx, 0);
+          final updateMonths = _approxPart(approx, 1);
+          final updateDays = _approxPart(approx, 2);
+
           final spState = SpousState(
             relation: m['sp_relation'],
             memberName: m['sp_memberName'],
@@ -971,7 +1008,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             dob: _parseDate(m['sp_dob']),
             edd: _parseDate(m['sp_edd']),
             lmp: _parseDate(m['sp_lmp']),
-            approxAge: m['sp_approxAge'],
+            approxAge: approx,
+            UpdateYears: updateYears,
+            UpdateMonths: updateMonths,
+            UpdateDays: updateDays,
             gender: m['sp_gender'],
             occupation: m['sp_occupation'],
             education: m['sp_education'],
