@@ -10,9 +10,6 @@ import 'package:medixcel_new/core/utils/device_info_utils.dart';
 import 'package:medixcel_new/core/utils/geolocation_utils.dart';
 import 'package:medixcel_new/core/utils/id_generator_utils.dart';
 import 'package:medixcel_new/data/Database/User_Info.dart';
-import 'package:medixcel_new/data/repositories/HousholdRepository/household_repository.dart';
-import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryRepository.dart';
-import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryApiHelper.dart';
 
 import '../../../../data/Database/local_storage_dao.dart';
 import '../../HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
@@ -22,7 +19,6 @@ part 'registernewhousehold_state.dart';
 
 class RegisterNewHouseholdBloc
     extends Bloc<RegisternewhouseholdEvent, RegisterHouseholdState> {
-  final HouseholdRepository _householdRepository = HouseholdRepository();
 
   RegisterNewHouseholdBloc() : super(const RegisterHouseholdState()) {
     //  Add Head
@@ -1440,19 +1436,6 @@ class RegisterNewHouseholdBloc
       return int.tryParse(s);
     }
     return int.tryParse(v.toString());
-  }
-
-  Future<void> _syncBeneficiaryByUniqueKey({
-    required String uniqueKey,
-    required dynamic deviceInfo,
-    required String ts,
-  }) async {
-    final helper = AddBeneficiaryApiHelper();
-    await helper.syncBeneficiaryByUniqueKey(
-      uniqueKey: uniqueKey,
-      deviceInfo: deviceInfo,
-      ts: ts,
-    );
   }
 
   Map<String, dynamic> _buildBeneficiaryApiPayload(Map<String, dynamic> row,
