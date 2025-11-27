@@ -302,7 +302,7 @@ class _PiePainter extends CustomPainter {
         ? Color.lerp(AppColors.primary, Colors.blue[900], 0.3) ?? AppColors.primary
         : AppColors.primary;
     final bgPaint = Paint()..color = pendingColor;
-    canvas.drawArc(rect, -1.5708, 6.28318, true, bgPaint); // full circle pending
+    canvas.drawArc(rect, -1.5708, 6.28318, true, bgPaint);
 
     // Completed slice overlay
     if (total > 0 && completed > 0) {

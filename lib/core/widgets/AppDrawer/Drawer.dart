@@ -213,48 +213,53 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     setState(() {
                       isSyncing = true;
                     });
+                    
+                    // Show loading snackbar
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+                    scaffoldMessenger.hideCurrentSnackBar();
+                    final controller = scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Data is being fetched...'),
+                        duration: Duration(seconds: 20), // Show for 20 seconds
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+
                     try {
-                      // Show a long-lived snackbar while sync is in progress
-                      if (mounted) {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(
-                            const SnackBar(
-                              content: Text('Data is being fetched...'),
-                              duration: Duration(hours: 1),
-                            ),
-                          );
-                      }
-
+                      // Start the sync operation
                       await SyncService.instance.runFullSyncOnce();
-                      // UI feedback only if drawer context is still mounted
+                      
+                      // If still mounted and sync completed successfully
                       if (mounted) {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(
-                            const SnackBar(
-                              content: Text('Data sync completed'),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
+                        // Remove the loading snackbar if still showing
+                        scaffoldMessenger.hideCurrentSnackBar();
+                        
+                        // Show success message
+                        scaffoldMessenger.showSnackBar(
+                          const SnackBar(
+                            content: Text('Data sync completed'),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
 
-                        // Close drawer only if it is still open
+                        // Close drawer if it's open
                         final scaffoldState = Scaffold.maybeOf(context);
                         if (scaffoldState != null && scaffoldState.isDrawerOpen) {
                           Navigator.pop(context);
                         }
                       }
 
-                      // Always notify parent (HomeScreen) even if drawer was closed manually
+                      // Notify parent (HomeScreen)
                       onCompleted?.call();
                     } catch (e) {
                       if (!mounted) return;
-                      // Replace any in-progress snackbar with an error message
-                      ScaffoldMessenger.of(context)
+                      
+                      // Remove loading snackbar and show error
+                      scaffoldMessenger
                         ..hideCurrentSnackBar()
                         ..showSnackBar(
                           SnackBar(
-                            content: Text('Sync failed: $e'),
+                            content: Text('Sync failed: ${e.toString()}'),
                             duration: const Duration(seconds: 4),
                           ),
                         );
