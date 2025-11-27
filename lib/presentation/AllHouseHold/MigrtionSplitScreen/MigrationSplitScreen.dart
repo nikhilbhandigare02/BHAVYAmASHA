@@ -193,11 +193,11 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
         padding: const EdgeInsets.symmetric(
           horizontal: _horizontalPadding,
-         //vertical: _verticalPadding,
+          //vertical: _verticalPadding,
         ),
         decoration: BoxDecoration(
-          color: Colors.white
-         // borderRadius: BorderRadius.circular(_borderRadius),
+            color: Colors.white
+          // borderRadius: BorderRadius.circular(_borderRadius),
         ),
         child: child,
       ),
@@ -867,40 +867,40 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               width: double.maxFinite,
               child: _isLoadingMembers
                   ? const SizedBox(
-                      height: 48,
-                      child: Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
+                height: 48,
+                child: Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
                   : SingleChildScrollView(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _childNames.length,
-                        itemBuilder: (context, index) {
-                          final name = _childNames[index];
-                          return CheckboxListTile(
-                            title: Text(
-                              name,
-                              style: const TextStyle(
-                                fontSize: _labelFontSize,
-                              ),
-                            ),
-                            value: localSelectedChildren.contains(name),
-                            onChanged: (bool? value) {
-                              setDialogState(() {
-                                if ((value ?? false)) {
-                                  localSelectedChildren.add(name);
-                                } else {
-                                  localSelectedChildren.remove(name);
-                                }
-                              });
-                            },
-                            controlAffinity: ListTileControlAffinity.leading,
-                          );
-                        },
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _childNames.length,
+                  itemBuilder: (context, index) {
+                    final name = _childNames[index];
+                    return CheckboxListTile(
+                      title: Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: _labelFontSize,
+                        ),
                       ),
-                    ),
+                      value: localSelectedChildren.contains(name),
+                      onChanged: (bool? value) {
+                        setDialogState(() {
+                          if ((value ?? false)) {
+                            localSelectedChildren.add(name);
+                          } else {
+                            localSelectedChildren.remove(name);
+                          }
+                        });
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,
+                    );
+                  },
+                ),
+              ),
             ),
             actions: [
               TextButton(
@@ -937,7 +937,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       builder: (context) => StatefulBuilder(
         builder: (dialogContext, setDialogState) {
           return AlertDialog(
-              backgroundColor: Colors.white,
+            backgroundColor: Colors.white,
             content: Container(
               width: double.maxFinite,
               child: _isLoadingMembers
@@ -1065,50 +1065,4 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
     );
   }
 
-  void _showAddChildDialog() {
-    final TextEditingController controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-
-        content: TextField(
-          controller: controller,
-          style: const TextStyle(fontSize: _inputFontSize),
-          decoration: const InputDecoration(
-            labelText: 'Child Name',
-            labelStyle: TextStyle(fontSize: _labelFontSize),
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'CANCEL',
-              style: TextStyle(fontSize: _buttonFontSize),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                setState(() {
-                  final name = controller.text.trim();
-                  if (name.isNotEmpty && !_childNames.contains(name)) {
-                    _childNames.add(name);
-                  }
-                  _selectedChild = name;
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text(
-              'ADD',
-              style: TextStyle(fontSize: _buttonFontSize),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
