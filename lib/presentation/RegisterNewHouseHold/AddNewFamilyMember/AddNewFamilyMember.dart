@@ -1947,13 +1947,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                                // Show birth weight if child age is from birth up to 15 months
                                 if (() {
                                   final yy = int.tryParse(state.updateYear ?? '0') ?? 0;
                                   final mm = int.tryParse(state.updateMonth ?? '0') ?? 0;
                                   final dd = int.tryParse(state.updateDay ?? '0') ?? 0;
 
-                                  // If no age entered at all, hide the field
                                   if (yy == 0 && mm == 0 && dd == 0) {
                                     return false;
                                   }

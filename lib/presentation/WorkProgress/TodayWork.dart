@@ -81,7 +81,7 @@ class _TodayworkState extends State<Todaywork> {
                               children: [
                                 _legend(color: Colors.green, label: 'Completed'),
                                 const SizedBox(width: 16),
-                                _legend(color: Colors.blue, label: 'Pending'),
+                                _legend(color: AppColors.primary, label: 'Pending'),
                               ],
                             ),
                             const SizedBox(height: 16),
@@ -153,7 +153,6 @@ class _TodayworkState extends State<Todaywork> {
                                       ),
                                       if (_selectedSlice != null)
                                         Builder(builder: (_) {
-                                          // Position label towards the middle of the selected slice.
                                           final total = (state.completed + state.pending).clamp(0, 1 << 31);
                                           if (total == 0) {
                                             return const SizedBox.shrink();
@@ -169,32 +168,27 @@ class _TodayworkState extends State<Todaywork> {
                                           String label;
                                           int count;
 
-                                          if (_selectedSlice == 0) {
-                                            // Completed slice in green: from start to start + completedSweep
-                                            midAngle = start + completedSweep / 2;
-                                            color = Colors.green;
-                                            label = 'Completed';
-                                            count = state.completed;
-                                          } else {
-                                            // Pending slice in blue: rest of circle
+                                          if (_selectedSlice == 1) {
                                             midAngle = start + completedSweep + remainingSweep / 2;
-                                            color = Colors.blue;
+                                            color = AppColors.primary;
                                             label = 'Pending';
                                             count = state.pending;
+
+                                            const radiusLabel = 220 / 4;
+                                            final dx = math.cos(midAngle) * radiusLabel;
+                                            final dy = math.sin(midAngle) * radiusLabel;
+
+                                            return Transform.translate(
+                                              offset: Offset(dx, dy),
+                                              child: _insideLabel(
+                                                color: color,
+                                                label: label,
+                                                count: count,
+                                              ),
+                                            );
+                                          } else {
+                                            return const SizedBox.shrink();
                                           }
-
-                                          const radiusLabel = 220 / 4; // place label at 1/2 of radius
-                                          final dx = math.cos(midAngle) * radiusLabel;
-                                          final dy = math.sin(midAngle) * radiusLabel;
-
-                                          return Transform.translate(
-                                            offset: Offset(dx, dy),
-                                            child: _legendWithCount(
-                                              color: color,
-                                              label: label,
-                                              count: count,
-                                            ),
-                                          );
                                         }),
                                     ],
                                   ),
@@ -247,18 +241,15 @@ class _TodayworkState extends State<Todaywork> {
           ),
         ),
         const SizedBox(width: 6),
-        const Text(
-          '',
-        ),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Colors.white),
+          style: const TextStyle(fontSize: 12, color: Colors.black),
         ),
       ],
     );
   }
-
-  Widget _legendWithCount({
+  
+  Widget _insideLabel({
     required Color color,
     required String label,
     required int count,
@@ -267,25 +258,28 @@ class _TodayworkState extends State<Todaywork> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 16,
-          height: 16,
+          width: 12,
+          height: 12,
           decoration: BoxDecoration(
             color: color,
             border: Border.all(color: Colors.white, width: 1),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 6),
         Text(
-          '$label : $count',
+          '$label: $count',
           style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
             color: Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
           ),
         ),
       ],
     );
   }
+
+
 }
 class _PiePainter extends CustomPainter {
   final int completed;
@@ -303,13 +297,12 @@ class _PiePainter extends CustomPainter {
     final total = (completed + pending).clamp(0, 1 << 31);
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
 
-    // Pending slice background
     final bool highlightPending = selectedSlice == 1;
     final Color pendingColor = highlightPending
-        ? Colors.blue.shade800
-        : Colors.blue;
+        ? Color.lerp(AppColors.primary, Colors.blue[900], 0.3) ?? AppColors.primary
+        : AppColors.primary;
     final bgPaint = Paint()..color = pendingColor;
-    canvas.drawArc(rect, -1.5708, 6.28318, true, bgPaint); // full circle pending
+    canvas.drawArc(rect, -1.5708, 6.28318, true, bgPaint);
 
     // Completed slice overlay
     if (total > 0 && completed > 0) {

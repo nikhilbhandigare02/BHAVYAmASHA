@@ -1119,7 +1119,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             _members[headIndex] = headRow;
                           }
 
-                          // Update or remove spouse summary row but do not create new rows
                           final String maritalStatus = (result['maritalStatus'] ?? '').toString();
                           final int spouseIndex = _members.indexWhere((row) => row['Relation'] == 'Wife' || row['Relation'] == 'Spouse');
 

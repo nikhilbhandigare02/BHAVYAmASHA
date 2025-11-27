@@ -50,14 +50,43 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onGridTap(0);
+      // Start loading data after the first frame
+      _loadData();
     });
+  }
 
-    _loadFamilySurveyItems();
-    _loadEligibleCoupleItems();
-    _loadAncItems();
-    _loadHbncItems();
-    _loadRoutineImmunizationItems();
-    _loadCompletedVisitsCount();
+  Future<void> _loadData() async {
+    if (!mounted) return;
+    
+    try {
+      // Load all the data from the database
+      await _loadFamilySurveyItems();
+      if (!mounted) return;
+      
+      await _loadEligibleCoupleItems();
+      if (!mounted) return;
+      
+      await _loadAncItems();
+      if (!mounted) return;
+      
+      await _loadHbncItems();
+      if (!mounted) return;
+      
+      await _loadRoutineImmunizationItems();
+      if (!mounted) return;
+      
+      // Finally, load the completed visits count
+      await _loadCompletedVisitsCount();
+      
+      // Save the counts to storage
+      if (mounted) {
+        await _saveTodayWorkCountsToStorage();
+        // Trigger a rebuild to ensure UI is updated
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint('Error loading data: $e');
+    }
   }
 
   String _last11(String? input) {
@@ -120,83 +149,105 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
   Future<void> _saveTodayWorkCountsToStorage() async {
     try {
-      final l10n = AppLocalizations.of(context);
+      if (!mounted) return;
+      
       final familyCount = _familySurveyItems.length;
       final eligibleCoupleCount = _eligibleCoupleItems.length;
       final ancCount = _ancItems.length;
       final hbncCount = _hbncItems.length;
       final riCount = _riItems.length;
 
+      // Calculate total to-do count (excluding completed visits)
       final totalToDoCount =
           familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
 
+      // Ensure we don't have negative counts
+      final toDoCount = totalToDoCount >= 0 ? totalToDoCount : 0;
+      final completedCount = _completedVisitsCount >= 0 ? _completedVisitsCount : 0;
+
+      // Save to secure storage
       await SecureStorageService.saveTodayWorkCounts(
-        toDo: totalToDoCount,
-        completed: _completedVisitsCount,
+        toDo: toDoCount,
+        completed: completedCount,
       );
-    } catch (_) {}
+      
+      if (mounted) {
+        // Update the UI with the latest counts
+        setState(() {
+          // Ensure the UI reflects the same values we saved
+          _completedVisitsCount = completedCount;
+        });
+      }
+    } catch (e) {
+      // Log error if needed
+      debugPrint('Error saving today\'s work counts: $e');
+    }
   }
 
   Future<void> _loadCompletedVisitsCount() async {
     try {
-      final db = await DatabaseProvider.instance.database;
-
-      final ecFormKey = FollowupFormDataTable
-              .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ??
-          '';
-      final ancFormKey = FollowupFormDataTable
-              .formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ??
-          '';
-
-      final formKeys = <String>[];
-      if (ecFormKey.isNotEmpty) formKeys.add(ecFormKey);
-      if (ancFormKey.isNotEmpty) formKeys.add(ancFormKey);
-
-      if (formKeys.isEmpty) return;
-
-      // Limit count to forms completed **today** so the completed
-      // visits count effectively resets every new day.
-      final placeholders = List.filled(formKeys.length, '?').join(',');
-
-      final now = DateTime.now();
-      final todayStr =
-          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-
-      final rows = await db.rawQuery(
-        'SELECT COUNT(*) AS cnt FROM ${FollowupFormDataTable.table} '
-        'WHERE forms_ref_key IN ($placeholders) '
-        'AND (is_deleted IS NULL OR is_deleted = 0) '
-        'AND DATE(created_date_time) = DATE(?)',
-        [
-          ...formKeys,
-          todayStr,
-        ],
-      );
-
-      int count = 0;
-      if (rows.isNotEmpty) {
-        final value = rows.first['cnt'];
-        if (value is int) {
-          count = value;
-        } else if (value is num) {
-          count = value.toInt();
-        } else if (value != null) {
-          count = int.tryParse(value.toString()) ?? 0;
-        }
-      }
-
+      // First try to load from SecureStorage
+      final counts = await SecureStorageService.getTodayWorkCounts();
       if (mounted) {
         setState(() {
-          _completedVisitsCount = count;
+          _completedVisitsCount = counts['completed'] ?? 0;
         });
-        _saveTodayWorkCountsToStorage();
       }
-    } catch (_) {}
+
+      // Then update from database in the background
+      try {
+        final db = await DatabaseProvider.instance.database;
+        final ecFormKey = FollowupFormDataTable
+                .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ??
+            '';
+        final ancFormKey = FollowupFormDataTable
+                .formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ??
+            '';
+
+        final formKeys = <String>[];
+        if (ecFormKey.isNotEmpty) formKeys.add(ecFormKey);
+        if (ancFormKey.isNotEmpty) formKeys.add(ancFormKey);
+
+        if (formKeys.isEmpty) return;
+
+        final placeholders = List.filled(formKeys.length, '?').join(',');
+        final now = DateTime.now();
+        final todayStr =
+            '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+        final rows = await db.rawQuery(
+          'SELECT COUNT(*) AS cnt FROM ${FollowupFormDataTable.table} '
+          'WHERE forms_ref_key IN ($placeholders) '
+          'AND (is_deleted IS NULL OR is_deleted = 0) '
+          'AND DATE(created_date_time) = DATE(?)',
+          [...formKeys, todayStr],
+        );
+
+        final count = rows.first['cnt'] as int? ?? 0;
+        
+        // Only update if the database count is higher than what we have in storage
+        if (mounted && count > _completedVisitsCount) {
+          setState(() {
+            _completedVisitsCount = count;
+          });
+          // Update storage with the new count
+          await _saveTodayWorkCountsToStorage();
+        }
+      } catch (e) {
+        // Ignore database errors, we already have a value from storage
+      }
+    } catch (_) {
+      // If loading from storage fails, initialize to 0
+      if (mounted) {
+        setState(() {
+          _completedVisitsCount = 0;
+        });
+      }
+    }
   }
 
   Future<void> _loadEligibleCoupleItems() async {
     try {
-      // Currently no special logic; just clear the list.
       if (mounted) {
         setState(() {
           _eligibleCoupleItems = [];
