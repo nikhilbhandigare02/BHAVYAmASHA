@@ -491,21 +491,17 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       const SizedBox(height: _verticalSpacing),
 
       if (_isMemberTypeSelected) ...[
-        // Select Child
-        _buildLabel('Select Child'),
+        // Select Child (Optional)
+        _buildLabel('Select Child (Optional)'),
         const SizedBox(height: _smallVerticalSpacing),
         ApiDropdown<String>(
-          items: [..._childNames, 'Add New Child'],
+          items: _childNames,
           getLabel: (item) => item,
           value: _selectedChild,
           onChanged: (value) {
-            if (value == 'Add New Child') {
-              _showAddChildDialog();
-            } else {
-              setState(() {
-                _selectedChild = value;
-              });
-            }
+            setState(() {
+              _selectedChild = value;
+            });
           },
           hintText: 'Select a child',
         ),
@@ -516,7 +512,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         _buildLabel('Select New Family Head', isRequired: true),
         const SizedBox(height: _smallVerticalSpacing),
         ApiDropdown<String>(
-          items: _adultNames,
+          items: _selectedAdults,
           getLabel: (item) => item,
           value: _selectedFamilyHead,
           onChanged: (value) {
@@ -559,7 +555,6 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           height: _buttonHeight,
           child: ElevatedButton(
             onPressed: _isMemberTypeSelected &&
-                _selectedChild != null &&
                 _selectedFamilyHead != null &&
                 _houseNoController.text.trim().isNotEmpty
                 ? () async {

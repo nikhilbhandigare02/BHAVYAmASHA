@@ -924,7 +924,7 @@ class RegisterNewHouseholdBloc
           'unique_key': uniqueKey,
           'address': jsonEncode(address),
           'geo_location': geoLocationJson,
-          // Store the true family head beneficiary unique_key in head_id
+          
           'head_id': familyHeadUniqueKey,
           'household_info': householdInfoJson,
           'device_details': jsonEncode({
