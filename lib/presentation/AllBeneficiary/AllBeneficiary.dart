@@ -270,6 +270,46 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     );
   }
 
+  String _formatDate(String dateString) {
+    if (dateString.isEmpty) return 'N/A';
+    
+    try {
+      // First try parsing ISO format (yyyy-mm-dd)
+      DateTime? date = DateTime.tryParse(dateString);
+      
+      // If that fails, try parsing other common formats
+      if (date == null && dateString.contains('-')) {
+        final parts = dateString.split(' ');
+        final datePart = parts[0]; // Get just the date part
+        final dateSegments = datePart.split('-');
+        
+        if (dateSegments.length == 3) {
+          // If it's already in dd-mm-yyyy format, just return it as is
+          if (dateSegments[0].length == 2 && dateSegments[2].length == 4) {
+            return datePart;
+          }
+          // If it's in yyyy-mm-dd format, reformat it
+          else if (dateSegments[0].length == 4 && dateSegments[2].length == 2) {
+            return '${dateSegments[2]}-${dateSegments[1]}-${dateSegments[0]}';
+          }
+        }
+      }
+      
+      // If we have a valid date, format it
+      if (date != null) {
+        final day = date.day.toString().padLeft(2, '0');
+        final month = date.month.toString().padLeft(2, '0');
+        final year = date.year.toString();
+        return '$day-$month-$year';
+      }
+      
+      // If all else fails, return the original string (or N/A if empty)
+      return dateString.isNotEmpty ? dateString : 'N/A';
+    } catch (e) {
+      return dateString.isNotEmpty ? dateString : 'N/A'; // Return original or N/A if empty
+    }
+  }
+
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
@@ -390,7 +430,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildRow([
-                        _rowText('Registration Date', data['RegitrationDate'] != null ? data['RegitrationDate'].toString().split(' ')[0] : 'N/A'),
+                        _rowText('Registration Date', _formatDate(data['RegitrationDate']?.toString() ?? '')),
                         _rowText('Registration Type', isChild ? 'Child' : 'General'),
                         _rowText('Beneficiary ID', displayBeneficiaryId), // Display trimmed version
                       ]),

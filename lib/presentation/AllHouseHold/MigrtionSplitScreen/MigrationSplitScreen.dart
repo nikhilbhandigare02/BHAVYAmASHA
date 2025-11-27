@@ -6,6 +6,11 @@ import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
 import '../../../data/Database/local_storage_dao.dart';
+import '../../../data/Database/User_Info.dart';
+import '../../../core/utils/geolocation_utils.dart';
+import '../../../core/utils/device_info_utils.dart';
+import '../../../core/utils/id_generator_utils.dart';
+import 'bloc/migration_split_bloc.dart';
 
 enum MigrationSplitOption { migration, split }
 
@@ -27,8 +32,16 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   List<Map<String, dynamic>> _householdMembers = [];
   bool _isLoadingMembers = false;
   String? _loadError;
-  List<String> _adultNames = [];
-  List<String> _childNames = [];
+  // Store name to ID mapping
+  final Map<String, String> _adultNameToId = {};
+  final Map<String, String> _childNameToId = {};
+  List<String> _selectedChildren = [];
+  late final MigrationSplitBloc _splitBloc;
+
+  // For backward compatibility
+  List<String> get _adultNames => _adultNameToId.keys.toList();
+  List<String> get _childNames => _childNameToId.keys.toList();
+
   List<String> _selectedAdults = [];
   Set<String> _disabledAdultNames = <String>{};
 
@@ -56,6 +69,13 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       return 'Select member type';
     }
     return selected.map((type) => type['label']).join(', ');
+  }
+
+  String get _selectedChildLabel {
+    if (_selectedChildren.isNotEmpty) {
+      return _selectedChildren.join(', ');
+    }
+    return 'Select a child';
   }
 
   bool get _isMemberTypeSelected => _selectedAdults.isNotEmpty;
@@ -126,6 +146,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   @override
   void initState() {
     super.initState();
+    _splitBloc = MigrationSplitBloc();
     _houseNoController.addListener(() {
       setState(() {});
     });
@@ -135,6 +156,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   @override
   void dispose() {
     _houseNoController.dispose();
+    _splitBloc.close();
     super.dispose();
   }
 
@@ -299,38 +321,40 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       final rows = await LocalStorageDao.instance.getBeneficiariesByHousehold(hhid);
       print('MigrationSplitScreen: Loaded ${rows.length} beneficiaries for household_ref_key=$hhid');
 
+      // Clear previous data
+      _adultNameToId.clear();
+      _childNameToId.clear();
+      _disabledAdultNames.clear();
+
+      for (final r in rows) {
+        // Skip if member is migrated (is_migrated = 1)
+        final isMigrated = r['is_migrated'] == 1 || r['is_migrated'] == '1' || r['is_migrated'] == true;
+        if (isMigrated) continue;
+
+        final uniqueKey = r['unique_key']?.toString() ?? '';
+        if (uniqueKey.isEmpty) continue;
+
+        final info = _tryDecodeInfo(r['beneficiary_info']);
+        final isAdult = _isAdultRecord(info, r);
+        final nm = (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString().trim();
+        final rel = (info['relation_to_head'] ?? info['relation'] ?? '').toString().toLowerCase();
+
+        if (nm.isEmpty) continue;
+
+        if (isAdult) {
+          _adultNameToId[nm] = uniqueKey;
+          print('Adult: $nm (ID: $uniqueKey)');
+          if (rel == 'self') {
+            _disabledAdultNames.add(nm);
+          }
+        } else {
+          _childNameToId[nm] = uniqueKey;
+          print('Child: $nm (ID: $uniqueKey)');
+        }
+      }
+
       setState(() {
         _householdMembers = rows;
-        _disabledAdultNames = <String>{};
-        final adults = <String>[];
-        final children = <String>[];
-
-        for (final r in rows) {
-          // Skip if member is migrated (is_migrated = 1)
-          final isMigrated = r['is_migrated'] == 1 || r['is_migrated'] == '1' || r['is_migrated'] == true;
-          if (isMigrated) continue;
-
-          final info = _tryDecodeInfo(r['beneficiary_info']);
-          final isAdult = _isAdultRecord(info, r);
-          final nm = (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString();
-          final rel = (info['relation_to_head'] ?? info['relation'] ?? '').toString().toLowerCase();
-
-          if (isAdult) {
-            if (nm.isNotEmpty) {
-              adults.add(nm);
-              if (rel == 'self') {
-                _disabledAdultNames.add(nm);
-              }
-            }
-          } else {
-            if (nm.isNotEmpty) {
-              children.add(nm);
-            }
-          }
-        }
-
-        _adultNames = adults.toSet().toList();
-        _childNames = children.toSet().toList();
       });
     } catch (e) {
       print('MigrationSplitScreen: Error loading household members for $hhid -> $e');
@@ -467,56 +491,75 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
       // Member Type Dropdown
       _buildLabel('Select Member Type', isRequired: true),
-
-      _buildDropdownContainer(
-        ' ',
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                _selectedMemberLabel,
-                style: TextStyle(
-                  fontSize: _inputFontSize,
-                  color: _isMemberTypeSelected ? Colors.black : Colors.grey[600],
+      const SizedBox(height: _smallVerticalSpacing),
+      GestureDetector(
+        onTap: () => _showMemberTypeDialog(),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: _horizontalPadding,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  _selectedMemberLabel,
+                  style: TextStyle(
+                    fontSize: _inputFontSize,
+                    color: _isMemberTypeSelected ? Colors.black : Colors.grey[600],
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
-          ],
+              Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
+            ],
+          ),
         ),
       ),
       const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
       const SizedBox(height: _verticalSpacing),
 
       if (_isMemberTypeSelected) ...[
-        // Select Child
-        _buildLabel('Select Child'),
+        // Select Child (Optional)
+        _buildLabel('Select Child (Optional)'),
         const SizedBox(height: _smallVerticalSpacing),
-        ApiDropdown<String>(
-          items: [..._childNames, 'Add New Child'],
-          getLabel: (item) => item,
-          value: _selectedChild,
-          onChanged: (value) {
-            if (value == 'Add New Child') {
-              _showAddChildDialog();
-            } else {
-              setState(() {
-                _selectedChild = value;
-              });
-            }
-          },
-          hintText: 'Select a child',
+        GestureDetector(
+          onTap: () => _showChildSelectionDialog(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: _horizontalPadding,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    _selectedChildLabel,
+                    style: TextStyle(
+                      fontSize: _inputFontSize,
+                      color: _selectedChildren.isNotEmpty ? Colors.black : Colors.grey[600],
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
+              ],
+            ),
+          ),
         ),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: _verticalSpacing),
 
-        // Select New Family Head
         _buildLabel('Select New Family Head', isRequired: true),
         const SizedBox(height: _smallVerticalSpacing),
         ApiDropdown<String>(
-          items: _adultNames,
+          items: _selectedAdults,
           getLabel: (item) => item,
           value: _selectedFamilyHead,
           onChanged: (value) {
@@ -559,7 +602,6 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           height: _buttonHeight,
           child: ElevatedButton(
             onPressed: _isMemberTypeSelected &&
-                _selectedChild != null &&
                 _selectedFamilyHead != null &&
                 _houseNoController.text.trim().isNotEmpty
                 ? () async {
@@ -653,8 +695,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   }
 
   void _handleSplit() {
-    if (_selectedChild == null ||
-        _selectedFamilyHead == null ||
+    if (_selectedFamilyHead == null ||
         _houseNoController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -667,23 +708,225 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       return;
     }
 
-    print('Split started:');
-    print('Child: $_selectedChild');
-    print('New Family Head: $_selectedFamilyHead');
-    print('House No: ${_houseNoController.text.trim()}');
+    Future<void>(() async {
+      try {
+        final headName = _selectedFamilyHead!.trim();
+        final headUniqueKey = _adultNameToId[headName] ?? '';
+        if (headUniqueKey.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Selected head not found',
+                style: TextStyle(fontSize: _labelFontSize),
+              ),
+            ),
+          );
+          return;
+        }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Split successful!',
-          style: TextStyle(fontSize: _labelFontSize),
-        ),
+        final headRow = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(headUniqueKey);
+        if (headRow == null || headRow.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Head record not found',
+                style: TextStyle(fontSize: _labelFontSize),
+              ),
+            ),
+          );
+          return;
+        }
+
+        final infoRaw = headRow['beneficiary_info'];
+        final Map<String, dynamic> headInfo = _tryDecodeInfo(infoRaw);
+        headInfo['houseNo'] = _houseNoController.text.trim();
+
+        final deviceInfo = await DeviceInfo.getDeviceInfo();
+        final geoLocation = await GeoLocation.getCurrentLocation();
+        final locationData = Map<String, String>.from(geoLocation.toJson());
+        locationData['source'] = 'gps';
+        if (!geoLocation.hasCoordinates) {
+          locationData['status'] = 'unavailable';
+          locationData['reason'] = 'Could not determine location';
+        }
+        final geoLocationJson = jsonEncode(locationData);
+
+        final currentUser = await UserInfo.getCurrentUser();
+        final userDetails = currentUser?['details'] is String
+            ? jsonDecode(currentUser?['details'] ?? '{}')
+            : currentUser?['details'] ?? {};
+        final working = userDetails['working_location'] ?? {};
+
+        final address = {
+          'state_name': working['state'] ?? userDetails['stateName'] ?? '',
+          'state_id': (working['state_id'] ?? userDetails['stateId'] ?? 1),
+          'state_lgd_code': userDetails['stateLgdCode'] ?? 1,
+          'division_name': working['division'] ?? userDetails['division'] ?? 'Patna',
+          'division_id': (working['division_id'] ?? userDetails['divisionId'] ?? 27),
+          'division_lgd_code': userDetails['divisionLgdCode'] ?? 198,
+          'district_name': working['district'] ?? userDetails['districtName'],
+          'district_id': (working['district_id'] ?? userDetails['districtId']),
+          'block_name': working['block'] ?? userDetails['blockName'],
+          'block_id': (working['block_id'] ?? userDetails['blockId']),
+          'village_name': working['village'] ?? userDetails['villageName'],
+          'village_id': (working['village_id'] ?? userDetails['villageId']),
+          'hsc_id': (working['hsc_id'] ?? userDetails['facility_hsc_id']),
+          'hsc_name': working['hsc_name'] ?? userDetails['facility_hsc_name'],
+          'hsc_hfr_id': working['hsc_hfr_id'] ?? userDetails['facility_hfr_id'],
+          'asha_id': working['asha_id'] ?? userDetails['asha_id'],
+          'pincode': working['pincode'] ?? userDetails['pincode'],
+          'user_identifier': working['user_identifier'] ?? userDetails['user_identifier'],
+        }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
+
+        final facilityId = working['asha_associated_with_facility_id'] ?? userDetails['asha_associated_with_facility_id'] ?? 0;
+        final ashaUniqueKey = userDetails['unique_key'] ?? {};
+
+        final ts = DateTime.now().toIso8601String();
+        final newHouseholdKey = await IdGenerator.generateUniqueId(deviceInfo);
+
+        final householdPayload = {
+          'server_id': null,
+          'unique_key': newHouseholdKey,
+          'address': jsonEncode(address),
+          'geo_location': geoLocationJson,
+          'head_id': headUniqueKey,
+          'household_info': jsonEncode(headInfo),
+          'device_details': jsonEncode({
+            'id': deviceInfo.deviceId,
+            'platform': deviceInfo.platform,
+            'version': deviceInfo.osVersion,
+            'model': deviceInfo.model,
+          }),
+          'app_details': jsonEncode({
+            'app_version': deviceInfo.appVersion.split('+').first,
+            'app_name': deviceInfo.appName,
+            'build_number': deviceInfo.buildNumber,
+            'package_name': deviceInfo.packageName,
+            'instance': 'prod'
+          }),
+          'parent_user': jsonEncode({}),
+          'current_user_key': ashaUniqueKey,
+          'facility_id': facilityId,
+          'created_date_time': ts,
+          'modified_date_time': ts,
+          'is_synced': 0,
+          'is_deleted': 0,
+        };
+
+        await LocalStorageDao.instance.insertHousehold(householdPayload);
+
+        final targets = <String>{headName, ..._selectedAdults, ..._selectedChildren};
+        final beneficiaryKeys = <String>[];
+        for (final name in targets) {
+          final uk = _adultNameToId[name] ?? _childNameToId[name] ?? '';
+          if (uk.isNotEmpty) beneficiaryKeys.add(uk);
+        }
+
+        _splitBloc.add(PerformSplitUpdateBeneficiaries(
+          newHouseholdKey: newHouseholdKey,
+          beneficiaryUniqueKeys: beneficiaryKeys,
+          isSeparated: 1,
+        ));
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Split successful!',
+              style: TextStyle(fontSize: _labelFontSize),
+            ),
+          ),
+        );
+
+        setState(() {
+          _resetForm();
+        });
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Split failed: $e',
+              style: const TextStyle(fontSize: _labelFontSize),
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  void _showChildSelectionDialog() {
+    final localSelectedChildren = Set<String>.from(_selectedChildren);
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            content: Container(
+              width: double.maxFinite,
+              child: _isLoadingMembers
+                  ? const SizedBox(
+                      height: 48,
+                      child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _childNames.length,
+                        itemBuilder: (context, index) {
+                          final name = _childNames[index];
+                          return CheckboxListTile(
+                            title: Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: _labelFontSize,
+                              ),
+                            ),
+                            value: localSelectedChildren.contains(name),
+                            onChanged: (bool? value) {
+                              setDialogState(() {
+                                if ((value ?? false)) {
+                                  localSelectedChildren.add(name);
+                                } else {
+                                  localSelectedChildren.remove(name);
+                                }
+                              });
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,
+                          );
+                        },
+                      ),
+                    ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: _buttonFontSize),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedChildren = localSelectedChildren.toList();
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(fontSize: _buttonFontSize),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
-
-    setState(() {
-      _resetForm();
-    });
   }
 
   void _showMemberTypeDialog() {

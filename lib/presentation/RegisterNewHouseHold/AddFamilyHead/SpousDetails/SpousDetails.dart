@@ -188,9 +188,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRelation(v)),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -202,9 +202,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     validator: (value) => captureSpousError(Validations.validateNameofMember(l, value)),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -215,9 +215,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateAgeAtMarriage(v.trim())),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -229,9 +229,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -241,9 +241,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateFatherName(v.trim())),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 Padding(
                   padding: EdgeInsets.all(2.h),
@@ -375,9 +375,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       ],
                     ),
                   ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   ApiDropdown<String>(
@@ -400,9 +400,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     validator: (value) => Validations.validateGender(l, value),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   ApiDropdown<String>(
@@ -434,10 +434,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateOccupation(v)),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 if (state.occupation == 'Other')
-                  SizedBox(height: 1.h),
+
                 if (state.occupation == 'Other')
                   _section(
                     CustomTextField(
@@ -450,10 +450,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ),
                   ),
                 if (state.occupation == 'Other')
-                  SizedBox(height: 1.h),
+
                 if (state.occupation == 'Other')
                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   ApiDropdown<String>(
@@ -483,9 +483,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateEducation(v)),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   ApiDropdown<String>(
@@ -519,10 +519,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateReligion(v)),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 if (state.religion == 'Other')
-                  SizedBox(height: 1.h),
+
                 if (state.religion == 'Other')
                   _section(
                     CustomTextField(
@@ -535,10 +535,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ),
                   ),
                 if (state.religion == 'Other')
-                  SizedBox(height: 1.h),
+
                 if (state.religion == 'Other')
                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   ApiDropdown<String>(
@@ -574,10 +574,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateCategory(v)),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 if (state.category == 'Other')
-                  SizedBox(height: 1.h),
+
                 if (state.category == 'Other')
                   _section(
                     CustomTextField(
@@ -590,10 +590,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ),
                   ),
                 if (state.category == 'Other')
-                  SizedBox(height: 1.h),
+
                 if (state.category == 'Other')
                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   Row(
@@ -607,7 +607,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               context.read<SpousBloc>().add(SpUpdateAbhaAddress(v.trim())),
                         ),
                       ),
-                      SizedBox(height: 1.h),
+
                       SizedBox(
                         height: 3.5.h,
                         child: RoundButton(
@@ -625,7 +625,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   ),
                 ),
 
-                SizedBox(height: 1.h),
+
                 if (state.gender == 'Female') ...[
                   _section(
                     Row(
@@ -638,7 +638,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                                 context.read<SpousBloc>().add(RichIDChanged(v.trim())),
                           ),
                         ),
-                        SizedBox(height: 1.h),
+
                         SizedBox(
                           height: 3.5.h,
                           width: 15.h,
@@ -655,9 +655,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ),
                   ),
                 ],
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   ApiDropdown<String>(
@@ -722,10 +722,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     validator: (value) => captureSpousError(Validations.validateWhoMobileNo(l, value)),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                 if (state.mobileOwner == 'Other')
-                  SizedBox(height: 1.h),
+
                 if (state.mobileOwner == 'Other')
                   _section(
                     CustomTextField(
@@ -745,10 +745,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ),
                   ),
                 if (state.mobileOwner == 'Other')
-                  SizedBox(height: 1.h),
+
                 if (state.mobileOwner == 'Other')
                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -783,9 +783,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ],
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -796,9 +796,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateBankAcc(v.trim())),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -808,9 +808,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateIfsc(v.trim())),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -820,9 +820,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateVoterId(v.trim())),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -832,9 +832,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRationId(v.trim())),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
                 _section(
                   CustomTextField(
@@ -844,9 +844,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdatePhId(v.trim())),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
 
 
                 _section(
@@ -867,9 +867,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateBeneficiaryType(v)),
                   ),
                 ),
-                SizedBox(height: 1.h),
+
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                SizedBox(height: 1.h),
+
                 if (state.gender == 'Female') ...[
                   _section(
                     ApiDropdown<String>(
@@ -894,9 +894,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       },
                     ),
                   ),
-                  SizedBox(height: 1.h),
+
                   Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-                SizedBox(height: 1.h),
 
                   if (state.isPregnant == 'Yes') ...[
                     _section(
@@ -959,7 +958,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       ),
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                    SizedBox(height: 1.h),
+
                     if (state.familyPlanningCounseling == 'Yes') ...[
                       const SizedBox(height: 8),
                       ApiDropdown<String>(
@@ -987,7 +986,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                      SizedBox(height: 1.h),
+
                     ],
 
 
@@ -1018,7 +1017,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                      SizedBox(height: 1.h),
+
                       CustomTextField(
                         labelText: 'Reason',
                         hintText: 'reason ',
@@ -1028,7 +1027,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                      SizedBox(height: 1.h),
+
                     ],
 
                     if (state.fpMethod == 'Condom') ...[
@@ -1042,7 +1041,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                      SizedBox(height: 1.h),                    ],
+                                      ],
 
                     if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)') ...[
                       CustomTextField(
@@ -1055,7 +1054,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                      SizedBox(height: 1.h),                    ],
+                                      ],
 
                     if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)') ...[
                       CustomTextField(
@@ -1068,7 +1067,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                      SizedBox(height: 1.h),                    ],
+                                       ],
 
                     if (state.fpMethod == 'ECP (Emergency Contraceptive pill)') ...[
                       CustomTextField(
@@ -1081,7 +1080,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                      SizedBox(height: 1.h),
+
                     ],
                   ]
                 ],
