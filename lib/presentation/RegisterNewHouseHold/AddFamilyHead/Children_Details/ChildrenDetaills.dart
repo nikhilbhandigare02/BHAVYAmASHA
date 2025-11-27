@@ -7,6 +7,7 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import '../../../../core/config/themes/CustomColors.dart';
+import '../../../../core/utils/Validations.dart';
 import 'bloc/children_bloc.dart';
 import '../HeadDetails/bloc/add_family_head_bloc.dart' as head_bloc;
 import '../../AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart' as member_bloc;
@@ -83,32 +84,15 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
       },
       child: BlocBuilder<ChildrenBloc, ChildrenState>(
         builder: (context, state) {
-          String? _validateYoungestAge(String raw) {
-            if (raw.trim().isEmpty) {
+          String? _validateYoungestAge(String raw, {String? overrideUnit}) {
+            final unit = overrideUnit ?? state.ageUnit;
+            final msg = Validations.validateYoungestChildAge(l, raw, unit);
+            // Suppress the long range message inline; it will be
+            // shown only from the Add button snackbar in head form.
+            if (msg != null && msg.startsWith('Please enter age of Youngest Child')) {
               return null;
             }
-            final unit = state.ageUnit;
-            final value = int.tryParse(raw.trim());
-            if (value == null) {
-              return  'Enter valid number';
-            }
-            if (unit == null || unit.isEmpty) {
-              return  'Select age unit';
-            }
-            if (unit == l.days) {
-              if (value < 1 || value > 30) {
-                return '${l.days}: 1-30';
-              }
-            } else if (unit == l.months) {
-              if (value < 1 || value > 11) {
-                return '${l.months}: 1-11';
-              }
-            } else if (unit == l.years) {
-              if (value < 1 || value > 90) {
-                return '${l.years}: 1-90';
-              }
-            }
-            return null;
+            return msg;
           }
           return ListView(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
@@ -239,7 +223,10 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                   onChanged: (v) {
                     context.read<ChildrenBloc>().add(ChUpdateAgeUnit(v));
                     setState(() {
-                      _youngestAgeError = _validateYoungestAge(state.youngestAge ?? '');
+                      _youngestAgeError = _validateYoungestAge(
+                        state.youngestAge ?? '',
+                        overrideUnit: v,
+                      );
                     });
                   },
                 ),

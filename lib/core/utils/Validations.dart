@@ -35,6 +35,36 @@ class Validations {
     }
     return null;
   }
+  
+  // Youngest child age validation used in Children details and Head submit.
+  // rawAge is the numeric string, unit is one of l10n.days / l10n.months / l10n.years.
+  static String? validateYoungestChildAge(AppLocalizations l10n, String? rawAge, String? unit) {
+    final raw = (rawAge ?? '').trim();
+    if (raw.isEmpty) return null;
+
+    final value = int.tryParse(raw);
+    if (value == null) {
+      return 'Enter valid number';
+    }
+    if (unit == null || unit.isEmpty) {
+      return 'Select age unit';
+    }
+
+    if (unit == l10n.days) {
+      if (value < 1 || value > 30) {
+        return 'Please enter age of Youngest Child between ${l10n.days}: 1 day to 30 days';
+      }
+    } else if (unit == l10n.months) {
+      if (value < 1 || value > 11) {
+        return 'Please enter age of Youngest Child between ${l10n.months}: 1 month to 11 months';
+      }
+    } else if (unit == l10n.years) {
+      if (value < 1 || value > 90) {
+        return 'Please enter age of Youngest Child between ${l10n.years}: 1 year to 90 years';
+      }
+    }
+    return null;
+  }
   static String? validateHouseNo(AppLocalizations l10n, String? houseNo) {
     if (houseNo == null || houseNo.isEmpty) {
       return 'House number is required';

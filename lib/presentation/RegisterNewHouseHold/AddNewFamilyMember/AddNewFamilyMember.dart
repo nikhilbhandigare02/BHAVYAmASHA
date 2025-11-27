@@ -978,19 +978,19 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              if (state.mobileOwner == 'Other')
-                                _section(
-                                  CustomTextField(
-                                    labelText: 'Relation with mobile holder *',
-                                    hintText: 'Enter relation with mobile holder',
-                                    initialValue: state.mobileOwnerRelation ?? '',
-                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileOwnerRelation(v.trim())),
-                                  ),
-                                ),
-                              if (state.mobileOwner == 'Other')
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                              // Member Status (only shown in edit mode)
+                              // if (state.mobileOwner == 'Other')
+                              //   _section(
+                              //     CustomTextField(
+                              //       labelText: 'Relation with mobile holder *',
+                              //       hintText: 'Enter relation with mobile holder',
+                              //       initialValue: state.mobileOwnerRelation ?? '',
+                              //       onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileOwnerRelation(v.trim())),
+                              //     ),
+                              //   ),
+                              // if (state.mobileOwner == 'Other')
+                              //   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              //
+                              // // Member Status (only shown in edit mode)
                               if (_isEdit) ...[
                                 _section(
                                   ApiDropdown<String>(
@@ -2277,6 +2277,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     isLoading: isLoading,
                                     onPress: () async {
                                       _clearAnmFormError();
+                                      clearSpousFormError();
+
+                                      // When on the spouse step (index 1), validate the
+                                      // Spousdetails form using its own GlobalKey. This
+                                      // ensures member spouse validations run and only
+                                      // a single message (the first error) is shown.
+                                      if (_currentStep == 1) {
+                                        final spouseForm = spousFormKey.currentState;
+                                        if (spouseForm == null || !spouseForm.validate()) {
+                                          final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                          showAppSnackBar(context, msg);
+                                          return;
+                                        }
+                                      }
+
                                       final formState = _formKey.currentState;
                                       if (formState == null) return;
 

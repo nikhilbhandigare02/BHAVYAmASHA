@@ -14,6 +14,7 @@ import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Spo
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/bloc/spous_bloc.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/ChildrenDetaills.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/bloc/children_bloc.dart';
+import 'package:medixcel_new/data/Database/User_Info.dart';
 import 'package:sizer/sizer.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/utils/enums.dart';
@@ -69,35 +70,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   }
 
   String? _validateYoungestChild(ChildrenState s, AppLocalizations l) {
-    final raw = s.youngestAge ?? '';
-    if (raw.trim().isEmpty) {
-      return null;
-    }
-
-    final unit = s.ageUnit;
-    final value = int.tryParse(raw.trim());
-    if (value == null) {
-      return 'Enter valid number';
-    }
-    if (unit == null || unit.isEmpty) {
-      return 'Select age unit';
-    }
-
-    if (unit == l.days) {
-      if (value < 1 || value > 30) {
-        return '${l.days}: 1-30';
-      }
-    } else if (unit == l.months) {
-      if (value < 1 || value > 11) {
-        return '${l.months}: 1-11';
-      }
-    } else if (unit == l.years) {
-      if (value < 1 || value > 90) {
-        return '${l.years}: 1-90';
-      }
-    }
-
-    return null;
+    return Validations.validateYoungestChildAge(l, s.youngestAge, s.ageUnit);
   }
 
   Widget _Section({required Widget child}) {
@@ -206,6 +179,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           initialValue: state.years ?? '',
                           keyboardType: TextInputType.number,
                           onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateYears(v.trim())),
+                          validator: (value) => _captureError(
+                            Validations.validateApproxAge(
+                              l,
+                              value,
+                              state.months,
+                              state.days,
+                            ),
+                          ),
                         ),
                       ),
 
@@ -226,6 +207,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           initialValue: state.months ?? '',
                           keyboardType: TextInputType.number,
                           onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateMonths(v.trim())),
+                          validator: (value) => _captureError(
+                            Validations.validateApproxAge(
+                              l,
+                              state.years,
+                              value,
+                              state.days,
+                            ),
+                          ),
                         ),
                       ),
 
@@ -246,6 +235,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           keyboardType: TextInputType.number,
                           maxLength: 2,
                           onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateDays(v.trim())),
+                          validator: (value) => _captureError(
+                            Validations.validateApproxAge(
+                              l,
+                              state.years,
+                              state.months,
+                              value,
+                            ),
+                          ),
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                           ],
@@ -612,6 +609,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               labelText: l.villageNameLabel,
               hintText: l.villageNameLabel,
               initialValue: state.village,
+              readOnly: !widget.isEdit,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVillage(v.trim())),
             ),
           ),
@@ -971,6 +969,25 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 ),
               ),
             );
+          } else {
+            // New insert: prefill village from current logged-in user
+            // working_location.village stored inside users.details JSON.
+            UserInfo.getCurrentUser().then((user) {
+              if (user == null) return;
+              final details = user['details'];
+              if (details is Map<String, dynamic>) {
+                final data = details['data'];
+                if (data is Map<String, dynamic>) {
+                  final working = data['working_location'];
+                  if (working is Map<String, dynamic>) {
+                    final village = (working['village'] ?? '').toString();
+                    if (village.isNotEmpty) {
+                      b.add(AfhUpdateVillage(village));
+                    }
+                  }
+                }
+              }
+            });
           }
           return b;
         }),
@@ -1019,6 +1036,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             category: m['sp_category'],
             abhaAddress: m['sp_abhaAddress'],
             mobileOwner: m['sp_mobileOwner'],
+            otherOccupation: m['sp_otherOccupation'],
+            otherReligion: m['sp_otherReligion'],
+            otherCategory: m['sp_otherCategory'],
+            mobileOwnerOtherRelation: m['sp_mobileOwnerOtherRelation'],
             mobileNo: m['sp_mobileNo'],
             bankAcc: m['sp_bankAcc'],
             ifsc: m['sp_ifsc'],
@@ -1027,6 +1048,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             phId: m['sp_phId'],
             beneficiaryType: m['sp_beneficiaryType'],
             isPregnant: m['sp_isPregnant'],
+            familyPlanningCounseling: m['sp_familyPlanningCounseling'],
+            fpMethod: m['sp_fpMethod'],
+            removalDate: _parseDate(m['sp_removalDate']),
+            removalReason: m['sp_removalReason'],
+            condomQuantity: m['sp_condomQuantity'],
+            malaQuantity: m['sp_malaQuantity'],
+            chhayaQuantity: m['sp_chhayaQuantity'],
+            ecpQuantity: m['sp_ecpQuantity'],
           );
 
           return SpousBloc(initial: spState);
@@ -1097,6 +1126,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               try {
                 final ch = context.read<ChildrenBloc>().state;
                 result['childrendetails'] = ch.toJson();
+                // Also flatten children summary fields into the head form so
+                // they are persisted in DB and available for future prefill.
+                result['totalBorn'] = ch.totalBorn.toString();
+                result['totalLive'] = ch.totalLive.toString();
+                result['totalMale'] = ch.totalMale.toString();
+                result['totalFemale'] = ch.totalFemale.toString();
+                result['youngestAge'] = ch.youngestAge;
+                result['ageUnit'] = ch.ageUnit;
+                result['youngestGender'] = ch.youngestGender;
               } catch (_) {}
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
@@ -1206,14 +1244,26 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                         if (showSpouse) {
                           final spBloc = context.read<SpousBloc>();
-                          if (spBloc.state.relation == null) {
+                          final current = spBloc.state;
+
+                          final bool isSpouseStateEmpty =
+                              (current.relation == null || current.relation!.trim().isEmpty) &&
+                              (current.memberName == null || current.memberName!.trim().isEmpty) &&
+                              (current.spouseName == null || current.spouseName!.trim().isEmpty) &&
+                              current.dob == null &&
+                              (current.UpdateYears == null || current.UpdateYears!.trim().isEmpty) &&
+                              (current.UpdateMonths == null || current.UpdateMonths!.trim().isEmpty) &&
+                              (current.UpdateDays == null || current.UpdateDays!.trim().isEmpty);
+
+                          if (isSpouseStateEmpty) {
                             final g = (state.gender == 'Male')
                                 ? 'Female'
                                 : (state.gender == 'Female')
                                     ? 'Male'
                                     : null;
                             // Hydrate only minimal shared fields so spouse
-                            // record stays independent from head record.
+                            // record stays independent from head record, and
+                            // only when there is no existing DB state.
                             spBloc.add(SpHydrate(SpousState(
                               relation: 'Spouse',
                               memberName: state.spouseName,
@@ -1222,13 +1272,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               gender: g,
                             )));
                           } else {
-                            final current = spBloc.state;
                             final headName = state.headName?.trim();
                             final spouseName = state.spouseName?.trim();
                             if ((current.memberName == null || current.memberName!.isEmpty) && (spouseName != null && spouseName.isNotEmpty)) {
                               spBloc.add(SpUpdateMemberName(spouseName));
                             }
-                            if ((current.spouseName == null || current.spouseName!.isEmpty) && (headName != null && headName.isNotEmpty)) {
+                            if ((current.spouseName == null || current.spouseName!.isEmpty) && (headName != null && headName!.isNotEmpty)) {
                               spBloc.add(SpUpdateSpouseName(headName));
                             }
                           }
@@ -1371,12 +1420,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                       child: OutlinedButton(
                                                           style: OutlinedButton.styleFrom(
                                                             minimumSize: Size(25.w, 4.5.h),
-                                                            backgroundColor: AppColors.primary, // 👈 filled background
-                                                            foregroundColor: Colors.white, // 👈 white text/icon
+                                                            backgroundColor: AppColors.primary,
+                                                            foregroundColor: Colors.white,
                                                             side: BorderSide(color: AppColors.primary, width: 0.2.w), // 👈 matching border
                                                             padding: const EdgeInsets.symmetric(horizontal: 16),
                                                             shape: RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(1.h), // rounded edges
+                                                              borderRadius: BorderRadius.circular(4), // rounded edges
                                                             ),
                                                             elevation: 0.5, // subtle elevation for depth
                                                             shadowColor: AppColors.primary.withOpacity(0.4),
@@ -1466,8 +1515,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                       }
                                                     },
                                                     color: AppColors.primary,
-                                                    borderRadius: 1.h,
+                                                    borderRadius:4,
                                                     isLoading: isLoading,
+                                                    fontSize: 14.sp,
                                                   ),
                                                 ),
                                               ],
