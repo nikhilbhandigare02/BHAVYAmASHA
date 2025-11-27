@@ -285,6 +285,20 @@ final class AnmUpdateIsPregnant extends AddnewfamilymemberEvent {
   @override
   List<Object> get props => [value];
 }
+
+final class AnmLMPChange extends AddnewfamilymemberEvent {
+  final DateTime? date;
+  const AnmLMPChange(this.date);
+  @override
+  List<Object> get props => [date ?? DateTime(0)];
+}
+
+final class AnmEDDChange extends AddnewfamilymemberEvent {
+  final DateTime? date;
+  const AnmEDDChange(this.date);
+  @override
+  List<Object> get props => [date ?? DateTime(0)];
+}
 final class UpdateYearChanged extends AddnewfamilymemberEvent {
   final String value; // 'Yes' | 'No'
   const UpdateYearChanged(this.value);
@@ -300,6 +314,77 @@ final class UpdateMonthChanged extends AddnewfamilymemberEvent {
 final class UpdateDayChanged extends AddnewfamilymemberEvent {
   final String value; // 'Yes' | 'No'
   const UpdateDayChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmUpdateFamilyPlanning extends AddnewfamilymemberEvent {
+  final String value; // 'Yes' | 'No' | 'Select'
+  const AnmUpdateFamilyPlanning(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmUpdateFamilyPlanningMethod extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmUpdateFamilyPlanningMethod(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+// Family planning detailed fields
+final class AnmFpMethodChanged extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmFpMethodChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmFpRemovalDateChanged extends AddnewfamilymemberEvent {
+  final DateTime value;
+  const AnmFpRemovalDateChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmFpDateOfAntraChanged extends AddnewfamilymemberEvent {
+  final DateTime value;
+  const AnmFpDateOfAntraChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmFpRemovalReasonChanged extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmFpRemovalReasonChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmFpCondomQuantityChanged extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmFpCondomQuantityChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmFpMalaQuantityChanged extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmFpMalaQuantityChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmFpChhayaQuantityChanged extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmFpChhayaQuantityChanged(this.value);
+  @override
+  List<Object> get props => [value];
+}
+
+final class AnmFpEcpQuantityChanged extends AddnewfamilymemberEvent {
+  final String value;
+  const AnmFpEcpQuantityChanged(this.value);
   @override
   List<Object> get props => [value];
 }

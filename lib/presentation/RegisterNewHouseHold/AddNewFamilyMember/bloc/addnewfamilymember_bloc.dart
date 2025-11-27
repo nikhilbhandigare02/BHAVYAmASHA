@@ -506,6 +506,21 @@ class AddnewfamilymemberBloc
     on<AnmUpdateIsPregnant>(
           (e, emit) => emit(state.copyWith(isPregnant: e.value)),
     );
+    on<AnmUpdateFamilyPlanning>(
+          (e, emit) => emit(state.copyWith(isFamilyPlanning: e.value)),
+    );
+    on<AnmUpdateFamilyPlanningMethod>(
+          (e, emit) => emit(state.copyWith(familyPlanningMethod: e.value)),
+    );
+    // Family planning detailed fields (mirror spouse flow)
+    on<AnmFpMethodChanged>((e, emit) => emit(state.copyWith(fpMethod: e.value)));
+    on<AnmFpRemovalDateChanged>((e, emit) => emit(state.copyWith(removalDate: e.value)));
+    on<AnmFpDateOfAntraChanged>((e, emit) => emit(state.copyWith(antraDate: e.value)));
+    on<AnmFpRemovalReasonChanged>((e, emit) => emit(state.copyWith(removalReason: e.value)));
+    on<AnmFpCondomQuantityChanged>((e, emit) => emit(state.copyWith(condomQuantity: e.value)));
+    on<AnmFpMalaQuantityChanged>((e, emit) => emit(state.copyWith(malaQuantity: e.value)));
+    on<AnmFpChhayaQuantityChanged>((e, emit) => emit(state.copyWith(chhayaQuantity: e.value)));
+    on<AnmFpEcpQuantityChanged>((e, emit) => emit(state.copyWith(ecpQuantity: e.value)));
     on<UpdateIsMemberStatus>(
           (e, emit) => emit(state.copyWith(memberStatus: e.value)),
     );
@@ -790,6 +805,16 @@ class AddnewfamilymemberBloc
             'spouseName': state.spouseName,
             'hasChildren': state.hasChildren,
             'isPregnant': state.isPregnant,
+            'isFamilyPlanning': state.isFamilyPlanning,
+            'familyPlanningMethod': state.familyPlanningMethod,
+            'fpMethod': state.fpMethod,
+            'removalDate': state.removalDate?.toIso8601String(),
+            'removalReason': state.removalReason,
+            'condomQuantity': state.condomQuantity,
+            'malaQuantity': state.malaQuantity,
+            'chhayaQuantity': state.chhayaQuantity,
+            'ecpQuantity': state.ecpQuantity,
+            'antraDate': state.antraDate?.toIso8601String(),
             'memberStatus': state.memberStatus,
             'relation_to_head': state.relation,
             'isFamilyhead': false,
@@ -800,7 +825,7 @@ class AddnewfamilymemberBloc
           'spouse_key': state.maritalStatus == 'Married' ? spousKey : null,
           'mother_key': resolvedMotherKey,
           'father_key': resolvedFatherKey,
-          'is_family_planning': 0,
+          'is_family_planning': (state.isFamilyPlanning?.toLowerCase() == 'yes') ? 1 : 0,
           'is_adult': isAdult,
           'is_guest': 0,
           'is_death': isDeath,

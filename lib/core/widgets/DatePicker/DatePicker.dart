@@ -149,7 +149,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
       child: AbsorbPointer(
         child: TextFormField(
           controller: _controller,
-          readOnly: true,
+          enabled: widget.isEditable && !widget.readOnly,
           style: inputStyle,
           validator: widget.validator != null
               ? (value) => widget.validator!(selectedDate)

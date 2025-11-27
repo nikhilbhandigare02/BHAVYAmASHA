@@ -122,6 +122,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   final TextEditingController _beneficiaryTypeController = TextEditingController();
   final TextEditingController _relationController = TextEditingController();
   final TextEditingController _memberStatusController = TextEditingController();
+  final TextEditingController _familyPlanningMethodController = TextEditingController();
 
   String _formatGender(String? gender) {
     if (gender == null) return 'Other';
@@ -312,7 +313,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     _beneficiaryTypeController.dispose();
     _relationController.dispose();
     _memberStatusController.dispose();
-
+    _familyPlanningMethodController.dispose();
     super.dispose();
   }
 
@@ -327,9 +328,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
         final dynamic flagC = args['edit'];
         _isEdit = (flagA == true) || (flagB == true) || (flagC == true);
 
-        // Standalone member details flow (from AllBeneficiary or
-        // HouseHold_Beneficiery) sets this flag so we save immediately
-        // on Add button.
+
         final dynamic memberFlag = args['isMemberDetails'];
         _isMemberDetails = memberFlag == true;
 
@@ -557,6 +556,24 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       // Birth order
       final birthOrder = (data['birthOrder'] ?? '') as String;
       if (birthOrder.isNotEmpty) b.add(AnmUpdateBirthOrder(birthOrder));
+
+      final fpFlagRaw = data['isFamilyPlanning'] ?? data['is_family_planning'];
+      if (fpFlagRaw != null) {
+        String fpVal;
+        if (fpFlagRaw is String) {
+          fpVal = fpFlagRaw;
+        } else if (fpFlagRaw is num) {
+          fpVal = (fpFlagRaw == 1) ? 'Yes' : 'No';
+        } else if (fpFlagRaw is bool) {
+          fpVal = fpFlagRaw ? 'Yes' : 'No';
+        } else {
+          fpVal = fpFlagRaw.toString();
+        }
+        if (fpVal.isNotEmpty) b.add(AnmUpdateFamilyPlanning(fpVal));
+      }
+
+      final fpMethod = (data['familyPlanningMethod'] ?? '') as String;
+      if (fpMethod.isNotEmpty) b.add(AnmUpdateFamilyPlanningMethod(fpMethod));
 
       // Type of beneficiary
       final benType = (data['beneficiaryType'] ?? '') as String;
@@ -1223,11 +1240,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateOtherRelation(v.trim())),
                                   ),
                                 ),
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               if (state.relation == 'Other')
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                              // Name
                               _section(
                                 CustomTextField(
                                   labelText: '${l.nameOfMemberLabel} *',
@@ -1249,104 +1265,330 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              _section(
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                      Builder(
-                                        builder: (context) {
-                                        final fatherItems = [
-                                          'Select',
-                                          ..._maleAdultNames,
-                                          'Other',
-                                        ];
-                                        print('Father dropdown items: $fatherItems');
-                                        print('Current father option: $_fatherOption');
+                              if ((state.memberType ?? '').toLowerCase() == 'adult') ...[
+                                _section(
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Builder(
+                                          builder: (context) {
+                                          final fatherItems = [
+                                            'Select',
+                                            ..._maleAdultNames,
+                                            'Other',
+                                          ];
+                                          return ApiDropdown<String>(
+                                            labelText: '${l.fatherGuardianNameLabel} ',
+                                            items: fatherItems,
+                                            getLabel: (s) => s,
+                                            value: _fatherOption,
+                                            onChanged: (v) {
+                                              if (v == null) return;
+                                              setState(() {
+                                                _fatherOption = v;
+                                              });
+                                              if (v != 'Select' && v != 'Other') {
+                                                context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v));
+                                              } else {
+                                                context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(''));
+                                              }
+                                            },
+                                          );
+                                        },
+                                      ),
+                                      if (_fatherOption == 'Other')
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 8),
+                                          child: CustomTextField(
+                                            labelText: l.fatherGuardianNameLabel,
+                                            hintText: l.fatherGuardianNameLabel,
+                                            initialValue: state.fatherName ?? '',
+                                            onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v.trim())),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                _section(
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Builder(
+                                          builder: (context) {
+                                          final motherItems = [
+                                            'Select',
+                                            ..._femaleAdultNames,
+                                            'Other',
+                                          ];
+                                          return ApiDropdown<String>(
+                                            labelText: "${l.motherNameLabel} ",
+                                            hintText: "${l.motherNameLabel} ",
+                                            items: motherItems,
+                                            getLabel: (s) => s,
+                                            value: _motherOption,
+                                            onChanged: (v) {
+                                              if (v == null) return;
+                                              setState(() {
+                                                _motherOption = v;
+                                              });
+                                              if (v != 'Select' && v != 'Other') {
+                                                context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v));
+                                              } else {
+                                                context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(''));
+                                              }
+                                            },
+                                          );
+                                        },
+                                        ),
+                                      if (_motherOption == 'Other')
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 8),
+                                          child: CustomTextField(
+                                            labelText: l.motherNameLabel,
+                                            hintText: l.motherNameLabel,
+                                            initialValue: state.motherName ?? '',
+                                            onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v.trim())),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ] else ...[
+                                _section(
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Builder(
+                                          builder: (context) {
+                                          final motherItems = [
+                                            'Select',
+                                            ..._femaleAdultNames,
+                                            'Other',
+                                          ];
+                                          return ApiDropdown<String>(
+                                            labelText: "${l.motherNameLabel} ",
+                                            hintText: "${l.motherNameLabel} ",
+                                            items: motherItems,
+                                            getLabel: (s) => s,
+                                            value: _motherOption,
+                                            onChanged: (v) {
+                                              if (v == null) return;
+                                              setState(() {
+                                                _motherOption = v;
+                                              });
+                                              if (v != 'Select' && v != 'Other') {
+                                                context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v));
+                                              } else {
+                                                context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(''));
+                                              }
+                                            },
+                                          );
+                                        },
+                                        ),
+                                      if (_motherOption == 'Other')
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 8),
+                                          child: CustomTextField(
+                                            labelText: l.motherNameLabel,
+                                            hintText: l.motherNameLabel,
+                                            initialValue: state.motherName ?? '',
+                                            onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v.trim())),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                _section(
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Builder(
+                                          builder: (context) {
+                                          final fatherItems = [
+                                            'Select',
+                                            ..._maleAdultNames,
+                                            'Other',
+                                          ];
+                                          return ApiDropdown<String>(
+                                            labelText: '${l.fatherGuardianNameLabel} ',
+                                            items: fatherItems,
+                                            getLabel: (s) => s,
+                                            value: _fatherOption,
+                                            onChanged: (v) {
+                                              if (v == null) return;
+                                              setState(() {
+                                                _fatherOption = v;
+                                              });
+                                              if (v != 'Select' && v != 'Other') {
+                                                context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v));
+                                              } else {
+                                                context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(''));
+                                              }
+                                            },
+                                          );
+                                        },
+                                      ),
+                                      if (_fatherOption == 'Other')
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 8),
+                                          child: CustomTextField(
+                                            labelText: l.fatherGuardianNameLabel,
+                                            hintText: l.fatherGuardianNameLabel,
+                                            initialValue: state.fatherName ?? '',
+                                            onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v.trim())),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
+                              if ((state.memberType ?? '').toLowerCase() == 'child') ...[
+                                _section(
+                                  ApiDropdown<String>(
+                                    labelText: '${l.genderLabel} *',
+                                    items: const ['Male', 'Female', 'Transgender'],
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Male':
+                                          return l.genderMale;
+                                        case 'Female':
+                                          return l.genderFemale;
+                                        case 'Transgender':
+                                          return l.transgender;
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.gender,
+                                    onChanged: (v) {
+                                      if (v == null) return;
+                                      final memberGender = v;
+                                      context.read<AddnewfamilymemberBloc>().add(AnmUpdateGender(memberGender));
+                                      try {
+                                        if (_syncingGender) return;
+                                        _syncingGender = true;
+                                        final opposite = _oppositeGender(memberGender);
+                                        final spBloc = context.read<SpousBloc>();
+                                        if (spBloc.state.gender != opposite) {
+                                          spBloc.add(SpUpdateGender(opposite));
+                                        }
+                                      } finally {
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          _syncingGender = false;
+                                        });
+                                      }
+                                    },
+                                    validator: (value) => _captureAnmError(Validations.validateGender(l, value)),
 
-                                        return ApiDropdown<String>(
-                                          labelText: '${l.fatherGuardianNameLabel} ',
-                                          items: fatherItems,
-                                          getLabel: (s) => s,
-                                          value: _fatherOption,
-                                          onChanged: (v) {
-                                            if (v == null) return;
-                                            setState(() {
-                                              _fatherOption = v;
-                                            });
-                                            if (v != 'Select' && v != 'Other') {
-                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v));
-                                            } else {
-                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(''));
-                                            }
-                                          },
-                                        );
-                                      },
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                _section(
+                                  ApiDropdown<String>(
+                                  labelText: '${l.whoseMobileLabel} *',
+                                  items: const [
+                                    'Self',
+                                    'Family Head',
+                                    'Wife',
+                                    'Father',
+                                    'Mother',
+                                    'Son',
+                                    'Daughter',
+                                    'Father in Law',
+                                    'Mother in Law',
+                                    'Neighbour',
+                                    'Relative',
+                                    'Other',
+                                  ],
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Self':
+                                        return l.self;
+                                      case 'Family Head':
+                                        return l.headOfFamily;
+                                      case 'Wife':
+                                        return l.wife;
+                                      case 'Father':
+                                        return l.father;
+                                      case 'Mother':
+                                        return l.mother;
+                                      case 'Son':
+                                        return l.son;
+                                      case 'Daughter':
+                                        return l.daughter;
+                                      case 'Father in Law':
+                                        return l.fatherInLaw;
+                                      case 'Mother in Law':
+                                        return l.motherInLaw;
+                                      case 'Neighbour':
+                                        return l.neighbour;
+                                      case 'Relative':
+                                        return l.relative;
+                                      case 'Other':
+                                        return l.other;
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.mobileOwner,
+                                  onChanged: (v) {
+                                    if (v == null) return;
+                                    final bloc = context.read<AddnewfamilymemberBloc>();
+                                    bloc.add(AnmUpdateMobileOwner(v));
+                                    if (v      == 'Family Head') {
+                                      // final headNo = widget. ?? '';
+                                      // if (headNo.isNotEmpty) {
+                                      //   bloc.add(AnmUpdateMobileNo(headNo));
+                                      // }
+                                    }
+                                  },
+                                  validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
+                                  
+                                ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                if (state.mobileOwner == 'Other')
+                                  _section(
+                                    CustomTextField(
+                                      labelText: 'Enter relation with mobile no. holder *',
+                                      hintText: 'Enter relation with mobile no. holder',
+                                      onChanged: (v) => context
+                                          .read<AddnewfamilymemberBloc>()
+                                          .add(AnmUpdateMobileOwnerRelation(v.trim())),
+                                      validator: (value) => state.mobileOwner == 'Other'
+                                          ? _captureAnmError(
+                                              (value == null || value.trim().isEmpty)
+                                                  ? 'Relation with mobile no. holder is required'
+                                                  : null,
+                                            )
+                                          : null,
                                     ),
-                                    if (_fatherOption == 'Other')
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 8),
-                                        child: CustomTextField(
-                                          labelText: l.fatherGuardianNameLabel,
-                                          hintText: l.fatherGuardianNameLabel,
-                                          initialValue: state.fatherName ?? '',
-                                          onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v.trim())),
-                                        ),
-                                      ),
-                                  ],
+                                  ),
+                                if (state.mobileOwner == 'Other')
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                _section(
+                                  CustomTextField(
+                                    key: ValueKey('member_mobile_${state.mobileOwner ?? ''}'),
+                                    controller: TextEditingController(text: state.mobileNo ?? '')
+                                      ..selection = TextSelection.collapsed(offset: state.mobileNo?.length ?? 0),
+                                    labelText: '${l.mobileLabel} *',
+                                    hintText: '${l.mobileLabel} *',
+                                    keyboardType: TextInputType.number,
+                                    maxLength: 10,
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(v.trim())),
+                                    validator: (value) => _captureAnmError(Validations.validateMobileNo(l, value)),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(10),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                              _section(
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                      Builder(
-                                        builder: (context) {
-                                        final motherItems = [
-                                          'Select',
-                                          ..._femaleAdultNames,
-                                          'Other',
-                                        ];
-                                        print('Mother dropdown items: $motherItems');
-                                        print('Current mother option: $_motherOption');
-
-                                        return ApiDropdown<String>(
-                                          labelText: "${l.motherNameLabel} ",
-                                          hintText: "${l.motherNameLabel} ",
-                                          items: motherItems,
-                                          getLabel: (s) => s,
-                                          value: _motherOption,
-                                          onChanged: (v) {
-                                            if (v == null) return;
-                                            setState(() {
-                                              _motherOption = v;
-                                            });
-                                            if (v != 'Select' && v != 'Other') {
-                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v));
-                                            } else {
-                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(''));
-                                            }
-                                          },
-                                        );
-                                      },
-                                      ),
-                                    if (_motherOption == 'Other')
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 8),
-                                        child: CustomTextField(
-                                          labelText: l.motherNameLabel,
-                                          hintText: l.motherNameLabel,
-                                          initialValue: state.motherName ?? '',
-                                          onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v.trim())),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              
-                              
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
 
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
@@ -1559,6 +1801,122 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
+                              if ((state.memberType ?? '').toLowerCase() == 'adult') ...[
+                                _section(
+                                  ApiDropdown<String>(
+                                    labelText: '${l.genderLabel} *',
+                                    items: const ['Male', 'Female', 'Transgender'],
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Male':
+                                          return l.genderMale;
+                                        case 'Female':
+                                          return l.genderFemale;
+                                        case 'Transgender':
+                                          return l.transgender;
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.gender,
+                                    onChanged: (v) {
+                                      if (v == null) return;
+                                      final memberGender = v;
+                                      context.read<AddnewfamilymemberBloc>().add(AnmUpdateGender(memberGender));
+                                      try {
+                                        if (_syncingGender) return;
+                                        _syncingGender = true;
+                                        final opposite = _oppositeGender(memberGender);
+                                        final spBloc = context.read<SpousBloc>();
+                                        if (spBloc.state.gender != opposite) {
+                                          spBloc.add(SpUpdateGender(opposite));
+                                        }
+                                      } finally {
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          _syncingGender = false;
+                                        });
+                                      }
+                                    },
+                                    validator: (value) => _captureAnmError(Validations.validateGender(l, value)),
+
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                _section(
+                                  ApiDropdown<String>(
+                                    labelText: l.occupationLabel,
+                                    items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Unemployed':
+                                          return l.occupationUnemployed;
+                                        case 'Housewife':
+                                          return l.occupationHousewife;
+                                        case 'Daily Wage Labor':
+                                          return l.occupationDailyWageLabor;
+                                        case 'Agriculture':
+                                          return l.occupationAgriculture;
+                                        case 'Salaried':
+                                          return l.occupationSalaried;
+                                        case 'Business':
+                                          return l.occupationBusiness;
+                                        case 'Retired':
+                                          return l.occupationRetired;
+                                        case 'Other':
+                                          return l.occupationOther;
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.occupation,
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateOccupation(v!)),
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                if (state.occupation == 'Other')
+                                  _section(
+                                    CustomTextField(
+                                      labelText: 'Enter occupation',
+                                      hintText: 'Enter occupation',
+                                      onChanged: (v) => context
+                                          .read<AddnewfamilymemberBloc>()
+                                          .add(AnmUpdateOtherOccupation(v.trim())),
+                                    ),
+                                  ),
+                                if (state.occupation == 'Other')
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                _section(
+                                  ApiDropdown<String>(
+                                    labelText: l.educationLabel,
+                                    items: const ['No Schooling', 'Primary', 'Secondary', 'High School', 'Intermediate', 'Diploma', 'Graduate and above'],
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'No Schooling':
+                                          return l.educationNoSchooling;
+                                        case 'Primary':
+                                          return l.educationPrimary;
+                                        case 'Secondary':
+                                          return l.educationSecondary;
+                                        case 'High School':
+                                          return l.educationHighSchool;
+                                        case 'Intermediate':
+                                          return l.educationIntermediate;
+                                        case 'Diploma':
+                                          return l.educationDiploma;
+                                        case 'Graduate and above':
+                                          return l.educationGraduateAndAbove;
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.education,
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateEducation(v!)),
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
 
 
                               if(state.memberType == 'Child')...[
@@ -1799,8 +2157,103 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   ],
                                 ),
                               ),
-
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              if ((state.memberType ?? '').toLowerCase() == 'adult') ...[
+                                _section(
+                                  ApiDropdown<String>(
+                                    labelText: '${l.whoseMobileLabel} *',
+                                    items: const [
+                                      'Self',
+                                      'Family Head',
+                                      'Wife',
+                                      'Father',
+                                      'Mother',
+                                      'Son',
+                                      'Daughter',
+                                      'Father in Law',
+                                      'Mother in Law',
+                                      'Neighbour',
+                                      'Relative',
+                                      'Other',
+                                    ],
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Self':
+                                          return l.self;
+                                        case 'Family Head':
+                                          return l.headOfFamily;
+                                        case 'Wife':
+                                          return l.wife;
+                                        case 'Father':
+                                          return l.father;
+                                        case 'Mother':
+                                          return l.mother;
+                                        case 'Son':
+                                          return l.son;
+                                        case 'Daughter':
+                                          return l.daughter;
+                                        case 'Father in Law':
+                                          return l.fatherInLaw;
+                                        case 'Mother in Law':
+                                          return l.motherInLaw;
+                                        case 'Neighbour':
+                                          return l.neighbour;
+                                        case 'Relative':
+                                          return l.relative;
+                                        case 'Other':
+                                          return l.other;
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.mobileOwner,
+                                    onChanged: (v) {
+                                      if (v == null) return;
+                                      final bloc = context.read<AddnewfamilymemberBloc>();
+                                      bloc.add(AnmUpdateMobileOwner(v));
+                                    },
+                                    validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                if (state.mobileOwner == 'Other')
+                                  _section(
+                                    CustomTextField(
+                                      labelText: 'Enter relation with mobile no. holder *',
+                                      hintText: 'Enter relation with mobile no. holder',
+                                      onChanged: (v) => context
+                                          .read<AddnewfamilymemberBloc>()
+                                          .add(AnmUpdateMobileOwnerRelation(v.trim())),
+                                      validator: (value) => state.mobileOwner == 'Other'
+                                          ? _captureAnmError(
+                                        (value == null || value.trim().isEmpty)
+                                            ? 'Relation with mobile no. holder is required'
+                                            : null,
+                                      )
+                                          : null,
+                                    ),
+                                  ),
+                                if (state.mobileOwner == 'Other')
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                _section(
+                                  CustomTextField(
+                                    key: ValueKey('member_mobile_${state.mobileOwner ?? ''}'),
+                                    controller: TextEditingController(text: state.mobileNo ?? '')
+                                      ..selection = TextSelection.collapsed(offset: state.mobileNo?.length ?? 0),
+                                    labelText: '${l.mobileLabel} *',
+                                    hintText: '${l.mobileLabel} *',
+                                    keyboardType: TextInputType.number,
+                                    maxLength: 10,
+                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(v.trim())),
+                                    validator: (value) => _captureAnmError(Validations.validateMobileNo(l, value)),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(10),
+                                    ],
+                                  ),
+                                ),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
 
 
                               // Bank account
@@ -1824,81 +2277,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                              // Occupation, Education, Religion, Category
-                              if (state.memberType == 'Adult') ...[
-                                _section(
-                                  ApiDropdown<String>(
-                                    labelText: l.occupationLabel,
-                                    items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
-                                    getLabel: (s) {
-                                      switch (s) {
-                                        case 'Unemployed':
-                                          return l.occupationUnemployed;
-                                        case 'Housewife':
-                                          return l.occupationHousewife;
-                                        case 'Daily Wage Labor':
-                                          return l.occupationDailyWageLabor;
-                                        case 'Agriculture':
-                                          return l.occupationAgriculture;
-                                        case 'Salaried':
-                                          return l.occupationSalaried;
-                                        case 'Business':
-                                          return l.occupationBusiness;
-                                        case 'Retired':
-                                          return l.occupationRetired;
-                                        case 'Other':
-                                          return l.occupationOther;
-                                        default:
-                                          return s;
-                                      }
-                                    },
-                                    value: state.occupation,
-                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateOccupation(v!)),
-                                  ),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                                if (state.occupation == 'Other')
-                                  _section(
-                                    CustomTextField(
-                                      labelText: 'Enter occupation',
-                                      hintText: 'Enter occupation',
-                                      onChanged: (v) => context
-                                          .read<AddnewfamilymemberBloc>()
-                                          .add(AnmUpdateOtherOccupation(v.trim())),
-                                    ),
-                                  ),
-                                if (state.occupation == 'Other')
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                                _section(
-                                  ApiDropdown<String>(
-                                    labelText: l.educationLabel,
-                                    items: const ['No Schooling', 'Primary', 'Secondary', 'High School', 'Intermediate', 'Diploma', 'Graduate and above'],
-                                    getLabel: (s) {
-                                      switch (s) {
-                                        case 'No Schooling':
-                                          return l.educationNoSchooling;
-                                        case 'Primary':
-                                          return l.educationPrimary;
-                                        case 'Secondary':
-                                          return l.educationSecondary;
-                                        case 'High School':
-                                          return l.educationHighSchool;
-                                        case 'Intermediate':
-                                          return l.educationIntermediate;
-                                        case 'Diploma':
-                                          return l.educationDiploma;
-                                        case 'Graduate and above':
-                                          return l.educationGraduateAndAbove;
-                                        default:
-                                          return s;
-                                      }
-                                    },
-                                    value: state.education,
-                                    onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateEducation(v!)),
-                                  ),
-                                ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              ],
+                              
 
                               // IDs
                               _section(CustomTextField(labelText: l.voterIdLabel,hintText: l.voterIdLabel, initialValue: state.voterId, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateVoterId(v.trim())),)),
@@ -2010,6 +2389,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
+
                               ]
                               else if (!_isEdit && state.maritalStatus != null &&
                                   ['Widowed', 'Separated', 'Divorced']
@@ -2025,9 +2405,242 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       }
                                     },
 
+
+
+
                                   ),
                                 ),
-                              ],]
+
+
+                              ],
+
+// Replace the existing code with this:
+                              if (state.memberType == 'Adult' &&
+                                  state.maritalStatus == 'Married' &&
+                                  state.gender == 'Female') ...[
+                                // Is Woman Pregnant?
+                                _section(
+                                  ApiDropdown<String>(
+                                    key: ValueKey('is_pregnant_${state.gender}_${state.isPregnant ?? ''}'),
+                                    labelText: '${l.isWomanPregnantQuestion} *',
+                                    items: const ['Yes', 'No'],
+                                    getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                                    value: state.isPregnant,
+                                    onChanged: (v) {
+                                      final bloc = context.read<AddnewfamilymemberBloc>();
+                                      bloc.add(AnmUpdateIsPregnant(v!));
+                                      if (v == 'No') {
+                                        bloc.add(const AnmLMPChange(null));
+                                        bloc.add(const AnmEDDChange(null));
+                                      }
+                                    },
+                                    validator: (value) {
+                                      if (state.gender == 'Female') {
+                                        return Validations.validateIsPregnant(l, value);
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                if (state.isPregnant == 'Yes') ...[
+                                  _section(
+                                    CustomDatePicker(
+                                      key: const ValueKey('lmp_date_picker'),
+                                      labelText: '${l.lmpDateLabel} *',
+                                      hintText: l.dateHint,
+                                      initialDate: state.lmp,
+                                      onDateChanged: (d) {
+                                        final bloc = context.read<AddnewfamilymemberBloc>();
+                                        bloc.add(AnmLMPChange(d));
+                                        if (d != null) {
+                                          // Calculate EDD: LMP + 9 months + 5 days (Naegele's rule)
+                                          final edd = DateTime(d.year, d.month + 9, d.day + 5);
+                                          bloc.add(AnmEDDChange(edd));
+                                        } else {
+                                          bloc.add(const AnmEDDChange(null));
+                                        }
+                                      },
+                                      validator: (date) => Validations.validateLMP(l, date),
+                                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                                      lastDate: DateTime.now(),
+                                    ),
+                                  ),
+                                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                  _section(
+                                    CustomDatePicker(
+                                      key: const ValueKey('edd_date_picker'),
+                                      labelText: '${l.eddDateLabel} *',
+                                      hintText: l.dateHint,
+                                      initialDate: state.edd,
+                                      onDateChanged: (d) => 
+                                          context.read<AddnewfamilymemberBloc>().add(AnmEDDChange(d)),
+                                      validator: (date) => Validations.validateEDD(l, date),
+                                      readOnly: true,
+                                    ),
+                                  ),
+                                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                ],
+                                
+                                if (state.isPregnant == 'No') ...[
+                                  _section(
+                                    ApiDropdown<String>(
+                                      key: const ValueKey('family_planning'),
+                                      labelText: 'Are you/your partner adopting family planning? *',
+                                      items: const ['Select', 'Yes', 'No'],
+                                      getLabel: (item) => item,
+                                      value: state.isFamilyPlanning,
+                                      onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(
+                                          AnmUpdateFamilyPlanning(v ?? '')),
+                                      validator: (value) {
+                                        if (value == null || value == 'Select') {
+                                          return 'Please select family planning status';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  
+                                  if (state.isFamilyPlanning == 'Yes') ...[
+                                    _section(
+                                      ApiDropdown<String>(
+                                        labelText: '${l.methodOfContra} *',
+                                        items: const [
+                                          'Select',
+                                          'Condom',
+                                          'Mala -N (Daily Contraceptive pill)',
+                                          'Antra injection',
+                                          'Copper -T (IUCD)',
+                                          'Chhaya (Weekly Contraceptive pill)',
+                                          'ECP (Emergency Contraceptive pill)',
+                                          'Male Sterilization',
+                                          'Female Sterilization',
+                                          'Any Other Specify'
+                                        ],
+                                        getLabel: (value) => value,
+                                        value: state.fpMethod ?? 'Select',
+                                        onChanged: (value) {
+                                          if (value != null) {
+                                            context.read<AddnewfamilymemberBloc>().add(AnmFpMethodChanged(value));
+                                          }
+                                        },
+                                        validator: (value) => _captureAnmError(Validations.validateAntra(l, value)),
+                                      ),
+                                    ),
+                                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                                    if (state.fpMethod == 'Antra injection') ...[
+                                      _section(
+                                        CustomDatePicker(
+                                          labelText: 'Date of Antra',
+                                          initialDate: state.antraDate ?? DateTime.now(),
+                                          firstDate: DateTime(1900),
+                                          lastDate: DateTime(2100),
+                                          onDateChanged: (date) {
+                                            if (date != null) {
+                                              context.read<AddnewfamilymemberBloc>().add(AnmFpDateOfAntraChanged(date));
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+
+                                    if (state.fpMethod == 'Copper -T (IUCD)') ...[
+                                      _section(
+                                        CustomDatePicker(
+                                          labelText: 'Removal Date',
+                                          initialDate: state.removalDate ?? DateTime.now(),
+                                          firstDate: DateTime(1900),
+                                          lastDate: DateTime(2100),
+                                          onDateChanged: (date) {
+                                            if (date != null) {
+                                              context.read<AddnewfamilymemberBloc>().add(AnmFpRemovalDateChanged(date));
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                      _section(
+                                        CustomTextField(
+                                          labelText: 'Reason',
+                                          hintText: 'reason ',
+                                          initialValue: state.removalReason,
+                                          onChanged: (value) {
+                                            context.read<AddnewfamilymemberBloc>().add(AnmFpRemovalReasonChanged(value ?? ''));
+                                          },
+                                        ),
+                                      ),
+                                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                    ],
+
+                                    if (state.fpMethod == 'Condom') ...[
+                                      _section(
+                                        CustomTextField(
+                                          labelText: 'Quantity of Condoms',
+                                          hintText: 'Quantity of Condoms',
+                                          keyboardType: TextInputType.number,
+                                          initialValue: state.condomQuantity,
+                                          onChanged: (value) {
+                                            context.read<AddnewfamilymemberBloc>().add(AnmFpCondomQuantityChanged(value ?? ''));
+                                          },
+                                        ),
+                                      ),
+                                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                    ],
+
+                                    if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)') ...[
+                                      _section(
+                                        CustomTextField(
+                                          labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
+                                          hintText: 'Quantity of Mala -N (Daily Contraceptive pill)',
+                                          keyboardType: TextInputType.number,
+                                          initialValue: state.malaQuantity,
+                                          onChanged: (value) {
+                                            context.read<AddnewfamilymemberBloc>().add(AnmFpMalaQuantityChanged(value ?? ''));
+                                          },
+                                        ),
+                                      ),
+                                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                    ],
+
+                                    if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)') ...[
+                                      _section(
+                                        CustomTextField(
+                                          labelText: 'Quantity of Chhaya (Weekly Contraceptive pill)',
+                                          hintText: 'Quantity of quantity',
+                                          keyboardType: TextInputType.number,
+                                          initialValue: state.chhayaQuantity,
+                                          onChanged: (value) {
+                                            context.read<AddnewfamilymemberBloc>().add(AnmFpChhayaQuantityChanged(value ?? ''));
+                                          },
+                                        ),
+                                      ),
+                                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                    ],
+
+                                    if (state.fpMethod == 'ECP (Emergency Contraceptive pill)') ...[
+                                      _section(
+                                        CustomTextField(
+                                          labelText: 'Quantity of ECP (Emergency Contraceptive pill)',
+                                          hintText: 'Quantity of ECP (Emergency Contraceptive pill)',
+                                          keyboardType: TextInputType.number,
+                                          initialValue: state.ecpQuantity,
+                                          onChanged: (value) {
+                                            context.read<AddnewfamilymemberBloc>().add(AnmFpEcpQuantityChanged(value ?? ''));
+                                          },
+                                        ),
+                                      ),
+                                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                    ],
+                                  ],
+                                ],
+                              ],
+
+
+                            ]
 
                           );
                         },
