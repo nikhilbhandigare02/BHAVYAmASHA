@@ -782,20 +782,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     .read<AddFamilyHeadBloc>()
                     .add(AfhUpdateSpouseName(v.trim())),
                 validator: (value) => _captureError(Validations.validateSpousName(l, value)),
-
-              ),
-            ),
-            Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-
-            _Section(
-              child: ApiDropdown<String>(
-                labelText: l.haveChildrenQuestion,
-                items: const ['Yes', 'No'],
-                getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                value: state.hasChildren,
-                onChanged: (v) => context
-                    .read<AddFamilyHeadBloc>()
-                    .add(AfhUpdateHasChildren(v)),
               ),
             ),
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -811,8 +797,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     final bloc = context.read<AddFamilyHeadBloc>();
                     bloc.add(AfhUpdateIsPregnant(v));
                     if (v == 'No') {
-                      bloc.add( LMPChange(null));
-                      bloc.add( EDDChange(null));
+                      bloc.add(LMPChange(null));
+                      bloc.add(EDDChange(null));
                     }
                   },
                   validator: (value) {
@@ -858,7 +844,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-
               ] else if (state.isPregnant == 'No') ...[
                 _Section(
                   child: CustomTextField(
@@ -869,13 +854,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         .add(AfhUpdateSpouseName(v.trim())),
                     validator: (value) => _captureError(Validations.validateAdoptingPlan(l, value)),
                   ),
-
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-
               ],
             ],
-          ] else if (state.maritalStatus != null && state.maritalStatus != 'Married') ...[
+          ],
+
+
+          if (state.maritalStatus != null && state.maritalStatus != 'Unmarried') ...[
             _Section(
               child: ApiDropdown<String>(
                 labelText: l.haveChildrenQuestion,
@@ -888,9 +874,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               ),
             ),
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-
           ],
-        ],
+          ],
+
       ),
     );
   }
