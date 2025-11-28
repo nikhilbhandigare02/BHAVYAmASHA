@@ -1238,8 +1238,31 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   value: state.relation,
                                   onChanged: (v) {
                                     context.read<AddnewfamilymemberBloc>().add(AnmUpdateRelation(v ?? ''));
-                                    // Auto-populate father/mother names based on relation
-                                    if (state.memberType == 'Child' && (v == 'Father' || v == 'Mother')) {
+                                    
+                                    // Auto-populate both parent names when either Mother or Father is selected
+                                    if (v == 'Father' || v == 'Mother') {
+                                      // Get first available names from both lists
+                                      final fatherName = _maleAdultNames.firstWhere(
+                                        (name) => name != 'Select' && name != 'Other',
+                                        orElse: () => '',
+                                      );
+                                      
+                                      final motherName = _femaleAdultNames.firstWhere(
+                                        (name) => name != 'Select' && name != 'Other',
+                                        orElse: () => '',
+                                      );
+                                      
+                                      // Update both father and mother names
+                                      if (fatherName.isNotEmpty) {
+                                        setState(() => _fatherOption = fatherName);
+                                        context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(fatherName));
+                                      }
+                                      
+                                      if (motherName.isNotEmpty) {
+                                        setState(() => _motherOption = motherName);
+                                        context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(motherName));
+                                      }
+                                    } else if (state.memberType == 'Child' && (v == 'Father' || v == 'Mother')) {
                                       _updateParentNames(v!);
                                     }
                                   },
