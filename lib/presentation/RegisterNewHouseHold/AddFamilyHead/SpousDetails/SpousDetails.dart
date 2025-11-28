@@ -108,9 +108,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
   Widget build(BuildContext context) {
     super.build(context);
     final l = AppLocalizations.of(context)!;
-    // When used inside AddNewFamilyHeadScreen we wrap the form in a
-    // BlocListener to mirror head changes. For member flows we just
-    // return the plain form driven by SpousBloc.
+ 
     if (widget.syncFromHead) {
       return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
         listenWhen: (previous, current) =>

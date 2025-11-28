@@ -294,6 +294,44 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     }
   }
 
+  String? _firstFatherItem() {
+    if (_isMemberDetails) {
+      try {
+        final v = _maleAdultNames.firstWhere((n) => n != 'Select' && n != 'Other');
+        return v.isNotEmpty ? v : null;
+      } catch (_) {
+        return null;
+      }
+    } else {
+      if ((_headName ?? '').isNotEmpty && _formatGender(_headGender) == 'Male') {
+        return _headName;
+      }
+      if ((_spouseName ?? '').isNotEmpty && _formatGender(_spouseGender) == 'Male') {
+        return _spouseName;
+      }
+      return null;
+    }
+  }
+
+  String? _firstMotherItem() {
+    if (_isMemberDetails) {
+      try {
+        final v = _femaleAdultNames.firstWhere((n) => n != 'Select' && n != 'Other');
+        return v.isNotEmpty ? v : null;
+      } catch (_) {
+        return null;
+      }
+    } else {
+      if ((_headName ?? '').isNotEmpty && _formatGender(_headGender) == 'Female') {
+        return _headName;
+      }
+      if ((_spouseName ?? '').isNotEmpty && _formatGender(_spouseGender) == 'Female') {
+        return _spouseName;
+      }
+      return null;
+    }
+  }
+
   @override
   void dispose() {
     // Close all BLoCs
@@ -1238,32 +1276,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   value: state.relation,
                                   onChanged: (v) {
                                     context.read<AddnewfamilymemberBloc>().add(AnmUpdateRelation(v ?? ''));
-                                    
-                                    // Auto-populate both parent names when either Mother or Father is selected
                                     if (v == 'Father' || v == 'Mother') {
-                                      // Get first available names from both lists
-                                      final fatherName = _maleAdultNames.firstWhere(
-                                        (name) => name != 'Select' && name != 'Other',
-                                        orElse: () => '',
-                                      );
-                                      
-                                      final motherName = _femaleAdultNames.firstWhere(
-                                        (name) => name != 'Select' && name != 'Other',
-                                        orElse: () => '',
-                                      );
-                                      
-                                      // Update both father and mother names
+                                      final fatherName = _firstFatherItem() ?? '';
+                                      final motherName = _firstMotherItem() ?? '';
                                       if (fatherName.isNotEmpty) {
                                         setState(() => _fatherOption = fatherName);
                                         context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(fatherName));
                                       }
-                                      
                                       if (motherName.isNotEmpty) {
                                         setState(() => _motherOption = motherName);
                                         context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(motherName));
                                       }
-                                    } else if (state.memberType == 'Child' && (v == 'Father' || v == 'Mother')) {
-                                      _updateParentNames(v!);
                                     }
                                   },
                                   validator: (value) => _captureAnmError(Validations.validateFamilyHeadRelation(l, value)),
@@ -1311,11 +1334,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     children: [
                                         Builder(
                                           builder: (context) {
-                                          final fatherItems = [
+                                          final List<String> fatherItems = [];
+                                          if (_isMemberDetails) {
 
-                                            ..._maleAdultNames,
-                                            'Other',
-                                          ];
+                                            fatherItems.addAll(_maleAdultNames);
+                                            fatherItems.add('Other');
+                                          } else {
+
+                                            if ((_headName ?? '').isNotEmpty && _formatGender(_headGender) == 'Male') {
+                                              fatherItems.add(_headName!);
+                                            }
+                                            if ((_spouseName ?? '').isNotEmpty && _formatGender(_spouseGender) == 'Male') {
+                                              fatherItems.add(_spouseName!);
+                                            }
+                                            fatherItems.add('Other');
+                                          }
                                           return ApiDropdown<String>(
                                             labelText: '${l.fatherGuardianNameLabel} ',
                                             items: fatherItems,
@@ -1355,11 +1388,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     children: [
                                         Builder(
                                           builder: (context) {
-                                          final motherItems = [
+                                          final List<String> motherItems = [];
+                                          if (_isMemberDetails) {
 
-                                            ..._femaleAdultNames,
-                                            'Other',
-                                          ];
+                                            motherItems.addAll(_femaleAdultNames);
+                                            motherItems.add('Other');
+                                          } else {
+                                          
+                                            if ((_headName ?? '').isNotEmpty && _formatGender(_headGender) == 'Female') {
+                                              motherItems.add(_headName!);
+                                            }
+                                            if ((_spouseName ?? '').isNotEmpty && _formatGender(_spouseGender) == 'Female') {
+                                              motherItems.add(_spouseName!);
+                                            }
+                                            motherItems.add('Other');
+                                          }
                                           return ApiDropdown<String>(
                                             labelText: "${l.motherNameLabel} ",
                                             hintText: "${l.motherNameLabel} ",
@@ -1401,11 +1444,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     children: [
                                         Builder(
                                           builder: (context) {
-                                          final motherItems = [
+                                          final List<String> motherItems = [];
+                                          if (_isMemberDetails) {
 
-                                            ..._femaleAdultNames,
-                                            'Other',
-                                          ];
+                                            motherItems.addAll(_femaleAdultNames);
+                                            motherItems.add('Other');
+                                          } else {
+
+                                            if ((_headName ?? '').isNotEmpty && _formatGender(_headGender) == 'Female') {
+                                              motherItems.add(_headName!);
+                                            }
+                                            if ((_spouseName ?? '').isNotEmpty && _formatGender(_spouseGender) == 'Female') {
+                                              motherItems.add(_spouseName!);
+                                            }
+                                            motherItems.add('Other');
+                                          }
                                           return ApiDropdown<String>(
                                             labelText: "${l.motherNameLabel} ",
                                             hintText: "${l.motherNameLabel} ",
@@ -1446,11 +1499,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     children: [
                                         Builder(
                                           builder: (context) {
-                                          final fatherItems = [
+                                          final List<String> fatherItems = [];
+                                          if (_isMemberDetails) {
 
-                                            ..._maleAdultNames,
-                                            'Other',
-                                          ];
+                                            fatherItems.addAll(_maleAdultNames);
+                                            fatherItems.add('Other');
+                                          } else {
+
+                                            if ((_headName ?? '').isNotEmpty && _formatGender(_headGender) == 'Male') {
+                                              fatherItems.add(_headName!);
+                                            }
+                                            if ((_spouseName ?? '').isNotEmpty && _formatGender(_spouseGender) == 'Male') {
+                                              fatherItems.add(_spouseName!);
+                                            }
+                                            fatherItems.add('Other');
+                                          }
                                           return ApiDropdown<String>(
                                             labelText: '${l.fatherGuardianNameLabel} ',
                                             items: fatherItems,
