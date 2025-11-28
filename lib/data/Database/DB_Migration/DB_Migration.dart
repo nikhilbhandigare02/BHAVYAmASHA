@@ -398,50 +398,57 @@ class DbMigration {
   }
 
 
-  // static Future<void> runEligibleChildTableMigration(Database db) async {
-  //   try {
-  //     await db.rawInsert('''
-  //     INSERT INTO child_care_activities (
-  //       server_id,
-  //       beneficiary_ref_key,
-  //       child_care_state,
-  //       mother_key,
-  //       created_date_time,
-  //       current_user_key,
-  //       modified_date_time,
-  //       parent_user,
-  //       is_synced,
-  //       is_deleted
-  //     )
-  //     SELECT
-  //       _id,
-  //       beneficiaries_registration_ref_key,
-  //       mother_ben_key,
-  //       child_care_type,
-  //       created_date_time,
-  //       created_by,
-  //
+  static Future<void> runEligibleChildTableMigration(Database db) async {
+    try {
+      //   await db.execute('''
+      //   ALTER TABLE child_care_activities ADD COLUMN unique_key TEXT;
+      // ''');
 
-  //       json_object(
-  //           'app_role_id', a.app_role_id,
-  //           'is_guest', a.is_guest,
-  //           'parent_added_by', a.parent_added_by,
-  //           'created_by', a.created_by,
-  //           'modified_by', a.modified_by
-  //         ),
-  //       is_synced,
-  //       is_deleted
-  //     FROM child_care a
-  //     WHERE NOT EXISTS (
-  //       SELECT 1
-  //       FROM child_care_activities b
-  //       WHERE b.beneficiary_ref_key = a.beneficiaries_registration_ref_key
-  //     );
-  //   ''');
-  //   } catch (e) {
-  //     print("❌ Migration error: $e");
-  //   }
-  // }
+      await db.rawInsert('''
+      INSERT INTO child_care_activities (
+        server_id,
+        household_ref_key,            
+        beneficiary_ref_key,
+        mother_key,
+        child_care_state,
+        created_date_time,
+        current_user_key,
+        parent_user,
+        is_synced,
+        is_deleted
+      )
+      SELECT
+        a._id,
+        bn.household_ref_key,
+        a.beneficiaries_registration_ref_key,
+        a.mother_ben_key,
+        a.child_care_type,
+        a.created_date_time,
+        a.created_by,
+
+        '{' ||
+        '"app_role_id":' || a.app_role_id || ',' ||
+        '"is_guest":' || a.is_guest || ',' ||
+        '"parent_added_by":' || a.parent_added_by || ',' ||
+        '"created_by":' || a.created_by || ',' ||
+        '"modified_by":' || a.modified_by ||
+        '}',
+        a.is_synced,
+        a.is_deleted
+      FROM child_care a
+      LEFT JOIN beneficiaries_new bn
+        ON bn.unique_key = a.beneficiaries_registration_ref_key
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM child_care_activities b
+        WHERE b.beneficiary_ref_key = a.beneficiaries_registration_ref_key
+      );
+    ''');
+    } catch (e) {
+      print("❌ Migration error: $e");
+    }
+  }
+
 
 
 

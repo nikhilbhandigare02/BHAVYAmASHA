@@ -407,37 +407,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
                 final householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
                 final motherKey = beneficiary['mother_key'] as String? ?? '';
                 final fatherKey = beneficiary['father_key'] as String? ?? '';
-                final ecPayloadList = [
-                  {
-                    'unique_key': householdRefKey,
-                    'beneficiaries_registration_ref_key': state.beneficiaryRefKey ?? state.beneficiaryId,
-                    'eligible_couple_type': 'tracking_due',
-                    'user_id': userId,
-                    'facility_id': facility,
-                    'is_deleted': 0,
-                    'created_by': userId,
-                    'created_date_time': nowTs,
-                    'modified_by': userId,
-                    'modified_date_time': nowTs,
-                    'parent_added_by': userId,
-                    'parent_facility_id': int.tryParse(facility) ?? facility,
-                    'app_role_id': appRoleId,
-                    'is_guest': 0,
-                    'device_details': {
-                      'device_id': deviceJson['id'] ?? deviceJson['device_id'] ?? deviceInfo.deviceId,
-                      'device_plateform': deviceJson['platform'] ?? deviceJson['device_plateform'] ?? deviceInfo.platform,
-                      'device_plateform_version': deviceJson['version'] ?? deviceJson['device_plateform_version'] ?? deviceInfo.osVersion,
-                    },
-                    'app_details': {
-                      'app_version': appJson['app_version'] ?? deviceInfo.appVersion.split('+').first,
-                      'app_name': appJson['app_name'] ?? deviceInfo.appName,
-                    },
-                    'geolocation_details': {
-                      'latitude': geoJson['lat']?.toString() ?? '',
-                      'longitude': geoJson['long']?.toString() ?? '',
-                    },
-                  },
-                ];
 
               }
             } catch (e) {

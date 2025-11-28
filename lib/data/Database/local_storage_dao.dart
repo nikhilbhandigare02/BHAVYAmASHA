@@ -816,25 +816,6 @@ class LocalStorageDao {
     return count ?? 0;
   }
 
-  Future<int> insertMotherCareActivity(Map<String, dynamic> data) async {
-    final db = await _db;
-    final row = <String, dynamic>{
-      'server_id': data['server_id'],
-      'household_ref_key': data['household_ref_key'],
-      'beneficiary_ref_key': data['beneficiary_ref_key'],
-      'mother_care_state': data['mother_care_state'],
-      'device_details': _encodeIfObject(data['device_details']),
-      'app_details': _encodeIfObject(data['app_details']),
-      'parent_user': _encodeIfObject(data['parent_user']),
-      'current_user_key': data['current_user_key'],
-      'facility_id': data['facility_id'],
-      'created_date_time': data['created_date_time'],
-      'modified_date_time': data['modified_date_time'],
-      'is_synced': data['is_synced'] ?? 0,
-      'is_deleted': data['is_deleted'] ?? 0,
-    };
-    return db.insert('mother_care_activities', row);
-  }
 
   Future<int> getMotherCareTotalCountLocal() async {
     final db = await _db;
@@ -1924,6 +1905,66 @@ class LocalStorageDao {
       );
     } catch (e) {
       print("Error fetching notifications: $e");
+      rethrow;
+    }
+  }
+
+  /// Inserts a new mother care activity record
+  Future<int> insertMotherCareActivity(Map<String, dynamic> data) async {
+    try {
+      final db = await _db;
+      return await db.insert('mother_care_activities', data);
+    } catch (e) {
+      print('Error inserting mother care activity: $e');
+      rethrow;
+    }
+  }
+
+  /// Updates an existing mother care activity record with the provided data
+  Future<int> updateMotherCareActivity(Map<String, dynamic> data) async {
+    try {
+      if (data['id'] == null) {
+        throw Exception('Cannot update mother care activity without ID');
+      }
+      final db = await _db;
+      final row = <String, dynamic>{
+        'server_id': data['server_id'],
+        'household_ref_key': data['household_ref_key'],
+        'beneficiary_ref_key': data['beneficiary_ref_key'],
+        'mother_care_state': data['mother_care_state'],
+        'device_details': _encodeIfObject(data['device_details']),
+        'app_details': _encodeIfObject(data['app_details']),
+        'parent_user': _encodeIfObject(data['parent_user']),
+        'current_user_key': data['current_user_key'],
+        'facility_id': data['facility_id'],
+        'modified_date_time': data['modified_date_time'],
+        'is_synced': data['is_synced'] ?? 0,
+        'is_deleted': data['is_deleted'] ?? 0,
+      };
+      return await db.update(
+        'mother_care_activities',
+        row,
+        where: 'id = ?',
+        whereArgs: [data['id']],
+      );
+    } catch (e) {
+      print('Error updating mother care activity: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getMotherCareActivityByBeneficiary(
+      String beneficiaryRefKey) async {
+    try {
+      final db = await _db;
+      final results = await db.query(
+        'mother_care_activities',
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey],
+      );
+      return results.isNotEmpty ? results.first : null;
+    } catch (e) {
+      print('Error getting mother care activity by beneficiary: $e');
       rethrow;
     }
   }

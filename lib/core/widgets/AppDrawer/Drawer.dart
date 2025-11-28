@@ -214,13 +214,12 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       isSyncing = true;
                     });
                     
-                    // Show loading snackbar
                     final scaffoldMessenger = ScaffoldMessenger.of(context);
                     scaffoldMessenger.hideCurrentSnackBar();
                     final controller = scaffoldMessenger.showSnackBar(
                       const SnackBar(
                         content: Text('Data is being fetched...'),
-                        duration: Duration(seconds: 20), // Show for 20 seconds
+                        duration: Duration(seconds: 5), // Show for 20 seconds
                         behavior: SnackBarBehavior.floating,
                       ),
                     );

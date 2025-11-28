@@ -376,7 +376,6 @@ class EligibleCouleUpdateBloc
 
       print('✅ Updated children details: $updatedChildrenDetails');
 
-      // Convert back to JSON string
       final updatedBeneficiaryInfoJson = jsonEncode(beneficiaryInfo);
 
       // Update the database
