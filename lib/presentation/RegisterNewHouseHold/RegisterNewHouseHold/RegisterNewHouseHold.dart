@@ -594,11 +594,30 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       }
       final latestBeneficiary = beneficiaries.first;
       final uniqueKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
+      Map<String, String> head = {};
+      Map<String, String> spouse = {};
+      try {
+        head = Map<String, String>.from(
+          _members.firstWhere((m) => (m['Relation'] ?? '') == 'Self'),
+        );
+      } catch (_) {}
+      try {
+        spouse = Map<String, String>.from(
+          _members.firstWhere((m) {
+            final r = (m['Relation'] ?? '').toString();
+            return r == 'Wife' || r == 'Spouse';
+          }),
+        );
+      } catch (_) {}
 
       final result = await Navigator.of(context).push<Map<String, dynamic>>(
         MaterialPageRoute(
           builder: (_) => AddNewFamilyMemberScreen(
             hhId: uniqueKey,
+            headName: head['Name'],
+            headGender: head['Gender'],
+            spouseName: spouse['Name'],
+            spouseGender: spouse['Gender'],
           ),
         ),
       );

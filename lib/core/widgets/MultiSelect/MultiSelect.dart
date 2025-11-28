@@ -95,7 +95,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                   : [],
             ),
           ),
-          SizedBox(height: 0.2.h),
+          SizedBox(height: 0.0.h),
         ],
         InkWell(
           onTap: _showMultiSelect,
@@ -180,6 +180,7 @@ class _MultiSelectDialogState<T> extends State<MultiSelectDialog<T>> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Colors.white,
       title: Text(widget.title),
       content: SingleChildScrollView(
         child: Column(

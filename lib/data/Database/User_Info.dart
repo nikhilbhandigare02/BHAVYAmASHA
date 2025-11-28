@@ -196,7 +196,7 @@ class UserInfo {
         print('User $username updated in the database');
         return {'isNewUser': false, 'user': existingUser.first};
       } else {
-        // Insert new user
+
         await db.insert(
           'users',
           {

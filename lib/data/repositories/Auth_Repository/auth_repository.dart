@@ -56,16 +56,14 @@ class AuthRepository {
         final roleId = userDetails['app_role_id'] is int 
             ? userDetails['app_role_id'] 
             : int.tryParse(userDetails['app_role_id']?.toString() ?? '0') ?? 0;
-        
-        // Store user data in local database
+
         final userData = await UserInfo.storeUserData(
           username: username,
           password: password,
           roleId: roleId,
           userDetails: userDetails,
         );
-        
-        // Save user data to secure storage for drawer access
+
         try {
           await SecureStorageService.saveUserDataWithKey(
             username, // Using username as unique key
@@ -76,8 +74,7 @@ class AuthRepository {
               'token': loginResponse.token,
             },
           );
-          
-          // Save token separately for auth purposes
+
           if (loginResponse.token != null) {
             await SecureStorageService.saveToken(loginResponse.token!);
           }

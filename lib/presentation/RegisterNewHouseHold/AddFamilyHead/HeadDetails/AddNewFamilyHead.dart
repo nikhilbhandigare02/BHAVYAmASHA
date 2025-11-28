@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +16,7 @@ import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Spo
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/ChildrenDetaills.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/bloc/children_bloc.dart';
 import 'package:medixcel_new/data/Database/User_Info.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:sizer/sizer.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/utils/enums.dart';
@@ -845,16 +847,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
               ] else if (state.isPregnant == 'No') ...[
-                _Section(
-                  child: CustomTextField(
-                    labelText: '${l.fpAdoptingLabel} *',
-                    hintText: l.select,
-                    onChanged: (v) => context
-                        .read<AddFamilyHeadBloc>()
-                        .add(AfhUpdateSpouseName(v.trim())),
-                    validator: (value) => _captureError(Validations.validateAdoptingPlan(l, value)),
-                  ),
-                ),
+
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
               ],
             ],
@@ -956,23 +949,50 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               ),
             );
           } else {
-            // New insert: prefill village from current logged-in user
-            // working_location.village stored inside users.details JSON.
-            UserInfo.getCurrentUser().then((user) {
-              if (user == null) return;
-              final details = user['details'];
-              if (details is Map<String, dynamic>) {
-                final data = details['data'];
-                if (data is Map<String, dynamic>) {
-                  final working = data['working_location'];
-                  if (working is Map<String, dynamic>) {
-                    final village = (working['village'] ?? '').toString();
-                    if (village.isNotEmpty) {
-                      b.add(AfhUpdateVillage(village));
+            // New insert: prefill village from the same source as AppDrawer
+            // using secure storage user data. Fallback to legacy format if needed.
+            SecureStorageService.getCurrentUserData().then((data) async {
+              Map<String, dynamic>? user = data;
+              if (user == null || user.isEmpty) {
+                try {
+                  final legacyRaw = await SecureStorageService.getUserData();
+                  if (legacyRaw != null && legacyRaw.isNotEmpty) {
+                    final parsed = jsonDecode(legacyRaw);
+                    if (parsed is Map<String, dynamic>) {
+                      user = parsed;
+                    }
+                  }
+                } catch (_) {}
+              }
+
+              try {
+                final working = user?['working_location'];
+                if (working is Map) {
+                  final village = (working['village'] ?? '').toString();
+                  if (village.isNotEmpty) {
+                    b.add(AfhUpdateVillage(village));
+                    return;
+                  }
+                }
+              } catch (_) {}
+
+              // Fallback to DB user details when secure storage lacks data
+              try {
+                final dbUser = await UserInfo.getCurrentUser();
+                final details = dbUser?['details'];
+                if (details is Map<String, dynamic>) {
+                  final data = details['data'];
+                  if (data is Map<String, dynamic>) {
+                    final working2 = data['working_location'];
+                    if (working2 is Map<String, dynamic>) {
+                      final village2 = (working2['village'] ?? '').toString();
+                      if (village2.isNotEmpty) {
+                        b.add(AfhUpdateVillage(village2));
+                      }
                     }
                   }
                 }
-              }
+              } catch (_) {}
             });
           }
           return b;
