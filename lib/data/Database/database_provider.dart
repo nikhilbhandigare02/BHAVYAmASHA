@@ -72,7 +72,7 @@ class DatabaseProvider {
       await DbMigration.runFollowUpTableMigration(db);
       await DbMigration.runEligileCoupleTableMigration(db);
       await DbMigration.runMotherCareTableMigration(db);
-      // await DbMigration.runEligibleChildTableMigration(db);
+      await DbMigration.runEligibleChildTableMigration(db);
 
     } catch (e) {
       print("❌ Migration error: $e");

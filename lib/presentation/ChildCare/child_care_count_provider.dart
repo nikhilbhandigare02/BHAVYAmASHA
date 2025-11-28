@@ -80,35 +80,27 @@ class ChildCareCountProvider {
       developer.log('Getting registration due count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
       
-       final rows = await db.query(
-        'beneficiaries_new',
-        where: 'is_deleted = ? AND beneficiary_state = ?',
-        whereArgs: [0, 'registration_due'],
+      // First check if child_care_activities table exists
+      final tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='child_care_activities'"
       );
-
-      int count = 0;
-      for (final row in rows) {
-        try {
-          // Parse beneficiary_info to check if it's a child
-          dynamic info;
-          if (row['beneficiary_info'] is String) {
-            info = jsonDecode(row['beneficiary_info'] as String);
-          } else {
-            info = row['beneficiary_info'];
-          }
-
-          if (info is! Map) continue;
-
-          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-          if (memberType == 'child') {
-            count++;
-          }
-        } catch (e) {
-          developer.log('Error processing beneficiary: $e', name: 'ChildCareCountProvider');
-          continue;
-        }
+      
+      if (tables.isEmpty) {
+        developer.log('child_care_activities table does not exist', name: 'ChildCareCountProvider');
+        return 0;
       }
       
+      // Get count of children with registration_due status from child_care_activities
+      final List<Map<String, dynamic>> results = await db.rawQuery('''
+        SELECT COUNT(DISTINCT cca.beneficiary_ref_key) as count
+        FROM child_care_activities cca
+        INNER JOIN beneficiaries_new bn ON cca.beneficiary_ref_key = bn.unique_key
+        WHERE cca.child_care_state = 'registration_due'
+        AND cca.is_deleted = 0
+        AND bn.is_deleted = 0
+      ''');
+      
+      final count = results.first['count'] as int? ?? 0;
       developer.log('Found $count children due for registration', name: 'ChildCareCountProvider');
       return count;
       

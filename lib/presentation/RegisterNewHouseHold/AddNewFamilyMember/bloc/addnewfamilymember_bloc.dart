@@ -854,6 +854,43 @@ class AddnewfamilymemberBloc
 
         print('Saving new family member with payload: ${jsonEncode(memberPayload)}');
         await LocalStorageDao.instance.insertBeneficiary(memberPayload);
+        
+        // If this is a child with registration_due status, insert into child_care_activities
+        if (state.memberType?.toLowerCase() == 'child' && beneficiaryState == 'registration_due') {
+          try {
+            final childCareActivityData = {
+              'server_id': null,
+              'household_ref_key': householdRefKey,
+              'beneficiary_ref_key': memberId,
+              'mother_key': resolvedMotherKey,
+              'father_key': resolvedFatherKey,
+              'child_care_state': 'registration_due',
+              'device_details': jsonEncode({
+                'id': deviceInfo.deviceId,
+                'platform': deviceInfo.platform,
+                'version': deviceInfo.osVersion,
+              }),
+              'app_details': jsonEncode({
+                'app_version': deviceInfo.appVersion.split('+').first,
+                'app_name': deviceInfo.appName,
+                'build_number': deviceInfo.buildNumber,
+                'package_name': deviceInfo.packageName,
+              }),
+              'parent_user': jsonEncode({}),
+              'current_user_key': ashaUniqueKey,
+              'facility_id': facilityId,
+              'created_date_time': ts,
+              'modified_date_time': ts,
+              'is_synced': 0,
+              'is_deleted': 0,
+            };
+            
+            print('Inserting child care activity: ${jsonEncode(childCareActivityData)}');
+            await LocalStorageDao.instance.insertChildCareActivity(childCareActivityData);
+          } catch (e) {
+            print('Error inserting child care activity: $e');
+          }
+        }
 
         if (state.maritalStatus == 'Married' && state.spouseName != null) {
           try {

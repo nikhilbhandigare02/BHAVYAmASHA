@@ -48,26 +48,44 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries_new',
-        where: 'beneficiary_state = ?',
+      // First, get all child care activities with registration_due status
+      final List<Map<String, dynamic>> childActivities = await db.query(
+        'child_care_activities',
+        where: 'child_care_state = ?',
         whereArgs: ['registration_due'],
         orderBy: 'created_date_time DESC',
       );
 
-      debugPrint('🎯 Found ${rows.length} beneficiaries with registration_due status');
+      debugPrint('🎯 Found ${childActivities.length} child care activities with registration_due status');
 
       final childBeneficiaries = <Map<String, dynamic>>[];
 
-      for (final row in rows) {
-        final rowHhId = row['household_ref_key']?.toString();
-        if (rowHhId == null) {
-          debugPrint('⚠️ Skipping row with null household_ref_key');
+      for (final activity in childActivities) {
+        final beneficiaryRefKey = activity['beneficiary_ref_key']?.toString();
+        final householdRefKey = activity['household_ref_key']?.toString();
+        
+        if (beneficiaryRefKey == null || householdRefKey == null) {
+          debugPrint('⚠️ Skipping child care activity with null beneficiary_ref_key or household_ref_key');
           continue;
         }
 
-        debugPrint('\n🔍 Processing beneficiary with household_ref_key: $rowHhId');
+        debugPrint('\n🔍 Processing child care activity for beneficiary: $beneficiaryRefKey');
 
+        // Get the beneficiary record
+        final List<Map<String, dynamic>> beneficiaryRows = await db.query(
+          'beneficiaries_new',
+          where: 'unique_key = ?',
+          whereArgs: [beneficiaryRefKey],
+          limit: 1,
+        );
+
+        if (beneficiaryRows.isEmpty) {
+          debugPrint('⚠️ No beneficiary found for child care activity: $beneficiaryRefKey');
+          continue;
+        }
+
+        final row = beneficiaryRows.first;
+        
         // Parse beneficiary_info
         dynamic info;
         try {
@@ -108,28 +126,24 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             continue;
           }
 
-          final isAlreadyRegistered = await _isChildRegistered(db, rowHhId, name);
+          final isAlreadyRegistered = await _isChildRegistered(db, householdRefKey, name);
 
           if (isAlreadyRegistered) {
-            debugPrint('⏭️ Child already registered: $name in household: $rowHhId - SKIPPING');
+            debugPrint('⏭️ Child already registered: $name in household: $householdRefKey - SKIPPING');
             continue;
           }
 
           debugPrint('✅ Child NOT registered yet: $name - ADDING TO LIST');
 
           final fatherName = memberData['fatherName']?.toString() ?? '';
-
           final motherName = memberData['motherName']?.toString() ?? '';
-
           final mobileNo = memberData['mobileNo']?.toString() ?? '';
-
           final richId = memberData['RichIDChanged']?.toString() ?? '';
-
           final beneficiaryId = row['unique_key']?.toString() ?? '';
 
           final card = <String, dynamic>{
-            'hhId': rowHhId,
-            'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+            'hhId': householdRefKey,
+            'RegitrationDate': _formatDate(activity['created_date_time']?.toString() ?? row['created_date_time']?.toString()),
             'RegitrationType': 'Child',
             'BeneficiaryID': beneficiaryId,
             'RchID': richId,
@@ -140,6 +154,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             'MotherName': motherName,
             '_raw': row,
             '_memberData': memberData,
+            '_activityData': activity,
           };
 
           debugPrint('📋 Created card: ${card['Name']}');

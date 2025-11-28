@@ -2874,108 +2874,64 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         print('Submitting member data: ${jsonEncode(memberData)}');
 
 
-                                        if (_isMemberDetails || _isEdit) {
-                                          if (_isEdit) {
-                                            bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
-                                          } else {
-                                            // For new members in member details mode
-                                            final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
-                                            final showChildren = showSpouse && state.hasChildren == 'Yes';
-                                            
-                                            // Calculate the last step we should show
-                                            final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
-                                            
-                                            // If we're not on the last step yet, go to the next step
-                                            if (_currentStep < lastStep) {
-                                              setState(() { _currentStep += 1; });
-                                              final ctrl = DefaultTabController.of(context);
-                                              ctrl?.animateTo(_currentStep);
-                                              return;
-                                            }
-                                            
-                                            // If we've gone through all steps, collect spouse and children data if applicable
-                                            if (showSpouse) {
-                                              try {
-                                                final spState = _spousBloc.state;
-                                                final spJson = spState.toJson();
-                                                
-                                                final hasSpouseData = spJson.values.any((v) {
-                                                  if (v == null) return false;
-                                                  if (v is String) return v.trim().isNotEmpty;
-                                                  return true;
-                                                });
-                                                
-                                                if (hasSpouseData) {
-                                                  memberData['spouseUseDob'] = spState.useDob;
-                                                  memberData['spouseDob'] = spState.dob?.toIso8601String();
-                                                  memberData['spouseApproxAge'] = spState.approxAge;
-                                                  memberData['spousedetails'] = jsonEncode(spJson);
-                                                }
-                                              } catch (e) {
-                                                print('Error processing spouse data: $e');
-                                              }
-                                            }
-                                            
-                                            // Add children data if applicable
-                                            if (showChildren) {
-                                              try {
-                                                final ch = _childrenBloc.state;
-                                                memberData['childrendetails'] = ch.toJson();
-                                              } catch (e) {
-                                                print('Error processing children data: $e');
-                                              }
-                                            }
-                                            
-                                            // Submit the form with all collected data
-                                            // The BlocListener will handle navigation after successful save
-                                            bloc.add(AnmSubmit(context, hhid: widget.hhId, extraData: memberData));
-                                            return; // Don't navigate yet, wait for success state
-                                          }
+                                        // For both member details and household flows, we need to collect all data first
+                                        final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
+                                        final showChildren = showSpouse && state.hasChildren == 'Yes';
+                                        final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
+
+                                        // If we're not on the last step yet, go to the next step
+                                        if (_currentStep < lastStep) {
+                                          setState(() { _currentStep += 1; });
+                                          final ctrl = DefaultTabController.of(context);
+                                          ctrl?.animateTo(_currentStep);
                                           return;
                                         }
 
-                                        if (!_isEdit) {
-                                          final showSpouse = !_isEdit && state.memberType != 'Child' && state.maritalStatus == 'Married';
-                                          final showChildren = !_isEdit && showSpouse && state.hasChildren == 'Yes';
-                                          final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
-
-                                          if (_currentStep < lastStep) {
-                                            setState(() { _currentStep += 1; });
-                                            final ctrl = DefaultTabController.of(context);
-                                            ctrl?.animateTo(_currentStep);
-                                            return;
-                                          }
-
-                                          // If this is the last step, submit the form
-                                          if (!_isEdit) {
-                                            bloc.add(AnmSubmit(context, hhid: widget.hhId));
-                                            return; // Don't navigate yet, wait for success state
-                                          }
-
+                                        // Collect spouse data if applicable
+                                        if (showSpouse) {
                                           try {
                                             final spState = _spousBloc.state;
                                             final spJson = spState.toJson();
-
-
+                                            
                                             final hasSpouseData = spJson.values.any((v) {
                                               if (v == null) return false;
                                               if (v is String) return v.trim().isNotEmpty;
                                               return true;
                                             });
+                                            
                                             if (hasSpouseData) {
                                               memberData['spouseUseDob'] = spState.useDob;
                                               memberData['spouseDob'] = spState.dob?.toIso8601String();
                                               memberData['spouseApproxAge'] = spState.approxAge;
-
-                                              // Store as JSON string so that it
-                                              // is compatible with memberData's
-                                              // String-valued fields. Inline edit
-                                              // hydration already supports both
-                                              // Map and String for spousedetails.
                                               memberData['spousedetails'] = jsonEncode(spJson);
                                             }
-                                          } catch (_) {}
+                                          } catch (e) {
+                                            print('Error processing spouse data: $e');
+                                          }
+                                        }
+                                        
+                                        // Add children data if applicable
+                                        if (showChildren) {
+                                          try {
+                                            final ch = _childrenBloc.state;
+                                            memberData['childrendetails'] = ch.toJson();
+                                          } catch (e) {
+                                            print('Error processing children data: $e');
+                                          }
+                                        }
 
+                                        // Handle based on the flow
+                                        if (_isMemberDetails) {
+                                          // In member details flow, save immediately on Add button
+                                          if (_isEdit) {
+                                            bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
+                                          } else {
+                                            bloc.add(AnmSubmit(context, hhid: widget.hhId, extraData: memberData));
+                                          }
+                                          return; // Don't navigate yet, wait for success state
+                                        } else {
+                                          // In household flow, just return the data to parent
+                                          // The parent will handle saving when the final Save button is clicked
                                           Navigator.of(context).pop(memberData);
                                           return;
                                         }
