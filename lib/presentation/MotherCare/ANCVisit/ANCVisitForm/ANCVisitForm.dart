@@ -16,6 +16,7 @@ import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/Database/tables/followup_form_data_table.dart';
 import 'bloc/anvvisitform_bloc.dart';
 import 'package:medixcel_new/core/widgets/MultiSelect/MultiSelect.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
 
 class Ancvisitform extends StatefulWidget {
   final Map<String, dynamic>? beneficiaryData;
@@ -52,7 +53,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
 
     if (beneficiaryId == null || beneficiaryId.isEmpty || householdRefKey == null || householdRefKey.isEmpty) {
-      print('⚠️ Missing parameters for ANC form. BeneficiaryID=$beneficiaryId, hhId=$householdRefKey');
+      print('Missing parameters for ANC form. BeneficiaryID=$beneficiaryId, hhId=$householdRefKey');
     }
 
     _bloc = AnvvisitformBloc(
@@ -60,7 +61,6 @@ class _AncvisitformState extends State<Ancvisitform> {
       householdRefKey: householdRefKey ?? '',
     );
 
-    // Initialize form with a post-frame callback to ensure widgets are built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _initializeForm();
@@ -84,7 +84,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
-  // Update form fields with loaded data
+
   void _updateFormWithData(Map<String, dynamic> formData) {
     // Basic information
     _bloc.add(VisitTypeChanged(formData['visit_type'] ?? ''));
@@ -191,7 +191,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
-  // Calculate weeks of pregnancy from LMP date to current date
+
   int _calculateWeeksOfPregnancy(DateTime? lmpDate) {
     if (lmpDate == null) return 0;
     final today = DateTime.now();
@@ -203,7 +203,9 @@ class _AncvisitformState extends State<Ancvisitform> {
   Future<void> _initializeForm() async {
     final data = widget.beneficiaryData;
     if (data == null) return;
-
+    
+    String? houseNo;
+    
     // 1. First try to get names directly from the passed data
     final womanName = data['Name']?.toString();
     final husbandName = data['Husband']?.toString() ?? data['husbandName']?.toString();
@@ -211,21 +213,40 @@ class _AncvisitformState extends State<Ancvisitform> {
     if (womanName != null && womanName.isNotEmpty) {
       _bloc.add(WomanNameChanged(womanName));
     }
-    
     if (husbandName != null && husbandName.isNotEmpty) {
       _bloc.add(HusbandNameChanged(husbandName));
     }
 
-    // 2. Process prefill data if available
-    if (data['prefill'] is Map) {
-      try {
-        _updateFormWithData(Map<String, dynamic>.from(data['prefill'] as Map));
-      } catch (e) {
-        print('Error updating form with prefill data: $e');
+    // 2. Fetch and set house number from beneficiary data
+    try {
+      final householdRefKey = data['hhId']?.toString() ?? 
+                            (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['household_ref_key']?.toString() : null);
+      
+      if (householdRefKey != null && householdRefKey.isNotEmpty) {
+        final db = await DatabaseProvider.instance.database;
+        final result = await db.query(
+          'beneficiaries_new',
+          where: 'household_ref_key = ?',
+          whereArgs: [householdRefKey],
+        );
+
+        if (result.isNotEmpty) {
+          for (final row in result) {
+            try {
+              final beneficiaryInfo = jsonDecode(row['beneficiary_info'] as String? ?? '{}') as Map<String, dynamic>;
+              if (beneficiaryInfo.containsKey('houseNo') && beneficiaryInfo['houseNo'] != null) {
+                _bloc.add(HouseNumberChanged(beneficiaryInfo['houseNo'].toString()));
+                break; // Found house number, no need to check other records
+              }
+            } catch (e) {
+              print('Error parsing beneficiary info: $e');
+            }
+          }
+        }
       }
+    } catch (e) {
+      print('Error fetching house number: $e');
     }
-    
-    String? houseNo;
 
     // Extract LMP and EDD from beneficiary data
     try {
@@ -648,7 +669,7 @@ class _AncvisitformState extends State<Ancvisitform> {
       }
     }
 
-    // If no data but we have houseNo from storage, set it
+    // If no data but we have house number from storage, set it
     if (houseNo != null) {
       _bloc.add(HouseNumberChanged(houseNo));
     }

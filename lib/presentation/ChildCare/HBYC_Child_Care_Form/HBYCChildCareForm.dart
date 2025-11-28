@@ -127,7 +127,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               value: state.beneficiaryAbsent.isNotEmpty ? state.beneficiaryAbsent : null,
                               hintText: AppLocalizations.of(context)!.select,
                               onChanged: (v) => context.read<HbycChildCareBloc>().add(BeneficiaryAbsentChanged(v ?? '')),
-                              validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
+                             // validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (state.beneficiaryAbsent == 'Yes') ...[ 
@@ -158,24 +158,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            RichText(
-                              text: TextSpan(
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: Colors.black,
-                                ),
-                                children: [
-                                  TextSpan(text: label.replaceAll(' *', '')),
-                                  const TextSpan(
-                                    text: ' *',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            Text('HYBC home visit?', style: TextStyle(fontSize: 14.sp),),
                             ApiDropdown<String>(
                               items: _hbycVisitMonthOptions,
                               getLabel: (s) => s,
@@ -207,6 +190,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (state.isChildSick == 'Yes')
                               Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Child referred to health facility?', style: TextStyle(fontSize: 14.sp)),
                                   ApiDropdown<String>(

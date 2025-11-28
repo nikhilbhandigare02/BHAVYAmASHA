@@ -414,6 +414,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     labelText: l10n?.rchIdChildLabel ?? 'RCH ID (Child)',
                                     hintText: l10n?.rchChildSerialHint ?? 'Enter RCH ID of the child',
                                     initialValue: state.rchIdChild,
+                                    maxLength: 12,
                                     onChanged: (v) => bloc.add(RchIdChildChanged(v)),
                                   ),
                                 ),
@@ -423,14 +424,22 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                   width: 80,
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 20),
-                                    child: RoundButton(
-                                      title: 'VERIFY',
-                                      borderRadius: 8,
-                                      fontSize: 12,
-                                      onPress: () {
-                                        // Add verification logic here
-                                      },
-                                    ),
+                                    child: state.isSubmitting
+                                        ? const Center(
+                                            child: SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(strokeWidth: 3),
+                                            ),
+                                          )
+                                        : RoundButton(
+                                            title: 'VERIFY',
+                                            borderRadius: 8,
+                                            fontSize: 12,
+                                            onPress: () {
+                                              // Add verification logic here
+                                            },
+                                          ),
                                   ),
                                 ),
                               ],
@@ -586,12 +595,45 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                            CustomTextField(
-                              labelText: l10n?.mothersRchIdLabel ?? "Mother's RCH ID number",
-                              hintText: 'Enter mother\'s RCH ID',
-                              initialValue: state.mothersRchIdNumber,
-                              onChanged: (v) => bloc.add(MothersRchIdNumberChanged(v)),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+
+                                Expanded(
+                                  child: CustomTextField(
+                                    labelText: l10n?.mothersRchIdLabel ?? "Mother's RCH ID number",
+                                    hintText: 'Enter mother\'s RCH ID',
+                                    initialValue: state.mothersRchIdNumber,
+                                    onChanged: (v) => bloc.add(MothersRchIdNumberChanged(v)),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                SizedBox(
+                                  height: 50,
+                                  width: 80,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 20),
+                                    child: state.isSubmitting
+                                        ? const Center(
+                                      child: SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(strokeWidth: 3),
+                                      ),
+                                    )
+                                        : RoundButton(
+                                      title: 'VERIFY',
+                                      borderRadius: 8,
+                                      fontSize: 12,
+                                      onPress: () {
+                                        // Add verification logic here
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
+                            const SizedBox(height: 5),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             Padding(

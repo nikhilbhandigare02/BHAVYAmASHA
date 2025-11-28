@@ -110,7 +110,7 @@ class HouseHoldAmenities extends StatelessWidget {
                                           style: const TextStyle(
                                             color: Colors.black,
                                             fontWeight: FontWeight.w400,
-                                            fontSize: 13,
+                                            fontSize: 14,
                                           ),
                                         ),
                                         const SizedBox(height: 6),
@@ -193,7 +193,7 @@ class HouseHoldAmenities extends StatelessWidget {
                                   child: Text(
                                     l.cookingFuelTypeLabel,
                                     style:  TextStyle(
-                                      fontSize: 11,
+                                      fontSize: 15,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),

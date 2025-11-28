@@ -83,6 +83,10 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     if (widget.initialHeadForm != null) {
       _headForm = Map<String, dynamic>.from(widget.initialHeadForm!);
       headAdded = true;
+      final hhKey = (_headForm?['hh_unique_key'] ?? '').toString();
+      if (widget.isEdit && hhKey.isNotEmpty) {
+        _hydrateAmenitiesFromDb(hhKey);
+      }
     }
   }
 
@@ -127,6 +131,74 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     _tabController.dispose();
     _hhBloc.close();
     super.dispose();
+  }
+
+  Future<void> _hydrateAmenitiesFromDb(String hhKey) async {
+    try {
+      final row = await LocalStorageDao.instance.getHouseholdByUniqueKey(hhKey);
+      if (row == null) return;
+      final infoRaw = row['household_info'];
+      final Map<String, dynamic> info = infoRaw is Map
+          ? Map<String, dynamic>.from(infoRaw)
+          : <String, dynamic>{};
+
+      String norm(dynamic v) {
+        final s = (v ?? '').toString().trim();
+        if (s.isEmpty) return '';
+        if (s.toLowerCase() == 'not specified') return '';
+        return s;
+      }
+
+      final residentialArea = norm(info['residentialArea']);
+      if (residentialArea.isNotEmpty) {
+        _hhBloc.add(ResidentialAreaChange(residentialArea: residentialArea));
+      }
+
+      final houseType = norm(info['houseType']);
+      if (houseType.isNotEmpty) {
+        _hhBloc.add(HouseTypeChange(houseType: houseType));
+      }
+
+      final ownershipType = norm(info['ownershipType']);
+      if (ownershipType.isNotEmpty) {
+        _hhBloc.add(OwnershipTypeChange(ownershipType: ownershipType));
+      }
+
+      final houseKitchen = norm(info['houseKitchen']);
+      if (houseKitchen.isNotEmpty) {
+        _hhBloc.add(KitchenChange(houseKitchen: houseKitchen));
+      }
+
+      final cookingFuel = norm(info['cookingFuel']);
+      if (cookingFuel.isNotEmpty) {
+        _hhBloc.add(CookingFuelTypeChange(cookingFuel: cookingFuel));
+      }
+
+      final waterSource = norm(info['waterSource']);
+      if (waterSource.isNotEmpty) {
+        _hhBloc.add(WaterSourceChange(waterSource: waterSource));
+      }
+
+      final electricity = norm(info['electricity']);
+      if (electricity.isNotEmpty) {
+        _hhBloc.add(ElectricityChange(electricity: electricity));
+      }
+
+      final toilet = norm(info['toilet']);
+      if (toilet.isNotEmpty) {
+        _hhBloc.add(ToiletChange(toilet: toilet));
+      }
+
+      final toiletType = norm(info['toiletType']);
+      if (toiletType.isNotEmpty) {
+        _hhBloc.add(ToiletTypeChange(toiletType: toiletType));
+      }
+
+      final toiletPlace = norm(info['toiletPlace']);
+      if (toiletPlace.isNotEmpty) {
+        _hhBloc.add(ToiletPlaceChange(toiletPlace: toiletPlace));
+      }
+    } catch (_) {}
   }
 
   @override
