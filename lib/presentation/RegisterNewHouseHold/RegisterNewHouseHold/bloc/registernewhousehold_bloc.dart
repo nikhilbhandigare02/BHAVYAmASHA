@@ -260,18 +260,45 @@ class RegisterNewHouseholdBloc
               print('📝 Inserting head beneficiary from headForm: ' +
                   jsonEncode(headPayload));
               await LocalStorageDao.instance.insertBeneficiary(headPayload);
-              
+                  
               // Check if head is female and pregnant, then insert ANC due status
-              if ((headForm['gender']?.toString().toLowerCase() == 'female') && 
-                  (headForm['isPregnant']?.toString().toLowerCase() == 'yes')) {
-                await _insertAncDueStatus(
-                  householdRefKey: uniqueKey,
-                  beneficiaryRefKey: headId,
-                  deviceInfo: deviceInfo,
-                  ashaUniqueKey: ashaUniqueKey,
-                  facilityId: facilityId,
-                  ts: ts,
-                );
+              if (headForm['gender']?.toString().toLowerCase() == 'female') {
+                final isPregnant = (headForm['isPregnant']?.toString().toLowerCase() == 'yes' || 
+                                  headForm['isPregnant']?.toString().toLowerCase() == 'true');
+                
+                if (isPregnant) {
+                  try {
+                    final motherCareActivityData = {
+                      'server_id': null,
+                      'household_ref_key': uniqueKey,
+                      'beneficiary_ref_key': headId,
+                      'mother_care_state': 'anc_due',
+                      'device_details': jsonEncode({
+                        'id': deviceInfo.deviceId,
+                        'platform': deviceInfo.platform,
+                        'version': deviceInfo.osVersion,
+                      }),
+                      'app_details': jsonEncode({
+                        'app_version': deviceInfo.appVersion.split('+').first,
+                        'app_name': deviceInfo.appName,
+                        'build_number': deviceInfo.buildNumber,
+                        'package_name': deviceInfo.packageName,
+                      }),
+                      'parent_user': jsonEncode({}),
+                      'current_user_key': ashaUniqueKey,
+                      'facility_id': facilityId,
+                      'created_date_time': ts,
+                      'modified_date_time': ts,
+                      'is_synced': 0,
+                      'is_deleted': 0,
+                    };
+                    
+                    print('Inserting mother care activity for pregnant head: ${jsonEncode(motherCareActivityData)}');
+                    await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
+                  } catch (e) {
+                    print('Error inserting mother care activity for head: $e');
+                  }
+                }
               }
 
 
@@ -401,16 +428,43 @@ class RegisterNewHouseholdBloc
                       .insertBeneficiary(spousePayload);
                       
                   // Check if spouse is female and pregnant, then insert ANC due status
-                  if ((spouseInfo['gender']?.toString().toLowerCase() == 'female') && 
-                      (spouseInfo['isPregnant']?.toString().toLowerCase() == 'yes')) {
-                    await _insertAncDueStatus(
-                      householdRefKey: uniqueKey,
-                      beneficiaryRefKey: spouseKey!,
-                      deviceInfo: deviceInfo,
-                      ashaUniqueKey: ashaUniqueKey,
-                      facilityId: facilityId,
-                      ts: ts,
-                    );
+                  if (spouseInfo['gender']?.toString().toLowerCase() == 'female') {
+                    final isPregnant = (spouseInfo['isPregnant']?.toString().toLowerCase() == 'yes' || 
+                                      spouseInfo['isPregnant']?.toString().toLowerCase() == 'true');
+                    
+                    if (isPregnant) {
+                      try {
+                        final motherCareActivityData = {
+                          'server_id': null,
+                          'household_ref_key': uniqueKey,
+                          'beneficiary_ref_key': spouseKey!,
+                          'mother_care_state': 'anc_due',
+                          'device_details': jsonEncode({
+                            'id': deviceInfo.deviceId,
+                            'platform': deviceInfo.platform,
+                            'version': deviceInfo.osVersion,
+                          }),
+                          'app_details': jsonEncode({
+                            'app_version': deviceInfo.appVersion.split('+').first,
+                            'app_name': deviceInfo.appName,
+                            'build_number': deviceInfo.buildNumber,
+                            'package_name': deviceInfo.packageName,
+                          }),
+                          'parent_user': jsonEncode({}),
+                          'current_user_key': ashaUniqueKey,
+                          'facility_id': facilityId,
+                          'created_date_time': ts,
+                          'modified_date_time': ts,
+                          'is_synced': 0,
+                          'is_deleted': 0,
+                        };
+                        
+                        print('Inserting mother care activity for pregnant spouse: ${jsonEncode(motherCareActivityData)}');
+                        await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
+                      } catch (e) {
+                        print('Error inserting mother care activity for spouse: $e');
+                      }
+                    }
                   }
 
                 } catch (e) {
@@ -505,19 +559,6 @@ class RegisterNewHouseholdBloc
                     existingHead['geo_location'] ?? geoLocationJson;
 
                 await LocalStorageDao.instance.updateBeneficiary(updatedHead);
-                
-                // Check if head is female and pregnant, then insert/update ANC due status
-                if ((headForm['gender']?.toString().toLowerCase() == 'female') && 
-                    (headForm['isPregnant']?.toString().toLowerCase() == 'yes')) {
-                  await _upsertAncDueStatus(
-                    householdRefKey: existingHhKey,
-                    beneficiaryRefKey: existingHeadKey,
-                    deviceInfo: deviceInfo,
-                    ashaUniqueKey: ashaUniqueKey,
-                    facilityId: facilityId,
-                    ts: ts,
-                  );
-                }
               }
 
               // ============================
@@ -862,6 +903,84 @@ class RegisterNewHouseholdBloc
                     '${jsonEncode(memberPayload)}');
                 await LocalStorageDao.instance
                     .insertBeneficiary(memberPayload);
+                    
+                // If this is a female member who is pregnant, insert into mother_care_activities
+                final isFemale = (member['gender']?.toString().toLowerCase() == 'female');
+                final isPregnant = (member['isPregnant']?.toString().toLowerCase() == 'yes' || 
+                                  member['isPregnant']?.toString().toLowerCase() == 'true');
+                                  
+                if (isFemale && isPregnant) {
+                  try {
+                    final motherCareActivityData = {
+                      'server_id': null,
+                      'household_ref_key': uniqueKey,
+                      'beneficiary_ref_key': memberId,
+                      'mother_care_state': 'anc_due',
+                      'device_details': jsonEncode({
+                        'id': deviceInfo.deviceId,
+                        'platform': deviceInfo.platform,
+                        'version': deviceInfo.osVersion,
+                      }),
+                      'app_details': jsonEncode({
+                        'app_version': deviceInfo.appVersion.split('+').first,
+                        'app_name': deviceInfo.appName,
+                        'build_number': deviceInfo.buildNumber,
+                        'package_name': deviceInfo.packageName,
+                      }),
+                      'parent_user': jsonEncode({}),
+                      'current_user_key': ashaUniqueKey,
+                      'facility_id': facilityId,
+                      'created_date_time': ts,
+                      'modified_date_time': ts,
+                      'is_synced': 0,
+                      'is_deleted': 0,
+                    };
+                    
+                    print('Inserting mother care activity for pregnant woman: ${jsonEncode(motherCareActivityData)}');
+                    await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
+                  } catch (e) {
+                    print('Error inserting mother care activity: $e');
+                  }
+                }
+                
+                // If this is a female member who is pregnant, insert into mother_care_activities
+                // final isFemale = (member['gender']?.toString().toLowerCase() == 'female');
+                // final isPregnant = (member['isPregnant']?.toString().toLowerCase() == 'yes' ||
+                //                   member['isPregnant']?.toString().toLowerCase() == 'true');
+                //
+                if (isFemale && isPregnant) {
+                  try {
+                    final motherCareActivityData = {
+                      'server_id': null,
+                      'household_ref_key': uniqueKey,
+                      'beneficiary_ref_key': memberId,
+                      'mother_care_state': 'anc_due',
+                      'device_details': jsonEncode({
+                        'id': deviceInfo.deviceId,
+                        'platform': deviceInfo.platform,
+                        'version': deviceInfo.osVersion,
+                      }),
+                      'app_details': jsonEncode({
+                        'app_version': deviceInfo.appVersion.split('+').first,
+                        'app_name': deviceInfo.appName,
+                        'build_number': deviceInfo.buildNumber,
+                        'package_name': deviceInfo.packageName,
+                      }),
+                      'parent_user': jsonEncode({}),
+                      'current_user_key': ashaUniqueKey,
+                      'facility_id': facilityId,
+                      'created_date_time': ts,
+                      'modified_date_time': ts,
+                      'is_synced': 0,
+                      'is_deleted': 0,
+                    };
+                    
+                    print('Inserting mother care activity for pregnant woman: ${jsonEncode(motherCareActivityData)}');
+                    await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
+                  } catch (e) {
+                    print('Error inserting mother care activity: $e');
+                  }
+                }
                 
                 // If this is a child with registration_due status, insert into child_care_activities
                 if (memberType.toLowerCase() == 'child' && beneficiaryState == 'registration_due') {
@@ -1502,95 +1621,6 @@ class RegisterNewHouseholdBloc
     return out;
   }
 
-  String _toYesNo(dynamic value) {
-    if (value == null) return 'no';
-    if (value is bool) return value ? 'yes' : 'no';
-    final str = value.toString().toLowerCase();
-    return (str == 'yes' || str == 'y' || str == 'true') ? 'yes' : 'no';
-  }
-
-  /// Inserts a new ANC due status for a pregnant woman
-  Future<void> _insertAncDueStatus({
-    required String householdRefKey,
-    required String beneficiaryRefKey,
-    required DeviceInfo deviceInfo,
-    required dynamic ashaUniqueKey,
-    required int facilityId,
-    required String ts,
-  }) async {
-    try {
-      final motherCarePayload = {
-        'server_id': null,
-        'household_ref_key': householdRefKey,
-        'beneficiary_ref_key': beneficiaryRefKey,
-        'mother_care_state': 'anc_due', // Setting the ANC due status
-        'device_details': jsonEncode({
-          'id': deviceInfo.deviceId,
-          'platform': deviceInfo.platform,
-          'version': deviceInfo.osVersion,
-        }),
-        'app_details': jsonEncode({
-          'app_version': deviceInfo.appVersion.split('+').first,
-          'app_name': deviceInfo.appName,
-          'build_number': deviceInfo.buildNumber,
-          'package_name': deviceInfo.packageName,
-        }),
-        'parent_user': jsonEncode({}),
-        'current_user_key': ashaUniqueKey,
-        'facility_id': facilityId,
-        'created_date_time': ts,
-        'modified_date_time': ts,
-        'is_synced': 0,
-        'is_deleted': 0,
-      };
-
-      print('📝 Inserting ANC due status for beneficiary: $beneficiaryRefKey');
-      await LocalStorageDao.instance.insertMotherCareActivity(motherCarePayload);
-    } catch (e) {
-      print('❌ Error inserting ANC due status: $e');
-      // Don't rethrow to prevent blocking the main flow
-    }
-  }
-
-  /// Updates existing or inserts new ANC due status for a pregnant woman
-  Future<void> _upsertAncDueStatus({
-    required String householdRefKey,
-    required String beneficiaryRefKey,
-    required DeviceInfo deviceInfo,
-    required dynamic ashaUniqueKey,
-    required int facilityId,
-    required String ts,
-  }) async {
-    try {
-      // First check if there's an existing record
-      final existingRecord = await LocalStorageDao.instance
-          .getMotherCareActivityByBeneficiary(beneficiaryRefKey);
-
-      if (existingRecord != null) {
-        // Update existing record
-        final updatedRecord = Map<String, dynamic>.from(existingRecord);
-        updatedRecord['mother_care_state'] = 'anc_due';
-        updatedRecord['modified_date_time'] = ts;
-        updatedRecord['is_synced'] = 0; // Mark as unsynced since we're updating
-
-        print('📝 Updating existing ANC due status for beneficiary: $beneficiaryRefKey');
-        await LocalStorageDao.instance.updateMotherCareActivity(updatedRecord);
-      } else {
-        // Insert new record
-        await _insertAncDueStatus(
-          householdRefKey: householdRefKey,
-          beneficiaryRefKey: beneficiaryRefKey,
-          deviceInfo: deviceInfo,
-          ashaUniqueKey: ashaUniqueKey,
-          facilityId: facilityId,
-          ts: ts,
-        );
-      }
-    } catch (e) {
-      print('❌ Error upserting ANC due status: $e');
-      // Don't rethrow to prevent blocking the main flow
-    }
-  }
 
   int? _asInt(dynamic v) {
     if (v == null) return null;

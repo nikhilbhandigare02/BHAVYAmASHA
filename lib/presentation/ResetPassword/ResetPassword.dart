@@ -135,40 +135,49 @@ class _ResetpasswordState extends State<Resetpassword> {
                 ),
 
                 // Submit Button at Bottom
+// Update the BlocListener in ResetPassword.dart
                 BlocListener<ResetPasswordBloc, ResetPasswordState>(
                   listener: (context, state) {
                     if (state.postApiStatus == PostApiStatus.success) {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        Route_Names.homeScreen,
-                            (route) => false,
-                      );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            l10n.loginSuccess,
+                            state.successMessage,
                             style: const TextStyle(color: Colors.white),
                           ),
                           backgroundColor: Colors.green,
+                          behavior: SnackBarBehavior.floating,
+                          margin: const EdgeInsets.all(10),
+                          duration: const Duration(seconds: 3),
                         ),
                       );
+                      // Navigate after showing the success message
+                      Future.delayed(const Duration(seconds: 2), () {
+                        if (mounted) {
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            Route_Names.homeScreen,
+                                (route) => false,
+                          );
+                        }
+                      });
                     } else if (state.postApiStatus == PostApiStatus.error) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            state.error.isNotEmpty
-                                ? state.error
-                                : l10n.loginFailed,
+                            state.error,
                             style: const TextStyle(color: Colors.white),
                           ),
                           backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                          margin: const EdgeInsets.all(10),
+                          duration: const Duration(seconds: 3),
                         ),
                       );
                     }
                   },
                   child: BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
-                    buildWhen: (prev, curr) =>
-                    prev.postApiStatus != curr.postApiStatus,
+                    buildWhen: (prev, curr) => prev.postApiStatus != curr.postApiStatus,
                     builder: (context, state) {
                       return SizedBox(
                         width: double.infinity,
@@ -176,21 +185,17 @@ class _ResetpasswordState extends State<Resetpassword> {
                         child: RoundButton(
                           title: l10n.updateButton,
                           color: AppColors.primary,
-                          isLoading:
-                          state.postApiStatus == PostApiStatus.loading,
+                          isLoading: state.postApiStatus == PostApiStatus.loading,
                           onPress: () {
                             if (_formKey.currentState!.validate()) {
-                              context
-                                  .read<ResetPasswordBloc>()
-                                  .add(ResetPasswordButton());
+                              context.read<ResetPasswordBloc>().add(ResetPasswordButton());
                             }
                           },
                         ),
                       );
                     },
                   ),
-                ),
-              ],
+                )              ],
             ),
           ),
         ),

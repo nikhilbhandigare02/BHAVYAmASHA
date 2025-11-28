@@ -40,9 +40,14 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     emit(state.copyWith(reEnterPassword: event.reEnterPassword));
   }
 
+  // Update the _onResetPassButton method in reset_password_bloc.dart
   Future<void> _onResetPassButton(
       ResetPasswordButton event, Emitter<ResetPasswordState> emit) async {
-    emit(state.copyWith(postApiStatus: PostApiStatus.loading, error: ''));
+    emit(state.copyWith(
+      postApiStatus: PostApiStatus.loading,
+      error: '',
+      successMessage: '',
+    ));
 
     try {
       final response = await _authRepository.changePassword(
@@ -54,24 +59,38 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
 
       debugPrint('Change Password API Response: $response');
 
-      final success = response['success'] == true;
-      final message = (response['msg'] ?? response['message'] ?? '').toString();
+      if (response is Map<String, dynamic>) {
+        final success = response['success'] == true;
+        final message = (response['msg'] ?? response['message'] ??
+            (success ? 'Password updated successfully' : 'Failed to update password')).toString();
 
-      if (success) {
-        emit(state.copyWith(
-          postApiStatus: PostApiStatus.success,
-          error: '',
-        ));
+        if (success) {
+          emit(state.copyWith(
+            postApiStatus: PostApiStatus.success,
+            successMessage: message,
+            error: '',
+          ));
+        } else {
+          emit(state.copyWith(
+            postApiStatus: PostApiStatus.error,
+            error: message,
+            successMessage: '',
+          ));
+        }
       } else {
         emit(state.copyWith(
           postApiStatus: PostApiStatus.error,
-          error: message.isNotEmpty ? message : 'Failed to change password',
+          error: 'Unexpected response format',
+          successMessage: '',
         ));
       }
     } catch (e) {
       emit(state.copyWith(
         postApiStatus: PostApiStatus.error,
-        error: e.toString(),
+        error: e.toString().contains('Exception:')
+            ? e.toString().split('Exception: ')[1]
+            : 'An error occurred. Please try again.',
+        successMessage: '',
       ));
     }
   }

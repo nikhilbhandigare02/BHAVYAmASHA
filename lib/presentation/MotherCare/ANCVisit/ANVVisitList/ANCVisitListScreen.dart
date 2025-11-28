@@ -9,6 +9,7 @@ import 'package:sizer/sizer.dart';
 import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 
+import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
 import '../ANCVisitForm/ANCVisitForm.dart';
 
@@ -25,15 +26,87 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   List<Map<String, dynamic>> _allData = [];
   bool _isLoading = true;
 
+  Future<List<Map<String, dynamic>>> _getAncDueRecords() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      // Query to get anc_due records with beneficiary details
+      final List<Map<String, dynamic>> ancDueRecords = await db.rawQuery('''
+        SELECT 
+          mca.*,
+          bn.*,
+          mca.id as mca_id,  
+          bn.id as beneficiary_id
+        FROM mother_care_activities mca
+        INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
+        WHERE mca.mother_care_state = 'anc_due' AND bn.is_deleted = 0
+      ''');
+
+      print('ℹ️ Found ${ancDueRecords.length} anc_due records with valid beneficiary references');
+
+      // Process the records to include beneficiary info
+      return ancDueRecords.map((record) {
+        // Extract beneficiary info
+        final beneficiaryInfo = {
+          'id': record['beneficiary_id'],
+          'unique_key': record['unique_key'],
+          'memberName': record['memberName'],
+          'headName': record['headName'],
+          'gender': record['gender'],
+          'dob': record['dob'],
+          'mobileNo': record['mobileNo'],
+          'isPregnant': 'yes',  // Since we're in ANC visit list
+          'RCH_ID': record['RCH_ID'],
+          'spouseName': record['spouseName'],
+          'beneficiary_info': jsonEncode({
+            'memberName': record['memberName'] ?? record['headName'],
+            'headName': record['headName'],
+            'gender': record['gender'],
+            'dob': record['dob'],
+            'mobileNo': record['mobileNo'],
+            'isPregnant': 'yes',
+            'RCH_ID': record['RCH_ID'],
+            'spouseName': record['spouseName'],
+          }),
+        };
+
+        // Combine MCA record with beneficiary info
+        return {
+          ...record,
+          'beneficiary_info': jsonEncode(beneficiaryInfo),
+          'isAncDue': true,
+          'Name': record['memberName'] ?? record['headName'] ?? 'Unknown',
+          'Husband': record['spouseName'] ?? record['headName'] ?? 'N/A',
+          'RCH ID': record['RCH_ID'] ?? 'N/A',
+          'Age': _calculateAge(record['dob'] ?? '')?.toString() ?? 'N/A',
+          'RegistrationDate': record['created_date_time'] ?? 'N/A',
+        };
+      }).toList();
+    } catch (e) {
+      print('⚠️ Error fetching anc_due records: $e');
+      if (e is Error) {
+        print('Stack trace: ${e.stackTrace}');
+      }
+      return [];
+    }
+  }
+
   Future<void> _loadPregnantWomen() async {
     setState(() {
       _isLoading = true;
     });
+    
     try {
+      // Get regular pregnant women
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final pregnantWomen = <Map<String, dynamic>>[];
+      final Set<String> processedBeneficiaries = {}; // To track already processed beneficiaries
 
       print('ℹ️ Found ${rows.length} beneficiaries to process');
+
+      // First, get all anc_due records to avoid duplicate DB queries
+      final ancDueRecords = await _getAncDueRecords();
+      final ancDueBeneficiaryIds = ancDueRecords.map((e) => e['beneficiary_ref_key']?.toString() ?? '').toSet();
 
       for (final row in rows) {
         try {
@@ -54,27 +127,60 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             continue;
           }
 
-
           final isPregnant =
               info['isPregnant']?.toString().toLowerCase() == 'yes';
-          if (!isPregnant) {
-            print('ℹ️ Skipping - isPregnant is not Yes');
-            continue;
-          }
-
           final name = info['memberName'] ?? info['headName'] ?? 'Unknown';
           final gender = info['gender']?.toString().toLowerCase() ?? '';
-
-          if (gender == 'f' || gender == 'female') {
-            print('  🤰 Found pregnant woman: $name');
-            final personData = _processPerson(row, info, isPregnant: true);
+          final beneficiaryId = row['unique_key']?.toString() ?? '';
+          
+          // Check if this beneficiary is in anc_due records
+          final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
+          
+          // Include if pregnant or in anc_due
+          if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
+            print('  🤰 Found ${isAncDue ? 'anc_due ' : ''}pregnant woman: $name (${isPregnant ? 'pregnant' : 'anc_due only'})');
+            final personData = _processPerson(row, info, isPregnant: isPregnant || isAncDue);
             if (personData != null) {
-              print('  ✅ Added pregnant woman: ${personData['Name']}');
+              // Mark if this is an anc_due record
+              personData['isAncDue'] = isAncDue;
+              print('  ✅ Added ${isAncDue ? "anc_due " : ""}pregnant woman: ${personData['Name']}');
               pregnantWomen.add(personData);
+              processedBeneficiaries.add(beneficiaryId);
             }
           }
         } catch (e, stackTrace) {
           print('⚠️ Error processing beneficiary row: $e');
+          print('Stack trace: $stackTrace');
+        }
+      }
+
+      // Add any anc_due records that weren't in the regular beneficiaries list
+      for (final ancDueRecord in ancDueRecords) {
+        final beneficiaryId = ancDueRecord['beneficiary_ref_key']?.toString() ?? '';
+        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) {
+          continue; // Skip if already processed or no beneficiary ID
+        }
+
+        try {
+          // For anc_due records not in regular beneficiaries, create a minimal record
+          final personData = {
+            'id': ancDueRecord['id']?.toString() ?? '',
+            'unique_key': beneficiaryId,
+            'BeneficiaryID': beneficiaryId,
+            'hhId': ancDueRecord['household_ref_key']?.toString() ?? '',
+            'unique_key_display': _getLast11Chars(beneficiaryId),
+            'BeneficiaryID_display': _getLast11Chars(beneficiaryId),
+            'hhId_display': _getLast11Chars(ancDueRecord['household_ref_key']?.toString() ?? ''),
+            'Name': 'ANC Due - ${_getLast11Chars(beneficiaryId)}',
+            'isAncDue': true,
+            'RegistrationDate': ancDueRecord['created_date_time']?.toString() ?? '',
+            '_rawRow': ancDueRecord,
+          };
+          
+          print('  ✅ Added anc_due only record: ${personData['Name']}');
+          pregnantWomen.add(personData);
+        } catch (e, stackTrace) {
+          print('⚠️ Error processing anc_due record: $e');
           print('Stack trace: $stackTrace');
         }
       }
@@ -345,6 +451,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   Widget _ancCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final primary = Theme.of(context).primaryColor;
+    final isAncDue = data['isAncDue'] == true;
 
     final registrationDate = data['RegistrationDate'] is String && data['RegistrationDate'].isNotEmpty
         ? data['RegistrationDate']
@@ -513,7 +620,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
 
                           Text(
-                            '${l10n?.visitsLabel ?? 'Visits :'} $count',
+                            '${isAncDue ? 'DUE - ' : ''}${l10n?.visitsLabel ?? 'Visits :'} $count',
                             style: TextStyle(
                               color: primary,
                               fontWeight: FontWeight.w500,
@@ -538,7 +645,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: primary,
+                color: isAncDue ? AppColors.primary : primary,
                 borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
               ),
               padding: const EdgeInsets.all(8),
