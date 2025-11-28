@@ -845,16 +845,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
               ] else if (state.isPregnant == 'No') ...[
-                _Section(
-                  child: CustomTextField(
-                    labelText: '${l.fpAdoptingLabel} *',
-                    hintText: l.select,
-                    onChanged: (v) => context
-                        .read<AddFamilyHeadBloc>()
-                        .add(AfhUpdateSpouseName(v.trim())),
-                    validator: (value) => _captureError(Validations.validateAdoptingPlan(l, value)),
-                  ),
-                ),
+
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
               ],
             ],

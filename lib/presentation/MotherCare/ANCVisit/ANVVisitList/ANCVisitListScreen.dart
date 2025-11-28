@@ -151,7 +151,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
   // Format date to dd/MM/yyyy format
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
   }
 
   Map<String, dynamic>? _processPerson(
@@ -184,7 +184,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       if (registrationDate.isNotEmpty) {
         try {
           final dateTime = DateTime.parse(registrationDate);
-          formattedDate = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+          formattedDate = '${dateTime.day}-${dateTime.month}-${dateTime.year}';
         } catch (e) {
           print('⚠️ Error parsing date: $e');
         }
@@ -350,7 +350,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         ? data['RegistrationDate']
         : l10n?.notAvailable ?? 'N/A';
 
-    final ageGender = '${data['Age']}Y';
+    final ageGender = '${data['Age']} Y';
 
     // Use COMPLETE IDs for functionality
     final uniqueKey = data['unique_key']?.toString() ?? '';

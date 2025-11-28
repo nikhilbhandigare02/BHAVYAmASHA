@@ -264,6 +264,24 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
 
+                    if (state.fpMethod == 'Atra injection') ...[
+                      CustomDatePicker(
+                        labelText: 'Date of Antra Injection',
+                        hintText: 'dd-mm-yyyy',
+                        initialDate: null,
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2100),
+                        onDateChanged: (date) {
+                          if (date != null) {
+                            context
+                                .read<TrackEligibleCoupleBloc>()
+                                .add(FpAntraInjectionDateChanged(date));
+                          }
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+
                     if (state.fpMethod == 'Copper -T (IUCD)') ...[
                       CustomDatePicker(
                         labelText: 'Date of removal',
@@ -304,49 +322,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
-                    if (state.fpMethod ==
-                        'Mala -N (Daily Contraceptive pill)') ...[
-                      CustomTextField(
-                        labelText:
-                        'Quantity of Mala -N (Daily Contraceptive pill)',
-                        hintText: 'Enter quantity',
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          context
-                              .read<TrackEligibleCoupleBloc>()
-                              .add(MalaQuantity(value));
-                        },
-                      ),
-                      const Divider(thickness: 1, color: Colors.grey),
-                    ],
-                    if (state.fpMethod ==
-                        'Chhaya (Weekly Contraceptive pill)') ...[
-                      CustomTextField(
-                        labelText: 'Chhaya (Weekly Contraceptive pill)',
-                        hintText: 'Enter quantity',
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          context
-                              .read<TrackEligibleCoupleBloc>()
-                              .add(ChayaQuantity(value));
-                        },
-                      ),
-                      const Divider(thickness: 1, color: Colors.grey),
-                    ],
-                    if (state.fpMethod ==
-                        'ECP (Emergency Contraceptive pill)') ...[
-                      CustomTextField(
-                        labelText: 'ECP (Emergency Contraceptive pill)',
-                        hintText: 'Enter quantity',
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          context
-                              .read<TrackEligibleCoupleBloc>()
-                              .add(ECPQuantity(value));
-                        },
-                      ),
-                      const Divider(thickness: 1, color: Colors.grey),
-                    ],
+
+
                   ],
                 );
               },

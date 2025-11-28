@@ -964,7 +964,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       ApiDropdown<String>(
                         labelText: '${l.methodOfContra} *',
                         items: const [
-                          'Select',
+                          
                           'Condom',
                           'Mala -N (Daily Contraceptive pill)',
                           'Antra injection',
@@ -1003,6 +1003,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         },
 
                       ),
+                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                     ],
                     if (state.fpMethod == 'Copper -T (IUCD)') ...[
                       CustomDatePicker(
@@ -1041,47 +1042,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                                      ],
-
-                    if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)') ...[
-                      CustomTextField(
-                        labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
-                        hintText: 'Quantity of Mala -N (Daily Contraceptive pill)',
-                        keyboardType: TextInputType.number,
-                        initialValue: state.malaQuantity,
-                        onChanged: (value) {
-                          spBloc.add(MalaQuantityChanged(value ?? ''));
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                                      ],
-
-                    if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)') ...[
-                      CustomTextField(
-                        labelText: 'Quantity of Chhaya (Weekly Contraceptive pill)',
-                        hintText: 'Quantity of quantity',
-                        keyboardType: TextInputType.number,
-                        initialValue: state.chhayaQuantity,
-                        onChanged: (value) {
-                          spBloc.add(ChhayaQuantityChanged(value ?? ''));
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                                       ],
-
-                    if (state.fpMethod == 'ECP (Emergency Contraceptive pill)') ...[
-                      CustomTextField(
-                        labelText: 'Quantity of ECP (Emergency Contraceptive pill)',
-                        hintText: 'Quantity of ECP (Emergency Contraceptive pill)',
-                        keyboardType: TextInputType.number,
-                        initialValue: state.ecpQuantity,
-                        onChanged: (value) {
-                          spBloc.add(ECPQuantityChanged(value ?? ''));
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
                     ],
+
                   ]
                 ],
               ],

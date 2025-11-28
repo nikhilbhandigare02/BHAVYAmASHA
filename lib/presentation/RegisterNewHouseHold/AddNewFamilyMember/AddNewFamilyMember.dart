@@ -1289,7 +1289,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         Builder(
                                           builder: (context) {
                                           final fatherItems = [
-                                            'Select',
+
                                             ..._maleAdultNames,
                                             'Other',
                                           ];
@@ -1333,7 +1333,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         Builder(
                                           builder: (context) {
                                           final motherItems = [
-                                            'Select',
+
                                             ..._femaleAdultNames,
                                             'Other',
                                           ];
@@ -1379,7 +1379,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         Builder(
                                           builder: (context) {
                                           final motherItems = [
-                                            'Select',
+
                                             ..._femaleAdultNames,
                                             'Other',
                                           ];
@@ -1424,7 +1424,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         Builder(
                                           builder: (context) {
                                           final fatherItems = [
-                                            'Select',
+
                                             ..._maleAdultNames,
                                             'Other',
                                           ];
