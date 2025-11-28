@@ -251,10 +251,11 @@ final class AnmUpdateMaritalStatus extends AddnewfamilymemberEvent {
 final class AnmSubmit extends AddnewfamilymemberEvent {
   final BuildContext context;
   final String? hhid;
-  const AnmSubmit(this.context, {this.hhid});
+  final Map<String, dynamic>? extraData;
+  const AnmSubmit(this.context, {this.hhid, this.extraData});
 
   @override
-  List<Object> get props => [context, hhid ?? ''];
+  List<Object> get props => [context, hhid ?? '', extraData ?? {}];
 }
 
 // Marital status dependent fields

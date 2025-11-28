@@ -854,6 +854,22 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                       }
                     },
                   ),
+                  BlocListener<AddnewfamilymemberBloc, AddnewfamilymemberState>(
+                    listenWhen: (previous, current) => previous.postApiStatus != current.postApiStatus,
+                    listener: (context, state) {
+                      if (state.postApiStatus == PostApiStatus.success) {
+                        // Only navigate back after successful save
+                        Navigator.of(context).pop(true);
+                      } else if (state.postApiStatus == PostApiStatus.error) {
+                        // Show error message if save fails
+                        if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+                          showAppSnackBar(context, state.errorMessage!);
+                        } else {
+                          showAppSnackBar(context, 'Failed to save family member. Please try again.');
+                        }
+                      }
+                    },
+                  ),
                 ],
                 child: Column(
                 children: [
@@ -2862,7 +2878,58 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           if (_isEdit) {
                                             bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
                                           } else {
-                                            bloc.add(AnmSubmit(context, hhid: widget.hhId));
+                                            // For new members in member details mode
+                                            final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
+                                            final showChildren = showSpouse && state.hasChildren == 'Yes';
+                                            
+                                            // Calculate the last step we should show
+                                            final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
+                                            
+                                            // If we're not on the last step yet, go to the next step
+                                            if (_currentStep < lastStep) {
+                                              setState(() { _currentStep += 1; });
+                                              final ctrl = DefaultTabController.of(context);
+                                              ctrl?.animateTo(_currentStep);
+                                              return;
+                                            }
+                                            
+                                            // If we've gone through all steps, collect spouse and children data if applicable
+                                            if (showSpouse) {
+                                              try {
+                                                final spState = _spousBloc.state;
+                                                final spJson = spState.toJson();
+                                                
+                                                final hasSpouseData = spJson.values.any((v) {
+                                                  if (v == null) return false;
+                                                  if (v is String) return v.trim().isNotEmpty;
+                                                  return true;
+                                                });
+                                                
+                                                if (hasSpouseData) {
+                                                  memberData['spouseUseDob'] = spState.useDob;
+                                                  memberData['spouseDob'] = spState.dob?.toIso8601String();
+                                                  memberData['spouseApproxAge'] = spState.approxAge;
+                                                  memberData['spousedetails'] = jsonEncode(spJson);
+                                                }
+                                              } catch (e) {
+                                                print('Error processing spouse data: $e');
+                                              }
+                                            }
+                                            
+                                            // Add children data if applicable
+                                            if (showChildren) {
+                                              try {
+                                                final ch = _childrenBloc.state;
+                                                memberData['childrendetails'] = ch.toJson();
+                                              } catch (e) {
+                                                print('Error processing children data: $e');
+                                              }
+                                            }
+                                            
+                                            // Submit the form with all collected data
+                                            // The BlocListener will handle navigation after successful save
+                                            bloc.add(AnmSubmit(context, hhid: widget.hhId, extraData: memberData));
+                                            return; // Don't navigate yet, wait for success state
                                           }
                                           return;
                                         }
@@ -2879,6 +2946,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                             return;
                                           }
 
+                                          // If this is the last step, submit the form
+                                          if (!_isEdit) {
+                                            bloc.add(AnmSubmit(context, hhid: widget.hhId));
+                                            return; // Don't navigate yet, wait for success state
+                                          }
 
                                           try {
                                             final spState = _spousBloc.state;
