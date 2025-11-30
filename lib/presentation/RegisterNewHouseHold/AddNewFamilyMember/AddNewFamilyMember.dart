@@ -1718,9 +1718,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     initialDate: state.dob,
                                     firstDate: (state.memberType.toLowerCase() == 'child')
                                         ? DateTime.now().subtract(const Duration(days: 15 * 365))
-                                        : DateTime(1900),
+                                        : DateTime.now().subtract(const Duration(days: 110 * 365)),
                                     lastDate: (state.memberType.toLowerCase() == 'child')
-                                        ? DateTime.now()
+                                        ? DateTime.now().subtract(const Duration(days: 1))
                                         : DateTime.now().subtract(const Duration(days: 15 * 365)),
                                     labelText: '${l.dobLabel} *',
                                     hintText: l.dateHint,

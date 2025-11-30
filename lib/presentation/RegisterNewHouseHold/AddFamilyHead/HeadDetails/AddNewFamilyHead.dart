@@ -47,6 +47,36 @@ class AddNewFamilyHeadScreen extends StatefulWidget {
 
 class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     with SingleTickerProviderStateMixin {
+  // Calculate DOB based on entered years, months, and days
+  void _updateDobFromAge(String years, String months, String days) {
+    final y = int.tryParse(years.trim()) ?? 0;
+    final m = int.tryParse(months.trim()) ?? 0;
+    final d = int.tryParse(days.trim()) ?? 0;
+
+    if (y == 0 && m == 0 && d == 0) return;
+
+    final now = DateTime.now();
+    var calculatedDob = DateTime(
+      now.year - y,
+      now.month - m,
+      now.day - d,
+    );
+
+    // Handle month overflow
+    if (calculatedDob.day != now.day) {
+      // Adjust for months with different number of days
+      calculatedDob = DateTime(calculatedDob.year, calculatedDob.month + 1, 0);
+    }
+
+    // Update the DOB in the state if it's different
+    final currentDob = context.read<AddFamilyHeadBloc>().state.dob;
+    if (currentDob == null || 
+        currentDob.year != calculatedDob.year || 
+        currentDob.month != calculatedDob.month || 
+        currentDob.day != calculatedDob.day) {
+      context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(calculatedDob));
+    }
+  }
   final _formKey = GlobalKey<FormState>();
 
   // Guard to avoid infinite loops when syncing names between
@@ -146,7 +176,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 labelText: '${l.dobLabel} *',
                 hintText: l.dateHint,
                 initialDate: state.dob,
-                firstDate: DateTime(1900),
+                firstDate: DateTime.now().subtract(const Duration(days: 110 * 365)),
                 lastDate: DateTime.now().subtract(const Duration(days: 15 * 365)),
                 onDateChanged: (d) =>
                     context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(d)),
@@ -180,7 +210,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           maxLength: 3,
                           initialValue: state.years ?? '',
                           keyboardType: TextInputType.number,
-                          onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateYears(v.trim())),
+                          onChanged: (v) {
+                            context.read<AddFamilyHeadBloc>().add(UpdateYears(v.trim()));
+                            final state = context.read<AddFamilyHeadBloc>().state;
+                            _updateDobFromAge(v.trim(), state.months ?? '', state.days ?? '');
+                          },
                           validator: (value) => _captureError(
                             Validations.validateApproxAge(
                               l,
@@ -208,7 +242,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           maxLength: 2,
                           initialValue: state.months ?? '',
                           keyboardType: TextInputType.number,
-                          onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateMonths(v.trim())),
+                          onChanged: (v) {
+                            context.read<AddFamilyHeadBloc>().add(UpdateMonths(v.trim()));
+                            final state = context.read<AddFamilyHeadBloc>().state;
+                            _updateDobFromAge(state.years ?? '', v.trim(), state.days ?? '');
+                          },
                           validator: (value) => _captureError(
                             Validations.validateApproxAge(
                               l,
@@ -236,7 +274,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           initialValue: state.days ?? '',
                           keyboardType: TextInputType.number,
                           maxLength: 2,
-                          onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateDays(v.trim())),
+                          onChanged: (v) {
+                            context.read<AddFamilyHeadBloc>().add(UpdateDays(v.trim()));
+                            final state = context.read<AddFamilyHeadBloc>().state;
+                            _updateDobFromAge(state.years ?? '', state.months ?? '', v.trim());
+                          },
                           validator: (value) => _captureError(
                             Validations.validateApproxAge(
                               l,
