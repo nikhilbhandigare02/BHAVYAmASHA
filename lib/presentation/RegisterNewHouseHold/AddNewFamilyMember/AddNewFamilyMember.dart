@@ -760,9 +760,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
       _initialApplied = true;
     }
-    // For inline edit inside RegisterNewHouseHold we keep _isEdit false
-    // so that the flow behaves like the household registration flow and
-    // returns data to the caller instead of triggering DB save.
+
     if (!widget.inlineEdit) {
       _isEdit = _isEdit || widget.isEdit;
     }

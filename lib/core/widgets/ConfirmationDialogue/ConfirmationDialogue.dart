@@ -2,6 +2,108 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../config/themes/CustomColors.dart';
 
+Future<List<String>?> showMultiSelectDialog({
+  required BuildContext context,
+  required String title,
+  required List<String> items,
+  required List<String> selectedItems,
+  bool isSearchable = false,
+  Color? dialogBackgroundColor,
+  Color? titleTextColor,
+  Color? selectedItemColor,
+}) async {
+  final localSelectedItems = Set<String>.from(selectedItems);
+    return showDialog<List<String>>(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => StatefulBuilder(
+      builder: (dialogContext, setDialogState) {
+        return AlertDialog(
+          backgroundColor: dialogBackgroundColor ?? Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w500,
+                  color: titleTextColor ?? AppColors.onSurfaceVariant,
+                ),
+              ),
+              const Divider(height: 10),
+            ],
+          ),
+          content: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: 40.h),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: items.map((item) {
+                  final selected = localSelectedItems.contains(item);
+                  return CheckboxListTile(
+                    title: Text(
+                      item,
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
+                    value: selected,
+                    onChanged: (bool? value) {
+                      setDialogState(() {
+                        if (value == true) {
+                          localSelectedItems.add(item);
+                        } else {
+                          localSelectedItems.remove(item);
+                        }
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    dense: true,
+                    activeColor: selectedItemColor ?? Theme.of(context).primaryColor,
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          actions: [
+            const Divider(height: 0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, null),
+                  child: Text(
+                    'CANCEL',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, localSelectedItems.toList()),
+                  child: Text(
+                    'OK',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
 Future<bool?> showConfirmationDialog({
   required BuildContext context,
   String?  title,

@@ -29,6 +29,13 @@ class MigrationSplitBloc extends Bloc<MigrationSplitEvent, MigrationSplitState> 
           final updatedRow = Map<String, dynamic>.from(row);
           updatedRow['household_ref_key'] = event.newHouseholdKey;
           updatedRow['is_separated'] = event.isSeparated;
+
+          final info = updatedRow['beneficiary_info'] is Map
+              ? Map<String, dynamic>.from(updatedRow['beneficiary_info'] as Map)
+              : <String, dynamic>{};
+          info['houseNo'] = event.houseNo;
+          updatedRow['beneficiary_info'] = info;
+
           await LocalStorageDao.instance.updateBeneficiary(updatedRow);
           updated++;
         } catch (_) {
