@@ -218,14 +218,14 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         debugPrint('Querying beneficiaries with household_id: $householdId');
         
         List<Map<String, dynamic>> beneficiaryMaps = await db.query(
-          'beneficiaries',
+          'beneficiaries_new',
           where: 'household_ref_key = ?',
           whereArgs: [householdId],
         );
 
         if (beneficiaryMaps.isEmpty) {
           beneficiaryMaps = await db.query(
-            'beneficiaries',
+            'beneficiaries_new',
             where: 'id = ?',
             whereArgs: [int.tryParse(householdId) ?? 0],
           );
@@ -353,7 +353,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
             
             // Query beneficiary by unique_key or name match
             List<Map<String, dynamic>> beneficiaryRecords = await db.query(
-              'beneficiaries',
+              'beneficiaries_new',
               where: 'unique_key = ? OR (beneficiary_info LIKE ?)',
               whereArgs: [beneficiaryRefKey, '%"$childName"%'],
             );
@@ -363,7 +363,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               final beneficiaryId = beneficiary['id'];
  
               await db.update(
-                'beneficiaries',
+                'beneficiaries_new',
                 {
                   'is_death': 1,
                   'death_details': jsonEncode(deathDetails),

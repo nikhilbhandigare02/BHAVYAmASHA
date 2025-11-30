@@ -52,8 +52,7 @@ class _DeliveryOutcomeScreenState
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // Directly use the key from the table file
-      const ancRefKey = 'bt7gs9rl1a5d26mz'; // From followup_form_data_table.dart
+      const ancRefKey = 'bt7gs9rl1a5d26mz';
 
       print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
 
@@ -104,23 +103,43 @@ class _DeliveryOutcomeScreenState
             // First try to get from beneficiaries_new table
             beneficiaryRow = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryRefKey);
 
-            // If not found, try the old beneficiaries table (without _new suffix)
+
             if (beneficiaryRow == null) {
               print('ℹ️ Beneficiary not found in beneficiaries_new, trying beneficiaries table');
               final db = await DatabaseProvider.instance.database;
               final results = await db.query(
-                'beneficiaries_new',
-                where: 'unique_key = ? AND is_deleted = 0',
+                'beneficiaries',
+                where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
                 whereArgs: [beneficiaryRefKey],
                 limit: 1,
               );
 
               if (results.isNotEmpty) {
-                beneficiaryRow = Map<String, dynamic>.from(results.first);
-                // Parse the JSON fields
-                beneficiaryRow['beneficiary_info'] = jsonDecode(beneficiaryRow['beneficiary_info'] ?? '{}');
-                beneficiaryRow['geo_location'] = jsonDecode(beneficiaryRow['geo_location'] ?? '{}');
-                beneficiaryRow['death_details'] = jsonDecode(beneficiaryRow['death_details'] ?? '{}');
+                final legacy = Map<String, dynamic>.from(results.first);
+                Map<String, dynamic> info = {};
+                try {
+                  final form = legacy['form_json'];
+                  if (form is String && form.isNotEmpty) {
+                    final decoded = jsonDecode(form);
+                    if (decoded is Map) {
+                      info = Map<String, dynamic>.from(decoded);
+                    }
+                  }
+                } catch (_) {}
+
+                if (!info.containsKey('dob') && info['date_of_birth'] != null) {
+                  info['dob'] = info['date_of_birth'];
+                }
+                if (!info.containsKey('mobileNo') && info['mobile_no'] != null) {
+                  info['mobileNo'] = info['mobile_no'];
+                }
+
+                beneficiaryRow = {
+                  ...legacy,
+                  'beneficiary_info': info,
+                  'geo_location': {},
+                  'death_details': {},
+                };
               }
             }
 
@@ -255,14 +274,32 @@ class _DeliveryOutcomeScreenState
               : <String, dynamic>{};
 
           final dob = info['dob']?.toString();
-          final ageYears = _calculateAge(dob);
-          ageYearsDisplay = ageYears.toString();
+          int ageYears = _calculateAge(dob);
+
+          if (ageYears == 0) {
+            final updateYearStr = info['updateYear']?.toString() ?? '';
+            final approxAgeStr = info['approxAge']?.toString() ?? '';
+            final parsedUpdateYear = int.tryParse(updateYearStr);
+            if (parsedUpdateYear != null && parsedUpdateYear > 0) {
+              ageYears = parsedUpdateYear;
+            } else if (approxAgeStr.isNotEmpty) {
+              final matches = RegExp(r"\d+").allMatches(approxAgeStr).toList();
+              if (matches.isNotEmpty) {
+                ageYears = int.tryParse(matches.first.group(0) ?? '') ?? 0;
+              }
+            }
+          }
+          ageYearsDisplay = ageYears > 0 ? ageYears.toString() : '';
 
           gender = (info['gender']?.toString() ?? '').trim();
+          if (gender.isEmpty) {
+            gender = (formData['gender']?.toString() ?? '').trim();
+          }
           if (gender.isNotEmpty) {
             final g = gender.toLowerCase();
             gender = g.startsWith('f') ? 'F' : (g.startsWith('m') ? 'M' : gender);
           }
+
           final m = (info['mobileNo']?.toString() ?? info['mobile']?.toString() ?? info['phone']?.toString() ?? '').trim();
           if (m.isNotEmpty) {
             mobileFromBeneficiary = m;

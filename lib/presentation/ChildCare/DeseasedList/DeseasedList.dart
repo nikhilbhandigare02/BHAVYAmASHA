@@ -156,8 +156,7 @@ class _DeseasedListState extends State<DeseasedList> {
         print('  Beneficiary ID: ${record['BeneficiaryID']}');
         print('  Date of Death: ${record['DateofDeath']}');
       }
-      
-      // Print raw data from DAO for debugging
+
       print('\n📋 Raw data from DAO:');
       for (var child in deceasedChildren) {
         print('Raw Record:');
@@ -249,8 +248,7 @@ class _DeseasedListState extends State<DeseasedList> {
             ),
           ),
         ),
-        
-        // Content Area
+
         Expanded(
           child: _filtered.isEmpty
               ? Center(
@@ -344,7 +342,6 @@ class _DeseasedListState extends State<DeseasedList> {
                 ),
               ),
 
-              // Card Body
               Container(
                 decoration: BoxDecoration(
                   color: primary.withOpacity(0.95),

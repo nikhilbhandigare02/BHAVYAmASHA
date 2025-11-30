@@ -802,7 +802,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             ),
           );
         }),
-        if (headAdded) _buildMembersTable(),
+        if (headAdded) _buildMembersCards(),
         if (headAdded) SizedBox(height: 2.h),
         if (!_hideAddMemberButton)
           Center(
@@ -833,451 +833,368 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     );
   }
 
-  Widget _buildMembersTable() {
+  Widget _buildMembersCards() {
     final l10n = AppLocalizations.of(context);
+    return Column(
+      children: [
+        for (final m in _members) ...[
+          _memberCard(context, m, l10n),
+          const SizedBox(height: 8),
+        ]
+      ],
+    );
+  }
+
+  Widget _memberCard(BuildContext context, Map<String, String> m, AppLocalizations? l10n) {
+    final Color primary = Theme.of(context).primaryColor;
+    final String ageGender = '${m['Age'] ?? ''} | ${m['Gender'] ?? ''}';
+    final String totalChildrenText = (m['Total Children'] ?? '').isNotEmpty ? (m['Total Children'] ?? '')! : '0';
 
     return Container(
-
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: 45.h,
-          child: SingleChildScrollView(
-            child: DataTable(
-              headingRowHeight: 3.h,
-              dataRowHeight: 3.h,
-              columnSpacing: 1.5.w,
-              horizontalMargin: 0.w,
-              dividerThickness: 0.1,
-              showCheckboxColumn: false,
-              headingRowColor: MaterialStateColor.resolveWith(
-                    (states) => AppColors.background,
-              ),
-              dataRowColor: MaterialStateColor.resolveWith(
-                    (states) => AppColors.background,
-              ),
-              border: TableBorder.all(color: AppColors.primary, width: 0.5),
-              columns: [
-                DataColumn(
-                  label: Center(
-                    child: Text(
-                      l10n?.thType ?? 'Type',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-                    ),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 2,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () async {
+            final formIndexStr = m['formIndex'];
+            if (formIndexStr != null && formIndexStr.toString().isNotEmpty) {
+              final idx = int.tryParse(formIndexStr.toString());
+              if (idx == null || idx < 0 || idx >= _memberForms.length) {
+                return;
+              }
+              final initialMember = Map<String, dynamic>.from(_memberForms[idx]);
+              final isSpouseRow = (m['isSpouseRow'] ?? '0').toString() == '1';
+              final int initialStep = isSpouseRow ? 1 : 0;
+              final result = await Navigator.of(context).push<Map<String, dynamic>>(
+                MaterialPageRoute(
+                  builder: (_) => AddNewFamilyMemberScreen(
+                    hhId: _headForm?['hh_unique_key']?.toString(),
+                    headName: _headForm?['headName']?.toString(),
+                    headGender: _headForm?['gender']?.toString(),
+                    spouseName: _headForm?['spouseName']?.toString(),
+                    spouseGender: _headForm?['spouseGender']?.toString(),
+                    inlineEdit: true,
+                    isEdit: true,
+                    initial: initialMember,
+                    initialStep: initialStep,
                   ),
                 ),
-                DataColumn(
-                  label: Center(
-                    child: Text(
-                      l10n?.thName ?? 'Name',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: Center(
-                    child: Text(
-                      l10n?.thAge ?? 'Age',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: Center(
-                    child: Text(
-                      l10n?.thGender ?? 'Gender',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: Center(
-                    child: Text(
-                      l10n?.thRelation ?? 'Relation',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: Center(
-                    child: Text(
-                      l10n?.thFather ?? 'Father',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: Center(
-                    child: Text(
-                      l10n?.thSpouse ?? 'Spouse',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: Center(
-                    child: Text(
-                      l10n?.thTotalChildren ?? 'Total Children',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ],
-              rows: _members.map((m) {
-
-                // Use per-row children count; default to '0' when empty
-                String totalChildrenText = m['Total Children'] ?? '';
-                if (totalChildrenText.isEmpty) {
-                  totalChildrenText = '0';
-                }
-
-                return DataRow(
-                  onSelectChanged: (selected) async {
-                    if (selected != true) return;
-
-                    final formIndexStr = m['formIndex'];
-                    // Inline member/child row edit when formIndex is present
-                    if (formIndexStr != null && formIndexStr.toString().isNotEmpty) {
-                      final idx = int.tryParse(formIndexStr.toString());
-                      if (idx == null || idx < 0 || idx >= _memberForms.length) {
-                        return;
+              );
+              if (result != null) {
+                setState(() {
+                  _memberForms[idx] = Map<String, dynamic>.from(result);
+                  final String type = (result['memberType'] ?? 'Adult').toString();
+                  final String name = (result['name'] ?? '').toString();
+                  final bool useDob = (result['useDob'] == true);
+                  final String? dobIso = result['dob'] as String?;
+                  String age = '';
+                  if (useDob && dobIso != null && dobIso.isNotEmpty) {
+                    final dob = DateTime.tryParse(dobIso);
+                    age = dob != null ? (DateTime.now().year - dob.year).toString() : (result['approxAge'] ?? '').toString();
+                  } else {
+                    age = (result['approxAge'] ?? '').toString();
+                  }
+                  final String gender = (result['gender'] ?? '').toString();
+                  final String relation = (result['relation'] ?? '').toString();
+                  final String father = (result['fatherName'] ?? '').toString();
+                  final String spouse = (result['spouseName'] ?? '').toString();
+                  final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
+                      ? (int.tryParse(result['children'].toString()) ?? 0) > 0
+                          ? result['children'].toString()
+                          : '0'
+                      : '0';
+                  final String maritalStatus = (result['maritalStatus'] ?? '').toString();
+                  final String formIndexKey = formIndexStr.toString();
+                  final int primaryIndex = _members.indexWhere((row) => (row['formIndex'] ?? '') == formIndexKey && (row['isSpouseRow'] ?? '0') == '0');
+                  final int spouseIndex = _members.indexWhere((row) => (row['formIndex'] ?? '') == formIndexKey && (row['isSpouseRow'] ?? '0') == '1');
+                  if (primaryIndex != -1) {
+                    final primary = _members[primaryIndex];
+                    primary['Type'] = type;
+                    primary['Name'] = name;
+                    primary['Age'] = age;
+                    primary['Gender'] = gender;
+                    primary['Relation'] = relation;
+                    primary['Father'] = father;
+                    primary['Spouse'] = spouse;
+                    primary['Total Children'] = totalChildren;
+                  }
+                  if (maritalStatus == 'Married' && spouse.isNotEmpty) {
+                    final String spouseGender = (gender == 'Male') ? 'Female' : (gender == 'Female') ? 'Male' : '';
+                    String spouseAge = '';
+                    final bool spouseUseDob = (result['spouseUseDob'] == true);
+                    final String? spouseDobIso = result['spouseDob'] as String?;
+                    if (spouseUseDob && spouseDobIso != null && spouseDobIso.isNotEmpty) {
+                      final spouseDob = DateTime.tryParse(spouseDobIso);
+                      if (spouseDob != null) {
+                        final today = DateTime.now();
+                        int years = today.year - spouseDob.year;
+                        if (today.month < spouseDob.month || (today.month == spouseDob.month && today.day < spouseDob.day)) {
+                          years--;
+                        }
+                        spouseAge = years.toString();
+                      } else {
+                        spouseAge = (result['spouseApproxAge'] ?? '').toString();
                       }
-
-                      final initialMember = Map<String, dynamic>.from(_memberForms[idx]);
-
-                      // Decide which tab to open initially inside AddNewFamilyMemberScreen
-                      // based on whether this is the auto-generated spouse summary row.
-                      // We use the explicit isSpouseRow flag so that even if a member
-                      // has Relation == 'Spouse', their own row still opens on the
-                      // Member Details tab, and only the extra spouse row opens on
-                      // the Spouse Details tab.
-                      final isSpouseRow = (m['isSpouseRow'] ?? '0').toString() == '1';
-                      final int initialStep = isSpouseRow ? 1 : 0;
-
-                      final result = await Navigator.of(context).push<Map<String, dynamic>>(
-                        MaterialPageRoute(
-                          builder: (_) => AddNewFamilyMemberScreen(
-                            hhId: _headForm?['hh_unique_key']?.toString(),
-                            headName: _headForm?['headName']?.toString(),
-                            headGender: _headForm?['gender']?.toString(),
-                            spouseName: _headForm?['spouseName']?.toString(),
-                            spouseGender: _headForm?['spouseGender']?.toString(),
-                            inlineEdit: true,
-                            isEdit: true,
-                            initial: initialMember,
-                            initialStep: initialStep,
-                          ),
-                        ),
-                      );
-
-                      if (result != null) {
-                        setState(() {
-                          _memberForms[idx] = Map<String, dynamic>.from(result);
-
-                          final String type = (result['memberType'] ?? 'Adult').toString();
-                          final String name = (result['name'] ?? '').toString();
-                          final bool useDob = (result['useDob'] == true);
-                          final String? dobIso = result['dob'] as String?;
-                          String age = '';
-                          if (useDob && dobIso != null && dobIso.isNotEmpty) {
-                            final dob = DateTime.tryParse(dobIso);
-                            age = dob != null
-                                ? (DateTime.now().year - dob.year).toString()
-                                : (result['approxAge'] ?? '').toString();
-                          } else {
-                            age = (result['approxAge'] ?? '').toString();
-                          }
-                          final String gender = (result['gender'] ?? '').toString();
-                          final String relation = (result['relation'] ?? '').toString();
-                          final String father = (result['fatherName'] ?? '').toString();
-                          final String spouse = (result['spouseName'] ?? '').toString();
-                          final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
-                              ? (int.tryParse(result['children'].toString()) ?? 0) > 0
-                                  ? result['children'].toString()
-                                  : '0'
-                              : '0';
-                          final String maritalStatus = (result['maritalStatus'] ?? '').toString();
-
-                          // Identify both the primary member row and (optional) spouse row
-                          final String formIndexKey = formIndexStr.toString();
-                          final int primaryIndex = _members.indexWhere((row) =>
-                              (row['formIndex'] ?? '') == formIndexKey &&
-                              (row['isSpouseRow'] ?? '0') == '0');
-                          final int spouseIndex = _members.indexWhere((row) =>
-                              (row['formIndex'] ?? '') == formIndexKey &&
-                              (row['isSpouseRow'] ?? '0') == '1');
-
-                          // Update primary member summary row
-                          if (primaryIndex != -1) {
-                            final primary = _members[primaryIndex];
-                            primary['Type'] = type;
-                            primary['Name'] = name;
-                            primary['Age'] = age;
-                            primary['Gender'] = gender;
-                            primary['Relation'] = relation;
-                            primary['Father'] = father;
-                            primary['Spouse'] = spouse;
-                            primary['Total Children'] = totalChildren;
-                          }
-
-                          // Maintain spouse summary row in sync with member details
-                          if (maritalStatus == 'Married' && spouse.isNotEmpty) {
-                            // Derive spouse gender and age from member details
-                            final String spouseGender = (gender == 'Male')
-                                ? 'Female'
-                                : (gender == 'Female')
-                                    ? 'Male'
-                                    : '';
-
-                            String spouseAge = '';
-                            final bool spouseUseDob = (result['spouseUseDob'] == true);
-                            final String? spouseDobIso = result['spouseDob'] as String?;
-                            if (spouseUseDob && spouseDobIso != null && spouseDobIso.isNotEmpty) {
-                              final spouseDob = DateTime.tryParse(spouseDobIso);
-                              if (spouseDob != null) {
-                                final today = DateTime.now();
-                                int years = today.year - spouseDob.year;
-                                if (today.month < spouseDob.month ||
-                                    (today.month == spouseDob.month && today.day < spouseDob.day)) {
-                                  years--;
-                                }
-                                spouseAge = years.toString();
-                              } else {
-                                spouseAge = (result['spouseApproxAge'] ?? '').toString();
-                              }
-                            } else {
-                              spouseAge = (result['spouseApproxAge'] ?? '').toString();
-                            }
-
-                            if (spouseIndex != -1) {
-                              // Update existing spouse summary row
-                              final spouseRow = _members[spouseIndex];
-                              spouseRow['Type'] = 'Adult';
-                              spouseRow['Name'] = spouse;
-                              spouseRow['Age'] = spouseAge;
-                              spouseRow['Gender'] = spouseGender;
-                              spouseRow['Relation'] = 'Spouse';
-                              spouseRow['Father'] = '';
-                              spouseRow['Spouse'] = name;
-                              spouseRow['Total Children'] = totalChildren;
-                            } else {
-                              // Create spouse summary row if it does not yet exist
-                              _members.add({
-                                '#': '${_members.length + 1}',
-                                'Type': 'Adult',
-                                'Name': spouse,
-                                'Age': spouseAge,
-                                'Gender': spouseGender,
-                                'Relation': 'Spouse',
-                                'Father': '',
-                                'Spouse': name,
-                                'Total Children': totalChildren,
-                                'formIndex': formIndexKey,
-                                'isSpouseRow': '1',
-                              });
-                              totalMembers = totalMembers + 1;
-                            }
-                          } else {
-                            // If no longer married or spouse cleared, remove spouse summary row
-                            if (spouseIndex != -1) {
-                              _members.removeAt(spouseIndex);
-                              totalMembers = (totalMembers - 1).clamp(0, 9999);
-                            }
-                          }
-                        });
-                      }
-                      return;
+                    } else {
+                      spouseAge = (result['spouseApproxAge'] ?? '').toString();
                     }
-
-                    // Head/spouse summary rows: open AddNewFamilyHeadScreen edit
-                    if (_headForm != null) {
-                      final initial = <String, String>{};
-                      _headForm!.forEach((key, value) {
+                    if (spouseIndex != -1) {
+                      final spouseRow = _members[spouseIndex];
+                      spouseRow['Type'] = 'Adult';
+                      spouseRow['Name'] = spouse;
+                      spouseRow['Age'] = spouseAge;
+                      spouseRow['Gender'] = spouseGender;
+                      spouseRow['Relation'] = 'Spouse';
+                      spouseRow['Father'] = '';
+                      spouseRow['Spouse'] = name;
+                      spouseRow['Total Children'] = totalChildren;
+                    } else {
+                      _members.add({
+                        '#': '${_members.length + 1}',
+                        'Type': 'Adult',
+                        'Name': spouse,
+                        'Age': spouseAge,
+                        'Gender': spouseGender,
+                        'Relation': 'Spouse',
+                        'Father': '',
+                        'Spouse': name,
+                        'Total Children': totalChildren,
+                        'formIndex': formIndexKey,
+                        'isSpouseRow': '1',
+                      });
+                      totalMembers = totalMembers + 1;
+                    }
+                  } else {
+                    if (spouseIndex != -1) {
+                      _members.removeAt(spouseIndex);
+                      totalMembers = (totalMembers - 1).clamp(0, 9999);
+                    }
+                  }
+                });
+              }
+              return;
+            }
+            if (_headForm != null) {
+              final initial = <String, String>{};
+              _headForm!.forEach((key, value) {
+                if (value != null) {
+                  initial[key] = value.toString();
+                }
+              });
+              for (final key in ['hh_unique_key', 'head_unique_key', 'spouse_unique_key', 'head_id_pk', 'spouse_id_pk']) {
+                final v = _headForm![key];
+                if (v != null && !initial.containsKey(key)) {
+                  initial[key] = v.toString();
+                }
+              }
+              final relation = (m['Relation'] ?? '').toString();
+              final int initialTab = (relation == 'Wife' || relation == 'Spouse') ? 1 : 0;
+              final result = await Navigator.of(context).push<Map<String, dynamic>>(
+                MaterialPageRoute(
+                  builder: (_) => AddNewFamilyHeadScreen(
+                    isEdit: false,
+                    initial: initial,
+                    initialTab: initialTab,
+                  ),
+                ),
+              );
+              if (result != null) {
+                setState(() {
+                  _headForm = Map<String, dynamic>.from(result);
+                  try {
+                    final spRaw = result['spousedetails'];
+                    Map<String, dynamic>? spMap;
+                    if (spRaw is Map) {
+                      spMap = Map<String, dynamic>.from(spRaw);
+                    } else if (spRaw is String && spRaw.isNotEmpty) {
+                      spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
+                    }
+                    if (spMap != null) {
+                      spMap.forEach((key, value) {
                         if (value != null) {
-                          initial[key] = value.toString();
+                          _headForm!['sp_$key'] = value.toString();
                         }
                       });
-
-                      // Also propagate technical keys used for update flows when editing
-                      // inside the household screen.
-                      for (final key in [
-                        'hh_unique_key',
-                        'head_unique_key',
-                        'spouse_unique_key',
-                        'head_id_pk',
-                        'spouse_id_pk',
-                      ]) {
-                        final v = _headForm![key];
-                        if (v != null && !initial.containsKey(key)) {
-                          initial[key] = v.toString();
-                        }
-                      }
-
-                      // Decide initial tab based on which summary row was tapped.
-                      // Head row (Relation == 'Self') -> tab 0 (Head)
-                      // Spouse summary row (Relation == 'Wife'/'Spouse') -> tab 1 (Spouse)
-                      final relation = (m['Relation'] ?? '').toString();
-                      final int initialTab = (relation == 'Wife' || relation == 'Spouse') ? 1 : 0;
-
-                      // Open head form in "inline edit" mode for this
-                      // household screen: we want to get the updated head
-                      // form back via Navigator.pop(result) and update the
-                      // existing table, not recreate a new screen.
-                      final result = await Navigator.of(context).push<Map<String, dynamic>>(
-                        MaterialPageRoute(
-                          builder: (_) => AddNewFamilyHeadScreen(
-                            isEdit: false,
-                            initial: initial,
-                            initialTab: initialTab,
-                          ),
-                        ),
-                      );
-
-                      if (result != null) {
-                        setState(() {
-                          _headForm = Map<String, dynamic>.from(result);
-
-
-                          try {final spRaw = result['spousedetails'];
-                            Map<String, dynamic>? spMap;
-                            if (spRaw is Map) {
-                              spMap = Map<String, dynamic>.from(spRaw);
-                            } else if (spRaw is String && spRaw.isNotEmpty) {
-                              spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
-                            }
-                            if (spMap != null) {
-                              spMap.forEach((key, value) {
-                                if (value != null) {
-                                  _headForm!['sp_$key'] = value.toString();
-                                }
-                              });
-                            }
-                          } catch (_) {}
-
-                          final String name = (result['headName'] ?? '').toString();
-                          final bool useDob = (result['useDob'] == true);
-                          final String? dobIso = result['dob'] as String?;
-
-                          String age = '';
-                          if (useDob && dobIso != null && dobIso.isNotEmpty) {
-                            final dob = DateTime.tryParse(dobIso);
-                            if (dob != null) {
-                              final today = DateTime.now();
-                              int years = today.year - dob.year;
-                              if (today.month < dob.month ||
-                                  (today.month == dob.month && today.day < dob.day)) {
-                                years--;
-                              }
-                              age = years.toString();
-                            } else {
-                              age = (result['approxAge'] ?? '').toString();
-                            }
-                          } else {
-                            age = (result['approxAge'] ?? '').toString();
-                          }
-
-                          final String gender = (result['gender'] ?? '').toString();
-                          final String father = (result['fatherName'] ?? '').toString();
-                          final String spouse = (result['spouseName'] ?? '').toString();
-                          final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
-                              ? (int.tryParse(result['children'].toString()) ?? 0) > 0
-                                  ? result['children'].toString()
-                                  : '0'
-                              : '0';
-
-                          // Update head row (Relation == 'Self') without creating new rows
-                          final int headIndex = _members.indexWhere((row) => row['Relation'] == 'Self');
-                          if (headIndex >= 0) {
-                            final Map<String, String> headRow = {
-                              '#': _members[headIndex]['#'] ?? '${headIndex + 1}',
-                              'Type': 'Adult',
-                              'Name': name,
-                              'Age': age,
-                              'Gender': gender,
-                              'Relation': 'Self',
-                              'Father': father,
-                              'Spouse': spouse,
-                              'Total Children': totalChildren,
-                            };
-                            _members[headIndex] = headRow;
-                          }
-
-                          final String maritalStatus = (result['maritalStatus'] ?? '').toString();
-                          final int spouseIndex = _members.indexWhere((row) => row['Relation'] == 'Wife' || row['Relation'] == 'Spouse');
-
-                          if (maritalStatus == 'Married' && spouse.isNotEmpty) {
-                            if (spouseIndex >= 0) {
-                              final String spouseGender = (gender == 'Male')
-                                  ? 'Female'
-                                  : (gender == 'Female')
-                                      ? 'Male'
-                                      : '';
-                              final bool spouseUseDob = (result['spouseUseDob'] == true);
-                              final String? spouseDobIso = result['spouseDob'] as String?;
-                              String spouseAge = '';
-                              if (spouseUseDob && spouseDobIso != null && spouseDobIso.isNotEmpty) {
-                                final spouseDob = DateTime.tryParse(spouseDobIso);
-                                if (spouseDob != null) {
-                                  final today = DateTime.now();
-                                  int years = today.year - spouseDob.year;
-                                  if (today.month < spouseDob.month ||
-                                      (today.month == spouseDob.month && today.day < spouseDob.day)) {
-                                    years--;
-                                  }
-                                  spouseAge = years.toString();
-                                } else {
-                                  spouseAge = (result['spouseApproxAge'] ?? '').toString();
-                                }
-                              } else {
-                                spouseAge = (result['spouseApproxAge'] ?? '').toString();
-                              }
-                              final Map<String, String> spouseRow = {
-                                '#': _members[spouseIndex]['#'] ?? '${spouseIndex + 1}',
-                                'Type': 'Adult',
-                                'Name': spouse,
-                                'Age': spouseAge,
-                                'Gender': spouseGender,
-                                'Relation': _members[spouseIndex]['Relation'] ?? 'Wife',
-                                'Father': '',
-                                'Spouse': name,
-                                'Total Children': totalChildren,
-                              };
-                              _members[spouseIndex] = spouseRow;
-                            }
-                          } else {
-                            if (spouseIndex >= 0) {
-                              _members.removeAt(spouseIndex);
-                              // Do not change totalMembers here; keep count stable during edit
-                            }
-                          }
-                        });
-                      }
                     }
-                  },
-                  cells: [
-                    DataCell(Center(child: Text(m['Type'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
-                    DataCell(Center(child: Text(m['Name'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
-                    DataCell(Center(child: Text(m['Age'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
-                    DataCell(Center(child: Text(m['Gender'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
-                    DataCell(Center(child: Text(m['Relation'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
-                    DataCell(Center(child: Text(m['Father'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
-                    DataCell(Center(child: Text(m['Spouse'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
-                    DataCell(Center(child: Text(totalChildrenText, textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp)))),
+                  } catch (_) {}
+                  final String name = (result['headName'] ?? '').toString();
+                  final bool useDob = (result['useDob'] == true);
+                  final String? dobIso = result['dob'] as String?;
+                  String age = '';
+                  if (useDob && dobIso != null && dobIso.isNotEmpty) {
+                    final dob = DateTime.tryParse(dobIso);
+                    if (dob != null) {
+                      final today = DateTime.now();
+                      int years = today.year - dob.year;
+                      if (today.month < dob.month || (today.month == dob.month && today.day < dob.day)) {
+                        years--;
+                      }
+                      age = years.toString();
+                    } else {
+                      age = (result['approxAge'] ?? '').toString();
+                    }
+                  } else {
+                    age = (result['approxAge'] ?? '').toString();
+                  }
+                  final String gender = (result['gender'] ?? '').toString();
+                  final String father = (result['fatherName'] ?? '').toString();
+                  final String spouse = (result['spouseName'] ?? '').toString();
+                  final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
+                      ? (int.tryParse(result['children'].toString()) ?? 0) > 0
+                          ? result['children'].toString()
+                          : '0'
+                      : '0';
+                  final int headIndex = _members.indexWhere((row) => row['Relation'] == 'Self');
+                  if (headIndex >= 0) {
+                    final Map<String, String> headRow = {
+                      '#': _members[headIndex]['#'] ?? '${headIndex + 1}',
+                      'Type': 'Adult',
+                      'Name': name,
+                      'Age': age,
+                      'Gender': gender,
+                      'Relation': 'Self',
+                      'Father': father,
+                      'Spouse': spouse,
+                      'Total Children': totalChildren,
+                    };
+                    _members[headIndex] = headRow;
+                  }
+                  final String maritalStatus = (result['maritalStatus'] ?? '').toString();
+                  final int spouseIndex = _members.indexWhere((row) => row['Relation'] == 'Wife' || row['Relation'] == 'Spouse');
+                  if (maritalStatus == 'Married' && spouse.isNotEmpty) {
+                    if (spouseIndex >= 0) {
+                      final String spouseGender = (gender == 'Male') ? 'Female' : (gender == 'Female') ? 'Male' : '';
+                      final bool spouseUseDob = (result['spouseUseDob'] == true);
+                      final String? spouseDobIso = result['spouseDob'] as String?;
+                      String spouseAge = '';
+                      if (spouseUseDob && spouseDobIso != null && spouseDobIso.isNotEmpty) {
+                        final spouseDob = DateTime.tryParse(spouseDobIso);
+                        if (spouseDob != null) {
+                          final today = DateTime.now();
+                          int years = today.year - spouseDob.year;
+                          if (today.month < spouseDob.month || (today.month == spouseDob.month && today.day < spouseDob.day)) {
+                            years--;
+                          }
+                          spouseAge = years.toString();
+                        } else {
+                          spouseAge = (result['spouseApproxAge'] ?? '').toString();
+                        }
+                      } else {
+                        spouseAge = (result['spouseApproxAge'] ?? '').toString();
+                      }
+                      final Map<String, String> spouseRow = {
+                        '#': _members[spouseIndex]['#'] ?? '${spouseIndex + 1}',
+                        'Type': 'Adult',
+                        'Name': spouse,
+                        'Age': spouseAge,
+                        'Gender': spouseGender,
+                        'Relation': _members[spouseIndex]['Relation'] ?? 'Wife',
+                        'Father': '',
+                        'Spouse': name,
+                        'Total Children': totalChildren,
+                      };
+                      _members[spouseIndex] = spouseRow;
+                    }
+                  } else {
+                    if (spouseIndex >= 0) {
+                      _members.removeAt(spouseIndex);
+                    }
+                  }
+                });
+              }
+            }
+          },
+          borderRadius: BorderRadius.circular(6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
+                ),
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  children: [
+                    const Icon(Icons.person, color: Colors.black54, size: 18),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        m['Name'] ?? 'N/A',
+                        style: TextStyle(color: primary, fontWeight: FontWeight.w600, fontSize: 14.sp),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios, color: Colors.black54, size: 16),
                   ],
-                );
-              }).toList(),
-            ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: primary.withOpacity(0.95),
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(6)),
+                ),
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCardRow([
+                      _cardRowText(l10n?.thType ?? 'Type', m['Type'] ?? ''),
+                      _cardRowText(l10n?.ageGenderLabel ?? 'Age | Gender', ageGender),
+                      _cardRowText(l10n?.thRelation ?? 'Relation', m['Relation'] ?? ''),
+                    ]),
+                    const SizedBox(height: 8),
+                    _buildCardRow([
+                      _cardRowText(l10n?.thFather ?? 'Father', m['Father'] ?? ''),
+                      _cardRowText(l10n?.thSpouse ?? 'Spouse', m['Spouse'] ?? ''),
+                      _cardRowText(l10n?.thTotalChildren ?? 'Total Children', totalChildrenText),
+                    ]),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCardRow(List<Widget> children) {
+    return Row(
+      children: [
+        for (int i = 0; i < children.length; i++) ...[
+          Expanded(child: children[i]),
+          if (i < children.length - 1) const SizedBox(width: 10),
+        ]
+      ],
+    );
+  }
+
+  Widget _cardRowText(String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+        ),
+      ],
     );
   }
 

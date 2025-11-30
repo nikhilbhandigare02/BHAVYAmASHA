@@ -102,7 +102,6 @@ class _HBNCListScreenState
     }
   }
 
-  // Method to fetch delivery outcome data from followup_form_data table
   Future<List<Map<String, dynamic>>> _getDeliveryOutcomeData() async {
     try {
       final db = await DatabaseProvider.instance.database;

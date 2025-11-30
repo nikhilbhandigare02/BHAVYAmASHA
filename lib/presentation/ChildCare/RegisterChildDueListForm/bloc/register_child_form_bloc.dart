@@ -101,7 +101,7 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
         'updated_at': now,
       };
 
-      // Get beneficiary details
+
       String householdRefKey = '';
       String motherKey = '';
       String fatherKey = '';

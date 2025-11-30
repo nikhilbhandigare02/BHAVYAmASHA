@@ -488,7 +488,7 @@ class LocalStorageDao {
       final db = await _db;
       final rows = await db.query(
         'beneficiaries_new',
-        where: 'unique_key = ? AND is_deleted = 0',
+        where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
         whereArgs: [uniqueKey],
         limit: 1,
       );
@@ -1021,8 +1021,9 @@ class LocalStorageDao {
 
     final forms = await db.query(
       FollowupFormDataTable.table,
-      where: ' form_json LIKE ?',
+      where: 'form_json LIKE ?',
       whereArgs: ['%case_closure%'],
+      orderBy: 'created_date_time DESC',
     );
 
     final List<Map<String, dynamic>> result = [];
@@ -1041,8 +1042,7 @@ class LocalStorageDao {
               : null;
 
           if (caseClosure != null &&
-              caseClosure['is_case_closure'] == true &&
-              caseClosure['date_of_death'] != null) {
+              caseClosure['is_case_closure'] == true) {
 
             final childDetails = formDataMap['child_details'] is Map
                 ? Map<String, dynamic>.from(formDataMap['child_details'] as Map)
@@ -1058,7 +1058,7 @@ class LocalStorageDao {
               try {
                 final beneficiaryRows = await db.query(
                   'beneficiaries_new',
-                  where: 'beneficiary_ref_key = ?',
+                  where: 'unique_key = ?',
                   whereArgs: [beneficiaryRefKey],
                   limit: 1,
                 );
