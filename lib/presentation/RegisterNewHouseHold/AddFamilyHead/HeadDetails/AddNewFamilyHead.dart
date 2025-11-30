@@ -49,11 +49,28 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     with SingleTickerProviderStateMixin {
   // Calculate DOB based on entered years, months, and days
   void _updateDobFromAge(String years, String months, String days) {
+    // If any field is empty, clear the DOB and return
+    if (years.trim().isEmpty || months.trim().isEmpty || days.trim().isEmpty) {
+      context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(null));
+      return;
+    }
+    
+    // If all fields are empty, clear the DOB and return
+    if (years.trim().isEmpty && months.trim().isEmpty && days.trim().isEmpty) {
+      context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(null));
+      return;
+    }
+    
+    // Parse the values, defaulting to 0 if parsing fails
     final y = int.tryParse(years.trim()) ?? 0;
     final m = int.tryParse(months.trim()) ?? 0;
     final d = int.tryParse(days.trim()) ?? 0;
 
-    if (y == 0 && m == 0 && d == 0) return;
+    // If all values are 0, clear the DOB
+    if (y == 0 && m == 0 && d == 0) {
+      context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(null));
+      return;
+    }
 
     final now = DateTime.now();
     var calculatedDob = DateTime(

@@ -2058,8 +2058,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     return false;
                                   }
 
-                                  final totalMonths = yy * 12 + mm;
-                                  return totalMonths <= 15;
+                                  // Check if age is exactly 1 year, 3 months, and 1 day or more
+                                  if (yy > 1) return false;
+                                  if (yy == 1 && mm > 3) return false;
+                                  if (yy == 1 && mm == 3 && dd >= 1) return false;
+                                  
+                                  return true; // Show only if age is less than 1 year, 3 months, and 1 day
                                 }())...[
                                   _section(
                                     CustomTextField(

@@ -112,7 +112,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     return RichText(
       text: TextSpan(
         style: TextStyle(
-          fontSize: 14.sp,
+          fontSize: 13.sp,
           color: AppColors.onSurface,
           fontWeight: FontWeight.w500,
         ),
@@ -136,61 +136,70 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    // Slightly lighter color for selected date text, darker for labels
+    // Match the TextField's input style
     final TextStyle inputStyle = TextStyle(
       fontSize: 15.sp,
-      fontWeight: FontWeight.w500,
       color: AppColors.onSurfaceVariant,
       height: 1.5,
+    );
+    
+    // Style for hint text to match TextField
+    final hintStyle = inputStyle.copyWith(
+      color: Theme.of(context).hintColor,
     );
 
     return GestureDetector(
       onTap: widget.isEditable && !widget.readOnly ? () => _pickDate(context) : null,
       child: AbsorbPointer(
-        child: TextFormField(
-          controller: _controller,
-          readOnly: true,
-          style: inputStyle,
-          validator: widget.validator != null
-              ? (value) => widget.validator!(selectedDate)
-              : null,
-          decoration: InputDecoration(
-
-            label: _labelWidget,
-
-            hintText: widget.hintText ?? 'dd-MM-yyyy',
-            hintStyle:
-            inputStyle.copyWith(color: AppColors.onSurfaceVariant),
-
-            errorStyle: TextStyle(
-              fontSize: 13.sp,
-              height: 1.2,
-              color: Colors.red[700],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.labelText.isNotEmpty) _labelWidget!,
+            const SizedBox(height: 0),
+            Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                // Actual text field
+                TextFormField(
+                  controller: _controller,
+                  readOnly: true,
+                  style: inputStyle,
+                  validator: widget.validator != null
+                      ? (value) => widget.validator!(selectedDate)
+                      : null,
+                  decoration: InputDecoration(
+                    hintText: _selectedDate == null ? (widget.hintText ?? 'dd-MM-yyyy') : null,
+                    hintStyle: hintStyle,
+                    errorStyle: TextStyle(
+                      fontSize: 13.sp,
+                      height: 1,
+                      color: Colors.red[700],
+                    ),
+                    suffixIcon: widget.isEditable && !widget.readOnly
+                        ? Padding(
+                            padding: EdgeInsets.only(right: 2.w),
+                            child: Icon(
+                              Icons.calendar_today_outlined,
+                              color: Colors.grey,
+                              size: 14.sp,
+                            ),
+                          )
+                        : null,
+                    suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    // contentPadding: EdgeInsets.symmetric(
+                    //   horizontal: 1.w,
+                    //   vertical: 1.5.h,
+                    // ),
+                    isDense: true,
+                  ),
+                ),
+              ],
             ),
-
-
-            suffixIcon: widget.isEditable && !widget.readOnly
-                ? Padding(
-              padding: EdgeInsets.only(right: 2.w),
-              child: Icon(
-                Icons.calendar_today_outlined,
-                color: Colors.grey,
-                size: 14.sp,
-              ),
-            )
-                : null,
-            suffixIconConstraints:
-            const BoxConstraints(minWidth: 0, minHeight: 0),
-
-
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 1.w,
-              vertical: 1.h,
-            ),
-          ),
+          ],
         ),
       ),
     );
