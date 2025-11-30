@@ -83,12 +83,11 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
   ];
 
   final List<String> _deathReasons = [
-
     'PH',
     'PPH',
     'Severe Anaemia',
     'Sepsis',
-    'Obstruct labour',
+    'Obstruct Labour',
     'Malpresentation'
   ];
 
@@ -213,6 +212,7 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
               value: widget.reasonOfDeath,
               getLabel: (value) => value,
               onChanged: widget.onReasonOfDeathChanged,
+              convertToTitleCase: false, // Disable title case conversion
             ),
             const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
           ],

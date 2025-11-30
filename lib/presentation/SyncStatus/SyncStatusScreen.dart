@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
+import 'package:sqflite/sqflite.dart';
+
+import '../../data/Database/database_provider.dart';
 
 class SyncStatusScreen extends StatefulWidget {
   const SyncStatusScreen({super.key});
@@ -12,6 +15,19 @@ class SyncStatusScreen extends StatefulWidget {
 
 class _SyncStatusScreenState extends State<SyncStatusScreen> {
   bool _isLoading = true;
+  DateTime? _lastSyncedAt;
+
+  String _formatDateTime(DateTime dateTime) {
+    return '${_twoDigits(dateTime.day)}-${_twoDigits(dateTime.month)}-${dateTime.year} ${_formatTime(dateTime)}';
+  }
+
+  String _twoDigits(int n) => n.toString().padLeft(2, '0');
+
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour % 12 == 0 ? 12 : dateTime.hour % 12;
+    final period = dateTime.hour < 12 ? 'am' : 'pm';
+    return '${_twoDigits(hour)}:${_twoDigits(dateTime.minute)}$period';
+  }
 
   int _householdTotal = 0;
   int _householdSynced = 0;
@@ -32,46 +48,49 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
     _loadCounts();
   }
 
+// In SyncStatusScreen.dart
   Future<void> _loadCounts() async {
     try {
-      final dao = LocalStorageDao.instance;
+      final dao = LocalStorageDao();
+      final lastSyncTime = await dao.getLastSyncTime();
 
-      final householdTotal = await dao.getHouseholdTotalCountLocal();
-      final householdSynced = await dao.getHouseholdSyncedCountLocal();
+      // Get counts directly from database tables
+      // Update household counts
+      _householdTotal = await _getTotalCount('households');
+      _householdSynced = await _getSyncedCount('households', await _getIdsFromTable('households'));
 
-      final beneficiaryTotal = await dao.getBeneficiaryTotalCountLocal();
-      final beneficiarySynced = await dao.getBeneficiarySyncedCountLocal();
+      // Update beneficiary counts
+      _beneficiaryTotal = await _getTotalCount('beneficiaries_new');
+      _beneficiarySynced = await _getSyncedCount('beneficiaries_new',
+          await _getIdsFromTable('beneficiaries_new'));
 
-      final followupTotal = await dao.getFollowupTotalCountLocal();
-      final followupSynced = await dao.getFollowupSyncedCountLocal();
+      // Update eligible couple counts
+      _eligibleCoupleTotal = await _getTotalCount('eligible_couple_activities');
+      _eligibleCoupleSynced = await _getSyncedCount('eligible_couple_activities',
+          await _getIdsFromTable('eligible_couple_activities'));
 
-      final eligibleTotal = await dao.getEligibleCoupleTotalCountLocal();
-      final eligibleSynced = await dao.getEligibleCoupleSyncedCountLocal();
+      // Update mother care counts
+      _motherCareTotal = await _getTotalCount('mother_care_activities');
+      _motherCareSynced = await _getSyncedCount('mother_care_activities',
+          await _getIdsFromTable('mother_care_activities'));
 
-      final motherTotal = await dao.getMotherCareTotalCountLocal();
-      final motherSynced = await dao.getMotherCareSyncedCountLocal();
+      // Update child care counts
+      _childCareTotal = await _getTotalCount('child_care_activities');
+      _childCareSynced = await _getSyncedCount('child_care_activities',
+          await _getIdsFromTable('child_care_activities'));
 
-      final childTotal = await dao.getChildCareTotalCountLocal();
-      final childSynced = await dao.getChildCareSyncedCountLocal();
+      // Followup counts (kept as is since it's not in dashboard)
+      _followupTotal = await dao.getFollowupTotalCountLocal();
+      _followupSynced = await dao.getFollowupSyncedCountLocal();
 
       if (!mounted) return;
 
       setState(() {
-        _householdTotal = householdTotal;
-        _householdSynced = householdSynced;
-        _beneficiaryTotal = beneficiaryTotal;
-        _beneficiarySynced = beneficiarySynced;
-        _followupTotal = followupTotal;
-        _followupSynced = followupSynced;
-        _eligibleCoupleTotal = eligibleTotal;
-        _eligibleCoupleSynced = eligibleSynced;
-        _motherCareTotal = motherTotal;
-        _motherCareSynced = motherSynced;
-        _childCareTotal = childTotal;
-        _childCareSynced = childSynced;
+        _lastSyncedAt = lastSyncTime;
         _isLoading = false;
       });
-    } catch (_) {
+    } catch (e) {
+      print('Error loading sync status: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -80,6 +99,47 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
     }
   }
 
+  // Helper method to get total count from a table
+  Future<int> _getTotalCount(String tableName) async {
+    try {
+      final db = await  DatabaseProvider.instance.database;
+      final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName WHERE is_deleted = 0');
+      return result.first['count'] as int? ?? 0;
+    } catch (e) {
+      print('Error getting total count from $tableName: $e');
+      return 0;
+    }
+  }
+
+  // Helper method to get synced count for a specific table and IDs
+  Future<int> _getSyncedCount(String tableName, List<int> ids) async {
+    if (ids.isEmpty) return 0;
+
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final placeholders = List.filled(ids.length, '?').join(',');
+      final result = await db.rawQuery(
+        'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_deleted = 0 AND is_synced = 1',
+        ids,
+      );
+      return result.first['count'] as int? ?? 0;
+    } catch (e) {
+      print('Error getting synced count from $tableName: $e');
+      return 0;
+    }
+  }
+
+  // Helper method to get IDs from a table
+  Future<List<int>> _getIdsFromTable(String tableName) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final result = await db.rawQuery('SELECT id FROM $tableName WHERE is_deleted = 0');
+      return result.map((e) => e['id'] as int).toList();
+    } catch (e) {
+      print('Error getting IDs from $tableName: $e');
+      return [];
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Sizer(
@@ -89,24 +149,27 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
           appBar: AppBar(
             backgroundColor: AppColors.primary,
             elevation: 0,
-            title:  Text(
+            title: Text(
               'Sync Status',
-              style: TextStyle(fontWeight: FontWeight.w600, color:AppColors.background),
+              style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.background),
             ),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(3.w),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(4),
-                ),
+          body: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.all(3.w),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                 child: Padding(
                   padding: EdgeInsets.all(3.w),
                   child: _isLoading
@@ -148,25 +211,53 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
                             ),
 
                             SizedBox(height: 2.h),
-                            Row(
-                              children: [
-                                Text(
-                                  'Last synced at: 29-10-2025 10:38am',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w500,
+                            if (_lastSyncedAt != null)
+                              Row(
+                                children: [
+                                  Text(
+                                    'Last synced: ${_formatDateTime(_lastSyncedAt!)}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 4),
-                                const Icon(Icons.check_circle, color: Colors.white, size: 18),
-                              ],
-                            ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.check_circle, color: Colors.white, size: 16),
+                                ],
+                              ),
                           ],
                         ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              // Logout button at the bottom
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Add your logout logic here
+                    // For example: 
+                    // Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                  },
+                  icon: Icon(Icons.logout, color: Colors.white),
+                  label: Text(
+                    'Logout',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

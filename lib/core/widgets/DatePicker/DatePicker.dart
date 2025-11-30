@@ -8,7 +8,7 @@ class CustomDatePicker extends StatefulWidget {
   final DateTime? initialDate;
   final bool isEditable;
   final Function(DateTime?)? onDateChanged;
-  final String labelText;               // e.g. "Birth date *"  (asterisk optional)
+  final String labelText;
   final String? hintText;
   final String? Function(DateTime?)? validator;
   final int? labelMaxLines;

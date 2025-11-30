@@ -243,25 +243,22 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                Padding(
-                  padding: EdgeInsets.all(2.h),
-                  child: Row(
-                    children: [
-                      Radio<bool>(
-                        value: true,
-                        groupValue: state.useDob,
-                        onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
-                      ),
-                      Text(l.dobShort, style: TextStyle(fontSize: 14.sp),),
-                      SizedBox(width: 4.w),
-                      Radio<bool>(
-                        value: false,
-                        groupValue: state.useDob,
-                        onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
-                      ),
-                      Text(l.ageApproximate, style: TextStyle(fontSize:14.sp),),
-                    ],
-                  ),
+                Row(
+                  children: [
+                    Radio<bool>(
+                      value: true,
+                      groupValue: state.useDob,
+                      onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
+                    ),
+                    Text(l.dobShort, style: TextStyle(fontSize: 14.sp),),
+                    SizedBox(width: 4.w),
+                    Radio<bool>(
+                      value: false,
+                      groupValue: state.useDob,
+                      onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
+                    ),
+                    Text(l.ageApproximate, style: TextStyle(fontSize:14.sp),),
+                  ],
                 ),
                 if (state.useDob)
                   _section(

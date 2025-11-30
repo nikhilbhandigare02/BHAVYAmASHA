@@ -911,6 +911,48 @@ class LocalStorageDao {
     return count ?? 0;
   }
 
+  /// Returns the timestamp of the most recent sync operation
+  Future<DateTime?> getLastSyncTime() async {
+    try {
+      final db = await _db;
+      final result = await db.rawQuery('''
+        SELECT MAX(modified_date_time) as last_sync 
+        FROM (
+          SELECT modified_date_time FROM households WHERE is_synced = 1
+          UNION ALL
+          SELECT modified_date_time FROM beneficiaries_new WHERE is_synced = 1
+          UNION ALL
+          SELECT modified_date_time FROM followup_form_data WHERE is_synced = 1
+          UNION ALL
+          SELECT modified_date_time FROM eligible_couple_activities WHERE is_synced = 1
+          UNION ALL
+          SELECT modified_date_time FROM mother_care_activities WHERE is_synced = 1
+          UNION ALL
+          SELECT modified_date_time FROM child_care_activities WHERE is_synced = 1
+        ) 
+        WHERE modified_date_time IS NOT NULL AND modified_date_time != ''
+      ''');
+
+      if (result.isNotEmpty && result.first['last_sync'] != null) {
+        return DateTime.tryParse(result.first['last_sync'] as String);
+      }
+      return null;
+    } catch (e) {
+      print('Error getting last sync time: $e');
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUnsyncedMotherCareActivities() async {
+    final db = await _db;
+    final rows = await db.query(
+      'mother_care_activities',
+      where: 'is_synced = 0 AND is_deleted = 0',
+    );
+    return rows;
+  }
+
+
   Future<List<Map<String, dynamic>>> getUnsyncedMotherCareAncForms() async {
     try {
       final db = await _db;
@@ -944,7 +986,7 @@ class LocalStorageDao {
         values['server_id'] = serverId;
       }
       return await db.update(
-        FollowupFormDataTable.table,
+        'mother_care_activities',
         values,
         where: 'id = ?',
         whereArgs: [id],
@@ -1000,19 +1042,9 @@ class LocalStorageDao {
 
   Future<int> getHouseholdCount() async {
     final db = await _db;
-
-
-    final count = Sqflite.firstIntValue(await db.rawQuery('''
-      SELECT COUNT(DISTINCT h.unique_key) AS household_count
-      FROM households h
-      INNER JOIN beneficiaries_new b
-        ON b.household_ref_key = h.unique_key
-      WHERE h.is_deleted = 0
-        AND b.is_deleted = 0
-        AND b.is_migrated = 0
-        AND b.is_death = 0
-    '''));
-
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM households WHERE is_deleted = 0',
+    ));
     return count ?? 0;
   }
 

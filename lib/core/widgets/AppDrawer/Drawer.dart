@@ -183,7 +183,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             // 🔹 Drawer Items List
             Expanded(
               child: ListView(
-                padding: EdgeInsets.zero,
+                padding: EdgeInsets.only(bottom: 0), // Remove bottom padding
                 children: [
                   _buildMenuItem(context, 'assets/images/home.png', l10n.drawerHome, onTap: () {
                     Navigator.pushReplacement(
@@ -330,14 +330,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 2.h),
                 ],
               ),
             ),
-
-            SizedBox(
+            // Logout Button - Fixed at bottom
+            Container(
+              margin: EdgeInsets.only(top: 0), // Remove any top margin
               width: double.infinity,
-              height: 6.h, // responsive height
+              height: 4.5.h, // responsive height
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
@@ -377,8 +377,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   ),
                 ),
               ),
-            ),
-          ],
+            )],
         ),
       ),
     );

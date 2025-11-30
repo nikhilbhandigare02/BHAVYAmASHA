@@ -225,19 +225,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
         final count = rows.first['cnt'] as int? ?? 0;
         
-        // Only update if the database count is higher than what we have in storage
         if (mounted && count > _completedVisitsCount) {
           setState(() {
             _completedVisitsCount = count;
           });
-          // Update storage with the new count
           await _saveTodayWorkCountsToStorage();
         }
       } catch (e) {
-        // Ignore database errors, we already have a value from storage
       }
     } catch (_) {
-      // If loading from storage fails, initialize to 0
       if (mounted) {
         setState(() {
           _completedVisitsCount = 0;
@@ -259,16 +255,16 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
   Future<void> _loadAncItems() async {
     try {
-      // Load ANC forms DB reference for per-beneficiary visit checks
       final db = await DatabaseProvider.instance.database;
       final ancFormKey =
           FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
 
-      final rows = await LocalStorageDao.instance.getANCList();
-
+      // Get regular ANC items
+      final regularRows = await LocalStorageDao.instance.getANCList();
       final List<Map<String, dynamic>> items = [];
 
-      for (final row in rows) {
+      // Process regular ANC items
+      for (final row in regularRows) {
         try {
           final uniqueKeyFull = row['unique_key']?.toString() ?? '';
 
@@ -374,13 +370,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             lmpDate = lastVisitDt ?? DateTime.now();
           }
 
-          // Calculate ANC visit windows based on LMP (same logic as ANCVisitListScreen)
           final ancRanges = _calculateAncDateRangesForToday(lmpDate);
 
-          // We will check each ANC window (1st–4th). If today is within a
-          // window and there is NO ANC form whose date_of_inspection falls
-          // inside that window, the record will be shown in Today's ANC list.
-          final today = DateTime.now();
+           final today = DateTime.now();
           final todayDate = DateTime(today.year, today.month, today.day);
 
           bool _isTodayInWindow(DateTime start, DateTime end) {
@@ -404,10 +396,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   }
                 }
 
-                // Fallback to created_date_time if date_of_inspection is missing
                 dateRaw ??= formRow['created_date_time']?.toString();
                 if (dateRaw == null || dateRaw.isEmpty) {
-                  // If we can't get any date, treat this form as within the window
                   return true;
                 }
 
@@ -417,7 +407,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 }
                 final dt = DateTime.tryParse(dateStr);
                 if (dt == null) {
-                  // If parsing fails, still consider it as within the window
                   return true;
                 }
 
@@ -524,13 +513,121 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         }
       }
 
+      // Get ANC due items
+      final List<Map<String, dynamic>> ancDueItems = [];
+      
+      try {
+        // Query to get anc_due records with beneficiary details
+        final ancDueRecords = await db.rawQuery('''
+          SELECT 
+            mca.*,
+            bn.*,
+            mca.id as mca_id,
+            bn.id as beneficiary_id
+          FROM mother_care_activities mca
+          INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
+          WHERE mca.mother_care_state = 'anc_due' 
+            AND (bn.is_deleted IS NULL OR bn.is_deleted = 0)
+            AND (bn.is_death IS NULL OR bn.is_death = 0)
+            AND (bn.is_migrated IS NULL OR bn.is_migrated = 0)
+        ''');
+
+        debugPrint('Found ${ancDueRecords.length} ANC due records');
+
+        for (final record in ancDueRecords) {
+          try {
+            final beneficiaryInfo = record['beneficiary_info'] is String
+                ? (jsonDecode(record['beneficiary_info'] as String) as Map<String, dynamic>?) ?? {}
+                : (record['beneficiary_info'] as Map<String, dynamic>?) ?? {};
+                
+            final name = beneficiaryInfo['memberName']?.toString() ?? 
+                        beneficiaryInfo['name']?.toString() ?? 
+                        'Unknown';
+                        
+            final dob = beneficiaryInfo['dob']?.toString() ?? '';
+            final mobile = beneficiaryInfo['mobileNo']?.toString() ?? '-';
+            final spouseName = beneficiaryInfo['spouseName']?.toString() ?? '-';
+            final gender = (beneficiaryInfo['gender']?.toString() ?? 'female').toLowerCase() == 'female' ? 'Female' : 'Male';
+            
+            // Skip if already in regular items
+            if (items.any((item) => 
+                (item['name'] ?? '').toString().toLowerCase() == name.toString().toLowerCase() &&
+                (item['mobile'] ?? '').toString() == mobile.toString())) {
+              debugPrint('Skipping duplicate ANC due record for $name ($mobile)');
+              continue;
+            }
+
+            final age = _calculateAge(dob);
+            final ageText = age > 0 ? '$age' : '-';
+            
+            final ancDueItem = {
+              'id': record['beneficiary_id'] ?? record['id'],
+              'unique_key': record['unique_key'],
+              'name': name,
+              'age': ageText,
+              'gender': gender,
+              'mobile': mobile,
+              'spouse_name': spouseName,
+              'last Visit date': record['created_date_time'] != null 
+                  ? _formatDateForDisplay(record['created_date_time'].toString()) 
+                  : '-',
+              'Current ANC last due date': record['created_date_time'] != null
+                  ? _formatDateForDisplay(record['created_date_time'].toString())
+                  : '-',
+              'is_anc_due': true,
+              'beneficiary_info': jsonEncode({
+                'memberName': name,
+                'headName': beneficiaryInfo['headName'],
+                'gender': gender.toLowerCase(),
+                'dob': dob,
+                'mobileNo': mobile,
+                'isPregnant': 'yes',
+                'spouseName': spouseName,
+              }),
+              'hhId': record['household_ref_key'] ?? '',
+              'BeneficiaryID': record['unique_key'] ?? '',
+              'household_ref_key': record['household_ref_key'] ?? '',
+              'badge': 'ANC',
+              'dob': dob, // Add dob for duplicate checking
+            };
+            
+            debugPrint('Adding ANC due item: ${ancDueItem['name']} (${ancDueItem['mobile']})');
+            ancDueItems.add(ancDueItem);
+          } catch (e) {
+            debugPrint('Error processing ANC due record: $e');
+          }
+        }
+        
+        debugPrint('Found ${ancDueItems.length} ANC due items to add');
+      } catch (e) {
+        debugPrint('Error fetching ANC due records: $e');
+      }
+
+      // Combine regular and ANC due items
+      final combinedItems = [...items, ...ancDueItems];
+      
       if (mounted) {
         setState(() {
-          _ancItems = items;
+          _ancItems = combinedItems;
         });
         _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
+  }
+
+  String _formatDateForDisplay(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '-';
+    try {
+      String s = dateStr;
+      if (s.contains('T')) {
+        s = s.split('T')[0];
+      }
+      final date = DateTime.tryParse(s);
+      if (date != null) {
+        return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+      }
+    } catch (_) {}
+    return '-';
   }
 
   Future<void> _loadHbncItems() async {
@@ -1424,14 +1521,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 }
               });
 
-              // Technical identifiers to support edit/update flow
               map['hh_unique_key'] = hhKey;
               map['head_unique_key'] = headRow['unique_key']?.toString() ?? '';
               if (headRow['id'] != null) {
                 map['head_id_pk'] = headRow['id'].toString();
               }
 
-              // Try to attach spouse info from the dedicated spouse beneficiary row
               try {
                 Map<String, dynamic>? spouseRow;
 
@@ -1701,69 +1796,17 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item['name']?.toString() ?? '-',
+                          '${item['name'] ?? 'N/A'}',
                           style: TextStyle(
                             color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14.sp,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${item['age'] ?? '-'} | ${item['gender'] ?? '-'}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14.sp,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 2),
-                        if (badge == 'ANC') ...[
+                        if (item['age'] != null || item['gender'] != null) ...[
                           Text(
-                            'last Visit date: ${item['last Visit date'] ?? '-'}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Current ANC last due date: ${item['Current ANC last due date'] ?? '-'}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                        ] else if (badge == 'Family') ...[
-                          Text(
-                            'Last survey date: ${item['last survey date'] ?? '-'}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                        ] else if (badge == 'EligibleCouple') ...[
-                          Text(
-                            'last Visit date: ${item['last Visit date'] ?? '-'}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                        ] else if (badge == 'HBNC') ...[
-                          Text(
-                            'Last HBNC due date: ${item['last HBNC due date'] ?? '-'}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                        ] else if (badge == 'RI') ...[
-                          Text(
-                            'last Visit date: ${item['last Visit date'] ?? '-'}',
+                            '${item['age'] ?? '-'} - ${item['gender'] ?? '-'}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,
@@ -1771,13 +1814,25 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           ),
                           const SizedBox(height: 2),
                         ],
-                        Text(
-                          'Mobile: ${item['mobile'] ?? '-'}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14.sp,
+                        if (item['mobile'] != null) ...[
+                          Text(
+                            'Mobile: ${item['mobile']}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 2),
+                        ],
+                        if (item['last Visit date'] != null) ...[
+                          Text(
+                            'Last Visit: ${item['last Visit date']}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -1820,10 +1875,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
+    ])));
   }
 
   @override

@@ -1656,7 +1656,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 if (state.mobileOwner == 'Other')
                                   _section(
                                     CustomTextField(
-                                      labelText: 'Enter relation with mobile no. holder *',
+                                      labelText: 'Enter relation with mobile no. holder',
                                       hintText: 'Enter relation with mobile no. holder',
                                       onChanged: (v) => context
                                           .read<AddnewfamilymemberBloc>()
