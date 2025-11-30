@@ -333,7 +333,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 ],
               ),
             ),
-            // Logout Button - Fixed at bottom
             Container(
               margin: EdgeInsets.only(top: 0), // Remove any top margin
               width: double.infinity,

@@ -134,24 +134,48 @@ class Validations {
   static String? validateApproxAge(AppLocalizations l10n, String? years, String? months, String? days) {
     const int minAgeYears = 15;
     const int maxAgeYears = 110;
+    const int maxMonths = 11;
+    const int maxDays = 30; // Using 30 as an average month length for validation
 
-    final y = int.tryParse((years ?? '').trim());
-    final m = int.tryParse((months ?? '').trim());
-    final d = int.tryParse((days ?? '').trim());
-
-    final yy = y ?? 0;
-    final mm = m ?? 0;
-    final dd = d ?? 0;
-
-    if (yy == 0 && mm == 0 && dd == 0) {
-      return 'Please enter the age between 15 to 110 year';
+    // Check if all fields are empty
+    if ((years?.trim().isEmpty ?? true) && 
+        (months?.trim().isEmpty ?? true) && 
+        (days?.trim().isEmpty ?? true)) {
+      return 'Please enter age between 15 to 110 years';
     }
 
-    final totalYears = yy + (mm / 12.0) + (dd / 365.0);
+    // Parse values, defaulting to 0 if empty or invalid
+    final y = int.tryParse((years ?? '').trim()) ?? 0;
+    final m = int.tryParse((months ?? '').trim()) ?? 0;
+    final d = int.tryParse((days ?? '').trim()) ?? 0;
 
-    if (totalYears < minAgeYears || totalYears > maxAgeYears) {
-      return 'Enter age between $minAgeYears to $maxAgeYears';
+    // Validate individual fields
+    if (y < 0 || y > 110) {
+      return 'Years must be between 0 and 110';
     }
+    if (m < 0 || m > maxMonths) {
+      return 'Months must be between 0 and 11';
+    }
+    if (d < 0 || d > maxDays) {
+      return 'Days must be between 0 and 30';
+    }
+
+    // Check if all zeros
+    if (y == 0 && m == 0 && d == 0) {
+      return 'Age cannot be zero';
+    }
+
+    // Calculate total years for range check
+    final totalYears = y + (m / 12.0) + (d / 365.0);
+
+    if (totalYears < minAgeYears) {
+      return 'Minimum age must be $minAgeYears years';
+    }
+    
+    if (totalYears > maxAgeYears) {
+      return 'Maximum age is $maxAgeYears years';
+    }
+    
     return null;
   }
 

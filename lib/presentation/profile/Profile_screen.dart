@@ -521,8 +521,7 @@
                             key: ValueKey('doj_field_${displayDoj?.toIso8601String()}'),
                             labelText: l10n.dojLabel,
                             initialDate: displayDoj,
-
-                            hintText: l10n.dojLabel,
+                            hintText: 'dd-MM-yyyy',
                             onDateChanged: (d) => bloc.add(DojChanged(d)),
                             readOnly: true,
                           );

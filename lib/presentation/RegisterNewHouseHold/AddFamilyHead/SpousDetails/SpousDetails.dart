@@ -50,6 +50,53 @@ class Spousdetails extends StatefulWidget {
 }
 
 class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClientMixin {
+  // Calculate DOB based on entered years, months, and days
+  void _updateDobFromAge(String years, String months, String days) {
+    // If any field is empty, clear the DOB and return
+    if (years.trim().isEmpty || months.trim().isEmpty || days.trim().isEmpty) {
+      context.read<SpousBloc>().add(SpUpdateDob(null));
+      return;
+    }
+    
+    // If all fields are empty, clear the DOB and return
+    if (years.trim().isEmpty && months.trim().isEmpty && days.trim().isEmpty) {
+      context.read<SpousBloc>().add(SpUpdateDob(null));
+      return;
+    }
+    
+    // Parse the values, defaulting to 0 if parsing fails
+    final y = int.tryParse(years.trim()) ?? 0;
+    final m = int.tryParse(months.trim()) ?? 0;
+    final d = int.tryParse(days.trim()) ?? 0;
+
+    // If all values are 0, clear the DOB
+    if (y == 0 && m == 0 && d == 0) {
+      context.read<SpousBloc>().add(SpUpdateDob(null));
+      return;
+    }
+
+    final now = DateTime.now();
+    var calculatedDob = DateTime(
+      now.year - y,
+      now.month - m,
+      now.day - d,
+    );
+
+    // Handle month overflow
+    if (calculatedDob.day != now.day) {
+      // Adjust for months with different number of days
+      calculatedDob = DateTime(calculatedDob.year, calculatedDob.month + 1, 0);
+    }
+
+    // Update the DOB in the state if it's different
+    final currentDob = context.read<SpousBloc>().state.dob;
+    if (currentDob == null || 
+        currentDob.year != calculatedDob.year || 
+        currentDob.month != calculatedDob.month || 
+        currentDob.day != calculatedDob.day) {
+      context.read<SpousBloc>().add(SpUpdateDob(calculatedDob));
+    }
+  }
   final GlobalKey<FormState> _formKey = spousFormKey;
 
   Widget _section(Widget child) => Padding(
@@ -267,7 +314,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       labelText: '${l.dobLabel} *',
                       hintText: l.dateHint,
                       initialDate: state.dob,
-                      firstDate: DateTime(1900),
+                      firstDate: DateTime.now().subtract(const Duration(days: 110 * 365)),
                       lastDate: DateTime.now().subtract(const Duration(days: 15 * 365)),
                       onDateChanged: (d) => context.read<SpousBloc>().add(SpUpdateDob(d)),
                       validator: (date) => captureSpousError(Validations.validateDOB(l, date)),
@@ -298,7 +345,11 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                                 maxLength: 3,
                                 initialValue: state.UpdateYears ?? '',
                                 keyboardType: TextInputType.number,
-                                onChanged: (v) => context.read<SpousBloc>().add(UpdateYearsChanged(v.trim())),
+                                onChanged: (v) {
+                                  context.read<SpousBloc>().add(UpdateYearsChanged(v.trim()));
+                                  final state = context.read<SpousBloc>().state;
+                                  _updateDobFromAge(v.trim(), state.UpdateMonths ?? '', state.UpdateDays ?? '');
+                                },
                                 validator: (value) => captureSpousError(
                                   Validations.validateApproxAge(
                                     l,
@@ -325,7 +376,11 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                                 maxLength: 2,
                                 initialValue: state.UpdateMonths ?? '',
                                 keyboardType: TextInputType.number,
-                                onChanged: (v) => context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim())),
+                                onChanged: (v) {
+                                  context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim()));
+                                  final state = context.read<SpousBloc>().state;
+                                  _updateDobFromAge(state.UpdateYears ?? '', v.trim(), state.UpdateDays ?? '');
+                                },
                                 validator: (value) => captureSpousError(
                                   Validations.validateApproxAge(
                                     l,
@@ -353,7 +408,11 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                                 maxLength: 2,
                                 initialValue: state.UpdateDays ?? '',
                                 keyboardType: TextInputType.number,
-                                onChanged: (v) => context.read<SpousBloc>().add(UpdateDaysChanged(v.trim())),
+                                onChanged: (v) {
+                                  context.read<SpousBloc>().add(UpdateDaysChanged(v.trim()));
+                                  final state = context.read<SpousBloc>().state;
+                                  _updateDobFromAge(state.UpdateYears ?? '', state.UpdateMonths ?? '', v.trim());
+                                },
                                 validator: (value) => captureSpousError(
                                   Validations.validateApproxAge(
                                     l,
