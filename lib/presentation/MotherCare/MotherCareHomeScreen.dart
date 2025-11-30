@@ -8,6 +8,7 @@ import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:medixcel_new/core/utils/anc_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../HomeScreen/HomeScreen.dart';
@@ -33,54 +34,24 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
     _loadHBCNCount();
   }
 
-  // Matches ANCVisitListScreen._loadPregnantWomen logic, but only counts rows
+  // Load ANC visit count using the shared utility
   Future<void> _loadAncVisitCount() async {
     try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      int count = 0;
-
-      for (final row in rows) {
-        try {
-          // Parse the beneficiary info
-          final dynamic rawInfo = row['beneficiary_info'];
-          if (rawInfo == null) continue;
-
-          Map<String, dynamic> info = {};
-          try {
-            info = rawInfo is String ? jsonDecode(rawInfo) as Map<String, dynamic>
-                : Map<String, dynamic>.from(rawInfo as Map);
-          } catch (e) {
-            continue;
-          }
-
-          // Match ANC list filter: isPregnant == 'yes' and female
-          final isPregnant =
-              info['isPregnant']?.toString().toLowerCase() == 'yes';
-          if (!isPregnant) continue;
-
-          final gender = info['gender']?.toString().toLowerCase() ?? '';
-          if (gender != 'f' && gender != 'female') continue;
-
-          count++;
-        } catch (e) {
-          print('Error processing beneficiary: $e');
-        }
-      }
-
+      final count = await ANCUtils.getAncVisitCount();
       if (mounted) {
         setState(() {
           _ancVisitCount = count;
           _isLoading = false;
         });
+        print('ANC Visit Count: $count');
       }
     } catch (e) {
-      print('Error loading eligible pregnant women count: $e');
+      print('Error loading ANC visit count: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
   }
-
   int? _calculateAge(dynamic dob) {
     if (dob == null) return null;
     try {

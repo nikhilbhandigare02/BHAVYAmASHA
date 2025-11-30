@@ -32,7 +32,7 @@ class SyncService {
   Timer? _timer;
   bool _running = false;
 
-  void start({Duration    interval = const Duration(minutes: 5)}) {
+  void start({Duration    interval = const Duration(minutes: 1)}) {
     stop();
 
     print('SyncService: starting with interval ${interval.inMinutes} minute(s)');
@@ -209,7 +209,7 @@ class SyncService {
 
   Future<void> syncUnsyncedMotherCareAncActivities() async {
     try {
-      final list = await _dao.getUnsyncedMotherCareAncForms();
+      final list = await _dao.getUnsyncedMotherCareActivities();
       if (list.isEmpty) {
         print('MotherCare ANC Push: No unsynced forms');
         return;
@@ -366,7 +366,7 @@ class SyncService {
     _timer?.cancel();
     _timer = null;
   }
-  
+
   Future<void> runFullSyncOnce() async {
     await _triggerOnce();
   }

@@ -8,6 +8,7 @@ import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../../../core/utils/device_info_utils.dart';
 import '../../../../core/utils/enums.dart' show FormStatus;
 import '../../../../data/Database/User_Info.dart';
@@ -205,24 +206,24 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           'form_name': formName,
           'unique_key': formsRefKey,
           'form_data': {
-            'visit_date': state.visitDate?.toIso8601String(),
-            'financial_year': state.financialYear,
-            'is_pregnant': state.isPregnant,
-            'lmp_date': state.lmpDate?.toIso8601String(),
-            'edd_date': state.eddDate?.toIso8601String(),
-            'fp_adopting': state.fpAdopting,
-            'fp_method': state.fpMethod,
-            'fp_adoption_date': state.fpAdoptionDate?.toIso8601String(),
-            'protection_status': state.fpAdopting == true ? 'Protected' : 'Unprotected',
-            'condom_quantity': state.condom,
-            'mala_quantity': state.mala,
-            'chhaya_quantity': state.chhaya,
-            'ecp_quantity': state.ecp,
-            'removal_reason': state.removalReasonChanged,
-            'beneficiary_absent': state.beneficiaryAbsentCHanged,
-            'beneficiary_absent_reason': state.beneficiaryAbsentReason,
-            'antra_injection_date': state.antraInjectionDateChanged?.toIso8601String(),
-            'removal_date': state.removalDate?.toIso8601String(),
+              'visit_date': state.visitDate?.toIso8601String(),
+              'financial_year': state.financialYear,
+              'is_pregnant': state.isPregnant,
+              'lmp_date': state.lmpDate?.toIso8601String(),
+              'edd_date': state.eddDate?.toIso8601String(),
+              'fp_adopting': state.fpAdopting,
+              'fp_method': state.fpMethod,
+              'fp_adoption_date': state.fpAdoptionDate?.toIso8601String(),
+              'protection_status': state.fpAdopting == true ? 'Protected' : 'Unprotected',
+              'condom_quantity': state.condom,
+              'mala_quantity': state.mala,
+              'chhaya_quantity': state.chhaya,
+              'ecp_quantity': state.ecp,
+              'removal_reason': state.removalReasonChanged,
+              'beneficiary_absent': state.beneficiaryAbsentCHanged,
+              'beneficiary_absent_reason': state.beneficiaryAbsentReason,
+              'antra_injection_date': state.antraInjectionDateChanged?.toIso8601String(),
+              'removal_date': state.removalDate?.toIso8601String(),
           },
           'created_at': nowIso,
           'updated_at': nowIso,
@@ -364,6 +365,34 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
 
           if (formId > 0) {
+            // Insert into eligible_couple_activities table
+            await db.insert(
+              'eligible_couple_activities',
+              {
+                'server_id': '',
+                'household_ref_key': householdRefKey,
+                'beneficiary_ref_key': state.beneficiaryRefKey ?? state.beneficiaryId,
+                'eligible_couple_state': 'eligible_couple',
+                'device_details': jsonEncode({
+                  'id': deviceInfo.deviceId,
+                  'platform': deviceInfo.platform,
+                  'version': deviceInfo.osVersion,
+                }),
+                'app_details': jsonEncode({
+                  'app_version': deviceInfo.appVersion.split('+').first,
+                  'form_data': formData,
+                }),
+                'parent_user': '',
+                'current_user_key': ashaUniqueKey,
+                'facility_id': facilityId,
+                'created_date_time': nowIso,
+                'modified_date_time': nowIso,
+                'is_synced': 0,
+                'is_deleted': 0,
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+
             try {
               final rows = await db.query(
                 FollowupFormDataTable.table,

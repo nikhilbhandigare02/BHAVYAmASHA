@@ -31,6 +31,7 @@ import '../GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import 'TodaysProgramm.dart';
 import 'AshaDashboardSection.dart';
 import '../../data/repositories/NotificationRepository/Notification_Repository.dart';
+import '../../core/utils/anc_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -92,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       } catch (_) {}
     });
-    SyncService.instance.start(interval: const Duration(minutes: 5));
+    SyncService.instance.start(interval: const Duration(minutes: 1));
 
     Future.delayed(const Duration(seconds: 5), () async {
       if (!mounted) return;
@@ -616,36 +617,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadAncVisitCount() async {
     try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      int count = 0;
-
-      for (final row in rows) {
-        try {
-          final dynamic rawInfo = row['beneficiary_info'];
-          if (rawInfo == null) continue;
-
-          Map<String, dynamic> info = {};
-          try {
-            info = rawInfo is String
-                ? jsonDecode(rawInfo) as Map<String, dynamic>
-                : Map<String, dynamic>.from(rawInfo as Map);
-          } catch (_) {
-            continue;
-          }
-
-          final isPregnant =
-              info['isPregnant']?.toString().toLowerCase() == 'yes';
-          if (!isPregnant) continue;
-
-          final gender = info['gender']?.toString().toLowerCase() ?? '';
-          if (gender != 'f' && gender != 'female') continue;
-
-          count++;
-        } catch (e) {
-          print('Error processing beneficiary for ANC visit count: $e');
-        }
-      }
-
+      final count = await ANCUtils.getAncVisitCount();
       if (mounted) {
         setState(() {
           ancVisitCount = count;
