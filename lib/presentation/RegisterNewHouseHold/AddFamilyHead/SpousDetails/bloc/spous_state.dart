@@ -44,6 +44,7 @@ class SpousState extends Equatable {
     this.malaQuantity,
     this.chhayaQuantity,
     this.ecpQuantity,
+
   });
 
   final String? relation;
@@ -88,6 +89,7 @@ class SpousState extends Equatable {
   final String? malaQuantity;
   final String? chhayaQuantity;
   final String? ecpQuantity;
+
 
   SpousState copyWith({
     String? relation,

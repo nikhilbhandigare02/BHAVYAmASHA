@@ -61,10 +61,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isEdit = false;
   bool _argsHandled = false;
-  // When true, this screen was opened directly from AllBeneficiary or
-  // HouseHold_Beneficiery and member details should be saved/updated
-  // immediately on the Add button. When false, data is returned to the
-  // RegisterNewHouseHold flow and persisted on its final Save button.
+
   bool _isMemberDetails = false;
   String _fatherOption = 'Select';
   String _motherOption = 'Select';
@@ -1006,8 +1003,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                             // mirror AddFamilyHeadBloc (head form). Instead it
                             // should rely purely on its own SpousBloc state,
                             // which we hydrate from member data.
-                            return const SizedBox.expand(
-                              child: Spousdetails(syncFromHead: false),
+                            return SizedBox.expand(
+                              child: Spousdetails(
+                                syncFromHead: false,
+                                isMemberDetails: true,
+                                hhId: widget.hhId,
+                              ),
                             );
                           }
                           if (_currentStep == 2) {
@@ -1165,12 +1166,39 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         children: [
                                           Expanded(
                                             child: CustomTextField(
-                                              labelText: "RICH ID",
-                                              hintText: 'RICH ID',
+                                              labelText: "RCH ID",
+                                              hintText: 'Enter 12 digit RCH ID',
+                                              keyboardType: TextInputType.number,
                                               initialValue: state.RichIDChanged,
-                                              onChanged: (v) => context
-                                                  .read<AddnewfamilymemberBloc>()
-                                                  .add(RichIDChanged(v ?? '')),
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.digitsOnly,
+                                                LengthLimitingTextInputFormatter(12),
+                                              ],
+                                              onChanged: (v) {
+                                                // Clear previous snackbar
+                                                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                                                
+                                                final value = v?.trim() ?? '';
+                                                context.read<AddnewfamilymemberBloc>().add(RichIDChanged(value));
+                                                
+                                                // Show error if not empty and not exactly 12 digits
+                                                if (value.isNotEmpty && value.length != 12) {
+                                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                    if (mounted) {
+                                                      showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                                                    }
+                                                  });
+                                                }
+                                              },
+                                              validator: (value) {
+                                                if (value == null || value.isEmpty) {
+                                                  return null; // Field is optional
+                                                }
+                                                if (value.length != 12) {
+                                                  return 'Must be 12 digits';
+                                                }
+                                                return null;
+                                              },
                                             ),
                                           ),
                                           const SizedBox(width: 8),
@@ -1686,29 +1714,37 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       final bloc = context.read<AddnewfamilymemberBloc>();
                                       bloc.add(AnmUpdateMobileOwner(v));
 
-                                      // For both adult and child member types, if Family Head is selected
-                                      if (v == 'Family Head' && widget.hhId != null) {
-                                        try {
-                                          final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
-                                          if (headMobile != null && headMobile.isNotEmpty) {
-                                            bloc.add(AnmUpdateMobileNo(headMobile));
-                                          } else {
+                                      if (v == 'Family Head') {
+                                        if (_isMemberDetails && widget.hhId != null) {
+                                          try {
+                                            final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                            print('📱 [AddNewMember] Fetched mobile from DB: $headMobile');
+                                            if (headMobile != null && headMobile.isNotEmpty) {
+                                              bloc.add(AnmUpdateMobileNo(headMobile));
+                                            } else if (mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(content: Text('No mobile number found for the head of family')),
+                                              );
+                                            }
+                                          } catch (e) {
+                                            print('❌ [AddNewMember] Error fetching from DB: $e');
                                             if (mounted) {
                                               ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('No mobile number found for the head of family')),
+                                                const SnackBar(content: Text('Error loading head of family mobile number')),
                                               );
                                             }
                                           }
-                                        } catch (e) {
-                                          print('Error fetching head mobile number: $e');
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Error loading head of family mobile number')),
-                                            );
+                                        } else {
+                                          final headNo = context.read<AddFamilyHeadBloc>().state.mobileNo?.trim();
+                                          print('📱 [AddNewMember] Using mobile from head details state: $headNo');
+                                          if (headNo != null && headNo.isNotEmpty) {
+                                            bloc.add(AnmUpdateMobileNo(headNo));
                                           }
                                         }
-                                      } else if (v != 'Family Head') {
-                                        bloc.add(AnmUpdateMobileNo(''));
+                                      } else {
+                                        // Clear mobile number if not Family Head
+                                        print('🔄 [AddNewMember] Clearing mobile number');
+                                        bloc.add(const AnmUpdateMobileNo(''));
                                       }
                                     },
                                     validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
@@ -2456,7 +2492,38 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   hintText: l.accountNumberLabel,
                                   keyboardType: TextInputType.number,
                                   initialValue: state.bankAcc,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateBankAcc(v.trim())),
+                                  onChanged: (v) {
+                                    final value = v.trim();
+                                    context.read<AddnewfamilymemberBloc>().add(AnmUpdateBankAcc(value));
+                                    // Clear previous snackbar
+                                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                                  },
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return null; // Field is optional
+                                    }
+
+                                    // Remove any non-digit characters
+                                    final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+                                    if (digitsOnly.length < 11 || digitsOnly.length > 18) {
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        if (mounted) {
+                                          showAppSnackBar(
+                                              context,
+                                              'Bank account number must be between 11 to 18 digits'
+                                          );
+                                        }
+                                      });
+                                      return 'Invalid length';
+                                    }
+
+                                    return null;
+                                  },
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(18),
+                                  ],
                                 ),
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -2465,8 +2532,36 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   labelText: l.ifscLabel,
                                   hintText: l.ifscLabel,
                                   initialValue: state.ifsc,
-                                  onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateIfsc(v.trim())),
+                                  onChanged: (v) {
+                                    final value = v.trim().toUpperCase();
+                                    context.read<SpousBloc>().add(SpUpdateIfsc(value));
+                                    // Clear previous snackbar
+                                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                                  },
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return null; // Field is optional
+                                    }
+
+                                    String? error;
+                                    if (value.length != 11) {
+                                      error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                                    } else if (!RegExp(r'^[A-Z]{4}0\d{6}$').hasMatch(value)) {
+                                      error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                                    }
+
+                                    if (error != null) {
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        if (mounted) {
+                                          showAppSnackBar(context, error!);
+                                        }
+                                      });
+                                    }
+
+                                    return error;
+                                  },
                                 ),
+
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 

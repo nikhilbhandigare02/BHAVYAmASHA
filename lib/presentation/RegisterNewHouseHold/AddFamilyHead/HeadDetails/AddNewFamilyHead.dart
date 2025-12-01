@@ -490,9 +490,38 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 children: [
                   Expanded(
                     child: CustomTextField(
-                      labelText: l.richIdLabel,
-                      onChanged: (v) =>
-                          context.read<AddFamilyHeadBloc>().add(AfhABHAChange(v.trim())),
+                      labelText: 'RCH ID',
+                      hintText: 'Enter 12 digit RCH ID',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(12),
+                      ],
+                      onChanged: (v) {
+                        // Clear previous snackbar
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        
+                        final value = v.trim();
+                        context.read<AddFamilyHeadBloc>().add(AfhRichIdChange(value));
+                        
+                        // Show error if not empty and not exactly 12 digits
+                        if (value.isNotEmpty && value.length != 12) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                            }
+                          });
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return null; // Field is optional
+                        }
+                        if (value.length != 12) {
+                          return 'Must be 12 digits';
+                        }
+                        return null;
+                      }
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -516,54 +545,47 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
           _Section(
             child: _Section(
-              child: ApiDropdown<String>(
-                labelText: '${l.whoseMobileLabel} *',
-                items: const [
+              child:ApiDropdown<String>(
+                labelText: 'Whose Mobile No.',
+                items: state.gender == 'Female'
+                    ? const [
+                  'Self',
+                  'Husband',
+                  'Father',
+                  'Mother',
+                  'Son',
+                  'Daughter',
+                  'Father In Law',
+                  'Mother In Law',
+                  'Neighbour',
+                  'Relative',
+                  'Other',
+                ]
+                    : const [
                   'Self',
                   'Wife',
                   'Father',
                   'Mother',
                   'Son',
                   'Daughter',
-                  'Father in Law',
-                  'Mother in Law',
+                  'Father In Law',
+                  'Mother In Law',
                   'Neighbour',
                   'Relative',
                   'Other',
                 ],
                 getLabel: (s) {
-                  switch (s) {
-                    case 'Self':
-                      return l.self;
-                    case 'Wife':
-                      return l.wife;
-                    case 'Father':
-                      return l.father;
-                    case 'Mother':
-                      return l.mother;
-                    case 'Son':
-                      return l.son;
-                    case 'Daughter':
-                      return l.daughter;
-                    case 'Father in Law':
-                      return l.fatherInLaw;
-                    case 'Mother in Law':
-                      return l.motherInLaw;
-                    case 'Neighbour':
-                      return l.neighbour;
-                    case 'Relative':
-                      return l.relative;
-                    case 'Other':
-                      return l.other;
-                    default:
-                      return s;
-                  }
+                  // Return same value because label = value
+                  return s;
                 },
                 value: state.mobileOwner,
-                onChanged: (v) =>
-                    context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileOwner(v)),
-                validator: (value) => _captureError(Validations.validateWhoMobileNo(l, value)),
+                onChanged: (v) => context
+                    .read<AddFamilyHeadBloc>()
+                    .add(AfhUpdateMobileOwner(v)),
+                validator: (value) =>
+                    _captureError(Validations.validateWhoMobileNo(l, value)),
               ),
+
             ),
 
           ),
@@ -647,12 +669,40 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 children: [
                   _Section(
                     child: CustomTextField(
-                      labelText: l.accountNumberLabel,
-                      hintText: l.accountNumberLabel,
+                      labelText: l.bankAccountNumber,
+                      hintText: l.bankAccountNumber,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       initialValue: state.bankAcc,
-                      onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(v.trim())),
+                      onChanged: (v) {
+                        final value = v.trim();
+                        context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(value));
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return null; // Field is optional
+                        }
+
+                        final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+                        if (digitsOnly.length < 11 || digitsOnly.length > 18) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              showAppSnackBar(
+                                  context,
+                                  'Bank account number must be between 11 to 18 digits'
+                              );
+                            }
+                          });
+                          return 'Invalid length';
+                        }
+
+                        return null;
+                      },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(18),
+                      ],
                     ),
                   ),
                   Divider(
@@ -670,7 +720,34 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               labelText: l.ifscLabel,
               hintText:l.ifscLabel,
               initialValue: state.ifsc,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateIfsc(v.trim())),
+              onChanged: (v) {
+                final value = v.trim().toUpperCase();
+                context.read<AddFamilyHeadBloc>().add(AfhUpdateIfsc(value));
+                // Clear previous snackbar
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return null; // Field is optional
+                }
+
+                String? error;
+                if (value.length != 11) {
+                  error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                } else if (!RegExp(r'^[A-Z]{4}0\d{6}$').hasMatch(value)) {
+                  error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                }
+
+                if (error != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      showAppSnackBar(context, error!);
+                    }
+                  });
+                }
+
+                return error;
+              },
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),

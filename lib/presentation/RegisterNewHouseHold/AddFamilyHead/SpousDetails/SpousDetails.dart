@@ -11,6 +11,8 @@ import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Hea
 import 'package:sizer/sizer.dart';
 import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
+import '../../../../core/widgets/SnackBar/app_snackbar.dart';
+import '../../../../data/Database/local_storage_dao.dart';
 import 'bloc/spous_bloc.dart';
 
 final GlobalKey<FormState> spousFormKey = GlobalKey<FormState>();
@@ -32,6 +34,8 @@ class Spousdetails extends StatefulWidget {
   final SpousState? initial;
   final String? headMobileOwner;
   final String? headMobileNo;
+  final String? hhId;  // Household ID for member details flow
+  final bool isMemberDetails;  // Flag to indicate if this is in member details flow
   // When true, this widget listens to AddFamilyHeadBloc and mirrors
   // head form fields into SpousBloc. For member flows we set this to
   // false so that only member-specific spouse data is shown.
@@ -42,6 +46,8 @@ class Spousdetails extends StatefulWidget {
     this.initial, 
     this.headMobileOwner, 
     this.headMobileNo,
+    this.hhId,
+    this.isMemberDetails = false,
     this.syncFromHead = true,
   });
 
@@ -688,10 +694,39 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       children: [
                         Expanded(
                           child: CustomTextField(
-                            labelText: l.richIdLabel,
+                            labelText: 'RCH ID',
+                            hintText: 'Enter 12 digit RCH ID',
+                            keyboardType: TextInputType.number,
                             initialValue: state.RichIDChanged,
-                            onChanged: (v) =>
-                                context.read<SpousBloc>().add(RichIDChanged(v.trim())),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(12),
+                            ],
+                            onChanged: (v) {
+                              // Clear previous snackbar
+                              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                              
+                              final value = v.trim();
+                              context.read<SpousBloc>().add(RichIDChanged(value));
+                              
+                              // Show error if not empty and not exactly 12 digits
+                              if (value.isNotEmpty && value.length != 12) {
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (mounted) {
+                                    showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                                  }
+                                });
+                              }
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return null; // Field is optional
+                              }
+                              if (value.length != 12) {
+                                return 'Must be 12 digits';
+                              }
+                              return null;
+                            }
                           ),
                         ),
 
@@ -762,14 +797,45 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     },
                     value: state.mobileOwner,
                     onChanged: (v) {
+                      if (v == null) return;
                       final spBloc = context.read<SpousBloc>();
                       spBloc.add(SpUpdateMobileOwner(v));
 
                       if (v == 'Family Head') {
-                        final headNo = (widget.headMobileNo?.trim() ??
-                            context.read<AddFamilyHeadBloc>().state.mobileNo?.trim());
-                        if (headNo != null && headNo.isNotEmpty) {
-                          spBloc.add(SpUpdateMobileNo(headNo));
+                        print('🔵 [SpousDetails] Family Head selected, isMemberDetails: ${widget.isMemberDetails}, hhId: ${widget.hhId}');
+                        if (widget.isMemberDetails && widget.hhId != null) {
+                          print('🔄 [SpousDetails] Fetching head mobile number for household: ${widget.hhId}');
+                          LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!).then((headMobile) {
+                            print('📱 [SpousDetails] Received head mobile: $headMobile');
+                            if (headMobile != null && headMobile.isNotEmpty) {
+                              if (mounted) {
+                                print('✅ [SpousDetails] Dispatching mobile number update: $headMobile');
+                                spBloc.add(SpUpdateMobileNo(headMobile));
+                              }
+                            } else {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('No mobile number found for the head of family')),
+                                );
+                              }
+                            }
+                          }).catchError((e) {
+                            if (mounted) {
+                              print('❌ [SpousDetails] Error fetching head mobile number: $e');
+                              print('Stack trace: ${e.stackTrace}');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error loading head of family mobile number')),
+                              );
+                            }
+                          });
+                        }
+                        // For non-member details flow, use the existing logic
+                        else {
+                          final headNo = (widget.headMobileNo?.trim() ??
+                              context.read<AddFamilyHeadBloc>().state.mobileNo?.trim());
+                          if (headNo != null && headNo.isNotEmpty) {
+                            spBloc.add(SpUpdateMobileNo(headNo));
+                          }
                         }
                       } else {
                         spBloc.add(const SpUpdateMobileNo(''));
@@ -856,14 +922,44 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  CustomTextField(
-                    labelText: l.ifscCode,
-                    hintText: l.ifscCodeHint,
-                    initialValue: state.ifsc,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateIfsc(v.trim())),
-                  ),
+              _section(
+                CustomTextField(
+                  labelText: l.bankAccountNumber,
+                  hintText: l.bankAccountNumber,
+                  keyboardType: TextInputType.number,
+                  initialValue: state.bankAcc,
+                  onChanged: (v) {
+                    final value = v.trim();
+                    context.read<SpousBloc>().add(SpUpdateBankAcc(value));
+                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return null; // Field is optional
+                    }
+
+                    final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+                    if (digitsOnly.length < 11 || digitsOnly.length > 18) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          showAppSnackBar(
+                              context,
+                              'Bank account number must be between 11 to 18 digits'
+                          );
+                        }
+                      });
+                      return 'Invalid length';
+                    }
+
+                    return null;
+                  },
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(18),
+                  ],
                 ),
+              ),
 
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
