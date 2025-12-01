@@ -273,7 +273,12 @@ class _UpdatedEligibleCoupleListScreenState
     final isMarried = maritalStatusRaw == 'married';
     final dob = person['dob'];
     final age = _calculateAge(dob);
-    return isFemale && isMarried && age >= 15 && age <= 49;
+    
+    // Check if the person is pregnant
+    final isPregnantRaw = person['isPregnant']?.toString().toLowerCase() ?? '';
+    final isPregnant = isPregnantRaw == 'yes' || isPregnantRaw == 'true' || isPregnantRaw == '1';
+    
+    return isFemale && isMarried && age >= 15 && age <= 49 && !isPregnant;
   }
 
   Map<String, dynamic> _formatData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> counterpart, {
