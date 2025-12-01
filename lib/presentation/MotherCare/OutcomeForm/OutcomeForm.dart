@@ -217,6 +217,7 @@ class _OutcomeFormFields extends StatelessWidget {
           isEditable: true,
           labelText: l10n.deliveryDate,
           onDateChanged: (d) => bloc.add(DeliveryDateChanged(d)),
+          readOnly: true,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: 8),
@@ -225,7 +226,7 @@ class _OutcomeFormFields extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4.0),
           child: Row(
             children: [
-              Expanded(
+              Expanded( 
                 child: Text(
                   l10n.gestationWeeks,
                   style: TextStyle(
@@ -272,13 +273,7 @@ class _OutcomeFormFields extends StatelessWidget {
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            l10n.placeOfDelivery,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
+
         ApiDropdown<String>(
           items: [
             l10n.select,
@@ -639,50 +634,46 @@ class _OutcomeFormFields extends StatelessWidget {
               }
             },
           ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           const SizedBox(height: 8),
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'Reason for Removal',
-              hintText: 'Enter reason for removal',
-              border: OutlineInputBorder(),
-            ),
+          CustomTextField(
+            labelText: 'Reason for Removal',
+            hintText: 'Enter reason for removal',
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(RemovalReasonChanged(value));
             },
             controller: TextEditingController(text: state.removalReason ?? ''),
           ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           const SizedBox(height: 8),
         ],
 
         if (state.fpMethod == 'Condom') ...[
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'Quantity of Condoms',
-              hintText: 'Enter quantity',
-              border: OutlineInputBorder(),
-            ),
+          CustomTextField(
+            labelText: 'Quantity of Condoms',
+            hintText: 'Enter quantity',
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(CondomQuantityChanged(value));
             },
             controller: TextEditingController(text: state.condomQuantity ?? ''),
           ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           const SizedBox(height: 8),
         ],
 
         if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)') ...[
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
-              hintText: 'Enter quantity',
-              border: OutlineInputBorder(),
-            ),
+          CustomTextField(
+            labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
+            hintText: 'Enter quantity',
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(MalaQuantityChanged(value));
             },
             controller: TextEditingController(text: state.malaQuantity ?? ''),
+
           ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           const SizedBox(height: 8),
         ],
 
@@ -703,18 +694,16 @@ class _OutcomeFormFields extends StatelessWidget {
         ],
 
         if (state.fpMethod == 'ECP (Emergency Contraceptive pill)') ...[
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'ECP (Emergency Contraceptive pill)',
-              hintText: 'Enter quantity',
-              border: OutlineInputBorder(),
-            ),
+          CustomTextField(
+            labelText: 'ECP (Emergency Contraceptive pill)',
+            hintText: 'Enter quantity',
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(ECPQuantityChanged(value));
             },
             controller: TextEditingController(text: state.ecpQuantity ?? ''),
           ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           const SizedBox(height: 8),
         ],
 

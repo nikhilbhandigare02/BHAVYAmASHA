@@ -671,9 +671,102 @@ class _DeliveryOutcomeScreenState
                         children: [
                           Expanded(child: _rowText('Name', name)),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Age | Gender', ageGender)),
+                          Expanded(
+                            child: FutureBuilder<String>(
+                              future: () async {
+                                try {
+                                  final db = await DatabaseProvider.instance.database;
+                                  final beneficiaryKey = (data['_rawRow']?['beneficiary_ref_key']?.toString() ?? data['BeneficiaryID']?.toString() ?? '').trim();
+                                  if (beneficiaryKey.isEmpty) return ageGender;
+                                  final rows = await db.query(
+                                    BeneficiariesTable.table,
+                                    where: 'unique_key = ?',
+                                    whereArgs: [beneficiaryKey],
+                                    limit: 1,
+                                  );
+                                  if (rows.isEmpty) return ageGender;
+                                  final infoRaw = rows.first['beneficiary_info']?.toString() ?? '';
+                                  Map<String, dynamic> info = {};
+                                  if (infoRaw.isNotEmpty) {
+                                    try { info = Map<String, dynamic>.from(jsonDecode(infoRaw)); } catch (_) {}
+                                  }
+                                  final dobStr = info['dob']?.toString() ?? '';
+                                  final gender = info['gender']?.toString() ?? '';
+                                  DateTime? dob;
+                                  if (dobStr.isNotEmpty) {
+                                    dob = DateTime.tryParse(dobStr);
+                                    if (dob == null) {
+                                      final parts = dobStr.split(RegExp(r'[-/]'));
+                                      if (parts.length == 3) {
+                                        int p0 = int.tryParse(parts[0]) ?? 0;
+                                        int p1 = int.tryParse(parts[1]) ?? 0;
+                                        int p2 = int.tryParse(parts[2]) ?? 0;
+                                        if (parts[0].length == 4) {
+                                          dob = DateTime(p0, p1, p2);
+                                        } else {
+                                          dob = DateTime(p2, p1, p0);
+                                        }
+                                      }
+                                    }
+                                  }
+                                  String computed = ageGender;
+                                  if (dob != null) {
+                                    final now = DateTime.now();
+                                    int age = now.year - dob.year;
+                                    if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+                                      age -= 1;
+                                    }
+                                    if (gender.isNotEmpty) {
+                                      computed = '$age | $gender';
+                                    } else {
+                                      computed = '$age';
+                                    }
+                                  } else if (gender.isNotEmpty) {
+                                    computed = gender;
+                                  }
+                                  return computed;
+                                } catch (_) {
+                                  return ageGender;
+                                }
+                              }(),
+                              builder: (context, snapshot) {
+                                final val = snapshot.data ?? ageGender;
+                                return _rowText('Age | Gender', val);
+                              },
+                            ),
+                          ),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Mobile No.', mobileNo)),
+                          Expanded(
+                            child: FutureBuilder<String>(
+                              future: () async {
+                                try {
+                                  final db = await DatabaseProvider.instance.database;
+                                  final beneficiaryKey = (data['_rawRow']?['beneficiary_ref_key']?.toString() ?? data['BeneficiaryID']?.toString() ?? '').trim();
+                                  if (beneficiaryKey.isEmpty) return mobileNo;
+                                  final rows = await db.query(
+                                    BeneficiariesTable.table,
+                                    where: 'unique_key = ?',
+                                    whereArgs: [beneficiaryKey],
+                                    limit: 1,
+                                  );
+                                  if (rows.isEmpty) return mobileNo;
+                                  final infoRaw = rows.first['beneficiary_info']?.toString() ?? '';
+                                  Map<String, dynamic> info = {};
+                                  if (infoRaw.isNotEmpty) {
+                                    try { info = Map<String, dynamic>.from(jsonDecode(infoRaw)); } catch (_) {}
+                                  }
+                                  final mobile = info['mobileNo']?.toString() ?? mobileNo;
+                                  return mobile.isNotEmpty ? mobile : mobileNo;
+                                } catch (_) {
+                                  return mobileNo;
+                                }
+                              }(),
+                              builder: (context, snapshot) {
+                                final val = snapshot.data ?? mobileNo;
+                                return _rowText('Mobile No.', val);
+                              },
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 10),

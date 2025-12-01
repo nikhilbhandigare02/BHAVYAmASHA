@@ -4796,7 +4796,7 @@ abstract class AppLocalizations {
   /// No description provided for @updatedEligibleCoupleListSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'List of eligible couples'**
+  /// **'Eligible Couples List'**
   String get updatedEligibleCoupleListSubtitle;
 
   /// No description provided for @updatedEligibleCoupleListTitle.
