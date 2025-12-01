@@ -751,30 +751,43 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                       ),
                     ),
                   ),
-                  SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      child: SizedBox(
-                        height: 44,
-                        child: RoundButton(
-                          title: state.isSubmitting ? (l10n?.savingButton ?? 'SAVING...') : (l10n?.saveButton ?? 'SAVE'),
-                          color: AppColors.primary,
-                          borderRadius: 8,
-                          onPress: () {
-                            _clearFirstError();
-                            final form = _formKey.currentState;
-                            if (form == null) return;
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 4,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 0), // TOP shadow
+                        ),
+                      ],
+                    ),
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                        child: SizedBox(
+                          height: 34,
+                          child: RoundButton(
+                            title: state.isSubmitting ? (l10n?.savingButton ?? 'SAVING...') : (l10n?.saveButton ?? 'SAVE'),
+                            color: AppColors.primary,
+                            borderRadius: 4,
+                            onPress: () {
+                              _clearFirstError();
+                              final form = _formKey.currentState;
+                              if (form == null) return;
 
-                            final isValid = form.validate();
-                            if (!isValid) {
-                              final msg = _firstError ?? 'Please correct the highlighted fields.';
-                              showAppSnackBar(context, msg);
-                              return;
-                            }
+                              final isValid = form.validate();
+                              if (!isValid) {
+                                final msg = _firstError ?? 'Please correct the highlighted fields.';
+                                showAppSnackBar(context, msg);
+                                return;
+                              }
 
-                            bloc.add(const SubmitPressed());
-                          },
-                          disabled: state.isSubmitting,
+                              bloc.add(const SubmitPressed());
+                            },
+                            disabled: state.isSubmitting,
+                          ),
                         ),
                       ),
                     ),

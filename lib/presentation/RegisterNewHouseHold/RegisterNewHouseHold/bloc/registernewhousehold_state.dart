@@ -8,6 +8,8 @@ class RegisterHouseholdState {
   final bool isSaving;
   final bool isSaved;
   final String? error;
+  final int unmarriedMemberCount;
+  final int remainingChildrenCount;
 
   const RegisterHouseholdState({
     this.headAdded = false,
@@ -16,6 +18,8 @@ class RegisterHouseholdState {
     this.isSaving = false,
     this.isSaved = false,
     this.error,
+    this.unmarriedMemberCount = 0,
+    this.remainingChildrenCount = 0, // Start with count of 0 for children
   });
 
   RegisterHouseholdState copyWith({
@@ -25,6 +29,8 @@ class RegisterHouseholdState {
     bool? isSaving,
     bool? isSaved,
     String? error,
+    int? unmarriedMemberCount,
+    int? remainingChildrenCount,
   }) {
     return RegisterHouseholdState(
       headAdded: headAdded ?? this.headAdded,
@@ -33,6 +39,8 @@ class RegisterHouseholdState {
       isSaving: isSaving ?? this.isSaving,
       isSaved: isSaved ?? this.isSaved,
       error: error,
+      unmarriedMemberCount: unmarriedMemberCount ?? this.unmarriedMemberCount,
+      remainingChildrenCount: remainingChildrenCount ?? this.remainingChildrenCount,
     );
   }
 

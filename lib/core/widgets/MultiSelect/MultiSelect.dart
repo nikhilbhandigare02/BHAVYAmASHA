@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 
 class MultiSelect<T> extends StatefulWidget {
@@ -78,8 +79,8 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
             text: TextSpan(
               text: widget.labelText,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-
-              fontWeight: FontWeight.w400,
+              fontSize: 13.7.sp,
+              fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.onSurface.withOpacity(0.87),
                   ),
               children: widget.isRequired
@@ -89,13 +90,14 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.error,
                           fontWeight: FontWeight.bold,
+
                         ),
                       ),
                     ]
                   : [],
             ),
           ),
-          SizedBox(height: 0.0.h),
+          // SizedBox(height: 0.0.h),
         ],
         InkWell(
           onTap: _showMultiSelect,
@@ -107,9 +109,9 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
 
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 12.0,
-                vertical: 14.0,
+                vertical: 8.0,
               ),
-              suffixIcon: Icon(Icons.arrow_drop_down),
+              suffixIcon: Icon(Icons.arrow_drop_down, color: Colors.grey,),
               filled: widget.isDisabled,
               fillColor: widget.isDisabled
                   ? Theme.of(context).disabledColor.withOpacity(0.04)
@@ -181,12 +183,13 @@ class _MultiSelectDialogState<T> extends State<MultiSelectDialog<T>> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.white,
-      title: Text(widget.title),
+      title: Text(widget.title, style: TextStyle(fontSize: 16.sp),),
       content: SingleChildScrollView(
         child: Column(
           children: widget.items.map((item) {
             return CheckboxListTile(
               title: Text(item.label,
+                style: TextStyle(fontSize: 15.sp),
                   ),
               value: _selectedItems.contains(item.value),
               onChanged: (bool? selected) {
@@ -206,11 +209,11 @@ class _MultiSelectDialogState<T> extends State<MultiSelectDialog<T>> {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('CANCEL'),
+          child: Text('CANCEL', style: TextStyle(fontSize: 14.sp),),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, _selectedItems),
-          child: Text('OK'),
+          child: Text('OK',style: TextStyle(fontSize: 14.sp),),
         ),
       ],
     );

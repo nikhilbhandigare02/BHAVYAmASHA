@@ -10,7 +10,9 @@ import 'package:medixcel_new/core/utils/device_info_utils.dart';
 import 'package:medixcel_new/core/utils/geolocation_utils.dart';
 import 'package:medixcel_new/core/utils/id_generator_utils.dart';
 import 'package:medixcel_new/data/Database/User_Info.dart';
+import 'package:sqflite/sqflite.dart';
 
+import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
 import '../../HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
 
@@ -24,18 +26,35 @@ class RegisterNewHouseholdBloc
     //  Add Head
     on<RegisterAddHead>((event, emit) {
       final current = state;
-
       final updated = List<Map<String, String>>.from(current.members);
       final data = Map<String, String>.from(event.data);
       data['#'] = '${updated.length + 1}';
       data['Relation'] = data['Relation'] ?? 'Self';
+      
+      // Check if this is a spouse being added (relation is 'Spouse')
+      final isSpouse = data['Relation']?.toLowerCase() == 'spouse';
+      final isUnmarried = data['marital_status']?.toLowerCase() == 'unmarried' ||
+                         data['maritalStatus']?.toLowerCase() == 'unmarried';
+      
+      int newUnmarriedCount = current.unmarriedMemberCount;
+      
+      // Only increment unmarried count if it's a spouse and unmarried
+      if (isSpouse && isUnmarried) {
+        newUnmarriedCount++;
+      }
+      
       updated.add(data);
 
+      // Calculate remaining children count based on head's children count
+      final headChildren = int.tryParse((data['children'] ?? '0').toString()) ?? 0;
+      
       emit(
         current.copyWith(
           headAdded: true,
           totalMembers: current.totalMembers + 1,
           members: updated,
+          unmarriedMemberCount: newUnmarriedCount,
+          remainingChildrenCount: headChildren, // Initialize with head's children count
         ),
       );
     });
@@ -43,16 +62,45 @@ class RegisterNewHouseholdBloc
     //  Add Member
     on<RegisterAddMember>((event, emit) {
       final current = state;
-
       final updated = List<Map<String, String>>.from(current.members);
       final data = Map<String, String>.from(event.data);
       data['#'] = '${updated.length + 1}';
+      
+      // Check if this is an unmarried member (not head or spouse)
+      final isUnmarried = data['marital_status']?.toLowerCase() == 'unmarried' ||
+                         data['maritalStatus']?.toLowerCase() == 'unmarried';
+      final isHeadOrSpouse = data['relation']?.toLowerCase() == 'self' || 
+                            data['relation']?.toLowerCase() == 'spouse';
+      
+      int newUnmarriedCount = current.unmarriedMemberCount;
+      int newRemainingChildrenCount = current.remainingChildrenCount;
+      
+      // Check if this is a child being added
+      final isChild = data['Relation']?.toLowerCase() == 'son' || 
+                     data['Relation']?.toLowerCase() == 'daughter' ||
+                     data['Type']?.toLowerCase() == 'child' ||
+                     data['Type']?.toLowerCase() == 'infant';
+      
+      if (isChild) {
+        // Decrease remaining children count if there are any remaining
+        if (newRemainingChildrenCount > 0) {
+          newRemainingChildrenCount--;
+        }
+      } else if (isUnmarried && !isHeadOrSpouse) {
+        // Only decrease the unmarried count if it's greater than 0
+        if (newUnmarriedCount > 0) {
+          newUnmarriedCount--;
+        }
+      }
+
       updated.add(data);
 
       emit(
         current.copyWith(
           totalMembers: current.totalMembers + 1,
           members: updated,
+          unmarriedMemberCount: newUnmarriedCount,
+          remainingChildrenCount: newRemainingChildrenCount,
         ),
       );
     });
@@ -260,6 +308,64 @@ class RegisterNewHouseholdBloc
               print('📝 Inserting head beneficiary from headForm: ' +
                   jsonEncode(headPayload));
               await LocalStorageDao.instance.insertBeneficiary(headPayload);
+              
+              final maritalStatus = headForm['maritalStatus']?.toString();
+              
+              int age = 0;
+              if (headForm['dob'] != null) {
+                try {
+                  final dob = DateTime.parse(headForm['dob']);
+                  final now = DateTime.now();
+                  age = now.year - dob.year;
+                  if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+                    age--;
+                  }
+                } catch (e) {
+                  print('Error parsing DOB: $e');
+                }
+              }
+              
+              final isEligibleForCouple = maritalStatus == 'Married' && age >= 15 && age <= 49;
+              
+              if (isEligibleForCouple) {
+                try {
+                  final db = await DatabaseProvider.instance.database;
+                  final eligibleCoupleActivityData = {
+                    'server_id': '',
+                    'household_ref_key': uniqueKey,
+                    'beneficiary_ref_key': headId,
+                    'eligible_couple_state': 'eligible_couple',
+                    'device_details': jsonEncode({
+                      'id': deviceInfo.deviceId,
+                      'platform': deviceInfo.platform,
+                      'version': deviceInfo.osVersion,
+                    }),
+                    'app_details': jsonEncode({
+                      'app_version': deviceInfo.appVersion.split('+').first,
+                      'form_data': {
+                        'created_at': DateTime.now().toIso8601String(),
+                        'updated_at': DateTime.now().toIso8601String(),
+                      },
+                    }),
+                    'parent_user': '',
+                    'current_user_key': ashaUniqueKey,
+                    'facility_id': facilityId,
+                    'created_date_time': ts,
+                    'modified_date_time': ts,
+                    'is_synced': 0,
+                    'is_deleted': 0,
+                  };
+                  
+                  print('Inserting eligible couple activity for head: $headId');
+                  await db.insert(
+                    'eligible_couple_activities',
+                    eligibleCoupleActivityData,
+                    conflictAlgorithm: ConflictAlgorithm.replace,
+                  );
+                } catch (e) {
+                  print('Error inserting eligible couple activity for head: $e');
+                }
+              }
                   
               // Check if head is female and pregnant, then insert ANC due status
               if (headForm['gender']?.toString().toLowerCase() == 'female') {

@@ -86,13 +86,30 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
         builder: (context, state) {
           String? _validateYoungestAge(String raw, {String? overrideUnit}) {
             final unit = overrideUnit ?? state.ageUnit;
-            final msg = Validations.validateYoungestChildAge(l, raw, unit);
-            // Suppress the long range message inline; it will be
-            // shown only from the Add button snackbar in head form.
-            if (msg != null && msg.startsWith('Please enter age of Youngest Child')) {
-              return null;
+            final gender = state.youngestGender;
+            
+            // If either unit or gender is selected but age is empty
+            if ((raw.isEmpty || raw.trim().isEmpty) && 
+                ((unit != null && unit.isNotEmpty) || (gender != null && gender.isNotEmpty))) {
+              return 'Please enter age of youngest child';
             }
-            return msg;
+            
+            // If age is entered but no unit is selected
+            if ((raw.isNotEmpty && raw.trim().isNotEmpty) && (unit == null || unit.isEmpty)) {
+              return 'Please select age unit';
+            }
+            
+            final msg = Validations.validateYoungestChildAge(l, raw, unit);
+            
+            // For the inline validation, we'll show a simpler message
+            if (msg != null) {
+              if (msg.startsWith('Please enter age of Youngest Child')) {
+                return null; // Suppress the long range message for inline validation
+              }
+              return 'Please enter valid age for selected unit';
+            }
+            
+            return null;
           }
           return ListView(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
@@ -248,7 +265,13 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                     }
                   },
                   value: state.youngestGender,
-                  onChanged: (v) => context.read<ChildrenBloc>().add(ChUpdateYoungestGender(v)),
+                  onChanged: (v) {
+                    context.read<ChildrenBloc>().add(ChUpdateYoungestGender(v));
+                    // Trigger validation when gender changes
+                    setState(() {
+                      _youngestAgeError = _validateYoungestAge(state.youngestAge ?? '');
+                    });
+                  },
                 ),
               ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
@@ -165,73 +166,89 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                     ),
                   ),
                 ),
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: AnimatedBuilder(
-                    animation: _tabController,
-                    builder: (context, _) {
-                      final idx = _tabController.index;
-                      final isLast = idx >= _tabController.length - 1;
-                      final t = AppLocalizations.of(context)!;
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: RoundButton(
-                              title: t.previousButton,
-                              onPress: () {
-                                final newIndex = idx - 1;
-                                _tabController.animateTo(newIndex);
-                                context
-                                    .read<HbncVisitBloc>()
-                                    .add(TabChanged(newIndex));
-                              },
-                              disabled: idx == 0,
-                              color: AppColors.primary,
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 4,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 0), // TOP shadow
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: AnimatedBuilder(
+                      animation: _tabController,
+                      builder: (context, _) {
+                        final idx = _tabController.index;
+                        final isLast = idx >= _tabController.length - 1;
+                        final t = AppLocalizations.of(context)!;
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: RoundButton(
+                                title: t.previousButton,
+                                height: 34,
+                                onPress: () {
+                                  final newIndex = idx - 1;
+                                  _tabController.animateTo(newIndex);
+                                  context
+                                      .read<HbncVisitBloc>()
+                                      .add(TabChanged(newIndex));
+                                },
+                                disabled: idx == 0,
+                                color: AppColors.primary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: isLast
-                                ? BlocConsumer<HbncVisitBloc, HbncVisitState>(
-                              listener: (context, state) {
-                                // Handle any state changes after save
-                                if (state.saveSuccess) {
-                                  // Reset form or navigate away
-                                  Navigator.pop(context, true);
-                                }
-                              },
-                              builder: (context, state) {
-                                return RoundButton(
-                                  title: t.saveButton,
-                                  isLoading: state.isSaving,
-                                  onPress: () {
-                                    if (!state.isSaving) {
-                                      if (_formKey.currentState?.validate() ?? true) {
-                                        context.read<HbncVisitBloc>().add(
-                                          ValidateSection(
-                                            _tabController.index,
-                                            isSave: true,
-                                          ),
-                                        );
+                            const SizedBox(width: 30),
+                            Expanded(
+                              child: isLast
+                                  ? BlocConsumer<HbncVisitBloc, HbncVisitState>(
+                                listener: (context, state) {
+                                  // Handle any state changes after save
+                                  if (state.saveSuccess) {
+                                    // Reset form or navigate away
+                                    Navigator.pop(context, true);
+                                  }
+                                },
+                                builder: (context, state) {
+                                  return RoundButton(
+                                    height: 34,
+                                    title: t.saveButton,
+                                    isLoading: state.isSaving,
+                                    onPress: () {
+                                      if (!state.isSaving) {
+                                        if (_formKey.currentState?.validate() ?? true) {
+                                          context.read<HbncVisitBloc>().add(
+                                            ValidateSection(
+                                              _tabController.index,
+                                              isSave: true,
+                                            ),
+                                          );
+                                        }
                                       }
-                                    }
-                                  },
-                                );
-                              },
-                            )
-                                : RoundButton(
-                              title: t.nextButton,
-                              onPress: () {
-                                context
-                                    .read<HbncVisitBloc>()
-                                    .add(ValidateSection(idx));
-                              },
+                                    },
+                                  );
+                                },
+                              )
+                                  : RoundButton(
+                                height: 34,
+                                title: t.nextButton,
+                                onPress: () {
+                                  context
+                                      .read<HbncVisitBloc>()
+                                      .add(ValidateSection(idx));
+                                },
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    },
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],

@@ -346,15 +346,16 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                   Expanded(child: Text(
                                       t?.totalChildrenBornLabel ??
                                           'Total number of children born',
-                                      style: TextStyle(fontSize: 15.sp))),
+                                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600))),
                                   _buildCountBoxField(
                                       state.totalChildrenBorn, (v) =>
                                       context.read<EligibleCouleUpdateBloc>()
                                           .add(TotalChildrenBornChanged(v))),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-
+                              Divider(color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 8,),
                               // Total Live Children
                               BlocBuilder<
                                   EligibleCouleUpdateBloc,
@@ -365,7 +366,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                         Expanded(child: Text(
                                             t?.totalLiveChildrenLabel ??
                                                 'Total live children',
-                                            style: TextStyle(fontSize: 15.sp))),
+                                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600))),
                                         _buildCountBoxField(
                                             state.totalLiveChildren, (v) =>
                                             context.read<
@@ -374,8 +375,9 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                       ],
                                     ),
                               ),
-                              const SizedBox(height: 8),
-
+                              Divider(color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 8,),
                               // Total Male Children
                               BlocBuilder<
                                   EligibleCouleUpdateBloc,
@@ -386,7 +388,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                         Expanded(child: Text(
                                             t?.totalMaleChildrenLabel ??
                                                 'Total male children',
-                                            style: TextStyle(fontSize: 15.sp))),
+                                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600))),
                                         _buildCountBoxField(
                                             state.totalMaleChildren, (v) =>
                                             context.read<
@@ -395,8 +397,9 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                       ],
                                     ),
                               ),
-                              const SizedBox(height: 8),
-
+                              Divider(color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 8,),
                               // Total Female Children
                               BlocBuilder<
                                   EligibleCouleUpdateBloc,
@@ -407,7 +410,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                         Expanded(child: Text(
                                             t?.totalFemaleChildrenLabel ??
                                                 'Total female children',
-                                            style: TextStyle(fontSize: 15.sp))),
+                                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600))),
                                         _buildCountBoxField(
                                             state.totalFemaleChildren, (v) =>
                                             context.read<
@@ -416,29 +419,30 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                       ],
                                     ),
                               ),
-                              const SizedBox(height: 16),
-
+                              Divider(color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 8,),
                               // Youngest Child Details
                               Text("yougest child detail" ??
                                   'Youngest Child Details', style: Theme
                                   .of(context)
                                   .textTheme
                                   .titleMedium),
-                              const SizedBox(height: 12),
-
+                              SizedBox(height: 10,),
                               // Youngest Child Age and Unit
                               Row(
                                 children: [
                                   Expanded(child: Text(
                                       t?.youngestChildAgeLabel ??
                                           'Age of youngest child',
-                                      style: TextStyle(fontSize: 15.sp))),
+                                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600))),
                                   _buildCountBoxField(
                                       state.youngestChildAge, (v) =>
                                       context.read<EligibleCouleUpdateBloc>()
                                           .add(YoungestChildAgeChanged(v))),
-                                  const SizedBox(width: 8),
-                                  Expanded(
+                                  Divider(color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 8,),                                  Expanded(
                                     child: ApiDropdown<String>(
                                       key: const ValueKey(
                                           'youngestChildAgeUnit'),
@@ -456,8 +460,9 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-
+                              Divider(color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 8,),
                               // Youngest Child Gender
                               ApiDropdown<String>(
                                 key: const ValueKey('youngestChildGender'),
@@ -488,18 +493,31 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: RoundButton(
-                            title: state.isSubmitting ? 'UPDATING...' : (t
-                                ?.updateButton ?? 'UPDATE'),
-                            onPress: () =>
-                                context.read<EligibleCouleUpdateBloc>().add(
-                                    const SubmitPressed()),
-                            disabled: state.isSubmitting,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 4,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 0), // TOP shadow
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 4.5.h,
+                            child: RoundButton(
+                              title: state.isSubmitting ? 'UPDATING...' : (t
+                                  ?.updateButton ?? 'UPDATE'),
+                              onPress: () =>
+                                  context.read<EligibleCouleUpdateBloc>().add(
+                                      const SubmitPressed()),
+                              disabled: state.isSubmitting,
+                            ),
                           ),
                         ),
                       ),

@@ -206,57 +206,70 @@ class _CbacformState extends State<Cbacform> {
                         children: pages,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // 👇 Keep layout stable — use SizedBox(width: 120) when hidden
-                          if (state.activeTab != 0)
-                            SizedBox(
-                              height: 44,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: TextButton(
-                                  style: TextButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  onPressed: () =>
-                                      context.read<CbacFormBloc>().add(const CbacPrevTab()),
-                                  child: Text(
-                                    l10n?.previousButton ?? 'PREVIOUS',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            )
-                          else
-                            const SizedBox(width: 120),
-
-                          SizedBox(
-                            height: 44,
-                            child: RoundButton(
-                              title: state.activeTab == tabs.length - 1
-                                  ? (l10n?.saveButton ?? 'SAVE')
-                                  : (l10n?.nextButton ?? 'NEXT'),
-                              width: 120,
-                              borderRadius: 8,
-                              isLoading: state.submitting,
-                              onPress: () {
-                                if (state.activeTab == tabs.length - 1) {
-                                  context.read<CbacFormBloc>().add(const CbacSubmitted());
-                                } else {
-                                  context.read<CbacFormBloc>().add(const CbacNextTab());
-                                }
-                              },
-                            ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 4,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 0), // TOP shadow
                           ),
                         ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // 👇 Keep layout stable — use SizedBox(width: 120) when hidden
+                            if (state.activeTab != 0)
+                              SizedBox(
+                                height: 34,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: TextButton(
+                                    style: TextButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    onPressed: () =>
+                                        context.read<CbacFormBloc>().add(const CbacPrevTab()),
+                                    child: Text(
+                                      l10n?.previousButton ?? 'PREVIOUS',
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else
+                              const SizedBox(width: 120),
+
+                            SizedBox(
+                              height: 34,
+                              child: RoundButton(
+                                title: state.activeTab == tabs.length - 1
+                                    ? (l10n?.saveButton ?? 'SAVE')
+                                    : (l10n?.nextButton ?? 'NEXT'),
+                                width: 120,
+                                borderRadius: 4,
+                                isLoading: state.submitting,
+                                onPress: () {
+                                  if (state.activeTab == tabs.length - 1) {
+                                    context.read<CbacFormBloc>().add(const CbacSubmitted());
+                                  } else {
+                                    context.read<CbacFormBloc>().add(const CbacNextTab());
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
@@ -728,12 +741,12 @@ class _PartATab extends StatelessWidget {
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
+                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5.sp)),
                 Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
               ],
             );
         Widget rowScore(int score) => SizedBox(
-              width: 25,
+              // width: 20,
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text('$score', style: const TextStyle(color: Colors.black54)),
@@ -909,7 +922,7 @@ class _PartBTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: 320,
+                width: 305,
                 child: BlocBuilder<CbacFormBloc, CbacFormState>(
                   buildWhen: (previous, current) => previous.data[keyPath] != current.data[keyPath],
                   builder: (context, state) {
@@ -1057,14 +1070,14 @@ class _PartCTabState extends State<_PartCTab> {
                 ? <String>{}
                 : raw.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
 
-            final summary = selected.isEmpty ? (l10n.choose) : selected.join(', ');
+            final summary = selected.isEmpty ? (l10n.select) : selected.join(', ');
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   l10n.cbacC_fuelQ,
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 InkWell(
@@ -1151,14 +1164,14 @@ class _PartCTabState extends State<_PartCTab> {
                 ? <String>{}
                 : raw.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
 
-            final summary = selected.isEmpty ? (l10n.choose) : selected.join(', ');
+            final summary = selected.isEmpty ? (l10n.select) : selected.join(', ');
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   l10n.cbacC_businessRiskQ,
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 InkWell(
