@@ -109,28 +109,31 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         ? widget.labelText.substring(0, widget.labelText.length - 2).trim()
         : widget.labelText;
 
-    return RichText(
-      text: TextSpan(
-        style: TextStyle(
-          fontSize: 13.sp,
-          color: AppColors.onSurface,
-          fontWeight: FontWeight.w500,
-        ),
-        children: [
-          TextSpan(text: base),
-          if (required)
-            const TextSpan(
-              text: '*',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: RichText(
+        text: TextSpan(
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: AppColors.onSurface,
+            fontWeight: FontWeight.w500,
+          ),
+          children: [
+            TextSpan(text: base),
+            if (required)
+              const TextSpan(
+                text: '*',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
+        maxLines: widget.labelMaxLines,
+        overflow: TextOverflow.visible,
+        softWrap: true,
       ),
-      maxLines: widget.labelMaxLines,
-      overflow: TextOverflow.visible,
-      softWrap: true,
     );
   }
 
@@ -151,55 +154,58 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     return GestureDetector(
       onTap: widget.isEditable && !widget.readOnly ? () => _pickDate(context) : null,
       child: AbsorbPointer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (widget.labelText.isNotEmpty) _labelWidget!,
-            const SizedBox(height: 0),
-            Stack(
-              alignment: Alignment.centerLeft,
-              children: [
-                // Actual text field
-                TextFormField(
-                  controller: _controller,
-                  readOnly: true,
-                  style: inputStyle,
-                  validator: widget.validator != null
-                      ? (value) => widget.validator!(selectedDate)
-                      : null,
-                  decoration: InputDecoration(
-                    hintText: _selectedDate == null ? (widget.hintText ?? 'dd-MM-yyyy') : null,
-                    hintStyle: hintStyle,
-                    errorStyle: TextStyle(
-                      fontSize: 13.sp,
-                      height: 1,
-                      color: Colors.red[700],
-                    ),
-                    suffixIcon: widget.isEditable && !widget.readOnly
-                        ? Padding(
-                            padding: EdgeInsets.only(right: 2.w),
-                            child: Icon(
-                              Icons.calendar_today_outlined,
-                              color: Colors.grey,
-                              size: 14.sp,
-                            ),
-                          )
+        child: Padding(
+          padding: const EdgeInsets.only(top: 6.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.labelText.isNotEmpty) _labelWidget!,
+              // const SizedBox(height: 4),
+              Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  // Actual text field
+                  TextFormField(
+                    controller: _controller,
+                    readOnly: true,
+                    style: inputStyle,
+                    validator: widget.validator != null
+                        ? (value) => widget.validator!(selectedDate)
                         : null,
-                    suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    // contentPadding: EdgeInsets.symmetric(
-                    //   horizontal: 1.w,
-                    //   vertical: 1.5.h,
-                    // ),
-                    isDense: true,
+                    decoration: InputDecoration(
+                      hintText: _selectedDate == null ? (widget.hintText ?? 'dd-MM-yyyy') : null,
+                      hintStyle: hintStyle,
+                      errorStyle: TextStyle(
+                        fontSize: 13.sp,
+                        height: 1,
+                        color: Colors.red[700],
+                      ),
+                      suffixIcon: widget.isEditable && !widget.readOnly
+                          ? Padding(
+                              padding: EdgeInsets.only(right: 2.w),
+                              child: Icon(
+                                Icons.calendar_today_outlined,
+                                color: Colors.grey,
+                                size: 14.sp,
+                              ),
+                            )
+                          : null,
+                      suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 1.w,
+                        vertical: 1.h
+                      ),
+                      isDense: true,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
