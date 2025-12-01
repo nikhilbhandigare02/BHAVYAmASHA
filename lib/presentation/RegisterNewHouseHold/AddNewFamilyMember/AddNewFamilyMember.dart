@@ -1348,10 +1348,16 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                             fatherItems.add('Other');
                                           }
                                           return ApiDropdown<String>(
-                                            labelText: '${l.fatherGuardianNameLabel} ',
+                                            labelText: '${l.fatherGuardianNameLabel} *',
                                             items: fatherItems,
                                             getLabel: (s) => s,
                                             value: _fatherOption,
+                                            validator: (value) {
+                                              if (_fatherOption == 'Select' || _fatherOption.isEmpty) {
+                                                return 'Please select or enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                              }
+                                              return null;
+                                            },
                                             onChanged: (v) {
                                               if (v == null) return;
                                               setState(() {
@@ -1362,6 +1368,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                               } else {
                                                 context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(''));
                                               }
+                                              // Trigger form validation
+                                              if (_formKey.currentState != null) {
+                                                _formKey.currentState!.validate();
+                                              }
                                             },
                                           );
                                         },
@@ -1370,10 +1380,23 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         Padding(
                                           padding: const EdgeInsets.only(top: 8),
                                           child: CustomTextField(
-                                            labelText: l.fatherGuardianNameLabel,
+                                            labelText: '${l.fatherGuardianNameLabel} *',
                                             hintText: l.fatherGuardianNameLabel,
                                             initialValue: state.fatherName ?? '',
-                                            onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v.trim())),
+                                            onChanged: (v) {
+                                              final name = v.trim();
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(name));
+                                              // Trigger form validation
+                                              if (_formKey.currentState != null) {
+                                                _formKey.currentState!.validate();
+                                              }
+                                            },
+                                            validator: (value) {
+                                              if (value == null || value.trim().isEmpty) {
+                                                return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                              }
+                                              return null;
+                                            },
                                           ),
                                         ),
                                     ],
@@ -1392,7 +1415,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                             motherItems.addAll(_femaleAdultNames);
                                             motherItems.add('Other');
                                           } else {
-                                          
+
                                             if ((_headName ?? '').isNotEmpty && _formatGender(_headGender) == 'Female') {
                                               motherItems.add(_headName!);
                                             }
@@ -1513,10 +1536,16 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                             fatherItems.add('Other');
                                           }
                                           return ApiDropdown<String>(
-                                            labelText: '${l.fatherGuardianNameLabel} ',
+                                            labelText: '${l.fatherGuardianNameLabel} *',
                                             items: fatherItems,
                                             getLabel: (s) => s,
                                             value: _fatherOption,
+                                            validator: (value) {
+                                              if (_fatherOption == 'Select' || _fatherOption.isEmpty) {
+                                                return 'Please select or enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                              }
+                                              return null;
+                                            },
                                             onChanged: (v) {
                                               if (v == null) return;
                                               setState(() {
@@ -1527,6 +1556,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                               } else {
                                                 context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(''));
                                               }
+                                              // Trigger form validation
+                                              if (_formKey.currentState != null) {
+                                                _formKey.currentState!.validate();
+                                              }
                                             },
                                           );
                                         },
@@ -1535,10 +1568,23 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                         Padding(
                                           padding: const EdgeInsets.only(top: 8),
                                           child: CustomTextField(
-                                            labelText: l.fatherGuardianNameLabel,
+                                            labelText: '${l.fatherGuardianNameLabel} *',
                                             hintText: l.fatherGuardianNameLabel,
                                             initialValue: state.fatherName ?? '',
-                                            onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(v.trim())),
+                                            onChanged: (v) {
+                                              final name = v.trim();
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(name));
+                                              // Trigger form validation
+                                              if (_formKey.currentState != null) {
+                                                _formKey.currentState!.validate();
+                                              }
+                                            },
+                                            validator: (value) {
+                                              if (value == null || value.trim().isEmpty) {
+                                                return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                              }
+                                              return null;
+                                            },
                                           ),
                                         ),
                                     ],
@@ -1635,19 +1681,38 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     }
                                   },
                                   value: state.mobileOwner,
-                                  onChanged: (v) {
-                                    if (v == null) return;
-                                    final bloc = context.read<AddnewfamilymemberBloc>();
-                                    bloc.add(AnmUpdateMobileOwner(v));
-                                    if (v      == 'Family Head') {
-                                      // final headNo = widget. ?? '';
-                                      // if (headNo.isNotEmpty) {
-                                      //   bloc.add(AnmUpdateMobileNo(headNo));
-                                      // }
-                                    }
-                                  },
-                                  validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
-                                  
+                                    onChanged: (v) async {
+                                      if (v == null) return;
+                                      final bloc = context.read<AddnewfamilymemberBloc>();
+                                      bloc.add(AnmUpdateMobileOwner(v));
+
+                                      // For both adult and child member types, if Family Head is selected
+                                      if (v == 'Family Head' && widget.hhId != null) {
+                                        try {
+                                          final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                          if (headMobile != null && headMobile.isNotEmpty) {
+                                            bloc.add(AnmUpdateMobileNo(headMobile));
+                                          } else {
+                                            if (mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('No mobile number found for the head of family')),
+                                              );
+                                            }
+                                          }
+                                        } catch (e) {
+                                          print('Error fetching head mobile number: $e');
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Error loading head of family mobile number')),
+                                            );
+                                          }
+                                        }
+                                      } else if (v != 'Family Head') {
+                                        bloc.add(AnmUpdateMobileNo(''));
+                                      }
+                                    },
+                                    validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
+
                                 ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -2060,7 +2125,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   if (yy > 1) return false;
                                   if (yy == 1 && mm > 3) return false;
                                   if (yy == 1 && mm == 3 && dd >= 1) return false;
-                                  
+
                                   return true; // Show only if age is less than 1 year, 3 months, and 1 day
                                 }())...[
                                   _section(
@@ -2311,12 +2376,36 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       }
                                     },
                                     value: state.mobileOwner,
-                                    onChanged: (v) {
+                                    onChanged: (v) async {
                                       if (v == null) return;
                                       final bloc = context.read<AddnewfamilymemberBloc>();
                                       bloc.add(AnmUpdateMobileOwner(v));
-                                    },
-                                    validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
+
+                                      // For both adult and child member types, if Family Head is selected
+                                      if (v == 'Family Head' && widget.hhId != null) {
+                                        try {
+                                          final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                          if (headMobile != null && headMobile.isNotEmpty) {
+                                            bloc.add(AnmUpdateMobileNo(headMobile));
+                                          } else {
+                                            if (mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('No mobile number found for the head of family')),
+                                              );
+                                            }
+                                          }
+                                        } catch (e) {
+                                          print('Error fetching head mobile number: $e');
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Error loading head of family mobile number')),
+                                            );
+                                          }
+                                        }
+                                      } else if (v != 'Family Head') {
+                                        bloc.add(AnmUpdateMobileNo(''));
+                                      }
+                                    },                                    validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
                                   ),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -2381,7 +2470,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                              
+
 
                               // IDs
                               _section(CustomTextField(labelText: l.voterIdLabel,hintText: l.voterIdLabel, initialValue: state.voterId, onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateVoterId(v.trim())),)),
@@ -2581,7 +2670,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       labelText: '${l.eddDateLabel} *',
                                       hintText: l.dateHint,
                                       initialDate: state.edd,
-                                      onDateChanged: (d) => 
+                                      onDateChanged: (d) =>
                                           context.read<AddnewfamilymemberBloc>().add(AnmEDDChange(d)),
                                       validator: (date) => Validations.validateEDD(l, date),
                                       readOnly: true,
@@ -2589,7 +2678,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   ),
                                   const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                 ],
-                                
+
                                 if (state.isPregnant == 'No') ...[
                                   _section(
                                     ApiDropdown<String>(
@@ -2609,7 +2698,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     ),
                                   ),
                                   const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                                  
+
                                   if (state.isFamilyPlanning == 'Yes') ...[
                                     _section(
                                       ApiDropdown<String>(

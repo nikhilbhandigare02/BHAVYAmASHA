@@ -109,7 +109,7 @@ class Validations {
 
   static String? validateDOB(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
-      return 'Date of birth is required'; // or l10n.dobRequired
+      return 'Date of birth is required';
     }
 
     final today = DateTime.now();
@@ -120,13 +120,31 @@ class Validations {
       return 'Date of birth cannot be in the future';
     }
 
-    int age = today.year - dob.year;
-    if (today.month < dob.month || (today.month == dob.month && today.day < dob.day)) {
-      age--;
+    int years = today.year - dob.year;
+    int months = today.month - dob.month;
+    int days = today.day - dob.day;
+
+    if (months < 0 || (months == 0 && days < 0)) {
+      years--;
+      months += 12;
+      if (days < 0) {
+        months--;
+        // Get the number of days in the previous month
+        final lastMonth = today.month == 1 ? 12 : today.month - 1;
+        final lastYear = today.month == 1 ? today.year - 1 : today.year;
+        final daysInLastMonth = DateTime(lastYear, lastMonth + 1, 0).day;
+        days += daysInLastMonth;
+      }
     }
 
-    if (age < 15 || age > 110) {
-      return 'Age must be between 15 and 110 years';
+    // Check if age is exactly 15 years or more
+    if (years < 15 || (years == 15 && (months < 0 || (months == 0 && days < 0)))) {
+      return 'Age must be 15 years or more';
+    }
+
+    // Check maximum age (110 years)
+    if (years > 110 || (years == 110 && (months > 0 || days > 0))) {
+      return 'Age cannot be more than 110 years';
     }
 
     return null; // ✅ valid

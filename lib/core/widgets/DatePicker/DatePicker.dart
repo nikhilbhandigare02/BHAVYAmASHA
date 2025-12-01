@@ -71,24 +71,77 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     }
   }
 
+  DateTime _getValidInitialDate() {
+    final now = DateTime.now();
+    final firstDate = widget.firstDate ?? DateTime(1900);
+    final lastDate = widget.lastDate ?? DateTime(2100);
+    
+    // Check if this is for a child (15 years range)
+    final isChildDateRange = firstDate == DateTime.now().subtract(const Duration(days: 15 * 365));
+    
+    // If there's a selected date and it's within range, use it
+    if (_selectedDate != null) {
+      if (isChildDateRange) {
+        // For child date range, check if selected date is within the last 15 years
+        final minChildDate = DateTime.now().subtract(const Duration(days: 15 * 365));
+        if (!_selectedDate!.isBefore(minChildDate) && !_selectedDate!.isAfter(now)) {
+          return _selectedDate!;
+        }
+      } else if (!_selectedDate!.isBefore(firstDate) && !_selectedDate!.isAfter(lastDate)) {
+        return _selectedDate!;
+      }
+    }
+    
+    // For child date range, default to 1 year ago
+    if (isChildDateRange) {
+      return now.subtract(const Duration(days: 365));
+    }
+    
+    // If no date is selected or it's invalid, use today's date if it's within range
+    if (!now.isBefore(firstDate) && !now.isAfter(lastDate)) {
+      return now;
+    }
+    
+    // If today is not in range, use the closest valid date
+    if (now.isBefore(firstDate)) {
+      return firstDate;
+    } else {
+      return lastDate;
+    }
+  }
+
   Future<void> _pickDate(BuildContext context) async {
     if (!widget.isEditable || widget.readOnly) return;
 
     final firstDate = widget.firstDate ?? DateTime(1900);
     final lastDate = widget.lastDate ?? DateTime(2100);
-
-    DateTime initial = _selectedDate ?? DateTime.now();
-    if (initial.isBefore(firstDate)) {
-      initial = firstDate;
-    } else if (initial.isAfter(lastDate)) {
-      initial = lastDate;
-    }
+    
+    // Always get a valid initial date, regardless of current _selectedDate
+    final initialDate = _getValidInitialDate();
 
     final picked = await showDatePicker(
       context: context,
-      initialDate: initial,
+      initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary, // Header background color
+              onPrimary: Colors.white, // Header text color
+              onSurface: Colors.black, // Body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary, // Button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {

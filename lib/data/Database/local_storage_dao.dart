@@ -1521,8 +1521,79 @@ class LocalStorageDao {
       print('Stack trace: $stackTrace');
       rethrow;
     }
+
+
   }
 
+  // In local_storage_dao.dart, update getHeadMobileNumber:
+  Future<String?> getHeadMobileNumber(String householdRefKey) async {
+    print('🔍 [getHeadMobileNumber] Fetching head mobile for household: $householdRefKey');
+    try {
+      final db = await _db;
+
+      // 1. Get all beneficiaries for the household
+      final beneficiaries = await db.query(
+        'beneficiaries_new',
+        where: 'household_ref_key = ? AND is_deleted = 0',
+        whereArgs: [householdRefKey],
+      );
+
+      if (beneficiaries.isEmpty) {
+        print('❌ [getHeadMobileNumber] No beneficiaries found for household: $householdRefKey');
+        return null;
+      }
+
+      // 2. Find the head of the family by checking the relation field
+      for (final beneficiary in beneficiaries) {
+        final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
+        if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;
+
+        try {
+          final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
+          if (infoMap == null) continue;
+
+          // Check if this is the head by relation
+          final relation = infoMap['relation']?.toString().toLowerCase();
+          if (relation == 'self' || relation == 'head') {
+            final mobile = infoMap['mobileNo']?.toString();
+            if (mobile != null && mobile.isNotEmpty) {
+              print('✅ [getHeadMobileNumber] Found head mobile: $mobile');
+              return mobile;
+            }
+          }
+        } catch (e) {
+          print('❌ [getHeadMobileNumber] Error parsing beneficiary info: $e');
+        }
+      }
+
+      // 3. If no head found by relation, try to find by headName
+      for (final beneficiary in beneficiaries) {
+        final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
+        if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;
+
+        try {
+          final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
+          if (infoMap == null) continue;
+
+          if (infoMap['headName'] != null) {
+            final mobile = infoMap['mobileNo']?.toString();
+            if (mobile != null && mobile.isNotEmpty) {
+              print('✅ [getHeadMobileNumber] Found head mobile by headName: $mobile');
+              return mobile;
+            }
+          }
+        } catch (e) {
+          print('❌ [getHeadMobileNumber] Error parsing beneficiary info (fallback): $e');
+        }
+      }
+
+      print('ℹ️ [getHeadMobileNumber] No head mobile number found in any beneficiary');
+      return null;
+    } catch (e) {
+      print('❌ [getHeadMobileNumber] Error: $e');
+      return null;
+    }
+  }
   Future<List<Map<String, dynamic>>> getMigratedBeneficiaries() async {
     try {
       print('🔍 [getMIGRecords] Querying  mig records...');
@@ -1983,6 +2054,49 @@ class LocalStorageDao {
     } catch (e) {
       print("Error fetching notifications: $e");
       rethrow;
+    }
+  }
+
+  Future<String?> getHeadOfFamilyMobileNumber(String householdRefKey) async {
+    try {
+      final db = await _db;
+      
+      final household = await db.query(
+        'households',
+        where: 'unique_key = ? AND is_deleted = 0',
+        whereArgs: [householdRefKey],
+        limit: 1,
+      );
+      
+      if (household.isEmpty) return null;
+      
+      final headId = household.first['head_id'] as String?;
+      if (headId == null || headId.isEmpty) return null;
+      
+      // Now get the beneficiary_info for the head
+      final beneficiaries = await db.query(
+        'beneficiaries_new',
+        where: 'unique_key = ? AND is_deleted = 0',
+        whereArgs: [headId],
+        limit: 1,
+      );
+      
+      if (beneficiaries.isEmpty) return null;
+      
+      final beneficiaryInfo = beneficiaries.first['beneficiary_info'] as String?;
+      if (beneficiaryInfo == null) return null;
+      
+      // Parse the JSON to get the mobile number
+      try {
+        final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
+        return infoMap?['mobile_number'] as String?;
+      } catch (e) {
+        print('Error parsing beneficiary_info JSON: $e');
+        return null;
+      }
+    } catch (e) {
+      print('Error in getHeadOfFamilyMobileNumber: $e');
+      return null;
     }
   }
 }

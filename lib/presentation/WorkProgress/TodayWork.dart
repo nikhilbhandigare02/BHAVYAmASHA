@@ -43,6 +43,7 @@ class _TodayworkState extends State<Todaywork> {
         return bloc;
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppHeader(screenTitle: l10n?.todayWorkTitle ?? "Today's Work Progress", showBack: true),
         body: SafeArea(
           child: BlocBuilder<TodaysWorkBloc, TodaysWorkState>(
@@ -216,12 +217,12 @@ class _TodayworkState extends State<Todaywork> {
           Expanded(
             child: Text(
               k,
-              style:  TextStyle(fontSize: 14.sp, color: AppColors.primary),
+              style:  TextStyle(fontSize: 15.sp, color: AppColors.primary),
             ),
           ),
           Text(
             v,
-            style:  TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+            style:  TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -243,7 +244,7 @@ class _TodayworkState extends State<Todaywork> {
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
+          style: const TextStyle(fontSize: 15, color: Colors.black),
         ),
       ],
     );

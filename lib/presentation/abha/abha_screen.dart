@@ -102,7 +102,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return PopScope(
-        canPop: false, // whether the route can be popped
+        canPop: true, // whether the route can be popped
         onPopInvoked: (didPop) {
        /*   if (!didPop) {
             Utils.willPopCallback(context);
@@ -371,10 +371,12 @@ class _ABHAScreenState extends State<ABHAScreen> {
           splitScreenMode: true,
           builder: (_, __) => Scaffold(
             appBar: AppHeader(
-              screenTitle: 'Abha Generation',
-              showBack: true,
+              screenTitle: 'ABHA Generation',
+              showBack: false,
 
-            ),          body: Stack(children: [
+            ),
+            drawer: CustomDrawer(),
+            body: Stack(children: [
             /*Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
@@ -529,7 +531,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            "Search ABHA",
+            "Mobile No.",
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -583,6 +585,22 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter mobile number';
                     }
+
+                    // Must be exactly 10 digits
+                    if (value.length != 10) {
+                      return 'Mobile number must be 10 digits';
+                    }
+
+                    // Must start with 6, 7, 8 or 9
+                    if (!RegExp(r'^[6-9]').hasMatch(value)) {
+                      return 'Enter valid Indian mobile number';
+                    }
+
+                    // Reject if all digits are the same (1111111111, 9999999999)
+                    if (RegExp(r'^(\d)\1{9}$').hasMatch(value)) {
+                      return 'Invalid mobile number';
+                    }
+
                     return null;
                   },
                 ),
@@ -813,258 +831,555 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
 
 
-          Column(children: [
-           // if(availableAbha)
-            SizedBox(height: 20,),
-            if(availableAbhaNumbers!=null&&availableAbhaNumbers.length!=0&&enableAbhaClick)
-            Text("Select to Proceed",  style: TextStyle(
-              fontSize: 12,
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-            ),),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: ListView.builder(
-                // primary: false,
-                  shrinkWrap: true,
-                  itemCount: availableAbhaNumbers.length ?? 0,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: 10),
-                      child: InkWell(
-                        onTap: (){
-                          if(enableAbhaClick){
-                            setState(() {
-                              availableAbhaNumbersSelectedIndex = index;
-                            });
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(15),
-                          //width: 240.w,
-                          //height: 50.h,
-                          //padding: EdgeInsets.all(6.w),
-                          decoration: BoxDecoration(
-                            color:  (availableAbhaNumbersSelectedIndex == index)?AppColors.bgColorScreen:Colors.white,
-                            borderRadius: BorderRadius.circular(10.0),
-                            border: Border.all(color: (availableAbhaNumbersSelectedIndex == index)?AppColors.blueApp:Colors.grey, width: (availableAbhaNumbersSelectedIndex == index)?1.5.w:1.w),
-                          ),
-                          child: Column(children: [
-                            Row(children: [
-                              Expanded(flex:1,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    localText.abhaNumber,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 11.sp,
-                                      //fontWeight: FontWeight.bold,
-                                    ),
+
+        Container(
+          child: Column(children: [
+             // if(availableAbha)
+              SizedBox(height: 20,),
+              if(availableAbhaNumbers!=null&&availableAbhaNumbers.length!=0&&enableAbhaClick)
+              Text("Select to Proceed",  style: TextStyle(
+                fontSize: 12,
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: 200, // your max height
+                  ), // set your max height here
+                  child: Scrollbar(
+
+    thumbVisibility: true,   // always show scrollbar
+    thickness: 6,
+    radius: Radius.circular(10),
+
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: List.generate(
+                        availableAbhaNumbers.length,
+                            (index) => Padding(
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: InkWell(
+                                onTap: (){
+                                  if(enableAbhaClick){
+                                    setState(() {
+                                      availableAbhaNumbersSelectedIndex = index;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(15),
+                                  //width: 240.w,
+                                  //height: 50.h,
+                                  //padding: EdgeInsets.all(6.w),
+                                  decoration: BoxDecoration(
+                                    color:  (availableAbhaNumbersSelectedIndex == index)?AppColors.bgColorScreen:Colors.white,
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    border: Border.all(color: (availableAbhaNumbersSelectedIndex == index)?AppColors.blueApp:Colors.grey, width: (availableAbhaNumbersSelectedIndex == index)?1.5.w:1.w),
                                   ),
-                                ),),
-                              Text(
-                                ':  ',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 11.sp,
-                                  //fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Expanded(flex:2,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    availableAbhaNumbers[index].abhaNumber??'',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 11.sp,
-                                      //fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),)
-                            ],),
-                            Row(children: [
-                              Expanded(flex:1,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    localText.name,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 11.sp,
-                                      //fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),),
-                              Text(
-                                ':  ',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 11.sp,
-                                  //fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Expanded(flex:2,
-                                child: Row(children: [
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      availableAbhaNumbers[index].name??'',
+                                  child: Column(children: [
+                                    Row(children: [
+                                      Expanded(flex:1,
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            localText.abhaNumber,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 11.sp,
+                                              //fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),),
+                                      Text(
+                                        ':  ',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 11.sp,
+                                          //fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Expanded(flex:2,
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            availableAbhaNumbers[index].abhaNumber??'',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 11.sp,
+                                              //fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),)
+                                    ],),
+                                    /*Row(children: [
+                                    Expanded(flex:1,
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          localText.name,
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 11.sp,
+                                            //fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),),
+                                    Text(
+                                      ':  ',
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 11.sp,
                                         //fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      availableAbhaNumbers[index].gender!=null?
-                                      ' (${availableAbhaNumbers[index].gender??''})':'',
+                                    Expanded(flex:2,
+                                      child:
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              localText.abhaNumber,
+                                              style: TextStyle(fontSize: 11.sp),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+
+                                          Text(':  '),
+
+                                          Expanded(
+                                            flex: 2,
+                                            child: Text(
+                                              availableAbhaNumbers[index].abhaNumber ?? '',
+                                              style: TextStyle(fontSize: 11.sp),
+                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: true,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                     *//* Row(children: [
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            availableAbhaNumbers[index].name??'',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 11.sp,
+                                              //fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            availableAbhaNumbers[index].gender!=null?
+                                            ' (${availableAbhaNumbers[index].gender??''})':'',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 11.sp,
+                                              //fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],)*//*
+
+                                      )
+                                  ],),*/
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            localText.name,
+                                            style: TextStyle(fontSize: 11.sp),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+
+                                        Text(':  '),
+
+                                        Expanded(
+                                          flex: 2,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  availableAbhaNumbers[index].name ?? '',
+                                                  style: TextStyle(fontSize: 11.sp),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                              Text(
+                                                availableAbhaNumbers[index].gender != null
+                                                    ? ' (${availableAbhaNumbers[index].gender})'
+                                                    : '',
+                                                style: TextStyle(fontSize: 11.sp),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+
+                                    /* Row(children: [
+                                    Expanded(flex:1,
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          '',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 11.sp,
+                                            //fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),),
+                                    Text(
+                                      '   ',
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 11.sp,
                                         //fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ),
-                                ],)
-
-                                )
-                            ],),
-                           /* Row(children: [
-                              Expanded(flex:1,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    '',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 11.sp,
-                                      //fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),),
-                              Text(
-                                '   ',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 11.sp,
-                                  //fontWeight: FontWeight.bold,
+                                    Expanded(flex:2,
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          availableAbhaNumbers[index].gender!=null?
+                                          '(${availableAbhaNumbers[index].gender??''})':'',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 11.sp,
+                                            //fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),)
+                                  ],),*/
+                                  ],),
                                 ),
                               ),
-                              Expanded(flex:2,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    availableAbhaNumbers[index].gender!=null?
-                                    '(${availableAbhaNumbers[index].gender??''})':'',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 11.sp,
-                                      //fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),)
-                            ],),*/
-                          ],),
-                        ),
-                      ),
-                    );
-                  }),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if(availableAbha)
-                  Align(
-                    alignment: Alignment.center,
-                    child: InkWell(
-                      onTap: () {
-                        dropdownvalue='';
-                        if(availableAbhaNumbersSelectedIndex != -1 && availableAbhaNumbers!=null){
-                          _sendOTPLinkExisting();
-                        }
-                        else {
-                          Utils.showToastMessage('Select ABHA number');
-                        }
-
-                      },
-                      child: Container(
-                        width: 130.w,
-                        height: 30.h,
-                        //padding: EdgeInsets.all(6.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(5.0),
-                          border: Border.all(
-                              color: AppColors.primary, width: 1.w),
-                        ),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            localText.proceedwithkyc,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                        ),
                       ),
                     ),
                   ),
-                  if(availableAbha)
-                  SizedBox(width: 10,),
-                  //if(availableAbha)
-                  if(availableAbha)
-                  Align(
-                    alignment: Alignment.center,
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          dropdownvalue = defaultDropdownValue;
-                          linkExistAbha =false;
-                          availableAbha =false;
-                          createViaAbha =true;
-                          termCondFlag =true;
-                          createnewFlag = false;
-                          enableAbhaClick = false;
-                        });
+                )
 
-                      },
-                      child: Container(
-                        width: 130.w,
-                        height: 30.h,
-                        //padding: EdgeInsets.all(6.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.orangeApp,
-                          borderRadius: BorderRadius.circular(5.0),
-                          border: Border.all(
-                              color: AppColors.orangeApp, width: 1.w),
+
+
+
+                /*ListView.builder(
+                  // primary: false,
+                    shrinkWrap: true,
+                    itemCount: availableAbhaNumbers.length ?? 0,
+                    itemBuilder: (BuildContext context, int index) {
+                      return
+
+                        Padding(
+                        padding: EdgeInsets.only(bottom: 10),
+                        child: InkWell(
+                          onTap: (){
+                            if(enableAbhaClick){
+                              setState(() {
+                                availableAbhaNumbersSelectedIndex = index;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(15),
+                            //width: 240.w,
+                            //height: 50.h,
+                            //padding: EdgeInsets.all(6.w),
+                            decoration: BoxDecoration(
+                              color:  (availableAbhaNumbersSelectedIndex == index)?AppColors.bgColorScreen:Colors.white,
+                              borderRadius: BorderRadius.circular(10.0),
+                              border: Border.all(color: (availableAbhaNumbersSelectedIndex == index)?AppColors.blueApp:Colors.grey, width: (availableAbhaNumbersSelectedIndex == index)?1.5.w:1.w),
+                            ),
+                            child: Column(children: [
+                              Row(children: [
+                                Expanded(flex:1,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      localText.abhaNumber,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 11.sp,
+                                        //fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),),
+                                Text(
+                                  ':  ',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 11.sp,
+                                    //fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Expanded(flex:2,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      availableAbhaNumbers[index].abhaNumber??'',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 11.sp,
+                                        //fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),)
+                              ],),
+                              *//*Row(children: [
+                                Expanded(flex:1,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      localText.name,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 11.sp,
+                                        //fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),),
+                                Text(
+                                  ':  ',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 11.sp,
+                                    //fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Expanded(flex:2,
+                                  child:
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 1,
+                                        child: Text(
+                                          localText.abhaNumber,
+                                          style: TextStyle(fontSize: 11.sp),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+          
+                                      Text(':  '),
+          
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          availableAbhaNumbers[index].abhaNumber ?? '',
+                                          style: TextStyle(fontSize: 11.sp),
+                                          overflow: TextOverflow.ellipsis,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                 *//**//* Row(children: [
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        availableAbhaNumbers[index].name??'',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 11.sp,
+                                          //fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        availableAbhaNumbers[index].gender!=null?
+                                        ' (${availableAbhaNumbers[index].gender??''})':'',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 11.sp,
+                                          //fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],)*//**//*
+          
+                                  )
+                              ],),*//*
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: Text(
+                                      localText.name,
+                                      style: TextStyle(fontSize: 11.sp),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+          
+                                  Text(':  '),
+          
+                                  Expanded(
+                                    flex: 2,
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            availableAbhaNumbers[index].name ?? '',
+                                            style: TextStyle(fontSize: 11.sp),
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                        Text(
+                                          availableAbhaNumbers[index].gender != null
+                                              ? ' (${availableAbhaNumbers[index].gender})'
+                                              : '',
+                                          style: TextStyle(fontSize: 11.sp),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+          
+                              *//* Row(children: [
+                                Expanded(flex:1,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      '',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 11.sp,
+                                        //fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),),
+                                Text(
+                                  '   ',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 11.sp,
+                                    //fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Expanded(flex:2,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      availableAbhaNumbers[index].gender!=null?
+                                      '(${availableAbhaNumbers[index].gender??''})':'',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 11.sp,
+                                        //fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),)
+                              ],),*//*
+                            ],),
+                          ),
                         ),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            localText.createNew,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
+                      );
+                    }),*/
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if(availableAbha)
+                    Align(
+                      alignment: Alignment.center,
+                      child: InkWell(
+                        onTap: () {
+                          dropdownvalue='';
+                          if(availableAbhaNumbersSelectedIndex != -1 && availableAbhaNumbers!=null){
+                            _sendOTPLinkExisting();
+                          }
+                          else {
+                            Utils.showToastMessage('Select ABHA number');
+                          }
+          
+                        },
+                        child: Container(
+                          width: 130.w,
+                          height: 30.h,
+                          //padding: EdgeInsets.all(6.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(5.0),
+                            border: Border.all(
+                                color: AppColors.primary, width: 1.w),
+                          ),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              localText.proceedwithkyc,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  )
-                ],),
-            ),
-          ],),
+                    if(availableAbha)
+                    SizedBox(width: 10,),
+                    //if(availableAbha)
+                    if(availableAbha)
+                    Align(
+                      alignment: Alignment.center,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            dropdownvalue = defaultDropdownValue;
+                            linkExistAbha =false;
+                            availableAbha =false;
+                            createViaAbha =true;
+                            termCondFlag =true;
+                            createnewFlag = false;
+                            enableAbhaClick = false;
+                          });
+          
+                        },
+                        child: Container(
+                          width: 130.w,
+                          height: 30.h,
+                          //padding: EdgeInsets.all(6.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.orangeApp,
+                            borderRadius: BorderRadius.circular(5.0),
+                            border: Border.all(
+                                color: AppColors.orangeApp, width: 1.w),
+                          ),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              localText.createNew,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],),
+              ),
+            ],),
+        ),
 
         if(createViaAbha)
           Column(children: [
@@ -1850,31 +2165,44 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   ),
 
                 if(listABHAID.length > 0)
-                ListView.builder(
-                    primary: false,
-                    shrinkWrap: true,
-                    itemCount: listABHAID.length ?? 0,
-                    itemBuilder: (BuildContext context, int index) {
-                      return RadioListTile(
-                        dense: true,
-                        title: Text(listABHAID[index].abhaId ?? '',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13)),
-                        // Display the title for option 1
-                        // subtitle: Text('Subtitle for Option 1'), // Display a subtitle for option 1
-                        value: listABHAID[index].abhaId ?? '',
-                        // Assign a value of 1 to this option
-                        groupValue: _selectedAbhaIDValue,
-                        // Use _selectedValue to track the selected option
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedAbhaIDValue = value!; // Update _selectedValue when option 1 is selected
-                          });
-                        },
-                      );
-                    }),
+                  ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: 200, // your max height
+                      ), // set your max height here
+
+                  child: Scrollbar(
+    //controller: _scrollController,
+    thumbVisibility: true,   // always show scrollbar
+    thickness: 6,
+    radius: Radius.circular(10),
+
+                    child: ListView.builder(
+                        primary: false,
+                        shrinkWrap: true,
+                        itemCount: listABHAID.length ?? 0,
+                        itemBuilder: (BuildContext context, int index) {
+                          return RadioListTile(
+                            dense: true,
+                            title: Text(listABHAID[index].abhaId ?? '',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13)),
+                            // Display the title for option 1
+                            // subtitle: Text('Subtitle for Option 1'), // Display a subtitle for option 1
+                            value: listABHAID[index].abhaId ?? '',
+                            // Assign a value of 1 to this option
+                            groupValue: _selectedAbhaIDValue,
+                            // Use _selectedValue to track the selected option
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedAbhaIDValue = value!; // Update _selectedValue when option 1 is selected
+                              });
+                            },
+                          );
+                        }),
+                  ),
+                ),
                 if(listABHAID.length > 0)
                 SizedBox(
                   height: 10,
@@ -2378,7 +2706,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text(localText.state,
+                      child: Text('${localText.state}*',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 11.sp)),
                     ),
@@ -2403,7 +2731,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text(localText.district,
+                      child: Text('${localText.district}*',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 11.sp)),
                     ),
@@ -4442,6 +4770,12 @@ class _ABHAScreenState extends State<ABHAScreen> {
     else if(dobController.text.isEmpty){
       Utils.showToastMessage('Select Date of Birth');
     }
+    else if(selectedState.stateCode==null||selectedState.stateCode.toString().isEmpty){
+      Utils.showToastMessage('Select State');
+    }
+    else if(selectedDistrict.code==null||selectedDistrict.code.toString().isEmpty){
+      Utils.showToastMessage('Select District');
+    }
     else if(patientEmailController.text.isEmpty){
       Utils.showToastMessage('Enter Email ID');
     }
@@ -4455,6 +4789,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
     else if(patientPinCodeController.text.isEmpty){
       Utils.showToastMessage('Enter Pincode');
     }
+
     else {
       if (await Utils.isConnected()) {
         bool _isLoading = true;

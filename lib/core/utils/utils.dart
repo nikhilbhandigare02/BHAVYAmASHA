@@ -246,13 +246,20 @@ class Utils {
   static String generateAbhaTokenUAT() {
     // Define your keys and values
 
-   /* //UAT
+    /* //UAT
     const secretKey = '0e8289d92d75ffb63420210d0f0301ae5f520bec5d26d1dcc29a79ad4c244f14';
     const clientId = '69e40e8ad5a3452a6937';*/
 
-    //UAT
-    const secretKey = '81592b837ab12ca0563c66cf4e13517f713391249ab971e2070df0546a14d094';
+    //ANDM key
+    /* const secretKey = '81592b837ab12ca0563c66cf4e13517f713391249ab971e2070df0546a14d094';
     const clientId = 'f3e913668614c6b57c2f';
+
+    const clinicId = 10; // Replace with actual clinic ID or keep as zero
+    const userId = 0; // Replace with actual staff ID if needed*/
+
+// Provide by asha team
+    const secretKey = '1c1ba8babab54dfdc85369c4faac68120a5157c8cc6cc43367613f1217be7fe1';
+    const clientId = '6d9c03a466223cfbf76c';
 
     const clinicId = 10; // Replace with actual clinic ID or keep as zero
     const userId = 0; // Replace with actual staff ID if needed
