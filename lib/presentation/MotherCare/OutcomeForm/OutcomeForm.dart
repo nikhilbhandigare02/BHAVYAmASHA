@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
@@ -10,6 +13,8 @@ import '../../../core/widgets/RoundButton/RoundButton.dart';
 import '../../../l10n/app_localizations.dart';
 import 'bloc/outcome_form_bloc.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
+import '../../../data/Database/database_provider.dart';
+import '../../../data/Database/tables/followup_form_data_table.dart';
 
 class OutcomeFormPage extends StatelessWidget {
   final Map<String, dynamic> beneficiaryData;
@@ -82,8 +87,7 @@ class _OutcomeFormView extends StatelessWidget {
               children: [
 
                 _SectionHeader(title: l10n.deliveryOutcomeDetails),
-
-                // Submission Count Section
+ 
                 FutureBuilder<int>(
                   future: () async {
                     try {
@@ -110,22 +114,72 @@ class _OutcomeFormView extends StatelessWidget {
                       color: Colors.white,
                       child: Row(
                         children: [
-                          // const Icon(Icons.history, size: 20, color: Colors.blue),
-                          // const SizedBox(width: 8),
-                          // Text(
-                          //   '${l10n.visitsLabel ?? 'Previous Submissions'}: $count',
-                          //   style: TextStyle(
-                          //     fontSize: 14.sp,
-                          //     fontWeight: FontWeight.w500,
-                          //     color: Colors.blue.shade800,
-                          //   ),
-                          // ),
+                          
                         ],
                       ),
                     );
                   },
                 ),
                 const SizedBox(height: 8),
+                FutureBuilder<void>(
+                  future: () async {
+                    try {
+                      final db = await DatabaseProvider.instance.database;
+                      final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString() ?? beneficiaryData['beneficiaryId']?.toString() ?? beneficiaryData['unique_key']?.toString() ?? '';
+                      final ancKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+                      if (beneficiaryId.isEmpty || ancKey.isEmpty) return;
+                      final results = await db.query(
+                        FollowupFormDataTable.table,
+                        where: 'beneficiary_ref_key = ? AND forms_ref_key = ?',
+                        whereArgs: [beneficiaryId, ancKey],
+                        orderBy: 'created_date_time DESC',
+                        limit: 1,
+                      );
+                      if (results.isEmpty) return;
+                      final formJsonRaw = results.first['form_json']?.toString() ?? '';
+                      final createdAt = results.first['created_date_time']?.toString() ?? '';
+                      DateTime? createdDate;
+                      try {
+                        createdDate = DateTime.tryParse(createdAt);
+                      } catch (_) {}
+                      if (createdDate != null) {
+                        context.read<OutcomeFormBloc>().add(DeliveryDateChanged(createdDate));
+                      }
+                      if (formJsonRaw.isEmpty) return;
+                      final decoded = jsonDecode(formJsonRaw);
+                      if (decoded is Map && decoded['form_data'] is Map) {
+                        final fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
+                        final flag = (fd['gives_birth_to_baby']?.toString() ?? '').toLowerCase();
+                        if (flag == 'yes') {
+                          print('ANC record with gives_birth_to_baby YES: ${results.first}');
+                        }
+                        final weeks = fd['weeks_of_pregnancy']?.toString() ?? '';
+                        if (weeks.isNotEmpty) {
+                          context.read<OutcomeFormBloc>().add(GestationWeeksChanged(weeks));
+                        }
+                        final children = fd['number_of_children']?.toString() ?? '';
+                        if (children.isNotEmpty) {
+                          final t = children.trim().toLowerCase();
+                          String numeric;
+                          if (t == 'one child' || t == 'one' || t == '1') {
+                            numeric = '1';
+                          } else if (t == 'twins' || t == 'two' || t == '2') {
+                            numeric = '2';
+                          } else if (t == 'triplets' || t == 'three' || t == '3') {
+                            numeric = '3';
+                          } else {
+                            final n = int.tryParse(children);
+                            numeric = n?.toString() ?? children;
+                          }
+                          context.read<OutcomeFormBloc>().add(OutcomeCountChanged(numeric));
+                        }
+                      }
+                    } catch (e) {
+                      print('Error loading ANC gives_birth_to_baby record: $e');
+                    }
+                  }(),
+                  builder: (context, snapshot) => const SizedBox.shrink(),
+                ),
 
                 // Form Area
                 Expanded(
@@ -200,6 +254,7 @@ class _OutcomeFormFields extends StatelessWidget {
                       borderRadius: BorderRadius.zero,
                     ),
                   ),
+                  controller: TextEditingController(text: state.gestationWeeks),
                 ),
               ),
             ],
@@ -246,6 +301,17 @@ class _OutcomeFormFields extends StatelessWidget {
           labelText: l10n.selectPlaceOfDelivery,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        if (state.placeOfDelivery == 'Other') ...[
+          const SizedBox(height: 8),
+          CustomTextField(
+            labelText: 'Enter other place of delivery',
+            hintText: 'Enter place',
+            initialValue: state.otherPlaceOfDeliveryName ?? '',
+            onChanged: (v) => bloc.add(OtherPlaceOfDeliveryNameChanged(v)),
+          ),
+          const SizedBox(height: 8),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        ],
         // Replace the institutional dropdowns section with this fixed code:
 
         if (state.placeOfDelivery == 'Institutional') ...[
@@ -265,8 +331,54 @@ class _OutcomeFormFields extends StatelessWidget {
             onChanged: (v) => bloc.add(InstitutionalPlaceTypeChanged(v ?? '')),
             labelText: 'Type of Institution',
           ),
-          const SizedBox(height: 8),
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          const SizedBox(height: 8),
+          if (state.institutionalPlaceType == 'Public') ...[
+            ApiDropdown<String>(
+              items: [
+                l10n.select,
+                'Sub-Center',
+                'PHC',
+                'CHC',
+                'RH',
+                'DH',
+                'MCH',
+              ],
+              getLabel: (s) => s,
+              value: (state.institutionalPlaceOfDelivery == null ||
+                  state.institutionalPlaceOfDelivery!.isEmpty ||
+                  ![l10n.select, 'Sub-Center', 'PHC', 'CHC', 'RH', 'DH', 'MCH']
+                      .contains(state.institutionalPlaceOfDelivery))
+                  ? l10n.select
+                  : state.institutionalPlaceOfDelivery!,
+              onChanged: (v) => bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
+              labelText: 'Institutional place of delivery',
+            ),
+            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+            const SizedBox(height: 8),
+
+          ] else if (state.institutionalPlaceType == 'Private') ...[
+            ApiDropdown<String>(
+              items: [
+                l10n.select,
+                'Nursing Home',
+                'Hospital',
+              ],
+              getLabel: (s) => s,
+              value: (state.institutionalPlaceOfDelivery == null ||
+                  state.institutionalPlaceOfDelivery!.isEmpty ||
+                  ![l10n.select, 'Nursing Home', 'Hospital']
+                      .contains(state.institutionalPlaceOfDelivery))
+                  ? l10n.select
+                  : state.institutionalPlaceOfDelivery!,
+              onChanged: (v) => bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
+              labelText: 'Institutional place of delivery',
+            ),
+            const SizedBox(height: 8),
+            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          ],
+
+
 
           ApiDropdown<String>(
             items: [
@@ -287,6 +399,66 @@ class _OutcomeFormFields extends StatelessWidget {
             labelText: 'Who conducted the delivery?',
           ),
           const SizedBox(height: 8),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        ],
+        if (state.placeOfDelivery == 'Non-Institutional') ...[
+
+          ApiDropdown<String>(
+            items: [
+              l10n.select,
+              'Home based delivery',
+              'In transit',
+              'Other',
+            ],
+            getLabel: (s) => s,
+            value: (state.nonInstitutionalPlaceType == null ||
+                state.nonInstitutionalPlaceType!.isEmpty ||
+                ![l10n.select, 'Home based delivery', 'In transit', 'Other']
+                    .contains(state.nonInstitutionalPlaceType))
+                ? l10n.select
+                : state.nonInstitutionalPlaceType!,
+            onChanged: (v) => bloc.add(NonInstitutionalPlaceTypeChanged(v ?? '')),
+            labelText: 'Non-institutional place of delivery',
+          ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          const SizedBox(height: 8),
+          if (state.nonInstitutionalPlaceType == 'Other') ...[
+            CustomTextField(
+              labelText: 'Enter name of other non-institutional delivery',
+              hintText: 'Enter name',
+              initialValue: state.otherNonInstitutionalPlaceName ?? '',
+              onChanged: (v) => bloc.add(OtherNonInstitutionalPlaceNameChanged(v)),
+            ),
+            const SizedBox(height: 8),
+            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          ] else if (state.nonInstitutionalPlaceType == 'In transit') ...[
+            ApiDropdown<String>(
+              items: [
+                l10n.select,
+                'Transit Ambulance',
+                'Other',
+              ],
+              getLabel: (s) => s,
+              value: (state.transitPlace == null ||
+                  state.transitPlace!.isEmpty ||
+                  ![l10n.select, 'Transit Ambulance', 'Other']
+                      .contains(state.transitPlace))
+                  ? l10n.select
+                  : state.transitPlace!,
+              onChanged: (v) => bloc.add(TransitPlaceChanged(v ?? '')),
+              labelText: 'Transit place',
+            ),
+            const SizedBox(height: 8),
+            if (state.transitPlace == 'Other') ...[
+              CustomTextField(
+                labelText: 'Enter other transit place',
+                hintText: 'Enter place',
+                initialValue: state.otherTransitPlaceName ?? '',
+                onChanged: (v) => bloc.add(OtherTransitPlaceNameChanged(v)),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ],
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         ],
         
@@ -332,6 +504,44 @@ class _OutcomeFormFields extends StatelessWidget {
           hintText: l10n.selectOption,
           labelText: l10n.complications,
         ),
+        if (state.complications == l10n.yes) ...[
+          const SizedBox(height: 8),
+          ApiDropdown<String>(
+            items: [
+              l10n.select,
+              'Convulsion',
+              'Ante Partumhhaenorhage',
+              'Pregnancy Induced Hypertension',
+              'Repeated Abortion',
+              'Mother death',
+              'Congenital Anomaly',
+              'Blood Transfusion',
+              'Obstructed Labour',
+              'PPH',
+              'Any other',
+            ],
+            getLabel: (s) => s,
+            value: (state.complicationType == null ||
+                state.complicationType!.isEmpty ||
+                ![l10n.select, 'Convulsion', 'Ante Partumhhaenorhage', 'Pregnancy Induced Hypertension', 'Repeated Abortion', 'Mother death', 'Congenital Anomaly', 'Blood Transfusion', 'Obstructed Labour', 'PPH', 'Any other']
+                    .contains(state.complicationType))
+                ? l10n.select
+                : state.complicationType!,
+            onChanged: (v) => bloc.add(ComplicationTypeChanged(v ?? '')),
+            labelText: 'Complication',
+          ),
+          const SizedBox(height: 8),
+          if (state.complicationType == 'Any other') ...[
+            CustomTextField(
+              labelText: 'Enter other complication during delivery',
+              hintText: 'Enter complication',
+              initialValue: state.otherComplicationName ?? '',
+              onChanged: (v) => bloc.add(OtherComplicationNameChanged(v)),
+            ),
+            const SizedBox(height: 8),
+          ],
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        ],
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: 8),
 
@@ -370,6 +580,7 @@ class _OutcomeFormFields extends StatelessWidget {
                       borderRadius: BorderRadius.zero,
                     ),
                   ),
+                  controller: TextEditingController(text: state.outcomeCount),
                 ),
               ),
             ],

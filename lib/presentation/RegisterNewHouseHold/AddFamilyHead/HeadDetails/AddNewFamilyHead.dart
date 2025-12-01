@@ -1378,7 +1378,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                     return AnimatedBuilder(
                                       animation: controller.animation!,
                                       builder: (context, _) {
-                                        final showNav = tabs.length > 1; // show when spouse or children tabs present
+                                        final showNav = tabs.length > 1;
                                         return BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
                                           builder: (context, state) {
                                             final isLoading = state.postApiStatus == PostApiStatus.loading;

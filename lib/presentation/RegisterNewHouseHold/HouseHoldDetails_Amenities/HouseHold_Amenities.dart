@@ -228,6 +228,7 @@ class HouseHoldAmenities extends StatelessWidget {
                                   CustomTextField(
                                     labelText: 'Enter type of fuel for cooking',
                                     hintText: 'Enter type of fuel for cooking',
+                                    initialValue: state.otherCookingFuel,
                                     onChanged: (v) => bloc.add(CookingFuelOtherChange(otherCookingFuel: v.trim())),
                                   ),
                                 if (selected.contains('Other'))
@@ -284,6 +285,7 @@ class HouseHoldAmenities extends StatelessWidget {
                           CustomTextField(
                             labelText: 'Enter primary source of water',
                             hintText: 'Enter primary source of water',
+                            initialValue: state.otherWaterSource,
                             onChanged: (v) => bloc.add(WaterSourceOtherChange(otherWaterSource: v.trim())),
                           ),
                         if (state.waterSource == 'Other')
@@ -321,6 +323,7 @@ class HouseHoldAmenities extends StatelessWidget {
                           CustomTextField(
                             labelText: 'Enter availability of electricity',
                             hintText: 'Enter availability of electricity',
+                            initialValue: state.otherElectricity,
                             onChanged: (v) => bloc.add(ElectricityOtherChange(otherElectricity: v.trim())),
                           ),
                         if (state.electricity == 'Other')
@@ -362,6 +365,7 @@ class HouseHoldAmenities extends StatelessWidget {
                             CustomTextField(
                               labelText: 'Enter Type of toilet',
                               hintText: 'Enter Type of toilet',
+                              initialValue: state.typeOfToilet,
                               onChanged: (v) => bloc.add(TypeOfToilet(TypeToilet: v.trim())),
                             ),
                             Divider(color: AppColors.divider, thickness: 0.8),

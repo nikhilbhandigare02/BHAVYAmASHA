@@ -670,27 +670,43 @@ class RegisterNewHouseholdBloc
           'residentialArea':
           event.amenitiesData['residentialArea']?.toString().trim() ??
               'Not Specified',
+          'otherResidentialArea':
+          event.amenitiesData['otherResidentialArea']?.toString().trim() ??
+              '',
           'houseType': event.amenitiesData['houseType']?.toString().trim() ??
               'Not Specified',
+          'otherHouseType': event.amenitiesData['otherHouseType']?.toString().trim() ??
+              '',
           'ownershipType':
           event.amenitiesData['ownershipType']?.toString().trim() ??
               'Not Specified',
+          'otherOwnershipType':
+          event.amenitiesData['otherOwnershipType']?.toString().trim() ??
+              '',
           'houseKitchen':
           event.amenitiesData['houseKitchen']?.toString().trim() ??
               'Not Specified',
           'cookingFuel':
           event.amenitiesData['cookingFuel']?.toString().trim() ??
               'Not Specified',
+          'otherCookingFuel': event.amenitiesData['otherCookingFuel']?.toString().trim() ??
+              '',
           'waterSource':
           event.amenitiesData['waterSource']?.toString().trim() ??
               'Not Specified',
+          'otherWaterSource': event.amenitiesData['otherWaterSource']?.toString().trim() ??
+              '',
           'electricity':
           event.amenitiesData['electricity']?.toString().trim() ??
               'Not Specified',
+          'otherElectricity': event.amenitiesData['otherElectricity']?.toString().trim() ??
+              '',
           'toilet': event.amenitiesData['toilet']?.toString().trim() ??
               'Not Specified',
           'toiletType': event.amenitiesData['toiletType']?.toString().trim() ??
               'Not Specified',
+          'typeOfToilet': event.amenitiesData['typeOfToilet']?.toString().trim() ??
+              '',
           'toiletPlace': event.amenitiesData['toiletPlace']
               ?.toString()
               .trim() ??

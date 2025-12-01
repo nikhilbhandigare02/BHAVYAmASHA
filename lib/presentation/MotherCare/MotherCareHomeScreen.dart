@@ -266,6 +266,7 @@ class _FeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
     final double cardHeight = 15.h; // uniform height
+    final scaleFactor = MediaQuery.of(context).textScaleFactor;
 
     return InkWell(
       onTap: onClick,
@@ -289,8 +290,8 @@ class _FeatureCard extends StatelessWidget {
                   children: [
                     Image.asset(
                       image,
-                      width: 28.sp,
-                      height: 28.sp,
+                      width: 28 * scaleFactor,
+                      height: 28 * scaleFactor,
                       fit: BoxFit.contain,
                     ),
                     const SizedBox(width: 8),

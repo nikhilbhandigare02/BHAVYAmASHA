@@ -153,15 +153,27 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       if (residentialArea.isNotEmpty) {
         _hhBloc.add(ResidentialAreaChange(residentialArea: residentialArea));
       }
+      final otherResidentialArea = norm(info['otherResidentialArea']);
+      if (otherResidentialArea.isNotEmpty) {
+        _hhBloc.add(ResidentialAreaOtherChange(otherResidentialArea: otherResidentialArea));
+      }
 
       final houseType = norm(info['houseType']);
       if (houseType.isNotEmpty) {
         _hhBloc.add(HouseTypeChange(houseType: houseType));
       }
+      final otherHouseType = norm(info['otherHouseType']);
+      if (otherHouseType.isNotEmpty) {
+        _hhBloc.add(HouseTypeOtherChange(otherHouseType: otherHouseType));
+      }
 
       final ownershipType = norm(info['ownershipType']);
       if (ownershipType.isNotEmpty) {
         _hhBloc.add(OwnershipTypeChange(ownershipType: ownershipType));
+      }
+      final otherOwnershipType = norm(info['otherOwnershipType']);
+      if (otherOwnershipType.isNotEmpty) {
+        _hhBloc.add(OwnershipTypeOtherChange(otherOwnershipType: otherOwnershipType));
       }
 
       final houseKitchen = norm(info['houseKitchen']);
@@ -173,15 +185,27 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       if (cookingFuel.isNotEmpty) {
         _hhBloc.add(CookingFuelTypeChange(cookingFuel: cookingFuel));
       }
+      final otherCookingFuel = norm(info['otherCookingFuel']);
+      if (otherCookingFuel.isNotEmpty) {
+        _hhBloc.add(CookingFuelOtherChange(otherCookingFuel: otherCookingFuel));
+      }
 
       final waterSource = norm(info['waterSource']);
       if (waterSource.isNotEmpty) {
         _hhBloc.add(WaterSourceChange(waterSource: waterSource));
       }
+      final otherWaterSource = norm(info['otherWaterSource']);
+      if (otherWaterSource.isNotEmpty) {
+        _hhBloc.add(WaterSourceOtherChange(otherWaterSource: otherWaterSource));
+      }
 
       final electricity = norm(info['electricity']);
       if (electricity.isNotEmpty) {
         _hhBloc.add(ElectricityChange(electricity: electricity));
+      }
+      final otherElectricity = norm(info['otherElectricity']);
+      if (otherElectricity.isNotEmpty) {
+        _hhBloc.add(ElectricityOtherChange(otherElectricity: otherElectricity));
       }
 
       final toilet = norm(info['toilet']);
@@ -192,6 +216,10 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       final toiletType = norm(info['toiletType']);
       if (toiletType.isNotEmpty) {
         _hhBloc.add(ToiletTypeChange(toiletType: toiletType));
+      }
+      final typeOfToilet = norm(info['typeOfToilet']);
+      if (typeOfToilet.isNotEmpty) {
+        _hhBloc.add(TypeOfToilet(TypeToilet: typeOfToilet));
       }
 
       final toiletPlace = norm(info['toiletPlace']);
@@ -406,77 +434,24 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             print(' Current Amenities State: ${amenitiesState.toString()}');
                             
                             // Build final values, replacing 'Other' selections with typed inputs
-                            final String finalResidentialArea =
-                                amenitiesState.residentialArea == 'Other'
-                                    ? (amenitiesState.otherResidentialArea.trim().isNotEmpty
-                                        ? amenitiesState.otherResidentialArea.trim()
-                                        : amenitiesState.residentialArea)
-                                    : amenitiesState.residentialArea;
-
-                            final String finalHouseType =
-                                amenitiesState.houseType == 'other'
-                                    ? (amenitiesState.otherHouseType.trim().isNotEmpty
-                                        ? amenitiesState.otherHouseType.trim()
-                                        : amenitiesState.houseType)
-                                    : amenitiesState.houseType;
-
-                            final String finalOwnershipType =
-                                amenitiesState.ownershipType == 'Other'
-                                    ? (amenitiesState.otherOwnershipType.trim().isNotEmpty
-                                        ? amenitiesState.otherOwnershipType.trim()
-                                        : amenitiesState.ownershipType)
-                                    : amenitiesState.ownershipType;
-
-                            final String finalWaterSource =
-                                amenitiesState.waterSource == 'Other'
-                                    ? (amenitiesState.otherWaterSource.trim().isNotEmpty
-                                        ? amenitiesState.otherWaterSource.trim()
-                                        : amenitiesState.waterSource)
-                                    : amenitiesState.waterSource;
-
-                            final String finalElectricity =
-                                amenitiesState.electricity == 'Other'
-                                    ? (amenitiesState.otherElectricity.trim().isNotEmpty
-                                        ? amenitiesState.otherElectricity.trim()
-                                        : amenitiesState.electricity)
-                                    : amenitiesState.electricity;
-
-                            final String finalToiletType =
-                                amenitiesState.toiletType == 'Other'
-                                    ? (amenitiesState.typeOfToilet.trim().isNotEmpty
-                                        ? amenitiesState.typeOfToilet.trim()
-                                        : amenitiesState.toiletType)
-                                    : amenitiesState.toiletType;
-
-                            String finalCookingFuel = amenitiesState.cookingFuel;
-                            {
-                              final selected = amenitiesState.cookingFuel
-                                  .split(',')
-                                  .map((e) => e.trim())
-                                  .where((e) => e.isNotEmpty)
-                                  .toList();
-                              if (selected.contains('Other')) {
-                                final other = amenitiesState.otherCookingFuel.trim();
-                                if (other.isNotEmpty) {
-                                  selected.remove('Other');
-                                  selected.add(other);
-                                }
-                              }
-                              finalCookingFuel = selected.join(', ');
-                            }
-
-                            // Create a map with all the amenities data
                             final amenitiesData = {
-                              'residentialArea': finalResidentialArea,
-                              'ownershipType': finalOwnershipType,
-                              'houseType': finalHouseType,
+                              'residentialArea': amenitiesState.residentialArea,
+                              'ownershipType': amenitiesState.ownershipType,
+                              'houseType': amenitiesState.houseType,
                               'houseKitchen': amenitiesState.houseKitchen,
-                              'cookingFuel': finalCookingFuel,
-                              'waterSource': finalWaterSource,
-                              'electricity': finalElectricity,
+                              'cookingFuel': amenitiesState.cookingFuel,
+                              'waterSource': amenitiesState.waterSource,
+                              'electricity': amenitiesState.electricity,
                               'toilet': amenitiesState.toilet,
-                              'toiletType': finalToiletType,
+                              'toiletType': amenitiesState.toiletType,
                               'toiletPlace': amenitiesState.toiletPlace,
+                              'otherResidentialArea': amenitiesState.otherResidentialArea,
+                              'otherHouseType': amenitiesState.otherHouseType,
+                              'otherOwnershipType': amenitiesState.otherOwnershipType,
+                              'otherCookingFuel': amenitiesState.otherCookingFuel,
+                              'otherWaterSource': amenitiesState.otherWaterSource,
+                              'otherElectricity': amenitiesState.otherElectricity,
+                              'typeOfToilet': amenitiesState.typeOfToilet,
                             };
                             
 

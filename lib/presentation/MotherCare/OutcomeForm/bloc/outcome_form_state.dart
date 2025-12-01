@@ -22,11 +22,17 @@ class OutcomeFormState extends Equatable {
   final String? chhayaQuantity;
   final String? ecpQuantity;
   final String? institutionalPlaceType; // 'Public' or 'Private'
+  final String? institutionalPlaceOfDelivery; // e.g. Sub-Center, PHC, Nursing Home
   final String? conductedBy; // 'ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative TBA'
   final String? typeOfDelivery; // 'Cesarean', 'Assisted/Forceps', 'Normal'
   final String? hadComplications; // 'Yes' or 'No'
   final String? nonInstitutionalPlaceType; // 'Home', 'In Transit', 'Other'
   final String? transitPlace; // 'Ambulance', 'Other'
+  final String? otherNonInstitutionalPlaceName; // free text when Other
+  final String? otherPlaceOfDeliveryName;
+  final String? otherTransitPlaceName;
+  final String? complicationType;
+  final String? otherComplicationName;
 
   const OutcomeFormState({
     this.householdId,
@@ -50,11 +56,17 @@ class OutcomeFormState extends Equatable {
     required this.submitted,
     required this.errorMessage,
     this.institutionalPlaceType,
+    this.institutionalPlaceOfDelivery,
     this.conductedBy,
     this.typeOfDelivery,
     this.hadComplications,
     this.nonInstitutionalPlaceType,
     this.transitPlace,
+    this.otherNonInstitutionalPlaceName,
+    this.otherPlaceOfDeliveryName,
+    this.otherTransitPlaceName,
+    this.complicationType,
+    this.otherComplicationName,
   });
 
   factory OutcomeFormState.initial() => const OutcomeFormState(
@@ -79,11 +91,17 @@ class OutcomeFormState extends Equatable {
     chhayaQuantity: null,
     ecpQuantity: null,
     institutionalPlaceType: null,  // ✅ ADDED
+    institutionalPlaceOfDelivery: null,
     conductedBy: null,              // ✅ ADDED
     typeOfDelivery: null,
     hadComplications: null,
     nonInstitutionalPlaceType: null,
     transitPlace: null,
+    otherNonInstitutionalPlaceName: null,
+    otherPlaceOfDeliveryName: null,
+    otherTransitPlaceName: null,
+    complicationType: null,
+    otherComplicationName: null,
   );
 
   OutcomeFormState copyWith({
@@ -108,11 +126,17 @@ class OutcomeFormState extends Equatable {
     String? chhayaQuantity,
     String? ecpQuantity,
     String? institutionalPlaceType,
+    String? institutionalPlaceOfDelivery,
     String? conductedBy,
     String? typeOfDelivery,
     String? hadComplications,
     String? nonInstitutionalPlaceType,
     String? transitPlace,
+    String? otherNonInstitutionalPlaceName,
+    String? otherPlaceOfDeliveryName,
+    String? otherTransitPlaceName,
+    String? complicationType,
+    String? otherComplicationName,
   }) {
     return OutcomeFormState(
       householdId: householdId ?? this.householdId,
@@ -137,11 +161,17 @@ class OutcomeFormState extends Equatable {
       chhayaQuantity: chhayaQuantity ?? this.chhayaQuantity,
       ecpQuantity: ecpQuantity ?? this.ecpQuantity,
       institutionalPlaceType: institutionalPlaceType ?? this.institutionalPlaceType,
+      institutionalPlaceOfDelivery: institutionalPlaceOfDelivery ?? this.institutionalPlaceOfDelivery,
       conductedBy: conductedBy ?? this.conductedBy,
       typeOfDelivery: typeOfDelivery ?? this.typeOfDelivery,
       hadComplications: hadComplications ?? this.hadComplications,
       nonInstitutionalPlaceType: nonInstitutionalPlaceType ?? this.nonInstitutionalPlaceType,
       transitPlace: transitPlace ?? this.transitPlace,
+      otherNonInstitutionalPlaceName: otherNonInstitutionalPlaceName ?? this.otherNonInstitutionalPlaceName,
+      otherPlaceOfDeliveryName: otherPlaceOfDeliveryName ?? this.otherPlaceOfDeliveryName,
+      otherTransitPlaceName: otherTransitPlaceName ?? this.otherTransitPlaceName,
+      complicationType: complicationType ?? this.complicationType,
+      otherComplicationName: otherComplicationName ?? this.otherComplicationName,
     );
   }
 
@@ -168,10 +198,16 @@ class OutcomeFormState extends Equatable {
     chhayaQuantity,
     ecpQuantity,
     institutionalPlaceType,
+    institutionalPlaceOfDelivery,
     conductedBy,
     typeOfDelivery,
     hadComplications,
     nonInstitutionalPlaceType,
     transitPlace,
+    otherNonInstitutionalPlaceName,
+    otherPlaceOfDeliveryName,
+    otherTransitPlaceName,
+    complicationType,
+    otherComplicationName,
   ];
 }
