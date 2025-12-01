@@ -276,7 +276,7 @@ class _OutcomeFormFields extends StatelessWidget {
 
         ApiDropdown<String>(
           items: [
-            l10n.select,
+
             'Institutional',
             'Non-Institutional',
             'Other',
@@ -371,10 +371,29 @@ class _OutcomeFormFields extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+            const SizedBox(height: 8),
+            ApiDropdown<String>(
+              items: [
+                l10n.select,
+                'ANM',
+                'LHV',
+                'Doctor',
+                'Staff Nurse',
+                'Relative TBA',
+              ],
+              getLabel: (s) => s,
+              value: (state.conductedBy == null ||
+                  state.conductedBy!.isEmpty ||
+                  ![l10n.select, 'ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative TBA'].contains(state.conductedBy))
+                  ? l10n.select
+                  : state.conductedBy!,
+              onChanged: (v) => bloc.add(ConductedByChanged(v ?? '')),
+              labelText: 'Who conducted the delivery?',
+            ),
+            const SizedBox(height: 8),
+            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           ],
-
-
-
+          const SizedBox(height: 8),
           ApiDropdown<String>(
             items: [
               l10n.select,
@@ -415,7 +434,7 @@ class _OutcomeFormFields extends StatelessWidget {
             onChanged: (v) => bloc.add(NonInstitutionalPlaceTypeChanged(v ?? '')),
             labelText: 'Non-institutional place of delivery',
           ),
-          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
           const SizedBox(height: 8),
           if (state.nonInstitutionalPlaceType == 'Other') ...[
             CustomTextField(
@@ -546,11 +565,25 @@ class _OutcomeFormFields extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text(
-                  '${l10n.outcomeCount}',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
+                child: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black, // Default text color
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: l10n.outcomeCount.endsWith('*')
+                            ? l10n.outcomeCount.substring(0, l10n.outcomeCount.length - 1)
+                            : l10n.outcomeCount,
+                      ),
+                      if (l10n.outcomeCount.endsWith('*'))
+                        TextSpan(
+                          text: '*',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -594,7 +627,7 @@ class _OutcomeFormFields extends StatelessWidget {
           hintText: l10n.selectOption,
           labelText: l10n.familyPlanningCounseling,
         ),
-
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         if (state.familyPlanningCounseling == 'Yes') ...[
           const SizedBox(height: 8),
           ApiDropdown<String>(

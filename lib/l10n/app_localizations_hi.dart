@@ -2973,7 +2973,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get privateHospital => 'Private Hospital';
 
   @override
-  String get deliveryType => 'Type of Delivery';
+  String get deliveryType => 'Type of Delivery *';
 
   @override
   String get normalDelivery => 'Normal';

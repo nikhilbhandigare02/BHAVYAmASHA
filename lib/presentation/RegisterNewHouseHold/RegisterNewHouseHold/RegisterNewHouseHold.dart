@@ -138,9 +138,18 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       final row = await LocalStorageDao.instance.getHouseholdByUniqueKey(hhKey);
       if (row == null) return;
       final infoRaw = row['household_info'];
-      final Map<String, dynamic> info = infoRaw is Map
-          ? Map<String, dynamic>.from(infoRaw)
-          : <String, dynamic>{};
+      Map<String, dynamic> info;
+      if (infoRaw is Map) {
+        info = Map<String, dynamic>.from(infoRaw);
+      } else if (infoRaw is String && infoRaw.isNotEmpty) {
+        try {
+          info = Map<String, dynamic>.from(jsonDecode(infoRaw));
+        } catch (_) {
+          info = <String, dynamic>{};
+        }
+      } else {
+        info = <String, dynamic>{};
+      }
 
       String norm(dynamic v) {
         final s = (v ?? '').toString().trim();
@@ -150,30 +159,30 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       }
 
       final residentialArea = norm(info['residentialArea']);
-      if (residentialArea.isNotEmpty) {
+      final residentialAreaOther = norm(info['otherResidentialArea']);
+      if (residentialAreaOther.isNotEmpty) {
+        _hhBloc.add(ResidentialAreaChange(residentialArea: 'Other'));
+        _hhBloc.add(ResidentialAreaOtherChange(otherResidentialArea: residentialAreaOther));
+      } else if (residentialArea.isNotEmpty) {
         _hhBloc.add(ResidentialAreaChange(residentialArea: residentialArea));
-      }
-      final otherResidentialArea = norm(info['otherResidentialArea']);
-      if (otherResidentialArea.isNotEmpty) {
-        _hhBloc.add(ResidentialAreaOtherChange(otherResidentialArea: otherResidentialArea));
       }
 
       final houseType = norm(info['houseType']);
-      if (houseType.isNotEmpty) {
+      final houseTypeOther = norm(info['otherHouseType']);
+      if (houseTypeOther.isNotEmpty) {
+        _hhBloc.add(HouseTypeChange(houseType: 'other'));
+        _hhBloc.add(HouseTypeOtherChange(otherHouseType: houseTypeOther));
+      } else if (houseType.isNotEmpty) {
         _hhBloc.add(HouseTypeChange(houseType: houseType));
-      }
-      final otherHouseType = norm(info['otherHouseType']);
-      if (otherHouseType.isNotEmpty) {
-        _hhBloc.add(HouseTypeOtherChange(otherHouseType: otherHouseType));
       }
 
       final ownershipType = norm(info['ownershipType']);
-      if (ownershipType.isNotEmpty) {
+      final ownershipTypeOther = norm(info['otherOwnershipType']);
+      if (ownershipTypeOther.isNotEmpty) {
+        _hhBloc.add(OwnershipTypeChange(ownershipType: 'Other'));
+        _hhBloc.add(OwnershipTypeOtherChange(otherOwnershipType: ownershipTypeOther));
+      } else if (ownershipType.isNotEmpty) {
         _hhBloc.add(OwnershipTypeChange(ownershipType: ownershipType));
-      }
-      final otherOwnershipType = norm(info['otherOwnershipType']);
-      if (otherOwnershipType.isNotEmpty) {
-        _hhBloc.add(OwnershipTypeOtherChange(otherOwnershipType: otherOwnershipType));
       }
 
       final houseKitchen = norm(info['houseKitchen']);
@@ -181,31 +190,34 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         _hhBloc.add(KitchenChange(houseKitchen: houseKitchen));
       }
 
-      final cookingFuel = norm(info['cookingFuel']);
+      var cookingFuel = norm(info['cookingFuel']);
+      final cookingFuelOther = norm(info['otherCookingFuel']);
+      if (cookingFuelOther.isNotEmpty && !cookingFuel.contains('Other')) {
+        cookingFuel = cookingFuel.isNotEmpty ? ("$cookingFuel, Other") : 'Other';
+      }
       if (cookingFuel.isNotEmpty) {
         _hhBloc.add(CookingFuelTypeChange(cookingFuel: cookingFuel));
       }
-      final otherCookingFuel = norm(info['otherCookingFuel']);
-      if (otherCookingFuel.isNotEmpty) {
-        _hhBloc.add(CookingFuelOtherChange(otherCookingFuel: otherCookingFuel));
+      if (cookingFuelOther.isNotEmpty) {
+        _hhBloc.add(CookingFuelOtherChange(otherCookingFuel: cookingFuelOther));
       }
 
       final waterSource = norm(info['waterSource']);
-      if (waterSource.isNotEmpty) {
+      final waterSourceOther = norm(info['otherWaterSource']);
+      if (waterSourceOther.isNotEmpty) {
+        _hhBloc.add(WaterSourceChange(waterSource: 'Other'));
+        _hhBloc.add(WaterSourceOtherChange(otherWaterSource: waterSourceOther));
+      } else if (waterSource.isNotEmpty) {
         _hhBloc.add(WaterSourceChange(waterSource: waterSource));
-      }
-      final otherWaterSource = norm(info['otherWaterSource']);
-      if (otherWaterSource.isNotEmpty) {
-        _hhBloc.add(WaterSourceOtherChange(otherWaterSource: otherWaterSource));
       }
 
       final electricity = norm(info['electricity']);
-      if (electricity.isNotEmpty) {
+      final electricityOther = norm(info['otherElectricity']);
+      if (electricityOther.isNotEmpty) {
+        _hhBloc.add(ElectricityChange(electricity: 'Other'));
+        _hhBloc.add(ElectricityOtherChange(otherElectricity: electricityOther));
+      } else if (electricity.isNotEmpty) {
         _hhBloc.add(ElectricityChange(electricity: electricity));
-      }
-      final otherElectricity = norm(info['otherElectricity']);
-      if (otherElectricity.isNotEmpty) {
-        _hhBloc.add(ElectricityOtherChange(otherElectricity: otherElectricity));
       }
 
       final toilet = norm(info['toilet']);
@@ -214,12 +226,12 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       }
 
       final toiletType = norm(info['toiletType']);
-      if (toiletType.isNotEmpty) {
+      final toiletTypeOther = norm(info['typeOfToilet']);
+      if (toiletTypeOther.isNotEmpty) {
+        _hhBloc.add(ToiletTypeChange(toiletType: 'Other'));
+        _hhBloc.add(TypeOfToilet(TypeToilet: toiletTypeOther));
+      } else if (toiletType.isNotEmpty) {
         _hhBloc.add(ToiletTypeChange(toiletType: toiletType));
-      }
-      final typeOfToilet = norm(info['typeOfToilet']);
-      if (typeOfToilet.isNotEmpty) {
-        _hhBloc.add(TypeOfToilet(TypeToilet: typeOfToilet));
       }
 
       final toiletPlace = norm(info['toiletPlace']);
@@ -433,25 +445,25 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             final amenitiesState = _hhBloc.state;
                             print(' Current Amenities State: ${amenitiesState.toString()}');
                             
-                            // Build final values, replacing 'Other' selections with typed inputs
+                            // Create a map with all the amenities data
                             final amenitiesData = {
                               'residentialArea': amenitiesState.residentialArea,
+                              'otherResidentialArea': amenitiesState.otherResidentialArea,
                               'ownershipType': amenitiesState.ownershipType,
+                              'otherOwnershipType': amenitiesState.otherOwnershipType,
                               'houseType': amenitiesState.houseType,
+                              'otherHouseType': amenitiesState.otherHouseType,
                               'houseKitchen': amenitiesState.houseKitchen,
                               'cookingFuel': amenitiesState.cookingFuel,
+                              'otherCookingFuel': amenitiesState.otherCookingFuel,
                               'waterSource': amenitiesState.waterSource,
+                              'otherWaterSource': amenitiesState.otherWaterSource,
                               'electricity': amenitiesState.electricity,
+                              'otherElectricity': amenitiesState.otherElectricity,
                               'toilet': amenitiesState.toilet,
                               'toiletType': amenitiesState.toiletType,
-                              'toiletPlace': amenitiesState.toiletPlace,
-                              'otherResidentialArea': amenitiesState.otherResidentialArea,
-                              'otherHouseType': amenitiesState.otherHouseType,
-                              'otherOwnershipType': amenitiesState.otherOwnershipType,
-                              'otherCookingFuel': amenitiesState.otherCookingFuel,
-                              'otherWaterSource': amenitiesState.otherWaterSource,
-                              'otherElectricity': amenitiesState.otherElectricity,
                               'typeOfToilet': amenitiesState.typeOfToilet,
+                              'toiletPlace': amenitiesState.toiletPlace,
                             };
                             
 

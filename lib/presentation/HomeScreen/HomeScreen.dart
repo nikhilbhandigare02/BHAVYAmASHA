@@ -617,7 +617,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadAncVisitCount() async {
     try {
-      final count = await ANCUtils.getAncVisitCount();
+      final count = await ANCUtils.getMotherCareTotalCount();
       if (mounted) {
         setState(() {
           ancVisitCount = count;
@@ -928,10 +928,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       null,
                       null,
                       null,
-                      () async { // 7: Mother Care
+                      () async {
                         final result = await Navigator.pushNamed(
                             context, Route_Names.Mothercarehomescreen);
-                        if (result == true && mounted) {
+                        if (!mounted) return;
+                        if (result is int) {
+                          setState(() {
+                            ancVisitCount = result;
+                          });
+                        } else if (result == true) {
+                          await _loadAncVisitCount();
+                        } else {
                           await _loadAncVisitCount();
                         }
                       },

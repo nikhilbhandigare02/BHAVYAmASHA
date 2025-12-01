@@ -1017,7 +1017,7 @@
   "chc": "CHC",
   "districtHospital": "District Hospital",
   "privateHospital": "Private Hospital",
-  "deliveryType": "Type of Delivery",
+  "deliveryType": "Type of Delivery *",
   "normalDelivery": "Normal",
   "cesareanDelivery": "Cesarean",
   "assistedDelivery": "Assisted (Vacuum/Forceps)",
