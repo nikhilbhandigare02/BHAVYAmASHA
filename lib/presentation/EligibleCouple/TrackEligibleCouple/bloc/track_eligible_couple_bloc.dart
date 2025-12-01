@@ -365,33 +365,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
 
           if (formId > 0) {
-            // Insert into eligible_couple_activities table
-            await db.insert(
-              'eligible_couple_activities',
-              {
-                'server_id': '',
-                'household_ref_key': householdRefKey,
-                'beneficiary_ref_key': state.beneficiaryRefKey ?? state.beneficiaryId,
-                'eligible_couple_state': 'eligible_couple',
-                'device_details': jsonEncode({
-                  'id': deviceInfo.deviceId,
-                  'platform': deviceInfo.platform,
-                  'version': deviceInfo.osVersion,
-                }),
-                'app_details': jsonEncode({
-                  'app_version': deviceInfo.appVersion.split('+').first,
-                  'form_data': formData,
-                }),
-                'parent_user': '',
-                'current_user_key': ashaUniqueKey,
-                'facility_id': facilityId,
-                'created_date_time': nowIso,
-                'modified_date_time': nowIso,
-                'is_synced': 0,
-                'is_deleted': 0,
-              },
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
+            // Eligible couple activities insertion has been moved to RegisterNewHouseholdBloc
 
             try {
               final rows = await db.query(

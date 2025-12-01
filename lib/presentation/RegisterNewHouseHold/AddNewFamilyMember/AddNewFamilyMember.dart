@@ -2415,7 +2415,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 _section(
                                   ApiDropdown<String>(
                                     labelText: '${l.maritalStatusLabel} *',
-                                    items: const ['Married', 'Unmarried', 'Widowed', 'Separated', 'Divorced'],
+                                    items: const ['Married', 'Unmarried', 'Widowed','Widower', 'Separated', 'Divorced'],
                                     getLabel: (s) {
                                       switch (s) {
                                         case 'Married':
@@ -2424,6 +2424,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                           return l.unmarried;
                                         case 'Widowed':
                                           return l.widowed;
+                                        case 'Widower':
+                                          return 'Widower';
                                         case 'Separated':
                                           return l.separated;
                                         case 'Divorced':
@@ -2785,254 +2787,267 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                       }
                     },
                     child: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: BlocBuilder<AddnewfamilymemberBloc, AddnewfamilymemberState>(
-                          builder: (context, state) {
-                            final isLoading =
-                                state.postApiStatus == PostApiStatus.loading;
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 4,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 0), // TOP shadow
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          child: BlocBuilder<AddnewfamilymemberBloc, AddnewfamilymemberState>(
+                            builder: (context, state) {
+                              final isLoading =
+                                  state.postApiStatus == PostApiStatus.loading;
 
-                            return Row(
-                              mainAxisAlignment: _isEdit
-                                  ? MainAxisAlignment.end
-                                  : MainAxisAlignment.spaceBetween,
-                              children: [
-                                if (!_isEdit) ...[
-                                  if (_currentStep > 0)
-                                    SizedBox(
-                                      width: 120,
-                                      height: 4.8.h,
-                                      child: RoundButton(
-                                        title: l.previousButton,
-                                        color: AppColors.primary,
-                                        borderRadius: 8,
-                                        height: 4.9.h,
-                                        isLoading: false,
-                                        onPress: () {
-                                          if (_currentStep > 0) {
-                                            setState(() { _currentStep -= 1; });
-                                            final ctrl = DefaultTabController.of(context);
-                                            ctrl?.animateTo(_currentStep);
+                              return Row(
+                                mainAxisAlignment: _isEdit
+                                    ? MainAxisAlignment.end
+                                    : MainAxisAlignment.spaceBetween,
+                                children: [
+                                  if (!_isEdit) ...[
+                                    if (_currentStep > 0)
+                                      SizedBox(
+                                        width: 25.5.w,
+                                        height: 4.5.h,
+                                        child: RoundButton(
+                                          title: l.previousButton,
+                                          color: AppColors.primary,
+                                          borderRadius: 4,
+                                          height: 4.9.h,
+                                          isLoading: false,
+                                          onPress: () {
+                                            if (_currentStep > 0) {
+                                              setState(() { _currentStep -= 1; });
+                                              final ctrl = DefaultTabController.of(context);
+                                              ctrl?.animateTo(_currentStep);
+                                            }
+                                          },
+                                        ),
+                                      )
+                                    else
+                                      const SizedBox.shrink(),
+                                  ],
+                                  SizedBox(
+                                    width: 25.5.w,
+                                    height: 4.5.h,
+                                    child: RoundButton(
+                                      title: () {
+                                        // Use the _isEdit flag (driven by widget.isEdit and
+                                        // route args) to decide whether this is an update
+                                        // context. inlineEdit still controls behavior (pop
+                                        // vs DB save) but not the label.
+                                        final bool isUpdateContext = _isEdit;
+
+                                        if (isLoading) {
+                                          return isUpdateContext ? 'UPDATING...' : l.addingButton;
+                                        }
+
+                                        if (isUpdateContext) {
+                                          return 'UPDATE';
+                                        }
+
+                                        final bool showSpouse = !_isEdit && state.memberType != 'Child' && state.maritalStatus == 'Married';
+                                        final bool showChildren = !_isEdit && showSpouse && state.hasChildren == 'Yes';
+                                        final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
+                                        return (_currentStep < lastStep) ? 'Next' : l.addButton;
+                                      }(),
+                                      color: AppColors.primary,
+                                      borderRadius: 4,
+                                      height: 44,
+                                      isLoading: isLoading,
+                                      onPress: () async {
+                                        _clearAnmFormError();
+                                        clearSpousFormError();
+
+                                        // When on the spouse step (index 1), validate the
+                                        // Spousdetails form using its own GlobalKey. This
+                                        // ensures member spouse validations run and only
+                                        // a single message (the first error) is shown.
+                                        if (_currentStep == 1) {
+                                          final spouseForm = spousFormKey.currentState;
+                                          if (spouseForm == null || !spouseForm.validate()) {
+                                            final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                            showAppSnackBar(context, msg);
+                                            return;
                                           }
-                                        },
-                                      ),
-                                    )
-                                  else
-                                    const SizedBox.shrink(),
-                                ],
-                                SizedBox(
-                                  width: 120,
-                                  height: 4.9.h,
-                                  child: RoundButton(
-                                    title: () {
-                                      // Use the _isEdit flag (driven by widget.isEdit and
-                                      // route args) to decide whether this is an update
-                                      // context. inlineEdit still controls behavior (pop
-                                      // vs DB save) but not the label.
-                                      final bool isUpdateContext = _isEdit;
+                                        }
 
-                                      if (isLoading) {
-                                        return isUpdateContext ? 'UPDATING...' : l.addingButton;
-                                      }
+                                        final formState = _formKey.currentState;
+                                        if (formState == null) return;
 
-                                      if (isUpdateContext) {
-                                        return 'UPDATE';
-                                      }
-
-                                      final bool showSpouse = !_isEdit && state.memberType != 'Child' && state.maritalStatus == 'Married';
-                                      final bool showChildren = !_isEdit && showSpouse && state.hasChildren == 'Yes';
-                                      final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
-                                      return (_currentStep < lastStep) ? 'Next' : l.addButton;
-                                    }(),
-                                    color: AppColors.primary,
-                                    borderRadius: 8,
-                                    height: 44,
-                                    isLoading: isLoading,
-                                    onPress: () async {
-                                      _clearAnmFormError();
-                                      clearSpousFormError();
-
-                                      // When on the spouse step (index 1), validate the
-                                      // Spousdetails form using its own GlobalKey. This
-                                      // ensures member spouse validations run and only
-                                      // a single message (the first error) is shown.
-                                      if (_currentStep == 1) {
-                                        final spouseForm = spousFormKey.currentState;
-                                        if (spouseForm == null || !spouseForm.validate()) {
-                                          final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                        final isValid = formState.validate();
+                                        if (!isValid) {
+                                          final msg = _anmLastFormError ?? 'Please correct the highlighted errors before continuing.';
                                           showAppSnackBar(context, msg);
                                           return;
                                         }
-                                      }
 
-                                      final formState = _formKey.currentState;
-                                      if (formState == null) return;
+                                        try {
+                                          // Get current state
+                                          final bloc = context.read<AddnewfamilymemberBloc>();
+                                          final state = bloc.state;
 
-                                      final isValid = formState.validate();
-                                      if (!isValid) {
-                                        final msg = _anmLastFormError ?? 'Please correct the highlighted errors before continuing.';
-                                        showAppSnackBar(context, msg);
-                                        return;
-                                      }
-
-                                      try {
-                                        // Get current state
-                                        final bloc = context.read<AddnewfamilymemberBloc>();
-                                        final state = bloc.state;
-
-                                        // Extra DOB safety check using bloc state to
-                                        // ensure invalid DOB never passes even if the
-                                        // DOB field widget is not currently mounted.
-                                        if (state.useDob == true) {
-                                          if (state.dob == null) {
-                                            showAppSnackBar(context, 'Date of birth is required');
-                                            return;
-                                          }
-
-                                          final today = DateTime.now();
-                                          final dobDate = DateTime(state.dob!.year, state.dob!.month, state.dob!.day);
-                                          final todayDate = DateTime(today.year, today.month, today.day);
-
-                                          if (dobDate.isAfter(todayDate)) {
-                                            showAppSnackBar(context, 'Date of birth cannot be in the future');
-                                            return;
-                                          }
-
-                                          final memberType = (state.memberType ?? '').trim().toLowerCase();
-                                          if (memberType == 'child') {
-                                            final diffDays = todayDate.difference(dobDate).inDays;
-
-                                            const int minDays = 1;
-                                            const int maxDays = 15 * 365;
-
-                                            if (diffDays < minDays || diffDays > maxDays) {
-                                              showAppSnackBar(context, 'For Child: Age should be between 1 day to 15 years.');
+                                          // Extra DOB safety check using bloc state to
+                                          // ensure invalid DOB never passes even if the
+                                          // DOB field widget is not currently mounted.
+                                          if (state.useDob == true) {
+                                            if (state.dob == null) {
+                                              showAppSnackBar(context, 'Date of birth is required');
                                               return;
                                             }
-                                          }
-                                        }
 
-                                        final memberData = {
-                                          'memberType': state.memberType,
-                                          'name': state.name,
-                                          'relation': state.relation,
-                                          'fatherName': state.fatherName,
-                                          'motherName': state.motherName,
-                                          'gender': state.gender,
-                                          'useDob': state.useDob,
-                                          'dob': state.dob?.toIso8601String(),
-                                          'approxAge': state.approxAge,
-                                          'children': state.children,
-                                          'birthOrder': state.birthOrder,
-                                          'maritalStatus': state.maritalStatus,
-                                          'mobileNo': state.mobileNo,
-                                          'mobileOwner': state.mobileOwner,
-                                          'education': state.education,
-                                          'occupation': state.occupation,
-                                          'religion': state.religion,
-                                          'category': state.category,
-                                          'bankAcc': state.bankAcc,
-                                          'ifsc': state.ifsc,
-                                          'voterId': state.voterId,
-                                          'rationId': state.rationId,
-                                          'phId': state.phId,
-                                          'beneficiaryType': state.beneficiaryType,
-                                          'abhaAddress': state.abhaAddress,
-                                          'richId': state.RichIDChanged,
-                                          'birthCertificate': state.BirthCertificateChange,
-                                          'weight': state.WeightChange,
-                                          'birthWeight': state.birthWeight,
-                                          'school': state.ChildSchool,
-                                          'hasChildren': state.hasChildren,
-                                          'isPregnant': state.isPregnant,
-                                          'ageAtMarriage': state.ageAtMarriage,
-                                          'spouseName': state.spouseName,
-                                          'createdAt': DateTime.now().toIso8601String(),
-                                        };
+                                            final today = DateTime.now();
+                                            final dobDate = DateTime(state.dob!.year, state.dob!.month, state.dob!.day);
+                                            final todayDate = DateTime(today.year, today.month, today.day);
 
-                                        // Attach children details snapshot so that
-                                        // reopening via the children tab can restore
-                                        // the same counters in ChildrenBloc.
-                                        try {
-                                          final ch = _childrenBloc.state;
-                                          memberData['childrendetails'] = ch.toJson();
-                                        } catch (_) {}
-
-
-                                        print('Submitting member data: ${jsonEncode(memberData)}');
-
-
-                                        // For both member details and household flows, we need to collect all data first
-                                        final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
-                                        final showChildren = showSpouse && state.hasChildren == 'Yes';
-                                        final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
-
-                                        // If we're not on the last step yet, go to the next step
-                                        if (_currentStep < lastStep) {
-                                          setState(() { _currentStep += 1; });
-                                          final ctrl = DefaultTabController.of(context);
-                                          ctrl?.animateTo(_currentStep);
-                                          return;
-                                        }
-
-                                        // Collect spouse data if applicable
-                                        if (showSpouse) {
-                                          try {
-                                            final spState = _spousBloc.state;
-                                            final spJson = spState.toJson();
-                                            
-                                            final hasSpouseData = spJson.values.any((v) {
-                                              if (v == null) return false;
-                                              if (v is String) return v.trim().isNotEmpty;
-                                              return true;
-                                            });
-                                            
-                                            if (hasSpouseData) {
-                                              memberData['spouseUseDob'] = spState.useDob;
-                                              memberData['spouseDob'] = spState.dob?.toIso8601String();
-                                              memberData['spouseApproxAge'] = spState.approxAge;
-                                              memberData['spousedetails'] = jsonEncode(spJson);
+                                            if (dobDate.isAfter(todayDate)) {
+                                              showAppSnackBar(context, 'Date of birth cannot be in the future');
+                                              return;
                                             }
-                                          } catch (e) {
-                                            print('Error processing spouse data: $e');
+
+                                            final memberType = (state.memberType ?? '').trim().toLowerCase();
+                                            if (memberType == 'child') {
+                                              final diffDays = todayDate.difference(dobDate).inDays;
+
+                                              const int minDays = 1;
+                                              const int maxDays = 15 * 365;
+
+                                              if (diffDays < minDays || diffDays > maxDays) {
+                                                showAppSnackBar(context, 'For Child: Age should be between 1 day to 15 years.');
+                                                return;
+                                              }
+                                            }
                                           }
-                                        }
-                                        
-                                        // Add children data if applicable
-                                        if (showChildren) {
+
+                                          final memberData = {
+                                            'memberType': state.memberType,
+                                            'name': state.name,
+                                            'relation': state.relation,
+                                            'fatherName': state.fatherName,
+                                            'motherName': state.motherName,
+                                            'gender': state.gender,
+                                            'useDob': state.useDob,
+                                            'dob': state.dob?.toIso8601String(),
+                                            'approxAge': state.approxAge,
+                                            'children': state.children,
+                                            'birthOrder': state.birthOrder,
+                                            'maritalStatus': state.maritalStatus,
+                                            'mobileNo': state.mobileNo,
+                                            'mobileOwner': state.mobileOwner,
+                                            'education': state.education,
+                                            'occupation': state.occupation,
+                                            'religion': state.religion,
+                                            'category': state.category,
+                                            'bankAcc': state.bankAcc,
+                                            'ifsc': state.ifsc,
+                                            'voterId': state.voterId,
+                                            'rationId': state.rationId,
+                                            'phId': state.phId,
+                                            'beneficiaryType': state.beneficiaryType,
+                                            'abhaAddress': state.abhaAddress,
+                                            'richId': state.RichIDChanged,
+                                            'birthCertificate': state.BirthCertificateChange,
+                                            'weight': state.WeightChange,
+                                            'birthWeight': state.birthWeight,
+                                            'school': state.ChildSchool,
+                                            'hasChildren': state.hasChildren,
+                                            'isPregnant': state.isPregnant,
+                                            'ageAtMarriage': state.ageAtMarriage,
+                                            'spouseName': state.spouseName,
+                                            'createdAt': DateTime.now().toIso8601String(),
+                                          };
+
+                                          // Attach children details snapshot so that
+                                          // reopening via the children tab can restore
+                                          // the same counters in ChildrenBloc.
                                           try {
                                             final ch = _childrenBloc.state;
                                             memberData['childrendetails'] = ch.toJson();
-                                          } catch (e) {
-                                            print('Error processing children data: $e');
-                                          }
-                                        }
+                                          } catch (_) {}
 
-                                        // Handle based on the flow
-                                        if (_isMemberDetails) {
-                                          // In member details flow, save immediately on Add button
-                                          if (_isEdit) {
-                                            bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
-                                          } else {
-                                            bloc.add(AnmSubmit(context, hhid: widget.hhId, extraData: memberData));
+
+                                          print('Submitting member data: ${jsonEncode(memberData)}');
+
+
+                                          // For both member details and household flows, we need to collect all data first
+                                          final showSpouse = state.memberType != 'Child' && state.maritalStatus == 'Married';
+                                          final showChildren = showSpouse && state.hasChildren == 'Yes';
+                                          final lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
+
+                                          // If we're not on the last step yet, go to the next step
+                                          if (_currentStep < lastStep) {
+                                            setState(() { _currentStep += 1; });
+                                            final ctrl = DefaultTabController.of(context);
+                                            ctrl?.animateTo(_currentStep);
+                                            return;
                                           }
-                                          return; // Don't navigate yet, wait for success state
-                                        } else {
-                                          // In household flow, just return the data to parent
-                                          // The parent will handle saving when the final Save button is clicked
-                                          Navigator.of(context).pop(memberData);
-                                          return;
+
+                                          // Collect spouse data if applicable
+                                          if (showSpouse) {
+                                            try {
+                                              final spState = _spousBloc.state;
+                                              final spJson = spState.toJson();
+
+                                              final hasSpouseData = spJson.values.any((v) {
+                                                if (v == null) return false;
+                                                if (v is String) return v.trim().isNotEmpty;
+                                                return true;
+                                              });
+
+                                              if (hasSpouseData) {
+                                                memberData['spouseUseDob'] = spState.useDob;
+                                                memberData['spouseDob'] = spState.dob?.toIso8601String();
+                                                memberData['spouseApproxAge'] = spState.approxAge;
+                                                memberData['spousedetails'] = jsonEncode(spJson);
+                                              }
+                                            } catch (e) {
+                                              print('Error processing spouse data: $e');
+                                            }
+                                          }
+
+                                          // Add children data if applicable
+                                          if (showChildren) {
+                                            try {
+                                              final ch = _childrenBloc.state;
+                                              memberData['childrendetails'] = ch.toJson();
+                                            } catch (e) {
+                                              print('Error processing children data: $e');
+                                            }
+                                          }
+
+                                          // Handle based on the flow
+                                          if (_isMemberDetails) {
+                                            // In member details flow, save immediately on Add button
+                                            if (_isEdit) {
+                                              bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
+                                            } else {
+                                              bloc.add(AnmSubmit(context, hhid: widget.hhId, extraData: memberData));
+                                            }
+                                            return; // Don't navigate yet, wait for success state
+                                          } else {
+                                            // In household flow, just return the data to parent
+                                            // The parent will handle saving when the final Save button is clicked
+                                            Navigator.of(context).pop(memberData);
+                                            return;
+                                          }
+                                        } catch (e) {
+                                          print('Error preparing member data: $e');
+                                          showAppSnackBar(context, 'Error preparing data. Please try again.');
                                         }
-                                      } catch (e) {
-                                        print('Error preparing member data: $e');
-                                        showAppSnackBar(context, 'Error preparing data. Please try again.');
-                                      }
-                                    },
+                                      },
+                                    ),
                                   ),
-                                ),
-                              ],
-                            );
-                          },
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),

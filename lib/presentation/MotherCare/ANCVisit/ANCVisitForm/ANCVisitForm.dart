@@ -761,8 +761,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
-                              child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: TextStyle(fontSize: 14.sp)),
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                             ),
                             const SizedBox(height: 6),
                             Padding(
@@ -905,7 +905,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)', style: TextStyle(fontSize: 14.sp)),
+                                Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600)),
                                 const SizedBox(height: 6),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -1365,7 +1365,6 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                            // Show reason field only if beneficiary is absent
                             if (state.beneficiaryAbsent == (l10n?.yes ?? 'Yes'))
                               Column(
                                 children: [
@@ -1387,54 +1386,64 @@ class _AncvisitformState extends State<Ancvisitform> {
                         ),
                       ),
                     ),
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 44,
-                                child: RoundButton(
-                                  title: l10n?.previousVisitsButton ?? 'PREVIOUS VISITS',
-                                  color: AppColors.primary,
-                                  borderRadius: 8,
-                                  onPress: () {
-                                    final benId = widget.beneficiaryData?['BeneficiaryID']?.toString() ?? widget.beneficiaryData?['unique_key']?.toString() ?? '';
-                                    Navigator.pushNamed(
-                                      context,
-                                      Route_Names.Previousvisit,
-                                      arguments: {'beneficiaryId': benId},
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: SizedBox(
-                                height: 44,
-                                child: RoundButton(
-                                  title: state.isSubmitting ? (l10n?.savingButton ?? 'SAVING...') : (l10n?.saveButton ?? 'SAVE'),
-                                  color: AppColors.primary,
-                                  borderRadius: 8,
-                                  onPress: () {
-                                    // Validate the form before submission
-                                    if (_formKey.currentState!.validate()) {
-                                      // Form is valid, proceed with submission
-                                      bloc.add(const SubmitPressed());
-                                    } else {
-                                      // Form is invalid, show error message
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Please fill all required fields correctly')),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 4,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 0), // TOP shadow
+                          ),
+                        ],
+                      ),
+                      child: SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 4.5.h,
+                                  child: RoundButton(
+                                    title: l10n?.previousVisitsButton ?? 'PREVIOUS VISITS',
+                                    color: AppColors.primary,
+                                    borderRadius: 4,
+                                    onPress: () {
+                                      final benId = widget.beneficiaryData?['BeneficiaryID']?.toString() ?? widget.beneficiaryData?['unique_key']?.toString() ?? '';
+                                      Navigator.pushNamed(
+                                        context,
+                                        Route_Names.Previousvisit,
+                                        arguments: {'beneficiaryId': benId},
                                       );
-                                    }
-                                  },
-                                  disabled: state.isSubmitting,
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 45),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 4.5.h,
+                                  child: RoundButton(
+                                    title: state.isSubmitting ? (l10n?.savingButton ?? 'SAVING...') : (l10n?.saveButton ?? 'SAVE'),
+                                    color: AppColors.primary,
+                                    borderRadius: 4,
+                                    onPress: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        bloc.add(const SubmitPressed());
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Please fill all required fields correctly')),
+                                        );
+                                      }
+                                    },
+                                    disabled: state.isSubmitting,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

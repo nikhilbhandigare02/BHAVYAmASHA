@@ -193,7 +193,7 @@ class HouseHoldAmenities extends StatelessWidget {
                                   child: Text(
                                     l.cookingFuelTypeLabel,
                                     style:  TextStyle(
-                                      fontSize: 15,
+                                      fontSize: 10,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),

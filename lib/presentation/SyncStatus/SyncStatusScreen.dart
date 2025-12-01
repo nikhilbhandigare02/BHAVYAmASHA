@@ -102,9 +102,15 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
   // Helper method to get total count from a table
   Future<int> _getTotalCount(String tableName) async {
     try {
-      final db = await  DatabaseProvider.instance.database;
-      final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName WHERE is_deleted = 0');
-      return result.first['count'] as int? ?? 0;
+      final db = await DatabaseProvider.instance.database;
+      // For child_care_activities, get all records regardless of is_deleted status
+      if (tableName == 'child_care_activities') {
+        final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName');
+        return result.first['count'] as int? ?? 0;
+      } else {
+        final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName WHERE is_deleted = 0');
+        return result.first['count'] as int? ?? 0;
+      }
     } catch (e) {
       print('Error getting total count from $tableName: $e');
       return 0;
@@ -118,11 +124,20 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
     try {
       final db = await DatabaseProvider.instance.database;
       final placeholders = List.filled(ids.length, '?').join(',');
-      final result = await db.rawQuery(
-        'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_deleted = 0 AND is_synced = 1',
-        ids,
-      );
-      return result.first['count'] as int? ?? 0;
+      // For child_care_activities, don't filter by is_deleted
+      if (tableName == 'child_care_activities') {
+        final result = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_synced = 1',
+          ids,
+        );
+        return result.first['count'] as int? ?? 0;
+      } else {
+        final result = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_deleted = 0 AND is_synced = 1',
+          ids,
+        );
+        return result.first['count'] as int? ?? 0;
+      }
     } catch (e) {
       print('Error getting synced count from $tableName: $e');
       return 0;
@@ -133,8 +148,14 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
   Future<List<int>> _getIdsFromTable(String tableName) async {
     try {
       final db = await DatabaseProvider.instance.database;
-      final result = await db.rawQuery('SELECT id FROM $tableName WHERE is_deleted = 0');
-      return result.map((e) => e['id'] as int).toList();
+      // For child_care_activities, get all IDs regardless of is_deleted status
+      if (tableName == 'child_care_activities') {
+        final result = await db.rawQuery('SELECT id FROM $tableName');
+        return result.map((e) => e['id'] as int).toList();
+      } else {
+        final result = await db.rawQuery('SELECT id FROM $tableName WHERE is_deleted = 0');
+        return result.map((e) => e['id'] as int).toList();
+      }
     } catch (e) {
       print('Error getting IDs from $tableName: $e');
       return [];
@@ -218,7 +239,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
                                     'Last synced: ${_formatDateTime(_lastSyncedAt!)}',
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 12.sp,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -233,30 +254,30 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
                   ),
                 ),
               ),
-              // Logout button at the bottom
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Add your logout logic here
-                    // For example: 
-                    // Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-                  },
-                  icon: Icon(Icons.logout, color: Colors.white),
-                  label: Text(
-                    'Logout',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
+              // // Logout button at the bottom
+              // Container(
+              //   width: double.infinity,
+              //   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              //   child: ElevatedButton.icon(
+              //     onPressed: () {
+              //       // Add your logout logic here
+              //       // For example:
+              //       // Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              //     },
+              //     icon: Icon(Icons.logout, color: Colors.white),
+              //     label: Text(
+              //       'Logout',
+              //       style: TextStyle(fontSize: 16, color: Colors.white),
+              //     ),
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: AppColors.primary,
+              //       padding: EdgeInsets.symmetric(vertical: 15),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(8),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         );

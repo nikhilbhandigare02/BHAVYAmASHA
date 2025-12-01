@@ -230,8 +230,8 @@ class _OutcomeFormFields extends StatelessWidget {
                 child: Text(
                   l10n.gestationWeeks,
                   style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -549,8 +549,8 @@ class _OutcomeFormFields extends StatelessWidget {
                 child: Text(
                   '${l10n.outcomeCount}',
                   style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -711,11 +711,11 @@ class _OutcomeFormFields extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 32.0),
           child: SizedBox(
-            height: 44,
+            height: 34,
             width: 140,
             child: RoundButton(
               title: l10n.saveButton,
-              borderRadius: 8,
+              borderRadius: 4,
               isLoading: state.submitting,
               color: AppColors.primary,
               onPress: () {

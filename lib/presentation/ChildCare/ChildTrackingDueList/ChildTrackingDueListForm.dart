@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 
 import '../../../core/utils/app_info_utils.dart';
@@ -402,7 +403,8 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           });
         }
       } else {
-        throw Exception('Failed to save form data');
+        throw Exception('Failed to '
+            ' form data');
       }
     } catch (e) {
       debugPrint('❌ Error saving child tracking form: $e');
@@ -549,15 +551,28 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: RoundButton(
-              title: _isSaving ? 'SAVING...' : 'SAVE',
-              onPress: _isSaving ? () {} : _saveForm,
-              height: 50,
-              borderRadius: 8,
-              fontSize: 16,
-              spacing: 1.2,
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 4,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 0), // TOP shadow
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: RoundButton(
+                title: _isSaving ? 'SAVING...' : 'SAVE',
+                onPress: _isSaving ? () {} : _saveForm,
+                height: 34,
+                borderRadius: 4,
+                fontSize: 15,
+                spacing: 1.2,
+              ),
             ),
           ),
         ],
@@ -1125,9 +1140,9 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 10)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 16)),
+        Text(value, style: const TextStyle(fontSize: 14)),
       ],
     );
   }

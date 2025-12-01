@@ -195,6 +195,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       CustomTextField(
                         labelText:
                         '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
+                        hintText:'dd-mm-yyyy',
                         readOnly: true,
                         controller: TextEditingController(
                           text: formatDate(edd),
@@ -374,79 +375,92 @@ class _TrackEligibleCoupleView extends StatelessWidget {
       ),
 
       // Bottom Buttons
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
-          builder: (context, state) {
-            final enabled =
-                state.isValid && state.status != FormStatus.submitting;
-            return Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              PreviousVisitsScreen(beneficiaryId: beneficiaryId),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 4,
+              spreadRadius: 2,
+              offset: const Offset(0, 0), // TOP shadow
+            ),
+          ],
+        ),
+        child: SafeArea(
+          minimum: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
+            builder: (context, state) {
+              final enabled =
+                  state.isValid && state.status != FormStatus.submitting;
+              return Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                PreviousVisitsScreen(beneficiaryId: beneficiaryId),
+                          ),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
                         ),
-                      );
-                    },
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        minimumSize:  Size.fromHeight(4.5.h),
                       ),
-                      minimumSize: const Size.fromHeight(48),
-                    ),
-                    child: Text(
-                      t?.previousButton ?? 'पिछला पेज',
-                      style: TextStyle(
-                        color: AppColors.background,
-                        fontSize: 15.sp,
+                      child: Text(
+                        t?.previousButton ?? 'पिछला पेज',
+                        style: TextStyle(
+                          color: AppColors.background,
+                          fontSize: 15.sp,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: enabled
-                        ? () {
-                      context
-                          .read<TrackEligibleCoupleBloc>()
-                          .add(const SubmitTrackForm());
-                    }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  const SizedBox(width: 50),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: enabled
+                          ? () {
+                        context
+                            .read<TrackEligibleCoupleBloc>()
+                            .add(const SubmitTrackForm());
+                      }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        minimumSize:  Size.fromHeight(4.5.h),
                       ),
-                      minimumSize: const Size.fromHeight(48),
-                    ),
-                    child: state.status == FormStatus.submitting
-                        ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                        : Text(
-                      t?.saveButton ?? 'संरक्षित करें',
-                      style: TextStyle(
-                        color: AppColors.background,
-                        fontSize: 15.sp,
+                      child: state.status == FormStatus.submitting
+                          ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                          : Text(
+                        t?.saveButton ?? 'संरक्षित करें',
+                        style: TextStyle(
+                          color: AppColors.background,
+                          fontSize: 15.sp,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

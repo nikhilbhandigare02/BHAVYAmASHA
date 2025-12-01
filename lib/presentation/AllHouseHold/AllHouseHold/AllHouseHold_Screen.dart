@@ -254,19 +254,19 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         }
         final int childrenTarget = declaredChildren;
 
-        // Any additional member for this household (beyond the head) counts
-        // towards fulfilling the declared children target.
-        // So childrenAdded is simply (total members - 1 head), min 0.
-        int childrenAdded = membersForHousehold.length - 1;
-        if (childrenAdded < 0) {
-          childrenAdded = 0;
-        }
-
-        final int remainingChildren =
-            childrenTarget > 0
-                ? (childrenTarget - childrenAdded).clamp(0, 9999)
-                : 0;
-        final bool hasChildrenTarget = childrenTarget > 0;
+        // Calculate children added (total members - 2 for head and spouse)
+        // Only start counting after both head and spouse are added
+        int childrenAdded = membersForHousehold.length > 2 
+            ? (membersForHousehold.length - 2)
+            : 0;
+        
+        // Calculate remaining children to add (if any)
+        final int remainingChildren = childrenTarget > childrenAdded 
+            ? (childrenTarget - childrenAdded)
+            : 0;
+            
+        // Only show remaining count if both head and spouse are added and there's a target
+        final bool hasChildrenTarget = childrenTarget > 0 && membersForHousehold.length >= 2;
 
         return {
           'name': name,

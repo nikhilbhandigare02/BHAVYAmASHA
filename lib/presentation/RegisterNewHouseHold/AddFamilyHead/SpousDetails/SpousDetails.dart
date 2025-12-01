@@ -216,6 +216,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
   Widget _buildForm(AppLocalizations l) {
     return Form(
       key: _formKey,
+      autovalidateMode: AutovalidateMode.always,  
+
       child: BlocBuilder<SpousBloc, SpousState>(
         builder: (context, state) {
           final spBloc = context.read<SpousBloc>();
