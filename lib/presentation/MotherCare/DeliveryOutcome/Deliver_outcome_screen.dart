@@ -460,7 +460,7 @@ class _DeliveryOutcomeScreenState
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.pregnancyOutcome ?? '',
+        screenTitle: 'Delivery Outcome List',
         showBack: false,
         icon1Image: 'assets/images/home.png',
         onIcon1Tap: () => Navigator.pushReplacement(
