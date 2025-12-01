@@ -41,6 +41,9 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     on<ComplicationsChanged>((event, emit) {
       emit(state.copyWith(complications: event.value, errorMessage: null));
     });
+    on<ComplicationTypeChanged>((event, emit) {
+      emit(state.copyWith(complicationType: event.value, errorMessage: null));
+    });
     on<OutcomeCountChanged>((event, emit) {
       emit(state.copyWith(outcomeCount: event.value, errorMessage: null));
     });
@@ -49,6 +52,9 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     });
     on<InstitutionalPlaceTypeChanged>((event, emit) {
       emit(state.copyWith(institutionalPlaceType: event.value, errorMessage: null));
+    });
+    on<InstitutionalPlaceOfDeliveryChanged>((event, emit) {
+      emit(state.copyWith(institutionalPlaceOfDelivery: event.value, errorMessage: null));
     });
     on<ConductedByChanged>((event, emit) {
       emit(state.copyWith(conductedBy: event.value, errorMessage: null));
@@ -79,6 +85,24 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     });
     on<ECPQuantityChanged>((event, emit) {
       emit(state.copyWith(ecpQuantity: event.quantity, errorMessage: null));
+    });
+    on<NonInstitutionalPlaceTypeChanged>((event, emit) {
+      emit(state.copyWith(nonInstitutionalPlaceType: event.value, errorMessage: null));
+    });
+    on<TransitPlaceChanged>((event, emit) {
+      emit(state.copyWith(transitPlace: event.value, errorMessage: null));
+    });
+    on<OtherNonInstitutionalPlaceNameChanged>((event, emit) {
+      emit(state.copyWith(otherNonInstitutionalPlaceName: event.value, errorMessage: null));
+    });
+    on<OtherPlaceOfDeliveryNameChanged>((event, emit) {
+      emit(state.copyWith(otherPlaceOfDeliveryName: event.value, errorMessage: null));
+    });
+    on<OtherTransitPlaceNameChanged>((event, emit) {
+      emit(state.copyWith(otherTransitPlaceName: event.value, errorMessage: null));
+    });
+    on<OtherComplicationNameChanged>((event, emit) {
+      emit(state.copyWith(otherComplicationName: event.value, errorMessage: null));
     });
 
     on<OutcomeFormSubmitted>((event, emit) async {
@@ -142,13 +166,21 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               'gestation_weeks': state.gestationWeeks,
               'delivery_time': state.deliveryTime,
               'place_of_delivery': state.placeOfDelivery,
+              'other_place_of_delivery_name': state.otherPlaceOfDeliveryName,
               // Add new institutional delivery fields
               'institutional_place_type': state.institutionalPlaceType,
+              'institutional_place_of_delivery': state.institutionalPlaceOfDelivery,
               'conducted_by': state.conductedBy,
               'type_of_delivery': state.typeOfDelivery,
               'had_complications': state.hadComplications,
+              'non_institutional_place_type': state.nonInstitutionalPlaceType,
+              'other_non_institutional_place_name': state.otherNonInstitutionalPlaceName,
+              'transit_place': state.transitPlace,
+              'other_transit_place_name': state.otherTransitPlaceName,
               'delivery_type': state.deliveryType,
               'complications': state.complications,
+              'complication_type': state.complicationType,
+              'other_complication_name': state.otherComplicationName,
               'outcome_count': state.outcomeCount,
               'family_planning_counseling': state.familyPlanningCounseling,
               'fp_method': state.fpMethod,
@@ -256,8 +288,17 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                 'gestation_weeks': state.gestationWeeks,
                 'delivery_time': state.deliveryTime,
                 'place_of_delivery': state.placeOfDelivery,
+                'other_place_of_delivery_name': state.otherPlaceOfDeliveryName,
+                'institutional_place_type': state.institutionalPlaceType,
+                'institutional_place_of_delivery': state.institutionalPlaceOfDelivery,
+                'non_institutional_place_type': state.nonInstitutionalPlaceType,
+                'other_non_institutional_place_name': state.otherNonInstitutionalPlaceName,
+                'transit_place': state.transitPlace,
+                'other_transit_place_name': state.otherTransitPlaceName,
                 'delivery_type': state.deliveryType,
                 'complications': state.complications,
+                'complication_type': state.complicationType,
+                'other_complication_name': state.otherComplicationName,
                 'outcome_count': state.outcomeCount,
                 'family_planning_counseling': state.familyPlanningCounseling,
                 'fp_method': state.fpMethod,

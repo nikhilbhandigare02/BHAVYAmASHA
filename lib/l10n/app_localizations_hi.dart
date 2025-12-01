@@ -2370,7 +2370,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get updateButton => 'अपडेट';
 
   @override
-  String get updatedEligibleCoupleListSubtitle => 'List of eligible couples';
+  String get updatedEligibleCoupleListSubtitle => 'Eligible Couples List';
 
   @override
   String get updatedEligibleCoupleListTitle => 'पात्र दंपत्ति सूची';

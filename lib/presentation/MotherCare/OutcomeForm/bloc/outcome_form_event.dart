@@ -29,6 +29,15 @@ class InstitutionalPlaceTypeChanged extends OutcomeFormEvent {
   List<Object?> get props => [value];
 }
 
+class InstitutionalPlaceOfDeliveryChanged extends OutcomeFormEvent {
+  final String value;
+
+  const InstitutionalPlaceOfDeliveryChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
 class ConductedByChanged extends OutcomeFormEvent {
   final String value;
 
@@ -51,6 +60,51 @@ class HadComplicationsChanged extends OutcomeFormEvent {
   final String value;
 
   const HadComplicationsChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class OtherNonInstitutionalPlaceNameChanged extends OutcomeFormEvent {
+  final String value;
+
+  const OtherNonInstitutionalPlaceNameChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class OtherPlaceOfDeliveryNameChanged extends OutcomeFormEvent {
+  final String value;
+
+  const OtherPlaceOfDeliveryNameChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class OtherTransitPlaceNameChanged extends OutcomeFormEvent {
+  final String value;
+
+  const OtherTransitPlaceNameChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class ComplicationTypeChanged extends OutcomeFormEvent {
+  final String value;
+
+  const ComplicationTypeChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class OtherComplicationNameChanged extends OutcomeFormEvent {
+  final String value;
+
+  const OtherComplicationNameChanged(this.value);
 
   @override
   List<Object?> get props => [value];

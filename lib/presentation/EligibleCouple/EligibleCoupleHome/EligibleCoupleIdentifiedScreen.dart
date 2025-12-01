@@ -42,7 +42,7 @@ class _EligibleCoupleIdentifiedScreenState
     super.dispose();
   }
 
-  // Helper function to safely convert dynamic Map to Map<String, dynamic>
+
   Map<String, dynamic> _toStringMap(dynamic map) {
     if (map == null) return {};
     if (map is Map<String, dynamic>) return map;
@@ -198,13 +198,15 @@ class _EligibleCoupleIdentifiedScreenState
     final head = _toStringMap(info['head_details']);
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
     final gender = female['gender']?.toString().toLowerCase();
-    final displayGender = gender == 'f' ? 'Female' : gender == 'm' ? 'Male' : 'Other';
+    final displayGender = 'Female';
     final age = _calculateAge(female['dob']);
     final richId = female['RichID']?.toString() ?? '';
-    final mobile = female['mobileNo']?.toString() ?? '';
-    final husbandName = isHead
-        ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString() ?? '')
-        : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? '');
+    final mobile = female['mobile_no']?.toString() ?? female['mobileNo']?.toString() ?? 'Not Available';
+    final husbandName = female['spouseName']?.toString() ??
+        (isHead
+            ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString())
+            : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString()))
+        ?? '';
 
     final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
     String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
@@ -230,10 +232,10 @@ class _EligibleCoupleIdentifiedScreenState
       'BeneficiaryID': uniqueKey,
       'BeneficiaryIDShort': last11(uniqueKey) ,
       'Name': name,
-      'age': age > 0 ? '$age Y / $displayGender' : 'N/A',
-      'RichID': richId,
+      'age': age > 0 ? '$age Y | $displayGender' : 'N/A',
+      'RCH ID': richId.isNotEmpty ? richId : 'Not Available',
       'mobileno': mobile,
-      'HusbandName': husbandName,
+      'HusbandName': husbandName.isNotEmpty ? husbandName : 'Not Available',
       'childrenSummary': childrenSummary,
       '_rawRow': row,
       'fullHhId': hhId,
@@ -289,7 +291,7 @@ class _EligibleCoupleIdentifiedScreenState
       child: Scaffold(
         appBar: AppHeader(
           screenTitle: l10n?.updatedEligibleCoupleListSubtitle ?? 'Eligible Couple List',
-          showBack: false,
+          showBack: true,
           icon1Image: 'assets/images/home.png',
 
           onIcon1Tap: () => Navigator.pushReplacement(
@@ -379,7 +381,7 @@ class _EligibleCoupleIdentifiedScreenState
             final fullBeneficiaryId = rowData['unique_key']?.toString() ??
                 data['fullBeneficiaryId']?.toString() ??
                 data['BeneficiaryID']?.toString() ?? '';
-            final name = data['Name']?.toString() ?? '';
+            final name = data['Name']?.toString() ?? '' ;
             final richId = data['RichID']?.toString() ?? '';
             final mobile = data['mobileno']?.toString() ?? '';
             final husbandName = data['HusbandName']?.toString() ?? '';
@@ -399,7 +401,7 @@ class _EligibleCoupleIdentifiedScreenState
                 'name': name,
 
                 'unique_key': fullBeneficiaryId,
-                'RichID': richId,
+                'RCH ID': richId,
                 'mobile': mobile,
                 'husbandName': husbandName,
                 'ageGender': ageGender,
@@ -486,9 +488,9 @@ class _EligibleCoupleIdentifiedScreenState
                         children: [
                           Expanded(child: _rowText(  'Name', data['Name'] ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText( 'Age', data['age']?.toString() ?? '')),
+                          Expanded(child: _rowText( 'Age | Gender', data['age']?.toString() ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Rich ID', data['RichID']?.toString() ?? '')),
+                          Expanded(child: _rowText('RCH ID', data['RCH ID']?.toString() ?? '')),
                         ],
                       ),
                       const SizedBox(height: 10),

@@ -73,6 +73,63 @@ class _DeliveryOutcomeScreenState
       ''');
 
       print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
+      // After line 61 in Deliver_outcome_screen.dart, add this code:
+
+      print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
+
+// For each form, fetch and print the beneficiary details
+      for (var form in ancForms) {
+        final beneficiaryRefKey = form['beneficiary_ref_key'] as String?;
+        if (beneficiaryRefKey == null) {
+          print('⚠️ Form missing beneficiary_ref_key: $form');
+          continue;
+        }
+
+        print('\n📋 Processing ANC Form for beneficiary: $beneficiaryRefKey');
+
+        try {
+          // Fetch the beneficiary record
+          final db = await DatabaseProvider.instance.database;
+          final beneficiary = await db.query(
+            'beneficiaries_new',
+            where: 'unique_key = ?',
+            whereArgs: [beneficiaryRefKey],
+          );
+
+          if (beneficiary.isNotEmpty) {
+            final beneficiaryData = beneficiary.first;
+            print('👤 Beneficiary Record:');
+            print('   - Unique Key: ${beneficiaryData['unique_key']}');
+            print('   - Household Ref Key: ${beneficiaryData['household_ref_key']}');
+
+            final beneficiaryInfo = beneficiaryData['beneficiary_info'];
+            if (beneficiaryInfo != null) {
+              try {
+
+                final infoJson = beneficiaryInfo is String ? beneficiaryInfo : jsonEncode(beneficiaryInfo);
+                final info = jsonDecode(infoJson) as Map<String, dynamic>;
+
+                print('   - Beneficiary Info:');
+                info.forEach((key, value) {
+                  print('     - $key: $value');
+                });
+              } catch (e) {
+                print('   - Error parsing beneficiary_info: $e');
+                print('   - Raw beneficiary_info type: ${beneficiaryInfo.runtimeType}');
+                print('   - Raw beneficiary_info value: $beneficiaryInfo');
+              }
+            } else {
+              print('   - No beneficiary_info available');
+            }
+          } else {
+            print('❌ No beneficiary found for ref key: $beneficiaryRefKey');
+          }
+        } catch (e) {
+          print('❌ Error fetching beneficiary: $e');
+        }
+      }
+
+
 
       if (ancForms.isEmpty) {
         print('ℹ️ No ANC forms found with gives_birth_to_baby: Yes');
@@ -87,7 +144,7 @@ class _DeliveryOutcomeScreenState
       // Process each form
       final List<Map<String, dynamic>> processedData = [];
 
-      // In _loadPregnancyOutcomeeCouples method, update the form processing loop:
+
 
       for (final form in ancForms) {
         try {
@@ -100,7 +157,7 @@ class _DeliveryOutcomeScreenState
 
           Map<String, dynamic>? beneficiaryRow;
           try {
-            // First try to get from beneficiaries_new table
+
             beneficiaryRow = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryRefKey);
 
 
@@ -108,7 +165,7 @@ class _DeliveryOutcomeScreenState
               print('ℹ️ Beneficiary not found in beneficiaries_new, trying beneficiaries table');
               final db = await DatabaseProvider.instance.database;
               final results = await db.query(
-                'beneficiaries',
+                'beneficiaries_new',
                 where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
                 whereArgs: [beneficiaryRefKey],
                 limit: 1,
@@ -189,7 +246,7 @@ class _DeliveryOutcomeScreenState
   bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     if (person.isEmpty) return false;
 
-    // Check if this is a form with gives_birth_to_baby = 'Yes'
+
     if (person['gives_birth_to_baby']?.toString().toLowerCase() == 'yes') {
       return true;
     }
@@ -217,7 +274,6 @@ class _DeliveryOutcomeScreenState
       final formData = (formJson['form_data'] ?? formJson) as Map<String, dynamic>;
       print('📋 Form data: $formData');
 
-      // Extract all required fields with proper fallbacks
       final womanName = (formData['woman_name'] ?? formData['name'] ?? 'Unknown').toString();
       final husbandName = (formData['husband_name'] ?? formData['spouse_name'] ?? 'N/A').toString();
       final rchNumber = (formData['rch_number'] ?? '').toString();
@@ -235,7 +291,6 @@ class _DeliveryOutcomeScreenState
       // Keep full household ID for data passing, will be truncated for display only
       final hhId = hhRefKey;
 
-      // Calculate pregnancy weeks display from EDD/LMP
       int age = 0;
       String displayAge = '';
 
@@ -291,14 +346,7 @@ class _DeliveryOutcomeScreenState
           }
           ageYearsDisplay = ageYears > 0 ? ageYears.toString() : '';
 
-          gender = (info['gender']?.toString() ?? '').trim();
-          if (gender.isEmpty) {
-            gender = (formData['gender']?.toString() ?? '').trim();
-          }
-          if (gender.isNotEmpty) {
-            final g = gender.toLowerCase();
-            gender = g.startsWith('f') ? 'F' : (g.startsWith('m') ? 'M' : gender);
-          }
+          gender = 'F';
 
           final m = (info['mobileNo']?.toString() ?? info['mobile']?.toString() ?? info['phone']?.toString() ?? '').trim();
           if (m.isNotEmpty) {
@@ -505,7 +553,7 @@ class _DeliveryOutcomeScreenState
 
             print('📋 Raw data: $data');
 
-            // First try to get from _rawRow
+
             if (data['_rawRow'] is Map) {
               final rawRow = data['_rawRow'] as Map;
               final beneficiaryRefKey = rawRow['beneficiary_ref_key']?.toString() ?? '';
@@ -517,7 +565,7 @@ class _DeliveryOutcomeScreenState
               print('   - unique_key: ${beneficiaryData['household_id']}');
               print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
             }
-            // Fallback to data['BeneficiaryID'] if _rawRow is not available
+
             else if (data['BeneficiaryID'] != null) {
               beneficiaryData['BeneficiaryID'] = data['BeneficiaryID'].toString();
               print('🔍 Using direct BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
@@ -538,7 +586,7 @@ class _DeliveryOutcomeScreenState
                   beneficiaryData: {
                     ...beneficiaryData,
                     'householdId': data['household_id'] ?? data['_rawRow']?['household_ref_key'] ?? '',
-                    'beneficiaryId': beneficiaryId,
+                    'beneficiaryId': beneficiaryData['BeneficiaryID'],
                   },
                 ),
               ),
@@ -623,9 +671,102 @@ class _DeliveryOutcomeScreenState
                         children: [
                           Expanded(child: _rowText('Name', name)),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Age | Gender', ageGender)),
+                          Expanded(
+                            child: FutureBuilder<String>(
+                              future: () async {
+                                try {
+                                  final db = await DatabaseProvider.instance.database;
+                                  final beneficiaryKey = (data['_rawRow']?['beneficiary_ref_key']?.toString() ?? data['BeneficiaryID']?.toString() ?? '').trim();
+                                  if (beneficiaryKey.isEmpty) return ageGender;
+                                  final rows = await db.query(
+                                    BeneficiariesTable.table,
+                                    where: 'unique_key = ?',
+                                    whereArgs: [beneficiaryKey],
+                                    limit: 1,
+                                  );
+                                  if (rows.isEmpty) return ageGender;
+                                  final infoRaw = rows.first['beneficiary_info']?.toString() ?? '';
+                                  Map<String, dynamic> info = {};
+                                  if (infoRaw.isNotEmpty) {
+                                    try { info = Map<String, dynamic>.from(jsonDecode(infoRaw)); } catch (_) {}
+                                  }
+                                  final dobStr = info['dob']?.toString() ?? '';
+                                  final gender = info['gender']?.toString() ?? '';
+                                  DateTime? dob;
+                                  if (dobStr.isNotEmpty) {
+                                    dob = DateTime.tryParse(dobStr);
+                                    if (dob == null) {
+                                      final parts = dobStr.split(RegExp(r'[-/]'));
+                                      if (parts.length == 3) {
+                                        int p0 = int.tryParse(parts[0]) ?? 0;
+                                        int p1 = int.tryParse(parts[1]) ?? 0;
+                                        int p2 = int.tryParse(parts[2]) ?? 0;
+                                        if (parts[0].length == 4) {
+                                          dob = DateTime(p0, p1, p2);
+                                        } else {
+                                          dob = DateTime(p2, p1, p0);
+                                        }
+                                      }
+                                    }
+                                  }
+                                  String computed = ageGender;
+                                  if (dob != null) {
+                                    final now = DateTime.now();
+                                    int age = now.year - dob.year;
+                                    if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+                                      age -= 1;
+                                    }
+                                    if (gender.isNotEmpty) {
+                                      computed = '$age | $gender';
+                                    } else {
+                                      computed = '$age';
+                                    }
+                                  } else if (gender.isNotEmpty) {
+                                    computed = gender;
+                                  }
+                                  return computed;
+                                } catch (_) {
+                                  return ageGender;
+                                }
+                              }(),
+                              builder: (context, snapshot) {
+                                final val = snapshot.data ?? ageGender;
+                                return _rowText('Age | Gender', val);
+                              },
+                            ),
+                          ),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Mobile No.', mobileNo)),
+                          Expanded(
+                            child: FutureBuilder<String>(
+                              future: () async {
+                                try {
+                                  final db = await DatabaseProvider.instance.database;
+                                  final beneficiaryKey = (data['_rawRow']?['beneficiary_ref_key']?.toString() ?? data['BeneficiaryID']?.toString() ?? '').trim();
+                                  if (beneficiaryKey.isEmpty) return mobileNo;
+                                  final rows = await db.query(
+                                    BeneficiariesTable.table,
+                                    where: 'unique_key = ?',
+                                    whereArgs: [beneficiaryKey],
+                                    limit: 1,
+                                  );
+                                  if (rows.isEmpty) return mobileNo;
+                                  final infoRaw = rows.first['beneficiary_info']?.toString() ?? '';
+                                  Map<String, dynamic> info = {};
+                                  if (infoRaw.isNotEmpty) {
+                                    try { info = Map<String, dynamic>.from(jsonDecode(infoRaw)); } catch (_) {}
+                                  }
+                                  final mobile = info['mobileNo']?.toString() ?? mobileNo;
+                                  return mobile.isNotEmpty ? mobile : mobileNo;
+                                } catch (_) {
+                                  return mobileNo;
+                                }
+                              }(),
+                              builder: (context, snapshot) {
+                                final val = snapshot.data ?? mobileNo;
+                                return _rowText('Mobile No.', val);
+                              },
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 10),

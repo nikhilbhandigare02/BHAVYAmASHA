@@ -107,13 +107,27 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       // First, get all anc_due records to avoid duplicate DB queries
       final ancDueRecords = await _getAncDueRecords();
       final ancDueBeneficiaryIds = ancDueRecords.map((e) => e['beneficiary_ref_key']?.toString() ?? '').toSet();
+      
+      // Get all delivery outcomes to exclude those records
+      final db = await DatabaseProvider.instance.database;
+      final deliveryOutcomes = await db.query(
+        'followup_form_data',
+        where: "forms_ref_key = 'bt7gs9rl1a5d26mz' AND form_json LIKE '%\"gives_birth_to_baby\":\"Yes\"%'",
+        columns: ['beneficiary_ref_key']
+      );
+      final deliveredBeneficiaryIds = deliveryOutcomes
+          .map((e) => e['beneficiary_ref_key']?.toString())
+          .where((id) => id != null && id.isNotEmpty)
+          .toSet();
+
+      print('ℹ️ Found ${deliveredBeneficiaryIds.length} beneficiaries with delivery outcomes');
 
       for (final row in rows) {
         try {
           // Parse the beneficiary info
           final dynamic rawInfo = row['beneficiary_info'];
           if (rawInfo == null) {
-            print('⚠️ Skipping - No beneficiary_info found');
+            print(' Skipping - No beneficiary_info found');
             continue;
           }
 
@@ -123,7 +137,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                 ? jsonDecode(rawInfo) as Map<String, dynamic>
                 : Map<String, dynamic>.from(rawInfo as Map);
           } catch (e) {
-            print('⚠️ Error parsing beneficiary_info: $e');
+            print(' Error parsing beneficiary_info: $e');
             continue;
           }
 
@@ -136,7 +150,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           // Check if this beneficiary is in anc_due records
           final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
           
-          // Include if pregnant or in anc_due
+          // Skip if this beneficiary already has a delivery outcome
+          if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
+            print('  ⏩ Skipping - Already has delivery outcome');
+            continue;
+          }
+          
+          // Include if pregnant or in anc_due and no delivery outcome
           if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
             print('  🤰 Found ${isAncDue ? 'anc_due ' : ''}pregnant woman: $name (${isPregnant ? 'pregnant' : 'anc_due only'})');
             final personData = _processPerson(row, info, isPregnant: isPregnant || isAncDue);

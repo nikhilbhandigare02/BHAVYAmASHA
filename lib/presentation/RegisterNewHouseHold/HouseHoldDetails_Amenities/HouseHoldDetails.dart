@@ -57,6 +57,7 @@ class HouseHoldDetails extends StatelessWidget {
                 CustomTextField(
                   labelText: 'Enter type of residential area',
                   hintText: 'Enter type of residential area',
+                  initialValue: state.otherResidentialArea,
                   onChanged: (v) => context
                       .read<HouseholdDetailsAmenitiesBloc>()
                       .add(ResidentialAreaOtherChange(otherResidentialArea: v.trim())),
@@ -94,6 +95,7 @@ class HouseHoldDetails extends StatelessWidget {
                 CustomTextField(
                   labelText: 'Enter type of house',
                   hintText: 'Enter type of house',
+                  initialValue: state.otherHouseType,
                   onChanged: (v) => context
                       .read<HouseholdDetailsAmenitiesBloc>()
                       .add(HouseTypeOtherChange(otherHouseType: v.trim())),
@@ -127,6 +129,7 @@ class HouseHoldDetails extends StatelessWidget {
                 CustomTextField(
                   labelText: 'Enter type of ownership',
                   hintText: 'Enter type of ownership',
+                  initialValue: state.otherOwnershipType,
                   onChanged: (v) => context
                       .read<HouseholdDetailsAmenitiesBloc>()
                       .add(OwnershipTypeOtherChange(otherOwnershipType: v.trim())),
