@@ -405,17 +405,77 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             final amenitiesState = _hhBloc.state;
                             print(' Current Amenities State: ${amenitiesState.toString()}');
                             
+                            // Build final values, replacing 'Other' selections with typed inputs
+                            final String finalResidentialArea =
+                                amenitiesState.residentialArea == 'Other'
+                                    ? (amenitiesState.otherResidentialArea.trim().isNotEmpty
+                                        ? amenitiesState.otherResidentialArea.trim()
+                                        : amenitiesState.residentialArea)
+                                    : amenitiesState.residentialArea;
+
+                            final String finalHouseType =
+                                amenitiesState.houseType == 'other'
+                                    ? (amenitiesState.otherHouseType.trim().isNotEmpty
+                                        ? amenitiesState.otherHouseType.trim()
+                                        : amenitiesState.houseType)
+                                    : amenitiesState.houseType;
+
+                            final String finalOwnershipType =
+                                amenitiesState.ownershipType == 'Other'
+                                    ? (amenitiesState.otherOwnershipType.trim().isNotEmpty
+                                        ? amenitiesState.otherOwnershipType.trim()
+                                        : amenitiesState.ownershipType)
+                                    : amenitiesState.ownershipType;
+
+                            final String finalWaterSource =
+                                amenitiesState.waterSource == 'Other'
+                                    ? (amenitiesState.otherWaterSource.trim().isNotEmpty
+                                        ? amenitiesState.otherWaterSource.trim()
+                                        : amenitiesState.waterSource)
+                                    : amenitiesState.waterSource;
+
+                            final String finalElectricity =
+                                amenitiesState.electricity == 'Other'
+                                    ? (amenitiesState.otherElectricity.trim().isNotEmpty
+                                        ? amenitiesState.otherElectricity.trim()
+                                        : amenitiesState.electricity)
+                                    : amenitiesState.electricity;
+
+                            final String finalToiletType =
+                                amenitiesState.toiletType == 'Other'
+                                    ? (amenitiesState.typeOfToilet.trim().isNotEmpty
+                                        ? amenitiesState.typeOfToilet.trim()
+                                        : amenitiesState.toiletType)
+                                    : amenitiesState.toiletType;
+
+                            String finalCookingFuel = amenitiesState.cookingFuel;
+                            {
+                              final selected = amenitiesState.cookingFuel
+                                  .split(',')
+                                  .map((e) => e.trim())
+                                  .where((e) => e.isNotEmpty)
+                                  .toList();
+                              if (selected.contains('Other')) {
+                                final other = amenitiesState.otherCookingFuel.trim();
+                                if (other.isNotEmpty) {
+                                  selected.remove('Other');
+                                  selected.add(other);
+                                }
+                              }
+                              finalCookingFuel = selected.join(', ');
+                            }
+
                             // Create a map with all the amenities data
                             final amenitiesData = {
-                              'residentialArea': amenitiesState.residentialArea,
-                              'ownershipType': amenitiesState.ownershipType,
-                              'houseType': amenitiesState.houseType,
+                              'residentialArea': finalResidentialArea,
+                              'ownershipType': finalOwnershipType,
+                              'houseType': finalHouseType,
                               'houseKitchen': amenitiesState.houseKitchen,
-                              'cookingFuel': amenitiesState.cookingFuel,
-                              'waterSource': amenitiesState.waterSource,
-                              'electricity': amenitiesState.electricity,
+                              'cookingFuel': finalCookingFuel,
+                              'waterSource': finalWaterSource,
+                              'electricity': finalElectricity,
                               'toilet': amenitiesState.toilet,
-                              'toiletType': amenitiesState.toiletType,
+                              'toiletType': finalToiletType,
                               'toiletPlace': amenitiesState.toiletPlace,
                             };
                             

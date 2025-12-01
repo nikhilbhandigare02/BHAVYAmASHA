@@ -205,7 +205,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
         final totalMembers = membersForHousehold.length;
 
-        // Head display fields
         final name = (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString();        final mobile = (info['mobileNo'] ?? '').toString();
 
         String houseNo = '';

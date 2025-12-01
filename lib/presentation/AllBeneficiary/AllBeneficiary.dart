@@ -49,7 +49,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     final beneficiaries = <Map<String, dynamic>>[];
 
     try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      // Only get non-migrated beneficiaries (is_migrated = 0)
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries(isMigrated: 0);
       print('=== AllBeneficiary Screen - Data Loading ===');
       print('Total records from database: ${rows.length}');
       for (int i = 0; i < rows.length; i++) {
@@ -274,10 +275,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     if (dateString.isEmpty) return 'N/A';
     
     try {
-      // First try parsing ISO format (yyyy-mm-dd)
-      DateTime? date = DateTime.tryParse(dateString);
       
-      // If that fails, try parsing other common formats
+      DateTime? date = DateTime.tryParse(dateString);
+ 
       if (date == null && dateString.contains('-')) {
         final parts = dateString.split(' ');
         final datePart = parts[0]; // Get just the date part

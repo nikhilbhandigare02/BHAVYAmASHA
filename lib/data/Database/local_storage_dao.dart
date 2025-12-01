@@ -1354,13 +1354,18 @@ class LocalStorageDao {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getAllBeneficiaries() async {
+  Future<List<Map<String, dynamic>>> getAllBeneficiaries({int? isMigrated}) async {
     try {
       final db = await _db;
-      final rows = await db.query('beneficiaries_new',
-          // where: 'is_deleted = ?',
-          // whereArgs: [0],
-          orderBy: 'created_date_time DESC');
+      final where = isMigrated != null ? 'is_migrated = ?' : null;
+      final whereArgs = isMigrated != null ? [isMigrated] : null;
+      
+      final rows = await db.query(
+        'beneficiaries_new',
+        where: where,
+        whereArgs: whereArgs,
+        orderBy: 'created_date_time DESC'
+      );
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
         mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
