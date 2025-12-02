@@ -10,6 +10,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
+import '../../../data/Database/tables/beneficiaries_table.dart';
 
 class Lbwrefered extends StatefulWidget {
   const Lbwrefered({super.key});
@@ -33,34 +34,76 @@ class _Lbwrefered extends State<Lbwrefered> {
     final db = await DatabaseProvider.instance.database;
 
     try {
-
       final formsRefKey =
           FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childRegistrationDue] ??
               '2ol35gbp7rczyvn6';
 
-      print('🔎 Loading followup_form_data for forms_ref_key (childRegistrationDue): $formsRefKey');
+      print('🔎 Loading LBW from beneficiaries and followup tables');
 
-      final rows = await db.query(
+      final List<Map<String, dynamic>> lbwChildren = [];
+      final Set<String> beneficiaryKeys = <String>{};
+
+      // 1) From beneficiaries_new: is_adult = 0 and beneficiary_info has weight <= 1.2 AND birthWeight <= 1200
+      final benRows = await db.query(
+        BeneficiariesTable.table,
+        where: 'is_deleted = 0 AND is_adult = 0',
+      );
+      print('🔎 Beneficiaries rows: ${benRows.length}');
+      for (final row in benRows) {
+        try {
+          final infoStr = row['beneficiary_info']?.toString() ?? '';
+          if (infoStr.isEmpty) continue;
+          Map<String, dynamic>? info;
+          try {
+            final decoded = jsonDecode(infoStr);
+            if (decoded is Map) {
+              info = Map<String, dynamic>.from(decoded);
+            }
+          } catch (_) {}
+          if (info == null || info!.isEmpty) continue;
+
+          final weight = _parseNum(info!['weight']);
+          final birthWeight = _parseNum(info!['birthWeight']);
+
+          final bool isLbwBen = (weight != null && weight.toDouble() <= 1.2) &&
+              (birthWeight != null && birthWeight.toDouble() <= 1200);
+          if (!isLbwBen) continue;
+
+          final uniqueKey = row['unique_key']?.toString() ?? '';
+          if (uniqueKey.isNotEmpty) beneficiaryKeys.add(uniqueKey);
+
+          final hhId = row['household_ref_key']?.toString() ?? '';
+          final name = info!['name']?.toString() ?? 'Unknown';
+          final ageGender = _formatAgeGender(info!['dob'], info!['gender']);
+
+          lbwChildren.add({
+            'hhId': hhId,
+            'name': name,
+            'age_gender': ageGender,
+            'status': 'LBW',
+            'unique_key': uniqueKey,
+            'source': 'beneficiary',
+          });
+        } catch (e) {
+          print('Error processing beneficiary LBW row: $e');
+        }
+      }
+
+      // 2) From followup_form_data: childRegistrationDue forms with weight/birth_weight in grams
+      final fuRows = await db.query(
         FollowupFormDataTable.table,
         where: 'forms_ref_key = ? AND is_deleted = 0',
         whereArgs: [formsRefKey],
       );
-
-      print('🔎 Total rows found in ${FollowupFormDataTable.table} for childRegistrationDue: ${rows.length}');
-
-      for (final row in rows) {
+      print('🔎 Followup rows: ${fuRows.length}');
+      for (final row in fuRows) {
         try {
-          print('🧾 followup_form_data row => ID: ${row['id']}, household_ref_key: ${row['household_ref_key']}, beneficiary_ref_key: ${row['beneficiary_ref_key']}, forms_ref_key: ${row['forms_ref_key']}');
-          print('🧾 form_json: ${row['form_json']}');
-        } catch (e) {
-          print('Error printing followup_form_data row: $e');
-        }
-      }
+          final beneficiaryRefKey = row['beneficiary_ref_key']?.toString() ?? '';
+          if (beneficiaryRefKey.isNotEmpty && beneficiaryKeys.contains(beneficiaryRefKey)) {
+            // Skip duplicates: prefer beneficiaries table record
+            continue;
+          }
 
-      final List<Map<String, dynamic>> lbwChildren = [];
-
-      for (final row in rows) {
-        try {
           final hhId = row['household_ref_key']?.toString() ?? '';
           if (hhId.isEmpty) continue;
 
@@ -73,38 +116,28 @@ class _Lbwrefered extends State<Lbwrefered> {
           final formData = decoded['form_data'] is Map
               ? Map<String, dynamic>.from(decoded['form_data'])
               : <String, dynamic>{};
-
           if (formData.isEmpty) continue;
 
-          final weightStr = formData['weight_grams']?.toString() ?? '';
-          final birthWeightStr = formData['birth_weight_grams']?.toString() ?? '';
+          final weight = _parseNum(formData['weight_grams'])?.toDouble();
+          final birthWeight = _parseNum(formData['birth_weight_grams'])?.toDouble();
 
-          final weight = double.tryParse(weightStr);
-          final birthWeight = double.tryParse(birthWeightStr);
-
-          // Filter: either current weight OR birth weight less than 1600 grams
           final isLbw = (weight != null && weight < 1600) ||
               (birthWeight != null && birthWeight < 1600);
-
           if (!isLbw) continue;
 
           final childName = formData['child_name']?.toString() ?? 'Unknown';
-          final genderRaw = formData['gender'];
-          final dobRaw = formData['date_of_birth'];
-
-          final age = _calculateAge(dobRaw);
-          final ageGender = _formatAgeGender(dobRaw, genderRaw);
+          final ageGender = _formatAgeGender(formData['date_of_birth'], formData['gender']);
 
           lbwChildren.add({
             'hhId': hhId,
             'name': childName,
-            'age': age,
             'age_gender': ageGender,
             'status': 'LBW',
-            '_raw': row,
+            'beneficiary_ref_key': beneficiaryRefKey,
+            'source': 'followup',
           });
         } catch (e) {
-          print('Error processing LBW child row: $e');
+          print('Error processing followup LBW row: $e');
         }
       }
 
@@ -166,6 +199,19 @@ class _Lbwrefered extends State<Lbwrefered> {
         : 'Other';
 
     return '$ageDisplay | $displayGender';
+  }
+
+  num? _parseNum(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v;
+    final s = v.toString().trim();
+    if (s.isEmpty) return null;
+    // Try double first, then int
+    final d = double.tryParse(s);
+    if (d != null) return d;
+    final i = int.tryParse(s);
+    if (i != null) return i;
+    return null;
   }
 
   @override
