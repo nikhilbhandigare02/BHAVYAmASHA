@@ -218,7 +218,11 @@ class BeneficiaryIdSet extends AnvvisitformEvent {
 
 class NumberOfChildrenChanged extends AnvvisitformEvent {
   final String value;
-  NumberOfChildrenChanged(this.value);
+  final String? womanName;
+  const NumberOfChildrenChanged(this.value, {this.womanName});
+  
+  @override
+  List<Object?> get props => [value, womanName];
 }
 
 class Baby1NameChanged extends AnvvisitformEvent { final String value; Baby1NameChanged(this.value); }

@@ -1168,7 +1168,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 if (state.numberOfChildren == "One Child") ...[
                                   // Baby 1 Name
                                   CustomTextField(
-                                    labelText: "Baby's Name*",
+                                    labelText: "Baby's Name *",
                                     hintText: "Enter Baby's Name",
                                     initialValue: state.baby1Name,
                                     onChanged: (v) => bloc.add(Baby1NameChanged(v)),
@@ -1178,7 +1178,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // Baby 1 Gender
                                   ApiDropdown<String>(
-                                    labelText: "Baby's Gender*",
+                                    labelText: "Baby's Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
                                     getLabel: (s) => s,
@@ -1190,7 +1190,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // Baby 1 Weight
                                   CustomTextField(
-                                    labelText: "Baby's Weight (1200–4000gms)*",
+                                    labelText: "Baby's Weight (1200–4000gms) *",
                                     hintText: "Enter Baby's Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
@@ -1201,7 +1201,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 ],
                                 if (state.numberOfChildren == "Twins") ...[
                                   CustomTextField(
-                                    labelText: "First Baby  Name*",
+                                    labelText: "First Baby  Name *",
                                     hintText: "Enter First Baby  Name",
                                     initialValue: state.baby1Name,
                                     onChanged: (v) => bloc.add(Baby1NameChanged(v)),
@@ -1210,7 +1210,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   ApiDropdown<String>(
-                                    labelText: "First Baby  Gender*",
+                                    labelText: "First Baby  Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
                                     getLabel: (s) => s,
@@ -1221,7 +1221,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   CustomTextField(
-                                    labelText: "First Baby Weight (1200–4000gms)*",
+                                    labelText: "First Baby Weight (1200–4000gms) *",
                                     hintText: "Enter First Baby  Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
@@ -1232,7 +1232,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // ========== BABY 2 ==========
                                   CustomTextField(
-                                    labelText: "Second Baby  Name*",
+                                    labelText: "Second Baby  Name *",
                                     hintText: "Enter Second Baby Name",
                                     initialValue: state.baby2Name,
                                     onChanged: (v) => bloc.add(Baby2NameChanged(v)),
@@ -1241,7 +1241,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   ApiDropdown<String>(
-                                    labelText: "Second Baby Gender*",
+                                    labelText: "Second Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
                                     getLabel: (s) => s,
@@ -1252,7 +1252,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   CustomTextField(
-                                    labelText: "Second Baby Weight (1200–4000gms)*",
+                                    labelText: "Second Baby Weight (1200–4000gms) *",
                                     hintText: "Enter Second Baby Weight",
                                     initialValue: state.baby2Weight,
                                     keyboardType: TextInputType.number,
@@ -1264,7 +1264,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 if (state.numberOfChildren == "Triplets") ...[
                                   // ========== BABY 1 ==========
                                   CustomTextField(
-                                    labelText: "First Baby  Name*",
+                                    labelText: "First Baby  Name *",
                                     hintText: "Enter First Baby  Name",
                                     initialValue: state.baby1Name,
                                     onChanged: (v) => bloc.add(Baby1NameChanged(v)),
@@ -1273,7 +1273,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   ApiDropdown<String>(
-                                    labelText: "First Baby Gender*",
+                                    labelText: "First Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
                                     getLabel: (s) => s,
@@ -1284,7 +1284,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   CustomTextField(
-                                    labelText: "First Baby Weight (1200–4000gms)*",
+                                    labelText: "First Baby Weight (1200–4000gms) *",
                                     hintText: "Enter First Baby Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
@@ -1295,7 +1295,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // ========== BABY 2 ==========
                                   CustomTextField(
-                                    labelText: "Second Baby Name*",
+                                    labelText: "Second Baby Name *",
                                     hintText: "Enter Second Baby Name",
                                     initialValue: state.baby2Name,
                                     onChanged: (v) => bloc.add(Baby2NameChanged(v)),
@@ -1304,7 +1304,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   ApiDropdown<String>(
-                                    labelText: "Second Baby Gender*",
+                                    labelText: "Second Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
                                     getLabel: (s) => s,
@@ -1315,7 +1315,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   CustomTextField(
-                                    labelText: "Second Baby Weight (1200–4000gms)*",
+                                    labelText: "Second Baby Weight (1200–4000gms) *",
                                     hintText: "Enter Second Baby Weight",
                                     initialValue: state.baby2Weight,
                                     keyboardType: TextInputType.number,
@@ -1326,7 +1326,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // ========== BABY 3 ==========
                                   CustomTextField(
-                                    labelText: "Third Baby Name*",
+                                    labelText: "Third Baby Name *",
                                     hintText: "Enter Third Baby Name",
                                     initialValue: state.baby3Name,
                                     onChanged: (v) => bloc.add(Baby3NameChanged(v)),
@@ -1335,7 +1335,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   ApiDropdown<String>(
-                                    labelText: "Third Baby Gender*",
+                                    labelText: "Third Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby3Gender.isEmpty ? null : state.baby3Gender,
                                     getLabel: (s) => s,
@@ -1346,7 +1346,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                                   CustomTextField(
-                                    labelText: "Third Baby Weight (1200–4000gms)*",
+                                    labelText: "Third Baby Weight (1200–4000gms) *",
                                     hintText: "Enter Third Baby Weight",
                                     initialValue: state.baby3Weight,
                                     keyboardType: TextInputType.number,

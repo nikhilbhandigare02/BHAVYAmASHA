@@ -7,9 +7,74 @@ import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_vis
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_event.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_state.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'dart:convert';
+import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 
-class ChildDetailsTab extends StatelessWidget {
-  const ChildDetailsTab({super.key});
+class ChildDetailsTab extends StatefulWidget {
+  final String beneficiaryId;
+  const ChildDetailsTab({super.key, required this.beneficiaryId});
+
+  @override
+  State<ChildDetailsTab> createState() => _ChildDetailsTabState();
+}
+
+class _ChildDetailsTabState extends State<ChildDetailsTab> {
+  @override
+  void initState() {
+    super.initState();
+    _loadLastAncForm();
+  }
+
+  Future<void> _loadLastAncForm() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final refKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+      if (refKey.isEmpty || widget.beneficiaryId.isEmpty) return;
+      final rows = await db.rawQuery(
+        'SELECT * FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 ORDER BY created_date_time DESC LIMIT 1',
+        [refKey, widget.beneficiaryId],
+      );
+      if (rows.isNotEmpty) {
+        final r = rows.first;
+        final s = r['form_json']?.toString() ?? '';
+        if (s.isNotEmpty) {
+          print('HBNC ChildDetails last ANC record for ${widget.beneficiaryId}: $s');
+          try {
+            final decoded = jsonDecode(s);
+            if (decoded is Map && decoded['form_data'] is Map) {
+              final fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
+              final outcome = fd['delivery_outcome']?.toString();
+              final babyName = fd['baby1_name']?.toString();
+              final babyGender = fd['baby1_gender']?.toString();
+              final babyWeight = fd['baby1_weight']?.toString();
+              if (mounted && outcome == 'Live birth') {
+                final bloc = context.read<HbncVisitBloc>();
+                bloc.add(NewbornDetailsChanged(field: 'babyCondition', value: 'alive'));
+                if (babyName != null && babyName.isNotEmpty) {
+                  bloc.add(NewbornDetailsChanged(field: 'babyName', value: babyName));
+                }
+                if (babyGender != null && babyGender.isNotEmpty) {
+                  bloc.add(NewbornDetailsChanged(field: 'gender', value: babyGender));
+                }
+                if (babyWeight != null && babyWeight.isNotEmpty) {
+                  bloc.add(NewbornDetailsChanged(field: 'weightAtBirth', value: babyWeight));
+                }
+              }
+            }
+          } catch (e) {
+            print('HBNC ChildDetails parse error: $e');
+          }
+        } else {
+          print('HBNC ChildDetails last ANC record for ${widget.beneficiaryId}: ${jsonEncode(r)}');
+        }
+      } else {
+        print('HBNC ChildDetails no ANC record for ${widget.beneficiaryId}');
+      }
+    } catch (e) {
+      print('HBNC ChildDetails load error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
