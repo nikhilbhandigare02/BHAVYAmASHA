@@ -111,9 +111,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     return out;
   }
 
-  // Extract only the year part from an approximate age string, e.g.
-  // "15 years 2 months" -> "15". If no number is found, returns the
-  // original string (or empty if null).
+
   String _extractYearsFromApprox(dynamic approx) {
     if (approx == null) return '';
     final s = approx.toString().trim();
@@ -819,9 +817,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         ),
         SizedBox(height: 2.h),
         Builder(builder: (_) {
-          // Total children expected in this household =
-          //   head's own children count + sum of children counts
-          //   declared on each member form.
+
           final int headChildren = int.tryParse((_headForm?['children'] ?? '').toString()) ?? 0;
 
           int memberChildren = 0;
@@ -835,14 +831,12 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
           final int childrenTarget = headChildren + memberChildren;
 
-          // Children already added as individual rows in the table.
           final int childrenAdded = _members.where((m) {
             final t = (m['Type'] ?? '');
             final r = (m['Relation'] ?? '');
-            return t == 'Child' || t == 'Infant' || r == 'Son' || r == 'Daughter';
+            return t ==  'Child' || t == 'Infant' || t == 'Adult' || r == 'Son' || r == 'Daughter';
           }).length;
 
-          // Remaining children to be added.
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
           if (childrenTarget <= 0) return const SizedBox.shrink();
           return Padding(

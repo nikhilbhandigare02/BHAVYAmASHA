@@ -141,6 +141,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No phone number available')),
         );
+
       }
       return;
     }

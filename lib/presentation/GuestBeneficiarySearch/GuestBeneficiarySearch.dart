@@ -9,6 +9,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/repositories/GuestBeneficiaryRepository.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import '../../core/utils/enums.dart';
+import '../../core/widgets/SnackBar/app_snackbar.dart';
 import '../myBeneficiary/Beneficiaries/GuestBeneficiaries.dart';
 import 'bloc/guest_beneficiary_search_bloc.dart';
 import 'bloc/guest_beneficiary_search_event.dart';
@@ -68,12 +69,9 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
             OutlinedButton(
               onPressed: () {
                 log('Full response data: $data');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Check console for full response data'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+
+                showAppSnackBar(context, 'Check console for full response data'!);
+
               },
               child: const Text('View Raw Data (Check Console)'),
             ),
@@ -98,12 +96,9 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
           listener: (context, state) {
             // Handle error state
             if (state.status == GbsStatus.failure && state.errorMessage != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.errorMessage!),
-                  backgroundColor: Colors.red,
-                ),
-              );
+
+              showAppSnackBar(context, state.errorMessage!);
+
             }
             // Handle success state
             else if (state.status == GbsStatus.success) {

@@ -29,6 +29,7 @@ class _TrainingReceivedState extends State<TrainingReceived> {
     _searchCtrl.addListener(_onSearchChanged);
   }
 
+  bool _isLoading = true;
   Future<void> _loadTrainingData() async {
     try {
       final rows = await LocalStorageDao.instance.fetchTrainingList();
@@ -111,7 +112,28 @@ class _TrainingReceivedState extends State<TrainingReceived> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
+            child: _isLoading
+                ? const Center(
+              child: CircularProgressIndicator(),
+            )
+                : _filtered.isEmpty
+                ? Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child:  Text(
+                  l10n!.noRecordFound,
+                  style:  TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            )
+                : ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               itemCount: _filtered.length,
               itemBuilder: (context, index) {

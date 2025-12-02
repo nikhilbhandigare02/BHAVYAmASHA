@@ -7,6 +7,7 @@ import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/widgets/SnackBar/app_snackbar.dart';
 import '../../../core/widgets/TextField/TextField.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../../../data/Database/User_Info.dart';
@@ -702,14 +703,9 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
   Future<void> _handleMigration() async {
     if (_selectedAdults.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please select at least one member to migrate',
-            style: TextStyle(fontSize: _labelFontSize),
-          ),
-        ),
-      );
+
+      showAppSnackBar(context, 'Please select at least one member to migrate');
+
       return;
     }
 
@@ -749,14 +745,8 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Migration updated: $updated record(s)${notFound > 0 ? ", $notFound name(s) not found" : ''}',
-          style: const TextStyle(fontSize: _labelFontSize),
-        ),
-      ),
-    );
+
+    showAppSnackBar(context, 'Migration updated: $updated record(s)${notFound > 0 ? ", $notFound name(s) not found" : ''}');
 
     await _loadHouseholdMembers();
     if (mounted) {

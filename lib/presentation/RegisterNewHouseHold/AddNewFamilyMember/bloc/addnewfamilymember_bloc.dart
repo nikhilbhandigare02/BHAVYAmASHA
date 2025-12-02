@@ -115,6 +115,10 @@ class AddnewfamilymemberBloc
         // Remember which row is being edited so that we can update it later
         _editingBeneficiaryRowId = beneficiary['id'] as int?;
         _editingBeneficiaryKey = beneficiary['unique_key']?.toString();
+        
+        print('=== Loaded Beneficiary for Editing ===');
+        print('Row ID: $_editingBeneficiaryRowId');
+        print('Unique Key: $_editingBeneficiaryKey');
         final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info'] as String? ?? '{}');
 
         // Create a map to hold all the data
@@ -1678,11 +1682,9 @@ class AddnewfamilymemberBloc
 
         await LocalStorageDao.instance.updateBeneficiary(updatedRow);
 
-        // Check if member is female and pregnant, then check if ANC record exists
-        if (state.gender?.toLowerCase() == 'female' && 
+        if (state.gender?.toLowerCase() == 'female' &&
             (state.isPregnant?.toLowerCase() == 'yes' || state.isPregnant?.toLowerCase() == 'true')) {
           try {
-            // Check if ANC record already exists
             final existingAnc = await LocalStorageDao.instance
                 .getMotherCareActivityByBeneficiary(_editingBeneficiaryKey!);
                 

@@ -542,6 +542,7 @@ class _HouseHold_BeneficiaryScreenState
           arguments: {
             'isBeneficiary': true,
             'isEdit': true,
+            'isMemberDetails': true,  // Add this flag to match AllBeneficiary behavior
             'beneficiaryId': completeBeneficiaryId,
             'hhId': data['hhId']?.toString() ?? '',
             // Use the overall head & spouse information for consistency
@@ -559,12 +560,17 @@ class _HouseHold_BeneficiaryScreenState
           },
         );
 
-        debugPrint(' Navigation to AddFamilyMember:');
+        debugPrint('=== Navigation to AddFamilyMember ===');
         debugPrint('   HHID: ${data['hhId']}');
-        debugPrint('   Complete Beneficiary ID (from unique_key): $completeBeneficiaryId');
-
-        debugPrint('   Head Name: ${data['Name']}');
-        debugPrint('   Spouse Name: ${data['SpouseName']}');
+        debugPrint('   Complete Beneficiary ID: $completeBeneficiaryId');
+        debugPrint('   isEdit: true');
+        debugPrint('   isMemberDetails: true');
+        debugPrint('   Head Name: ${head['Name']}');
+        debugPrint('   Spouse Name: ${spouse['Name']}');
+        debugPrint('   Relation: ${data['Relation']}');
+        debugPrint('   Village: ${_village}');
+        debugPrint('   Tola/Mohalla: ${_mohalla}');
+        debugPrint('===================================');
 
         await _loadBeneficiaries();
         _onSearchChanged();

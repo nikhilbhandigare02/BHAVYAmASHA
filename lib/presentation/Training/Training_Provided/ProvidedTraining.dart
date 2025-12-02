@@ -25,6 +25,7 @@ class _TrainingProvidedState
   List<Map<String, dynamic>> _allData = [];
   List<Map<String, dynamic>> _filtered = [];
 
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -120,11 +121,21 @@ class _TrainingProvidedState
       ),
       body: Column(
         children: [
-          // Search
-
-
           Expanded(
-            child: ListView.builder(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _filtered.isEmpty
+                ? Center(
+              child: Text(
+                l10n!.noRecordFound,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )
+                : ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               itemCount: _filtered.length,
               itemBuilder: (context, index) {
@@ -133,7 +144,6 @@ class _TrainingProvidedState
               },
             ),
           ),
-
         ],
       ),
     );

@@ -1,7 +1,10 @@
 part of 'addnewfamilymember_bloc.dart';
 
+enum AddnewfamilymemberStatus { initial, loading, success, failure }
+
 @immutable
 class AddnewfamilymemberState extends Equatable {
+  final AddnewfamilymemberStatus status;
   final PostApiStatus postApiStatus;
   final String error;
   final String memberType;
@@ -71,6 +74,7 @@ class AddnewfamilymemberState extends Equatable {
 
 
   const AddnewfamilymemberState({
+    this.status = AddnewfamilymemberStatus.initial,
     this.postApiStatus = PostApiStatus.initial,
     this.error = '',
     this.memberType = 'Adult',
@@ -136,6 +140,7 @@ class AddnewfamilymemberState extends Equatable {
   });
 
   AddnewfamilymemberState copyWith({
+    AddnewfamilymemberStatus? status,
     PostApiStatus? postApiStatus,
     String? error,
     String? memberType,
@@ -203,6 +208,7 @@ class AddnewfamilymemberState extends Equatable {
 
   }) {
     return AddnewfamilymemberState(
+      status: status ?? this.status,
       postApiStatus: postApiStatus ?? this.postApiStatus,
       error: error ?? this.error,
       WeightChange: WeightChange ?? this.WeightChange,
@@ -271,6 +277,7 @@ class AddnewfamilymemberState extends Equatable {
 
   @override
   List<Object?> get props => [
+    status,
     postApiStatus,
     error,
     memberType,

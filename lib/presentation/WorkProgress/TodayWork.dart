@@ -17,14 +17,62 @@ class Todaywork extends StatefulWidget {
 }
 
 class _TodayworkState extends State<Todaywork> {
+  int completed = 0;
+  int pending = 0;
+
+
+  int? detectSlice(Offset local) {
+    const size = Size(220, 220);   // your chart radius
+    final center = Offset(size.width / 2, size.height / 2);
+
+    final dx = local.dx - center.dx;
+    final dy = local.dy - center.dy;
+
+    final radius = math.sqrt(dx * dx + dy * dy);
+    final maxRadius = size.width / 2;
+
+    // Outside circle = do nothing
+    if (radius > maxRadius) return null;
+
+    // Use your real values instead of "state"
+    final total = (completed + pending);
+    if (total == 0) return null;
+
+    // Angle of the tap
+    double angle = math.atan2(dy, dx);
+    if (angle < 0) angle += 2 * math.pi;
+
+    // Align with -90° start
+    const start = -math.pi / 2;
+    double rel = (angle - start) % (2 * math.pi);
+    if (rel < 0) rel += 2 * math.pi;
+
+    // Sweep angles
+    final sweepCompleted = (completed / total) * (2 * math.pi);
+
+    // Detect slice
+    if (completed > 0 && rel <= sweepCompleted) {
+      return 0; // completed slice
+    }
+
+    if (pending > 0) {
+      return 1; // pending slice
+    }
+
+    return null;
+  }
+
   // 0 = completed slice, 1 = pending slice, null = none selected
   int? _selectedSlice;
+  int? _selectedSliceFromLegend; // 0 = completed, 1 = pending, null = normal
+  int? _selectedSliceFromPie;    // used ONLY to show tooltips
   Future<void> _loadCountsFromStorage(TodaysWorkBloc bloc) async {
     try {
       final stored = await SecureStorageService.getTodayWorkCounts();
       final toDo = stored['toDo'] ?? 0;
       final completed = stored['completed'] ?? 0;
-
+      // final toDo = 4;
+      // final completed = 3;
       if (!mounted) return;
 
       bloc.add(TwUpdateCounts(toDo: toDo, completed: completed));
@@ -80,9 +128,17 @@ class _TodayworkState extends State<Todaywork> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                _legend(color: Colors.green, label: 'Completed'),
+                                _legend(
+                                  color: Colors.green,
+                                  label: 'Completed',
+                                  sliceIndex: 0,
+                                ),
                                 const SizedBox(width: 16),
-                                _legend(color: AppColors.primary, label: 'Pending'),
+                                _legend(
+                                  color: AppColors.primary,
+                                  label: 'Pending',
+                                  sliceIndex: 1,
+                                ),
                               ],
                             ),
                             const SizedBox(height: 16),
@@ -101,7 +157,7 @@ class _TodayworkState extends State<Todaywork> {
                                           const size = Size(220, 220);
                                           final center = Offset(size.width / 2, size.height / 2);
                                           final local = details.localPosition;
-
+                                          int? tappedSlice = detectSlice(details.localPosition);
                                           final dx = local.dx - center.dx;
                                           final dy = local.dy - center.dy;
                                           final radius = math.sqrt(dx * dx + dy * dy);
@@ -133,9 +189,12 @@ class _TodayworkState extends State<Todaywork> {
                                               }
                                             }
                                           }
-
                                           setState(() {
-                                            // Toggle if tapping same slice, otherwise select new slice
+                                            //   _selectedSliceFromLegend = null;
+
+                                            // These drive the tooltip
+                                            _selectedSliceFromPie = tappedSlice;
+                                            _selectedSlice = tappedSlice;                                            // Toggle if tapping same slice, otherwise select new slice
                                             if (_selectedSlice == newSelected) {
                                               _selectedSlice = null;
                                             } else {
@@ -148,7 +207,7 @@ class _TodayworkState extends State<Todaywork> {
                                           painter: _PiePainter(
                                             completed: state.completed,
                                             pending: state.pending,
-                                            selectedSlice: _selectedSlice,
+                                            legendSelected: _selectedSliceFromLegend,
                                           ),
                                         ),
                                       ),
@@ -158,22 +217,12 @@ class _TodayworkState extends State<Todaywork> {
                                           if (total == 0) {
                                             return const SizedBox.shrink();
                                           }
-
                                           const start = -math.pi / 2;
                                           final full = 2 * math.pi;
                                           final completedSweep = (state.completed / total) * full;
                                           final remainingSweep = full - completedSweep;
-
-                                          double midAngle;
-                                          Color color;
-                                          String label;
-                                          int count;
-
-                                          if (_selectedSlice == 1) {
-                                            midAngle = start + completedSweep + remainingSweep / 2;
-                                            color = AppColors.primary;
-                                            label = 'Pending';
-                                            count = state.pending;
+                                          if (_selectedSlice == 0) {
+                                            final midAngle = start + completedSweep / 2;
 
                                             const radiusLabel = 220 / 4;
                                             final dx = math.cos(midAngle) * radiusLabel;
@@ -182,14 +231,28 @@ class _TodayworkState extends State<Todaywork> {
                                             return Transform.translate(
                                               offset: Offset(dx, dy),
                                               child: _insideLabel(
-                                                color: color,
-                                                label: label,
-                                                count: count,
+                                                color: Colors.green,
+                                                label: 'Completed',
+                                                count: state.completed,
                                               ),
                                             );
-                                          } else {
-                                            return const SizedBox.shrink();
                                           }
+                                          if (_selectedSlice == 1) {
+                                            final midAngle = start + completedSweep + remainingSweep / 2;
+                                            const radiusLabel = 220 / 4;
+                                            final dx = math.cos(midAngle) * radiusLabel;
+                                            final dy = math.sin(midAngle) * radiusLabel;
+
+                                            return Transform.translate(
+                                              offset: Offset(dx, dy),
+                                              child: _insideLabel(
+                                                color: AppColors.primary,
+                                                label: 'Pending',
+                                                count: state.pending,
+                                              ),
+                                            );
+                                          }
+                                          return const SizedBox.shrink();
                                         }),
                                     ],
                                   ),
@@ -229,27 +292,71 @@ class _TodayworkState extends State<Todaywork> {
     );
   }
 
-  Widget _legend({required Color color, required String label}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 24,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            border: Border.all(color: Colors.white, width: 1),
+  Widget _legend({
+    required Color color,
+    required String label,
+    required int sliceIndex, // 0=completed, 1=pending
+  }) {
+    final bool isStriked =
+    (_selectedSliceFromLegend == sliceIndex || _selectedSliceFromLegend == 2);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          // CASE 1 → Tap same legend when ONLY that one is selected → unselect it
+          if (_selectedSliceFromLegend == sliceIndex) {
+            _selectedSliceFromLegend = null;
+          }
+
+          // CASE 2 → Nothing selected → select this one
+          else if (_selectedSliceFromLegend == null) {
+            _selectedSliceFromLegend = sliceIndex;
+          }
+
+          // CASE 3 → One selected, tapping the other → BOTH selected mode
+          else if (_selectedSliceFromLegend != sliceIndex &&
+              _selectedSliceFromLegend != 2) {
+            _selectedSliceFromLegend = 2;  // both selected
+          }
+
+          // ⭐ CASE 4 → BOTH selected, and user taps ANY legend
+          // → Only THAT legend should remain selected
+          else if (_selectedSliceFromLegend == 2) {
+            _selectedSliceFromLegend = sliceIndex;
+          }
+
+          // Clear pie selection (tooltip)
+          _selectedSliceFromPie = null;
+          _selectedSlice = null;
+        });
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 24,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color,
+              border: Border.all(color: Colors.white, width: 1),
+            ),
           ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 15, color: Colors.black),
-        ),
-      ],
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 15,
+              decoration:
+              isStriked ? TextDecoration.lineThrough : TextDecoration.none,
+              decorationThickness: 2,
+            ),
+          ),
+        ],
+      ),
     );
   }
-  
+
   Widget _insideLabel({
     required Color color,
     required String label,
@@ -279,48 +386,60 @@ class _TodayworkState extends State<Todaywork> {
       ],
     );
   }
-
-
 }
 class _PiePainter extends CustomPainter {
   final int completed;
   final int pending;
-  final int? selectedSlice; // 0 = completed, 1 = pending, null = none
+  final int? legendSelected; // NEW
 
   _PiePainter({
     required this.completed,
     required this.pending,
-    required this.selectedSlice,
+    required this.legendSelected,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final total = (completed + pending).clamp(0, 1 << 31);
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    const start = -math.pi / 2;
+    const full = 2 * math.pi;
 
-    final bool highlightPending = selectedSlice == 1;
-    final Color pendingColor = highlightPending
-        ? Color.lerp(AppColors.primary, Colors.blue[900], 0.3) ?? AppColors.primary
-        : AppColors.primary;
-    final bgPaint = Paint()..color = pendingColor;
-    canvas.drawArc(rect, -1.5708, 6.28318, true, bgPaint);
+    if (legendSelected == 0) {
+      canvas.drawArc(rect, start, full, true, Paint()..color = Colors.green);
+      return;
+    }
 
-    // Completed slice overlay
-    if (total > 0 && completed > 0) {
-      final sweep = (completed / total) * 6.28318;
-      final bool highlightCompleted = selectedSlice == 0;
-      final Color completedColor = highlightCompleted
-          ? Colors.green.shade800
-          : Colors.green;
-      final compPaint = Paint()..color = completedColor;
-      canvas.drawArc(rect, -1.5708, sweep, true, compPaint);
+    if (legendSelected == 1) {
+      canvas.drawArc(rect, start, full, true, Paint()..color = AppColors.primary);
+      return;
+    }
+
+    if (legendSelected == 2) {
+      // BOTH selected → white pie
+      canvas.drawArc(rect, start, full, true, Paint()..color = Colors.white);
+      return;
+    }
+
+    // --- 2️⃣ NORMAL PIE MODE ---
+    final total = completed + pending;
+    if (total == 0) return;
+
+    final sweepCompleted = (completed / total) * full;
+
+    final paintPending = Paint()..color = AppColors.primary;
+    final paintCompleted = Paint()..color = Colors.green;
+
+    canvas.drawArc(rect, start, full, true, paintPending);
+
+    if (completed > 0) {
+      canvas.drawArc(rect, start, sweepCompleted, true, paintCompleted);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _PiePainter oldDelegate) {
-    return oldDelegate.completed != completed ||
-        oldDelegate.pending != pending ||
-        oldDelegate.selectedSlice != selectedSlice;
-  }
+  bool shouldRepaint(covariant _PiePainter old) =>
+      old.completed != completed ||
+          old.pending != pending ||
+          old.legendSelected != legendSelected;
 }
+

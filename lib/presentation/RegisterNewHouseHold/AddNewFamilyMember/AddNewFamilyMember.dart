@@ -137,7 +137,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   }
   Future<void> _loadBeneficiaryData(String beneficiaryId) async {
     try {
-      // Load beneficiary data through bloc
+      print('=== Loading Beneficiary Data ===');
+      print('Beneficiary ID: $beneficiaryId');
+      print('isEdit: $_isEdit');
+      print('isMemberDetails: $_isMemberDetails');
+      
       _bloc.add(LoadBeneficiaryData(beneficiaryId));
 
       // Show loading indicator
@@ -238,8 +242,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
       // Handle beneficiary data loading if in edit mode
       final args = ModalRoute.of(context)?.settings.arguments as Map?;
-      if (args != null && args['isBeneficiary'] == true && args['beneficiaryId'] != null) {
-        await _loadBeneficiaryData(args['beneficiaryId']);
+      if (args != null) {
+        print('=== Form Arguments ===');
+        print('isEdit: ${args['isEdit']}');
+        print('isMemberDetails: ${args['isMemberDetails']}');
+        print('beneficiaryId: ${args['beneficiaryId']}');
+        print('hhId: ${args['hhId']}');
+        
+        setState(() {
+          _isEdit = args['isEdit'] == true;
+          _isMemberDetails = args['isMemberDetails'] == true;
+        });
+        
+        if (args['isBeneficiary'] == true && args['beneficiaryId'] != null) {
+          await _loadBeneficiaryData(args['beneficiaryId']);
+        }
       }
 
       if (_fatherOption != 'Other') {
@@ -1229,7 +1246,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       ? const ['Father', 'Mother', 'Brother', 'Sister','Grand Father','Grand Mother', 'Other']
                                       : const [
                                     'Self',
-                                   
+
                                     'Husband',
                                     'Son',
                                     'Daughter',
@@ -3211,8 +3228,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                                           // Handle based on the flow
                                           if (_isMemberDetails) {
-                                            // In member details flow, save immediately on Add button
                                             if (_isEdit) {
+                                              print('=== Form Submission (Edit Mode) ===');
+                                              print('HHID: ${widget.hhId}');
+                                              print('isMemberDetails: $_isMemberDetails');
+
+                                              // Show loading
+                                              setState(() => _isLoading = true);
+
+
+
+                                              // Trigger the update
                                               bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
                                             } else {
                                               bloc.add(AnmSubmit(context, hhid: widget.hhId, extraData: memberData));
