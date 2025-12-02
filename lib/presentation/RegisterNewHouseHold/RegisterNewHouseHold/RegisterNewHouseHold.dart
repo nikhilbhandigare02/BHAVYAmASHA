@@ -834,7 +834,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           final int childrenAdded = _members.where((m) {
             final t = (m['Type'] ?? '');
             final r = (m['Relation'] ?? '');
-            return t ==  'Child' || t == 'Infant' || t == 'Adult' || r == 'Son' || r == 'Daughter';
+            return t ==  'Child' || t == 'Infant' || r == 'Son' || r == 'Daughter';
           }).length;
 
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);

@@ -75,14 +75,12 @@ class RegisterNewHouseholdBloc
       int newUnmarriedCount = current.unmarriedMemberCount;
       int newRemainingChildrenCount = current.remainingChildrenCount;
       
-      // Check if this is a child being added
-      final isChild = data['Relation']?.toLowerCase() == 'son' || 
+      final isChild = data['Relation']?.toLowerCase() == 'son' ||
                      data['Relation']?.toLowerCase() == 'daughter' ||
                      data['Type']?.toLowerCase() == 'child' ||
-                     data['Type']?.toLowerCase() == 'infant';
-      
+                     data['Type']?.toLowerCase() == 'Adult';
+
       if (isChild) {
-        // Decrease remaining children count if there are any remaining
         if (newRemainingChildrenCount > 0) {
           newRemainingChildrenCount--;
         }

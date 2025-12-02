@@ -1553,7 +1553,6 @@ class LocalStorageDao {
           final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
           if (infoMap == null) continue;
 
-          // Check if this is the head by relation
           final relation = infoMap['relation']?.toString().toLowerCase();
           if (relation == 'self' || relation == 'head') {
             final mobile = infoMap['mobileNo']?.toString();

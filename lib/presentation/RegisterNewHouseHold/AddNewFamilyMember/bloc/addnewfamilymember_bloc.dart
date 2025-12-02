@@ -16,12 +16,14 @@ import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/repositories/AddBeneficiary/AddBeneficiaryRepository.dart';
 import '../../AddFamilyHead/Children_Details/bloc/children_bloc.dart' show ChildrenBloc;
 import '../../AddFamilyHead/SpousDetails/bloc/spous_bloc.dart';
+import '../../RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
 
 part 'addnewfamilymember_event.dart';
 part 'addnewfamilymember_state.dart';
 
 class AddnewfamilymemberBloc
     extends Bloc<AddnewfamilymemberEvent, AddnewfamilymemberState> {
+  final RegisterNewHouseholdBloc? householdBloc;
   final LocalStorageDao _localStorageDao = LocalStorageDao();
 
   int _daysInMonth(int year, int month) {
@@ -336,7 +338,7 @@ class AddnewfamilymemberBloc
     }
   }
 
-  AddnewfamilymemberBloc() : super(const AddnewfamilymemberState()) {
+  AddnewfamilymemberBloc({this.householdBloc}) : super(const AddnewfamilymemberState()) {
     on<LoadBeneficiaryData>(_onLoadBeneficiaryData);
     on<AddnewfamilymemberEvent>((event, emit) {
       // TODO: implement event handler
