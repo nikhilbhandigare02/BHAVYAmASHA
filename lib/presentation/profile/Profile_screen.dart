@@ -1,6 +1,7 @@
   import 'dart:convert';
   import 'package:flutter/cupertino.dart';
   import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
   import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
   import 'package:medixcel_new/core/config/themes/CustomColors.dart';
@@ -47,6 +48,8 @@
       Country(id: 1, name: 'Rural'),
       Country(id: 2, name: 'Urban'),
     ];
+    int? appRoleId;
+
     Country? selectedCountry;
     String _userFullName = '';
     Map<String, dynamic> details = {};
@@ -112,6 +115,7 @@
     Future<void> _loadUserData() async {
       try {
 
+        print('\n=== COMPLETE USERS TABLE ===');
         await UserInfo.printUserData();
         print('=== END USERS TABLE ===\n');
 
@@ -120,15 +124,12 @@
         if (userData == null || userData.isEmpty) {
           return;
         }
-
         if (!mounted) {
           return;
         }
 
         if (!mounted) return;
         final bloc = context.read<ProfileBloc>();
-
-        final username = userData['user_name']?.toString() ?? '';
 
         // Safely parse details
         try {
@@ -141,7 +142,15 @@
         }
 
         Map<String, dynamic> actualUserData = details;
+        final appRoleId = actualUserData['app_role_id'] ?? '';
+        print("APP ROLE ID: $appRoleId");
 
+        if (appRoleId != null) {
+          final roleId = int.tryParse(appRoleId.toString());
+          if (roleId != null) {
+            _profileBloc.add(RoleIdChanged(roleId));
+          }
+        }
         final name = actualUserData['name'] is Map ? Map<String, dynamic>.from(actualUserData['name']) : <String, dynamic>{};
         final workingLocation = actualUserData['working_location'] is Map
             ? Map<String, dynamic>.from(actualUserData['working_location'])
@@ -150,15 +159,15 @@
             ? Map<String, dynamic>.from(actualUserData['contact_info'])
             : <String, dynamic>{};
 
-        final areaOfWorking = _toCamelCase(actualUserData['area_of_working']?.toString().trim() ?? '');
+        final areaOfWorking = actualUserData['area_of_working']?.toString().toLowerCase().trim() ?? '';
 
         if (mounted) {
           setState(() {
             if (areaOfWorking.isNotEmpty) {
               try {
                 selectedCountry = countries.firstWhere(
-                  (c) => c.name.toLowerCase() == areaOfWorking,
-                  orElse: () => countries.first
+                        (c) => c.name.toLowerCase() == areaOfWorking,
+                    orElse: () => countries.first
                 );
               } catch (e) {
                 selectedCountry = countries.isNotEmpty ? countries.first : null;
@@ -175,7 +184,7 @@
         try {
 
           final ashaId = workingLocation['asha_id']?.toString() ?? '';
-           final firstName = name['first_name']?.toString().trim() ?? '';
+          final firstName = name['first_name']?.toString().trim() ?? '';
           final middleName = name['middle_name']?.toString().trim() ?? '';
           final lastName = name['last_name']?.toString().trim() ?? '';
 
@@ -183,6 +192,7 @@
               .where((part) => part.isNotEmpty)
               .join(' ');
 
+          // Update the BLoC state with the full name
           bloc.add(AshaNameChanged(fullName));
 
           final fatherSpouse = actualUserData['father_or_spouse_name']?.toString() ?? '';
@@ -192,14 +202,16 @@
           final altMobileNumber = contactInfo['alternate_mobile_number']?.toString() ?? '';
 
 
-          final state = _toCamelCase(workingLocation['state']?.toString().trim() ?? '');
-          final division = _toCamelCase(workingLocation['division']?.toString().trim() ?? '');
-          final district = _toCamelCase(workingLocation['district']?.toString().trim() ?? '');
-          final block = _toCamelCase(workingLocation['block']?.toString().trim() ?? '');
-          final panchayat = _toCamelCase(workingLocation['panchayat']?.toString().trim() ?? '');
-          final village = _toCamelCase(workingLocation['village']?.toString().trim() ?? '');
-          final tola = _toCamelCase(workingLocation['tola']?.toString().trim() ?? '');
+          final state = workingLocation['state']?.toString() ?? '';
+          final division = workingLocation['division']?.toString() ?? '';
+          final district = workingLocation['district']?.toString() ?? '';
+          final block = workingLocation['block']?.toString() ?? '';
+          final panchayat = workingLocation['panchayat']?.toString() ?? '';
+          final village = workingLocation['village']?.toString() ?? '';
+          final tola = workingLocation['tola']?.toString() ?? '';
 
+
+          // HSC Information
           final hscName = workingLocation['hsc_name']?.toString() ?? '';
           final hscHfrId = workingLocation['hsc_hfr_id']?.toString() ?? '';
 
@@ -246,7 +258,7 @@
           // Update form fields using individual events
           if (mounted) {
             // Update basic information
-            _profileBloc.add(AshaIdChanged(username));
+            _profileBloc.add(AshaIdChanged(ashaId));
             _profileBloc.add(AshaNameChanged(fullName));
             _profileBloc.add(FatherSpouseChanged(fatherSpouse));
             _profileBloc.add(MobileChanged(mobileNumber));
@@ -263,6 +275,7 @@
 
             // Update other fields
             _profileBloc.add(HscNameChanged(hscName));
+            _profileBloc.add(HwcNameChanged(hscHfrId));
             _profileBloc.add(AccountNumberChanged(accountNumber));
             _profileBloc.add(IfscChanged(ifscCode));
             _profileBloc.add(PopulationCoveredChanged(populationCovered));
@@ -317,17 +330,16 @@
             );
           }
         }
-       } catch (e) {
-         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-                 content: Text('Failed to load profile data: ${e.toString()}')),
-           );
-         }
-       }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Failed to load profile data: ${e.toString()}')),
+          );
+        }
+      }
 
     }
-
     @override
     Widget build(BuildContext context) {
       final l10n = AppLocalizations.of(context)!;
@@ -461,7 +473,7 @@
                           final ageText = dob != null ? _calculateAge(dob) : '';
                           return CustomTextField(
                             labelText: l10n.ageLabel,
-                            hintText: _toTitleCase(ageText),
+                            hintText: l10n.ageLabel,
                             readOnly: true,
                           );
                         },
@@ -1001,14 +1013,60 @@
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5),
+                      BlocBuilder<ProfileBloc, ProfileState>(
+                        builder: (context, state) {
+                          print("APP ROLE ID VALUE → ${state.appRoleId}");
+                          final roleId = state.appRoleId?.toString();
 
+                          if (int.tryParse(roleId ?? "") != 4) {
+                            return const SizedBox.shrink();
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    "No. of ASHA under the facilitator",
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600
+                                    ),
+                                  ),
+                                ),
+
+                                // Square count box
+                                Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: AppColors.divider),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "12",
+                                    style:  TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                       const SizedBox(height: 24),
                       RoundButton(
                         title: l10n.updateButton,
-                        height: 48,
+                        height: 34,
                         onPress: () => bloc.add(const SubmitProfile()),
                         isLoading: state.submitting,
                         color: AppColors.primary,
+                        borderRadius: 4,
                       ),
                     ],
                   ),

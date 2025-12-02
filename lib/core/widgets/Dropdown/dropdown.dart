@@ -22,11 +22,13 @@ class ApiDropdown<T> extends StatelessWidget {
   final double? labelFontSize;
 
   String _toTitleCase(String text) {
-    if (text.isEmpty) return text;
+    return text;
+    /*if (text.isEmpty) return text;
     return text.split(' ').map((word) {
       if (word.isEmpty) return '';
       return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
-    }).join(' ');
+
+    }).join(' ');*/
   }
 
   const ApiDropdown({

@@ -1229,7 +1229,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                       ? const ['Father', 'Mother', 'Brother', 'Sister','Grand Father','Grand Mother', 'Other']
                                       : const [
                                     'Self',
-                                    'Spouse',
+                                   
                                     'Husband',
                                     'Son',
                                     'Daughter',
@@ -1254,8 +1254,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                     switch (s) {
                                       case 'Self':
                                         return l.self;
-                                      case 'Spouse':
-                                        return l.relationSpouse;
+
                                       case 'Husband':
                                         return l.husbandLabel;
                                       case 'Wife':
@@ -1319,16 +1318,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                                 ),
                               ),
-                              if (state.relation == 'Other')
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+                              if (state.relation == 'Other') ... [
                                 _section(
                                   CustomTextField(
-                                    labelText: 'Enter relation with family head*',
+                                    labelText: 'Enter relation with family head',
                                     hintText: 'Enter relation with family head',
                                     initialValue: state.otherRelation ?? '',
                                     onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateOtherRelation(v.trim())),
                                   ),
                                 ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              ],
+
                               if (state.relation == 'Other')
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -2599,14 +2602,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                 _section(
                                   ApiDropdown<String>(
                                     labelText: '${l.maritalStatusLabel} *',
-                                    items: const ['Married', 'Unmarried', 'Widowed','Widower', 'Separated', 'Divorced'],
+                                    items: const ['Married', 'Unmarried', 'Widow','Widower', 'Separated', 'Divorced'],
                                     getLabel: (s) {
                                       switch (s) {
                                         case 'Married':
                                           return l.married;
                                         case 'Unmarried':
                                           return l.unmarried;
-                                        case 'Widowed':
+                                        case 'Widow':
                                           return l.widowed;
                                         case 'Widower':
                                           return 'Widower';

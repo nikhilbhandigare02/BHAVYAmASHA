@@ -709,40 +709,105 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
+                            // Religion Dropdown with Other Option
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: ApiDropdown<String>(
-                                labelText: l10n?.religionLabel ?? 'Religion',
-                                items: [
-                                  l10n?.religionHindu ?? 'Hindu',
-                                  l10n?.religionMuslim ?? 'Muslim',
-                                  l10n?.religionChristian ?? 'Christian',
-                                  l10n?.religionSikh ?? 'Sikh',
-                                  l10n?.other ?? 'Other',
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ApiDropdown<String>(
+                                    labelText: l10n?.religionLabel ?? 'Religion',
+                                    items: [
+                                      l10n?.religionHindu ?? 'Hindu',
+                                      l10n?.religionMuslim ?? 'Muslim',
+                                      l10n?.religionChristian ?? 'Christian',
+                                      l10n?.religionSikh ?? 'Sikh',
+                                      'Buddism',
+                                      'Jainism',
+                                      'Parsi',
+                                      'Do not want to disclose',
+                                      l10n?.other ?? 'Other',
+                                    ],
+                                    value: state.religion.isEmpty ? null : state.religion,
+                                    getLabel: (s) => s,
+                                    onChanged: (v) {
+                                      bloc.add(ReligionChanged(v ?? ''));
+                                      // Clear custom religion when changing from 'Other' to something else
+                                      if (v != 'Other') {
+                                        bloc.add(CustomReligionChanged(''));
+                                      }
+                                    },
+                                    hintText: l10n?.choose ?? 'choose',
+                                  ),
+                                  if (state.religion == 'Other')
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: CustomTextField(
+                                        labelText: 'Specify Religion',
+                                        hintText: 'Enter your religion',
+                                        initialValue: state.customReligion,
+                                        onChanged: (v) => bloc.add(CustomReligionChanged(v)),
+                                        validator: (value) {
+                                          if (state.religion == 'Other' && (value == null || value.trim().isEmpty)) {
+                                            return 'Please specify your religion';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
                                 ],
-                                value: state.religion.isEmpty ? null : state.religion,
-                                getLabel: (s) => s,
-                                onChanged: (v) => bloc.add(ReligionChanged(v ?? '')),
-                                hintText: l10n?.choose ?? 'choose',
                               ),
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
+                            // Caste Dropdown with Other Option
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: ApiDropdown<String>(
-                                labelText: l10n?.casteLabel ?? 'Caste',
-                                items: [
-                                  l10n?.casteGeneral ?? 'General',
-                                  l10n?.casteObc ?? 'OBC',
-                                  l10n?.casteSc ?? 'SC',
-                                  l10n?.casteSt ?? 'ST',
-                                  l10n?.other ?? 'Pichda varg',
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ApiDropdown<String>(
+                                    labelText: 'Category',
+                                    items: [
+                                      'Do not want to disclose',
+                                      'General',
+                                      'OBC',
+                                      'SC',
+                                      'ST',
+                                      'Pichda Varg 1',
+                                      'Pichda Varg 2',
+                                      'Atyant Pichda Varg',
+                                      "Don't Know",
+                                      "Other",
+                                    ],
+                                    value: state.caste.isEmpty ? null : state.caste,
+                                    getLabel: (s) => s,
+                                    onChanged: (v) {
+                                      bloc.add(CasteChanged(v ?? ''));
+                                      // Clear custom caste when changing from 'Other' to something else
+                                      if (v != 'Other') {
+                                        bloc.add(CustomCasteChanged(''));
+                                      }
+                                    },
+                                    hintText: l10n?.choose ?? 'choose',
+                                  ),
+                                  if (state.caste == 'Other')
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: CustomTextField(
+                                        labelText: 'Specify Category',
+                                        hintText: 'Enter your category',
+                                        initialValue: state.customCaste,
+                                        onChanged: (v) => bloc.add(CustomCasteChanged(v)),
+                                        validator: (value) {
+                                          if (state.caste == 'Other' && (value == null || value.trim().isEmpty)) {
+                                            return 'Please specify your category';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
                                 ],
-                                value: state.caste.isEmpty ? null : state.caste,
-                                getLabel: (s) => s,
-                                onChanged: (v) => bloc.add(CasteChanged(v ?? '')),
-                                hintText: l10n?.choose ?? 'choose',
                               ),
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),

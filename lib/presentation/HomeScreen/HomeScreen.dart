@@ -11,6 +11,7 @@ import 'package:sizer/sizer.dart';
 import '../../core/widgets/AppDrawer/Drawer.dart';
 import '../../core/widgets/AppHeader/AppHeader.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
+import '../../data/Database/User_Info.dart';
 import '../../data/Database/local_storage_dao.dart';
 import '../../data/Database/database_provider.dart';
 import '../../data/Database/tables/followup_form_data_table.dart' as ffd;
@@ -54,6 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
     "Routine Immunization (RI)": [],
   };
 
+  int? appRoleId;
+
   bool isLoading = true;
   int householdCount = 0;
   int beneficiariesCount = 0;
@@ -67,10 +70,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final ChildCareCountProvider _childCareCountProvider = ChildCareCountProvider();
   Timer? _uiRefreshTimer;
+  Future<void> _loadUserRoleAndData() async {
+    try {
+      final userData = await UserInfo.getCurrentUser();
+      if (userData == null || userData.isEmpty) {
+        setState(() => appRoleId = 0);
+        return;
+      }
 
+      dynamic details = userData['details'];
+      if (details is String) {
+        details = jsonDecode(details);
+      }
+
+      final roleId = details['app_role_id'];
+      final parsedRoleId = int.tryParse(roleId.toString()) ?? 0;
+
+      print("FETCHED APP ROLE ID: $parsedRoleId"); // You will see this in logs
+
+      if (mounted) {
+        setState(() {
+          appRoleId = parsedRoleId;
+        });
+      }
+    } catch (e) {
+      print("Error loading app_role_id: $e");
+      if (mounted) setState(() => appRoleId = 0);
+    }
+  }
   @override
   void initState() {
     super.initState();
+    _loadUserRoleAndData();
+
     selectedIndex = widget.initialTabIndex;
     fetchApiData();
     _loadHouseholdCount();
@@ -140,6 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
   }
+
 
   @override
   void dispose() {
@@ -920,6 +953,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     selectedGridIndex: selectedGridIndex,
                     onGridTap: (index) =>
                         setState(() => selectedGridIndex = index),
+                    appRoleId: appRoleId ?? 0,
                     mainGridActions: [
                       null, 
                       null,

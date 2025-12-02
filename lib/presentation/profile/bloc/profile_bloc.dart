@@ -35,7 +35,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       logStateChanges(state, newState);
       emit(newState);
     });
-    
+    on<RoleIdChanged>((event, emit) {
+      emit(state.copyWith(appRoleId: event.value));
+    });
     on<DistrictChanged>((event, emit) {
       final newState = state.copyWith(district: event.value);
       logStateChanges(state, newState);

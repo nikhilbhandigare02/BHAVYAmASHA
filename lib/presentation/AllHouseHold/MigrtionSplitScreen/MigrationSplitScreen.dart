@@ -7,6 +7,7 @@ import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/widgets/TextField/TextField.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../../../data/Database/User_Info.dart';
 import '../../../core/utils/geolocation_utils.dart';
@@ -50,14 +51,14 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   Set<String> _disabledAdultNames = <String>{};
 
   // Design Constants
-  static const double _labelFontSize = 14.0;
-  static const double _inputFontSize = 14.0;
+  static const double _labelFontSize = 9.5;
+  static const double _inputFontSize = 12.0;
   static const double _buttonFontSize = 12.0;
   static const double _radioFontSize = 13.0;
-  static const double _verticalSpacing = 16.0;
+  static const double _verticalSpacing = 7.0;
   static const double _smallVerticalSpacing = 6.0;
   static const double _horizontalPadding = 12.0;
-  static const double _verticalPadding = 16.0;
+  static const double _verticalPadding = 12.0;
   static const double _borderRadius = 4.0;
   static const double _buttonHeight = 40.0;
   static const double _buttonWidth = 105.0;
@@ -166,27 +167,30 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
 
   Widget _buildLabel(String text, {bool isRequired = false}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: _labelFontSize,
-            fontWeight: FontWeight.normal,
-            color: Colors.black87,
-          ),
-        ),
-        if (isRequired)
-          const Text(
-            ' *',
-            style: TextStyle(
-              color: Colors.red,
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: const TextStyle(
               fontSize: _labelFontSize,
-              fontWeight: FontWeight.normal,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
-      ],
+          if (isRequired)
+            const Text(
+              ' *',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: _labelFontSize,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -196,7 +200,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       child: Container(
 
         padding: const EdgeInsets.symmetric(
-          horizontal: _horizontalPadding,
+          horizontal: 8,
           //vertical: _verticalPadding,
         ),
         decoration: BoxDecoration(
@@ -256,78 +260,78 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-              // Migration/Split Toggle
-              Row(
-                children: [
-                  Expanded(
-                    child: RadioListTile<MigrationSplitOption>(
-                      title: const Text(
-                        'Migration',
-                        style: TextStyle(fontSize: _radioFontSize),
+                // Migration/Split Toggle
+                Row(
+                  children: [
+                    Expanded(
+                      child: RadioListTile<MigrationSplitOption>(
+                        title: const Text(
+                          'Migration',
+                          style: TextStyle(fontSize: _radioFontSize),
+                        ),
+                        value: MigrationSplitOption.migration,
+                        groupValue: _selectedOption,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedOption = value;
+                            _resetForm();
+                          });
+                        },
                       ),
-                      value: MigrationSplitOption.migration,
-                      groupValue: _selectedOption,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedOption = value;
-                          _resetForm();
-                        });
-                      },
                     ),
-                  ),
-                  Expanded(
-                    child: RadioListTile<MigrationSplitOption>(
-                      title: const Text(
-                        'Split',
-                        style: TextStyle(fontSize: _radioFontSize),
+                    Expanded(
+                      child: RadioListTile<MigrationSplitOption>(
+                        title: const Text(
+                          'Split',
+                          style: TextStyle(fontSize: _radioFontSize),
+                        ),
+                        value: MigrationSplitOption.split,
+                        groupValue: _selectedOption,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedOption = value;
+                            _resetForm();
+                          });
+                        },
                       ),
-                      value: MigrationSplitOption.split,
-                      groupValue: _selectedOption,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedOption = value;
-                          _resetForm();
-                        });
-                      },
                     ),
-                  ),
+                  ],
+                ),
+
+                if (widget.hhid != null && widget.hhid!.isNotEmpty) ...[
+                  const SizedBox(height: _smallVerticalSpacing),
+                  if (_isLoadingMembers)
+                    Row(
+                      children: const [
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Loading members...',
+                          style: TextStyle(fontSize: _labelFontSize),
+                        ),
+                      ],
+                    )
+                  else if (_loadError != null)
+                    const Text(
+                      'Failed to load members',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: _labelFontSize,
+                      ),
+                    ),
                 ],
-              ),
 
-              if (widget.hhid != null && widget.hhid!.isNotEmpty) ...[
-                const SizedBox(height: _smallVerticalSpacing),
-                if (_isLoadingMembers)
-                  Row(
-                    children: const [
-                      SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Loading members...',
-                        style: TextStyle(fontSize: _labelFontSize),
-                      ),
-                    ],
-                  )
-                else if (_loadError != null)
-                  const Text(
-                    'Failed to load members',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: _labelFontSize,
-                    ),
-                  ),
-              ],
+                if (_selectedOption == MigrationSplitOption.migration)
+                  ..._buildMigrationForm(),
 
-              if (_selectedOption == MigrationSplitOption.migration)
-                ..._buildMigrationForm(),
+                if (_selectedOption == MigrationSplitOption.split)
+                  ..._buildSplitForm(),
 
-              if (_selectedOption == MigrationSplitOption.split)
-                ..._buildSplitForm(),
-
-              const SizedBox(height: _verticalSpacing),
+                const SizedBox(height: _verticalSpacing),
               ],
             ),
           ),
@@ -426,33 +430,32 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       const SizedBox(height: _verticalSpacing),
 
       _buildLabel('Select Member', isRequired: true),
-
+      // SizedBox(height: 12),
       _buildDropdownContainer(
-        ' ',
+        '',
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Text(
-                _selectedMemberLabel,
-                style: TextStyle(
-                  fontSize: _inputFontSize,
-                  color: _isMemberTypeSelected ? Colors.black : Colors.grey[600],
-                ),
-                overflow: TextOverflow.ellipsis,
+            Text(
+              _selectedMemberLabel,
+              style: TextStyle(
+                fontSize: _inputFontSize,
+                color: _isMemberTypeSelected ? Colors.black : Colors.grey[800],
               ),
+              overflow: TextOverflow.ellipsis,
             ),
-            Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
+
+            Icon(Icons.arrow_drop_down, color: Colors.grey[500]),
           ],
         ),
       ),
+      SizedBox(height: 4),
       const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-      const SizedBox(height: _verticalSpacing),
-
+      SizedBox(height: 4),
       if (_isMemberTypeSelected) ...[
-        _buildLabel('Select Child'),
+        // _buildLabel('Select Child'),
 
         ApiDropdown<String>(
+          labelText: 'Select Child',
           items: _childNames,
           getLabel: (item) => item,
           value: _selectedChild,
@@ -475,19 +478,19 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           child: ElevatedButton(
             onPressed: _isMemberTypeSelected && !_isMigrating
                 ? () async {
-                    final confirm = await _showConfirmDialog();
-                    if (confirm) {
-                      setState(() {
-                        _isMigrating = true;
-                      });
-                      await _handleMigration();
-                      if (mounted) {
-                        setState(() {
-                          _isMigrating = false;
-                        });
-                      }
-                    }
-                  }
+              final confirm = await _showConfirmDialog();
+              if (confirm) {
+                setState(() {
+                  _isMigrating = true;
+                });
+                await _handleMigration();
+                if (mounted) {
+                  setState(() {
+                    _isMigrating = false;
+                  });
+                }
+              }
+            }
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
@@ -497,21 +500,21 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
             ),
             child: _isMigrating
                 ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
                 : const Text(
-                    'MIGRATE',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: _buttonFontSize,
-                    ),
-                  ),
+              'MIGRATE',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: _buttonFontSize,
+              ),
+            ),
           ),
         ),
       ),
@@ -523,75 +526,77 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       const SizedBox(height: _verticalSpacing),
 
       // Member Type Dropdown
-      _buildLabel('Select Member Type', isRequired: true),
-      const SizedBox(height: _smallVerticalSpacing),
+      Padding(
+        padding: const EdgeInsets.only(left: 0),
+        child: _buildLabel('Select Member Type', isRequired: true),
+      ),
+      // SizedBox(height: 12),
       GestureDetector(
         onTap: () => _showMemberTypeDialog(),
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: _horizontalPadding,
-          ),
           decoration: const BoxDecoration(
             color: Colors.white,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
+              Padding(
+                padding: const EdgeInsets.only(left: 4.0),
                 child: Text(
                   _selectedMemberLabel,
                   style: TextStyle(
                     fontSize: _inputFontSize,
-                    color: _isMemberTypeSelected ? Colors.black : Colors.grey[600],
+                    color: _isMemberTypeSelected ? Colors.black : Colors.grey[800],
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
+              Icon(Icons.arrow_drop_down, color: Colors.grey[800]),
             ],
           ),
         ),
       ),
+      SizedBox(height: 4),
       const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
       const SizedBox(height: _verticalSpacing),
 
       if (_isMemberTypeSelected) ...[
         // Select Child (Optional)
         _buildLabel('Select Child (Optional)'),
-        const SizedBox(height: _smallVerticalSpacing),
+        // const SizedBox(height: 12),
         GestureDetector(
           onTap: () => _showChildSelectionDialog(),
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: _horizontalPadding,
-            ),
+
             decoration: const BoxDecoration(
               color: Colors.white,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
                   child: Text(
                     _selectedChildLabel,
                     style: TextStyle(
                       fontSize: _inputFontSize,
-                      color: _selectedChildren.isNotEmpty ? Colors.black : Colors.grey[600],
+                      color: _selectedChildren.isNotEmpty ? Colors.black : Colors.grey[800],
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
+                Icon(Icons.arrow_drop_down, color: Colors.grey[500]),
               ],
             ),
           ),
         ),
+        SizedBox(height: 4),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-        const SizedBox(height: _verticalSpacing),
 
-        _buildLabel('Select New Family Head', isRequired: true),
-        const SizedBox(height: _smallVerticalSpacing),
+        // _buildLabel('', isRequired: true),
+        const SizedBox(height: _verticalSpacing),
         ApiDropdown<String>(
+          labelText: 'Select New Family Head',
           items: _selectedAdults,
           getLabel: (item) => item,
           value: _selectedFamilyHead,
@@ -603,26 +608,25 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           hintText: 'Select new family head',
         ),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-        const SizedBox(height: _verticalSpacing),
 
-        // House No TextField
-        _buildLabel('House No', isRequired: true),
-        const SizedBox(height: _smallVerticalSpacing),
-        TextField(
+        // _buildLabel('House No', isRequired: true),
+        // TextField(
+        //   controller: _houseNoController,
+        //   style: const TextStyle(fontSize: _inputFontSize),
+        //   decoration: InputDecoration(
+        //     hintText: 'Enter house number',
+        //     hintStyle: TextStyle(
+        //       color: Colors.grey[600],
+        //       fontSize: _inputFontSize,
+        //     ),
+        //     border: InputBorder.none,
+        //   ),
+        // ),
+        CustomTextField(
+          labelText: 'Enter house number',
+          hintText: 'Enter house number',
           controller: _houseNoController,
-          style: const TextStyle(fontSize: _inputFontSize),
-          decoration: InputDecoration(
-            hintText: 'Enter house number',
-            hintStyle: TextStyle(
-              color: Colors.grey[600],
-              fontSize: _inputFontSize,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: _horizontalPadding,
-              vertical: _verticalPadding,
-            ),
-            border: InputBorder.none,
-          ),
+
         ),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: _verticalSpacing),
@@ -639,19 +643,19 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                 _selectedFamilyHead != null &&
                 _houseNoController.text.trim().isNotEmpty
                 ? () async {
-                    final confirm = await _showConfirmDialog();
-                    if (confirm) {
-                      setState(() {
-                        _isSplitting = true;
-                      });
-                      await _handleSplit();
-                      if (mounted) {
-                        setState(() {
-                          _isSplitting = false;
-                        });
-                      }
-                    }
-                  }
+              final confirm = await _showConfirmDialog();
+              if (confirm) {
+                setState(() {
+                  _isSplitting = true;
+                });
+                await _handleSplit();
+                if (mounted) {
+                  setState(() {
+                    _isSplitting = false;
+                  });
+                }
+              }
+            }
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
@@ -661,35 +665,35 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
             ),
             child: _isSplitting
                 ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'SPLIT',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: _buttonFontSize,
-                        ),
-                      ),
-                    ],
-                  )
-                : const Text(
-                    'SPLIT',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: _buttonFontSize,
-                    ),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'SPLIT',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: _buttonFontSize,
+                  ),
+                ),
+              ],
+            )
+                : const Text(
+              'SPLIT',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: _buttonFontSize,
+              ),
+            ),
           ),
         ),
       ),
@@ -717,32 +721,32 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
     int updated = 0;
     int notFound = 0;
 
-      for (final targetName in targets.toSet()) {
-        final matches = _householdMembers.where((r) {
-          final info = _tryDecodeInfo(r['beneficiary_info']);
-          final nm = (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString();
-          return nm.trim() == targetName;
-        }).toList();
+    for (final targetName in targets.toSet()) {
+      final matches = _householdMembers.where((r) {
+        final info = _tryDecodeInfo(r['beneficiary_info']);
+        final nm = (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString();
+        return nm.trim() == targetName;
+      }).toList();
 
-        if (matches.isEmpty) {
-          notFound++;
-          continue;
-        }
+      if (matches.isEmpty) {
+        notFound++;
+        continue;
+      }
 
-        for (final row in matches) {
-          final uniqueKey = row['unique_key']?.toString();
-          if (uniqueKey == null || uniqueKey.isEmpty) continue;
-          try {
-            final changes = await LocalStorageDao.instance.setBeneficiaryMigratedByUniqueKey(
-              uniqueKey: uniqueKey,
-              isMigrated: 1,
-            );
-            if (changes > 0) updated += changes;
-          } catch (e) {
-            print('MigrationSplitScreen: Failed to set is_migrated for $uniqueKey -> $e');
-          }
+      for (final row in matches) {
+        final uniqueKey = row['unique_key']?.toString();
+        if (uniqueKey == null || uniqueKey.isEmpty) continue;
+        try {
+          final changes = await LocalStorageDao.instance.setBeneficiaryMigratedByUniqueKey(
+            uniqueKey: uniqueKey,
+            isMigrated: 1,
+          );
+          if (changes > 0) updated += changes;
+        } catch (e) {
+          print('MigrationSplitScreen: Failed to set is_migrated for $uniqueKey -> $e');
         }
       }
+    }
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -777,137 +781,137 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
     }
 
     try {
-        final headName = _selectedFamilyHead!.trim();
-        final headUniqueKey = _adultNameToId[headName] ?? '';
-        if (headUniqueKey.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Selected head not found',
-                style: TextStyle(fontSize: _labelFontSize),
-              ),
-            ),
-          );
-          return;
-        }
-
-        final headRow = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(headUniqueKey);
-        if (headRow == null || headRow.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Head record not found',
-                style: TextStyle(fontSize: _labelFontSize),
-              ),
-            ),
-          );
-          return;
-        }
-
-        final infoRaw = headRow['beneficiary_info'];
-        final Map<String, dynamic> headInfo = _tryDecodeInfo(infoRaw);
-        headInfo['houseNo'] = _houseNoController.text.trim();
-
-        final deviceInfo = await DeviceInfo.getDeviceInfo();
-        final geoLocation = await GeoLocation.getCurrentLocation();
-        final locationData = Map<String, String>.from(geoLocation.toJson());
-        locationData['source'] = 'gps';
-        if (!geoLocation.hasCoordinates) {
-          locationData['status'] = 'unavailable';
-          locationData['reason'] = 'Could not determine location';
-        }
-        final geoLocationJson = jsonEncode(locationData);
-
-        final currentUser = await UserInfo.getCurrentUser();
-        final userDetails = currentUser?['details'] is String
-            ? jsonDecode(currentUser?['details'] ?? '{}')
-            : currentUser?['details'] ?? {};
-        final working = userDetails['working_location'] ?? {};
-
-        final address = {
-          'state_name': working['state'] ?? userDetails['stateName'] ?? '',
-          'state_id': (working['state_id'] ?? userDetails['stateId'] ?? 1),
-          'state_lgd_code': userDetails['stateLgdCode'] ?? 1,
-          'division_name': working['division'] ?? userDetails['division'] ?? 'Patna',
-          'division_id': (working['division_id'] ?? userDetails['divisionId'] ?? 27),
-          'division_lgd_code': userDetails['divisionLgdCode'] ?? 198,
-          'district_name': working['district'] ?? userDetails['districtName'],
-          'district_id': (working['district_id'] ?? userDetails['districtId']),
-          'block_name': working['block'] ?? userDetails['blockName'],
-          'block_id': (working['block_id'] ?? userDetails['blockId']),
-          'village_name': working['village'] ?? userDetails['villageName'],
-          'village_id': (working['village_id'] ?? userDetails['villageId']),
-          'hsc_id': (working['hsc_id'] ?? userDetails['facility_hsc_id']),
-          'hsc_name': working['hsc_name'] ?? userDetails['facility_hsc_name'],
-          'hsc_hfr_id': working['hsc_hfr_id'] ?? userDetails['facility_hfr_id'],
-          'asha_id': working['asha_id'] ?? userDetails['asha_id'],
-          'pincode': working['pincode'] ?? userDetails['pincode'],
-          'user_identifier': working['user_identifier'] ?? userDetails['user_identifier'],
-        }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
-
-        final facilityId = working['asha_associated_with_facility_id'] ?? userDetails['asha_associated_with_facility_id'] ?? 0;
-        final ashaUniqueKey = userDetails['unique_key'] ?? {};
-
-        final ts = DateTime.now().toIso8601String();
-        final newHouseholdKey = await IdGenerator.generateUniqueId(deviceInfo);
-
-        final householdPayload = {
-          'server_id': null,
-          'unique_key': newHouseholdKey,
-          'address': jsonEncode(address),
-          'geo_location': geoLocationJson,
-          'head_id': headUniqueKey,
-          'household_info': jsonEncode(headInfo),
-          'device_details': jsonEncode({
-            'id': deviceInfo.deviceId,
-            'platform': deviceInfo.platform,
-            'version': deviceInfo.osVersion,
-            'model': deviceInfo.model,
-          }),
-          'app_details': jsonEncode({
-            'app_version': deviceInfo.appVersion.split('+').first,
-            'app_name': deviceInfo.appName,
-            'build_number': deviceInfo.buildNumber,
-            'package_name': deviceInfo.packageName,
-            'instance': 'prod'
-          }),
-          'parent_user': jsonEncode({}),
-          'current_user_key': ashaUniqueKey,
-          'facility_id': facilityId,
-          'created_date_time': ts,
-          'modified_date_time': ts,
-          'is_synced': 0,
-          'is_deleted': 0,
-        };
-
-        await LocalStorageDao.instance.insertHousehold(householdPayload);
-
-        final targets = <String>{headName, ..._selectedAdults, ..._selectedChildren};
-        final beneficiaryKeys = <String>[];
-        for (final name in targets) {
-          final uk = _adultNameToId[name] ?? _childNameToId[name] ?? '';
-          if (uk.isNotEmpty) beneficiaryKeys.add(uk);
-        }
-
-        _splitBloc.add(PerformSplitUpdateBeneficiaries(
-          newHouseholdKey: newHouseholdKey,
-          beneficiaryUniqueKeys: beneficiaryKeys,
-          isSeparated: 1,
-          houseNo: _houseNoController.text.trim(),
-        ));
-
-        // UI refresh and success handling moved to BlocListener on MigrationSplitBloc
-      } catch (e) {
-        if (!mounted) return;
+      final headName = _selectedFamilyHead!.trim();
+      final headUniqueKey = _adultNameToId[headName] ?? '';
+      if (headUniqueKey.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text(
-              'Split failed: $e',
-              style: const TextStyle(fontSize: _labelFontSize),
+              'Selected head not found',
+              style: TextStyle(fontSize: _labelFontSize),
             ),
           ),
         );
+        return;
       }
+
+      final headRow = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(headUniqueKey);
+      if (headRow == null || headRow.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Head record not found',
+              style: TextStyle(fontSize: _labelFontSize),
+            ),
+          ),
+        );
+        return;
+      }
+
+      final infoRaw = headRow['beneficiary_info'];
+      final Map<String, dynamic> headInfo = _tryDecodeInfo(infoRaw);
+      headInfo['houseNo'] = _houseNoController.text.trim();
+
+      final deviceInfo = await DeviceInfo.getDeviceInfo();
+      final geoLocation = await GeoLocation.getCurrentLocation();
+      final locationData = Map<String, String>.from(geoLocation.toJson());
+      locationData['source'] = 'gps';
+      if (!geoLocation.hasCoordinates) {
+        locationData['status'] = 'unavailable';
+        locationData['reason'] = 'Could not determine location';
+      }
+      final geoLocationJson = jsonEncode(locationData);
+
+      final currentUser = await UserInfo.getCurrentUser();
+      final userDetails = currentUser?['details'] is String
+          ? jsonDecode(currentUser?['details'] ?? '{}')
+          : currentUser?['details'] ?? {};
+      final working = userDetails['working_location'] ?? {};
+
+      final address = {
+        'state_name': working['state'] ?? userDetails['stateName'] ?? '',
+        'state_id': (working['state_id'] ?? userDetails['stateId'] ?? 1),
+        'state_lgd_code': userDetails['stateLgdCode'] ?? 1,
+        'division_name': working['division'] ?? userDetails['division'] ?? 'Patna',
+        'division_id': (working['division_id'] ?? userDetails['divisionId'] ?? 27),
+        'division_lgd_code': userDetails['divisionLgdCode'] ?? 198,
+        'district_name': working['district'] ?? userDetails['districtName'],
+        'district_id': (working['district_id'] ?? userDetails['districtId']),
+        'block_name': working['block'] ?? userDetails['blockName'],
+        'block_id': (working['block_id'] ?? userDetails['blockId']),
+        'village_name': working['village'] ?? userDetails['villageName'],
+        'village_id': (working['village_id'] ?? userDetails['villageId']),
+        'hsc_id': (working['hsc_id'] ?? userDetails['facility_hsc_id']),
+        'hsc_name': working['hsc_name'] ?? userDetails['facility_hsc_name'],
+        'hsc_hfr_id': working['hsc_hfr_id'] ?? userDetails['facility_hfr_id'],
+        'asha_id': working['asha_id'] ?? userDetails['asha_id'],
+        'pincode': working['pincode'] ?? userDetails['pincode'],
+        'user_identifier': working['user_identifier'] ?? userDetails['user_identifier'],
+      }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
+
+      final facilityId = working['asha_associated_with_facility_id'] ?? userDetails['asha_associated_with_facility_id'] ?? 0;
+      final ashaUniqueKey = userDetails['unique_key'] ?? {};
+
+      final ts = DateTime.now().toIso8601String();
+      final newHouseholdKey = await IdGenerator.generateUniqueId(deviceInfo);
+
+      final householdPayload = {
+        'server_id': null,
+        'unique_key': newHouseholdKey,
+        'address': jsonEncode(address),
+        'geo_location': geoLocationJson,
+        'head_id': headUniqueKey,
+        'household_info': jsonEncode(headInfo),
+        'device_details': jsonEncode({
+          'id': deviceInfo.deviceId,
+          'platform': deviceInfo.platform,
+          'version': deviceInfo.osVersion,
+          'model': deviceInfo.model,
+        }),
+        'app_details': jsonEncode({
+          'app_version': deviceInfo.appVersion.split('+').first,
+          'app_name': deviceInfo.appName,
+          'build_number': deviceInfo.buildNumber,
+          'package_name': deviceInfo.packageName,
+          'instance': 'prod'
+        }),
+        'parent_user': jsonEncode({}),
+        'current_user_key': ashaUniqueKey,
+        'facility_id': facilityId,
+        'created_date_time': ts,
+        'modified_date_time': ts,
+        'is_synced': 0,
+        'is_deleted': 0,
+      };
+
+      await LocalStorageDao.instance.insertHousehold(householdPayload);
+
+      final targets = <String>{headName, ..._selectedAdults, ..._selectedChildren};
+      final beneficiaryKeys = <String>[];
+      for (final name in targets) {
+        final uk = _adultNameToId[name] ?? _childNameToId[name] ?? '';
+        if (uk.isNotEmpty) beneficiaryKeys.add(uk);
+      }
+
+      _splitBloc.add(PerformSplitUpdateBeneficiaries(
+        newHouseholdKey: newHouseholdKey,
+        beneficiaryUniqueKeys: beneficiaryKeys,
+        isSeparated: 1,
+        houseNo: _houseNoController.text.trim(),
+      ));
+
+      // UI refresh and success handling moved to BlocListener on MigrationSplitBloc
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Split failed: $e',
+            style: const TextStyle(fontSize: _labelFontSize),
+          ),
+        ),
+      );
+    }
   }
 
   void _showChildSelectionDialog() {
@@ -944,35 +948,35 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               child: SingleChildScrollView(
                 child: _isLoadingMembers
                     ? const SizedBox(
-                        height: 48,
-                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                      )
+                  height: 48,
+                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                )
                     : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: _childNames.map((name) {
-                          final selected = localSelectedChildren.contains(name);
-                          return CheckboxListTile(
-                            title: Text(
-                              name,
-                              style: TextStyle(fontSize: 15.sp),
-                            ),
-                            value: selected,
-                            onChanged: (bool? value) {
-                              setDialogState(() {
-                                if ((value ?? false)) {
-                                  localSelectedChildren.add(name);
-                                } else {
-                                  localSelectedChildren.remove(name);
-                                }
-                              });
-                            },
-                            controlAffinity: ListTileControlAffinity.leading,
-                            contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
-                            dense: true,
-                            visualDensity: const VisualDensity(vertical: -4),
-                          );
-                        }).toList(),
+                  mainAxisSize: MainAxisSize.min,
+                  children: _childNames.map((name) {
+                    final selected = localSelectedChildren.contains(name);
+                    return CheckboxListTile(
+                      title: Text(
+                        name,
+                        style: TextStyle(fontSize: 15.sp),
                       ),
+                      value: selected,
+                      onChanged: (bool? value) {
+                        setDialogState(() {
+                          if ((value ?? false)) {
+                            localSelectedChildren.add(name);
+                          } else {
+                            localSelectedChildren.remove(name);
+                          }
+                        });
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
+                      dense: true,
+                      visualDensity: const VisualDensity(vertical: -4),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
             actions: [
@@ -1059,74 +1063,74 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               child: SingleChildScrollView(
                 child: _isLoadingMembers
                     ? const SizedBox(
-                        height: 48,
-                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                      )
+                  height: 48,
+                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                )
                     : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
 
-                          ),
-                          if (_adultNames.isEmpty)
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    'No adult members found for this household',
-                                    style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () async {
-                                    setDialogState(() {});
-                                    await _loadHouseholdMembers();
-                                    if (mounted) setState(() {});
-                                  },
-                                  icon: const Icon(Icons.refresh),
-                                  tooltip: 'Refresh',
-                                ),
-                              ],
-                            )
-                          else
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(_adultNames.length, (index) {
-                                final name = _adultNames[index];
-                                final isDisabled = _disabledAdultNames.contains(name) || index == 0;
-                                return CheckboxListTile(
-                                  title: Text(
-                                    isDisabled ? '$name (Head)' : name,
-                                    style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: isDisabled ? Colors.black54 : Colors.black,
-                                    ),
-                                  ),
-                                  value: localSelectedAdults.contains(name),
-                                  onChanged: isDisabled
-                                      ? null
-                                      : (bool? value) {
-                                          setDialogState(() {
-                                            if ((value ?? false)) {
-                                              localSelectedAdults.add(name);
-                                            } else {
-                                              localSelectedAdults.remove(name);
-                                            }
-                                          });
-                                        },
-                                  controlAffinity: ListTileControlAffinity.leading,
-                                  contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
-                                  dense: true,
-                                  visualDensity: const VisualDensity(vertical: -4),
-                                );
-                              }),
+                    ),
+                    if (_adultNames.isEmpty)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'No adult members found for this household',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                color: Colors.black54,
+                              ),
                             ),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              setDialogState(() {});
+                              await _loadHouseholdMembers();
+                              if (mounted) setState(() {});
+                            },
+                            icon: const Icon(Icons.refresh),
+                            tooltip: 'Refresh',
+                          ),
                         ],
+                      )
+                    else
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(_adultNames.length, (index) {
+                          final name = _adultNames[index];
+                          final isDisabled = _disabledAdultNames.contains(name) || index == 0;
+                          return CheckboxListTile(
+                            title: Text(
+                              isDisabled ? '$name (Head)' : name,
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                color: isDisabled ? Colors.black54 : Colors.black,
+                              ),
+                            ),
+                            value: localSelectedAdults.contains(name),
+                            onChanged: isDisabled
+                                ? null
+                                : (bool? value) {
+                              setDialogState(() {
+                                if ((value ?? false)) {
+                                  localSelectedAdults.add(name);
+                                } else {
+                                  localSelectedAdults.remove(name);
+                                }
+                              });
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,
+                            contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
+                            dense: true,
+                            visualDensity: const VisualDensity(vertical: -4),
+                          );
+                        }),
                       ),
+                  ],
+                ),
               ),
             ),
             actions: [

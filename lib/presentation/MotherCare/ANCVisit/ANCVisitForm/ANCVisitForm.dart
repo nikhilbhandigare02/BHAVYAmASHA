@@ -782,11 +782,20 @@ class _AncvisitformState extends State<Ancvisitform> {
                             const SizedBox(height: 12),
                             ApiDropdown<String>(
                               labelText: l10n?.visitTypeLabel ?? 'Visit type *',
-                              items: const [
-                                'ANC', 'PMSMA'
-                              ],
+
+                              items: const ['ANC', 'PMSMA',],
+                              getLabel: (s) {
+                                switch (s) {
+                                  case 'ANC':
+                                    return 'ANC';
+                                  case 'Female':
+                                    return 'PMSMA';
+                                  default:
+                                    return s;
+                                }
+                              },
                               value: state.visitType.isEmpty ? null : state.visitType,
-                              getLabel: (s) => s,
+
                               onChanged: (v) => bloc.add(VisitTypeChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
                               validator: validateDropdownRequired,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:medixcel_new/data/Database/tables/beneficiaries_table.dart';
+import 'package:medixcel_new/data/Database/tables/cluster_meeting_table.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/data/Database/tables/notification_table.dart';
 import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
@@ -2057,6 +2058,87 @@ class LocalStorageDao {
     }
   }
 
+  Future<int> insertClusterMeeting(Map<String, dynamic> formData) async {
+    try {
+      final db = await _db;
+
+      final row = <String, dynamic>{
+        'unique_key': formData['unique_key'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        'form_json': jsonEncode(formData['form_json'] ?? {}), // your entire form as JSON
+        'created_date_time': DateTime.now().toIso8601String(),
+        'created_by': formData['created_by'] ?? 'current_user_key',
+        'modified_date_time': null,
+        'modified_by': null,
+        'is_synced': 0,
+        'is_deleted': 0,
+      };
+
+      final id = await db.insert(ClusterMeetingsTable.table, row);
+      print('Cluster meeting saved locally with id: $id');
+      return id;
+    } catch (e, stack) {
+      print('Error inserting cluster meeting: $e');
+      print(stack);
+      rethrow;
+    }
+  }
+  Future<Map<String, dynamic>?> getClusterMeetingById(String uniqueKey) async {
+    final db = await _db;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'cluster_meetings',
+      where: 'unique_key = ?',
+      whereArgs: [uniqueKey],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return maps.first;
+    }
+    return null;
+  }
+  Future<void> updateClusterMeeting({
+    required String uniqueKey,
+    required Map<String, dynamic> formJson,
+  }) async {
+    final db = await _db;
+
+    await db.update(
+      ClusterMeetingsTable.table,
+      {
+        'form_json': jsonEncode(formJson),
+        'modified_date_time': DateTime.now().toIso8601String(),
+        'modified_by': 'current_user',
+      },
+      where: 'unique_key = ?',
+      whereArgs: [uniqueKey],
+    );
+  }
+
+  // VIEW: Get all saved cluster meetings (latest first)
+  Future<List<Map<String, dynamic>>> getAllClusterMeetings() async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        ClusterMeetingsTable.table,
+        where: 'is_deleted = 0',
+        orderBy: 'created_date_time DESC',
+      );
+
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        // Decode form_json back to Map
+        try {
+          mapped['form_json'] = jsonDecode(mapped['form_json'] as String);
+        } catch (e) {
+          mapped['form_json'] = {};
+        }
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error fetching cluster meetings: $e');
+      return [];
+    }
+  }
   Future<String?> getHeadOfFamilyMobileNumber(String householdRefKey) async {
     try {
       final db = await _db;

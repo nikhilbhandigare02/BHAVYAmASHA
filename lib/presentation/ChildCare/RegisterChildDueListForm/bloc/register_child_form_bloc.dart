@@ -43,20 +43,36 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
     on<WeightGramsChanged>((e, emit) => emit(state.copyWith(weightGrams: e.value, clearError: true)));
     on<BirthWeightGramsChanged>((e, emit) => emit(state.copyWith(birthWeightGrams: e.value, clearError: true)));
     on<ReligionChanged>((e, emit) => emit(state.copyWith(religion: e.value, clearError: true)));
+    on<CustomReligionChanged>((e, emit) => emit(state.copyWith(customReligion: e.value, clearError: true)));
     on<CasteChanged>((e, emit) => emit(state.copyWith(caste: e.value, clearError: true)));
+    on<CustomCasteChanged>((e, emit) => emit(state.copyWith(customCaste: e.value, clearError: true)));
     on<SerialNumberOFRegister>((e, emit) => emit(state.copyWith(registerSerialNumber: e.value, clearError: true)));
 
     on<SubmitPressed>(_onSubmit);
   }
 
   void _onSubmit(SubmitPressed event, Emitter<RegisterChildFormState> emit) async {
-    // Minimal validation based on screenshots
+    // Form validation
     final missing = <String>[];
     if (state.dateOfBirth == null) missing.add('Date of Birth');
     if (state.dateOfRegistration == null) missing.add('Date of Registration');
     if (state.childName.isEmpty) missing.add("Child's name");
     if (state.motherName.isEmpty) missing.add("Mother's name");
     if (state.mobileNumber.isEmpty) missing.add('Mobile number');
+    
+    // Validate religion
+    if (state.religion.isEmpty) {
+      missing.add('Religion');
+    } else if (state.religion == 'Other' && state.customReligion.trim().isEmpty) {
+      missing.add('Please specify your religion');
+    }
+    
+    // Validate caste/category
+    if (state.caste.isEmpty) {
+      missing.add('Category');
+    } else if (state.caste == 'Other' && state.customCaste.trim().isEmpty) {
+      missing.add('Please specify your category');
+    }
 
     if (missing.isNotEmpty) {
       emit(state.copyWith(error: 'Please fill: ' + missing.join(', ')));
@@ -94,8 +110,8 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
           'birth_certificate_number': state.birthCertificateNumber,
           'weight_grams': state.weightGrams,
           'birth_weight_grams': state.birthWeightGrams,
-          'religion': state.religion,
-          'caste': state.caste,
+          'religion': state.religion == 'Other' ? state.customReligion : state.religion,
+          'caste': state.caste == 'Other' ? state.customCaste : state.caste,
         },
         'created_at': now,
         'updated_at': now,
