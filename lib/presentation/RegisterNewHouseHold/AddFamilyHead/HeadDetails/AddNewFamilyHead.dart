@@ -575,15 +575,31 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   'Other',
                 ],
                 getLabel: (s) {
-                  // Return same value because label = value
                   return s;
                 },
                 value: state.mobileOwner,
                 onChanged: (v) => context
                     .read<AddFamilyHeadBloc>()
                     .add(AfhUpdateMobileOwner(v)),
-                validator: (value) =>
-                    _captureError(Validations.validateWhoMobileNo(l, value)),
+
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return null;
+                  }
+
+                  String? error = Validations.validateWhoMobileNo(l, value);
+
+                  if (error != null) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        showAppSnackBar(context, error!);
+                      }
+                    });
+                  }
+
+                  return error;
+                },
+
               ),
 
             ),

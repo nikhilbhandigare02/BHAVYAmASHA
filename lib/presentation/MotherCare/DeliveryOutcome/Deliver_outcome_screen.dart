@@ -155,6 +155,17 @@ class _DeliveryOutcomeScreenState
             continue;
           }
 
+          final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome];
+          final existingOutcome = await db.query(
+            FollowupFormDataTable.table,
+            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0',
+            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey],
+            limit: 1,
+          );
+          if (existingOutcome.isNotEmpty) {
+            continue;
+          }
+
           Map<String, dynamic>? beneficiaryRow;
           try {
 
@@ -449,7 +460,7 @@ class _DeliveryOutcomeScreenState
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.pregnancyOutcome ?? '',
+        screenTitle: 'Delivery Outcome List',
         showBack: false,
         icon1Image: 'assets/images/home.png',
         onIcon1Tap: () => Navigator.pushReplacement(

@@ -6002,7 +6002,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryType.
   ///
   /// In en, this message translates to:
-  /// **'Type of Delivery'**
+  /// **'Type of Delivery *'**
   String get deliveryType;
 
   /// No description provided for @normalDelivery.

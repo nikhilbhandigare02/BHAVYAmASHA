@@ -302,7 +302,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
       final registrationDate = row['created_date_time']?.toString() ?? '';
 
-      // Only include if pregnant
       if (!isPregnant) return null;
 
       // Format registration date if available
@@ -318,11 +317,11 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
       return {
         'id': row['id']?.toString() ?? '',
-        // COMPLETE IDs for passing to next screen
+
         'unique_key': uniqueKey,
         'BeneficiaryID': uniqueKey,
         'hhId': householdRefKey,
-        // DISPLAY versions (trimmed) for UI only
+
         'unique_key_display': uniqueKeyDisplay,
         'BeneficiaryID_display': uniqueKeyDisplay,
         'hhId_display': householdRefKeyDisplay,

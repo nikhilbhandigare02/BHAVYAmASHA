@@ -137,6 +137,14 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         print('  Household: ${beneficiaries[i]['hhId']}');
       }
       print('=== End Processing ===\n');
+      beneficiaries.sort((a, b) {
+        final da = DateTime.tryParse((a['RegitrationDate'] ?? '').toString());
+        final db = DateTime.tryParse((b['RegitrationDate'] ?? '').toString());
+        if (da != null && db != null) {
+          return db.compareTo(da);
+        }
+        return 0;
+      });
       setState(() {
         _allBeneficiaries = beneficiaries;
         _filtered = beneficiaries;
