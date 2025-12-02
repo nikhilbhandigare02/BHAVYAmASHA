@@ -19,7 +19,9 @@ class RegisterChildFormState extends Equatable {
   final String weightGrams;
   final String birthWeightGrams;
   final String religion;
+  final String customReligion;
   final String caste;
+  final String customCaste;
 
   final bool isSubmitting;
   final bool isSuccess;
@@ -44,7 +46,9 @@ class RegisterChildFormState extends Equatable {
     this.weightGrams = '',
     this.birthWeightGrams = '',
     this.religion = '',
+    this.customReligion = '',
     this.caste = '',
+    this.customCaste = '',
     this.isSubmitting = false,
     this.isSuccess = false,
     this.error,
@@ -71,7 +75,9 @@ class RegisterChildFormState extends Equatable {
     String? weightGrams,
     String? birthWeightGrams,
     String? religion,
+    String? customReligion,
     String? caste,
+    String? customCaste,
     bool? isSubmitting,
     bool? isSuccess,
     String? error,
@@ -96,7 +102,9 @@ class RegisterChildFormState extends Equatable {
       weightGrams: weightGrams ?? this.weightGrams,
       birthWeightGrams: birthWeightGrams ?? this.birthWeightGrams,
       religion: religion ?? this.religion,
+      customReligion: customReligion ?? this.customReligion,
       caste: caste ?? this.caste,
+      customCaste: customCaste ?? this.customCaste,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isSuccess: isSuccess ?? this.isSuccess,
       error: clearError ? null : (error ?? this.error),
@@ -110,11 +118,11 @@ class RegisterChildFormState extends Equatable {
         dateOfBirth,
         dateOfRegistration,
         childName,
+        registerSerialNumber,
         gender,
         motherName,
         fatherName,
         address,
-    registerSerialNumber,
         whoseMobileNumber,
         mobileNumber,
         mothersRchIdNumber,
@@ -123,7 +131,9 @@ class RegisterChildFormState extends Equatable {
         weightGrams,
         birthWeightGrams,
         religion,
+        customReligion,
         caste,
+        customCaste,
         isSubmitting,
         isSuccess,
         error,

@@ -278,8 +278,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         errorMaxLines: 2,
         border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
+        // enabledBorder: InputBorder.none,
+        // focusedBorder: InputBorder.none,
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: AppColors.greenHighlight, // highlight color
+            width: 2.0,
+          ),
+        ),
       ),
       style: inputStyle,
     );

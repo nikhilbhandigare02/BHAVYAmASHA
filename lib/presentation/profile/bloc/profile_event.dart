@@ -5,6 +5,10 @@ abstract class ProfileEvent extends Equatable {
   @override
   List<Object?> get props => [];
 }
+class RoleIdChanged extends ProfileEvent {
+  final int value;
+  const RoleIdChanged(this.value);
+}
 
 class AreaOfWorkingChanged extends ProfileEvent {
   final String value;

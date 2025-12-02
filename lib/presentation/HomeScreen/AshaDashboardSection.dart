@@ -3,6 +3,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 import '../../l10n/app_localizations.dart' show AppLocalizations;
+import '../ClusterMeeting/ClusterMeetingScreen.dart';
 import '../High-Risk/High_Risk.dart';
 import '../RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 
@@ -21,6 +22,8 @@ class AshaDashboardSection extends StatelessWidget {
   final int? childRegisteredCount;
   final int? highRiskCount;
   final int? ncdCount;
+  final int appRoleId;
+
 
   const AshaDashboardSection({
     super.key,
@@ -38,6 +41,8 @@ class AshaDashboardSection extends StatelessWidget {
     this.childRegisteredCount,
     this.highRiskCount,
     this.ncdCount,
+    required this.appRoleId,
+
   });
 
   @override
@@ -66,6 +71,8 @@ class AshaDashboardSection extends StatelessWidget {
 
     final List<Map<String, dynamic>> bottomGridItems = [
       {"image": 'assets/images/announcement.png', "label": l10n.announcements},
+      if (appRoleId == 4)
+        {"image": 'assets/images/beneficiaries.png', "label": "Cluster meetings"},
       {"image": 'assets/images/help-icon.png', "label": '${l10n.help}\nनियम'},
       {"image": 'assets/images/autoimmune-disease.png', "label": l10n.ncd, "count": ncdCount ?? 0},
     ];
@@ -341,30 +348,32 @@ class AshaDashboardSection extends StatelessWidget {
   }
 
   void _onBottomGridTap(BuildContext context, int index) {
-    if (bottomGridActions != null && index < bottomGridActions!.length) {
-      final action = bottomGridActions![index];
-      if (action != null) {
-        action();
-        return;
-      }
+    int dynamicIndex = index;
+
+    // If appRoleId != 4, cluster meeting is removed, so adjust index
+    bool hasCluster = appRoleId == 4;
+
+    if (!hasCluster && index >= 1) {
+      dynamicIndex = index + 1; // shift to match original mapping
     }
 
-    // handle navigation for each bottom grid item
-    switch (index) {
+    switch (dynamicIndex) {
       case 0:
-      // Announcement
         Navigator.pushNamed(context, Route_Names.Annoucement);
         break;
-      case 1:
-      // Help
-        Navigator.pushNamed(context, Route_Names.HelpScreen);
+      case 1: // Cluster meetings (only when visible)
+        if (hasCluster) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ClusterMeetingScreen()),
+          );
+        }
         break;
       case 2:
-      // NCD
+        Navigator.pushNamed(context, Route_Names.HelpScreen);
+        break;
+      case 3:
         Navigator.pushNamed(context, Route_Names.NCDHome);
         break;
-      default:
-        if (onBottomGridTap != null) onBottomGridTap!(index);
     }
-  }
-}
+  }}

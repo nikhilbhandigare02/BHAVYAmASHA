@@ -335,173 +335,186 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       ),
 
       bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (_tabController.index > 0)
-                SizedBox(
-                  width: 25.5.w,
-                  height: 4.5.h,
-                  child: RoundButton(
-                    title: l10n?.previousButton ?? 'PREVIOUS',
-                    color: AppColors.primary,
-                    fontSize: 14.sp,
-                    borderRadius: 4,
-                    height: 44,
-                    onPress: () {
-                      final prev = (_tabController.index - 1).clamp(0, 2);
-                      _tabController.animateTo(prev);
-                    },
-                  ),
-                )
-              else
-                const SizedBox(width: 120, height: 44),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 4,
+                spreadRadius: 2,
+                offset: const Offset(0, 0), // TOP shadow
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (_tabController.index > 0)
+                  SizedBox(
+                    width: 25.5.w,
+                    height: 4.5.h,
+                    child: RoundButton(
+                      title: l10n?.previousButton ?? 'PREVIOUS',
+                      color: AppColors.primary,
+                      fontSize: 14.sp,
+                      borderRadius: 4,
+                      height: 44,
+                      onPress: () {
+                        final prev = (_tabController.index - 1).clamp(0, 2);
+                        _tabController.animateTo(prev);
+                      },
+                    ),
+                  )
+                else
+                  const SizedBox(width: 120, height: 44),
 
-          SizedBox(
-            width: 25.5.w,
-            height: 4.5.h,
-            child: Builder(
-              builder: (context) {
-                final idx = _tabController.index;
-                final bool disableNext = idx == 0 && !headAdded;
+            SizedBox(
+              width: 25.5.w,
+              height: 4.5.h,
+              child: Builder(
+                builder: (context) {
+                  final idx = _tabController.index;
+                  final bool disableNext = idx == 0 && !headAdded;
 
-                String rightTitle;
-                if (idx == 2) {
-                  rightTitle = widget.isEdit
-                      ? (l10n?.updateButton ?? 'UPDATE')
-                      : (l10n?.saveButton ?? 'SAVE');
-                } else {
-                  rightTitle = (l10n?.nextButton ?? 'NEXT');
-                }
+                  String rightTitle;
+                  if (idx == 2) {
+                    rightTitle = widget.isEdit
+                        ? (l10n?.updateButton ?? 'UPDATE')
+                        : (l10n?.saveButton ?? 'SAVE');
+                  } else {
+                    rightTitle = (l10n?.nextButton ?? 'NEXT');
+                  }
 
-                final householdBloc = context.read<RegisterNewHouseholdBloc>();
-                
-                return BlocConsumer<RegisterNewHouseholdBloc, RegisterHouseholdState>(
-                  listener: (context, state) {
-                    if (state.isSaved) {
-                      _skipExitConfirm = true;
-                      if (widget.showSuccessOnSave) {
-                        showSuccessDialog(context).then((shouldNavigate) {
-                          if (shouldNavigate == true && mounted) {
+                  final householdBloc = context.read<RegisterNewHouseholdBloc>();
+
+                  return BlocConsumer<RegisterNewHouseholdBloc, RegisterHouseholdState>(
+                    listener: (context, state) {
+                      if (state.isSaved) {
+                        _skipExitConfirm = true;
+                        if (widget.showSuccessOnSave) {
+                          showSuccessDialog(context).then((shouldNavigate) {
+                            if (shouldNavigate == true && mounted) {
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                Route_Names.homeScreen,
+                                (route) => false,
+                              );
+                            }
+                          });
+                        } else {
+                          if (mounted) {
                             Navigator.pushNamedAndRemoveUntil(
                               context,
                               Route_Names.homeScreen,
                               (route) => false,
                             );
                           }
-                        });
-                      } else {
-                        if (mounted) {
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            Route_Names.homeScreen,
-                            (route) => false,
-                          );
                         }
-                      }
-                    } else if (state.error != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            state.error!,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          backgroundColor: Colors.redAccent,
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 3),
-                        ),
-                      );
-                    }
-                  },
-                  builder: (context, state) {
-                    return RoundButton(
-                      title: rightTitle,
-                      color: AppColors.primary,
-                      height: 44,
-                      isLoading: state.isSaving,
-                      onPress: () async {
-                        if (disableNext) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please add family head details',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              backgroundColor: Colors.redAccent,
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 2),
+                      } else if (state.error != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              state.error!,
+                              style: const TextStyle(color: Colors.white),
                             ),
-                          );
-                          return;
-                        }
-
-                        if (idx < 2) {
-                          _tabController.animateTo(idx + 1);
-                        } else {
-                          try {
-                            _hhBloc.emit(_hhBloc.state);
-                            final amenitiesState = _hhBloc.state;
-                            print(' Current Amenities State: ${amenitiesState.toString()}');
-                            
-                            // Create a map with all the amenities data
-                            final amenitiesData = {
-                              'residentialArea': amenitiesState.residentialArea,
-                              'otherResidentialArea': amenitiesState.otherResidentialArea,
-                              'ownershipType': amenitiesState.ownershipType,
-                              'otherOwnershipType': amenitiesState.otherOwnershipType,
-                              'houseType': amenitiesState.houseType,
-                              'otherHouseType': amenitiesState.otherHouseType,
-                              'houseKitchen': amenitiesState.houseKitchen,
-                              'cookingFuel': amenitiesState.cookingFuel,
-                              'otherCookingFuel': amenitiesState.otherCookingFuel,
-                              'waterSource': amenitiesState.waterSource,
-                              'otherWaterSource': amenitiesState.otherWaterSource,
-                              'electricity': amenitiesState.electricity,
-                              'otherElectricity': amenitiesState.otherElectricity,
-                              'toilet': amenitiesState.toilet,
-                              'toiletType': amenitiesState.toiletType,
-                              'typeOfToilet': amenitiesState.typeOfToilet,
-                              'toiletPlace': amenitiesState.toiletPlace,
-                            };
-                            
-
-                            amenitiesData.removeWhere((key, value) => 
-                                value == null || 
-                                (value is String && value.isEmpty) ||
-                                value == '');
-                            
-                            print('📤 Prepared Amenities Data: $amenitiesData');
-                            
-                            if (amenitiesData.isEmpty) {
-                              print('⚠️ Warning: No amenities data to save');
-                            }
-                            
-                            householdBloc.add(
-                              SaveHousehold(
-                                headForm: _headForm,
-                                memberForms: _memberForms,
-                                amenitiesData: amenitiesData,
+                            backgroundColor: Colors.redAccent,
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    },
+                    builder: (context, state) {
+                      return RoundButton(
+                        title: rightTitle,
+                        color: AppColors.primary,
+                        height: 44,
+                        isLoading: state.isSaving,
+                        onPress: () async {
+                          if (disableNext) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Please add family head details',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                backgroundColor: Colors.redAccent,
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 2),
                               ),
                             );
-                          } catch (e, stackTrace) {
-                            print('❌ Error preparing amenities data:');
-                            print('   Error: $e');
-                            print('   Stack trace: $stackTrace');
-                            // Re-throw to show error to user
-                            rethrow;
+                            return;
                           }
-                        }
-                      },
-                    );
-                  },
-                );
 
-              },
+                          if (idx < 2) {
+                            _tabController.animateTo(idx + 1);
+                          } else {
+                            try {
+                              _hhBloc.emit(_hhBloc.state);
+                              final amenitiesState = _hhBloc.state;
+                              print(' Current Amenities State: ${amenitiesState.toString()}');
+
+                              // Create a map with all the amenities data
+                              final amenitiesData = {
+                                'residentialArea': amenitiesState.residentialArea,
+                                'otherResidentialArea': amenitiesState.otherResidentialArea,
+                                'ownershipType': amenitiesState.ownershipType,
+                                'otherOwnershipType': amenitiesState.otherOwnershipType,
+                                'houseType': amenitiesState.houseType,
+                                'otherHouseType': amenitiesState.otherHouseType,
+                                'houseKitchen': amenitiesState.houseKitchen,
+                                'cookingFuel': amenitiesState.cookingFuel,
+                                'otherCookingFuel': amenitiesState.otherCookingFuel,
+                                'waterSource': amenitiesState.waterSource,
+                                'otherWaterSource': amenitiesState.otherWaterSource,
+                                'electricity': amenitiesState.electricity,
+                                'otherElectricity': amenitiesState.otherElectricity,
+                                'toilet': amenitiesState.toilet,
+                                'toiletType': amenitiesState.toiletType,
+                                'typeOfToilet': amenitiesState.typeOfToilet,
+                                'toiletPlace': amenitiesState.toiletPlace,
+                              };
+
+
+                              amenitiesData.removeWhere((key, value) =>
+                                  value == null ||
+                                  (value is String && value.isEmpty) ||
+                                  value == '');
+
+                              print('📤 Prepared Amenities Data: $amenitiesData');
+
+                              if (amenitiesData.isEmpty) {
+                                print('⚠️ Warning: No amenities data to save');
+                              }
+
+                              householdBloc.add(
+                                SaveHousehold(
+                                  headForm: _headForm,
+                                  memberForms: _memberForms,
+                                  amenitiesData: amenitiesData,
+                                ),
+                              );
+                            } catch (e, stackTrace) {
+                              print('❌ Error preparing amenities data:');
+                              print('   Error: $e');
+                              print('   Stack trace: $stackTrace');
+                              // Re-throw to show error to user
+                              rethrow;
+                            }
+                          }
+                        },
+                      );
+                    },
+                  );
+
+                },
+              ),
             ),
-          ),
-          ],
+            ],
+            ),
           ),
         ),
       ),

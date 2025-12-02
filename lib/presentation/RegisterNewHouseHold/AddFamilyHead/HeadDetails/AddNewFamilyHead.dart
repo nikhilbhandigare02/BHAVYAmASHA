@@ -490,9 +490,36 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 children: [
                   Expanded(
                     child: CustomTextField(
-                      labelText: l.richIdLabel,
-                      onChanged: (v) =>
-                          context.read<AddFamilyHeadBloc>().add(AfhABHAChange(v.trim())),
+                      labelText: 'RCH ID',
+                      hintText: 'Enter 12 digit RCH ID',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(12),
+                      ],
+                      onChanged: (v) {
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        
+                        final value = v.trim();
+                        context.read<AddFamilyHeadBloc>().add(AfhRichIdChange(value));
+                        
+                        if (value.isNotEmpty && value.length != 12) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                            }
+                          });
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return null; // Field is optional
+                        }
+                        if (value.length != 12) {
+                          return 'Must be 12 digits';
+                        }
+                        return null;
+                      }
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -516,54 +543,48 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
           _Section(
             child: _Section(
-              child: ApiDropdown<String>(
-                labelText: '${l.whoseMobileLabel} *',
-                items: const [
+              child:ApiDropdown<String>(
+                labelText: 'Whose Mobile No. *',
+                items: state.gender == 'Female'
+                    ? const [
+                  'Self',
+                  'Husband',
+                  'Father',
+                  'Mother',
+                  'Son',
+                  'Daughter',
+                  'Father In Law',
+                  'Mother In Law',
+                  'Neighbour',
+                  'Relative',
+                  'Other',
+                ]
+                    : const [
                   'Self',
                   'Wife',
                   'Father',
                   'Mother',
                   'Son',
                   'Daughter',
-                  'Father in Law',
-                  'Mother in Law',
+                  'Father In Law',
+                  'Mother In Law',
                   'Neighbour',
                   'Relative',
                   'Other',
                 ],
                 getLabel: (s) {
-                  switch (s) {
-                    case 'Self':
-                      return l.self;
-                    case 'Wife':
-                      return l.wife;
-                    case 'Father':
-                      return l.father;
-                    case 'Mother':
-                      return l.mother;
-                    case 'Son':
-                      return l.son;
-                    case 'Daughter':
-                      return l.daughter;
-                    case 'Father in Law':
-                      return l.fatherInLaw;
-                    case 'Mother in Law':
-                      return l.motherInLaw;
-                    case 'Neighbour':
-                      return l.neighbour;
-                    case 'Relative':
-                      return l.relative;
-                    case 'Other':
-                      return l.other;
-                    default:
-                      return s;
-                  }
+                  // Return same value because label = value
+                  return s;
                 },
                 value: state.mobileOwner,
-                onChanged: (v) =>
-                    context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileOwner(v)),
-                validator: (value) => _captureError(Validations.validateWhoMobileNo(l, value)),
+                onChanged: (v) => context
+                    .read<AddFamilyHeadBloc>()
+                    .add(AfhUpdateMobileOwner(v)),
+
+                validator: (value) =>
+                    _captureError(Validations.validateWhoMobileNo(l, value)),
               ),
+
             ),
 
           ),
@@ -647,12 +668,40 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 children: [
                   _Section(
                     child: CustomTextField(
-                      labelText: l.accountNumberLabel,
-                      hintText: l.accountNumberLabel,
+                      labelText: l.bankAccountNumber,
+                      hintText: l.bankAccountNumber,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       initialValue: state.bankAcc,
-                      onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(v.trim())),
+                      onChanged: (v) {
+                        final value = v.trim();
+                        context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(value));
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return null; // Field is optional
+                        }
+
+                        final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+                        if (digitsOnly.length < 11 || digitsOnly.length > 18) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              showAppSnackBar(
+                                  context,
+                                  'Bank account number must be between 11 to 18 digits'
+                              );
+                            }
+                          });
+                          return 'Invalid length';
+                        }
+
+                        return null;
+                      },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(18),
+                      ],
                     ),
                   ),
                   Divider(
@@ -670,7 +719,34 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               labelText: l.ifscLabel,
               hintText:l.ifscLabel,
               initialValue: state.ifsc,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateIfsc(v.trim())),
+              onChanged: (v) {
+                final value = v.trim().toUpperCase();
+                context.read<AddFamilyHeadBloc>().add(AfhUpdateIfsc(value));
+                // Clear previous snackbar
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return null; // Field is optional
+                }
+
+                String? error;
+                if (value.length != 11) {
+                  error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                } else if (!RegExp(r'^[A-Z]{4}0\d{6}$').hasMatch(value)) {
+                  error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                }
+
+                if (error != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      showAppSnackBar(context, error!);
+                    }
+                  });
+                }
+
+                return error;
+              },
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -731,7 +807,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               items: const [
                 'Married',
                 'Unmarried',
-                'Widowed',
+                'Widow',
                 'Widower',
                 'Separated',
                 'Divorced',
@@ -742,7 +818,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     return l.maritalStatusMarried;
                   case 'Unmarried':
                     return l.maritalStatusUnmarried;
-                  case 'Widowed':
+                  case 'Widow':
                     return l.maritalStatusWidowed;
                   case 'Widower':
                     return l.maritalStatusWidower;
@@ -1370,169 +1446,192 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               Expanded(
                                 child: TabBarView(children: views),
                               ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h).copyWith(bottom: 2.h),
-                                child: Builder(
-                                  builder: (ctx) {
-                                    final controller = DefaultTabController.of(ctx)!;
-                                    return AnimatedBuilder(
-                                      animation: controller.animation!,
-                                      builder: (context, _) {
-                                        final showNav = tabs.length > 1;
-                                        return BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
-                                          builder: (context, state) {
-                                            final isLoading = state.postApiStatus == PostApiStatus.loading;
-                                            if (!showNav) {
-                                              return Align(
-                                                alignment: Alignment.centerRight,
-                                                child: SizedBox(
-                                                  width: 25.5.w,
-                                                  height: 4.5.h,
-                                                  child: RoundButton(
-                                                    title: isLoading
-                                                        ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
-                                                        : (widget.isEdit ? 'UPDATE' : l.addButton),
-                                                    color: AppColors.primary,
-                                                    borderRadius: 4,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.15),
+                                      blurRadius: 4,
+                                      spreadRadius: 2,
+                                      offset: const Offset(0, 0), // TOP shadow
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h).copyWith(bottom: 2.h),
+                                  child: Builder(
+                                    builder: (ctx) {
+                                      final controller = DefaultTabController.of(ctx)!;
+                                      return AnimatedBuilder(
+                                        animation: controller.animation!,
+                                        builder: (context, _) {
+                                          final showNav = tabs.length > 1;
+                                          return BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
+                                            builder: (context, state) {
+                                              final isLoading = state.postApiStatus == PostApiStatus.loading;
+                                              if (!showNav) {
+                                                return Align(
+                                                  alignment: Alignment.centerRight,
+                                                  child: SizedBox(
+                                                    width: 25.5.w,
                                                     height: 4.5.h,
-                                                    isLoading: isLoading,
-                                                    onPress: () {
-                                                      _clearFormError();
-                                                      final formState = _formKey.currentState;
-                                                      if (formState == null) return;
-                                                      final isValid = formState.validate();
-                                                      if (!isValid) {
-                                                        if (_lastFormError != null) {
-                                                          showAppSnackBar(context, _lastFormError!);
-                                                        }
-                                                        return;
-                                                      }
-                                                      context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
-                                                    },
-                                                  ),
-                                                ),
-                                              );
-                                            }
-
-                                            final i = controller.index;
-                                            final last = tabs.length - 1;
-                                            return Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                if (i > 0)
-                                                  SizedBox(
+                                                    child: RoundButton(
+                                                      title: isLoading
+                                                          ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
+                                                          : (widget.isEdit ? 'UPDATE' : l.addButton),
+                                                      color: AppColors.primary,
+                                                      borderRadius: 4,
                                                       height: 4.5.h,
-                                                      width: 25.5.w,
-                                                      child: OutlinedButton(
-                                                          style: OutlinedButton.styleFrom(
-                                                            minimumSize: Size(25.w, 4.5.h),
-                                                            backgroundColor: AppColors.primary,
-                                                            foregroundColor: Colors.white,
-                                                            side: BorderSide(color: AppColors.primary, width: 0.2.w), // 👈 matching border
-                                                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                                                            shape: RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(4), // rounded edges
-                                                            ),
-                                                            elevation: 0.5, // subtle elevation for depth
-                                                            shadowColor: AppColors.primary.withOpacity(0.4),
-                                                          ),
-                                                          onPressed: () => controller.animateTo(i - 1),
-                                                          child: Text(
-                                                            l.previousButton,
-                                                            style:  TextStyle(
-                                                              fontWeight: FontWeight.w600,
-                                                              letterSpacing: 0.5,
-                                                              fontSize: 14.sp
-                                                            ),
-                                                          ),
-                                                        )
-                                                  )
-                                                else
-                                                  const SizedBox.shrink(),
-                                                SizedBox(
-                                                  height: 4.5.h,
-                                                  width: 25.5.w,
-                                                  child: RoundButton(
-                                                    title: i < last
-                                                        ? l.nextButton
-                                                        : (isLoading
-                                                            ? l.addingButton
-                                                            : l.addButton),
-                                                    onPress: () {
-                                                      if (i < last) {
-                                                        bool canProceed = true;
-                                                        if (i == 0) {
-                                                          _clearFormError();
-                                                          final headForm = _formKey.currentState;
-                                                          if (headForm == null || !headForm.validate()) {
-                                                            canProceed = false;
-                                                            final msg = _lastFormError ?? 'Please correct the highlighted errors before continuing.';
-                                                            showAppSnackBar(context, msg);
+                                                      isLoading: isLoading,
+                                                      onPress: () {
+                                                        _clearFormError();
+                                                        final formState = _formKey.currentState;
+                                                        if (formState == null) return;
+                                                        final isValid = formState.validate();
+                                                        if (!isValid) {
+                                                          if (_lastFormError != null) {
+                                                            showAppSnackBar(context, _lastFormError!);
                                                           }
-                                                        } else if (i == 1) {
-                                                          clearSpousFormError();
-                                                          final spouseForm = spousFormKey.currentState;
-                                                          if (spouseForm == null || !spouseForm.validate()) {
-                                                            canProceed = false;
-                                                            final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
-                                                            showAppSnackBar(context, msg);
-                                                            }
+                                                          return;
                                                         }
-                                                        if (!canProceed) return;
-                                                        controller.animateTo(i + 1);
-                                                      } else {
-
-                                                        if (last == 1) {
-                                                          clearSpousFormError();
-                                                          final spouseForm = spousFormKey.currentState;
-                                                          if (spouseForm == null || !spouseForm.validate()) {
-                                                            final msg = spousLastFormError ??
-                                                                'Please correct the highlighted errors before continuing.';
-                                                            showAppSnackBar(context, msg);
-                                                            return;
-                                                            }
-                                                        }
-
-                                                        if (last == 2) {
-                                                          // Children tab present, validate children details
-                                                          try {
-                                                            final ch = context.read<ChildrenBloc>().state;
-
-                                                            if (ch.totalLive > 0 &&
-                                                                (ch.totalMale + ch.totalFemale) !=
-                                                                    ch.totalLive) {
-                                                              showAppSnackBar(
-                                                                  context, l.malePlusFemaleError);
-                                                              return;
-                                                            }
-
-                                                            final youngestErr =
-                                                                _validateYoungestChild(ch, l);
-                                                            if (youngestErr != null) {
-                                                              showAppSnackBar(context, youngestErr);
-                                                              return;
-                                                            }
-                                                          } catch (_) {}
-                                                          }
-
-                                                        context
-                                                            .read<AddFamilyHeadBloc>()
-                                                            .add(AfhSubmit(context: context));
-                                                      }
-                                                    },
-                                                    color: AppColors.primary,
-                                                    borderRadius:4,
-                                                    isLoading: isLoading,
-                                                    fontSize: 14.sp,
+                                                        context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
+                                                      },
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                    );
-                                  },
+                                                );
+                                              }
+
+                                              final i = controller.index;
+                                              final last = tabs.length - 1;
+                                              return Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  if (i > 0)
+                                                    SizedBox(
+                                                        height: 4.5.h,
+                                                        width: 25.5.w,
+                                                        child: OutlinedButton(
+                                                            style: OutlinedButton.styleFrom(
+                                                              minimumSize: Size(25.w, 4.5.h),
+                                                              backgroundColor: AppColors.primary,
+                                                              foregroundColor: Colors.white,
+                                                              side: BorderSide(color: AppColors.primary, width: 0.2.w), // 👈 matching border
+                                                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                              shape: RoundedRectangleBorder(
+                                                                borderRadius: BorderRadius.circular(4), // rounded edges
+                                                              ),
+                                                              elevation: 0.5, // subtle elevation for depth
+                                                              shadowColor: AppColors.primary.withOpacity(0.4),
+                                                            ),
+                                                            onPressed: () => controller.animateTo(i - 1),
+                                                            child: Text(
+                                                              l.previousButton,
+                                                              style:  TextStyle(
+                                                                fontWeight: FontWeight.w600,
+                                                                letterSpacing: 0.5,
+                                                                fontSize: 14.sp
+                                                              ),
+                                                            ),
+                                                          )
+                                                    )
+                                                  else
+                                                    const SizedBox.shrink(),
+                                                  SizedBox(
+                                                    height: 4.5.h,
+                                                    width: 25.5.w,
+                                                    child: RoundButton(
+                                                      title: i < last
+                                                          ? l.nextButton
+                                                          : (isLoading
+                                                              ? l.addingButton
+                                                              : l.addButton),
+
+                                                      onPress: () {
+                                                        if (i < last) {
+                                                          bool canProceed = true;
+                                                          if (i == 0) {
+                                                            _clearFormError();
+                                                            final headForm = _formKey.currentState;
+                                                            if (headForm == null || !headForm.validate()) {
+                                                              canProceed = false;
+                                                              final msg = _lastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                                              showAppSnackBar(context, msg);
+                                                            }
+                                                          } else if (i == 1) {
+                                                            clearSpousFormError();
+                                                            final spouseForm = spousFormKey.currentState;
+
+                                                            if (spouseForm == null || !spousFormKey.currentState!.validate()) {
+                                                              canProceed = false;
+                                                              // Scroll to the first error in spouse form
+                                                              Scrollable.ensureVisible(
+                                                                context,
+                                                                alignment: 0.1, // Adjust this value as needed
+                                                                duration: const Duration(milliseconds: 300),
+                                                              );
+                                                              final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                                              if (mounted) {
+                                                                showAppSnackBar(context, msg);
+                                                              }
+                                                            }
+                                                          }
+                                                          if (!canProceed) return;
+                                                          controller.animateTo(i + 1);
+                                                        } else {
+
+                                                          if (last == 1) {
+                                                            clearSpousFormError();
+                                                            final spouseForm = spousFormKey.currentState;
+                                                            if (spouseForm == null || !spouseForm.validate()) {
+                                                              final msg = spousLastFormError ??
+                                                                  'Please correct the highlighted errors before continuing.';
+                                                              showAppSnackBar(context, msg);
+                                                              return;
+                                                              }
+                                                          }
+
+                                                          if (last == 2) {
+                                                            // Children tab present, validate children details
+                                                            try {
+                                                              final ch = context.read<ChildrenBloc>().state;
+
+                                                              if (ch.totalLive > 0 &&
+                                                                  (ch.totalMale + ch.totalFemale) !=
+                                                                      ch.totalLive) {
+                                                                showAppSnackBar(
+                                                                    context, l.malePlusFemaleError);
+                                                                return;
+                                                              }
+
+                                                              final youngestErr =
+                                                                  _validateYoungestChild(ch, l);
+                                                              if (youngestErr != null) {
+                                                                showAppSnackBar(context, youngestErr);
+                                                                return;
+                                                              }
+                                                            } catch (_) {}
+                                                            }
+
+                                                          context
+                                                              .read<AddFamilyHeadBloc>()
+                                                              .add(AfhSubmit(context: context));
+                                                        }
+                                                      },
+                                                      color: AppColors.primary,
+                                                      borderRadius:4,
+                                                      isLoading: isLoading,
+                                                      fontSize: 15.sp,
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                             ],

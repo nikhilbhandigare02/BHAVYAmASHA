@@ -203,7 +203,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.householdBeneficiaryTitle ?? 'Household Beneficiary',
+        screenTitle: 'All Beneficiaries',
         showBack: false,
         icon2Image: 'assets/images/home.png',
         onIcon2Tap: () => Navigator.pushReplacement(
@@ -263,7 +263,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 width: double.infinity,
                 height: 40,
                 child: RoundButton(
-                  title: (l10n?.gridRegisterNewHousehold ?? 'Add New Household').toUpperCase(),
+                  title: ( 'New Household Registration').toUpperCase(),
                   color: AppColors.primary,
                   borderRadius: 8,
                   height: 45,

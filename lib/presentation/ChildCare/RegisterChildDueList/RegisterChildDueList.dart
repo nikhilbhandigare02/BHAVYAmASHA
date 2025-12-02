@@ -475,15 +475,21 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-        height: 180,
+        // height: 180,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 3,
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 2,
               spreadRadius: 1,
               offset: const Offset(0, 2),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 2,
+              spreadRadius: 1,
+              offset: const Offset(0, -2),
             ),
           ],
         ),

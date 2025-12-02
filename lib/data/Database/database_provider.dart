@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:medixcel_new/data/Database/tables/cluster_meeting_table.dart';
 import 'package:medixcel_new/data/Database/tables/notification_table.dart';
 import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
 import 'package:path/path.dart' as p;
@@ -50,6 +51,8 @@ class DatabaseProvider {
     await db.execute(FollowupFormDataTable.create);
     await db.execute(TrainingDataTable.create);
     await db.execute(NotificationDetailsTable.create);
+    await db.execute(ClusterMeetingsTable.create);
+
   }
 
   Future<void> ensureTablesExist(Database db) async {
@@ -62,6 +65,8 @@ class DatabaseProvider {
     await db.execute(FollowupFormDataTable.create);
     await db.execute(TrainingDataTable.create);
     await db.execute(NotificationDetailsTable.create);
+    await db.execute(ClusterMeetingsTable.create);
+
   }
 
   Future<void> runMigration(Database db) async {

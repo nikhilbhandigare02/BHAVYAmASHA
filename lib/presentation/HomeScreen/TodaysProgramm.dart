@@ -135,11 +135,33 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
-  Future<void> _launchPhoneDialer(String? mobile) async {
-    if (mobile == null || mobile.trim().isEmpty || mobile == '-') return;
-    final uri = Uri(scheme: 'tel', path: mobile.trim());
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+  void _launchPhoneDialer(String? phoneNumber) async {
+    if (phoneNumber == null || phoneNumber.isEmpty || phoneNumber == '-') {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No phone number available')),
+        );
+      }
+      return;
+    }
+
+    // Clean the phone number - remove all spaces and any non-digit characters
+    final raw = phoneNumber.replaceAll(' ', '').replaceAll(RegExp(r'[^0-9+]'), '');
+    final uri = Uri(scheme: 'tel', path: raw);
+
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to open dialer on this device.')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to open dialer on this device.')),
+        );
+      }
     }
   }
 

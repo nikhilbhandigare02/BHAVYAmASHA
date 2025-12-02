@@ -276,6 +276,7 @@ class AddnewfamilymemberBloc
           updateMonth: loadedUpdateMonth,
           updateYear: loadedUpdateYear,
           WeightChange: allData['weight'] as String?,
+          birthWeight: allData['birthWeight']?.toString(),
           ChildSchool: allData['childSchool'] as String?,
           BirthCertificateChange: allData['birthCertificate'] as String?,
           errorMessage: null,
@@ -469,6 +470,7 @@ class AddnewfamilymemberBloc
     on<AnmUpdateCategory>((e, emit) => emit(state.copyWith(category: e.value)));
     on<AnmUpdateOtherCategory>((e, emit) => emit(state.copyWith(otherCategory: e.value)));
     on<WeightChange>((e, emit) => emit(state.copyWith(WeightChange: e.value)));
+    on<BirthWeightChange>((e, emit) => emit(state.copyWith(birthWeight: e.value)));
     on<ChildSchoolChange>(
           (e, emit) => emit(state.copyWith(ChildSchool: e.value)),
     );

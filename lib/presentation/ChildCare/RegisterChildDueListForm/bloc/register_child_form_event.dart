@@ -125,9 +125,23 @@ class ReligionChanged extends RegisterChildFormEvent {
   List<Object?> get props => [value];
 }
 
+class CustomReligionChanged extends RegisterChildFormEvent {
+  final String value;
+  const CustomReligionChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
 class CasteChanged extends RegisterChildFormEvent {
   final String value;
   const CasteChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class CustomCasteChanged extends RegisterChildFormEvent {
+  final String value;
+  const CustomCasteChanged(this.value);
   @override
   List<Object?> get props => [value];
 }

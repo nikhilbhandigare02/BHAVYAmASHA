@@ -10,7 +10,6 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
-import '../../../data/Database/tables/beneficiaries_table.dart';
 
 class Lbwrefered extends StatefulWidget {
   const Lbwrefered({super.key});
@@ -34,112 +33,62 @@ class _Lbwrefered extends State<Lbwrefered> {
     final db = await DatabaseProvider.instance.database;
 
     try {
-      final formsRefKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childRegistrationDue] ??
-              '2ol35gbp7rczyvn6';
+      print('🔍 Loading LBW children from beneficiaries table (strict AND thresholds)');
 
-      print('🔎 Loading LBW from beneficiaries and followup tables');
+      final rows = await db.query(
+        'beneficiaries_new',
+        where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL)',
+      );
+
+      print('🔎 Beneficiaries fetched: ${rows.length}');
 
       final List<Map<String, dynamic>> lbwChildren = [];
-      final Set<String> beneficiaryKeys = <String>{};
+      int passed = 0;
 
-      // 1) From beneficiaries_new: is_adult = 0 and beneficiary_info has weight <= 1.2 AND birthWeight <= 1200
-      final benRows = await db.query(
-        BeneficiariesTable.table,
-        where: 'is_deleted = 0 AND is_adult = 0',
-      );
-      print('🔎 Beneficiaries rows: ${benRows.length}');
-      for (final row in benRows) {
+      for (final row in rows) {
         try {
-          final infoStr = row['beneficiary_info']?.toString() ?? '';
-          if (infoStr.isEmpty) continue;
+          final hhId = row['household_ref_key']?.toString() ?? '';
+          if (hhId.isEmpty) continue;
+
+          final infoStr = row['beneficiary_info']?.toString();
+          if (infoStr == null || infoStr.isEmpty) continue;
+
           Map<String, dynamic>? info;
           try {
             final decoded = jsonDecode(infoStr);
-            if (decoded is Map) {
-              info = Map<String, dynamic>.from(decoded);
-            }
+            if (decoded is Map) info = Map<String, dynamic>.from(decoded);
           } catch (_) {}
           if (info == null || info!.isEmpty) continue;
 
-          final weight = _parseNum(info!['weight']);
-          final birthWeight = _parseNum(info!['birthWeight']);
 
-          final bool isLbwBen = (weight != null && weight.toDouble() <= 1.2) &&
-              (birthWeight != null && birthWeight.toDouble() <= 1200);
-          if (!isLbwBen) continue;
+          var weight = _parseNumFlexible(info!['weight'])?.toDouble();
+          var birthWeight = _parseNumFlexible(info!['birthWeight'])?.toDouble();
 
-          final uniqueKey = row['unique_key']?.toString() ?? '';
-          if (uniqueKey.isNotEmpty) beneficiaryKeys.add(uniqueKey);
 
-          final hhId = row['household_ref_key']?.toString() ?? '';
-          final name = info!['name']?.toString() ?? 'Unknown';
-          final ageGender = _formatAgeGender(info!['dob'], info!['gender']);
+
+          final isLbw = (weight != null && birthWeight != null && weight <= 1.2 && birthWeight <= 1200);
+          if (!isLbw) continue;
+          passed++;
+
+          final name = (info!['name'] ?? info['memberName'] ?? '').toString();
+          final genderRaw = info['gender'];
+          final dobRaw = info['dob'] ?? info['dateOfBirth'];
+
+          final ageGender = _formatAgeGender(dobRaw, genderRaw);
 
           lbwChildren.add({
             'hhId': hhId,
-            'name': name,
+            'name': name.isEmpty ? 'Unknown' : name,
             'age_gender': ageGender,
             'status': 'LBW',
-            'unique_key': uniqueKey,
-            'source': 'beneficiary',
+            '_raw': row,
           });
         } catch (e) {
           print('Error processing beneficiary LBW row: $e');
         }
       }
 
-      // 2) From followup_form_data: childRegistrationDue forms with weight/birth_weight in grams
-      final fuRows = await db.query(
-        FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND is_deleted = 0',
-        whereArgs: [formsRefKey],
-      );
-      print('🔎 Followup rows: ${fuRows.length}');
-      for (final row in fuRows) {
-        try {
-          final beneficiaryRefKey = row['beneficiary_ref_key']?.toString() ?? '';
-          if (beneficiaryRefKey.isNotEmpty && beneficiaryKeys.contains(beneficiaryRefKey)) {
-            // Skip duplicates: prefer beneficiaries table record
-            continue;
-          }
-
-          final hhId = row['household_ref_key']?.toString() ?? '';
-          if (hhId.isEmpty) continue;
-
-          final formJsonStr = row['form_json']?.toString() ?? '';
-          if (formJsonStr.isEmpty) continue;
-
-          final decoded = jsonDecode(formJsonStr);
-          if (decoded is! Map) continue;
-
-          final formData = decoded['form_data'] is Map
-              ? Map<String, dynamic>.from(decoded['form_data'])
-              : <String, dynamic>{};
-          if (formData.isEmpty) continue;
-
-          final weight = _parseNum(formData['weight_grams'])?.toDouble();
-          final birthWeight = _parseNum(formData['birth_weight_grams'])?.toDouble();
-
-          final isLbw = (weight != null && weight < 1600) ||
-              (birthWeight != null && birthWeight < 1600);
-          if (!isLbw) continue;
-
-          final childName = formData['child_name']?.toString() ?? 'Unknown';
-          final ageGender = _formatAgeGender(formData['date_of_birth'], formData['gender']);
-
-          lbwChildren.add({
-            'hhId': hhId,
-            'name': childName,
-            'age_gender': ageGender,
-            'status': 'LBW',
-            'beneficiary_ref_key': beneficiaryRefKey,
-            'source': 'followup',
-          });
-        } catch (e) {
-          print('Error processing followup LBW row: $e');
-        }
-      }
+      print('✅ Beneficiaries passing strict LBW filter: $passed');
 
       setState(() {
         _filtered = lbwChildren;
@@ -201,12 +150,13 @@ class _Lbwrefered extends State<Lbwrefered> {
     return '$ageDisplay | $displayGender';
   }
 
-  num? _parseNum(dynamic v) {
+  num? _parseNumFlexible(dynamic v) {
     if (v == null) return null;
     if (v is num) return v;
-    final s = v.toString().trim();
+    String s = v.toString().trim().toLowerCase();
     if (s.isEmpty) return null;
-    // Try double first, then int
+    s = s.replaceAll(RegExp(r'[^0-9\.-]'), '');
+    if (s.isEmpty) return null;
     final d = double.tryParse(s);
     if (d != null) return d;
     final i = int.tryParse(s);

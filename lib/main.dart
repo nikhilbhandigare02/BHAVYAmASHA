@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
             );
 
         return MaterialApp(
-          title: 'Flutter Demo',
+          title: 'BHAVYA mASHA',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             scaffoldBackgroundColor: Colors.white,

@@ -120,8 +120,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Is Beneficiary Absent?', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: 'Is Beneficiary Absent?',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.beneficiaryAbsent.isNotEmpty ? state.beneficiaryAbsent : null,
@@ -132,10 +132,10 @@ class _HbycFormViewState extends State<_HbycFormView> {
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (state.beneficiaryAbsent == 'Yes') ...[ 
                               const SizedBox(height: 8),
-                              Text('Reason for Absent', style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600)),
                               CustomTextField(
                                 key: const ValueKey('beneficiaryAbsentReason'),
                                 hintText: 'Enter reason for absence',
+                                labelText: 'Reason for Absent',
                                 onChanged: (value) => context.read<HbycChildCareBloc>().add(BeneficiaryAbsentReasonChanged(value)),
                                 // validator: (value) {
                                 //   if (state.beneficiaryAbsent == 'Yes' && (value == null || value.isEmpty)) {
@@ -158,8 +158,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('HYBC home visit?', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: 'HYBC home visit?',
                               items: _hbycVisitMonthOptions,
                               getLabel: (s) => s,
                               value: state.hbycBhraman.isNotEmpty ? state.hbycBhraman : null,
@@ -179,8 +179,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycIsChildSickLabel, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!.hbycIsChildSickLabel,
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.isChildSick.isNotEmpty ? state.isChildSick : null,
@@ -192,8 +192,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Child referred to health facility?', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                                   ApiDropdown<String>(
+                                    labelText: 'Child referred to health facility?',
                                     items: _yesNoOptions,
                                     getLabel: (s) => s,
                                     value: _yesNoOptions.contains(_sicknessDetailsController.text)
@@ -218,8 +218,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycBreastfeedingContinuingLabel, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: 'AppLocalizations.of(context)!.hbycBreastfeedingContinuingLabel',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.breastfeedingContinuing.isNotEmpty ? state.breastfeedingContinuing : null,
@@ -238,8 +238,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Complementary food given?', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                             ApiDropdown<String>(
+                              labelText: 'Complementary food given?',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.completeDietProvided.isNotEmpty ? state.completeDietProvided : null,
@@ -249,8 +249,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (state.completeDietProvided == 'Yes') ...[
                               const SizedBox(height: 12),
-                              Text('1. 2-3 tablespoons of food at a time, 2-3 times each day', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                               ApiDropdown<String>(
+                                labelText: '1. 2-3 tablespoons of food at a time, 2-3 times each day',
                                 items: _yesNoOptions,
                                 getLabel: (s) => s,
                                 value: state.foodFrequency1.isNotEmpty ? state.foodFrequency1 : null,
@@ -259,9 +259,9 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               const SizedBox(height: 12),
-                              Text('2. 1/2 cup/katori serving at a time, 2-3 times each day with 1-2 snacks between meals',
-                                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+
                               ApiDropdown<String>(
+                                labelText: '2. 1/2 cup/katori serving at a time, 2-3 times each day with 1-2 snacks between meals',
                                 items: _yesNoOptions,
                                 getLabel: (s) => s,
                                 value: state.foodFrequency2.isNotEmpty ? state.foodFrequency2 : null,
@@ -270,9 +270,9 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               const SizedBox(height: 12),
-                              Text('3. 1/2 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
-                                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+
                               ApiDropdown<String>(
+                                labelText: '3. 1/2 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
                                 items: _yesNoOptions,
                                 getLabel: (s) => s,
                                 value: state.foodFrequency3.isNotEmpty ? state.foodFrequency3 : null,
@@ -281,9 +281,9 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               const SizedBox(height: 12),
-                              Text('4. 3/4 to 1 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
-                                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+
                               ApiDropdown<String>(
+                                labelText: '4. 3/4 to 1 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
                                 items: _yesNoOptions,
                                 getLabel: (s) => s,
                                 value: state.foodFrequency4.isNotEmpty ? state.foodFrequency4 : null,
@@ -302,8 +302,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycWeighedByAwwLabel, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!.hbycWeighedByAwwLabel,
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.weighedByAww.isNotEmpty ? state.weighedByAww : null,
@@ -316,6 +316,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               CustomTextField(
                                 key: const ValueKey('weightForAge'),
                                 hintText: 'Mention the recorded weight-for-age as per MCP card (in kg)',
+                                labelText: 'Mention the recorded weight-for-age as per MCP card (in kg)',
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) => context.read<HbycChildCareBloc>().add(WeightForAgeChanged(value)),
                                 validator: (value) {
@@ -337,8 +338,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Recording of weight-for-length/height by Anganwadi Worker', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                             ApiDropdown<String>(
+                              labelText: 'Recording of weight-for-length/height by Anganwadi Worker',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.lengthHeightRecorded.isNotEmpty ? state.lengthHeightRecorded : null,
@@ -351,6 +352,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               CustomTextField(
                                 key: const ValueKey('weightForLength'),
                                 hintText: 'Mention the recorded weight-for-length/height as per MCP card (in cm)',
+                                labelText: 'Mention the recorded weight-for-length/height as per MCP card (in cm)',
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) => context.read<HbycChildCareBloc>().add(WeightForLengthChanged(value)),
                                 validator: (value) {
@@ -373,8 +375,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycWeightLessThan3sdLabel, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!.hbycWeightLessThan3sdLabel,
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.weightLessThan3sdReferred.isNotEmpty ? state.weightLessThan3sdReferred : null,
@@ -387,6 +389,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                 child: CustomTextField(
                                   controller: _referralDetailsController,
                                   hintText: 'Referred place ',
+                                  labelText: 'Referred place ',
                                   maxLines: 3,
                                 ),
                               ),
@@ -403,8 +406,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Developmental delay checked?', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: 'Developmental delay checked?',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.developmentDelaysObserved.isNotEmpty ? state.developmentDelaysObserved : null,
@@ -417,6 +420,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                 child: CustomTextField(
                                   controller: _developmentDelaysDetailsController,
                                   hintText: 'is the child referred?',
+                                  labelText: 'is the child referred?',
                                   maxLines: 3,
                                 ),
                               ),
@@ -432,8 +436,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Immunization status checked as per MCP card?', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                             ApiDropdown<String>(
+                              labelText: 'Immunization status checked as per MCP card?',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.fullyVaccinatedAsPerMcp.isNotEmpty ? state.fullyVaccinatedAsPerMcp : null,
@@ -451,8 +455,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycMeaslesVaccineGivenLabel, style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!.hbycMeaslesVaccineGivenLabel,
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.measlesVaccineGiven.isNotEmpty ? state.measlesVaccineGiven : null,
@@ -470,8 +474,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycVitaminADosageGivenLabel, style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!.hbycVitaminADosageGivenLabel,
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.vitaminADosageGiven.isNotEmpty ? state.vitaminADosageGiven : null,
@@ -489,8 +493,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycOrsPacketAvailableLabel, style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!.hbycOrsPacketAvailableLabel,
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.orsPacketAvailable.isNotEmpty ? state.orsPacketAvailable : null,
@@ -507,8 +511,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (state.orsPacketAvailable == 'No') ...[
                               const SizedBox(height: 8),
-                              Text('ORS given?', style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600)),
                               ApiDropdown<String>(
+                                labelText: 'ORS given?',
                                 items: _yesNoOptions,
                                 getLabel: (s) => s,
                                 value: state.orsGiven.isNotEmpty ? state.orsGiven : null,
@@ -526,6 +530,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                 CustomTextField(
                                   key: const ValueKey('orsCount'),
                                   hintText: 'Number of ORS given',
+                                  labelText: 'Number of ORS given',
                                   keyboardType: TextInputType.number,
                                   onChanged: (value) => context.read<HbycChildCareBloc>().add(OrsCountChanged(value)),
                                   validator: (value) {
@@ -548,11 +553,9 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              AppLocalizations.of(context)!.hbycIronFolicSyrupAvailableLabel,
-                              style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),
-                            ),
+
                             ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!.hbycIronFolicSyrupAvailableLabel,
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.ironFolicSyrupAvailable.isNotEmpty
@@ -575,11 +578,9 @@ class _HbycFormViewState extends State<_HbycFormView> {
                             // Show these fields when syrup IS available (Yes)
                             if (state.ironFolicSyrupAvailable == 'Yes') ...[
                               const SizedBox(height: 8),
-                              Text(
-                                  'Iron Folic Acid syrup Given?',
-                                  style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600)
-                              ),
+
                               ApiDropdown<String>(
+                                labelText: 'Iron Folic Acid syrup Given?',
                                 items: _yesNoOptions,
                                 getLabel: (s) => s,
                                 value: state.ifaSyrupGiven.isNotEmpty
@@ -603,6 +604,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                 CustomTextField(
                                   key: const ValueKey('ifaSyrupCount'),
                                   hintText: 'Number of Iron Folic Acid syrup given',
+                                  labelText: 'Number of Iron Folic Acid syrup given',
                                   keyboardType: TextInputType.number,
                                   onChanged: (value) => context.read<HbycChildCareBloc>().add(
                                       IfaSyrupCountChanged(value)
@@ -628,8 +630,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Counsel for exclusive breastfeeding?', style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600)),
                             ApiDropdown<String>(
+                              labelText: 'Counsel for exclusive breastfeeding?',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.counselingExclusiveBf6m.isNotEmpty
@@ -651,8 +653,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Counsel for complementary feeding? ', style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: 'Counsel for complementary feeding?',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.adviceComplementaryFoods.isNotEmpty ? state.adviceComplementaryFoods : null,
@@ -670,8 +672,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Counsel for hand washing?', style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: 'Counsel for hand washing?',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.adviceHandWashingHygiene.isNotEmpty ? state.adviceHandWashingHygiene : null,
@@ -689,8 +691,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Counsel for parenting?', style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: 'Counsel for parenting?',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.adviceParentingSupport.isNotEmpty ? state.adviceParentingSupport : null,
@@ -708,8 +710,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('family planning Counselling?', style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: 'family planning Counselling?',
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.counselingFamilyPlanning.isNotEmpty ? state.counselingFamilyPlanning : null,
@@ -727,8 +729,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.hbycAdvicePreparingAdministeringOrsLabel, style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                             ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!.hbycAdvicePreparingAdministeringOrsLabel,
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.advicePreparingAdministeringOrs.isNotEmpty ? state.advicePreparingAdministeringOrs : null,
@@ -741,17 +743,16 @@ class _HbycFormViewState extends State<_HbycFormView> {
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    Text(AppLocalizations.of(context)!.hbycAdviceAdministeringIfaSyrupLabel, style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                     ApiDropdown<String>(
+                      labelText: AppLocalizations.of(context)!.hbycAdviceAdministeringIfaSyrupLabel,
                       items: _yesNoOptions,
                       getLabel: (s) => s,
                       hintText: AppLocalizations.of(context)!.select,
                       onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceAdministeringIfaSyrupChanged(v ?? '')),
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                    Text(AppLocalizations.of(context)!.hbycCompletionDateLabel, style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w600),),
                     CustomDatePicker(
-                      labelText: '',
+                      labelText: AppLocalizations.of(context)!.hbycCompletionDateLabel,
                       hintText: AppLocalizations.of(context)!.dateHint,
                       onDateChanged: (dt) {
                         if (dt == null) return;

@@ -240,7 +240,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     // Dependent questions for family planning
                     if (state.fpAdopting == true) ...[
                       ApiDropdown<String>(
-                        labelText: t?.fpMethodLabel ?? 'गर्भनिरोधक का तरीका',
+                        labelText: 'Method of contraception' ?? 'गर्भनिरोधक का तरीका',
                         items: const [
                           'Condom',
                           'Mala -N (Daily Contraceptive pill)',
