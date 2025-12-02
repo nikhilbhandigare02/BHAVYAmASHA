@@ -48,6 +48,7 @@ class AddNewFamilyHeadScreen extends StatefulWidget {
 class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
+  final now = DateTime.now();
 
   // Guard to avoid infinite loops when syncing names between
   // head form and spouse details tab.
@@ -72,6 +73,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   }
 
   String? _validateYoungestChild(ChildrenState s, AppLocalizations l) {
+    // Check if age unit is selected but age is empty
+    if ((s.ageUnit != null && s.ageUnit!.isNotEmpty) && 
+        (s.youngestAge == null || s.youngestAge!.trim().isEmpty)) {
+      return 'Please enter age of youngest child';
+    }
+    
+    // Existing validation for age ranges
     return Validations.validateYoungestChildAge(l, s.youngestAge, s.ageUnit);
   }
 
@@ -142,17 +150,19 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           ),
           if (state.useDob)
             _Section(
-              child: CustomDatePicker(
-                labelText: '${l.dobLabel} *',
-                hintText: l.dateHint,
-                initialDate: state.dob,
-                firstDate: DateTime(1900),
-                lastDate: DateTime.now().subtract(const Duration(days: 15 * 365)),
-                onDateChanged: (d) =>
-                    context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(d)),
-                validator: (date) =>
-                    _captureError(Validations.validateDOB(l, date)),
-              ),
+              child:
+                CustomDatePicker(
+                  labelText: '${l.dobLabel} *',
+                  hintText: l.dateHint,
+                  initialDate: state.dob,
+                  firstDate: DateTime(1915),
+                  lastDate: DateTime(now.year - 15, now.month, now.day), // 15 years ago
+                  onDateChanged: (date) {
+                    if (date != null) {
+                      context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(date));
+                    }
+                  },
+                )
             )
           else
             _Section(

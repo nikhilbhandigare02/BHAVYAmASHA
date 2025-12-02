@@ -91,6 +91,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
       calculatedDob = DateTime(calculatedDob.year, calculatedDob.month + 1, 0);
     }
 
+
     // Update the DOB in the state if it's different
     final currentDob = context.read<SpousBloc>().state.dob;
     if (currentDob == null ||
@@ -106,6 +107,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
         padding: EdgeInsets.symmetric(vertical: 0.h),
         child: child,
       );
+
+
+  final now = DateTime.now();
 
   @override
   void initState() {
@@ -315,15 +319,18 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 if (state.useDob)
                   _section(
 
-                    CustomDatePicker(
-                      labelText: '${l.dobLabel} *',
-                      hintText: l.dateHint,
-                      initialDate: state.dob,
-                      firstDate: DateTime.now().subtract(const Duration(days: 110 * 365)),
-                      lastDate: DateTime.now().subtract(const Duration(days: 15 * 365)),
-                      onDateChanged: (d) => context.read<SpousBloc>().add(SpUpdateDob(d)),
-                      validator: (date) => captureSpousError(Validations.validateDOB(l, date)),
-                    ),
+                      CustomDatePicker(
+                        labelText: '${l.dobLabel} *',
+                        hintText: l.dateHint,
+                        initialDate: state.dob,
+                        firstDate: DateTime(1915),
+                        lastDate: DateTime(now.year - 15, now.month, now.day),
+                        onDateChanged: (date) {
+                          if (date != null) {
+                            context.read<SpousBloc>().add(SpUpdateDob(date));
+                          }
+                        },
+                      )
                   )
                 else
                   _section(
