@@ -303,30 +303,16 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
                                 height: 0,),
-                              // ApiDropdown<String>(
-                              //   key: const ValueKey('categoryField'),
-                              //   labelText: t?.categoryLabel ?? 'Category',
-                              //   items: const [
-                              //     'NotDisclosed',
-                              //     'General',
-                              //     'OBC',
-                              //     'SC',
-                              //     'ST',
-                              //     'PichdaVarg1',
-                              //     'PichdaVarg2',
-                              //     'AtyantPichdaVarg',
-                              //     'DontKnow',
-                              //     'Other'
-                              //   ],
-                              //
-                              //   value: state.category.isEmpty ? null : state
-                              //       .category,
-                              //   onChanged: (v) =>
-                              //       context.read<EligibleCouleUpdateBloc>().add(
-                              //           CategoryChanged(v ?? '')),
-                              //   hintText: t?.select ?? 'Select',
-                              //   getLabel: (String p1) ,
-                              // ),
+                              
+                              // Category Field
+                              CustomTextField(
+                                labelText: 'Category',
+                                hintText: 'Enter category',
+                                initialValue: state.category,
+                                onChanged: (value) => context.read<EligibleCouleUpdateBloc>().add(CategoryChanged(value)),
+                                readOnly: true,
+                              ),
+
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
                                 height: 0,),

@@ -47,10 +47,9 @@ class EligibleCouleUpdateBloc
       final rchId = data['RichID']?.toString() ?? '';
       final ageGender = data['ageGender']?.toString() ?? '';
       final hhId = data['hhId']?.toString() ?? '';
-      // Prefer the full unique beneficiary ID if available (unique_key / fullBeneficiaryId)
+
       final beneficiaryId = (data['unique_key'] ?? data['fullBeneficiaryId'] ?? data['BeneficiaryID'])?.toString() ?? '';
 
-      // Parse age from ageGender (format: "31 Y / Other")
       String currentAge = '';
       if (ageGender.isNotEmpty) {
         final parts = ageGender.split('/');
@@ -198,8 +197,10 @@ class EligibleCouleUpdateBloc
             currentAge: info['age']?.toString() ?? currentAge,
             mobileNo: info['mobileNo']?.toString() ?? mobile,
             address: info['address']?.toString() ?? '',
-            religion: info['religion']?.toString() ?? '',
-            category: info['category']?.toString() ?? '',
+            religion: info['religion']?.toString() ?? state.religion,
+            category: info['category']?.toString() ?? state.category,
+            ageAtMarriage: info['ageAtMarriage']?.toString() ?? state.ageAtMarriage,
+            whoseMobile: info['mobileOwner']?.toString() ?? state.whoseMobile,
             totalChildrenBorn: info['totalBorn']?.toString() ?? totalBorn,
             totalLiveChildren: info['totalLive']?.toString() ?? totalLive,
             totalMaleChildren: info['totalMale']?.toString() ?? totalMale,
@@ -225,15 +226,15 @@ class EligibleCouleUpdateBloc
         mobileNo: mobile, // Always use the passed mobile
 
         // Use database values for other fields
-        ageAtMarriage: womanDetails['ageAtMarriage']?.toString() ?? '',
+        ageAtMarriage: womanDetails['ageAtMarriage']?.toString() ?? state.ageAtMarriage,
         address: address,
-        whoseMobile: womanDetails['mobileOwner']?.toString() ?? 'Self',
+        whoseMobile: womanDetails['mobileOwner']?.toString() ?? state.whoseMobile,
         religion: womanDetails['religion']?.toString() ??
-            headDetails['religion']?.toString() ?? '',
+            headDetails['religion']?.toString() ?? state.religion,
         category: womanDetails['category']?.toString() ??
             headDetails['category']?.toString() ??
             womanDetails['caste']?.toString() ??
-            headDetails['caste']?.toString() ?? '',
+            headDetails['caste']?.toString() ?? state.category,
 
         // Children details from database
         totalChildrenBorn: childrenDetails['totalBorn']?.toString() ?? totalBorn,
@@ -362,10 +363,8 @@ class EligibleCouleUpdateBloc
         'youngestGender': state.youngestChildGender.toLowerCase(),
       };
 
-      // Update the children_details in the beneficiary_info
       beneficiaryInfo['children_details'] = updatedChildrenDetails;
 
-      // Also check if children_details is nested under head_details
       if (beneficiaryInfo.containsKey('head_details')) {
         final headDetails = Map<String, dynamic>.from(beneficiaryInfo['head_details'] as Map? ?? {});
         if (headDetails.containsKey('childrendetails')) {

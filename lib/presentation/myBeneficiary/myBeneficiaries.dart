@@ -199,26 +199,23 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
   Future<int> _getLBWReferredCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
-      final childRegKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childRegistrationDue] ?? '';
-      if (childRegKey.isEmpty) return 0;
       final rows = await db.query(
-        FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND is_deleted = 0',
-        whereArgs: [childRegKey],
+        BeneficiariesTable.table,
+        where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL)',
       );
       int c = 0;
       for (final r in rows) {
         try {
-          final s = r['form_json']?.toString() ?? '';
-          if (s.isEmpty) continue;
-          final decoded = jsonDecode(s);
+          final infoStr = r['beneficiary_info']?.toString();
+          if (infoStr == null || infoStr.isEmpty) continue;
+          final decoded = jsonDecode(infoStr);
           if (decoded is! Map) continue;
-          final fd = decoded['form_data'] is Map ? Map<String, dynamic>.from(decoded['form_data']) : <String, dynamic>{};
-          final wStr = fd['weight_grams']?.toString() ?? '';
-          final bwStr = fd['birth_weight_grams']?.toString() ?? '';
-          final w = double.tryParse(wStr);
-          final bw = double.tryParse(bwStr);
-          final isLbw = (w != null && w < 1600) || (bw != null && bw < 1600);
+          final info = Map<String, dynamic>.from(decoded);
+          var weight = _parseNumFlexible(info['weight'])?.toDouble();
+          var birthWeight = _parseNumFlexible(info['birthWeight'])?.toDouble();
+          if (weight != null && weight > 20) weight = weight / 1000.0; // grams -> kg
+          if (birthWeight != null && birthWeight <= 20) birthWeight = birthWeight * 1000.0; // kg -> grams
+          final isLbw = (weight != null && birthWeight != null && weight <= 1.2 && birthWeight <= 1200);
           if (isLbw) c++;
         } catch (_) {}
       }
@@ -275,6 +272,20 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
     } catch (_) {
       return 0;
     }
+  }
+
+  num? _parseNumFlexible(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v;
+    String s = v.toString().trim().toLowerCase();
+    if (s.isEmpty) return null;
+    s = s.replaceAll(RegExp(r'[^0-9\.-]'), '');
+    if (s.isEmpty) return null;
+    final d = double.tryParse(s);
+    if (d != null) return d;
+    final i = int.tryParse(s);
+    if (i != null) return i;
+    return null;
   }
 
   @override

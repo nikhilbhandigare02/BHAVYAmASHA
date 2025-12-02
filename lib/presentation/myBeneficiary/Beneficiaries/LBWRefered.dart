@@ -33,80 +33,62 @@ class _Lbwrefered extends State<Lbwrefered> {
     final db = await DatabaseProvider.instance.database;
 
     try {
-
-      final formsRefKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childRegistrationDue] ??
-              '2ol35gbp7rczyvn6';
-
-      print('🔎 Loading followup_form_data for forms_ref_key (childRegistrationDue): $formsRefKey');
+      print('🔍 Loading LBW children from beneficiaries table (strict AND thresholds)');
 
       final rows = await db.query(
-        FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND is_deleted = 0',
-        whereArgs: [formsRefKey],
+        'beneficiaries_new',
+        where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL)',
       );
 
-      print('🔎 Total rows found in ${FollowupFormDataTable.table} for childRegistrationDue: ${rows.length}');
-
-      for (final row in rows) {
-        try {
-          print('🧾 followup_form_data row => ID: ${row['id']}, household_ref_key: ${row['household_ref_key']}, beneficiary_ref_key: ${row['beneficiary_ref_key']}, forms_ref_key: ${row['forms_ref_key']}');
-          print('🧾 form_json: ${row['form_json']}');
-        } catch (e) {
-          print('Error printing followup_form_data row: $e');
-        }
-      }
+      print('🔎 Beneficiaries fetched: ${rows.length}');
 
       final List<Map<String, dynamic>> lbwChildren = [];
+      int passed = 0;
 
       for (final row in rows) {
         try {
           final hhId = row['household_ref_key']?.toString() ?? '';
           if (hhId.isEmpty) continue;
 
-          final formJsonStr = row['form_json']?.toString() ?? '';
-          if (formJsonStr.isEmpty) continue;
+          final infoStr = row['beneficiary_info']?.toString();
+          if (infoStr == null || infoStr.isEmpty) continue;
 
-          final decoded = jsonDecode(formJsonStr);
-          if (decoded is! Map) continue;
+          Map<String, dynamic>? info;
+          try {
+            final decoded = jsonDecode(infoStr);
+            if (decoded is Map) info = Map<String, dynamic>.from(decoded);
+          } catch (_) {}
+          if (info == null || info!.isEmpty) continue;
 
-          final formData = decoded['form_data'] is Map
-              ? Map<String, dynamic>.from(decoded['form_data'])
-              : <String, dynamic>{};
 
-          if (formData.isEmpty) continue;
+          var weight = _parseNumFlexible(info!['weight'])?.toDouble();
+          var birthWeight = _parseNumFlexible(info!['birthWeight'])?.toDouble();
 
-          final weightStr = formData['weight_grams']?.toString() ?? '';
-          final birthWeightStr = formData['birth_weight_grams']?.toString() ?? '';
 
-          final weight = double.tryParse(weightStr);
-          final birthWeight = double.tryParse(birthWeightStr);
 
-          // Filter: either current weight OR birth weight less than 1600 grams
-          final isLbw = (weight != null && weight < 1600) ||
-              (birthWeight != null && birthWeight < 1600);
-
+          final isLbw = (weight != null && birthWeight != null && weight <= 1.2 && birthWeight <= 1200);
           if (!isLbw) continue;
+          passed++;
 
-          final childName = formData['child_name']?.toString() ?? 'Unknown';
-          final genderRaw = formData['gender'];
-          final dobRaw = formData['date_of_birth'];
+          final name = (info!['name'] ?? info['memberName'] ?? '').toString();
+          final genderRaw = info['gender'];
+          final dobRaw = info['dob'] ?? info['dateOfBirth'];
 
-          final age = _calculateAge(dobRaw);
           final ageGender = _formatAgeGender(dobRaw, genderRaw);
 
           lbwChildren.add({
             'hhId': hhId,
-            'name': childName,
-            'age': age,
+            'name': name.isEmpty ? 'Unknown' : name,
             'age_gender': ageGender,
             'status': 'LBW',
             '_raw': row,
           });
         } catch (e) {
-          print('Error processing LBW child row: $e');
+          print('Error processing beneficiary LBW row: $e');
         }
       }
+
+      print('✅ Beneficiaries passing strict LBW filter: $passed');
 
       setState(() {
         _filtered = lbwChildren;
@@ -166,6 +148,20 @@ class _Lbwrefered extends State<Lbwrefered> {
         : 'Other';
 
     return '$ageDisplay | $displayGender';
+  }
+
+  num? _parseNumFlexible(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v;
+    String s = v.toString().trim().toLowerCase();
+    if (s.isEmpty) return null;
+    s = s.replaceAll(RegExp(r'[^0-9\.-]'), '');
+    if (s.isEmpty) return null;
+    final d = double.tryParse(s);
+    if (d != null) return d;
+    final i = int.tryParse(s);
+    if (i != null) return i;
+    return null;
   }
 
   @override
