@@ -372,6 +372,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+
     if (!_argsHandled) {
       final args = ModalRoute.of(context)?.settings.arguments;
       if (args is Map) {
@@ -1833,48 +1835,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                               ),
                               if (state.useDob)
                                 _section(
-                                  CustomDatePicker(
-                                    initialDate: state.dob,
-                                    firstDate: (state.memberType.toLowerCase() == 'child')
-                                        ? DateTime.now().subtract(const Duration(days: 15 * 365))
-                                        : DateTime.now().subtract(const Duration(days: 110 * 365)),
-                                    lastDate: (state.memberType.toLowerCase() == 'child')
-                                        ? DateTime.now().subtract(const Duration(days: 1))
-                                        : DateTime.now().subtract(const Duration(days: 15 * 365)),
-                                    labelText: '${l.dobLabel} *',
-                                    hintText: l.dateHint,
-                                    onDateChanged: (d) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateDob(d!)),
-                                    validator: (date) {
-                                      if (date == null) {
-                                        return _captureAnmError('Date of birth is required');
-                                      }
-
-                                      final today = DateTime.now();
-                                      final dobDate = DateTime(date.year, date.month, date.day);
-                                      final todayDate = DateTime(today.year, today.month, today.day);
-
-                                      if (dobDate.isAfter(todayDate)) {
-                                        return _captureAnmError('Date of birth cannot be in the future');
-                                      }
-
-                                      // Apply the 1 day–15 years rule only when member type is Child
-                                      final memberType = (state.memberType ?? '').trim().toLowerCase();
-                                      if (memberType == 'child') {
-                                        final diffDays = todayDate.difference(dobDate).inDays;
-
-                                        const int minDays = 1;
-                                        const int maxDays = 15 * 365;
-
-                                        if (diffDays < minDays || diffDays > maxDays) {
-                                          return _captureAnmError('For Child: Age should be between 1 day to 15 years.');
+                                    CustomDatePicker(
+                                      initialDate: state.dob,
+                                      firstDate: (state.memberType.toLowerCase() == 'child')
+                                          ? DateTime.now().subtract(const Duration(days: 15 * 365))
+                                          : DateTime.now().subtract(const Duration(days: 110 * 365)), // 110 years ago
+                                      lastDate: (state.memberType.toLowerCase() == 'child')
+                                          ? DateTime.now()
+                                          : DateTime(now.year - 15, now.month, now.day), // 15 years ago for adults
+                                      onDateChanged: (date) {
+                                        if (date != null) {
+                                          context.read<AddnewfamilymemberBloc>().add(AnmUpdateDob(date));
                                         }
-                                      }
-
-                                      // For adults, no extra age-range restriction beyond not-future
-                                      return null;
-                                    },
-
-                                  ),
+                                      },
+                                    )
                                 )
                               else
                                 _section(

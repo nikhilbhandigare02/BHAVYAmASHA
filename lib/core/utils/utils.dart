@@ -258,8 +258,8 @@ class Utils {
     const userId = 0; // Replace with actual staff ID if needed*/
 
 // Provide by asha team
-    const secretKey = '1c1ba8babab54dfdc85369c4faac68120a5157c8cc6cc43367613f1217be7fe1';
-    const clientId = '6d9c03a466223cfbf76c';
+    const secretKey = 'fd552680cc6109736122c2ff389b6f11c94fedbc9b773a4e009c3b29c9431886';
+    const clientId = '66816ed95497a29b31c9';
 
     const clinicId = 10; // Replace with actual clinic ID or keep as zero
     const userId = 0; // Replace with actual staff ID if needed

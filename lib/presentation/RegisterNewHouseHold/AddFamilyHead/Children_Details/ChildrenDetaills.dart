@@ -86,27 +86,23 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
         builder: (context, state) {
           String? _validateYoungestAge(String raw, {String? overrideUnit}) {
             final unit = overrideUnit ?? state.ageUnit;
-            final gender = state.youngestGender;
             
-            // If either unit or gender is selected but age is empty
-            if ((raw.isEmpty || raw.trim().isEmpty) && 
-                ((unit != null && unit.isNotEmpty) || (gender != null && gender.isNotEmpty))) {
-              return 'Please enter age of youngest child';
-            }
-            
-            // If age is entered but no unit is selected
-            if ((raw.isNotEmpty && raw.trim().isNotEmpty) && (unit == null || unit.isEmpty)) {
-              return 'Please select age unit';
-            }
-            
-            final msg = Validations.validateYoungestChildAge(l, raw, unit);
-            
-            // For the inline validation, we'll show a simpler message
-            if (msg != null) {
-              if (msg.startsWith('Please enter age of Youngest Child')) {
-                return null; // Suppress the long range message for inline validation
+            // Only validate if age is not empty
+            if (raw.isNotEmpty && raw.trim().isNotEmpty) {
+              // If age is entered but no unit is selected
+              if (unit == null || unit.isEmpty) {
+                return 'Please select age unit';
               }
-              return 'Please enter valid age for selected unit';
+              
+              final msg = Validations.validateYoungestChildAge(l, raw, unit);
+              
+              // For the inline validation, we'll show a simpler message
+              if (msg != null) {
+                if (msg.startsWith('Please enter age of Youngest Child')) {
+                  return null; // Suppress the long range message for inline validation
+                }
+                return 'Please enter valid age for selected unit';
+              }
             }
             
             return null;
@@ -245,8 +241,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                         overrideUnit: v,
                       );
                     });
-                  },
-                ),
+                  },                ),
               ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
