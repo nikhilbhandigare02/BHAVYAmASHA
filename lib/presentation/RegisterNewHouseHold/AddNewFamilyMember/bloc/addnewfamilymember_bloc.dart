@@ -246,6 +246,20 @@ class AddnewfamilymemberBloc
           if (d.isNotEmpty) loadedUpdateDay = d;
         }
 
+        // Parse LMP and EDD dates if they exist
+        DateTime? lmpDate = allData['lmp'] != null
+            ? DateTime.tryParse(allData['lmp'])
+            : null;
+        DateTime? eddDate = allData['edd'] != null
+            ? DateTime.tryParse(allData['edd'])
+            : null;
+
+        // Check if 'other' fields exist
+        final otherReligion = allData['otherReligion'] as String?;
+        final otherCategory = allData['otherCategory'] as String?;
+        final otherOccupation = allData['otherOccupation'] as String?;
+        final otherRelation = allData['otherRelation'] as String?;
+
         // Update the state with all the data
         emit(state.copyWith(
           // Map all the fields to the state
@@ -254,6 +268,7 @@ class AddnewfamilymemberBloc
           motherName: allData['motherName'] as String?,
           memberType: allData['memberType'] as String? ?? 'Adult',
           relation: primaryRelation,
+          otherRelation: otherRelation,
           useDob: allData['useDob'] as bool? ?? true,
           dob: loadedDob,
           approxAge: loadedApproxAge,
@@ -262,12 +277,29 @@ class AddnewfamilymemberBloc
           gender: allData['gender'] as String?,
           bankAcc: allData['bankAcc'] as String?,
           ifsc: allData['ifsc'] as String?,
+          // Handle occupation and other occupation
           occupation: allData['occupation'] as String?,
+          otherOccupation: allData['otherOccupation'] as String? ?? 
+                         (allData['occupation_other'] as String?),
+          
           education: allData['education'] as String?,
+          
+          // Handle religion and other religion
           religion: allData['religion'] as String?,
+          otherReligion: allData['otherReligion'] as String? ?? 
+                       (allData['religion_other'] as String?),
+          
+          // Handle category and other category
           category: allData['category'] as String?,
+          otherCategory: allData['otherCategory'] as String? ?? 
+                       (allData['category_other'] as String?),
+          
           abhaAddress: allData['abhaAddress'] as String?,
+          
+          // Handle mobile owner and relation
           mobileOwner: allData['mobileOwner'] as String?,
+          mobileOwnerRelation: allData['mobileOwnerRelation'] as String? ?? 
+                            (allData['mobile_owner_relation'] as String?),
           mobileNo: allData['mobileNo'] as String?,
           voterId: allData['voterId'] as String?,
           rationId: allData['rationId'] as String?,
@@ -276,8 +308,10 @@ class AddnewfamilymemberBloc
           maritalStatus: allData['maritalStatus'] as String?,
           ageAtMarriage: allData['ageAtMarriage'] as String?,
           spouseName: allData['spouseName'] as String?,
-          hasChildren: allData['hasChildren'] as String?,
+          hasChildren: (allData['hasChildren'] ?? allData['have_children']) as String?,
           isPregnant: allData['isPregnant'] as String?,
+          lmp: lmpDate,
+          edd: eddDate,
           updateDay: loadedUpdateDay,
           updateMonth: loadedUpdateMonth,
           updateYear: loadedUpdateYear,
@@ -296,7 +330,29 @@ class AddnewfamilymemberBloc
           otherDeathReason: allData['other_death_reason'] as String?,
           deathPlace: allData['death_place'] as String?,
         ));
+        // Handle family planning and pregnancy related fields
+        final isFamilyPlanning = allData['isFamilyPlanning'] == true || allData['isFamilyPlanning'] == 'true';
+        final familyPlanningMethod = allData['familyPlanningMethod'] as String?;
+        final fpMethod = allData['fpMethod'] as String?;
+        final antraDate = allData['antraDate'] != null ? DateTime.tryParse(allData['antraDate']) : null;
+        final removalDate = allData['removalDate'] != null ? DateTime.tryParse(allData['removalDate']) : null;
+        final removalReason = allData['removalReason'] as String?;
+        final condomQuantity = allData['condomQuantity'] as String?;
+        final malaQuantity = allData['malaQuantity'] as String?;
+        final chhayaQuantity = allData['chhayaQuantity'] as String?;
+        final ecpQuantity = allData['ecpQuantity'] as String?;
+
         emit(state.copyWith(
+          isFamilyPlanning: isFamilyPlanning ? 'Yes' : 'No',
+          familyPlanningMethod: familyPlanningMethod,
+          fpMethod: fpMethod,
+          antraDate: antraDate,
+          removalDate: removalDate,
+          removalReason: removalReason,
+          condomQuantity: condomQuantity,
+          malaQuantity: malaQuantity,
+          chhayaQuantity: chhayaQuantity,
+          ecpQuantity: ecpQuantity,
           otherRelation: allData['otherRelation'] as String?,
           mobileOwnerRelation: allData['mobileOwnerRelation'] as String?,
         ));
@@ -799,8 +855,9 @@ class AddnewfamilymemberBloc
             'weight': state.WeightChange,
             'childSchool': state.ChildSchool,
             'birthCertificate': state.BirthCertificateChange,
-          'birthWeight': state.birthWeight,
+            'birthWeight': state.birthWeight,
             'abhaAddress': state.abhaAddress,
+            'abhaNumber': state.abhaAddress,
             'mobileOwner': state.mobileOwner,
             'mobileOwnerRelation': state.mobileOwnerRelation,
             'mobileNo': state.mobileNo,
@@ -813,8 +870,22 @@ class AddnewfamilymemberBloc
             'spouseName': state.spouseName,
             'hasChildren': state.hasChildren,
             'isPregnant': state.isPregnant,
+            'lmp': state.lmp?.toIso8601String(),
             'isFamilyPlanning': state.isFamilyPlanning,
             'familyPlanningMethod': state.familyPlanningMethod,
+            'other_occupation': state.otherOccupation,
+            'other_religion': state.otherReligion,
+            'other_category': state.otherCategory,
+            'mobile_owner_relation': state.mobileOwnerRelation,
+            // 'education': state.education,
+            // 'occupation': state.occupation,
+            // 'religion': state.religion,
+            // 'category': state.category,
+            // 'memberType': state.memberType,
+            'years': state.updateYear,
+            'months': state.updateMonth,
+            'days': state.updateDay,
+            // 'gender': state.gender,
             'fpMethod': state.fpMethod,
             'removalDate': state.removalDate?.toIso8601String(),
             'removalReason': state.removalReason,
@@ -899,7 +970,6 @@ class AddnewfamilymemberBloc
           }
         }
         
-        // If this is a child with registration_due status, insert into child_care_activities
         if (state.memberType?.toLowerCase() == 'child' && beneficiaryState == 'registration_due') {
           try {
             final childCareActivityData = {
@@ -964,6 +1034,11 @@ class AddnewfamilymemberBloc
                 'education': spousState.education,
                 'religion': spousState.religion,
                 'category': spousState.category,
+                'mobileOwnerOtherRelation': spousState.mobileOwnerOtherRelation,
+                'otherCategory': spousState.otherCategory,
+                'otherReligion': spousState.otherReligion,
+                'otherOccupation': spousState.otherOccupation,
+                'antraDate':spousState.antraDate,
                 'abhaAddress': spousState.abhaAddress,
                 'mobileOwner': spousState.mobileOwner,
                 'mobileNo': spousState.mobileNo,

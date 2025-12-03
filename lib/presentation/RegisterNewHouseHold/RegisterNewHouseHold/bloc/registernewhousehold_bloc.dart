@@ -134,7 +134,6 @@ class RegisterNewHouseholdBloc
           print('Error getting package/device info: $e');
         }
 
-        // --- INSERT / UPDATE HEAD & SPOUSE BENEFICIARY FROM headForm ---
         final headForm = event.headForm ?? {};
         final String existingHeadKey = (headForm['head_unique_key'] ?? '')
             .toString();
@@ -144,8 +143,6 @@ class RegisterNewHouseholdBloc
             .toString();
         final bool isEdit = existingHeadKey.isNotEmpty;
 
-        // Will hold the newly generated household key for this save operation
-        // so we can reuse it later when inserting/updating the households table.
         String? newHouseholdKey;
 
         if (headForm.isNotEmpty) {
@@ -169,8 +166,7 @@ class RegisterNewHouseholdBloc
 
             if (!isEdit) {
               final uniqueKey = await IdGenerator.generateUniqueId(deviceInfo);
-              // Remember this generated household key so it can be used
-              // directly as households.unique_key later in the flow.
+
               newHouseholdKey = uniqueKey;
               final headId = await IdGenerator.generateUniqueId(deviceInfo);
 
@@ -200,7 +196,12 @@ class RegisterNewHouseholdBloc
               'spouseName': headForm['spouseName'],
               'education': headForm['education'],
               'occupation': headForm['occupation'],
+              'other_occupation': headForm['otherOccupation'],
               'religion': headForm['religion'],
+              'other_religion': headForm['otherReligion'],
+              'category': headForm['category'],
+              'other_category': headForm['otherCategory'],
+              'mobile_owner_relation': headForm['mobileOwnerOtherRelation'],
               'category': headForm['category'],
               'hasChildren': headForm['hasChildren'],
               'isPregnant': headForm['isPregnant'],
@@ -409,9 +410,7 @@ class RegisterNewHouseholdBloc
               // --- INSERT SPOUSE BENEFICIARY IF MARRIED & SPOUSE NAME PRESENT ---
               if (hasSpouse && spouseKey != null) {
                 try {
-                  // Prefer the full spouse payload from SpousBloc (spousedetails)
-                  // when available (edit flow), otherwise fall back to sp_* keys
-                  // from headForm (new registration flow).
+
                   Map<String, dynamic> spDetails = {};
                   final spRaw = headForm['spousedetails'];
                   if (spRaw is Map) {
@@ -436,6 +435,9 @@ class RegisterNewHouseholdBloc
                   'dob': spDetails['dob'] ?? headForm['sp_dob'],
                   'edd': spDetails['edd'] ?? headForm['sp_edd'],
                   'lmp': spDetails['lmp'] ?? headForm['sp_lmp'],
+                  'years': spDetails['years'] ?? headForm['sp_years'],
+                  'months': spDetails['months'] ?? headForm['sp_months'],
+                  'days': spDetails['days'] ?? headForm['sp_days'],
                   'approxAge': spDetails['approxAge'] ?? headForm['sp_approxAge'],
                   'gender': spDetails['gender'] ?? headForm['sp_gender'] ??
                       ((headForm['gender'] == 'Male')
@@ -444,12 +446,17 @@ class RegisterNewHouseholdBloc
                           ? 'Male'
                           : null),
                   'occupation': spDetails['occupation'] ?? headForm['sp_occupation'],
+                  'otherOccupation': spDetails['otherOccupation'] ?? headForm['sp_otherOccupation'],
                   'education': spDetails['education'] ?? headForm['sp_education'],
                   'religion': spDetails['religion'] ?? headForm['sp_religion'],
+                  'otherReligion': spDetails['otherReligion'] ?? headForm['sp_otherReligion'],
                   'category': spDetails['category'] ?? headForm['sp_category'],
+                  'otherCategory': spDetails['otherCategory'] ?? headForm['sp_otherCategory'],
                   'abhaAddress': spDetails['abhaAddress'] ?? headForm['sp_abhaAddress'],
+                  'abhaNumber': spDetails['abhaNumber'] ?? headForm['sp_abhaNumber'],
                   'mobileOwner': spDetails['mobileOwner'] ?? headForm['sp_mobileOwner'],
                   'mobileNo': spDetails['mobileNo'] ?? headForm['sp_mobileNo'],
+                  'mobileOwnerOtherRelation': spDetails['mobileOwnerOtherRelation'] ?? headForm['sp_mobileOwnerOtherRelation'],
                   'bankAcc': spDetails['bankAcc'] ?? headForm['sp_bankAcc'],
                   'ifsc': spDetails['ifsc'] ?? headForm['sp_ifsc'],
                   'voterId': spDetails['voterId'] ?? headForm['sp_voterId'],
@@ -464,12 +471,17 @@ class RegisterNewHouseholdBloc
                       ? 1
                       : 0,
                   'fpMethod': spDetails['fpMethod'] ?? headForm['sp_fpMethod'],
-                  'removalDate': spDetails['removalDate'] ?? headForm['sp_removalDate'],
+                  'removalDate': spDetails['removalDate'] is DateTime 
+                      ? (spDetails['removalDate'] as DateTime).toIso8601String() 
+                      : spDetails['removalDate'] ?? headForm['sp_removalDate'],
                   'removalReason': spDetails['removalReason'] ?? headForm['sp_removalReason'],
                   'condomQuantity': spDetails['condomQuantity'] ?? headForm['sp_condomQuantity'],
                   'malaQuantity': spDetails['malaQuantity'] ?? headForm['sp_malaQuantity'],
                   'chhayaQuantity': spDetails['chhayaQuantity'] ?? headForm['sp_chhayaQuantity'],
                   'ecpQuantity': spDetails['ecpQuantity'] ?? headForm['sp_ecpQuantity'],
+                  'antraDate': spDetails['antraDate'] is DateTime 
+                      ? (spDetails['antraDate'] as DateTime).toIso8601String() 
+                      : spDetails['antraDate'] ?? headForm['sp_antraDate'],
                   'maritalStatus': 'Married',
                   'relation_to_head': 'spouse',
                   // Children summary mirrored for spouse as in AddFamilyHeadBloc
@@ -580,9 +592,7 @@ class RegisterNewHouseholdBloc
 
 
             if (isEdit) {
-              // ============================
-              // UPDATE EXISTING HEAD BENEFICIARY
-              // ============================
+
               final existingHead =
               await LocalStorageDao.instance.getBeneficiaryByUniqueKey(
                   existingHeadKey);
@@ -927,30 +937,27 @@ class RegisterNewHouseholdBloc
                   'memberType': memberType,
                   'relation': relation,
                   'otherRelation': member['otherRelation'],
+                  'memberStatus': member['memberStatus'] ?? 'active',
                   'name': name,
                   'fatherName': member['fatherName'],
                   'motherName': member['motherName'],
-                  'useDob': member['useDob'],
+                  'updateYear': member['updateYear'],
+                  'updateMonth': member['updateMonth'],
+                  'updateDay': member['updateDay'],
+                  'useDob': member['useDob'] ?? true,
                   'dob': member['dob'],
                   'approxAge': member['approxAge'],
-                  'updateDay': member['updateDay'],
-                  'updateMonth': member['updateMonth'],
-                  'updateYear': member['updateYear'],
-                  'children': member['children'],
                   'birthOrder': member['birthOrder'],
                   'gender': member['gender'],
                   'bankAcc': member['bankAcc'],
                   'ifsc': member['ifsc'],
                   'occupation': member['occupation'],
+                  'otherOccupation': member['otherOccupation'],
                   'education': member['education'],
                   'religion': member['religion'],
+                  'otherReligion': member['otherReligion'],
                   'category': member['category'],
-                  'weight': member['WeightChange'] ?? member['weight'],
-                  'childSchool':
-                      member['ChildSchool'] ?? member['childSchool'],
-                  'birthCertificate': member['BirthCertificateChange'] ??
-                      member['birthCertificate'],
-                  'birthWeight': member['birthWeight'],
+                  'otherCategory': member['otherCategory'],
                   'abhaAddress': member['abhaAddress'],
                   'mobileOwner': member['mobileOwner'],
                   'mobileOwnerRelation': member['mobileOwnerRelation'],
@@ -964,15 +971,28 @@ class RegisterNewHouseholdBloc
                   'spouseName': member['spouseName'],
                   'hasChildren': member['hasChildren'],
                   'isPregnant': member['isPregnant'],
-
-                  // Inline member spouse details captured in AddNewFamilyMember
-                  // so they are not lost when saving the household.
-                  'spousedetails': member['spousedetails'],
-                  'spouseUseDob': member['spouseUseDob'],
-                  'spouseDob': member['spouseDob'],
-                  'spouseApproxAge': member['spouseApproxAge'],
-
-                  'memberStatus': memberStatus,
+                  'isFamilyPlanning': member['isFamilyPlanning'],
+                  'familyPlanningMethod': member['familyPlanningMethod'],
+                  'fpMethod': member['fpMethod'],
+                  'antraDate': member['antraDate'],
+                  'removalDate': member['removalDate'],
+                  'removalReason': member['removalReason'],
+                  'condomQuantity': member['condomQuantity'],
+                  'malaQuantity': member['malaQuantity'],
+                  'chhayaQuantity': member['chhayaQuantity'],
+                  'ecpQuantity': member['ecpQuantity'],
+                  'lmp': member['lmp'],
+                  'edd': member['edd'],
+                  'dateOfDeath': member['dateOfDeath'],
+                  'deathPlace': member['deathPlace'],
+                  'deathReason': member['deathReason'],
+                  'otherDeathReason': member['otherDeathReason'],
+                  'WeightChange': member['WeightChange'],
+                  'birthWeight': member['birthWeight'],
+                  'ChildSchool': member['ChildSchool'],
+                  'BirthCertificateChange': member['BirthCertificateChange'],
+                  'RichIDChanged': member['RichIDChanged'],
+                  'children': member['children'],
                   'relation_to_head': relation,
                   'isFamilyhead': false,
                   'isFamilyheadWife': false,
@@ -1183,6 +1203,11 @@ class RegisterNewHouseholdBloc
                           'education': spMap['education'],
                           'religion': spMap['religion'],
                           'category': spMap['category'],
+                          'antraDate': spMap['antraDate'],
+                          'mobileOwnerOtherRelation': spMap['mobileOwnerOtherRelation'],
+                          'otherCategory': spMap['otherCategory'],
+                          'otherReligion': spMap['otherReligion'],
+                          'otherOccupation': spMap['otherOccupation'],
                           'abhaAddress': spMap['abhaAddress'],
                           'mobileOwner': spMap['mobileOwner'],
                           'mobileNo': spMap['mobileNo'],
