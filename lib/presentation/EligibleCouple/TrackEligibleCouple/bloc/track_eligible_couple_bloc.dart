@@ -37,6 +37,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
     if (isProtected) {
       _loadPreviousFormData();
     }
+    _loadPreviousFormDataFromDb();
     on<VisitDateChanged>((event, emit) {
       final fy = _deriveFinancialYear(event.date);
       emit(state.copyWith(visitDate: event.date, financialYear: fy, status: state.isValid ? FormStatus.valid : FormStatus.initial, clearError: true));
@@ -160,6 +161,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         final chhaya = formData['chhaya_quantity']?.toString();
         final ecp = formData['ecp_quantity']?.toString();
         final removalReason = formData['removal_reason']?.toString();
+        final removalDate = parseDate(formData['removal_date']);
         final fpAdoptionDate = parseDate(formData['fp_adoption_date']);
         final antraInjectionDate = parseDate(formData['antra_injection_date']);
 
@@ -175,6 +177,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           chhaya: chhaya,
           ecp: ecp,
           removalReasonChanged: removalReason,
+          removalDate: removalDate,
           fpAdoptionDate: fpAdoptionDate,
           antraInjectionDateChanged: antraInjectionDate,
         ));
@@ -525,5 +528,30 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
       print('Error loading previous form data: $e');
       print('Stack trace: $stackTrace');
     }
+  }
+
+  Future<void> _loadPreviousFormDataFromDb() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final formsRefKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
+      if (formsRefKey.isEmpty) return;
+      final beneficiaryKey = state.beneficiaryRefKey ?? state.beneficiaryId;
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0',
+        whereArgs: [formsRefKey, beneficiaryKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+      if (rows.isEmpty) return;
+      final r = rows.first;
+      final s = r['form_json']?.toString() ?? '';
+      if (s.isEmpty) return;
+      final decoded = jsonDecode(s);
+      if (decoded is Map && decoded['form_data'] is Map) {
+        final fd = Map<String, dynamic>.from(decoded['form_data']);
+        add(LoadPreviousFormData(fd));
+      }
+    } catch (_) {}
   }
 }

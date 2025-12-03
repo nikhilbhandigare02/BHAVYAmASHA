@@ -11,6 +11,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/utils/enums.dart';
+import '../../../core/widgets/SnackBar/app_snackbar.dart';
 import 'PreviousVisits.dart';
 import 'bloc/track_eligible_couple_bloc.dart';
 
@@ -50,13 +51,13 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
       child: BlocListener<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
         listener: (context, state) {
           if (state.status == FormStatus.success) {
-            if (state.fpAdopting == true) {
+            if (state.isPregnant == true) {
               showConfirmationDialog(
                 context: context,
                 title: 'Form has been saved successfully',
                 message:
                 'Pregnant beneficiary has been added to antenatal care (ANC) list.',
-                yesText: 'Yes',
+                yesText: 'Okay',
                 onYes: () => Navigator.pop(context),
                 titleBackgroundColor: AppColors.background,
                 titleTextColor: AppColors.primary,
@@ -65,6 +66,7 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
                 dialogBackgroundColor: Colors.white,
               );
             } else {
+              showAppSnackBar(context, 'Form saved successfully');
               Navigator.of(context).pop(true);
             }
           }
@@ -243,11 +245,11 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         labelText: 'Method of contraception' ?? 'गर्भनिरोधक का तरीका',
                         items: const [
                           'Condom',
-                          'Mala -N (Daily Contraceptive pill)',
-                          'Atra injection',
+                          'Mala -N (Daily contraceptive pill)',
+                          'Atra Injection',
                           'Copper -T (IUCD)',
-                          'Chhaya (Weekly Contraceptive pill)',
-                          'ECP (Emergency Contraceptive pill)',
+                          'Chhaya (Weekly contraceptive pill)',
+                          'ECP (Emergency contraceptive pill)',
                           'Male Sterilization',
                           'Female Sterilization',
                           'Any Other Specify'
@@ -265,11 +267,11 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
 
-                    if (state.fpMethod == 'Atra injection') ...[
+                    if (state.fpMethod == 'Atra Injection' && state.fpAdopting == true) ...[
                       CustomDatePicker(
                         labelText: 'Date of Antra Injection',
                         hintText: 'dd-mm-yyyy',
-                        initialDate: null,
+                        initialDate: state.antraInjectionDateChanged,
                         firstDate: DateTime(1900),
                         lastDate: DateTime(2100),
                         onDateChanged: (date) {
@@ -283,10 +285,11 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
 
-                    if (state.fpMethod == 'Copper -T (IUCD)') ...[
+
+                    if (state.fpMethod == 'Copper -T (IUCD)' && state.fpAdopting == true) ...[
                       CustomDatePicker(
                         labelText: 'Date of removal',
-                        initialDate: DateTime.now(),
+                        initialDate: state.removalDate ?? DateTime.now(),
                         firstDate: DateTime(1900),
                         lastDate: DateTime(2100),
                         onDateChanged: (date) {
@@ -301,6 +304,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       CustomTextField(
                         labelText: 'Reason for Removal',
                         hintText: 'Enter reason for removal',
+                        initialValue: state.removalReasonChanged,
                         onChanged: (value) {
                           context
                               .read<TrackEligibleCoupleBloc>()
@@ -310,15 +314,57 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
 
-                    if (state.fpMethod == 'Condom') ...[
+                    if (state.fpMethod == 'Condom' && state.fpAdopting == true) ...[
                       CustomTextField(
                         labelText: 'Quantity of Condoms',
-                        hintText: 'Enter quantity',
+                        hintText: 'Quantity of condoms',
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
                           context
                               .read<TrackEligibleCoupleBloc>()
                               .add(CondomQuantity(value));
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+                    if (state.fpMethod == 'Chhaya (Weekly contraceptive pill)' && state.fpAdopting == true) ...[
+                      CustomTextField(
+                        labelText: 'Quantity of Chhaya (Weekly contraceptive pill)',
+                        hintText: 'Quantity of Chhaya (Weekly contraceptive pill)',
+                        keyboardType: TextInputType.number,
+                        initialValue: state.chhaya,
+                        onChanged: (value) {
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(ChayaQuantity(value));
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+                    if (state.fpMethod == 'ECP (Emergency contraceptive pill)' && state.fpAdopting == true) ...[
+                      CustomTextField(
+                        labelText: 'Quantity of ECP (Emergency contraceptive pill)',
+                        hintText: 'Quantity of ECP (Emergency contraceptive pill)',
+                        keyboardType: TextInputType.number,
+                        initialValue: state.ecp,
+                        onChanged: (value) {
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(ECPQuantity(value));
+                        },
+                      ),
+                      const Divider(thickness: 1, color: Colors.grey),
+                    ],
+                    if (state.fpMethod == 'Mala -N (Daily contraceptive pill)' && state.fpAdopting == true) ...[
+                      CustomTextField(
+                        labelText: 'Quantity of Mala -N (Daily contraceptive pill)',
+                        hintText: 'Quantity of Mala -N (Daily contraceptive pill)',
+                        keyboardType: TextInputType.number,
+                        initialValue: state.mala,
+                        onChanged: (value) {
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(MalaQuantity(value));
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),

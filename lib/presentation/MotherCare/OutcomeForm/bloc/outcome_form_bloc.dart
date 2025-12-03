@@ -32,6 +32,12 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     on<DeliveryTimeChanged>((event, emit) {
       emit(state.copyWith(deliveryTime: event.time, errorMessage: null));
     });
+    on<DischargeDateChanged>((event, emit) {
+      emit(state.copyWith(dischargeDate: event.date, errorMessage: null));
+    });
+    on<DischargeTimeChanged>((event, emit) {
+      emit(state.copyWith(dischargeTime: event.time, errorMessage: null));
+    });
     on<PlaceOfDeliveryChanged>((event, emit) {
       emit(state.copyWith(placeOfDelivery: event.value, errorMessage: null));
     });
@@ -50,6 +56,9 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     on<FamilyPlanningCounselingChanged>((event, emit) {
       emit(state.copyWith(familyPlanningCounseling: event.value, errorMessage: null));
     });
+    on<AdaptFpMethodChanged>((event, emit) {
+      emit(state.copyWith(adaptFpMethod: event.value, errorMessage: null));
+    });
     on<InstitutionalPlaceTypeChanged>((event, emit) {
       emit(state.copyWith(institutionalPlaceType: event.value, errorMessage: null));
     });
@@ -58,6 +67,9 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     });
     on<ConductedByChanged>((event, emit) {
       emit(state.copyWith(conductedBy: event.value, errorMessage: null));
+    });
+    on<OtherConductedByNameChanged>((event, emit) {
+      emit(state.copyWith(otherConductedByName: event.value, errorMessage: null));
     });
     on<TypeOfDeliveryChanged>((event, emit) {
       emit(state.copyWith(typeOfDelivery: event.value, errorMessage: null));
@@ -70,6 +82,9 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     });
     on<RemovalDateChanged>((event, emit) {
       emit(state.copyWith(removalDate: event.date, errorMessage: null));
+    });
+    on<AntraDateChanged>((event, emit) {
+      emit(state.copyWith(antraDate: event.date, errorMessage: null));
     });
     on<RemovalReasonChanged>((event, emit) {
       emit(state.copyWith(removalReason: event.reason, errorMessage: null));
@@ -165,12 +180,15 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               'delivery_date': state.deliveryDate?.toIso8601String(),
               'gestation_weeks': state.gestationWeeks,
               'delivery_time': state.deliveryTime,
+              'discharge_date': state.dischargeDate?.toIso8601String(),
+              'discharge_time': state.dischargeTime,
               'place_of_delivery': state.placeOfDelivery,
               'other_place_of_delivery_name': state.otherPlaceOfDeliveryName,
               // Add new institutional delivery fields
               'institutional_place_type': state.institutionalPlaceType,
               'institutional_place_of_delivery': state.institutionalPlaceOfDelivery,
               'conducted_by': state.conductedBy,
+              'other_conducted_by_name': state.otherConductedByName,
               'type_of_delivery': state.typeOfDelivery,
               'had_complications': state.hadComplications,
               'non_institutional_place_type': state.nonInstitutionalPlaceType,
@@ -183,7 +201,9 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               'other_complication_name': state.otherComplicationName,
               'outcome_count': state.outcomeCount,
               'family_planning_counseling': state.familyPlanningCounseling,
+              'adapt_fp_method': state.adaptFpMethod,
               'fp_method': state.fpMethod,
+              'antra_date': state.antraDate?.toIso8601String(),
               'removal_date': state.removalDate?.toIso8601String(),
               'removal_reason': state.removalReason,
               'condom_quantity': state.condomQuantity,

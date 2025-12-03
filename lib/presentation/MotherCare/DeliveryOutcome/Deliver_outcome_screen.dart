@@ -15,6 +15,7 @@ import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../HomeScreen/HomeScreen.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../OutcomeForm/OutcomeForm.dart';
+import '../../../core/widgets/SnackBar/app_snackbar.dart';
 
 class DeliveryOutcomeScreen extends StatefulWidget {
   const DeliveryOutcomeScreen({super.key});
@@ -30,13 +31,23 @@ class _DeliveryOutcomeScreenState
 
   List<Map<String, dynamic>> _allData = []; // Store all loaded data
   List<Map<String, dynamic>> _filtered = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
+  DateTime? _lastRefresh;
 
   @override
   void initState() {
     super.initState();
     _loadPregnancyOutcomeeCouples();
     _searchCtrl.addListener(_onSearchChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh every time this screen becomes active
+    if (_lastRefresh == null || DateTime.now().difference(_lastRefresh!).inMilliseconds > 300) {
+      _loadPregnancyOutcomeeCouples();
+    }
   }
 
   @override
@@ -47,7 +58,9 @@ class _DeliveryOutcomeScreenState
   }
 
   Future<void> _loadPregnancyOutcomeeCouples() async {
+    if (_isLoading) return;
     setState(() { _isLoading = true; });
+    _lastRefresh = DateTime.now();
 
     try {
       final db = await DatabaseProvider.instance.database;
@@ -461,16 +474,12 @@ class _DeliveryOutcomeScreenState
     return Scaffold(
       appBar: AppHeader(
         screenTitle: 'Delivery Outcome List',
-        showBack: false,
-        icon1Image: 'assets/images/home.png',
-        onIcon1Tap: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(initialTabIndex: 1),
-          ),
-        ),
+        showBack: true,
+
+
+
       ),
-      drawer: const CustomDrawer(),
+
       body: Column(
         children: [
           // Search Field
@@ -584,9 +593,7 @@ class _DeliveryOutcomeScreenState
 
             if ((beneficiaryData['BeneficiaryID'] as String?)?.isEmpty ?? true) {
               print('❌ No BeneficiaryID could be determined!');
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Error: Missing beneficiary information')),
-              );
+              showAppSnackBar(context, 'Error: Missing beneficiary information');
               return;
             }
 
@@ -601,7 +608,9 @@ class _DeliveryOutcomeScreenState
                   },
                 ),
               ),
-            );
+            ).then((_) {
+              _loadPregnancyOutcomeeCouples();
+            });
           },
           borderRadius: BorderRadius.circular(8),
           child: Container(

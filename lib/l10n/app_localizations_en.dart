@@ -2940,7 +2940,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gestationWeeks => 'Number of weeks of pregnancy during delivery';
 
   @override
-  String get deliveryTime => 'Delivery Time (hh:mm)';
+  String get deliveryTime => 'Time of Delivery (hh:mm)';
 
   @override
   String get deliveryTimeHint => 'hh:mm';
@@ -2949,7 +2949,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get placeOfDelivery => 'Place of Delivery';
 
   @override
-  String get selectPlaceOfDelivery => 'Select Place of Delivery *';
+  String get selectPlaceOfDelivery => ' Place of Delivery *';
 
   @override
   String get selectOption => 'Select';
@@ -2973,7 +2973,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privateHospital => 'Private Hospital';
 
   @override
-  String get deliveryType => 'Type of Delivery *';
+  String get deliveryType => 'Type of delivery *';
 
   @override
   String get normalDelivery => 'Normal';
@@ -2982,13 +2982,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cesareanDelivery => 'Cesarean';
 
   @override
-  String get assistedDelivery => 'Assisted (Vacuum/Forceps)';
+  String get assistedDelivery => 'Assisted /Forceps';
 
   @override
   String get complications => 'Complications during delivery? *';
 
   @override
-  String get outcomeCount => 'Number of Outcomes *';
+  String get outcomeCount => 'Delivery Outcomes *';
 
   @override
   String get familyPlanningCounseling => 'Family Planning Counseling Provided?';

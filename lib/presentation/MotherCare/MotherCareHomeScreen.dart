@@ -497,7 +497,6 @@ class _FeatureCard extends StatelessWidget {
   final String image;
   final VoidCallback onClick;
   final double width;
-
   const _FeatureCard({
     required this.title,
     required this.count,
@@ -505,13 +504,11 @@ class _FeatureCard extends StatelessWidget {
     required this.onClick,
     required this.width,
   });
-
   @override
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
     final double cardHeight = 15.h;
     final scaleFactor = MediaQuery.of(context).textScaleFactor;
-
     return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(10),
@@ -525,35 +522,35 @@ class _FeatureCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(1.h),
             child: Column(
-
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Image.asset(
                       image,
-                      width: 29 * scaleFactor,
-                      height: 29 * scaleFactor,
+                      width: 28 * scaleFactor,
+                      height: 28 * scaleFactor,
                       fit: BoxFit.contain,
                     ),
-                    const SizedBox(width: 8),
+                    const Spacer(),
                     Text(
                       '$count',
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13.sp,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ],
                 ),
-
                 SizedBox(height: 1.5.h,),
                 Text(
                   title,
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(

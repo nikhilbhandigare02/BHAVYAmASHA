@@ -274,7 +274,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     const Day(id: 6, name: 'Saturday'),
     const Day(id: 7, name: 'Sunday'),
   ];
-  String? uniqueKey; // To store existing unique_key when editing
+  String? uniqueKey;
 
   @override
   void initState() {
