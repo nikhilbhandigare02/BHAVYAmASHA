@@ -49,25 +49,17 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
     try {
       developer.log('Loading user data from secure storage...', name: 'Drawer');
-      final data = await SecureStorageService.getCurrentUserData();
-      developer.log('User data loaded: ${data != null}', name: 'Drawer');
-
+      
+      // First try to get current user data
+      Map<String, dynamic>? data = await SecureStorageService.getCurrentUserData();
+      
+      // If no data found, try the legacy format
       if (data == null || data.isEmpty) {
-        developer.log('No user data found in secure storage, trying legacy format...', name: 'Drawer');
-        // Try to get legacy format data
+        developer.log('No current user data found, trying legacy format...', name: 'Drawer');
         final legacyData = await SecureStorageService.getUserData();
         if (legacyData != null && legacyData.isNotEmpty) {
           try {
-            final parsedData = jsonDecode(legacyData);
-            if (parsedData is Map<String, dynamic>) {
-              if (mounted) {
-                setState(() {
-                  userData = parsedData;
-                  isLoading = false;
-                });
-                return;
-              }
-            }
+            data = jsonDecode(legacyData) as Map<String, dynamic>?;
           } catch (e) {
             developer.log('Error parsing legacy user data: $e', name: 'Drawer', error: e);
           }
@@ -93,15 +85,25 @@ class _CustomDrawerState extends State<CustomDrawer> {
   String _getFullName() {
     if (userData == null) return '-';
     try {
-      // Try to get name from nested structure
+      // Handle different possible structures
       if (userData!['name'] is Map) {
         final name = userData!['name'] as Map;
-        return '${name['first_name'] ?? ''} ${name['middle_name'] ?? ''} ${name['last_name'] ?? ''}'.trim().replaceAll('  ', ' ');
+        return [
+          name['first_name'],
+          name['middle_name'],
+          name['last_name']
+        ].where((part) => part != null).join(' ').trim();
       }
-      // Fallback to direct fields if not in nested structure
-      return '${userData!['first_name'] ?? ''} ${userData!['middle_name'] ?? ''} ${userData!['last_name'] ?? ''}'.trim().replaceAll('  ', ' ');
+      
+      // Try direct fields
+      return [
+        userData!['first_name'],
+        userData!['middle_name'],
+        userData!['last_name'],
+        userData!['name']  // Fallback to name if it's a string
+      ].where((part) => part != null && part is String).join(' ').trim();
     } catch (e) {
-      print('Error getting full name: $e');
+      developer.log('Error getting full name: $e', name: 'Drawer');
       return '-';
     }
   }

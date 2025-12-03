@@ -1641,8 +1641,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           if (result == true && mounted) {
             setState(() {
               _completedVisitsCount++;
+              // Remove the item from the eligible couple items list
+              _eligibleCoupleItems.removeWhere((element) => 
+                element['id'] == item['id'] && 
+                element['beneficiaryId'] == item['beneficiaryId']
+              );
             });
-            _loadEligibleCoupleItems();
             _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'ANC') {
@@ -1668,8 +1672,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           if (result == true && mounted) {
             setState(() {
               _completedVisitsCount++;
+              // Remove the item from the ANC items list
+              _ancItems.removeWhere((element) => 
+                element['unique_key'] == item['unique_key'] && 
+                element['BeneficiaryID'] == item['BeneficiaryID']
+              );
             });
-            _loadAncItems();
             _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'HBNC') {
@@ -1695,7 +1703,13 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           );
 
           if (result == true && mounted) {
-            await _loadHbncItems();
+            setState(() {
+              _completedVisitsCount++;
+              // Remove the item from the HBNC items list
+              _hbncItems.removeWhere((element) => 
+                element['fullBeneficiaryId'] == item['fullBeneficiaryId']
+              );
+            });
             _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'RI') {
@@ -1719,7 +1733,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'mobile_number': item['mobile']?.toString() ?? '',
           };
 
-          await Navigator.push(
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const ChildTrackingDueListForm(),
@@ -1728,6 +1742,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               }),
             ),
           );
+
+          if (result == true && mounted) {
+            setState(() {
+              _completedVisitsCount++;
+              // Remove the item from the RI items list
+              _riItems.removeWhere((element) => 
+                element['id'] == item['id'] && 
+                element['BeneficiaryID'] == item['BeneficiaryID']
+              );
+            });
+            _saveTodayWorkCountsToStorage();
+          }
         }
       },
       borderRadius: BorderRadius.circular(4),
