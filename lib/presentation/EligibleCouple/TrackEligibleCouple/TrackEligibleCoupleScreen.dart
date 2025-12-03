@@ -176,7 +176,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         initialDate: lmp,
                         onDateChanged: (date) {
                           if (date != null) {
-                            final edd = DateTime(date.year, date.month + 9, date.day + 5);
+                            final edd = date.add(const Duration(days: 277));
                             context.read<TrackEligibleCoupleBloc>()
                               ..add(LmpDateChanged(date))
                               ..add(EddDateChanged(edd));
