@@ -1153,7 +1153,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                                if (state.deliveryOutcome == "Live birth") ...[
+                                if (state.deliveryOutcome == "Live birth" && state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) ...[
                                   ApiDropdown<String>(
                                     labelText: 'Number of Children *',
                                     items: ["One Child", "Twins", "Triplets"],
@@ -1165,7 +1165,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                 ],
-                                if (state.numberOfChildren == "One Child") ...[
+                                if (state.numberOfChildren == "One Child" && state.givesBirthToBaby == (l10n?.yes ?? 'Yes' ) && state.deliveryOutcome == "Live birth") ...[
                                   // Baby 1 Name
                                   CustomTextField(
                                     labelText: "Baby's Name *",
@@ -1199,7 +1199,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                 ],
-                                if (state.numberOfChildren == "Twins") ...[
+                                if (state.numberOfChildren == "Twins" && state.givesBirthToBaby == (l10n?.yes ?? 'Yes')&& state.deliveryOutcome == "Live birth") ...[
                                   CustomTextField(
                                     labelText: "First Baby  Name *",
                                     hintText: "Enter First Baby  Name",
@@ -1261,7 +1261,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                 ],
-                                if (state.numberOfChildren == "Triplets") ...[
+                                if (state.numberOfChildren == "Triplets" && state.givesBirthToBaby == (l10n?.yes ?? 'Yes') && state.deliveryOutcome == "Live birth") ...[
                                   // ========== BABY 1 ==========
                                   CustomTextField(
                                     labelText: "First Baby  Name *",

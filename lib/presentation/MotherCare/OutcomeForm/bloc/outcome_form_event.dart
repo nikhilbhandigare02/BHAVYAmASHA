@@ -47,6 +47,15 @@ class ConductedByChanged extends OutcomeFormEvent {
   List<Object?> get props => [value];
 }
 
+class OtherConductedByNameChanged extends OutcomeFormEvent {
+  final String value;
+
+  const OtherConductedByNameChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
 class TypeOfDeliveryChanged extends OutcomeFormEvent {
   final String value;
 
@@ -155,6 +164,24 @@ class DeliveryTimeChanged extends OutcomeFormEvent {
   List<Object?> get props => [time];
 }
 
+class DischargeDateChanged extends OutcomeFormEvent {
+  final DateTime? date;
+
+  const DischargeDateChanged(this.date);
+
+  @override
+  List<Object?> get props => [date];
+}
+
+class DischargeTimeChanged extends OutcomeFormEvent {
+  final String? time;
+
+  const DischargeTimeChanged(this.time);
+
+  @override
+  List<Object?> get props => [time];
+}
+
 class PlaceOfDeliveryChanged extends OutcomeFormEvent {
   final String value;
 
@@ -200,6 +227,15 @@ class FamilyPlanningCounselingChanged extends OutcomeFormEvent {
   List<Object?> get props => [value];
 }
 
+class AdaptFpMethodChanged extends OutcomeFormEvent {
+  final String value;
+
+  const AdaptFpMethodChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
 class FpMethodChanged extends OutcomeFormEvent {
   final String? value;
 
@@ -213,6 +249,15 @@ class RemovalDateChanged extends OutcomeFormEvent {
   final DateTime? date;
 
   const RemovalDateChanged(this.date);
+
+  @override
+  List<Object?> get props => [date];
+}
+
+class AntraDateChanged extends OutcomeFormEvent {
+  final DateTime? date;
+
+  const AntraDateChanged(this.date);
 
   @override
   List<Object?> get props => [date];

@@ -438,18 +438,13 @@ class _HBNCListScreenState
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.pregnancyOutcome ?? '',
-        showBack: false,
-        icon1Image: 'assets/images/home.png',
+        screenTitle: 'HBNC List',
+        showBack: true,
 
-        onIcon1Tap: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(initialTabIndex: 1),
-          ),
-        ),
+
+
       ),
-      drawer: const CustomDrawer(),
+
       body: Column(
         children: [
           // Search Field

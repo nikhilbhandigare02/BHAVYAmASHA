@@ -9,12 +9,15 @@ import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
+import '../../../core/widgets/DatePicker/timepicker.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
 import '../../../l10n/app_localizations.dart';
 import 'bloc/outcome_form_bloc.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
+import '../../../core/widgets/SnackBar/app_snackbar.dart';
+import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 
 class OutcomeFormPage extends StatelessWidget {
   final Map<String, dynamic> beneficiaryData;
@@ -57,29 +60,21 @@ class _OutcomeFormView extends StatelessWidget {
           listenWhen: (previous, current) => true,
           listener: (context, state) {
             _logState(state);
-            ScaffoldMessenger.of(context).clearSnackBars();
-
             if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.errorMessage!),
-                  backgroundColor: Colors.redAccent,
-                  behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 4),
-                ),
-              );
+              showAppSnackBar(context, state.errorMessage!);
             }
 
             if (state.submitted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.dataSavedSuccessMessage),
-                  backgroundColor: Colors.green,
-                  behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-              Navigator.pop(context);
+              showAppSnackBar(context, l10n.dataSavedSuccessMessage);
+              Future.microtask(() async {
+                await showConfirmationDialog(
+                  context: context,
+                  title: 'Form has been saved successfully',
+                  message: 'Beneficiary has been added to HBNC list',
+                  yesText: 'OK',
+                );
+                Navigator.pop(context);
+              });
             }
           },
           builder: (context, state) {
@@ -264,12 +259,30 @@ class _OutcomeFormFields extends StatelessWidget {
         const SizedBox(height: 8),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-        CustomTextField(
-          labelText: l10n.deliveryTime,
-          hintText: l10n.deliveryTimeHint,
-          initialValue: state.deliveryTime ?? '',
-          keyboardType: TextInputType.datetime,
-          onChanged: (v) => bloc.add(DeliveryTimeChanged(v)),
+        GestureDetector(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              builder: (context) => ScrollableTimePicker(
+                initialTime: state.deliveryTime,
+                use24Hour: true,
+                onTimeSelected: (time) {
+                  bloc.add(DeliveryTimeChanged(time));
+                },
+              ),
+            );
+          },
+          child: AbsorbPointer(
+            child: CustomTextField(
+              labelText: l10n.deliveryTime,
+              hintText: l10n.deliveryTimeHint,
+              initialValue: state.deliveryTime ?? '',
+              keyboardType: TextInputType.datetime,
+              onChanged: (v) => bloc.add(DeliveryTimeChanged(v)),
+             // suffixIcon: Icon(Icons.access_time),
+            ),
+          ),
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -310,28 +323,28 @@ class _OutcomeFormFields extends StatelessWidget {
         // Replace the institutional dropdowns section with this fixed code:
 
         if (state.placeOfDelivery == 'Institutional') ...[
-          const SizedBox(height: 16),
+
           ApiDropdown<String>(
             items: [
-              l10n.select,
+
               'Public',
               'Private',
             ],
             getLabel: (s) => s,
             value: (state.institutionalPlaceType == null ||
                 state.institutionalPlaceType!.isEmpty ||
-                ![l10n.select, 'Public', 'Private'].contains(state.institutionalPlaceType))
+                ![  'Public', 'Private'].contains(state.institutionalPlaceType))
                 ? l10n.select
                 : state.institutionalPlaceType!,
             onChanged: (v) => bloc.add(InstitutionalPlaceTypeChanged(v ?? '')),
-            labelText: 'Type of Institution',
+            labelText: 'Institution place of delivery',
           ),
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-          const SizedBox(height: 8),
+
           if (state.institutionalPlaceType == 'Public') ...[
             ApiDropdown<String>(
               items: [
-                l10n.select,
+
                 'Sub-Center',
                 'PHC',
                 'CHC',
@@ -342,7 +355,7 @@ class _OutcomeFormFields extends StatelessWidget {
               getLabel: (s) => s,
               value: (state.institutionalPlaceOfDelivery == null ||
                   state.institutionalPlaceOfDelivery!.isEmpty ||
-                  ![l10n.select, 'Sub-Center', 'PHC', 'CHC', 'RH', 'DH', 'MCH']
+                  ![  'Sub-Center', 'PHC', 'CHC', 'RH', 'DH', 'MCH']
                       .contains(state.institutionalPlaceOfDelivery))
                   ? l10n.select
                   : state.institutionalPlaceOfDelivery!,
@@ -355,14 +368,14 @@ class _OutcomeFormFields extends StatelessWidget {
           ] else if (state.institutionalPlaceType == 'Private') ...[
             ApiDropdown<String>(
               items: [
-                l10n.select,
+
                 'Nursing Home',
                 'Hospital',
               ],
               getLabel: (s) => s,
               value: (state.institutionalPlaceOfDelivery == null ||
                   state.institutionalPlaceOfDelivery!.isEmpty ||
-                  ![l10n.select, 'Nursing Home', 'Hospital']
+                  !['Nursing Home', 'Hospital']
                       .contains(state.institutionalPlaceOfDelivery))
                   ? l10n.select
                   : state.institutionalPlaceOfDelivery!,
@@ -372,62 +385,24 @@ class _OutcomeFormFields extends StatelessWidget {
             const SizedBox(height: 8),
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             const SizedBox(height: 8),
-            ApiDropdown<String>(
-              items: [
-                l10n.select,
-                'ANM',
-                'LHV',
-                'Doctor',
-                'Staff Nurse',
-                'Relative TBA',
-              ],
-              getLabel: (s) => s,
-              value: (state.conductedBy == null ||
-                  state.conductedBy!.isEmpty ||
-                  ![l10n.select, 'ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative TBA'].contains(state.conductedBy))
-                  ? l10n.select
-                  : state.conductedBy!,
-              onChanged: (v) => bloc.add(ConductedByChanged(v ?? '')),
-              labelText: 'Who conducted the delivery?',
-            ),
-            const SizedBox(height: 8),
-            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
           ],
-          const SizedBox(height: 8),
-          ApiDropdown<String>(
-            items: [
-              l10n.select,
-              'ANM',
-              'LHV',
-              'Doctor',
-              'Staff Nurse',
-              'Relative TBA',
-            ],
-            getLabel: (s) => s,
-            value: (state.conductedBy == null ||
-                state.conductedBy!.isEmpty ||
-                ![l10n.select, 'ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative TBA'].contains(state.conductedBy))
-                ? l10n.select
-                : state.conductedBy!,
-            onChanged: (v) => bloc.add(ConductedByChanged(v ?? '')),
-            labelText: 'Who conducted the delivery?',
-          ),
-          const SizedBox(height: 8),
-          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
         ],
         if (state.placeOfDelivery == 'Non-Institutional') ...[
 
           ApiDropdown<String>(
             items: [
-              l10n.select,
-              'Home based delivery',
-              'In transit',
+
+              'Home Based Delivery',
+              'In Transit',
               'Other',
             ],
             getLabel: (s) => s,
             value: (state.nonInstitutionalPlaceType == null ||
                 state.nonInstitutionalPlaceType!.isEmpty ||
-                ![l10n.select, 'Home based delivery', 'In transit', 'Other']
+                ![  'Home Based delivery', 'In Transit', 'Other']
                     .contains(state.nonInstitutionalPlaceType))
                 ? l10n.select
                 : state.nonInstitutionalPlaceType!,
@@ -445,17 +420,18 @@ class _OutcomeFormFields extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-          ] else if (state.nonInstitutionalPlaceType == 'In transit') ...[
+          ] else if (state.nonInstitutionalPlaceType == 'In Transit') ...[
+            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             ApiDropdown<String>(
               items: [
-                l10n.select,
-                'Transit Ambulance',
+
+                'Ambulance',
                 'Other',
               ],
               getLabel: (s) => s,
               value: (state.transitPlace == null ||
                   state.transitPlace!.isEmpty ||
-                  ![l10n.select, 'Transit Ambulance', 'Other']
+                  ![  'Ambulance', 'Other']
                       .contains(state.transitPlace))
                   ? l10n.select
                   : state.transitPlace!,
@@ -464,9 +440,10 @@ class _OutcomeFormFields extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             if (state.transitPlace == 'Other') ...[
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
               CustomTextField(
-                labelText: 'Enter other transit place',
-                hintText: 'Enter place',
+                labelText: 'Please Enter name of other transit place',
+                hintText: 'Please Enter name of other transit place',
                 initialValue: state.otherTransitPlaceName ?? '',
                 onChanged: (v) => bloc.add(OtherTransitPlaceNameChanged(v)),
               ),
@@ -475,24 +452,53 @@ class _OutcomeFormFields extends StatelessWidget {
           ],
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         ],
-        
+
+        ApiDropdown<String>(
+          items: [
+
+            'ANM',
+            'LHV',
+            'Doctor',
+            'Staff Nurse',
+            'Relative',
+            'TBA (Non-Skilled birth attendant)',
+            'Other'
+          ],
+          getLabel: (s) => s,
+          value: (state.conductedBy == null ||
+              state.conductedBy!.isEmpty ||
+              !['ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative', 'TBA (Non-Skilled birth attendant)', 'Other'].contains(state.conductedBy))
+              ? l10n.select
+              : state.conductedBy!,
+          onChanged: (v) => bloc.add(ConductedByChanged(v ?? '')),
+          labelText: 'Who conducted the delivery? *',
+        ),
+        if (state.conductedBy == 'Other') ...[
+          const SizedBox(height: 8),
+          CustomTextField(
+            labelText: 'Who else did the delivery ?',
+            hintText: 'Enter name',
+            initialValue: state.otherConductedByName ?? '',
+            onChanged: (v) => bloc.add(OtherConductedByNameChanged(v)),
+          ),
+        ],
+        const SizedBox(height: 8),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
           items: [
-            l10n.select,
-            l10n.normalDelivery,
+
             l10n.cesareanDelivery,
             l10n.assistedDelivery,
+            l10n.normalDelivery,
           ],
           getLabel: (s) => s,
           value:
               state.deliveryType.isEmpty ||
                   ![
-                    l10n.select,
-                    l10n.normalDelivery,
                     l10n.cesareanDelivery,
                     l10n.assistedDelivery,
+                    l10n.normalDelivery,
                   ].contains(state.deliveryType)
               ? l10n.select
               : state.deliveryType,
@@ -503,12 +509,11 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items: [l10n.select, l10n.yes, l10n.no],
+          items: [ l10n.yes, l10n.no],
           getLabel: (s) => s,
           value:
               state.complications.isEmpty ||
                   ![
-                    l10n.select,
                     l10n.yes,
                     l10n.no,
                   ].contains(state.complications)
@@ -520,14 +525,14 @@ class _OutcomeFormFields extends StatelessWidget {
         ),
         if (state.complications == l10n.yes) ...[
           const SizedBox(height: 8),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           ApiDropdown<String>(
             items: [
-              l10n.select,
               'Convulsion',
-              'Ante Partumhhaenorhage',
-              'Pregnancy Induced Hypertension',
+              'Ante Partumhaemorrhage (Aph)',
+              'Pregnancy Induced Hypertension (PIH)',
               'Repeated Abortion',
-              'Mother death',
+              'Mother Death',
               'Congenital Anomaly',
               'Blood Transfusion',
               'Obstructed Labour',
@@ -537,15 +542,16 @@ class _OutcomeFormFields extends StatelessWidget {
             getLabel: (s) => s,
             value: (state.complicationType == null ||
                 state.complicationType!.isEmpty ||
-                ![l10n.select, 'Convulsion', 'Ante Partumhhaenorhage', 'Pregnancy Induced Hypertension', 'Repeated Abortion', 'Mother death', 'Congenital Anomaly', 'Blood Transfusion', 'Obstructed Labour', 'PPH', 'Any other']
+                !['Convulsion', 'Ante Partumhaemorrhage (Aph)', 'Pregnancy Induced Hypertension (PIH)', 'Repeated Abortion', 'Mother Death', 'Congenital Anomaly', 'Blood Transfusion', 'Obstructed Labour', 'PPH', 'Any other']
                     .contains(state.complicationType))
                 ? l10n.select
                 : state.complicationType!,
             onChanged: (v) => bloc.add(ComplicationTypeChanged(v ?? '')),
-            labelText: 'Complication',
+            labelText: 'Complication *',
           ),
-          const SizedBox(height: 8),
+
           if (state.complicationType == 'Any other') ...[
+            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             CustomTextField(
               labelText: 'Enter other complication during delivery',
               hintText: 'Enter complication',
@@ -554,6 +560,41 @@ class _OutcomeFormFields extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        ],
+        if (state.placeOfDelivery == 'Institutional') ...[
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          CustomDatePicker(
+            initialDate: state.dischargeDate,
+            isEditable: true,
+            labelText: 'Date of discharge',
+            onDateChanged: (d) => bloc.add(DischargeDateChanged(d)),
+          ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+          GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                builder: (context) => ScrollableTimePicker(
+                  initialTime: state.dischargeTime,
+                  use24Hour: true, // Set to false for 12-hour format
+                  onTimeSelected: (time) {
+                    bloc.add(DischargeTimeChanged(time));
+                  },
+                ),
+              );
+            },
+            child: AbsorbPointer(
+              child: CustomTextField(
+                labelText: 'Discharge time (hh:mm)',
+                hintText: 'hh:mm',
+                initialValue: state.dischargeTime ?? '',
+               // suffixIcon: Icon(Icons.access_time),
+              ),
+            ),
+          ),
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         ],
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -570,7 +611,7 @@ class _OutcomeFormFields extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w400,
-                      color: Colors.black, // Default text color
+                      color: Colors.black,
                     ),
                     children: <TextSpan>[
                       TextSpan(
@@ -618,7 +659,7 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items: [l10n.select, l10n.yes, l10n.no],
+          items: [ l10n.yes, l10n.no],
           getLabel: (s) => s,
           value: state.familyPlanningCounseling.isEmpty
               ? l10n.select
@@ -631,34 +672,45 @@ class _OutcomeFormFields extends StatelessWidget {
         if (state.familyPlanningCounseling == 'Yes') ...[
           const SizedBox(height: 8),
           ApiDropdown<String>(
-            labelText: 'Family Planning Method',
-            items: const [
-              'Select',
-              'Condom',
-              'Mala -N (Daily Contraceptive pill)',
-              'Atra injection',
-              'Copper -T (IUCD)',
-              'Chhaya (Weekly Contraceptive pill)',
-              'ECP (Emergency Contraceptive pill)',
-              'Male Sterilization',
-              'Female Sterilization',
-              'Any Other Specify'
-            ],
-            getLabel: (value) => value,
-            value: state.fpMethod ?? 'Select',
-            onChanged: (value) {
-              if (value != null) {
-                context.read<OutcomeFormBloc>().add(FpMethodChanged(value));
-              }
-            },
+            labelText: 'Do you want to adapt family planning method ? *',
+            items: [  l10n.yes, l10n.no],
+            getLabel: (s) => s,
+            value: state.adaptFpMethod ?? l10n.select,
+            onChanged: (v) => bloc.add(AdaptFpMethodChanged(v ?? '')),
+            hintText: l10n.selectOption,
           ),
-          const SizedBox(height: 8),
-        ],
 
-        if (state.fpMethod == 'Copper -T (IUCD)') ...[
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          if (state.adaptFpMethod == 'Yes' && state.familyPlanningCounseling == 'Yes') ...[
+            ApiDropdown<String>(
+              labelText: 'Method of contraception',
+              items: const [
+                'Condom',
+                'Mala -N (Daily Contraceptive pill)',
+                'Atra injection',
+                'Copper -T (IUCD)',
+                'Chhaya (Weekly Contraceptive pill)',
+                'ECP (Emergency Contraceptive pill)',
+                'Male Sterilization',
+                'Female Sterilization',
+                'Any Other Specify'
+              ],
+              getLabel: (value) => value,
+              value: state.fpMethod ?? 'Select',
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<OutcomeFormBloc>().add(FpMethodChanged(value));
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ],
+        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+        if (state.fpMethod == 'Copper -T (IUCD)' && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
           CustomDatePicker(
             labelText: 'Date of removal',
-            initialDate: state.removalDate ?? DateTime.now(),
+           // initialDate: state.removalDate ?? DateTime.now(),
             firstDate: DateTime(1900),
             lastDate: DateTime(2100),
             onDateChanged: (date) {
@@ -681,10 +733,26 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        if (state.fpMethod == 'Condom') ...[
+        if (state.fpMethod == 'Atra injection'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
+          CustomDatePicker(
+            labelText: 'Date of Antra',
+           // initialDate: state.antraDate ?? DateTime.now(),
+            firstDate: DateTime(1900),
+            lastDate: DateTime(2100),
+            onDateChanged: (date) {
+              if (date != null) {
+                context.read<OutcomeFormBloc>().add(AntraDateChanged(date));
+              }
+            },
+          ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+          const SizedBox(height: 8),
+        ],
+
+        if (state.fpMethod == 'Condom'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
           CustomTextField(
             labelText: 'Quantity of Condoms',
-            hintText: 'Enter quantity',
+            hintText: 'Quantity of Condoms',
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(CondomQuantityChanged(value));
@@ -695,10 +763,10 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)') ...[
+        if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
           CustomTextField(
             labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
-            hintText: 'Enter quantity',
+            hintText: 'Quantity of Mala -N (Daily Contraceptive pill)',
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(MalaQuantityChanged(value));
@@ -710,26 +778,24 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)') ...[
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'Chhaya (Weekly Contraceptive pill)',
-              hintText: 'Enter quantity',
-              border: OutlineInputBorder(),
-            ),
+        if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
+          CustomTextField(
+            labelText: 'Chhaya (Weekly Contraceptive pill)',
+            hintText: 'Chhaya (Weekly Contraceptive pill)',
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(ChhayaQuantityChanged(value));
             },
             controller: TextEditingController(text: state.chhayaQuantity ?? ''),
           ),
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           const SizedBox(height: 8),
         ],
 
-        if (state.fpMethod == 'ECP (Emergency Contraceptive pill)') ...[
+        if (state.fpMethod == 'ECP (Emergency Contraceptive pill)'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
           CustomTextField(
             labelText: 'ECP (Emergency Contraceptive pill)',
-            hintText: 'Enter quantity',
+            hintText: 'ECP (Emergency Contraceptive pill)',
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(ECPQuantityChanged(value));
@@ -740,7 +806,7 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
         Padding(
           padding: const EdgeInsets.only(top: 32.0),
           child: SizedBox(

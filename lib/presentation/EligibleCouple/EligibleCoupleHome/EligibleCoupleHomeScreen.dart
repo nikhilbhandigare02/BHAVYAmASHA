@@ -291,7 +291,9 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     final isMarried = maritalStatusRaw == 'married';
     final dob = person['dob'];
     final age = _calculateAge(dob);
-    return isFemale && isMarried && age >= 15 && age <= 49;
+    final isPregnantRaw = person['isPregnant']?.toString().toLowerCase() ?? '';
+    final isPregnant = isPregnantRaw == 'yes' || isPregnantRaw == 'true' || isPregnantRaw == '1';
+    return isFemale && isMarried && age >= 15 && age <= 49 && !isPregnant;
   }
 
   int _calculateAge(dynamic dobRaw) {

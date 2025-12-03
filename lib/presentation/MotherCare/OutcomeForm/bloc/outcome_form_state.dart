@@ -6,11 +6,14 @@ class OutcomeFormState extends Equatable {
   final DateTime? deliveryDate;
   final String gestationWeeks;
   final String? deliveryTime;
+  final DateTime? dischargeDate;
+  final String? dischargeTime;
   final String placeOfDelivery;
   final String deliveryType;
   final String complications;
   final String outcomeCount;
   final String familyPlanningCounseling;
+  final String? adaptFpMethod;
   final bool submitting;
   final bool submitted;
   final String? errorMessage;
@@ -21,9 +24,11 @@ class OutcomeFormState extends Equatable {
   final String? malaQuantity;
   final String? chhayaQuantity;
   final String? ecpQuantity;
+  final DateTime? antraDate;
   final String? institutionalPlaceType; // 'Public' or 'Private'
   final String? institutionalPlaceOfDelivery; // e.g. Sub-Center, PHC, Nursing Home
   final String? conductedBy; // 'ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative TBA'
+  final String? otherConductedByName;
   final String? typeOfDelivery; // 'Cesarean', 'Assisted/Forceps', 'Normal'
   final String? hadComplications; // 'Yes' or 'No'
   final String? nonInstitutionalPlaceType; // 'Home', 'In Transit', 'Other'
@@ -47,17 +52,22 @@ class OutcomeFormState extends Equatable {
     required this.deliveryDate,
     required this.gestationWeeks,
     required this.deliveryTime,
+    this.dischargeDate,
+    this.dischargeTime,
     required this.placeOfDelivery,
     required this.deliveryType,
     required this.complications,
     required this.outcomeCount,
     required this.familyPlanningCounseling,
+    this.adaptFpMethod,
     required this.submitting,
     required this.submitted,
     required this.errorMessage,
+    this.antraDate,
     this.institutionalPlaceType,
     this.institutionalPlaceOfDelivery,
     this.conductedBy,
+    this.otherConductedByName,
     this.typeOfDelivery,
     this.hadComplications,
     this.nonInstitutionalPlaceType,
@@ -75,11 +85,14 @@ class OutcomeFormState extends Equatable {
     deliveryDate: null,
     gestationWeeks: '',
     deliveryTime: null,
+    dischargeDate: null,
+    dischargeTime: null,
     placeOfDelivery: '',
     deliveryType: '',
     complications: '',
     outcomeCount: '',
     familyPlanningCounseling: 'No',
+    adaptFpMethod: null,
     submitting: false,
     submitted: false,
     errorMessage: null,
@@ -90,9 +103,11 @@ class OutcomeFormState extends Equatable {
     malaQuantity: null,
     chhayaQuantity: null,
     ecpQuantity: null,
+    antraDate: null,
     institutionalPlaceType: null,  // ✅ ADDED
     institutionalPlaceOfDelivery: null,
     conductedBy: null,              // ✅ ADDED
+    otherConductedByName: null,
     typeOfDelivery: null,
     hadComplications: null,
     nonInstitutionalPlaceType: null,
@@ -110,11 +125,14 @@ class OutcomeFormState extends Equatable {
     DateTime? deliveryDate,
     String? gestationWeeks,
     String? deliveryTime,
+    DateTime? dischargeDate,
+    String? dischargeTime,
     String? placeOfDelivery,
     String? deliveryType,
     String? complications,
     String? outcomeCount,
     String? familyPlanningCounseling,
+    String? adaptFpMethod,
     bool? submitting,
     bool? submitted,
     String? errorMessage,
@@ -125,9 +143,11 @@ class OutcomeFormState extends Equatable {
     String? malaQuantity,
     String? chhayaQuantity,
     String? ecpQuantity,
+    DateTime? antraDate,
     String? institutionalPlaceType,
     String? institutionalPlaceOfDelivery,
     String? conductedBy,
+    String? otherConductedByName,
     String? typeOfDelivery,
     String? hadComplications,
     String? nonInstitutionalPlaceType,
@@ -144,12 +164,15 @@ class OutcomeFormState extends Equatable {
       deliveryDate: deliveryDate ?? this.deliveryDate,
       gestationWeeks: gestationWeeks ?? this.gestationWeeks,
       deliveryTime: deliveryTime ?? this.deliveryTime,
+      dischargeDate: dischargeDate ?? this.dischargeDate,
+      dischargeTime: dischargeTime ?? this.dischargeTime,
       placeOfDelivery: placeOfDelivery ?? this.placeOfDelivery,
       deliveryType: deliveryType ?? this.deliveryType,
       complications: complications ?? this.complications,
       outcomeCount: outcomeCount ?? this.outcomeCount,
       familyPlanningCounseling:
       familyPlanningCounseling ?? this.familyPlanningCounseling,
+      adaptFpMethod: adaptFpMethod ?? this.adaptFpMethod,
       submitting: submitting ?? this.submitting,
       submitted: submitted ?? this.submitted,
       errorMessage: errorMessage ?? this.errorMessage,
@@ -160,9 +183,11 @@ class OutcomeFormState extends Equatable {
       malaQuantity: malaQuantity ?? this.malaQuantity,
       chhayaQuantity: chhayaQuantity ?? this.chhayaQuantity,
       ecpQuantity: ecpQuantity ?? this.ecpQuantity,
+      antraDate: antraDate ?? this.antraDate,
       institutionalPlaceType: institutionalPlaceType ?? this.institutionalPlaceType,
       institutionalPlaceOfDelivery: institutionalPlaceOfDelivery ?? this.institutionalPlaceOfDelivery,
       conductedBy: conductedBy ?? this.conductedBy,
+      otherConductedByName: otherConductedByName ?? this.otherConductedByName,
       typeOfDelivery: typeOfDelivery ?? this.typeOfDelivery,
       hadComplications: hadComplications ?? this.hadComplications,
       nonInstitutionalPlaceType: nonInstitutionalPlaceType ?? this.nonInstitutionalPlaceType,
@@ -182,11 +207,14 @@ class OutcomeFormState extends Equatable {
     deliveryDate,
     gestationWeeks,
     deliveryTime,
+    dischargeDate,
+    dischargeTime,
     placeOfDelivery,
     deliveryType,
     complications,
     outcomeCount,
     familyPlanningCounseling,
+    adaptFpMethod,
     submitting,
     submitted,
     errorMessage,
@@ -197,9 +225,11 @@ class OutcomeFormState extends Equatable {
     malaQuantity,
     chhayaQuantity,
     ecpQuantity,
+    antraDate,
     institutionalPlaceType,
     institutionalPlaceOfDelivery,
     conductedBy,
+    otherConductedByName,
     typeOfDelivery,
     hadComplications,
     nonInstitutionalPlaceType,

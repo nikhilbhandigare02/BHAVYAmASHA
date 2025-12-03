@@ -5936,7 +5936,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryTime.
   ///
   /// In en, this message translates to:
-  /// **'Delivery Time (hh:mm)'**
+  /// **'Time of Delivery (hh:mm)'**
   String get deliveryTime;
 
   /// No description provided for @deliveryTimeHint.
@@ -5954,7 +5954,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectPlaceOfDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Select Place of Delivery *'**
+  /// **' Place of Delivery *'**
   String get selectPlaceOfDelivery;
 
   /// No description provided for @selectOption.
@@ -6002,7 +6002,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryType.
   ///
   /// In en, this message translates to:
-  /// **'Type of Delivery *'**
+  /// **'Type of delivery *'**
   String get deliveryType;
 
   /// No description provided for @normalDelivery.
@@ -6020,7 +6020,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistedDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Assisted (Vacuum/Forceps)'**
+  /// **'Assisted /Forceps'**
   String get assistedDelivery;
 
   /// No description provided for @complications.
@@ -6032,7 +6032,7 @@ abstract class AppLocalizations {
   /// No description provided for @outcomeCount.
   ///
   /// In en, this message translates to:
-  /// **'Number of Outcomes *'**
+  /// **'Delivery Outcomes *'**
   String get outcomeCount;
 
   /// No description provided for @familyPlanningCounseling.
