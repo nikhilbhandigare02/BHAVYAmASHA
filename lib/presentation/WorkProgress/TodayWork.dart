@@ -22,7 +22,7 @@ class _TodayworkState extends State<Todaywork> {
 
 
   int? detectSlice(Offset local) {
-    const size = Size(220, 220);   // your chart radius
+    const size = Size(220, 220);
     final center = Offset(size.width / 2, size.height / 2);
 
     final dx = local.dx - center.dx;
@@ -31,41 +31,34 @@ class _TodayworkState extends State<Todaywork> {
     final radius = math.sqrt(dx * dx + dy * dy);
     final maxRadius = size.width / 2;
 
-    // Outside circle = do nothing
     if (radius > maxRadius) return null;
 
-    // Use your real values instead of "state"
     final total = (completed + pending);
     if (total == 0) return null;
 
-    // Angle of the tap
     double angle = math.atan2(dy, dx);
     if (angle < 0) angle += 2 * math.pi;
 
-    // Align with -90° start
     const start = -math.pi / 2;
     double rel = (angle - start) % (2 * math.pi);
     if (rel < 0) rel += 2 * math.pi;
 
-    // Sweep angles
     final sweepCompleted = (completed / total) * (2 * math.pi);
 
-    // Detect slice
     if (completed > 0 && rel <= sweepCompleted) {
-      return 0; // completed slice
+      return 0;
     }
 
     if (pending > 0) {
-      return 1; // pending slice
+      return 1;
     }
 
     return null;
   }
 
-  // 0 = completed slice, 1 = pending slice, null = none selected
   int? _selectedSlice;
-  int? _selectedSliceFromLegend; // 0 = completed, 1 = pending, null = normal
-  int? _selectedSliceFromPie;    // used ONLY to show tooltips
+  int? _selectedSliceFromLegend;
+  int? _selectedSliceFromPie;
   Future<void> _loadCountsFromStorage(TodaysWorkBloc bloc) async {
     try {
       final stored = await SecureStorageService.getTodayWorkCounts();
@@ -77,7 +70,6 @@ class _TodayworkState extends State<Todaywork> {
 
       bloc.add(TwUpdateCounts(toDo: toDo, completed: completed));
     } catch (_) {
-      // leave defaults if anything fails
     }
   }
 
@@ -120,23 +112,23 @@ class _TodayworkState extends State<Todaywork> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _kv('To do visits :', state.toDo.toString()),
-                            _kv('Completed visits :', state.completed.toString()),
-                            _kv('Pending visits :', state.pending.toString()),
-                            _kv('Progress :', '$percent%'),
+                            _kv('${l10n!.toDoVisits} :', state.toDo.toString()),
+                            _kv('${l10n.completedVisits} :', state.completed.toString()),
+                            _kv('${l10n.pendingVisits} :', state.pending.toString()),
+                            _kv('${l10n.progress} :', '$percent%'),
                             const SizedBox(height: 8),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 _legend(
                                   color: Colors.green,
-                                  label: 'Completed',
+                                  label: l10n.completed,
                                   sliceIndex: 0,
                                 ),
                                 const SizedBox(width: 16),
                                 _legend(
                                   color: AppColors.primary,
-                                  label: 'Pending',
+                                  label: l10n.pending,
                                   sliceIndex: 1,
                                 ),
                               ],
@@ -153,7 +145,6 @@ class _TodayworkState extends State<Todaywork> {
                                     children: [
                                       GestureDetector(
                                         onTapDown: (details) {
-                                          // Determine which slice (if any) was tapped
                                           const size = Size(220, 220);
                                           final center = Offset(size.width / 2, size.height / 2);
                                           final local = details.localPosition;
@@ -168,11 +159,9 @@ class _TodayworkState extends State<Todaywork> {
                                           if (radius <= maxRadius) {
                                             final total = (state.completed + state.pending).clamp(0, 1 << 31);
                                             if (total > 0) {
-                                              // atan2 gives angle in range [-pi, pi]. Convert to [0, 2*pi).
                                               double angle = math.atan2(dy, dx);
                                               if (angle < 0) angle += 2 * math.pi;
 
-                                              // Our pie starts at -pi/2 (top). Normalize tap angle relative to that.
                                               const start = -math.pi / 2;
                                               double rel = angle - start;
                                               final full = 2 * math.pi;
@@ -247,7 +236,7 @@ class _TodayworkState extends State<Todaywork> {
                                               offset: Offset(dx, dy),
                                               child: _insideLabel(
                                                 color: AppColors.primary,
-                                                label: 'Pending',
+                                                label: l10n.pending,
                                                 count: state.pending,
                                               ),
                                             );
@@ -303,29 +292,24 @@ class _TodayworkState extends State<Todaywork> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          // CASE 1 → Tap same legend when ONLY that one is selected → unselect it
           if (_selectedSliceFromLegend == sliceIndex) {
             _selectedSliceFromLegend = null;
           }
 
-          // CASE 2 → Nothing selected → select this one
           else if (_selectedSliceFromLegend == null) {
             _selectedSliceFromLegend = sliceIndex;
           }
 
-          // CASE 3 → One selected, tapping the other → BOTH selected mode
           else if (_selectedSliceFromLegend != sliceIndex &&
               _selectedSliceFromLegend != 2) {
-            _selectedSliceFromLegend = 2;  // both selected
+            _selectedSliceFromLegend = 2;
           }
 
-          // ⭐ CASE 4 → BOTH selected, and user taps ANY legend
-          // → Only THAT legend should remain selected
+
           else if (_selectedSliceFromLegend == 2) {
             _selectedSliceFromLegend = sliceIndex;
           }
 
-          // Clear pie selection (tooltip)
           _selectedSliceFromPie = null;
           _selectedSlice = null;
         });
@@ -415,12 +399,10 @@ class _PiePainter extends CustomPainter {
     }
 
     if (legendSelected == 2) {
-      // BOTH selected → white pie
       canvas.drawArc(rect, start, full, true, Paint()..color = Colors.white);
       return;
     }
 
-    // --- 2️⃣ NORMAL PIE MODE ---
     final total = completed + pending;
     if (total == 0) return;
 

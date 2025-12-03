@@ -9238,6 +9238,678 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'slots are not available'**
   String get msg_no_slots_available;
+
+  /// No description provided for @mob_no.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile No'**
+  String get mob_no;
+
+  /// No description provided for @mohalla.
+  ///
+  /// In en, this message translates to:
+  /// **'Mohalla'**
+  String get mohalla;
+
+  /// No description provided for @search_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by HH ID, Name or Mobile'**
+  String get search_placeholder;
+
+  /// No description provided for @no_pregnancy_cases_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No pregnancy cases found'**
+  String get no_pregnancy_cases_found;
+
+  /// No description provided for @no_hbnc_beneficiaries_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No HBNC beneficiaries found'**
+  String get no_hbnc_beneficiaries_found;
+
+  /// No description provided for @no_high_risk_anc_visits_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No high-risk ANC visits found'**
+  String get no_high_risk_anc_visits_found;
+
+  /// No description provided for @hrp.
+  ///
+  /// In en, this message translates to:
+  /// **'HRP'**
+  String get hrp;
+
+  /// No description provided for @no_name.
+  ///
+  /// In en, this message translates to:
+  /// **'No Name'**
+  String get no_name;
+
+  /// No description provided for @search_by_id_name_contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by ID/Name/Contact'**
+  String get search_by_id_name_contact;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @death_record_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Death Record Details'**
+  String get death_record_details;
+
+  /// No description provided for @death_record.
+  ///
+  /// In en, this message translates to:
+  /// **'Death Record'**
+  String get death_record;
+
+  /// No description provided for @try_different_search_term.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get try_different_search_term;
+
+  /// No description provided for @no_matching_records_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching records found'**
+  String get no_matching_records_found;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @no_death_records_in_database.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no death records in the database.'**
+  String get no_death_records_in_database;
+
+  /// No description provided for @no_death_records_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No death records found'**
+  String get no_death_records_found;
+
+  /// No description provided for @refresh_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh data'**
+  String get refresh_data;
+
+  /// No description provided for @guest_beneficiaries.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest Beneficiaries'**
+  String get guest_beneficiaries;
+
+  /// No description provided for @no_guest_beneficiaries_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No guest beneficiaries found'**
+  String get no_guest_beneficiaries_found;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get progress;
+
+  /// No description provided for @pendingVisits.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending visits'**
+  String get pendingVisits;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @failedToLoadVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load video'**
+  String get failedToLoadVideo;
+
+  /// No description provided for @unableToOpenDialer.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open dialer on this device.'**
+  String get unableToOpenDialer;
+
+  /// No description provided for @unableToOpenEmailApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open email app on this device.'**
+  String get unableToOpenEmailApp;
+
+  /// No description provided for @disability.
+  ///
+  /// In en, this message translates to:
+  /// **'Disability'**
+  String get disability;
+
+  /// No description provided for @hasConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Has Conditions'**
+  String get hasConditions;
+
+  /// No description provided for @idType.
+  ///
+  /// In en, this message translates to:
+  /// **'ID Type'**
+  String get idType;
+
+  /// No description provided for @village.
+  ///
+  /// In en, this message translates to:
+  /// **'Village'**
+  String get village;
+
+  /// No description provided for @mobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile'**
+  String get mobile;
+
+  /// No description provided for @fathersName.
+  ///
+  /// In en, this message translates to:
+  /// **'Father\'s Name'**
+  String get fathersName;
+
+  /// No description provided for @beneficiaryId.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary ID'**
+  String get beneficiaryId;
+
+  /// No description provided for @householdId.
+  ///
+  /// In en, this message translates to:
+  /// **'Household ID'**
+  String get householdId;
+
+  /// No description provided for @registrationDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Date'**
+  String get registrationDate;
+
+  /// No description provided for @formId.
+  ///
+  /// In en, this message translates to:
+  /// **'Form ID'**
+  String get formId;
+
+  /// No description provided for @basicInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Information'**
+  String get basicInformation;
+
+  /// No description provided for @cbacFormDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'CBAC Form Details'**
+  String get cbacFormDetails;
+
+  /// No description provided for @anmName.
+  ///
+  /// In en, this message translates to:
+  /// **'ANM Name'**
+  String get anmName;
+
+  /// No description provided for @ashaName.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA Name'**
+  String get ashaName;
+
+  /// No description provided for @healthcareProviderInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthcare Provider Information'**
+  String get healthcareProviderInformation;
+
+  /// No description provided for @hsc.
+  ///
+  /// In en, this message translates to:
+  /// **'HSC'**
+  String get hsc;
+
+  /// No description provided for @familyHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Family History'**
+  String get familyHistory;
+
+  /// No description provided for @waistMeasurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Waist Measurement'**
+  String get waistMeasurement;
+
+  /// No description provided for @physicalActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical Activity'**
+  String get physicalActivity;
+
+  /// No description provided for @alcoholConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Alcohol Consumption'**
+  String get alcoholConsumption;
+
+  /// No description provided for @tobaccoUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Tobacco Use'**
+  String get tobaccoUse;
+
+  /// No description provided for @ageGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Age Group'**
+  String get ageGroup;
+
+  /// No description provided for @partA_riskFactors.
+  ///
+  /// In en, this message translates to:
+  /// **'Part A - Risk Factors'**
+  String get partA_riskFactors;
+
+  /// No description provided for @voiceChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Change'**
+  String get voiceChange;
+
+  /// No description provided for @hearingDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Hearing Difficulty'**
+  String get hearingDifficulty;
+
+  /// No description provided for @eyeRedness.
+  ///
+  /// In en, this message translates to:
+  /// **'Eye Redness'**
+  String get eyeRedness;
+
+  /// No description provided for @eyePain.
+  ///
+  /// In en, this message translates to:
+  /// **'Eye Pain'**
+  String get eyePain;
+
+  /// No description provided for @readingDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading Difficulty'**
+  String get readingDifficulty;
+
+  /// No description provided for @blurredVision.
+  ///
+  /// In en, this message translates to:
+  /// **'Blurred Vision'**
+  String get blurredVision;
+
+  /// No description provided for @tinglingSensation.
+  ///
+  /// In en, this message translates to:
+  /// **'Tingling Sensation'**
+  String get tinglingSensation;
+
+  /// No description provided for @palmsSolesIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'Palms/Soles Issues'**
+  String get palmsSolesIssues;
+
+  /// No description provided for @medicalHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical History'**
+  String get medicalHistory;
+
+  /// No description provided for @tuberculosis.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuberculosis'**
+  String get tuberculosis;
+
+  /// No description provided for @drugUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Drug Use'**
+  String get drugUse;
+
+  /// No description provided for @painWhileChewing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pain While Chewing'**
+  String get painWhileChewing;
+
+  /// No description provided for @rashInMouth.
+  ///
+  /// In en, this message translates to:
+  /// **'Rash in Mouth'**
+  String get rashInMouth;
+
+  /// No description provided for @swellingInMouth.
+  ///
+  /// In en, this message translates to:
+  /// **'Swelling in Mouth'**
+  String get swellingInMouth;
+
+  /// No description provided for @ulcers.
+  ///
+  /// In en, this message translates to:
+  /// **'Ulcers'**
+  String get ulcers;
+
+  /// No description provided for @difficultyOpeningMouth.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty Opening Mouth'**
+  String get difficultyOpeningMouth;
+
+  /// No description provided for @seizures.
+  ///
+  /// In en, this message translates to:
+  /// **'Seizures'**
+  String get seizures;
+
+  /// No description provided for @nightSweats.
+  ///
+  /// In en, this message translates to:
+  /// **'Night Sweats'**
+  String get nightSweats;
+
+  /// No description provided for @weightLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight Loss'**
+  String get weightLoss;
+
+  /// No description provided for @fever2Weeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Fever for 2+ Weeks'**
+  String get fever2Weeks;
+
+  /// No description provided for @bloodInMucus.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood in Mucus'**
+  String get bloodInMucus;
+
+  /// No description provided for @cough2Weeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Cough for 2+ Weeks'**
+  String get cough2Weeks;
+
+  /// No description provided for @shortnessOfBreath.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortness of Breath'**
+  String get shortnessOfBreath;
+
+  /// No description provided for @partB1GeneralSymptoms.
+  ///
+  /// In en, this message translates to:
+  /// **'Part B1 - General Symptoms'**
+  String get partB1GeneralSymptoms;
+
+  /// No description provided for @partB1_skinSensorySymptoms.
+  ///
+  /// In en, this message translates to:
+  /// **'Part B1 - Skin & Sensory Symptoms'**
+  String get partB1_skinSensorySymptoms;
+
+  /// No description provided for @skinRashDiscoloration.
+  ///
+  /// In en, this message translates to:
+  /// **'Skin Rash/Discoloration'**
+  String get skinRashDiscoloration;
+
+  /// No description provided for @thickSkin.
+  ///
+  /// In en, this message translates to:
+  /// **'Thick Skin'**
+  String get thickSkin;
+
+  /// No description provided for @skinLump.
+  ///
+  /// In en, this message translates to:
+  /// **'Skin Lump'**
+  String get skinLump;
+
+  /// No description provided for @numbnessHotCold.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbness (Hot/Cold)'**
+  String get numbnessHotCold;
+
+  /// No description provided for @scratchesCracks.
+  ///
+  /// In en, this message translates to:
+  /// **'Scratches/Cracks'**
+  String get scratchesCracks;
+
+  /// No description provided for @tinglingNumbness.
+  ///
+  /// In en, this message translates to:
+  /// **'Tingling/Numbness'**
+  String get tinglingNumbness;
+
+  /// No description provided for @eyelidClosingDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Eyelid Closing Difficulty'**
+  String get eyelidClosingDifficulty;
+
+  /// No description provided for @holdingDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Holding Difficulty'**
+  String get holdingDifficulty;
+
+  /// No description provided for @legWeaknessWalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Leg Weakness/Walk'**
+  String get legWeaknessWalk;
+
+  /// No description provided for @partB2_womenHealthSymptoms.
+  ///
+  /// In en, this message translates to:
+  /// **'Part B2 - Women’s Health Symptoms'**
+  String get partB2_womenHealthSymptoms;
+
+  /// No description provided for @breastLump.
+  ///
+  /// In en, this message translates to:
+  /// **'Breast Lump'**
+  String get breastLump;
+
+  /// No description provided for @nippleBleeding.
+  ///
+  /// In en, this message translates to:
+  /// **'Nipple Bleeding'**
+  String get nippleBleeding;
+
+  /// No description provided for @breastShapeDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Breast Shape Difference'**
+  String get breastShapeDifference;
+
+  /// No description provided for @excessiveBleeding.
+  ///
+  /// In en, this message translates to:
+  /// **'Excessive Bleeding'**
+  String get excessiveBleeding;
+
+  /// No description provided for @depression.
+  ///
+  /// In en, this message translates to:
+  /// **'Depression'**
+  String get depression;
+
+  /// No description provided for @uterusProlapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Uterus Prolapse'**
+  String get uterusProlapse;
+
+  /// No description provided for @postMenopauseBleeding.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Menopause Bleeding'**
+  String get postMenopauseBleeding;
+
+  /// No description provided for @postIntercourseBleeding.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Intercourse Bleeding'**
+  String get postIntercourseBleeding;
+
+  /// No description provided for @smellyDischarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Smelly Discharge'**
+  String get smellyDischarge;
+
+  /// No description provided for @irregularPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'Irregular Periods'**
+  String get irregularPeriods;
+
+  /// No description provided for @jointPain.
+  ///
+  /// In en, this message translates to:
+  /// **'Joint Pain'**
+  String get jointPain;
+
+  /// No description provided for @totalScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Score'**
+  String get totalScore;
+
+  /// No description provided for @partDScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Part D Score'**
+  String get partDScore;
+
+  /// No description provided for @partAScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Part A Score'**
+  String get partAScore;
+
+  /// No description provided for @assessmentScores.
+  ///
+  /// In en, this message translates to:
+  /// **'Assessment Scores'**
+  String get assessmentScores;
+
+  /// No description provided for @question2.
+  ///
+  /// In en, this message translates to:
+  /// **'Question 2'**
+  String get question2;
+
+  /// No description provided for @question1.
+  ///
+  /// In en, this message translates to:
+  /// **'Question 1'**
+  String get question1;
+
+  /// No description provided for @partD_mentalHealthAssessment.
+  ///
+  /// In en, this message translates to:
+  /// **'Part D - Mental Health Assessment'**
+  String get partD_mentalHealthAssessment;
+
+  /// No description provided for @businessRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Risk'**
+  String get businessRisk;
+
+  /// No description provided for @cookingFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking Fuel'**
+  String get cookingFuel;
+
+  /// No description provided for @partC_environmentalFactors.
+  ///
+  /// In en, this message translates to:
+  /// **'Part C - Environmental Factors'**
+  String get partC_environmentalFactors;
+
+  /// No description provided for @ncdBeneficiarySearch.
+  ///
+  /// In en, this message translates to:
+  /// **'NCD Beneficiary Search'**
+  String get ncdBeneficiarySearch;
+
+  /// No description provided for @wifeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Wife Name'**
+  String get wifeName;
+
+  /// No description provided for @husbandName.
+  ///
+  /// In en, this message translates to:
+  /// **'Husband Name'**
+  String get husbandName;
+
+  /// No description provided for @noRecordsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No records found'**
+  String get noRecordsFound;
+
+  /// No description provided for @tolaMohalla.
+  ///
+  /// In en, this message translates to:
+  /// **'Tola/Mohalla'**
+  String get tolaMohalla;
+
+  /// No description provided for @noHouseholdsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No households found'**
+  String get noHouseholdsFound;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

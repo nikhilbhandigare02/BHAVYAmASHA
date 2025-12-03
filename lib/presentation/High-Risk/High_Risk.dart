@@ -214,7 +214,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _loadANCVisits,
-                      child: const Text('Retry'),
+                      child:  Text(l10n.retry),
                     ),
                   ],
                 ),
@@ -229,7 +229,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                       Icon(Icons.assignment_late_outlined, size: 48, color: Colors.grey[400]),
                       const SizedBox(height: 16),
                       Text(
-                        'No high-risk ANC visits found',
+                        l10n.no_high_risk_anc_visits_found,
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                     ],
@@ -290,7 +290,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                       Icon(Icons.home, color: Colors.black54, size: 14.sp),
                       const SizedBox(width: 6),
                       Text(
-                        visit.hhId ?? 'N/A',
+                        visit.hhId ?? l10n!.na,
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
@@ -308,7 +308,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      'HRP',
+                      l10n!.hrp,
                       style: TextStyle(
                         color: Colors.red[600],
                         fontWeight: FontWeight.bold,
@@ -333,9 +333,9 @@ class _EligibleCoupleListState extends State<HighRisk> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Name
-                  _infoRow(
+                  _infoRow(context,
                     '',
-                    visit.womanName ?? 'No Name',
+                    visit.womanName ?? l10n.no_name,
                     textStyle:  TextStyle(
                       fontWeight: FontWeight.w500,
                       color: Colors.white,
@@ -369,8 +369,10 @@ class _EligibleCoupleListState extends State<HighRisk> {
 
 
 
-  Widget _infoRow(String title, String value,
+  Widget _infoRow(BuildContext context,String title, String value,
       {bool isWrappable = false, TextStyle? textStyle}) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -387,7 +389,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? 'N/A' : value,
+              value.isEmpty ? l10n!.na : value,
               style: textStyle ??
                   TextStyle(
                     color: Colors.white,

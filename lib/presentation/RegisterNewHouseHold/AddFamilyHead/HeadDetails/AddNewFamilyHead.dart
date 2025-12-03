@@ -50,8 +50,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   final _formKey = GlobalKey<FormState>();
   final now = DateTime.now();
 
-  // Guard to avoid infinite loops when syncing names between
-  // head form and spouse details tab.
+
   bool _syncingNames = false;
 
 

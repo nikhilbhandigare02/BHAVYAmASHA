@@ -2961,7 +2961,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get subCenter => 'Sub-Center';
 
   @override
-  String get phc => 'PHC';
+  String get phc => 'पीएचसी';
 
   @override
   String get chc => 'CHC';
@@ -3789,7 +3789,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enterDob => 'कृपया जन्म तिथि दर्ज करें';
 
   @override
-  String get age => 'आयु';
+  String get age => 'उम्र';
 
   @override
   String get enterAge => 'कृपया आयु दर्ज करें';
@@ -3961,7 +3961,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get billed => 'बिल किया गया';
 
   @override
-  String get pending => 'बकाया';
+  String get pending => 'लंबित';
 
   @override
   String get collected => 'संग्रहित';
@@ -4595,4 +4595,340 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get msg_no_slots_available => 'के स्लॉट उपलब्ध नहीं हैं';
+
+  @override
+  String get mob_no => 'मोबाइल नंबर';
+
+  @override
+  String get mohalla => 'मोहल्ला';
+
+  @override
+  String get search_placeholder => 'HH ID, नाम या मोबाइल से खोजें';
+
+  @override
+  String get no_pregnancy_cases_found => 'कोई गर्भावस्था मामले नहीं मिले';
+
+  @override
+  String get no_hbnc_beneficiaries_found => 'कोई HBNC लाभार्थी नहीं मिले';
+
+  @override
+  String get no_high_risk_anc_visits_found => 'कोई उच्च-जोखिम ANC विज़िट नहीं मिली';
+
+  @override
+  String get hrp => 'एचआरपी';
+
+  @override
+  String get no_name => 'कोई नाम नहीं';
+
+  @override
+  String get search_by_id_name_contact => 'ID/नाम/संपर्क से खोजें';
+
+  @override
+  String get close => 'बंद करें';
+
+  @override
+  String get death_record_details => 'मृत्यु रिकॉर्ड विवरण';
+
+  @override
+  String get death_record => 'मृत्यु रिकॉर्ड';
+
+  @override
+  String get try_different_search_term => 'कोई अन्य खोज शब्द आज़माएँ';
+
+  @override
+  String get no_matching_records_found => 'कोई मिलते-जुलते रिकॉर्ड नहीं मिले';
+
+  @override
+  String get refresh => 'रीफ़्रेश';
+
+  @override
+  String get no_death_records_in_database => 'डेटाबेस में कोई मृत्यु रिकॉर्ड नहीं हैं।';
+
+  @override
+  String get no_death_records_found => 'कोई मृत्यु रिकॉर्ड नहीं मिले';
+
+  @override
+  String get refresh_data => 'डेटा रीफ़्रेश करें';
+
+  @override
+  String get guest_beneficiaries => 'अतिथि लाभार्थी';
+
+  @override
+  String get no_guest_beneficiaries_found => 'कोई अतिथि लाभार्थी नहीं मिले';
+
+  @override
+  String get completed => 'पूर्ण';
+
+  @override
+  String get progress => 'प्रगति';
+
+  @override
+  String get pendingVisits => 'लंबित दौरे';
+
+  @override
+  String get tryAgain => 'पुनः प्रयास करें';
+
+  @override
+  String get failedToLoadVideo => 'वीडियो लोड करने में विफल';
+
+  @override
+  String get unableToOpenDialer => 'इस डिवाइस पर डायलर नहीं खोला जा सका।';
+
+  @override
+  String get unableToOpenEmailApp => 'इस डिवाइस पर ईमेल ऐप नहीं खोला जा सका।';
+
+  @override
+  String get disability => 'विकलांगता';
+
+  @override
+  String get hasConditions => 'स्थितियाँ हैं';
+
+  @override
+  String get idType => 'पहचान प्रकार';
+
+  @override
+  String get village => 'गाँव';
+
+  @override
+  String get mobile => 'मोबाइल';
+
+  @override
+  String get fathersName => 'पिता का नाम';
+
+  @override
+  String get beneficiaryId => 'लाभार्थी आईडी';
+
+  @override
+  String get householdId => 'परिवार आईडी';
+
+  @override
+  String get registrationDate => 'पंजीकरण की तिथि';
+
+  @override
+  String get formId => 'फ़ॉर्म आईडी';
+
+  @override
+  String get basicInformation => 'मूल जानकारी';
+
+  @override
+  String get cbacFormDetails => 'CBAC फ़ॉर्म विवरण';
+
+  @override
+  String get anmName => 'ए.एन.एम. का नाम';
+
+  @override
+  String get ashaName => 'आशा का नाम';
+
+  @override
+  String get healthcareProviderInformation => 'स्वास्थ्य सेवा प्रदाता की जानकारी';
+
+  @override
+  String get hsc => 'एचएससी.';
+
+  @override
+  String get familyHistory => 'पारिवारिक इतिहास';
+
+  @override
+  String get waistMeasurement => 'कमर माप';
+
+  @override
+  String get physicalActivity => 'शारीरिक गतिविधि';
+
+  @override
+  String get alcoholConsumption => 'शराब का सेवन';
+
+  @override
+  String get tobaccoUse => 'तंबाकू का उपयोग';
+
+  @override
+  String get ageGroup => 'आयु समूह';
+
+  @override
+  String get partA_riskFactors => 'भाग A - जोखिम कारक';
+
+  @override
+  String get voiceChange => 'आवाज़ में बदलाव';
+
+  @override
+  String get hearingDifficulty => 'सुनने में कठिनाई';
+
+  @override
+  String get eyeRedness => 'आंखों में लाली';
+
+  @override
+  String get eyePain => 'आंखों में दर्द';
+
+  @override
+  String get readingDifficulty => 'पढ़ने में कठिनाई';
+
+  @override
+  String get blurredVision => 'धुंधली दृष्टि';
+
+  @override
+  String get tinglingSensation => 'झुनझुनी महसूस होना';
+
+  @override
+  String get palmsSolesIssues => 'हथेलियों/तलवों की समस्याएँ';
+
+  @override
+  String get medicalHistory => 'चिकित्सकीय इतिहास';
+
+  @override
+  String get tuberculosis => 'क्षय रोग';
+
+  @override
+  String get drugUse => 'नशीली दवाओं का उपयोग';
+
+  @override
+  String get painWhileChewing => 'चबाते समय दर्द';
+
+  @override
+  String get rashInMouth => 'मुंह में दाने';
+
+  @override
+  String get swellingInMouth => 'मुंह में सूजन';
+
+  @override
+  String get ulcers => 'घाव/अल्सर';
+
+  @override
+  String get difficultyOpeningMouth => 'मुंह खोलने में कठिनाई';
+
+  @override
+  String get seizures => 'बरामदगी';
+
+  @override
+  String get nightSweats => 'रात में अत्यधिक पसीना';
+
+  @override
+  String get weightLoss => 'वजन कम होना';
+
+  @override
+  String get fever2Weeks => '2 या अधिक सप्ताह से बुखार';
+
+  @override
+  String get bloodInMucus => 'बलगम में खून';
+
+  @override
+  String get cough2Weeks => '2 या अधिक सप्ताह से खांसी';
+
+  @override
+  String get shortnessOfBreath => 'सांस लेने में तकलीफ़';
+
+  @override
+  String get partB1GeneralSymptoms => 'भाग B1 - सामान्य लक्षण';
+
+  @override
+  String get partB1_skinSensorySymptoms => 'भाग B1 - त्वचा एवं संवेदी लक्षण';
+
+  @override
+  String get skinRashDiscoloration => 'त्वचा पर दाने/वर्ण परिवर्तन';
+
+  @override
+  String get thickSkin => 'मोटी त्वचा';
+
+  @override
+  String get skinLump => 'त्वचा में गांठ';
+
+  @override
+  String get numbnessHotCold => 'सुन्नपन (गरम/ठंडा)';
+
+  @override
+  String get scratchesCracks => 'खरोंच/दरारें';
+
+  @override
+  String get tinglingNumbness => 'झुनझुनी/सुन्नपन';
+
+  @override
+  String get eyelidClosingDifficulty => 'पलकें बंद करने में कठिनाई';
+
+  @override
+  String get holdingDifficulty => 'वस्तु पकड़ने में कठिनाई';
+
+  @override
+  String get legWeaknessWalk => 'टांगों में कमजोरी/चलने में कठिनाई';
+
+  @override
+  String get partB2_womenHealthSymptoms => 'भाग B2 - महिला स्वास्थ्य लक्षण';
+
+  @override
+  String get breastLump => 'स्तन में गांठ';
+
+  @override
+  String get nippleBleeding => 'निप्पल से रक्तस्राव';
+
+  @override
+  String get breastShapeDifference => 'स्तन के आकार में अंतर';
+
+  @override
+  String get excessiveBleeding => 'अत्यधिक रक्तस्राव';
+
+  @override
+  String get depression => 'अवसाद';
+
+  @override
+  String get uterusProlapse => 'गर्भाशय का गिरना';
+
+  @override
+  String get postMenopauseBleeding => 'रजोनिवृत्ति के बाद रक्तस्राव';
+
+  @override
+  String get postIntercourseBleeding => 'संभोग के बाद रक्तस्राव';
+
+  @override
+  String get smellyDischarge => 'दुर्गंधयुक्त स्राव';
+
+  @override
+  String get irregularPeriods => 'अनियमित मासिक धर्म';
+
+  @override
+  String get jointPain => 'जोड़ों में दर्द';
+
+  @override
+  String get totalScore => 'कुल स्कोर';
+
+  @override
+  String get partDScore => 'भाग D स्कोर';
+
+  @override
+  String get partAScore => 'भाग A स्कोर';
+
+  @override
+  String get assessmentScores => 'मूल्यांकन स्कोर';
+
+  @override
+  String get question2 => 'प्रश्न 2';
+
+  @override
+  String get question1 => 'प्रश्न 1';
+
+  @override
+  String get partD_mentalHealthAssessment => 'भाग D - मानसिक स्वास्थ्य मूल्यांकन';
+
+  @override
+  String get businessRisk => 'व्यवसायिक जोखिम';
+
+  @override
+  String get cookingFuel => 'खाना पकाने का ईंधन';
+
+  @override
+  String get partC_environmentalFactors => 'भाग C - पर्यावरणीय कारक';
+
+  @override
+  String get ncdBeneficiarySearch => 'एनसीडी लाभार्थी खोज';
+
+  @override
+  String get wifeName => 'पत्नी का नाम';
+
+  @override
+  String get husbandName => 'पति का नाम';
+
+  @override
+  String get noRecordsFound => 'कोई रिकॉर्ड नहीं मिला';
+
+  @override
+  String get tolaMohalla => 'टोला/मोहल्ला';
+
+  @override
+  String get noHouseholdsFound => 'कोई परिवार नहीं मिला';
 }

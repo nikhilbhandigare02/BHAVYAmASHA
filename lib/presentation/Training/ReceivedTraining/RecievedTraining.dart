@@ -29,7 +29,6 @@ class _TrainingReceivedState extends State<TrainingReceived> {
     _searchCtrl.addListener(_onSearchChanged);
   }
 
-  bool _isLoading = true;
   Future<void> _loadTrainingData() async {
     try {
       final rows = await LocalStorageDao.instance.fetchTrainingList();
@@ -63,7 +62,9 @@ class _TrainingReceivedState extends State<TrainingReceived> {
 
           final hhIdRaw = (row['household_ref_key'] ?? '').toString();
           final hhId = hhIdRaw.isNotEmpty ? hhIdRaw : 'N/A';
-          final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
+          final displayHhId = hhId.length > 11
+              ? hhId.substring(hhId.length - 11)
+              : hhId;
 
           parsed.add({
             'hhId': displayHhId,
@@ -99,6 +100,8 @@ class _TrainingReceivedState extends State<TrainingReceived> {
       }).toList();
     });
   }
+
+  bool _isLoading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +151,7 @@ class _TrainingReceivedState extends State<TrainingReceived> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -209,9 +213,15 @@ class _TrainingReceivedState extends State<TrainingReceived> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _rowText("Training Name:", data['trainingName'] ?? ''),
+                    _rowText(
+                      "${l10n?.trainingNameLabel}:" ?? "Training Name:",
+                      data['trainingName'] ?? '',
+                    ),
                     const SizedBox(height: 6),
-                    _rowText("Date:", data['Date'] ?? ''),
+                    _rowText(
+                      "${l10n?.dateLabel}:" ?? "Date:",
+                      data['Date'] ?? '',
+                    ),
                   ],
                 ),
               ),

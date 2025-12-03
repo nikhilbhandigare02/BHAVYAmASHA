@@ -127,7 +127,7 @@ class _NCDHomeState extends State<Ncdnoneligiblelist> {
                 child: TextField(
                   controller: _searchCtrl,
                   decoration: InputDecoration(
-                    hintText: 'Household Search ',
+                    hintText:l10n?.searchHousehold ?? 'Household Search ',
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: AppColors.background,
@@ -154,7 +154,7 @@ class _NCDHomeState extends State<Ncdnoneligiblelist> {
                 child: _filtered.isEmpty
                     ? Center(
                         child: Text(
-                          'No households found',
+                          l10n?.noHouseholdsFound ?? 'No households found',
                           style: textTheme.titleMedium?.copyWith(
                             color: Colors.grey,
                           ),
@@ -253,36 +253,36 @@ class _NCDHomeState extends State<Ncdnoneligiblelist> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildRow([
-                      _rowText(
+                      _rowText(context,
                           l10n?.registrationDateLabel ?? 'Registration Date',
                           data['RegitrationDate']),
-                      _rowText(
+                      _rowText(context,
                           l10n?.registrationTypeLabel ?? 'Registration Type',
                           data['RegitrationType']),
-                      _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                      _rowText(context,l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           data['BeneficiaryID']),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.villageLabel ?? 'Village', data['village']),
-                      _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
-                          data['Tola/Mohalla']),
-                      _rowText('RCH ID', data['RichID']),
+                      _rowText(context,l10n?.villageLabel ?? 'Village', data['village']),
+                      _rowText(context,l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
+                          data[l10n?.tolaMohalla ?? 'Tola/Mohalla']),
+                      _rowText(context,l10n?.rchIdLabel ??'RCH ID', data['RichID']),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.thName ?? 'Name', data['Name']),
-                      _rowText(l10n?.ageGenderLabel ?? 'Age | Gender',
+                      _rowText(context,l10n?.thName ?? 'Name', data['Name']),
+                      _rowText(context,l10n?.ageGenderLabel ?? 'Age | Gender',
                           data['Age|Gender']),
-                      _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.',
+                      _rowText(context,l10n?.mobileLabelSimple ?? 'Mobile No.',
                           data['Mobileno.']),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.fatherNameLabel ?? 'Father Name',
+                      _rowText(context,l10n?.fatherNameLabel ?? 'Father Name',
                           data['FatherName']),
-                      _rowText('Husband Name', data['HusbandName']),
-                      _rowText('Wife Name', data['WifeName']),
+                      _rowText(context,l10n?.husbandName ??'Husband Name', data['HusbandName']),
+                      _rowText(context,l10n?.wifeName ??'Wife Name', data['WifeName']),
                     ]),
                   ],
                 ),
@@ -305,7 +305,9 @@ class _NCDHomeState extends State<Ncdnoneligiblelist> {
     );
   }
 
-  Widget _rowText(String title, String value) {
+  Widget _rowText(BuildContext context,String title, String value) {
+    final l10n = AppLocalizations.of(context);
+
     final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,7 +319,7 @@ class _NCDHomeState extends State<Ncdnoneligiblelist> {
         ),
         const SizedBox(height: 2),
         Text(
-          value.isEmpty ? 'N/A' : value,
+          value.isEmpty ? l10n?.na ??'N/A' : value,
           style: textTheme.bodySmall?.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w500,

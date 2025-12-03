@@ -126,7 +126,7 @@ class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText:  'NCD Beneficiary Search',
+                hintText: l10n?.ncdBeneficiarySearch ?? 'NCD Beneficiary Search',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -234,7 +234,7 @@ class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
                     _buildRow([
                       _rowText(l10n?.villageLabel ?? 'Village', data['village']),
                       _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla', data['Tola/Mohalla']),
-                      _rowText('RCH ID', data['RichID']),
+                      _rowText(l10n?.rchIdLabel??'RCH ID', data['RichID']),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
@@ -245,8 +245,8 @@ class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
                     const SizedBox(height: 8),
                     _buildRow([
                       _rowText(l10n?.fatherNameLabel ?? 'Father Name', data['FatherName']),
-                      _rowText( 'Husband Name', data['HusbandName']),
-                      _rowText( 'Wife Name', data['WifeName']),
+                      _rowText(l10n?.husbandName ?? 'Husband Name', data['HusbandName']),
+                      _rowText(l10n?.wifeName ??'Wife Name', data['WifeName']),
                     ]),
                   ],
                 ),

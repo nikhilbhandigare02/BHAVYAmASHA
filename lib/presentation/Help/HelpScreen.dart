@@ -27,7 +27,11 @@ class HelpScreen extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: const [
-              BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 2)),
+              BoxShadow(
+                color: Color(0x1A000000),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
             ],
           ),
           padding: const EdgeInsets.all(12),
@@ -52,42 +56,58 @@ class HelpScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: const Color(0xFFE6EEF7)),
                       boxShadow: const [
-                        BoxShadow(color: Color(0x0F000000), blurRadius: 6, offset: Offset(0, 1)),
+                        BoxShadow(
+                          color: Color(0x0F000000),
+                          blurRadius: 6,
+                          offset: Offset(0, 1),
+                        ),
                       ],
                     ),
                     child: ListTile(
                       dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                      leading: Text('${index + 1}.', style: const TextStyle(fontWeight: FontWeight.w600)),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 3,
+                      ),
+                      leading: Text(
+                        '${index + 1}.',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       title: Text(number, style: const TextStyle(fontSize: 15)),
                       trailing: Container(
-                        decoration: BoxDecoration(
-
-                        ),
+                        decoration: BoxDecoration(),
                         child: IconButton(
-                          icon: const Icon(Icons.call, color: AppColors.primary, weight: 800),
+                          icon: const Icon(
+                            Icons.call,
+                            color: AppColors.primary,
+                            weight: 800,
+                          ),
                           onPressed: () => _callNumber(context, number),
                         ),
                       ),
                       onTap: () => _callNumber(context, number),
                     ),
-
                   );
-
                 },
-
               ),
 
-Divider(),
+              Divider(),
               InkWell(
-                onTap: () => _sendEmail(context, 'helpdesk.bhavya@bihar.gov.in'),
+                onTap: () =>
+                    _sendEmail(context, 'helpdesk.bhavya@bihar.gov.in'),
                 child: Row(
                   children: [
-                    Text(l10n.emailLabel + '  ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(
+                      l10n.emailLabel + '  ',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     const Expanded(
                       child: Text(
                         'helpdesk.bhavya@bihar.gov.in',
-                        style: TextStyle(color: Colors.black87, decoration: TextDecoration.underline),
+                        style: TextStyle(
+                          color: Colors.black87,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ],
@@ -101,41 +121,42 @@ Divider(),
   }
 }
 
-
 Future<void> _callNumber(BuildContext context, String number) async {
   final raw = number.replaceAll(' ', '').replaceAll('+', '');
   final uri = Uri(scheme: 'tel', path: raw);
+  final l10n = AppLocalizations.of(context);
 
   try {
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to open dialer on this device.')),
+         SnackBar(content: Text(l10n?.unableToOpenDialer ?? 'Unable to open dialer on this device.')),
       );
     }
   } catch (_) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Unable to open dialer on this device.')),
+       SnackBar(content: Text(l10n?.unableToOpenDialer ??'Unable to open dialer on this device.')),
     );
   }
 }
 
 Future<void> _sendEmail(BuildContext context, String email) async {
-  final uri = Uri(
-    scheme: 'mailto',
-    path: email,
-  );
+  final uri = Uri(scheme: 'mailto', path: email);
+  final l10n = AppLocalizations.of(context);
+
 
   try {
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to open email app on this device.')),
+         SnackBar(
+          content: Text(l10n?.unableToOpenEmailApp ?? 'Unable to open email app on this device.'),
+        ),
       );
     }
   } catch (_) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Unable to open email app on this device.')),
+       SnackBar(content: Text(l10n?.unableToOpenEmailApp ?? 'Unable to open email app on this device.')),
     );
   }
 }

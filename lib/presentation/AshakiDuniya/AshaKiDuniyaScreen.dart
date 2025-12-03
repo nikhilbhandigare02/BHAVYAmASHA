@@ -222,7 +222,7 @@ class _VideoCardState extends State<VideoCard> {
                   borderRadius: BorderRadius.circular(8),
                   child: AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: _buildVideoPlayer(),
+                    child: _buildVideoPlayer(context),
                   ),
                 ),
               ),
@@ -233,7 +233,9 @@ class _VideoCardState extends State<VideoCard> {
     );
   }
 
-  Widget _buildVideoPlayer() {
+  Widget _buildVideoPlayer(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     if (_isLoading) {
       return Container(
         color: Colors.white,
@@ -259,13 +261,13 @@ class _VideoCardState extends State<VideoCard> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Failed to load video',
+                l10n!.failedToLoadVideo ?? 'Failed to load video',
                 style: GoogleFonts.roboto(fontSize: 14.sp, color: Colors.red),
               ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Try Again'),
+                label:  Text(l10n.tryAgain ?? 'Try Again'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1E88E5),
                   foregroundColor: Colors.white,

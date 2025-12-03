@@ -121,69 +121,85 @@ class _NCDHomeState extends State<Ncdprioritylist> {
       body: _isLoading
           ? const CenterBoxLoader()
           : Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText:  'Household Search ',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    decoration: InputDecoration(
+                      hintText: l10n?.searchHousehold ?? 'Household Search ',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppColors.outlineVariant),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-          ),
 
-          Expanded(
-            child: _filtered.isEmpty
-                ? Center(
-              child: Text(
-                'No households found',
-                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-              ),
-            )
-                : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) => _householdCard(context, _filtered[index]),
-            ),
-          ),
-
-          SafeArea(
-            bottom: true,
-            child: SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(
-                      context, Route_Names.RegisterNewHousehold);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                Expanded(
+                  child: _filtered.isEmpty
+                      ? Center(
+                          child: Text(
+                            l10n?.noHouseholdsFound ?? 'No households found',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: _filtered.length,
+                          itemBuilder: (context, index) =>
+                              _householdCard(context, _filtered[index]),
+                        ),
                 ),
-                child: Text(
-                    (l10n?.gridRegisterNewHousehold ?? 'NEW HOUSEHOLD REGISTRATION').toUpperCase(),
-                    style: const TextStyle(color: Colors.white)),
-              ),
+
+                SafeArea(
+                  bottom: true,
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          Route_Names.RegisterNewHousehold,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                      ),
+                      child: Text(
+                        (l10n?.gridRegisterNewHousehold ??
+                                'NEW HOUSEHOLD REGISTRATION')
+                            .toUpperCase(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -226,14 +242,13 @@ class _NCDHomeState extends State<Ncdprioritylist> {
                       child: Text(
                         data['hhId'] ?? '',
                         style: TextStyle(
-                            color: primary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.sp
+                          color: primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -242,34 +257,80 @@ class _NCDHomeState extends State<Ncdprioritylist> {
               Container(
                 decoration: BoxDecoration(
                   color: primary.withOpacity(0.95),
-                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(6)),
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(6),
+                  ),
                 ),
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildRow([
-                      _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate']),
-                      _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType']),
-                      _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryID']),
+                      _rowText(
+                        context,
+                        l10n?.registrationDateLabel ?? 'Registration Date',
+                        data['RegitrationDate'],
+                      ),
+                      _rowText(
+                        context,
+                        l10n?.registrationTypeLabel ?? 'Registration Type',
+                        data['RegitrationType'],
+                      ),
+                      _rowText(
+                        context,
+                        l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                        data['BeneficiaryID'],
+                      ),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.villageLabel ?? 'Village', data['village']),
-                      _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla', data['Tola/Mohalla']),
-                      _rowText('RCH ID', data['RichID']),
+                      _rowText(
+                        context,
+                        l10n?.villageLabel ?? 'Village',
+                        data['village'],
+                      ),
+                      _rowText(
+                        context,
+                        l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
+                        data['Tola/Mohalla'],
+                      ),
+                      _rowText(
+                        context,
+                        l10n?.rchIdLabel ?? 'RCH ID',
+                        data['RichID'],
+                      ),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.thName ?? 'Name', data['Name']),
-                      _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender']),
-                      _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.']),
+                      _rowText(context, l10n?.thName ?? 'Name', data['Name']),
+                      _rowText(
+                        context,
+                        l10n?.ageGenderLabel ?? 'Age | Gender',
+                        data['Age|Gender'],
+                      ),
+                      _rowText(
+                        context,
+                        l10n?.mobileLabelSimple ?? 'Mobile No.',
+                        data['Mobileno.'],
+                      ),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.fatherNameLabel ?? 'Father Name', data['FatherName']),
-                      _rowText( 'Husband Name', data['HusbandName']),
-                      _rowText( 'Wife Name', data['WifeName']),
+                      _rowText(
+                        context,
+                        l10n?.fatherNameLabel ?? 'Father Name',
+                        data['FatherName'],
+                      ),
+                      _rowText(
+                        context,
+                        l10n?.husbandName ?? 'Husband Name',
+                        data['HusbandName'],
+                      ),
+                      _rowText(
+                        context,
+                        l10n?.wifeName ?? 'Wife Name',
+                        data['WifeName'],
+                      ),
                     ]),
                   ],
                 ),
@@ -277,9 +338,6 @@ class _NCDHomeState extends State<Ncdprioritylist> {
             ],
           ),
         ),
-
-
-
       ],
     );
   }
@@ -290,31 +348,35 @@ class _NCDHomeState extends State<Ncdprioritylist> {
         for (int i = 0; i < children.length; i++) ...[
           Expanded(child: children[i]),
           if (i < children.length - 1) const SizedBox(width: 10),
-        ]
+        ],
       ],
     );
   }
 
-  Widget _rowText(String title, String value) {
+  Widget _rowText(BuildContext context, String title, String value) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style:  TextStyle(color: Colors.white70, fontSize: 14.sp, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
-          value.isEmpty ? 'N/A' : value,
-          style:  TextStyle(
+          value.isEmpty ? l10n?.na ?? 'N/A' : value,
+          style: TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.w500, fontSize: 14.sp,
-
+            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
           ),
         ),
       ],
     );
   }
-
 }
-

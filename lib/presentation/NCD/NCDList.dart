@@ -176,7 +176,7 @@ class _NCDHomeState extends State<Ncdlist> {
           : _filtered.isEmpty
           ? Center(
         child: Text(
-          'No records found',
+          l10n?.noRecordsFound ??'No records found',
           style: TextStyle(fontSize: 16.sp, color: Colors.grey),
         ),
       )
@@ -187,7 +187,7 @@ class _NCDHomeState extends State<Ncdlist> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: 'Household Search',
+                hintText:l10n?.searchHousehold ?? 'Household Search',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -273,7 +273,7 @@ class _NCDHomeState extends State<Ncdlist> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        data['hhId'] ?? 'N/A',
+                        data['hhId'] ?? l10n?.na ?? 'N/A',
                         style: TextStyle(
                             color: primary,
                             fontWeight: FontWeight.w600,
@@ -313,7 +313,7 @@ class _NCDHomeState extends State<Ncdlist> {
                       _rowText(
                           l10n?.villageLabel ?? 'Village', data['village']),
                       _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
-                          data['Tola/Mohalla']),
+                          data[l10n?.tolaMohalla ??'Tola/Mohalla']),
                       _rowText('RCH ID', data['RichID']),
                     ]),
                     const SizedBox(height: 8),
@@ -328,8 +328,8 @@ class _NCDHomeState extends State<Ncdlist> {
                     _buildRow([
                       _rowText(l10n?.fatherNameLabel ?? 'Father Name',
                           data['FatherName']),
-                      _rowText('Husband Name', data['HusbandName']),
-                      _rowText('Wife Name', data['WifeName']),
+                      _rowText(l10n?.husbandName ??'Husband Name', data['HusbandName']),
+                      _rowText(l10n?.wifeName ??'Wife Name', data['WifeName']),
                     ]),
                   ],
                 ),

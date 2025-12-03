@@ -4595,4 +4595,340 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get msg_no_slots_available => 'slots are not available';
+
+  @override
+  String get mob_no => 'Mobile No';
+
+  @override
+  String get mohalla => 'Mohalla';
+
+  @override
+  String get search_placeholder => 'Search by HH ID, Name or Mobile';
+
+  @override
+  String get no_pregnancy_cases_found => 'No pregnancy cases found';
+
+  @override
+  String get no_hbnc_beneficiaries_found => 'No HBNC beneficiaries found';
+
+  @override
+  String get no_high_risk_anc_visits_found => 'No high-risk ANC visits found';
+
+  @override
+  String get hrp => 'HRP';
+
+  @override
+  String get no_name => 'No Name';
+
+  @override
+  String get search_by_id_name_contact => 'Search by ID/Name/Contact';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get death_record_details => 'Death Record Details';
+
+  @override
+  String get death_record => 'Death Record';
+
+  @override
+  String get try_different_search_term => 'Try a different search term';
+
+  @override
+  String get no_matching_records_found => 'No matching records found';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get no_death_records_in_database => 'There are no death records in the database.';
+
+  @override
+  String get no_death_records_found => 'No death records found';
+
+  @override
+  String get refresh_data => 'Refresh data';
+
+  @override
+  String get guest_beneficiaries => 'Guest Beneficiaries';
+
+  @override
+  String get no_guest_beneficiaries_found => 'No guest beneficiaries found';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get progress => 'Progress';
+
+  @override
+  String get pendingVisits => 'Pending visits';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get failedToLoadVideo => 'Failed to load video';
+
+  @override
+  String get unableToOpenDialer => 'Unable to open dialer on this device.';
+
+  @override
+  String get unableToOpenEmailApp => 'Unable to open email app on this device.';
+
+  @override
+  String get disability => 'Disability';
+
+  @override
+  String get hasConditions => 'Has Conditions';
+
+  @override
+  String get idType => 'ID Type';
+
+  @override
+  String get village => 'Village';
+
+  @override
+  String get mobile => 'Mobile';
+
+  @override
+  String get fathersName => 'Father\'s Name';
+
+  @override
+  String get beneficiaryId => 'Beneficiary ID';
+
+  @override
+  String get householdId => 'Household ID';
+
+  @override
+  String get registrationDate => 'Registration Date';
+
+  @override
+  String get formId => 'Form ID';
+
+  @override
+  String get basicInformation => 'Basic Information';
+
+  @override
+  String get cbacFormDetails => 'CBAC Form Details';
+
+  @override
+  String get anmName => 'ANM Name';
+
+  @override
+  String get ashaName => 'ASHA Name';
+
+  @override
+  String get healthcareProviderInformation => 'Healthcare Provider Information';
+
+  @override
+  String get hsc => 'HSC';
+
+  @override
+  String get familyHistory => 'Family History';
+
+  @override
+  String get waistMeasurement => 'Waist Measurement';
+
+  @override
+  String get physicalActivity => 'Physical Activity';
+
+  @override
+  String get alcoholConsumption => 'Alcohol Consumption';
+
+  @override
+  String get tobaccoUse => 'Tobacco Use';
+
+  @override
+  String get ageGroup => 'Age Group';
+
+  @override
+  String get partA_riskFactors => 'Part A - Risk Factors';
+
+  @override
+  String get voiceChange => 'Voice Change';
+
+  @override
+  String get hearingDifficulty => 'Hearing Difficulty';
+
+  @override
+  String get eyeRedness => 'Eye Redness';
+
+  @override
+  String get eyePain => 'Eye Pain';
+
+  @override
+  String get readingDifficulty => 'Reading Difficulty';
+
+  @override
+  String get blurredVision => 'Blurred Vision';
+
+  @override
+  String get tinglingSensation => 'Tingling Sensation';
+
+  @override
+  String get palmsSolesIssues => 'Palms/Soles Issues';
+
+  @override
+  String get medicalHistory => 'Medical History';
+
+  @override
+  String get tuberculosis => 'Tuberculosis';
+
+  @override
+  String get drugUse => 'Drug Use';
+
+  @override
+  String get painWhileChewing => 'Pain While Chewing';
+
+  @override
+  String get rashInMouth => 'Rash in Mouth';
+
+  @override
+  String get swellingInMouth => 'Swelling in Mouth';
+
+  @override
+  String get ulcers => 'Ulcers';
+
+  @override
+  String get difficultyOpeningMouth => 'Difficulty Opening Mouth';
+
+  @override
+  String get seizures => 'Seizures';
+
+  @override
+  String get nightSweats => 'Night Sweats';
+
+  @override
+  String get weightLoss => 'Weight Loss';
+
+  @override
+  String get fever2Weeks => 'Fever for 2+ Weeks';
+
+  @override
+  String get bloodInMucus => 'Blood in Mucus';
+
+  @override
+  String get cough2Weeks => 'Cough for 2+ Weeks';
+
+  @override
+  String get shortnessOfBreath => 'Shortness of Breath';
+
+  @override
+  String get partB1GeneralSymptoms => 'Part B1 - General Symptoms';
+
+  @override
+  String get partB1_skinSensorySymptoms => 'Part B1 - Skin & Sensory Symptoms';
+
+  @override
+  String get skinRashDiscoloration => 'Skin Rash/Discoloration';
+
+  @override
+  String get thickSkin => 'Thick Skin';
+
+  @override
+  String get skinLump => 'Skin Lump';
+
+  @override
+  String get numbnessHotCold => 'Numbness (Hot/Cold)';
+
+  @override
+  String get scratchesCracks => 'Scratches/Cracks';
+
+  @override
+  String get tinglingNumbness => 'Tingling/Numbness';
+
+  @override
+  String get eyelidClosingDifficulty => 'Eyelid Closing Difficulty';
+
+  @override
+  String get holdingDifficulty => 'Holding Difficulty';
+
+  @override
+  String get legWeaknessWalk => 'Leg Weakness/Walk';
+
+  @override
+  String get partB2_womenHealthSymptoms => 'Part B2 - Women’s Health Symptoms';
+
+  @override
+  String get breastLump => 'Breast Lump';
+
+  @override
+  String get nippleBleeding => 'Nipple Bleeding';
+
+  @override
+  String get breastShapeDifference => 'Breast Shape Difference';
+
+  @override
+  String get excessiveBleeding => 'Excessive Bleeding';
+
+  @override
+  String get depression => 'Depression';
+
+  @override
+  String get uterusProlapse => 'Uterus Prolapse';
+
+  @override
+  String get postMenopauseBleeding => 'Post Menopause Bleeding';
+
+  @override
+  String get postIntercourseBleeding => 'Post Intercourse Bleeding';
+
+  @override
+  String get smellyDischarge => 'Smelly Discharge';
+
+  @override
+  String get irregularPeriods => 'Irregular Periods';
+
+  @override
+  String get jointPain => 'Joint Pain';
+
+  @override
+  String get totalScore => 'Total Score';
+
+  @override
+  String get partDScore => 'Part D Score';
+
+  @override
+  String get partAScore => 'Part A Score';
+
+  @override
+  String get assessmentScores => 'Assessment Scores';
+
+  @override
+  String get question2 => 'Question 2';
+
+  @override
+  String get question1 => 'Question 1';
+
+  @override
+  String get partD_mentalHealthAssessment => 'Part D - Mental Health Assessment';
+
+  @override
+  String get businessRisk => 'Business Risk';
+
+  @override
+  String get cookingFuel => 'Cooking Fuel';
+
+  @override
+  String get partC_environmentalFactors => 'Part C - Environmental Factors';
+
+  @override
+  String get ncdBeneficiarySearch => 'NCD Beneficiary Search';
+
+  @override
+  String get wifeName => 'Wife Name';
+
+  @override
+  String get husbandName => 'Husband Name';
+
+  @override
+  String get noRecordsFound => 'No records found';
+
+  @override
+  String get tolaMohalla => 'Tola/Mohalla';
+
+  @override
+  String get noHouseholdsFound => 'No households found';
 }

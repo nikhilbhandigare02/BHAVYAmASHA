@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
-import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart' hide ApiDropdown;
+import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart'
+    hide ApiDropdown;
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/utils/enums.dart';
@@ -47,11 +48,14 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
       listenWhen: (p, c) => p.status != c.status,
       listener: (context, state) {
         if (state.status == FormStatus.success) {
-
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Training scheduled successfully')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Training scheduled successfully')),
+          );
           Navigator.pop(context);
         } else if (state.status == FormStatus.failure && state.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!)));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error!)));
         }
       },
       child: Scaffold(
@@ -68,10 +72,14 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                   builder: (context, state) {
                     return ApiDropdown<String>(
                       labelText: l10n.trainingTypeLabel,
-                      items: state.trainingTypes.where((e) => e != 'Select').toList(),
+                      items: state.trainingTypes
+                          .where((e) => e != 'Select')
+                          .toList(),
                       getLabel: (item) => item,
                       value: state.trainingType,
-                      onChanged: (v) => context.read<TrainingBloc>().add(TrainingTypeChanged(v ?? '')),
+                      onChanged: (v) => context.read<TrainingBloc>().add(
+                        TrainingTypeChanged(v ?? ''),
+                      ),
                       hintText: l10n.select,
                     );
                   },
@@ -82,10 +90,14 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                   builder: (context, state) {
                     return ApiDropdown<String>(
                       labelText: l10n.trainingNameLabel,
-                      items: state.trainingNames.where((e) => e != 'Select').toList(),
+                      items: state.trainingNames
+                          .where((e) => e != 'Select')
+                          .toList(),
                       getLabel: (item) => item,
                       value: state.trainingName,
-                      onChanged: (v) => context.read<TrainingBloc>().add(TrainingNameChanged(v ?? '')),
+                      onChanged: (v) => context.read<TrainingBloc>().add(
+                        TrainingNameChanged(v ?? ''),
+                      ),
                       hintText: l10n.select,
                     );
                   },
@@ -119,7 +131,9 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                               lastDate: DateTime(now.year + 5),
                             );
                             if (picked != null) {
-                              context.read<TrainingBloc>().add(TrainingDateChanged(picked));
+                              context.read<TrainingBloc>().add(
+                                TrainingDateChanged(picked),
+                              );
                             }
                           },
                           child: AbsorbPointer(
@@ -143,13 +157,17 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                   builder: (context, state) {
                     _placeCtrl.value = TextEditingValue(
                       text: state.place ?? '',
-                      selection: TextSelection.collapsed(offset: (state.place ?? '').length),
+                      selection: TextSelection.collapsed(
+                        offset: (state.place ?? '').length,
+                      ),
                     );
                     return CustomTextField(
                       labelText: l10n.trainingPlaceLabel,
                       hintText: l10n.trainingPlaceLabel,
                       initialValue: state.place ?? '',
-                      onChanged: (v) => context.read<TrainingBloc>().add(TrainingPlaceChanged(v)),
+                      onChanged: (v) => context.read<TrainingBloc>().add(
+                        TrainingPlaceChanged(v),
+                      ),
                     );
                   },
                 ),
@@ -160,22 +178,23 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                   builder: (context, state) {
                     _daysCtrl.value = TextEditingValue(
                       text: state.days ?? '',
-                      selection: TextSelection.collapsed(offset: (state.days ?? '').length),
+                      selection: TextSelection.collapsed(
+                        offset: (state.days ?? '').length,
+                      ),
                     );
                     return CustomTextField(
                       labelText: l10n.trainingDaysLabel,
                       hintText: l10n.trainingDaysLabel,
                       initialValue: state.days ?? '',
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      onChanged: (v) => context.read<TrainingBloc>().add(TrainingDaysChanged(v)),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: (v) => context.read<TrainingBloc>().add(
+                        TrainingDaysChanged(v),
+                      ),
                     );
                   },
                 ),
                 Divider(color: AppColors.divider, thickness: 0.5),
-
               ],
             ),
           ),
@@ -187,7 +206,8 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
               final isLoading = state.status == FormStatus.submitting;
               return RoundButton(
                 title: l10n.trainingSave,
-                onPress: () => context.read<TrainingBloc>().add(const SubmitTraining()),
+                onPress: () =>
+                    context.read<TrainingBloc>().add(const SubmitTraining()),
                 isLoading: isLoading,
                 disabled: !state.isValid || isLoading,
                 width: double.infinity,
@@ -199,5 +219,4 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
       ),
     );
   }
-
 }
