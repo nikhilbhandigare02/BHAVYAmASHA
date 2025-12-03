@@ -96,15 +96,13 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<GivesBirthToBaby>((e, emit) => emit(state.copyWith(givesBirthToBaby: e.value)));
     on<DeliveryOutcomeChanged>((e, emit) => emit(state.copyWith(deliveryOutcome: e.value)));
     on<NumberOfChildrenChanged>((e, emit) {
-      // Auto-fill baby names based on pregnancy type and woman's name
+
       final womanName = e.womanName?.trim() ?? state.womanName.trim();
-      
-      // Default empty values
+
       String baby1Name = '';
       String baby2Name = '';
       String baby3Name = '';
-      
-      // Only auto-fill if woman's name is not empty
+
       if (womanName.isNotEmpty) {
         switch (e.value) {
           case 'One Child':

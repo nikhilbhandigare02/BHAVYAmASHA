@@ -1091,7 +1091,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           final bloc = context.read<SpousBloc>();
                           bloc.add(SpLMPChange(d));
                           if (d != null) {
-                            final edd = DateTime(d.year, d.month + 9, d.day + 5);
+                            final edd = d.add(const Duration(days: 277));
                             bloc.add(SpEDDChange(edd));
                           } else {
                             bloc.add(const SpEDDChange(null));
