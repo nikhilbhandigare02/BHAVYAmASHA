@@ -50,208 +50,212 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
       create: (context) => HbncVisitBloc(),
       child: Builder(
         builder: (context) => Scaffold(
-          body: BlocListener<HbncVisitBloc, HbncVisitState>(
-            listenWhen: (previous, current) => 
-                (previous.validationTick != current.validationTick) ||
-                (previous.isSaving && !current.isSaving && current.saveSuccess),
-            listener: (context, state) {
-              final idx = _tabController.index;
-              if (state.lastValidatedIndex == idx && state.validationErrors.isNotEmpty) {
-                final t = AppLocalizations.of(context)!;
-                final first = state.validationErrors.first;
-                final localized = _mapErrorCodeToText(t, first);
-                showAppSnackBar(context, localized);
-              }
-              
-              // Handle successful save
-              if (state.saveSuccess && !state.isSaving) {
-                // Show success message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppLocalizations.of(context)!.dataSavedSuccessfully),
-                    backgroundColor: Colors.green,
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-                
-                if (mounted) {
-                  Future.delayed(const Duration(milliseconds: 2200), () {
-                    if (mounted) {
-                      Navigator.pushNamedAndRemoveUntil(context, Route_Names.HBNCScreen,  (route) => false,);
-                    }
-                  });
+          body: SafeArea(
+            bottom: true,
+            top: false,
+            child: BlocListener<HbncVisitBloc, HbncVisitState>(
+              listenWhen: (previous, current) =>
+                  (previous.validationTick != current.validationTick) ||
+                  (previous.isSaving && !current.isSaving && current.saveSuccess),
+              listener: (context, state) {
+                final idx = _tabController.index;
+                if (state.lastValidatedIndex == idx && state.validationErrors.isNotEmpty) {
+                  final t = AppLocalizations.of(context)!;
+                  final first = state.validationErrors.first;
+                  final localized = _mapErrorCodeToText(t, first);
+                  showAppSnackBar(context, localized);
                 }
-              }
-              
-              if (state.lastValidatedIndex == idx &&
-                  !state.lastValidationWasSave && 
-                  state.validationErrors.isEmpty) {
-                final newIndex = idx + 1;
-                if (newIndex < _tabController.length) {
-                  _tabController.animateTo(newIndex);
-                  context.read<HbncVisitBloc>().add(TabChanged(newIndex));
+
+                // Handle successful save
+                if (state.saveSuccess && !state.isSaving) {
+                  // Show success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!.dataSavedSuccessfully),
+                      backgroundColor: Colors.green,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+
+                  if (mounted) {
+                    Future.delayed(const Duration(milliseconds: 2200), () {
+                      if (mounted) {
+                        Navigator.pushNamedAndRemoveUntil(context, Route_Names.HBNCScreen,  (route) => false,);
+                      }
+                    });
+                  }
                 }
-              }
-              
-              // Handle save after validation
-              if (state.lastValidatedIndex == idx && 
-                  state.lastValidationWasSave && 
-                  state.validationErrors.isEmpty) {
-                final beneficiaryData = (widget as dynamic).beneficiaryData;
-                context.read<HbncVisitBloc>().add(
-                  SaveHbncVisit(beneficiaryData: beneficiaryData),
-                );
-              }
-            },
-            child: Column(
-              children: [
-                AppHeader(
-                  screenTitle: t.hbncListTitle,
-                  showBack: true,
-                  icon1Widget: Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(6.0),
-                        child: Text(
-                          t.previousVisits,
-                          style: TextStyle(
-                            color: AppColors.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
+
+                if (state.lastValidatedIndex == idx &&
+                    !state.lastValidationWasSave &&
+                    state.validationErrors.isEmpty) {
+                  final newIndex = idx + 1;
+                  if (newIndex < _tabController.length) {
+                    _tabController.animateTo(newIndex);
+                    context.read<HbncVisitBloc>().add(TabChanged(newIndex));
+                  }
+                }
+
+                // Handle save after validation
+                if (state.lastValidatedIndex == idx &&
+                    state.lastValidationWasSave &&
+                    state.validationErrors.isEmpty) {
+                  final beneficiaryData = (widget as dynamic).beneficiaryData;
+                  context.read<HbncVisitBloc>().add(
+                    SaveHbncVisit(beneficiaryData: beneficiaryData),
+                  );
+                }
+              },
+              child: Column(
+                children: [
+                  AppHeader(
+                    screenTitle: t.hbncListTitle,
+                    showBack: true,
+                    icon1Widget: Padding(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Text(
+                            t.previousVisits,
+                            style: TextStyle(
+                              color: AppColors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
                     ),
+                    onIcon1Tap: () {
+                      Navigator.pushNamed(context, Route_Names.previousVisit);
+                    },
                   ),
-                  onIcon1Tap: () {
-                    Navigator.pushNamed(context, Route_Names.previousVisit);
-                  },
-                ),
-                Container(
-                  color: AppColors.primary,
-                  child: TabBar(
-                    controller: _tabController,
-                    isScrollable: true, // ✅ makes the tabs scrollable
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white70,
-                    indicatorColor: Colors.white,
-                    indicatorWeight: 3,
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    tabs: [
-                      Tab(text: t.tabGeneralDetails),
-                      Tab(text: t.tabMotherDetails),
-                      Tab(text: t.tabNewbornDetails),
-                    ],
-                    onTap: (index) =>
-                        context.read<HbncVisitBloc>().add(TabChanged(index)),
-                  ),
-                ),
-
-                Expanded(
-                  child: Form(
-                    key: _formKey,
-                    child: TabBarView(
+                  Container(
+                    color: AppColors.primary,
+                    child: TabBar(
                       controller: _tabController,
-                      children: [
-                        GeneralDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
-                        const MotherDetailsTab(),
-                        const ChildDetailsTab(),
+                      isScrollable: true, // ✅ makes the tabs scrollable
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white70,
+                      indicatorColor: Colors.white,
+                      indicatorWeight: 3,
+                      labelStyle: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      tabs: [
+                        Tab(text: t.tabGeneralDetails),
+                        Tab(text: t.tabMotherDetails),
+                        Tab(text: t.tabNewbornDetails),
+                      ],
+                      onTap: (index) =>
+                          context.read<HbncVisitBloc>().add(TabChanged(index)),
+                    ),
+                  ),
+
+                  Expanded(
+                    child: Form(
+                      key: _formKey,
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          GeneralDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
+                          const MotherDetailsTab(),
+                          ChildDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 4,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 0), // TOP shadow
+                        ),
                       ],
                     ),
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 4,
-                        spreadRadius: 2,
-                        offset: const Offset(0, 0), // TOP shadow
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: AnimatedBuilder(
-                      animation: _tabController,
-                      builder: (context, _) {
-                        final idx = _tabController.index;
-                        final isLast = idx >= _tabController.length - 1;
-                        final t = AppLocalizations.of(context)!;
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: RoundButton(
-                                title: t.previousButton,
-                                height: 34,
-                                onPress: () {
-                                  final newIndex = idx - 1;
-                                  _tabController.animateTo(newIndex);
-                                  context
-                                      .read<HbncVisitBloc>()
-                                      .add(TabChanged(newIndex));
-                                },
-                                disabled: idx == 0,
-                                color: AppColors.primary,
+                    child: Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: AnimatedBuilder(
+                        animation: _tabController,
+                        builder: (context, _) {
+                          final idx = _tabController.index;
+                          final isLast = idx >= _tabController.length - 1;
+                          final t = AppLocalizations.of(context)!;
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: RoundButton(
+                                  title: t.previousButton,
+                                  height: 34,
+                                  onPress: () {
+                                    final newIndex = idx - 1;
+                                    _tabController.animateTo(newIndex);
+                                    context
+                                        .read<HbncVisitBloc>()
+                                        .add(TabChanged(newIndex));
+                                  },
+                                  disabled: idx == 0,
+                                  color: AppColors.primary,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 30),
-                            Expanded(
-                              child: isLast
-                                  ? BlocConsumer<HbncVisitBloc, HbncVisitState>(
-                                listener: (context, state) {
-                                  // Handle any state changes after save
-                                  if (state.saveSuccess) {
-                                    // Reset form or navigate away
-                                    Navigator.pop(context, true);
-                                  }
-                                },
-                                builder: (context, state) {
-                                  return RoundButton(
-                                    height: 34,
-                                    title: t.saveButton,
-                                    isLoading: state.isSaving,
-                                    onPress: () {
-                                      if (!state.isSaving) {
-                                        if (_formKey.currentState?.validate() ?? true) {
-                                          context.read<HbncVisitBloc>().add(
-                                            ValidateSection(
-                                              _tabController.index,
-                                              isSave: true,
-                                            ),
-                                          );
+                              const SizedBox(width: 30),
+                              Expanded(
+                                child: isLast
+                                    ? BlocConsumer<HbncVisitBloc, HbncVisitState>(
+                                  listener: (context, state) {
+                                    // Handle any state changes after save
+                                    if (state.saveSuccess) {
+                                      // Reset form or navigate away
+                                      Navigator.pop(context, true);
+                                    }
+                                  },
+                                  builder: (context, state) {
+                                    return RoundButton(
+                                      height: 34,
+                                      title: t.saveButton,
+                                      isLoading: state.isSaving,
+                                      onPress: () {
+                                        if (!state.isSaving) {
+                                          if (_formKey.currentState?.validate() ?? true) {
+                                            context.read<HbncVisitBloc>().add(
+                                              ValidateSection(
+                                                _tabController.index,
+                                                isSave: true,
+                                              ),
+                                            );
+                                          }
                                         }
-                                      }
-                                    },
-                                  );
-                                },
-                              )
-                                  : RoundButton(
-                                height: 34,
-                                title: t.nextButton,
-                                onPress: () {
-                                  context
-                                      .read<HbncVisitBloc>()
-                                      .add(ValidateSection(idx));
-                                },
+                                      },
+                                    );
+                                  },
+                                )
+                                    : RoundButton(
+                                  height: 34,
+                                  title: t.nextButton,
+                                  onPress: () {
+                                    context
+                                        .read<HbncVisitBloc>()
+                                        .add(ValidateSection(idx));
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
-                        );
-                      },
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
