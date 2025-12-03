@@ -26,18 +26,15 @@ import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Hea
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
 class AddNewFamilyMemberScreen extends StatefulWidget {
-  final bool isEdit;
   final String? hhId;
   final String? headName;
   final String? headGender;
   final String? spouseName;
   final String? spouseGender;
-  // When true, this screen is used for inline edit inside
-  // RegisterNewHouseHold and should not trigger DB save via bloc.
+  final bool isEdit;
   final bool inlineEdit;
-  // Full member data map used to prefill fields during inline edit.
+  final bool maintainState;
   final Map<String, dynamic>? initial;
-  // Initial tab index for the DefaultTabController: 0 = member, 1 = spouse, 2 = children.
   final int initialStep;
 
   const AddNewFamilyMemberScreen({
@@ -49,6 +46,7 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
     this.spouseName,
     this.spouseGender,
     this.inlineEdit = false,
+    this.maintainState = true,
     this.initial,
     this.initialStep = 0,
   });
@@ -57,7 +55,7 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
   State<AddNewFamilyMemberScreen> createState() => _AddNewFamilyMemberScreenState();
 }
 
-class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
+class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> with AutomaticKeepAliveClientMixin {
   final _formKey = GlobalKey<FormState>();
   bool _isEdit = false;
   bool _argsHandled = false;
@@ -141,7 +139,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       print('Beneficiary ID: $beneficiaryId');
       print('isEdit: $_isEdit');
       print('isMemberDetails: $_isMemberDetails');
-      
+
       _bloc.add(LoadBeneficiaryData(beneficiaryId));
 
       // Show loading indicator
@@ -248,12 +246,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
         print('isMemberDetails: ${args['isMemberDetails']}');
         print('beneficiaryId: ${args['beneficiaryId']}');
         print('hhId: ${args['hhId']}');
-        
+
         setState(() {
           _isEdit = args['isEdit'] == true;
           _isMemberDetails = args['isMemberDetails'] == true;
         });
-        
+
         if (args['isBeneficiary'] == true && args['beneficiaryId'] != null) {
           await _loadBeneficiaryData(args['beneficiaryId']);
         }
@@ -268,45 +266,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
     });
   }
 
-
-  void _updateParentNames(String relation) {
-    // Determine father and mother based on head and spouse
-    String? fatherName;
-    String? motherName;
-
-    if (_maleAdultNames.isNotEmpty) {
-      fatherName = _maleAdultNames.first;
-    }
-    if (_femaleAdultNames.isNotEmpty) {
-      motherName = _femaleAdultNames.first;
-    }
-    if (fatherName == null) {
-      if (_headGender == 'Male') {
-        fatherName = _headName;
-      } else if (_spouseGender == 'Male') {
-        fatherName = _spouseName;
-      }
-    }
-    if (motherName == null) {
-      if (_headGender == 'Female') {
-        motherName = _headName;
-      } else if (_spouseGender == 'Female') {
-        motherName = _spouseName;
-      }
-    }
-
-    if (relation == 'Father' && fatherName != null) {
-      setState(() {
-        _fatherOption = fatherName!;
-      });
-      _bloc.add(AnmUpdateFatherName(fatherName));
-    } else if (relation == 'Mother' && motherName != null) {
-      setState(() {
-        _motherOption = motherName!;
-      });
-      _bloc.add(AnmUpdateMotherName(motherName));
-    }
-  }
 
   String? _firstFatherItem() {
     if (_isMemberDetails) {
@@ -370,7 +329,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Call super.build for AutomaticKeepAliveClientMixin
     final l = AppLocalizations.of(context)!;
     final now = DateTime.now();
 
@@ -404,21 +367,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       }
       _argsHandled = true;
     }
-    // On first build, honor the initialStep requested by the caller so that
-    // we can open directly on Spouse/Children tabs when needed.
+
     if (_isFirstLoad) {
       _isFirstLoad = false;
-      // tabCount is computed below as either 1 or 3; clamp will be applied again
-      // just before creating DefaultTabController.
+
       _currentStep = widget.initialStep;
     }
-    // Inline edit inside RegisterNewHouseHold: hydrate member + spouse blocs
-    // once from the initial map stored in RegisterNewHouseHold._memberForms.
+
     if (widget.inlineEdit && !_initialApplied && widget.initial != null) {
       final data = widget.initial!;
       final b = _bloc;
 
-      // Basic identity and relation fields
       final memberType = (data['memberType'] ?? '') as String;
       if (memberType.isNotEmpty) b.add(AnmUpdateMemberType(memberType));
 
@@ -431,8 +390,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       final fatherName = (data['fatherName'] ?? '') as String;
       if (fatherName.isNotEmpty) b.add(AnmUpdateFatherName(fatherName));
 
-      // Align father dropdown selection with stored fatherName so that
-      // reopening shows the correct option or 'Other' + text field.
+
       if (fatherName.isNotEmpty) {
         if (_maleAdultNames.contains(fatherName)) {
           _fatherOption = fatherName;
@@ -444,8 +402,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
       final motherName = (data['motherName'] ?? '') as String;
       if (motherName.isNotEmpty) b.add(AnmUpdateMotherName(motherName));
 
-      // Align mother dropdown selection with stored motherName so that
-      // reopening shows the correct option or 'Other' + text field.
+
       if (motherName.isNotEmpty) {
         if (_femaleAdultNames.contains(motherName)) {
           _motherOption = motherName;
@@ -536,6 +493,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
       final occupation = (data['occupation'] ?? '') as String;
       if (occupation.isNotEmpty) b.add(AnmUpdateOccupation(occupation));
+
 
       final religion = (data['religion'] ?? '') as String;
       if (religion.isNotEmpty) b.add(AnmUpdateReligion(religion));
@@ -1196,10 +1154,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                               onChanged: (v) {
                                                 // Clear previous snackbar
                                                 ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                                                
+
                                                 final value = v?.trim() ?? '';
                                                 context.read<AddnewfamilymemberBloc>().add(RichIDChanged(value));
-                                                
+
                                                 // Show error if not empty and not exactly 12 digits
                                                 if (value.isNotEmpty && value.length != 12) {
                                                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -2528,9 +2486,32 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
                                   initialValue: state.ifsc,
                                   onChanged: (v) {
                                     final value = v.trim().toUpperCase();
-                                    context.read<SpousBloc>().add(SpUpdateIfsc(value));
                                     // Clear previous snackbar
                                     ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                                    // Always update the state with the current value
+                                    context.read<AddnewfamilymemberBloc>().add(AnmUpdateIfsc(value));
+
+                                    // Validate the input
+                                    String? error;
+                                    if (value.isNotEmpty) { // Only validate if there's input
+                                      if (value.length != 11) {
+                                        error = 'Please enter a valid 11-character IFSC code';
+                                      } else if (!RegExp(r'^[A-Z]{4}0\d{6}$').hasMatch(value)) {
+                                        error = 'IFSC code must have first 4 uppercase letters, followed by 0 and 6 digits';
+                                      }
+
+                                      if (error != null) {
+                                        // Show error snackbar but keep the current value in the state
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(error),
+                                            backgroundColor: Colors.orange,
+                                            duration: const Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+                                    }
                                   },
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -2539,9 +2520,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> {
 
                                     String? error;
                                     if (value.length != 11) {
-                                      error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                                      error = 'Please enter a valid 11-character IFSC code';
                                     } else if (!RegExp(r'^[A-Z]{4}0\d{6}$').hasMatch(value)) {
-                                      error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                                      error = 'IFSC code must have first 4 uppercase letters, followed by 0 and 6 digits';
                                     }
 
                                     if (error != null) {
