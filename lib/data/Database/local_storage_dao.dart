@@ -1544,7 +1544,6 @@ class LocalStorageDao {
         return null;
       }
 
-      // 2. Find the head of the family by checking the relation field
       for (final beneficiary in beneficiaries) {
         final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
         if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;

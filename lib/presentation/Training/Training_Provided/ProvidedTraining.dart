@@ -58,6 +58,10 @@ class _TrainingProvidedState
 
   Future<void> _loadTrainingData() async {
     try {
+      setState(() {
+        _isLoading = true; // Optional: ensure it's true at start
+      });
+
       final rows = await LocalStorageDao.instance.fetchTrainingList();
 
       final List<Map<String, dynamic>> parsed = [];
@@ -78,7 +82,7 @@ class _TrainingProvidedState
             try {
               final parsedDate = DateTime.tryParse(rawDate);
               if (parsedDate != null) {
-                dateStr = DateFormat('dd-MM-ssyyyy').format(parsedDate);
+                dateStr = DateFormat('dd-MM-yyyy').format(parsedDate);
               } else {
                 dateStr = rawDate;
               }
@@ -102,13 +106,21 @@ class _TrainingProvidedState
       }
 
       if (!mounted) return;
+
       setState(() {
         _allData = parsed;
         _filtered = List.from(parsed);
+        _isLoading = false; // THIS WAS MISSING!
       });
-    } catch (_) {}
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _allData = [];
+        _filtered = [];
+        _isLoading = false; // Also stop loading on error
+      });
+    }
   }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);

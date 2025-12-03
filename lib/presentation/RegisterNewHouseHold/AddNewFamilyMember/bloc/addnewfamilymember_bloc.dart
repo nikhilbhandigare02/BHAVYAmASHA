@@ -260,6 +260,30 @@ class AddnewfamilymemberBloc
         final otherOccupation = allData['otherOccupation'] as String?;
         final otherRelation = allData['otherRelation'] as String?;
 
+        // Handle 'Other' option fields - using the exact field names from the database
+        final rawReligion = allData['religion'] as String?;
+        final rawCategory = allData['category'] as String?;
+        final rawOccupation = allData['occupation'] as String?;
+        final rawMobileOwnerRelation = allData['mobileOwnerRelation'] as String?;
+        
+        // Check if the field is 'Other' in the database
+        final isReligionOther = rawReligion == 'Other';
+        final isCategoryOther = rawCategory == 'Other';
+        final isOccupationOther = rawOccupation == 'Other';
+        final isRelationOther = rawMobileOwnerRelation == 'Other';
+        
+        // Get the 'other' values from the database fields with underscore naming
+        final otherReligionValue = allData['other_religion'] as String?;
+        final otherCategoryValue = allData['other_category'] as String?;
+        final otherOccupationValue = allData['other_occupation'] as String?;
+        final otherRelationValue = allData['other_relation'] as String?;
+        
+        // Debug log to see what values we're getting from the database
+        print('Religion: $rawReligion, Other: $otherReligionValue');
+        print('Category: $rawCategory, Other: $otherCategoryValue');
+        print('Occupation: $rawOccupation, Other: $otherOccupationValue');
+        print('Relation: $rawMobileOwnerRelation, Other: $otherRelationValue');
+        
         // Update the state with all the data
         emit(state.copyWith(
           // Map all the fields to the state
@@ -268,7 +292,7 @@ class AddnewfamilymemberBloc
           motherName: allData['motherName'] as String?,
           memberType: allData['memberType'] as String? ?? 'Adult',
           relation: primaryRelation,
-          otherRelation: otherRelation,
+          otherRelation: otherRelationValue,
           useDob: allData['useDob'] as bool? ?? true,
           dob: loadedDob,
           approxAge: loadedApproxAge,
@@ -278,27 +302,24 @@ class AddnewfamilymemberBloc
           bankAcc: allData['bankAcc'] as String?,
           ifsc: allData['ifsc'] as String?,
           // Handle occupation and other occupation
-          occupation: allData['occupation'] as String?,
-          otherOccupation: allData['otherOccupation'] as String? ?? 
-                         (allData['occupation_other'] as String?),
+          occupation: rawOccupation,
+          otherOccupation: otherOccupationValue,
           
           education: allData['education'] as String?,
           
           // Handle religion and other religion
-          religion: allData['religion'] as String?,
-          otherReligion: allData['otherReligion'] as String? ?? 
-                       (allData['religion_other'] as String?),
+          religion: rawReligion,
+          otherReligion: otherReligionValue,
           
           // Handle category and other category
-          category: allData['category'] as String?,
-          otherCategory: allData['otherCategory'] as String? ?? 
-                       (allData['category_other'] as String?),
+          category: rawCategory,
+          otherCategory: otherCategoryValue,
           
           abhaAddress: allData['abhaAddress'] as String?,
           
           // Handle mobile owner and relation
           mobileOwner: allData['mobileOwner'] as String?,
-          mobileOwnerRelation: allData['mobileOwnerRelation'] as String? ?? 
+          mobileOwnerRelation: rawMobileOwnerRelation ?? 
                             (allData['mobile_owner_relation'] as String?),
           mobileNo: allData['mobileNo'] as String?,
           voterId: allData['voterId'] as String?,
@@ -1034,10 +1055,10 @@ class AddnewfamilymemberBloc
                 'education': spousState.education,
                 'religion': spousState.religion,
                 'category': spousState.category,
-                'mobileOwnerOtherRelation': spousState.mobileOwnerOtherRelation,
-                'otherCategory': spousState.otherCategory,
-                'otherReligion': spousState.otherReligion,
-                'otherOccupation': spousState.otherOccupation,
+                'mobile_owner_relation': spousState.mobileOwnerOtherRelation,
+                'other_category': spousState.otherCategory,
+                'other_religion': spousState.otherReligion,
+                'other_occupation': spousState.otherOccupation,
                 'antraDate':spousState.antraDate,
                 'abhaAddress': spousState.abhaAddress,
                 'mobileOwner': spousState.mobileOwner,
@@ -1726,16 +1747,16 @@ class AddnewfamilymemberBloc
           ..['gender'] = state.gender
           ..['bankAcc'] = state.bankAcc
           ..['ifsc'] = state.ifsc
-          ..['occupation'] = state.occupation
+          ..['occupation'] = state.occupation == 'Other' && state.otherOccupation != null && state.otherOccupation!.isNotEmpty ? '${state.otherOccupation}_other' : state.occupation
           ..['education'] = state.education
-          ..['religion'] = state.religion
-          ..['category'] = state.category
+          ..['religion'] = state.religion == 'Other' && state.otherReligion != null && state.otherReligion!.isNotEmpty ? '${state.otherReligion}_other' : state.religion
+          ..['category'] = state.category == 'Other' && state.otherCategory != null && state.otherCategory!.isNotEmpty ? '${state.otherCategory}_other' : state.category
           ..['weight'] = state.WeightChange
           ..['childSchool'] = state.ChildSchool
           ..['birthCertificate'] = state.BirthCertificateChange
           ..['abhaAddress'] = state.abhaAddress
           ..['mobileOwner'] = state.mobileOwner
-          ..['mobileOwnerRelation'] = state.mobileOwnerRelation
+          ..['mobileOwnerRelation'] = state.mobileOwnerRelation == 'Other' && state.otherRelation != null && state.otherRelation!.isNotEmpty ? '${state.otherRelation}_other' : state.mobileOwnerRelation
           ..['mobileNo'] = state.mobileNo
           ..['voterId'] = state.voterId
           ..['rationId'] = state.rationId

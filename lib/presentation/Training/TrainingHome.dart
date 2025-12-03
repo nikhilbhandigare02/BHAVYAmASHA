@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
@@ -7,6 +8,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/widgets/RoundButton/RoundButton.dart';
+import '../../data/Database/local_storage_dao.dart';
 
 class TrainingHomeScreen extends StatefulWidget {
   const TrainingHomeScreen({super.key});
@@ -16,6 +18,69 @@ class TrainingHomeScreen extends StatefulWidget {
 }
 
 class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
+  List<Map<String, dynamic>> _allData = [];
+  List<Map<String, dynamic>> _filtered = [];
+  @override
+  void initState() {
+    super.initState();
+    _loadTrainingData();
+  }
+
+  Future<void> _loadTrainingData() async {
+    try {
+      final rows = await LocalStorageDao.instance.fetchTrainingList();
+
+      final List<Map<String, dynamic>> parsed = [];
+      for (final row in rows) {
+        try {
+          final formJson = row['form_json'];
+          if (formJson is! Map) continue;
+
+          final data = formJson['form_data'];
+          if (data is! Map) continue;
+
+          final trainingType = (data['training_type'] ?? '').toString();
+
+          // Keep both Received & Providing
+          if (trainingType != 'Providing' && trainingType != 'Receiving') continue;
+
+          final trainingName = (data['training_name'] ?? '').toString();
+          final rawDate = data['training_date']?.toString();
+
+          String dateStr = '';
+          if (rawDate != null && rawDate.isNotEmpty) {
+            final parsedDate = DateTime.tryParse(rawDate);
+            if (parsedDate != null) {
+              dateStr = DateFormat('dd-MM-yyyy').format(parsedDate);
+            } else {
+              dateStr = rawDate;
+            }
+          }
+
+          final hhIdRaw = (row['household_ref_key'] ?? '').toString();
+          final hhId = hhIdRaw.isNotEmpty ? hhIdRaw : 'N/A';
+          final displayHhId =
+          hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
+
+          parsed.add({
+            'trainingType': trainingType,  // 🔥 Added
+            'hhId': displayHhId,
+            'trainingName': trainingName,
+            'Date': dateStr,
+          });
+        } catch (_) {
+          continue;
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _allData = parsed;
+        _filtered = List.from(parsed);
+      });
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -26,7 +91,11 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
         totalHorizontalPadding -
         spacingBetweenCards) /
         3;
+    final receivedCount =
+        _allData.where((x) => x['trainingType'] == 'Receiving').length;
 
+    final providedCount =
+        _allData.where((x) => x['trainingType'] == 'Providing').length;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppHeader(
@@ -45,14 +114,15 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
                 .toUpperCase(),
             color: AppColors.primary,
             borderRadius: 8,
-            onPress: () {
-              Navigator.pushNamed(context, Route_Names.Trainingform);
+            onPress: () async {
+              final result = await Navigator.pushNamed(context, Route_Names.Trainingform);
+              if (result == true) {
+                _loadTrainingData();
+              }
             },
           ),
         ),
       ),
-
-
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(
@@ -67,6 +137,7 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
                     title: (l10n?.trainingReceivedTitle ?? 'Training Received')
                         .toString(),
                     image: 'assets/images/id-card.png',
+                    count: receivedCount,
                     onClick: () {
                       Navigator.pushNamed(context, Route_Names.TrainingReceived);
                     },
@@ -77,6 +148,7 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
                     title: (l10n?.trainingProvidedTitle ?? 'Training Provided')
                         .toString(),
                     image: 'assets/images/notes.png',
+                    count: providedCount,
                     onClick: () {
                       Navigator.pushNamed(context, Route_Names.TrainingProvided);
                     },
@@ -93,12 +165,14 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
 
 class _FeatureCard extends StatelessWidget {
   final String title;
+  final int count;
   final String image;
   final VoidCallback onClick;
   final double width;
 
   const _FeatureCard({
     required this.title,
+    required this.count,
     required this.image,
     required this.onClick,
     required this.width,
@@ -108,35 +182,44 @@ class _FeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
     final double cardHeight = 15.h;
+    final scaleFactor = MediaQuery.of(context).textScaleFactor;
 
     return InkWell(
       onTap: onClick,
-       borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(10),
       child: SizedBox(
         width: width,
         height: cardHeight,
         child: Card(
-          elevation: 2,
+          elevation: 3,
           color: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(1.h),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Image.asset(
                       image,
-                      width: 28.sp,
-                      height: 28.sp,
+                      width: 28 * scaleFactor,
+                      height: 28 * scaleFactor,
                       fit: BoxFit.contain,
                     ),
-
+                    const Spacer(),
+                    Text(
+                      '$count',
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14.sp,
+                      ),
+                    ),
                   ],
                 ),
                 SizedBox(height: 1.5.h),
