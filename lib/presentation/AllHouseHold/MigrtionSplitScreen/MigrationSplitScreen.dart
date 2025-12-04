@@ -168,30 +168,31 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
 
   Widget _buildLabel(String text, {bool isRequired = false}) {
+    final bool required = isRequired;
+    final String base = required ? text : text;
+    
     return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            text,
-            style:   TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
+      padding: const EdgeInsets.only(left: 4.0, bottom: 4.0),
+      child: RichText(
+        text: TextSpan(
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: AppColors.onSurface,
+            fontWeight: FontWeight.w500,
           ),
-          if (isRequired)
-             Text(
-              ' *',
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w600,
+          children: [
+            TextSpan(text: base),
+            if (required)
+              const TextSpan(
+                text: ' *',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
               ),
-            ),
-        ],
-      ),
+          ],
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.visible,
+              ),
+
     );
   }
 
@@ -435,6 +436,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       _buildDropdownContainer(
         '',
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               _selectedMemberLabel,
@@ -552,7 +554,10 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(Icons.arrow_drop_down, color: Colors.grey[800]),
+              Padding(
+                padding: const EdgeInsets.only(right: 4.0),
+                child: Icon(Icons.arrow_drop_down, color: Colors.grey[500]),
+              ),
             ],
           ),
         ),
@@ -586,7 +591,10 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(Icons.arrow_drop_down, color: Colors.grey[500]),
+                Padding(
+                  padding: const EdgeInsets.only(right: 4.0),
+                  child: Icon(Icons.arrow_drop_down, color: Colors.grey[500]),
+                ),
               ],
             ),
           ),

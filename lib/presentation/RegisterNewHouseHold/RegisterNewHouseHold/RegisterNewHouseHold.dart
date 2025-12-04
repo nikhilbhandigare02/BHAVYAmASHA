@@ -674,6 +674,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             hhId: uniqueKey,
             headName: head['Name'] ?? '',
             headGender: head['Gender'] ?? '',
+            isAddMember: true,
+            headMobileNumber: _headForm?['mobileNo']?.toString(), // Add this line
             spouseName: spouse['Name'] ?? '',
             spouseGender: spouse['Gender'] ?? '',
           ),
@@ -936,11 +938,12 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     hhId: _headForm?['hh_unique_key']?.toString(),
                     headName: _headForm?['headName']?.toString(),
                     headGender: _headForm?['gender']?.toString(),
+                    isAddMember: true,
+                    headMobileNumber: _headForm?['mobileNo']?.toString(), // Add this line
                     spouseName: _headForm?['spouseName']?.toString(),
                     spouseGender: _headForm?['spouseGender']?.toString(),
                     inlineEdit: true,
                     isEdit: true,
-
                     initial: initialMember,
                     initialStep: initialStep,
                   ),

@@ -209,22 +209,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     super.initState();
     _isEdit = widget.isEdit;
 
-    if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<AddnewfamilymemberBloc>().add(
-          AnmUpdateMobileNo(widget.headMobileNumber!),
-        );
-        // Set mobile owner to Family Head
-        context.read<AddnewfamilymemberBloc>().add(
-          const AnmUpdateMobileOwner('Family Head'),
-        );
-      });
-    }
-
     _bloc = AddnewfamilymemberBloc();
     _spousBloc = SpousBloc();
     _childrenBloc = ChildrenBloc();
     _dummyHeadBloc = AddFamilyHeadBloc();
+
+    if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _bloc.add(AnmUpdateMobileNo(widget.headMobileNumber!));
+        _bloc.add(const AnmUpdateMobileOwner('Family Head'));
+      });
+    }
 
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
 
@@ -1371,7 +1366,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             ),
                                             const SizedBox(width: 8),
                                             SizedBox(
-                                              height: 48,
+                                              height: 3.5.h,
                                               child: RoundButton(
                                                 title: 'VERIFY',
                                                 width: 100,
@@ -2226,7 +2221,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           case 'Self':
                                             return l.self;
                                           case 'Family Head':
-                                            return l.headOfFamily;
+                                            return 'Family Head';
                                           case 'Wife':
                                             return l.wife;
                                           case 'Father':
@@ -2258,73 +2253,37 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             .read<AddnewfamilymemberBloc>();
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        if (v == 'Family Head') {
-                                          if (_isMemberDetails &&
-                                              widget.hhId != null) {
-                                            try {
-                                              final headMobile =
-                                                  await LocalStorageDao.instance
-                                                      .getHeadMobileNumber(
-                                                        widget.hhId!,
-                                                      );
-                                              print(
-                                                '📱 [AddNewMember] Fetched mobile from DB: $headMobile',
-                                              );
-                                              if (headMobile != null &&
-                                                  headMobile.isNotEmpty) {
-                                                bloc.add(
-                                                  AnmUpdateMobileNo(headMobile),
-                                                );
-                                              } else if (mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                      'No mobile number found for the head of family',
-                                                    ),
-                                                  ),
-                                                );
+                                        onChanged: (v) async {
+                                          if (v == null) return;
+                                          final bloc = context.read<AddnewfamilymemberBloc>();
+                                          bloc.add(AnmUpdateMobileOwner(v));
+
+                                          if (v == 'Family Head') {
+                                            if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
+                                              print('📱 [AddNewMember] Using head mobile from props: ${widget.headMobileNumber}');
+                                              bloc.add(AnmUpdateMobileNo(widget.headMobileNumber!));
+                                            } else if (_isMemberDetails && widget.hhId != null) {
+                                              try {
+                                                final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                                print('📱 [AddNewMember] Fetched mobile from DB: $headMobile');
+                                                if (headMobile != null && headMobile.isNotEmpty) {
+                                                  bloc.add(AnmUpdateMobileNo(headMobile));
+                                                } else if (mounted) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(content: Text('No mobile number found for the head of family')),
+                                                  );
+                                                }
+                                              } catch (e) {
+                                                print('❌ [AddNewMember] Error fetching from DB: $e');
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(content: Text('Error loading head of family mobile number')),
+                                                  );
+                                                }
                                               }
-                                            } catch (e) {
-                                              print(
-                                                '❌ [AddNewMember] Error fetching from DB: $e',
-                                              );
-                                              if (mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                      'Error loading head of family mobile number',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            }
-                                          } else {
-                                            final headNo = context
-                                                .read<AddFamilyHeadBloc>()
-                                                .state
-                                                .mobileNo
-                                                ?.trim();
-                                            print(
-                                              '📱 [AddNewMember] Using mobile from head details state: $headNo',
-                                            );
-                                            if (headNo != null &&
-                                                headNo.isNotEmpty) {
-                                              bloc.add(
-                                                AnmUpdateMobileNo(headNo),
-                                              );
                                             }
                                           }
-                                        } else {
-                                          // Clear mobile number if not Family Head
-                                          print(
-                                            '🔄 [AddNewMember] Clearing mobile number',
-                                          );
-                                          bloc.add(const AnmUpdateMobileNo(''));
-                                        }
+                                        };
                                       },
                                       validator: (value) => _captureAnmError(
                                         Validations.validateWhoMobileNo(
@@ -3253,7 +3212,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             .read<AddnewfamilymemberBloc>();
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        // For both adult and child member types, if Family Head is selected
                                         if (v == 'Family Head' &&
                                             widget.hhId != null) {
                                           try {
