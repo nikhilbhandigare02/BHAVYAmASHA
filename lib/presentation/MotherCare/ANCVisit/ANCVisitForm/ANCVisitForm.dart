@@ -990,20 +990,32 @@ class _AncvisitformState extends State<Ancvisitform> {
                             MultiSelect<String>(
                               items: [
                                 MultiSelectItem(
-                                  label: l10n?.diseaseNone ?? 'None',
-                                  value: l10n?.diseaseNone ?? 'None',
+                                  label:  'Turbeculosis (TB)',
+                                  value:  'Turbeculosis (TB)',
                                 ),
                                 MultiSelectItem(
                                   label: l10n?.diseaseDiabetes ?? 'Diabetes',
                                   value: l10n?.diseaseDiabetes ?? 'Diabetes',
                                 ),
                                 MultiSelectItem(
-                                  label: l10n?.diseaseHypertension ?? 'Hypertension',
-                                  value: l10n?.diseaseHypertension ?? 'Hypertension',
+                                  label: 'Hepetitis - B',
+                                  value:  'Hepetitis - B',
                                 ),
                                 MultiSelectItem(
-                                  label: l10n?.diseaseAnemia ?? 'Anemia',
-                                  value: l10n?.diseaseAnemia ?? 'Anemia',
+                                  label:  'Asthma',
+                                  value:   'Asthma',
+                                ),
+                                MultiSelectItem(
+                                  label:   'High BP',
+                                  value:  'High BP',
+                                ),
+                                MultiSelectItem(
+                                  label:   'STI/RTI',
+                                  value:  'STI/RTI',
+                                ),
+                                MultiSelectItem(
+                                  label:   'Heart Disease',
+                                  value:  'Heart Disease',
                                 ),
                                 MultiSelectItem(
                                   label: l10n?.diseaseOther ?? 'Other',
