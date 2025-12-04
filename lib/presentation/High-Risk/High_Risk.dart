@@ -188,7 +188,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n!.highRisk,
+        screenTitle: l10n?.highRisk ??"High-Risk Pregnancy List",
         showBack: true,
       ),
       drawer: const CustomDrawer(),
@@ -214,7 +214,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _loadANCVisits,
-                      child:  Text(l10n.retry),
+                      child:  Text(l10n?.retry ?? "Retry"),
                     ),
                   ],
                 ),
@@ -229,7 +229,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                       Icon(Icons.assignment_late_outlined, size: 48, color: Colors.grey[400]),
                       const SizedBox(height: 16),
                       Text(
-                        l10n.no_high_risk_anc_visits_found,
+                        l10n?.no_high_risk_anc_visits_found ?? "No high-risk ANC visits found",
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                     ],
@@ -290,7 +290,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                       Icon(Icons.home, color: Colors.black54, size: 14.sp),
                       const SizedBox(width: 6),
                       Text(
-                        visit.hhId ?? l10n!.na,
+                        visit.hhId ?? l10n?.na ?? "N/A",
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
@@ -308,7 +308,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      l10n!.hrp,
+                      l10n?.hrp ?? "HRP",
                       style: TextStyle(
                         color: Colors.red[600],
                         fontWeight: FontWeight.bold,
@@ -335,7 +335,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                   // Name
                   _infoRow(context,
                     '',
-                    visit.womanName ?? l10n.no_name,
+                    visit.womanName ?? (l10n?.no_name ?? "No Name"),
                     textStyle:  TextStyle(
                       fontWeight: FontWeight.w500,
                       color: Colors.white,
@@ -389,7 +389,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? l10n!.na : value,
+              value.isEmpty ? (l10n?.na ?? "N/A") : value,
               style: textStyle ??
                   TextStyle(
                     color: Colors.white,

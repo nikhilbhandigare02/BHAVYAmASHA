@@ -1169,7 +1169,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> wit
                                               },
                                               validator: (value) {
                                                 if (value == null || value.isEmpty) {
-                                                  return null; // Field is optional
+                                                  return null;
                                                 }
                                                 if (value.length != 12) {
                                                   return 'Must be 12 digits';
@@ -1394,14 +1394,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> wit
                                             onChanged: (v) {
                                               final name = v.trim();
                                               context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(name));
-                                              // Trigger form validation
                                               if (_formKey.currentState != null) {
                                                 _formKey.currentState!.validate();
                                               }
                                             },
                                             validator: (value) {
                                               if (value == null || value.trim().isEmpty) {
-                                                return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                                return 'Please enter ${l.motherNameLabel.toLowerCase()}';
                                               }
                                               return null;
                                             },
@@ -1433,7 +1432,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> wit
                                             motherItems.add('Other');
                                           }
                                           return ApiDropdown<String>(
-                                            labelText: "${l.motherNameLabel} ",
+                                            labelText: "${l.motherNameLabel} * ",
                                             hintText: "${l.motherNameLabel} ",
                                             items: motherItems,
                                             getLabel: (s) => s,
@@ -1447,6 +1446,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> wit
                                                 context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(v));
                                               } else {
                                                 context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(''));
+                                              }
+
+                                              if (_formKey.currentState != null) {
+                                                _formKey.currentState!.validate();
                                               }
                                             },
                                           );
@@ -1787,13 +1790,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> wit
                                       groupValue: state.useDob,
                                       onChanged: (_) => context.read<AddnewfamilymemberBloc>().add(AnmToggleUseDob()),
                                     ),
-                                    Text(l.ageApproximate),
+                                    Text("${l.ageApproximate}"),
                                   ],
                                 ),
                               ),
                               if (state.useDob)
                                 _section(
                                     CustomDatePicker(
+                                      labelText: 'Date of Birth *',
                                       initialDate: state.dob,
                                       firstDate: (state.memberType.toLowerCase() == 'child')
                                           ? DateTime.now().subtract(const Duration(days: 15 * 365))
@@ -1807,6 +1811,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen> wit
                                         }
                                       },
                                     )
+
                                 )
                               else
                                 _section(

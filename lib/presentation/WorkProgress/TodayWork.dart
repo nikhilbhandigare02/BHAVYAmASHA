@@ -103,22 +103,22 @@ class _TodayworkState extends State<Todaywork> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _kv('To do visits :', state.toDo.toString()),
-                          _kv('Completed visits :', state.completed.toString()),
-                          _kv('Pending visits :', state.pending.toString()),
-                          _kv('Progress :', '$percent%'),
+                          _kv("${l10n!.toDoVisits}:", state.toDo.toString()),
+                          _kv('${l10n.completedVisits} :', state.completed.toString()),
+                          _kv('${l10n.pendingVisits}:', state.pending.toString()),
+                          _kv('${l10n.progress} :', '$percent%'),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               _legend(
                                   color: Colors.green,
-                                  label: 'Completed',
+                                  label: l10n.completed,
                                   sliceIndex: 0),
                               const SizedBox(width: 16),
                               _legend(
                                   color: AppColors.primary,
-                                  label: 'Pending',
+                                  label: l10n.pending,
                                   sliceIndex: 1),
                             ],
                           ),
@@ -356,6 +356,7 @@ class _TodayworkState extends State<Todaywork> {
   }
 
   Widget _buildTooltip(int completed, int pending, int sliceIndex) {
+    final l = AppLocalizations.of(context);
     final total = completed + pending;
     if (total == 0) return const SizedBox.shrink();
 
@@ -373,12 +374,12 @@ class _TodayworkState extends State<Todaywork> {
     final remainingSweep = full - sweepCompleted;
 
     if (sliceIndex == 0) {
-      label = "Completed";
+      label = l!.completed;
       count = completed;
       color = Colors.green;
       midAngle = start + sweepCompleted / 2;
     } else {
-      label = "Pending";
+      label = l!.pending;
       count = pending;
       color = AppColors.primary;
       midAngle = start + sweepCompleted + remainingSweep / 2;

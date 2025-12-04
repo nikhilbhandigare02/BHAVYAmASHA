@@ -23,13 +23,19 @@ class GuestBeneficiarySearch extends StatefulWidget {
 }
 
 class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
-  final List<String> districts = const ['Patna', 'Maner'];
-  final List<String> categories = const ['ANC', 'PNC', 'RI',];
-  final List<String> genders = const ['Male', 'Female', 'Transgender'];
-  final List<String> blocks = const [];
+  List<String> districts = [];
+  List<String> categories = [];
+  List<String> genders = [];
+
+  /* List<String> districts =  ['Patna', 'Maner'];
+   List<String> categories =  ['ANC', 'PNC', 'RI',];
+   List<String> genders =  ['Male', 'Female', 'Transgender'];*/
+   List<String> blocks =  [];
 
   // Build search results widget
   Widget _buildSearchResults(BuildContext context, Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 16),
       child: Padding(
@@ -37,8 +43,8 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Search Results',
+             Text(
+              l10n.searchResults ??'Search Results',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -56,7 +62,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                   ),
                   Expanded(
                     child: Text(
-                      entry.value?.toString() ?? 'N/A',
+                      entry.value?.toString() ?? (l10n.na ??'N/A'),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -73,7 +79,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                 showAppSnackBar(context, 'Check console for full response data'!);
 
               },
-              child: const Text('View Raw Data (Check Console)'),
+              child: Text(l10n.viewRawData ?? 'View Raw Data (Check Console)'),
             ),
           ],
         ),
@@ -85,6 +91,23 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    districts = [
+      l10n.districtPatna,
+      l10n.districtManer,
+    ];
+
+    categories = [
+      l10n.categoryANC,
+      l10n.categoryPNC,
+      l10n.categoryRI,
+    ];
+
+    genders = [
+      l10n.male,
+      l10n.female,
+      l10n.transgender,
+    ];
 
     return BlocProvider(
       create: (_) => GuestBeneficiarySearchBloc(
@@ -251,7 +274,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
 
                             CustomTextField(
                               labelText: l10n.mobileLabelSimple,
-                              hintText: 'Enter 10 digit number',
+                              hintText: l10n.enter10DigitNumber ?? 'Enter 10 digit number',
                               keyboardType: TextInputType.phone,
                               maxLength: 10,
                               inputFormatters: [

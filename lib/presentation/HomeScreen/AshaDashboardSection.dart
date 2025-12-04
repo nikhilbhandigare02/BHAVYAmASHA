@@ -72,7 +72,7 @@ class AshaDashboardSection extends StatelessWidget {
     final List<Map<String, dynamic>> bottomGridItems = [
       {"image": 'assets/images/announcement.png', "label": l10n.announcements},
       if (appRoleId == 4)
-        {"image": 'assets/images/beneficiaries.png', "label": "Cluster meetings"},
+        {"image": 'assets/images/beneficiaries.png', "label": l10n.clusterMeetings},
       {"image": 'assets/images/help-icon.png', "label": '${l10n.help}\nनियम'},
       {"image": 'assets/images/autoimmune-disease.png', "label": l10n.ncd, "count": ncdCount ?? 0},
     ];

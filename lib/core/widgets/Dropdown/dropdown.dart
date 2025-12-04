@@ -184,6 +184,8 @@ class ApiDropdown<T> extends StatelessWidget {
   Future<void> _showSingleSelectDialog(
       BuildContext context, FormFieldState<T> field) async {
     T? tempValue = items.contains(value) ? value : null;
+    final l10n = AppLocalizations.of(context);
+
 
     await showDialog<T>(
       context: context,
@@ -246,7 +248,7 @@ class ApiDropdown<T> extends StatelessWidget {
                     Navigator.pop(context);
                   },
                   child: Text(
-                    'CANCEL',
+                      l10n?.cancel ?? 'CANCEL',
                     style: TextStyle(
                       fontSize: labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
@@ -266,7 +268,7 @@ class ApiDropdown<T> extends StatelessWidget {
                     Navigator.pop(context);
                   },
                   child: Text(
-                    'OK',
+                    l10n?.ok ?? 'OK',
                     style: TextStyle(
                       fontSize: labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
@@ -288,6 +290,7 @@ class ApiDropdown<T> extends StatelessWidget {
   Future<void> _showMultiSelectDialog(
       BuildContext context, FormFieldState<T> field) async {
     List<T> tempValues = List<T>.from(selectedValues);
+
   final l10n = AppLocalizations.of(context);
     await showDialog<List<T>>(
       context: context,
@@ -353,7 +356,7 @@ class ApiDropdown<T> extends StatelessWidget {
                     Navigator.pop(context);
                   },
                   child: Text(
-                    'CANCEL',
+                    l10n?.cancel ?? 'CANCEL',
                     style: TextStyle(
                       fontSize: labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
@@ -370,7 +373,7 @@ class ApiDropdown<T> extends StatelessWidget {
                     Navigator.pop(context);
                   },
                   child: Text(
-                    'OK',
+                    l10n?.ok ?? 'OK',
                     style: TextStyle(
                       fontSize: labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w500,

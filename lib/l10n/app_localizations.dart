@@ -3938,7 +3938,7 @@ abstract class AppLocalizations {
   /// No description provided for @pregnantWomen.
   ///
   /// In en, this message translates to:
-  /// **'Pregnant women'**
+  /// **'Pregnant Women'**
   String get pregnantWomen;
 
   /// No description provided for @previousButton.
@@ -5936,7 +5936,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryTime.
   ///
   /// In en, this message translates to:
-  /// **'Time of Delivery (hh:mm)'**
+  /// **'Delivery Time (hh:mm)'**
   String get deliveryTime;
 
   /// No description provided for @deliveryTimeHint.
@@ -5954,7 +5954,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectPlaceOfDelivery.
   ///
   /// In en, this message translates to:
-  /// **' Place of Delivery *'**
+  /// **'Select Place of Delivery *'**
   String get selectPlaceOfDelivery;
 
   /// No description provided for @selectOption.
@@ -6002,7 +6002,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryType.
   ///
   /// In en, this message translates to:
-  /// **'Type of delivery *'**
+  /// **'Type of Delivery *'**
   String get deliveryType;
 
   /// No description provided for @normalDelivery.
@@ -6020,7 +6020,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistedDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Assisted /Forceps'**
+  /// **'Assisted (Vacuum/Forceps)'**
   String get assistedDelivery;
 
   /// No description provided for @complications.
@@ -6032,7 +6032,7 @@ abstract class AppLocalizations {
   /// No description provided for @outcomeCount.
   ///
   /// In en, this message translates to:
-  /// **'Delivery Outcomes *'**
+  /// **'Number of Outcomes *'**
   String get outcomeCount;
 
   /// No description provided for @familyPlanningCounseling.
@@ -9910,6 +9910,378 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No households found'**
   String get noHouseholdsFound;
+
+  /// No description provided for @noOfASHAUnderTheFacilitator.
+  ///
+  /// In en, this message translates to:
+  /// **'No. of ASHA under the facilitator'**
+  String get noOfASHAUnderTheFacilitator;
+
+  /// No description provided for @ashaFacilitatorClusterMeetingList.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA Facilitator Cluster Meeting List'**
+  String get ashaFacilitatorClusterMeetingList;
+
+  /// No description provided for @addNewClusterMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'ADD NEW CLUSTER MEETING'**
+  String get addNewClusterMeeting;
+
+  /// No description provided for @facilitatorNotSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Facilitator not specified'**
+  String get facilitatorNotSpecified;
+
+  /// No description provided for @clusterMeetings.
+  ///
+  /// In en, this message translates to:
+  /// **'Cluster meetings'**
+  String get clusterMeetings;
+
+  /// No description provided for @ashaFacilitatorClusterMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA Facilitator Cluster Meeting'**
+  String get ashaFacilitatorClusterMeeting;
+
+  /// No description provided for @phcName.
+  ///
+  /// In en, this message translates to:
+  /// **'PHC Name'**
+  String get phcName;
+
+  /// No description provided for @decisionTakenDuringMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision Taken During the Meeting'**
+  String get decisionTakenDuringMeeting;
+
+  /// No description provided for @discussionSubTopicProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Discussion Sub Topic/Program'**
+  String get discussionSubTopicProgram;
+
+  /// No description provided for @discussionTopicProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Discussion Topic/Program'**
+  String get discussionTopicProgram;
+
+  /// No description provided for @selectTopics.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Topics'**
+  String get selectTopics;
+
+  /// No description provided for @clusterMeetingsCountThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'No. of cluster meetings conducted in this month'**
+  String get clusterMeetingsCountThisMonth;
+
+  /// No description provided for @noOfASHAAbsentInThisMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'No. of ASHA absent in this meeting'**
+  String get noOfASHAAbsentInThisMeeting;
+
+  /// No description provided for @ashaPresentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'No. of ASHA present in this meeting'**
+  String get ashaPresentCount;
+
+  /// No description provided for @totalAshaUnderFacilitator.
+  ///
+  /// In en, this message translates to:
+  /// **'Total no. of ASHA under facilitator'**
+  String get totalAshaUnderFacilitator;
+
+  /// No description provided for @noOfHours.
+  ///
+  /// In en, this message translates to:
+  /// **'No. of hours'**
+  String get noOfHours;
+
+  /// No description provided for @toTime.
+  ///
+  /// In en, this message translates to:
+  /// **'To (HH:MM)'**
+  String get toTime;
+
+  /// No description provided for @ashaInchargeName.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA Incharge Name'**
+  String get ashaInchargeName;
+
+  /// No description provided for @ashaFacilitatorName.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA Facilitator Name'**
+  String get ashaFacilitatorName;
+
+  /// No description provided for @subcenterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Subcenter Name'**
+  String get subcenterName;
+
+  /// No description provided for @awwName.
+  ///
+  /// In en, this message translates to:
+  /// **'AWW Name'**
+  String get awwName;
+
+  /// No description provided for @awcNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'AWC Number'**
+  String get awcNumber;
+
+  /// No description provided for @villageName.
+  ///
+  /// In en, this message translates to:
+  /// **'Village Name'**
+  String get villageName;
+
+  /// No description provided for @wardName.
+  ///
+  /// In en, this message translates to:
+  /// **'Ward Name'**
+  String get wardName;
+
+  /// No description provided for @wardNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Ward Number'**
+  String get wardNumber;
+
+  /// No description provided for @blockName.
+  ///
+  /// In en, this message translates to:
+  /// **'Block Name'**
+  String get blockName;
+
+  /// No description provided for @dateOfMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of the meeting'**
+  String get dateOfMeeting;
+
+  /// No description provided for @day.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get day;
+
+  /// No description provided for @selectDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Day'**
+  String get selectDay;
+
+  /// No description provided for @fromTime.
+  ///
+  /// In en, this message translates to:
+  /// **'From (HH:MM)'**
+  String get fromTime;
+
+  /// No description provided for @selectDiscussionTopics.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Discussion Topics'**
+  String get selectDiscussionTopics;
+
+  /// No description provided for @selectMonthYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Month & Year'**
+  String get selectMonthYear;
+
+  /// No description provided for @toTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'To Time'**
+  String get toTimeLabel;
+
+  /// No description provided for @fromTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'From Time'**
+  String get fromTimeLabel;
+
+  /// No description provided for @monday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get monday;
+
+  /// No description provided for @tuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get tuesday;
+
+  /// No description provided for @wednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get wednesday;
+
+  /// No description provided for @thursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get thursday;
+
+  /// No description provided for @friday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get friday;
+
+  /// No description provided for @saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get saturday;
+
+  /// No description provided for @sunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get sunday;
+
+  /// No description provided for @immunization.
+  ///
+  /// In en, this message translates to:
+  /// **'Immunization'**
+  String get immunization;
+
+  /// No description provided for @deliveries.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries'**
+  String get deliveries;
+
+  /// No description provided for @pnc.
+  ///
+  /// In en, this message translates to:
+  /// **'PNC (Post Natal Care)'**
+  String get pnc;
+
+  /// No description provided for @maternalChildHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Maternal & Child Health'**
+  String get maternalChildHealth;
+
+  /// No description provided for @homeVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Visit'**
+  String get homeVisit;
+
+  /// No description provided for @newBornCare.
+  ///
+  /// In en, this message translates to:
+  /// **'New Born Care'**
+  String get newBornCare;
+
+  /// No description provided for @deaths.
+  ///
+  /// In en, this message translates to:
+  /// **'Deaths'**
+  String get deaths;
+
+  /// No description provided for @adolescentHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Adolescent Health'**
+  String get adolescentHealth;
+
+  /// No description provided for @familyPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Planning'**
+  String get familyPlanning;
+
+  /// No description provided for @otherPublicHealthProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Public Health Program'**
+  String get otherPublicHealthProgram;
+
+  /// No description provided for @administrative.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrative'**
+  String get administrative;
+
+  /// No description provided for @trainingSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Training and Support'**
+  String get trainingSupport;
+
+  /// No description provided for @districtPatna.
+  ///
+  /// In en, this message translates to:
+  /// **'Patna'**
+  String get districtPatna;
+
+  /// No description provided for @districtManer.
+  ///
+  /// In en, this message translates to:
+  /// **'Maner'**
+  String get districtManer;
+
+  /// No description provided for @categoryANC.
+  ///
+  /// In en, this message translates to:
+  /// **'ANC'**
+  String get categoryANC;
+
+  /// No description provided for @categoryPNC.
+  ///
+  /// In en, this message translates to:
+  /// **'PNC'**
+  String get categoryPNC;
+
+  /// No description provided for @categoryRI.
+  ///
+  /// In en, this message translates to:
+  /// **'RI'**
+  String get categoryRI;
+
+  /// No description provided for @enter10DigitNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 10 digit number'**
+  String get enter10DigitNumber;
+
+  /// No description provided for @viewRawData.
+  ///
+  /// In en, this message translates to:
+  /// **'View Raw Data (Check Console)'**
+  String get viewRawData;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Results'**
+  String get searchResults;
+
+  /// No description provided for @noNotificationsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications found.'**
+  String get noNotificationsFound;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
