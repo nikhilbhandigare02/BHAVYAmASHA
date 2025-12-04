@@ -1779,7 +1779,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get motherInLaw => 'सास';
 
   @override
-  String get motherNameLabel => 'माता का नाम';
+  String get motherNameLabel => 'माता का नाम *';
 
   @override
   String get mukhiyaMobileHint => 'मुखिया का मोबाइल नंबर';
@@ -5119,20 +5119,20 @@ class AppLocalizationsHi extends AppLocalizations {
   String get noNotificationsFound => 'कोई सूचनाएँ नहीं मिलीं।';
 
   @override
-  String get syncStatus => 'Sync Status';
+  String get syncStatus => 'सिंक स्थिति';
 
   @override
-  String get household => 'Household';
+  String get household => 'परिवार';
 
   @override
-  String get beneficiary => 'Beneficiary';
+  String get beneficiary => 'लाभार्थी';
 
   @override
-  String get followUpLabel => 'Follow Up';
+  String get followUpLabel => 'फॉलो अप';
 
   @override
-  String get lastSynced => 'Last synced';
+  String get lastSynced => 'अंतिम सिंक';
 
   @override
-  String get synced => 'Synced';
+  String get synced => 'सिंक';
 }

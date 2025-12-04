@@ -222,12 +222,12 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ApiDropdown<String>(
                     labelText: t.firstBreastfeedTimingLabel,
                     items: const [
-                      'within 30 minutes of birth',
-                      'within 1 hour of birth',
-                      'within 6 hours of birth',
-                      'within 24 hours of birth',
-                      'other',
-                      'not breastfed'
+                      'Within 30 minutes of birth',
+                      'Within 1 hour of birth',
+                      'Within 6 hours of birth',
+                      'Within 24 hours of birth',
+                      'Other',
+                      'Not breastfed'
                     ],
                     getLabel: (e) => e,
                     value: c['firstBreastfeedTiming'] ?? '',
@@ -240,11 +240,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ApiDropdown<String>(
                     labelText: t.howWasBreastfedLabel,
                     items: const [
-                      'normal',
-                      'forcefully',
-                      'with weakness',
-                      'could not breast feed but had to be fed with spoon',
-                      'could neither breast feed nor take given by spoon'
+                      'Normal',
+                      'Forcefully',
+                      'With weakness',
+                      'Could not breast feed but had to be fed with spoon',
+                      'Could neither breast feed nor take given by spoon'
                     ],
                     getLabel: (e) => e,
                     value: c['howWasBreastfed'] ?? '',
@@ -252,13 +252,13 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'howWasBreastfed', value: val),
                     ),
                   ),
-                                      const Divider(height: 0,),
+                   const Divider(height: 0,),
               
                   ApiDropdown<String>(
                     labelText: t.firstFeedGivenAfterBirthLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['firstFeedGivenAfterBirth']),
+                    items: const ['First Breastfeeding','Water','Honey','Mishri Water / Sugar Syrup', 'Goat Milk','Cow Milk', 'Other' ],
+                    getLabel: (e) => e,
+                    value: s(c['firstFeedGivenAfterBirth']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'firstFeedGivenAfterBirth', value: val),
                     ),
@@ -274,7 +274,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'adequatelyFedSevenToEightTimes', value: val),
                     ),
                   ),
-                                      const Divider(height: 0,),
+                     const Divider(height: 0,),
               
                   ApiDropdown<String>(
                     labelText: t.babyDrinkingLessMilkLabel,
@@ -372,7 +372,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
               
                   // New Question 2: Kept warm
                   ApiDropdown<String>(
-                    labelText: 'Has the baby been kept warm?',
+                    labelText: 'Has the baby kept warm?',
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['keptWarm']),
@@ -384,7 +384,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
               
                   // New Question 3: Given bath
                   ApiDropdown<String>(
-                    labelText: 'Has the baby been given a bath?',
+                    labelText: 'Has the baby given a bath?',
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['givenBath']),
@@ -396,7 +396,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
               
                   // New Question 4: Wrapped and placed near mother
                   ApiDropdown<String>(
-                    labelText: 'Was the baby wrapped in a cloth and placed near the mother?',
+                    labelText: 'Whether the baby was wrapped in a cloth and placed near the mother ? *',
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['wrappedAndPlacedNearMother']),
