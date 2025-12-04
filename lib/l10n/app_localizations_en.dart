@@ -1779,7 +1779,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherInLaw => 'Mother in Law';
 
   @override
-  String get motherNameLabel => 'Mother Name';
+  String get motherNameLabel => 'Mother Name *';
 
   @override
   String get mukhiyaMobileHint => 'Mobile no. of mukhiya';
@@ -2709,55 +2709,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold to the touch, or that the child\'s temperature is 37.5°C or higher or less than 35.5°C, and that the chest draws inward when breathing. *';
 
   @override
-  String get bleedingUmbilicalCordLabel => 'Is there bleeding from the umbilical cord? *';
+  String get bleedingUmbilicalCordLabel => 'Is umbilical cord bleeding? *';
 
   @override
-  String get pusInNavelLabel => 'Is there pus in the navel? *';
+  String get pusInNavelLabel => 'Is pus in the navel! ? *';
 
   @override
-  String get routineCareDoneLabel => 'Were routine newborn care tasks performed?*';
+  String get routineCareDoneLabel => 'Whether the Routine Newborn care tasks was performed? *';
 
   @override
-  String get breathingRapidLabel => 'Is your baby breathing rapidly (60 or more per minute)? *';
+  String get breathingRapidLabel => 'Is the breath of the baby going fast (60 or more per minute) *';
 
   @override
   String get lethargicLabel => 'Is the baby lethargic?';
 
   @override
-  String get congenitalAbnormalitiesLabel => 'Does the baby have any congenital physical abnormalities? *';
+  String get congenitalAbnormalitiesLabel => 'Is the baby having any congenital physical abnormality *';
 
   @override
   String get eyesNormalLabel => 'Eyes: Normal *';
 
   @override
-  String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming from the eyes? *';
+  String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming out of the eyes? *';
 
   @override
-  String get skinFoldRednessLabel => 'Is there any cracking/redness in the skin fold? (thigh/armpit/hip) *';
+  String get skinFoldRednessLabel => 'Is there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock) *';
 
   @override
-  String get newbornJaundiceLabel => 'Yellowing of the skin/palms/soles/eyes: Jaundice *';
+  String get newbornJaundiceLabel => 'Yellowness in skin/ palm/ sole/eyes: Jaudice *';
 
   @override
-  String get pusBumpsOrBoilLabel => 'More than 10 pus-filled bumps on the skin or one large boil? *';
+  String get pusBumpsOrBoilLabel => 'More than ten pus- filled pustules or large boil *';
 
   @override
-  String get newbornSeizuresLabel => 'Is the child having seizures?*';
+  String get newbornSeizuresLabel => 'Is the child having seizures? *';
 
   @override
-  String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying constantly or urinating less than 6 times a day? *';
+  String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying continuously or passing usrine less than 6 times a day? *';
 
   @override
-  String get cryingSoftlyLabel => 'Is the baby crying softly? *';
+  String get cryingSoftlyLabel => 'Is the baby crying weak? *';
 
   @override
   String get stoppedCryingLabel => 'Has the baby stopped crying? *';
 
   @override
-  String get newbornReferredByAshaLabel => 'Has the child been referred by ASHA for the above symptoms? *';
+  String get newbornReferredByAshaLabel => 'In the above symptoms, weather the child is referred by ASHA? *';
 
   @override
-  String get birthRegisteredLabel => 'Has the birth been registered? *';
+  String get birthRegisteredLabel => 'Is birth registration complete*';
 
   @override
   String get mcpCardAvailableLabel => 'Is \'Matra Child Protection (MCP)\' card available? *';
@@ -2997,16 +2997,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
-  String get exclusiveBreastfeedingStartedLabel => 'Has exclusive breastfeeding started? *';
+  String get exclusiveBreastfeedingStartedLabel => 'Has exclusive breastfeeding initaited? *';
 
   @override
-  String get firstBreastfeedTimingLabel => 'When was the first breastfeed given to the baby? *';
+  String get firstBreastfeedTimingLabel => 'At what time was the baby first breastfed? *';
 
   @override
   String get howWasBreastfedLabel => 'How was the baby breastfed? *';
 
   @override
-  String get firstFeedGivenAfterBirthLabel => 'What was given to the baby as the first feed after birth? *';
+  String get firstFeedGivenAfterBirthLabel => 'What was given as the first feed after birth? *';
 
   @override
   String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)? *';
