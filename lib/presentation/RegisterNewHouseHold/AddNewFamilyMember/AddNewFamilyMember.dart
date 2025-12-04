@@ -214,13 +214,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     _childrenBloc = ChildrenBloc();
     _dummyHeadBloc = AddFamilyHeadBloc();
 
-    if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _bloc.add(AnmUpdateMobileNo(widget.headMobileNumber!));
-        _bloc.add(const AnmUpdateMobileOwner('Family Head'));
-      });
-    }
-
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
 
     _fatherOption = 'Select';
@@ -319,8 +312,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         _bloc.add(AnmUpdateMotherName(_motherOption));
       }
     });
-
-
 
   }
 
@@ -437,7 +428,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
       _currentStep = widget.initialStep;
     }
-
 
     final childMinDate = DateTime(now.year - 15, now.month, now.day);
     final childMaxDate = now;
@@ -1477,10 +1467,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             ),
                                           ],
                                         ),
-                                      ],
+                                      ]),
                                     ),
-                                  ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                 ],
 
                                 _section(
@@ -1829,7 +1818,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             }
                                             return ApiDropdown<String>(
                                               labelText:
-                                                  "${l.motherNameLabel}* ",
+                                                  "${l.motherNameLabel} *",
                                               hintText: "${l.motherNameLabel} ",
                                               items: motherItems,
                                               getLabel: (s) => s,
@@ -1857,19 +1846,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                         AnmUpdateMotherName(''),
                                                       );
                                                 }
-
-                                                if (_formKey.currentState !=
-                                                    null) {
-                                                  _formKey.currentState!
-                                                      .validate();
-                                                }
-                                              },
-                                              validator: (value) {
-                                                if (_motherOption == 'Select' ||
-                                                    _motherOption.isEmpty) {
-                                                  return 'Please select or enter ${l.motherNameLabel.toLowerCase()}';
-                                                }
-                                                return null;
                                               },
                                             );
                                           },
@@ -1880,38 +1856,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           height: 0,
                                         ),
                                         if (_motherOption == 'Other') ...[
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 8,
-                                            ),
-                                            child: CustomTextField(
-                                              labelText: "${l.motherNameLabel}*",
-                                              hintText: l.motherNameLabel,
-                                              initialValue:
-                                              state.motherName ?? '',
-                                              onChanged: (v) {
-                                                final name = v.trim();
-                                                context
-                                                    .read<
-                                                    AddnewfamilymemberBloc
+                                          CustomTextField(
+                                            labelText: "${l.motherNameLabel} *",
+                                            hintText: l.motherNameLabel,
+                                            initialValue:
+                                                state.motherName ?? '',
+                                            onChanged: (v) => context
+                                                .read<
+                                                  AddnewfamilymemberBloc
                                                 >()
-                                                    .add(
-                                                  AnmUpdateMotherName(name),
-                                                );
-                                                if (_formKey.currentState !=
-                                                    null) {
-                                                  _formKey.currentState!
-                                                      .validate();
-                                                }
-                                              },
-                                              validator: (value) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return 'Please enter ${l.motherNameLabel.toLowerCase()}';
-                                                }
-                                                return null;
-                                              },
-                                            ),
+                                                .add(
+                                                  AnmUpdateMotherName(
+                                                    v.trim(),
+                                                  ),
+                                                ),
                                           ),
                                           Divider(
                                             color: AppColors.divider,
@@ -1924,100 +1882,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     ),
                                   ),
 
-                                ] else ...[
-                                  _section(
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Builder(
-                                          builder: (context) {
-                                            final List<String> motherItems = [];
-                                            if (_isMemberDetails) {
-                                              motherItems.addAll(
-                                                _femaleAdultNames,
-                                              );
-                                              motherItems.add('Other');
-                                            } else {
-                                              if ((_headName ?? '')
-                                                      .isNotEmpty &&
-                                                  _formatGender(_headGender) ==
-                                                      'Female') {
-                                                motherItems.add(_headName!);
-                                              }
-                                              if ((_spouseName ?? '')
-                                                      .isNotEmpty &&
-                                                  _formatGender(
-                                                        _spouseGender,
-                                                      ) ==
-                                                      'Female') {
-                                                motherItems.add(_spouseName!);
-                                              }
-                                              motherItems.add('Other');
-                                            }
-                                            return ApiDropdown<String>(
-                                              labelText:
-                                                  "${l.motherNameLabel} ",
-                                              hintText: "${l.motherNameLabel} ",
-                                              items: motherItems,
-                                              getLabel: (s) => s,
-                                              value: _motherOption,
-                                              onChanged: (v) {
-                                                if (v == null) return;
-                                                setState(() {
-                                                  _motherOption = v;
-                                                });
-                                                if (v != 'Select' &&
-                                                    v != 'Other') {
-                                                  context
-                                                      .read<
-                                                        AddnewfamilymemberBloc
-                                                      >()
-                                                      .add(
-                                                        AnmUpdateMotherName(v),
-                                                      );
-                                                } else {
-                                                  context
-                                                      .read<
-                                                        AddnewfamilymemberBloc
-                                                      >()
-                                                      .add(
-                                                        AnmUpdateMotherName(''),
-                                                      );
-                                                }
-                                              },
-                                            );
-                                          },
-                                        ),
-                                        if (_motherOption == 'Other')
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 8,
-                                            ),
-                                            child: CustomTextField(
-                                              labelText: l.motherNameLabel,
-                                              hintText: l.motherNameLabel,
-                                              initialValue:
-                                                  state.motherName ?? '',
-                                              onChanged: (v) => context
-                                                  .read<
-                                                    AddnewfamilymemberBloc
-                                                  >()
-                                                  .add(
-                                                    AnmUpdateMotherName(
-                                                      v.trim(),
-                                                    ),
-                                                  ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                  Divider(
-                                    color: AppColors.divider,
-                                    thickness: 0.5,
-                                    height: 0,
-                                  ),
                                   _section(
                                     Column(
                                       crossAxisAlignment:
@@ -2253,37 +2117,34 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             .read<AddnewfamilymemberBloc>();
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        onChanged: (v) async {
-                                          if (v == null) return;
-                                          final bloc = context.read<AddnewfamilymemberBloc>();
-                                          bloc.add(AnmUpdateMobileOwner(v));
-
-                                          if (v == 'Family Head') {
-                                            if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
-                                              print('📱 [AddNewMember] Using head mobile from props: ${widget.headMobileNumber}');
-                                              bloc.add(AnmUpdateMobileNo(widget.headMobileNumber!));
-                                            } else if (_isMemberDetails && widget.hhId != null) {
-                                              try {
-                                                final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
-                                                print('📱 [AddNewMember] Fetched mobile from DB: $headMobile');
-                                                if (headMobile != null && headMobile.isNotEmpty) {
-                                                  bloc.add(AnmUpdateMobileNo(headMobile));
-                                                } else if (mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(content: Text('No mobile number found for the head of family')),
-                                                  );
-                                                }
-                                              } catch (e) {
-                                                print('❌ [AddNewMember] Error fetching from DB: $e');
-                                                if (mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(content: Text('Error loading head of family mobile number')),
-                                                  );
-                                                }
+                                        if (v == 'Family Head' || v == 'Father') {
+                                          if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
+                                            print('📱 [AddNewMember] Using head mobile from props: ${widget.headMobileNumber}');
+                                            bloc.add(AnmUpdateMobileNo(widget.headMobileNumber!));
+                                          } else if (_isMemberDetails && widget.hhId != null) {
+                                            try {
+                                              final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                              print('📱 [AddNewMember] Fetched mobile from DB: $headMobile');
+                                              if (headMobile != null && headMobile.isNotEmpty) {
+                                                bloc.add(AnmUpdateMobileNo(headMobile));
+                                              } else if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('No mobile number found for the head of family')),
+                                                );
+                                              }
+                                            } catch (e) {
+                                              print('❌ [AddNewMember] Error fetching from DB: $e');
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Error loading head of family mobile number')),
+                                                );
                                               }
                                             }
                                           }
-                                        };
+                                        } else {
+                                          // Clear mobile number if not Family Head
+                                          bloc.add(AnmUpdateMobileNo(''));
+                                        }
                                       },
                                       validator: (value) => _captureAnmError(
                                         Validations.validateWhoMobileNo(
@@ -3160,7 +3021,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     'adult') ...[
                                   _section(
                                     ApiDropdown<String>(
-                                      labelText: '${l.whoseMobileLabel} *',
+                                      labelText: '${l.whoseMobileLabel}? *',
                                       items: const [
                                         'Self',
                                         'Family Head',
@@ -3180,7 +3041,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           case 'Self':
                                             return l.self;
                                           case 'Family Head':
-                                            return l.headOfFamily;
+                                            return 'Family Head';
                                           case 'Wife':
                                             return l.wife;
                                           case 'Father':
@@ -3212,49 +3073,32 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             .read<AddnewfamilymemberBloc>();
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        if (v == 'Family Head' &&
-                                            widget.hhId != null) {
-                                          try {
-                                            final headMobile =
-                                                await LocalStorageDao.instance
-                                                    .getHeadMobileNumber(
-                                                      widget.hhId!,
-                                                    );
-                                            if (headMobile != null &&
-                                                headMobile.isNotEmpty) {
-                                              bloc.add(
-                                                AnmUpdateMobileNo(headMobile),
-                                              );
-                                            } else {
+                                        if (v == 'Family Head' || v == "Father") {
+                                          if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
+                                            print('📱 [AddNewMember] Using head mobile from props: ${widget.headMobileNumber}');
+                                            bloc.add(AnmUpdateMobileNo(widget.headMobileNumber!));
+                                          } else if (_isMemberDetails && widget.hhId != null) {
+                                            try {
+                                              final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                              print('📱 [AddNewMember] Fetched mobile from DB: $headMobile');
+                                              if (headMobile != null && headMobile.isNotEmpty) {
+                                                bloc.add(AnmUpdateMobileNo(headMobile));
+                                              } else if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('No mobile number found for the head of family')),
+                                                );
+                                              }
+                                            } catch (e) {
+                                              print('❌ [AddNewMember] Error fetching from DB: $e');
                                               if (mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      'No mobile number found for the head of family',
-                                                    ),
-                                                  ),
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Error loading head of family mobile number')),
                                                 );
                                               }
                                             }
-                                          } catch (e) {
-                                            print(
-                                              'Error fetching head mobile number: $e',
-                                            );
-                                            if (mounted) {
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    'Error loading head of family mobile number',
-                                                  ),
-                                                ),
-                                              );
-                                            }
                                           }
-                                        } else if (v != 'Family Head') {
+                                        } else {
+                                          // Clear mobile number if not Family Head
                                           bloc.add(AnmUpdateMobileNo(''));
                                         }
                                       },
@@ -4227,17 +4071,34 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           // Spousdetails form using its own GlobalKey. This
                                           // ensures member spouse validations run and only
                                           // a single message (the first error) is shown.
+                                          // Calculate the last step based on the form state
+                                          final bool showSpouse = state.memberType != 'Child' &&
+                                              state.maritalStatus == 'Married';
+                                          final bool showChildren = showSpouse && state.hasChildren == 'Yes';
+                                          final int lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
+
+// When on the spouse step (index 1), validate the Spouse form
                                           if (_currentStep == 1) {
-                                            final spouseForm =
-                                                spousFormKey.currentState;
-                                            if (spouseForm == null ||
-                                                !spouseForm.validate()) {
-                                              final msg =
-                                                  spousLastFormError ??
-                                                  'Please correct the highlighted errors before continuing.';
+                                            final spouseForm = spousFormKey.currentState;
+                                            if (spouseForm == null || !spouseForm.validate()) {
+                                              final msg = spousLastFormError ?? 'Please fill all required fields in the spouse details before continuing.';
                                               showAppSnackBar(context, msg);
                                               return;
                                             }
+                                          }
+
+                                          if (_currentStep < lastStep) {
+                                            final newStep = _currentStep + 1;
+                                            setState(() {
+                                              _currentStep = newStep;
+                                            });
+
+                                            // Get the tab controller and animate to the new step
+                                            final tabController = DefaultTabController.of(context);
+                                            if (tabController != null) {
+                                              tabController.animateTo(newStep);
+                                            }
+                                            return;
                                           }
 
                                           final formState =
@@ -4358,9 +4219,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   .toIso8601String(),
                                             };
 
-                                            // Attach children details snapshot so that
-                                            // reopening via the children tab can restore
-                                            // the same counters in ChildrenBloc.
+                                         
                                             try {
                                               final ch = _childrenBloc.state;
                                               memberData['childrendetails'] = ch
