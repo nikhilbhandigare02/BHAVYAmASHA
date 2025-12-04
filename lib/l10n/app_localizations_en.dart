@@ -1941,7 +1941,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preExistingDiseaseLabel => 'Pre - Existing disease';
 
   @override
-  String get pregnantWomen => 'Pregnant women';
+  String get pregnantWomen => 'Pregnant Women';
 
   @override
   String get previousButton => 'PREVIOUS';
@@ -2940,7 +2940,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gestationWeeks => 'Number of weeks of pregnancy during delivery';
 
   @override
-  String get deliveryTime => 'Time of Delivery (hh:mm)';
+  String get deliveryTime => 'Delivery Time (hh:mm)';
 
   @override
   String get deliveryTimeHint => 'hh:mm';
@@ -2949,7 +2949,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get placeOfDelivery => 'Place of Delivery';
 
   @override
-  String get selectPlaceOfDelivery => ' Place of Delivery *';
+  String get selectPlaceOfDelivery => 'Select Place of Delivery *';
 
   @override
   String get selectOption => 'Select';
@@ -2973,7 +2973,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privateHospital => 'Private Hospital';
 
   @override
-  String get deliveryType => 'Type of delivery *';
+  String get deliveryType => 'Type of Delivery *';
 
   @override
   String get normalDelivery => 'Normal';
@@ -2982,13 +2982,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cesareanDelivery => 'Cesarean';
 
   @override
-  String get assistedDelivery => 'Assisted /Forceps';
+  String get assistedDelivery => 'Assisted (Vacuum/Forceps)';
 
   @override
   String get complications => 'Complications during delivery? *';
 
   @override
-  String get outcomeCount => 'Delivery Outcomes *';
+  String get outcomeCount => 'Number of Outcomes *';
 
   @override
   String get familyPlanningCounseling => 'Family Planning Counseling Provided?';
@@ -4931,4 +4931,190 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noHouseholdsFound => 'No households found';
+
+  @override
+  String get noOfASHAUnderTheFacilitator => 'No. of ASHA under the facilitator';
+
+  @override
+  String get ashaFacilitatorClusterMeetingList => 'ASHA Facilitator Cluster Meeting List';
+
+  @override
+  String get addNewClusterMeeting => 'ADD NEW CLUSTER MEETING';
+
+  @override
+  String get facilitatorNotSpecified => 'Facilitator not specified';
+
+  @override
+  String get clusterMeetings => 'Cluster meetings';
+
+  @override
+  String get ashaFacilitatorClusterMeeting => 'ASHA Facilitator Cluster Meeting';
+
+  @override
+  String get phcName => 'PHC Name';
+
+  @override
+  String get decisionTakenDuringMeeting => 'Decision Taken During the Meeting';
+
+  @override
+  String get discussionSubTopicProgram => 'Discussion Sub Topic/Program';
+
+  @override
+  String get discussionTopicProgram => 'Discussion Topic/Program';
+
+  @override
+  String get selectTopics => 'Select Topics';
+
+  @override
+  String get clusterMeetingsCountThisMonth => 'No. of cluster meetings conducted in this month';
+
+  @override
+  String get noOfASHAAbsentInThisMeeting => 'No. of ASHA absent in this meeting';
+
+  @override
+  String get ashaPresentCount => 'No. of ASHA present in this meeting';
+
+  @override
+  String get totalAshaUnderFacilitator => 'Total no. of ASHA under facilitator';
+
+  @override
+  String get noOfHours => 'No. of hours';
+
+  @override
+  String get toTime => 'To (HH:MM)';
+
+  @override
+  String get ashaInchargeName => 'ASHA Incharge Name';
+
+  @override
+  String get ashaFacilitatorName => 'ASHA Facilitator Name';
+
+  @override
+  String get subcenterName => 'Subcenter Name';
+
+  @override
+  String get awwName => 'AWW Name';
+
+  @override
+  String get awcNumber => 'AWC Number';
+
+  @override
+  String get villageName => 'Village Name';
+
+  @override
+  String get wardName => 'Ward Name';
+
+  @override
+  String get wardNumber => 'Ward Number';
+
+  @override
+  String get blockName => 'Block Name';
+
+  @override
+  String get dateOfMeeting => 'Date of the meeting';
+
+  @override
+  String get day => 'Day';
+
+  @override
+  String get selectDay => 'Select Day';
+
+  @override
+  String get fromTime => 'From (HH:MM)';
+
+  @override
+  String get selectDiscussionTopics => 'Select Discussion Topics';
+
+  @override
+  String get selectMonthYear => 'Select Month & Year';
+
+  @override
+  String get toTimeLabel => 'To Time';
+
+  @override
+  String get fromTimeLabel => 'From Time';
+
+  @override
+  String get monday => 'Monday';
+
+  @override
+  String get tuesday => 'Tuesday';
+
+  @override
+  String get wednesday => 'Wednesday';
+
+  @override
+  String get thursday => 'Thursday';
+
+  @override
+  String get friday => 'Friday';
+
+  @override
+  String get saturday => 'Saturday';
+
+  @override
+  String get sunday => 'Sunday';
+
+  @override
+  String get immunization => 'Immunization';
+
+  @override
+  String get deliveries => 'Deliveries';
+
+  @override
+  String get pnc => 'PNC (Post Natal Care)';
+
+  @override
+  String get maternalChildHealth => 'Maternal & Child Health';
+
+  @override
+  String get homeVisit => 'Home Visit';
+
+  @override
+  String get newBornCare => 'New Born Care';
+
+  @override
+  String get deaths => 'Deaths';
+
+  @override
+  String get adolescentHealth => 'Adolescent Health';
+
+  @override
+  String get familyPlanning => 'Family Planning';
+
+  @override
+  String get otherPublicHealthProgram => 'Other Public Health Program';
+
+  @override
+  String get administrative => 'Administrative';
+
+  @override
+  String get trainingSupport => 'Training and Support';
+
+  @override
+  String get districtPatna => 'Patna';
+
+  @override
+  String get districtManer => 'Maner';
+
+  @override
+  String get categoryANC => 'ANC';
+
+  @override
+  String get categoryPNC => 'PNC';
+
+  @override
+  String get categoryRI => 'RI';
+
+  @override
+  String get enter10DigitNumber => 'Enter 10 digit number';
+
+  @override
+  String get viewRawData => 'View Raw Data (Check Console)';
+
+  @override
+  String get searchResults => 'Search Results';
+
+  @override
+  String get noNotificationsFound => 'No notifications found.';
 }

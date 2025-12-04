@@ -51,7 +51,7 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Training scheduled successfully')),
           );
-          Navigator.pop(context);
+          Navigator.pop(context, true);
         } else if (state.status == FormStatus.failure && state.error != null) {
           ScaffoldMessenger.of(
             context,

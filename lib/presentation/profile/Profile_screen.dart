@@ -1,351 +1,351 @@
-  import 'dart:convert';
-  import 'package:flutter/cupertino.dart';
-  import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-  import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-  import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
-  import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-  import 'package:medixcel_new/data/Database/User_Info.dart';
-  import '../../core/config/routes/Route_Name.dart';
-  import '../../core/widgets/Dropdown/Dropdown.dart';
-  import '../../core/widgets/Dropdown/dropdown.dart' hide ApiDropdown;
-  import '../../data/SecureStorage/SecureStorage.dart';
-  import '../../l10n/app_localizations.dart';
-  import 'package:flutter_bloc/flutter_bloc.dart';
-  import 'bloc/profile_bloc.dart';
-  import '../../core/widgets/DatePicker/DatePicker.dart';
-  import '../../core/widgets/RoundButton/RoundButton.dart';
+import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
+import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/data/Database/User_Info.dart';
+import '../../core/config/routes/Route_Name.dart';
+import '../../core/widgets/Dropdown/Dropdown.dart';
+import '../../core/widgets/Dropdown/dropdown.dart' hide ApiDropdown;
+import '../../data/SecureStorage/SecureStorage.dart';
+import '../../l10n/app_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'bloc/profile_bloc.dart';
+import '../../core/widgets/DatePicker/DatePicker.dart';
+import '../../core/widgets/RoundButton/RoundButton.dart';
 
-  class ProfileScreen extends StatefulWidget {
-    final bool fromLogin;
+class ProfileScreen extends StatefulWidget {
+  final bool fromLogin;
 
-    const ProfileScreen({
-      super.key,
-      this.fromLogin = false,
+  const ProfileScreen({
+    super.key,
+    this.fromLogin = false,
+  });
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+String _toTitleCase(String? text) {
+  if (text == null || text.isEmpty) return '';
+  return text.split(' ').map((word) {
+    if (word.isEmpty) return '';
+    return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+  }).join(' ');
+}
+
+String _toCamelCase(String? text) {
+  if (text == null || text.isEmpty) return '';
+  final words = text.toLowerCase().split(RegExp(r'[\s_]+'));
+  if (words.isEmpty) return '';
+  return words.first + words.skip(1).map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '').join('');
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  List<Country> countries = [
+    Country(id: 1, name: 'Rural'),
+    Country(id: 2, name: 'Urban'),
+  ];
+  int? appRoleId;
+
+  Country? selectedCountry;
+  String _userFullName = '';
+  Map<String, dynamic> details = {};
+  late final ProfileBloc _profileBloc;
+
+  Map<String, dynamic> _getActualUserData() {
+    return details;
+  }
+
+
+
+  DateTime? _parseDob(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return null;
+    try {
+      return DateTime.tryParse(dateString);
+    } catch (e) {
+      print('Error parsing date: $e');
+      return null;
+    }
+  }
+
+
+  String _calculateAge(DateTime? dob) {
+    if (dob == null) return '';
+
+    final now = DateTime.now();
+
+
+    int years = now.year - dob.year;
+    int months = now.month - dob.month;
+    int days = now.day - dob.day;
+
+    // Handle negative days/months
+    if (days < 0) {
+      final lastMonth = DateTime(now.year, now.month - 1, dob.day);
+      days = now.difference(lastMonth).inDays + 1;
+      months--;
+    }
+
+    if (months < 0) {
+      months += 12;
+      years--;
+    }
+
+    // Build the age string
+    final parts = <String>[];
+    if (years > 0) parts.add('$years ${years == 1 ? 'year' : 'years'}');
+    if (months > 0) parts.add('$months ${months == 1 ? 'month' : 'months'}');
+    if (days > 0 || parts.isEmpty) parts.add('$days ${days == 1 ? 'day' : 'days'}');
+
+    return parts.join(', ');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _profileBloc = context.read<ProfileBloc>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserData();
     });
-
-    @override
-    State<ProfileScreen> createState() => _ProfileScreenState();
   }
 
-  String _toTitleCase(String? text) {
-    if (text == null || text.isEmpty) return '';
-    return text.split(' ').map((word) {
-      if (word.isEmpty) return '';
-      return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
-    }).join(' ');
-  }
+  Future<void> _loadUserData() async {
+    try {
 
-  String _toCamelCase(String? text) {
-    if (text == null || text.isEmpty) return '';
-    final words = text.toLowerCase().split(RegExp(r'[\s_]+'));
-    if (words.isEmpty) return '';
-    return words.first + words.skip(1).map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '').join('');
-  }
+      print('\n=== COMPLETE USERS TABLE ===');
+      await UserInfo.printUserData();
+      print('=== END USERS TABLE ===\n');
 
-  class _ProfileScreenState extends State<ProfileScreen> {
-    List<Country> countries = [
-      Country(id: 1, name: 'Rural'),
-      Country(id: 2, name: 'Urban'),
-    ];
-    int? appRoleId;
+      final userData = await UserInfo.getCurrentUser();
 
-    Country? selectedCountry;
-    String _userFullName = '';
-    Map<String, dynamic> details = {};
-    late final ProfileBloc _profileBloc;
+      if (userData == null || userData.isEmpty) {
+        return;
+      }
+      if (!mounted) {
+        return;
+      }
 
-    Map<String, dynamic> _getActualUserData() {
-      return details;
-    }
+      if (!mounted) return;
+      final bloc = context.read<ProfileBloc>();
 
-
-
-    DateTime? _parseDob(String? dateString) {
-      if (dateString == null || dateString.isEmpty) return null;
+      // Safely parse details
       try {
-        return DateTime.tryParse(dateString);
+        details = userData['details'] is String
+            ? jsonDecode(userData['details'] as String)
+            : userData['details'] as Map<String, dynamic>? ?? {};
       } catch (e) {
-        print('Error parsing date: $e');
-        return null;
-      }
-    }
-
-
-    String _calculateAge(DateTime? dob) {
-      if (dob == null) return '';
-
-      final now = DateTime.now();
-
-
-      int years = now.year - dob.year;
-      int months = now.month - dob.month;
-      int days = now.day - dob.day;
-
-      // Handle negative days/months
-      if (days < 0) {
-        final lastMonth = DateTime(now.year, now.month - 1, dob.day);
-        days = now.difference(lastMonth).inDays + 1;
-        months--;
+        print('Error parsing user details: $e');
+        return;
       }
 
-      if (months < 0) {
-        months += 12;
-        years--;
+      Map<String, dynamic> actualUserData = details;
+      final appRoleId = actualUserData['app_role_id'] ?? '';
+      print("APP ROLE ID: $appRoleId");
+
+      if (appRoleId != null) {
+        final roleId = int.tryParse(appRoleId.toString());
+        if (roleId != null) {
+          _profileBloc.add(RoleIdChanged(roleId));
+        }
       }
+      final name = actualUserData['name'] is Map ? Map<String, dynamic>.from(actualUserData['name']) : <String, dynamic>{};
+      final workingLocation = actualUserData['working_location'] is Map
+          ? Map<String, dynamic>.from(actualUserData['working_location'])
+          : <String, dynamic>{};
+      final contactInfo = actualUserData['contact_info'] is Map
+          ? Map<String, dynamic>.from(actualUserData['contact_info'])
+          : <String, dynamic>{};
 
-      // Build the age string
-      final parts = <String>[];
-      if (years > 0) parts.add('$years ${years == 1 ? 'year' : 'years'}');
-      if (months > 0) parts.add('$months ${months == 1 ? 'month' : 'months'}');
-      if (days > 0 || parts.isEmpty) parts.add('$days ${days == 1 ? 'day' : 'days'}');
+      final areaOfWorking = actualUserData['area_of_working']?.toString().toLowerCase().trim() ?? '';
 
-      return parts.join(', ');
-    }
-
-    @override
-    void initState() {
-      super.initState();
-      _profileBloc = context.read<ProfileBloc>();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadUserData();
-      });
-    }
-
-    Future<void> _loadUserData() async {
-      try {
-
-        print('\n=== COMPLETE USERS TABLE ===');
-        await UserInfo.printUserData();
-        print('=== END USERS TABLE ===\n');
-
-        final userData = await UserInfo.getCurrentUser();
-
-        if (userData == null || userData.isEmpty) {
-          return;
-        }
-        if (!mounted) {
-          return;
-        }
-
-        if (!mounted) return;
-        final bloc = context.read<ProfileBloc>();
-
-        // Safely parse details
-        try {
-          details = userData['details'] is String
-              ? jsonDecode(userData['details'] as String)
-              : userData['details'] as Map<String, dynamic>? ?? {};
-        } catch (e) {
-          print('Error parsing user details: $e');
-          return;
-        }
-
-        Map<String, dynamic> actualUserData = details;
-        final appRoleId = actualUserData['app_role_id'] ?? '';
-        print("APP ROLE ID: $appRoleId");
-
-        if (appRoleId != null) {
-          final roleId = int.tryParse(appRoleId.toString());
-          if (roleId != null) {
-            _profileBloc.add(RoleIdChanged(roleId));
-          }
-        }
-        final name = actualUserData['name'] is Map ? Map<String, dynamic>.from(actualUserData['name']) : <String, dynamic>{};
-        final workingLocation = actualUserData['working_location'] is Map
-            ? Map<String, dynamic>.from(actualUserData['working_location'])
-            : <String, dynamic>{};
-        final contactInfo = actualUserData['contact_info'] is Map
-            ? Map<String, dynamic>.from(actualUserData['contact_info'])
-            : <String, dynamic>{};
-
-        final areaOfWorking = actualUserData['area_of_working']?.toString().toLowerCase().trim() ?? '';
-
-        if (mounted) {
-          setState(() {
-            if (areaOfWorking.isNotEmpty) {
-              try {
-                selectedCountry = countries.firstWhere(
-                        (c) => c.name.toLowerCase() == areaOfWorking,
-                    orElse: () => countries.first
-                );
-              } catch (e) {
-                selectedCountry = countries.isNotEmpty ? countries.first : null;
-              }
-            } else {
+      if (mounted) {
+        setState(() {
+          if (areaOfWorking.isNotEmpty) {
+            try {
+              selectedCountry = countries.firstWhere(
+                      (c) => c.name.toLowerCase() == areaOfWorking,
+                  orElse: () => countries.first
+              );
+            } catch (e) {
               selectedCountry = countries.isNotEmpty ? countries.first : null;
             }
-          });
+          } else {
+            selectedCountry = countries.isNotEmpty ? countries.first : null;
+          }
+        });
+      }
+
+
+      _userFullName = '${name['first_name'] ?? ''} ${name['middle_name'] ?? ''} ${name['last_name'] ?? ''}'.trim();
+
+      try {
+
+        final ashaId = workingLocation['asha_id']?.toString() ?? '';
+        final firstName = name['first_name']?.toString().trim() ?? '';
+        final middleName = name['middle_name']?.toString().trim() ?? '';
+        final lastName = name['last_name']?.toString().trim() ?? '';
+
+        final fullName = [firstName, middleName, lastName]
+            .where((part) => part.isNotEmpty)
+            .join(' ');
+
+        // Update the BLoC state with the full name
+        bloc.add(AshaNameChanged(fullName));
+
+        final fatherSpouse = actualUserData['father_or_spouse_name']?.toString() ?? '';
+
+
+        final mobileNumber = contactInfo['mobile_number']?.toString() ?? '';
+        final altMobileNumber = contactInfo['alternate_mobile_number']?.toString() ?? '';
+
+
+        final state = workingLocation['state']?.toString() ?? '';
+        final division = workingLocation['division']?.toString() ?? '';
+        final district = workingLocation['district']?.toString() ?? '';
+        final block = workingLocation['block']?.toString() ?? '';
+        final panchayat = workingLocation['panchayat']?.toString() ?? '';
+        final village = workingLocation['village']?.toString() ?? '';
+        final tola = workingLocation['tola']?.toString() ?? '';
+
+
+        // HSC Information
+        final hscName = workingLocation['hsc_name']?.toString() ?? '';
+        final hscHfrId = workingLocation['hsc_hfr_id']?.toString() ?? '';
+
+        // Bank Details
+        final bankDetails = actualUserData['bank_account_details'] is Map
+            ? Map<String, dynamic>.from(actualUserData['bank_account_details'])
+            : <String, dynamic>{};
+        final accountNumber = bankDetails['bank_account_number']?.toString() ?? '';
+        final ifscCode = bankDetails['ifsc_code']?.toString() ?? '';
+
+        // Other fields
+        final populationCovered = actualUserData['population_covered_by_asha']?.toString() ?? '';
+        final qualification = actualUserData['qualification']?.toString() ?? '';
+
+        // Verification details
+        final verificationDetails = actualUserData['verification_details'] is Map
+            ? Map<String, dynamic>.from(actualUserData['verification_details'])
+            : <String, dynamic>{};
+        final aadharNumber = verificationDetails['aadhar_number']?.toString() ?? '';
+        final panCardNumber = verificationDetails['pan_card_number']?.toString() ?? '';
+        final voterId = verificationDetails['voter_id']?.toString() ?? '';
+
+        // Additional fields from stored data
+        final aadharBirthYear = actualUserData['aadhar_birth_year']?.toString() ?? '';
+        final aadharName = actualUserData['aadhar_name']?.toString() ?? '';
+        final uniqueKey = actualUserData['unique_key']?.toString() ?? '';
+
+        // Extract additional contact/staff information if available
+        final choName = workingLocation['cho_name']?.toString() ?? '';
+        final choMobile = workingLocation['cho_mobile']?.toString() ?? '';
+        final awwName = workingLocation['aww_name']?.toString() ?? '';
+        final awwMobile = workingLocation['aww_mobile']?.toString() ?? '';
+        final anganwadiCenterNo = workingLocation['anganwadi_center_no']?.toString() ?? '';
+        final anm1Name = workingLocation['anm1_name']?.toString() ?? '';
+        final anm1Mobile = workingLocation['anm1_mobile']?.toString() ?? '';
+        final anm2Name = workingLocation['anm2_name']?.toString() ?? '';
+        final anm2Mobile = workingLocation['anm2_mobile']?.toString() ?? '';
+        final bcmName = workingLocation['bcm_name']?.toString() ?? '';
+        final bcmMobile = workingLocation['bcm_mobile']?.toString() ?? '';
+        final dcmName = workingLocation['dcm_name']?.toString() ?? '';
+        final dcmMobile = workingLocation['dcm_mobile']?.toString() ?? '';
+
+
+        // Update form fields using individual events
+        if (mounted) {
+          // Update basic information
+          _profileBloc.add(AshaIdChanged(ashaId));
+          _profileBloc.add(AshaNameChanged(fullName));
+          _profileBloc.add(FatherSpouseChanged(fatherSpouse));
+          _profileBloc.add(MobileChanged(mobileNumber));
+          _profileBloc.add(AltMobileChanged(altMobileNumber));
+
+          // Update location information
+          _profileBloc.add(StateChanged(state));
+          _profileBloc.add(DivisionChanged(division));
+          _profileBloc.add(DistrictChanged(district));
+          _profileBloc.add(BlockChanged(block));
+          _profileBloc.add(PanchayatChanged(panchayat));
+          _profileBloc.add(VillageChanged(village));
+          _profileBloc.add(TolaChanged(tola));
+
+          // Update other fields
+          _profileBloc.add(HscNameChanged(hscName));
+          _profileBloc.add(HwcNameChanged(hscHfrId));
+          _profileBloc.add(AccountNumberChanged(accountNumber));
+          _profileBloc.add(IfscChanged(ifscCode));
+          _profileBloc.add(PopulationCoveredChanged(populationCovered));
+
+          // Update area of working dropdown
+          if (areaOfWorking.isNotEmpty) {
+            _profileBloc.add(AreaOfWorkingChanged(areaOfWorking));
+          }
+
+          // Update additional staff/contact information
+          _profileBloc.add(ChoNameChanged(choName));
+          _profileBloc.add(ChoMobileChanged(choMobile));
+          _profileBloc.add(AwwNameChanged(awwName));
+          _profileBloc.add(AwwMobileChanged(awwMobile));
+          _profileBloc.add(AnganwadiCenterNoChanged(anganwadiCenterNo));
+          _profileBloc.add(Anm1NameChanged(anm1Name));
+          _profileBloc.add(Anm1MobileChanged(anm1Mobile));
+          _profileBloc.add(Anm2NameChanged(anm2Name));
+          _profileBloc.add(Anm2MobileChanged(anm2Mobile));
+          _profileBloc.add(BcmNameChanged(bcmName));
+          _profileBloc.add(BcmMobileChanged(bcmMobile));
+          _profileBloc.add(DcmNameChanged(dcmName));
+          _profileBloc.add(DcmMobileChanged(dcmMobile));
         }
 
-
-        _userFullName = '${name['first_name'] ?? ''} ${name['middle_name'] ?? ''} ${name['last_name'] ?? ''}'.trim();
-
-        try {
-
-          final ashaId = workingLocation['asha_id']?.toString() ?? '';
-          final firstName = name['first_name']?.toString().trim() ?? '';
-          final middleName = name['middle_name']?.toString().trim() ?? '';
-          final lastName = name['last_name']?.toString().trim() ?? '';
-
-          final fullName = [firstName, middleName, lastName]
-              .where((part) => part.isNotEmpty)
-              .join(' ');
-
-          // Update the BLoC state with the full name
-          bloc.add(AshaNameChanged(fullName));
-
-          final fatherSpouse = actualUserData['father_or_spouse_name']?.toString() ?? '';
-
-
-          final mobileNumber = contactInfo['mobile_number']?.toString() ?? '';
-          final altMobileNumber = contactInfo['alternate_mobile_number']?.toString() ?? '';
-
-
-          final state = workingLocation['state']?.toString() ?? '';
-          final division = workingLocation['division']?.toString() ?? '';
-          final district = workingLocation['district']?.toString() ?? '';
-          final block = workingLocation['block']?.toString() ?? '';
-          final panchayat = workingLocation['panchayat']?.toString() ?? '';
-          final village = workingLocation['village']?.toString() ?? '';
-          final tola = workingLocation['tola']?.toString() ?? '';
-
-
-          // HSC Information
-          final hscName = workingLocation['hsc_name']?.toString() ?? '';
-          final hscHfrId = workingLocation['hsc_hfr_id']?.toString() ?? '';
-
-          // Bank Details
-          final bankDetails = actualUserData['bank_account_details'] is Map
-              ? Map<String, dynamic>.from(actualUserData['bank_account_details'])
-              : <String, dynamic>{};
-          final accountNumber = bankDetails['bank_account_number']?.toString() ?? '';
-          final ifscCode = bankDetails['ifsc_code']?.toString() ?? '';
-
-          // Other fields
-          final populationCovered = actualUserData['population_covered_by_asha']?.toString() ?? '';
-          final qualification = actualUserData['qualification']?.toString() ?? '';
-
-          // Verification details
-          final verificationDetails = actualUserData['verification_details'] is Map
-              ? Map<String, dynamic>.from(actualUserData['verification_details'])
-              : <String, dynamic>{};
-          final aadharNumber = verificationDetails['aadhar_number']?.toString() ?? '';
-          final panCardNumber = verificationDetails['pan_card_number']?.toString() ?? '';
-          final voterId = verificationDetails['voter_id']?.toString() ?? '';
-
-          // Additional fields from stored data
-          final aadharBirthYear = actualUserData['aadhar_birth_year']?.toString() ?? '';
-          final aadharName = actualUserData['aadhar_name']?.toString() ?? '';
-          final uniqueKey = actualUserData['unique_key']?.toString() ?? '';
-
-          // Extract additional contact/staff information if available
-          final choName = workingLocation['cho_name']?.toString() ?? '';
-          final choMobile = workingLocation['cho_mobile']?.toString() ?? '';
-          final awwName = workingLocation['aww_name']?.toString() ?? '';
-          final awwMobile = workingLocation['aww_mobile']?.toString() ?? '';
-          final anganwadiCenterNo = workingLocation['anganwadi_center_no']?.toString() ?? '';
-          final anm1Name = workingLocation['anm1_name']?.toString() ?? '';
-          final anm1Mobile = workingLocation['anm1_mobile']?.toString() ?? '';
-          final anm2Name = workingLocation['anm2_name']?.toString() ?? '';
-          final anm2Mobile = workingLocation['anm2_mobile']?.toString() ?? '';
-          final bcmName = workingLocation['bcm_name']?.toString() ?? '';
-          final bcmMobile = workingLocation['bcm_mobile']?.toString() ?? '';
-          final dcmName = workingLocation['dcm_name']?.toString() ?? '';
-          final dcmMobile = workingLocation['dcm_mobile']?.toString() ?? '';
-
-
-          // Update form fields using individual events
-          if (mounted) {
-            // Update basic information
-            _profileBloc.add(AshaIdChanged(ashaId));
-            _profileBloc.add(AshaNameChanged(fullName));
-            _profileBloc.add(FatherSpouseChanged(fatherSpouse));
-            _profileBloc.add(MobileChanged(mobileNumber));
-            _profileBloc.add(AltMobileChanged(altMobileNumber));
-
-            // Update location information
-            _profileBloc.add(StateChanged(state));
-            _profileBloc.add(DivisionChanged(division));
-            _profileBloc.add(DistrictChanged(district));
-            _profileBloc.add(BlockChanged(block));
-            _profileBloc.add(PanchayatChanged(panchayat));
-            _profileBloc.add(VillageChanged(village));
-            _profileBloc.add(TolaChanged(tola));
-
-            // Update other fields
-            _profileBloc.add(HscNameChanged(hscName));
-            _profileBloc.add(HwcNameChanged(hscHfrId));
-            _profileBloc.add(AccountNumberChanged(accountNumber));
-            _profileBloc.add(IfscChanged(ifscCode));
-            _profileBloc.add(PopulationCoveredChanged(populationCovered));
-
-            // Update area of working dropdown
-            if (areaOfWorking.isNotEmpty) {
-              _profileBloc.add(AreaOfWorkingChanged(areaOfWorking));
+        // Handle dates
+        if (actualUserData['date_of_birth'] != null) {
+          try {
+            final dob = DateTime.tryParse(actualUserData['date_of_birth'].toString());
+            if (dob != null) {
+              bloc.add(DobChanged(dob));
             }
-
-            // Update additional staff/contact information
-            _profileBloc.add(ChoNameChanged(choName));
-            _profileBloc.add(ChoMobileChanged(choMobile));
-            _profileBloc.add(AwwNameChanged(awwName));
-            _profileBloc.add(AwwMobileChanged(awwMobile));
-            _profileBloc.add(AnganwadiCenterNoChanged(anganwadiCenterNo));
-            _profileBloc.add(Anm1NameChanged(anm1Name));
-            _profileBloc.add(Anm1MobileChanged(anm1Mobile));
-            _profileBloc.add(Anm2NameChanged(anm2Name));
-            _profileBloc.add(Anm2MobileChanged(anm2Mobile));
-            _profileBloc.add(BcmNameChanged(bcmName));
-            _profileBloc.add(BcmMobileChanged(bcmMobile));
-            _profileBloc.add(DcmNameChanged(dcmName));
-            _profileBloc.add(DcmMobileChanged(dcmMobile));
-          }
-
-          // Handle dates
-          if (actualUserData['date_of_birth'] != null) {
-            try {
-              final dob = DateTime.tryParse(actualUserData['date_of_birth'].toString());
-              if (dob != null) {
-                bloc.add(DobChanged(dob));
-              }
-            } catch (e) {
-            }
-          }
-
-          if (actualUserData['date_of_joining'] != null) {
-            try {
-              final doj = DateTime.tryParse(actualUserData['date_of_joining'].toString());
-              if (doj != null) {
-                bloc.add(DojChanged(doj));
-              }
-            } catch (e) {
-
-            }
-          }
-
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error updating form: ${e.toString()}')),
-            );
+          } catch (e) {
           }
         }
+
+        if (actualUserData['date_of_joining'] != null) {
+          try {
+            final doj = DateTime.tryParse(actualUserData['date_of_joining'].toString());
+            if (doj != null) {
+              bloc.add(DojChanged(doj));
+            }
+          } catch (e) {
+
+          }
+        }
+
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Failed to load profile data: ${e.toString()}')),
+            SnackBar(content: Text('Error updating form: ${e.toString()}')),
           );
         }
       }
-
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Failed to load profile data: ${e.toString()}')),
+        );
+      }
     }
-    @override
-    Widget build(BuildContext context) {
-      final l10n = AppLocalizations.of(context)!;
-      final loginFlag =  SecureStorageService.getLoginFlag();
 
-      return WillPopScope(
+  }
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final loginFlag =  SecureStorageService.getLoginFlag();
+
+    return WillPopScope(
         onWillPop: () async {
           if (widget.fromLogin) {
 
@@ -356,17 +356,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
           return true;
         },
         child: Scaffold(
-            backgroundColor: AppColors.surface,
-            appBar: AppHeader(
-              screenTitle: l10n.ashaProfile,
-              showBack: true,
-              onBackTap: () {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  Route_Names.homeScreen,
-                  (route) => false,
-                );
-              },
-            ),
+          backgroundColor: AppColors.surface,
+          appBar: AppHeader(
+            screenTitle: l10n.ashaProfile,
+            showBack: true,
+            onBackTap: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                Route_Names.homeScreen,
+                    (route) => false,
+              );
+            },
+          ),
           body: SafeArea(
             child: BlocConsumer<ProfileBloc, ProfileState>(
               listener: (context, state) {
@@ -403,10 +403,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                             displayValue = _toCamelCase(state.areaOfWorking);
                           }
                           return CustomTextField(
-                            labelText: l10n.areaOfWorking, 
-                            hintText: l10n.selectArea, 
-                            initialValue: displayValue, 
-                            readOnly: true
+                              labelText: l10n.areaOfWorking,
+                              hintText: l10n.selectArea,
+                              initialValue: displayValue,
+                              readOnly: true
                           );
                         },
                       ),
@@ -418,7 +418,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                             key: ValueKey('asha_id_field_${state.ashaId}'),
                             labelText: l10n.ashaIdLabel,
                             hintText: l10n.ashaIdHint,
-                            initialValue: state.ashaId != null ? _toTitleCase(state.ashaId!.trim()) : '',
+                            initialValue: state.ashaId != null ? state.ashaId!.toUpperCase().trim() : '',
                             onChanged: (v) => bloc.add(AshaIdChanged(v)),
                             readOnly: true,
                           );
@@ -474,6 +474,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                           return CustomTextField(
                             labelText: l10n.ageLabel,
                             hintText: l10n.ageLabel,
+                            initialValue: ageText,
                             readOnly: true,
                           );
                         },
@@ -547,9 +548,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold, fontSize: 18),
                       ),
-                       const SizedBox(height: 12),
-                                          Divider(color: AppColors.divider, thickness: 0.5),
-                                        BlocBuilder<ProfileBloc, ProfileState>(
+                      const SizedBox(height: 12),
+                      Divider(color: AppColors.divider, thickness: 0.5),
+                      BlocBuilder<ProfileBloc, ProfileState>(
                         buildWhen: (previous, current) => previous.accountNumber != current.accountNumber,
                         builder: (context, state) {
                           return CustomTextField(
@@ -1029,10 +1030,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                               children: [
                                 Expanded(
                                   child: Text(
-                                    "No. of ASHA under the facilitator",
+                                    l10n.noOfASHAUnderTheFacilitator ?? "No. of ASHA under the facilitator",
                                     style: TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w600
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w600
                                     ),
                                   ),
                                 ),
@@ -1075,14 +1076,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
             ),
           ),
         )
-      );
-    }
-    }
-
-
-  class Country {
-    final int id;
-    final String name;
-
-    Country({required this.id, required this.name});
+    );
   }
+}
+
+
+class Country {
+  final int id;
+  final String name;
+
+  Country({required this.id, required this.name});
+}

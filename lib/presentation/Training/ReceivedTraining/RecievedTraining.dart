@@ -80,6 +80,7 @@ class _TrainingReceivedState extends State<TrainingReceived> {
       setState(() {
         _allData = parsed;
         _filtered = List.from(parsed);
+        _isLoading = false;
       });
     } catch (_) {}
   }

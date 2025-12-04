@@ -1941,7 +1941,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get preExistingDiseaseLabel => 'Pre - Existing disease';
 
   @override
-  String get pregnantWomen => 'गर्भवती महिलाएँ';
+  String get pregnantWomen => 'गर्भवती महिलाएं';
 
   @override
   String get previousButton => 'पिछला';
@@ -2940,7 +2940,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gestationWeeks => 'Number of weeks of pregnancy during delivery';
 
   @override
-  String get deliveryTime => 'Time of Delivery (hh:mm)';
+  String get deliveryTime => 'Delivery Time (hh:mm)';
 
   @override
   String get deliveryTimeHint => 'hh:mm';
@@ -2949,7 +2949,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get placeOfDelivery => 'Place of Delivery';
 
   @override
-  String get selectPlaceOfDelivery => ' Place of Delivery *';
+  String get selectPlaceOfDelivery => 'Select Place of Delivery *';
 
   @override
   String get selectOption => 'Select';
@@ -2973,7 +2973,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get privateHospital => 'Private Hospital';
 
   @override
-  String get deliveryType => 'Type of delivery *';
+  String get deliveryType => 'Type of Delivery *';
 
   @override
   String get normalDelivery => 'Normal';
@@ -2982,13 +2982,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cesareanDelivery => 'Cesarean';
 
   @override
-  String get assistedDelivery => 'Assisted /Forceps';
+  String get assistedDelivery => 'Assisted (Vacuum/Forceps)';
 
   @override
   String get complications => 'Complications during delivery? *';
 
   @override
-  String get outcomeCount => 'Delivery Outcomes *';
+  String get outcomeCount => 'Number of Outcomes *';
 
   @override
   String get familyPlanningCounseling => 'Family Planning Counseling Provided?';
@@ -4931,4 +4931,190 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get noHouseholdsFound => 'कोई परिवार नहीं मिला';
+
+  @override
+  String get noOfASHAUnderTheFacilitator => 'फैसिलिटेटर के अंतर्गत आशा की संख्या';
+
+  @override
+  String get ashaFacilitatorClusterMeetingList => 'आशा फ़ैसिलिटेटर क्लस्टर बैठक सूची';
+
+  @override
+  String get addNewClusterMeeting => 'नई क्लस्टर बैठक जोड़ें';
+
+  @override
+  String get facilitatorNotSpecified => 'सुविधादाता निर्दिष्ट नहीं किया गया';
+
+  @override
+  String get clusterMeetings => 'क्लस्टर बैठकें';
+
+  @override
+  String get ashaFacilitatorClusterMeeting => 'आशा सुविधादाता क्लस्टर बैठक';
+
+  @override
+  String get phcName => 'पी.एच.सी का नाम';
+
+  @override
+  String get decisionTakenDuringMeeting => 'बैठक के दौरान लिया गया निर्णय';
+
+  @override
+  String get discussionSubTopicProgram => 'चर्चा का उप विषय/कार्यक्रम';
+
+  @override
+  String get discussionTopicProgram => 'चर्चा का विषय/कार्यक्रम';
+
+  @override
+  String get selectTopics => 'विषय चुनें';
+
+  @override
+  String get clusterMeetingsCountThisMonth => 'इस महीने आयोजित क्लस्टर बैठकों की संख्या';
+
+  @override
+  String get noOfASHAAbsentInThisMeeting => 'इस बैठक में अनुपस्थित आशाओं की संख्या';
+
+  @override
+  String get ashaPresentCount => 'इस बैठक में उपस्थित आशाओं की संख्या';
+
+  @override
+  String get totalAshaUnderFacilitator => 'सुविधादाता के अंतर्गत कुल आशाओं की संख्या';
+
+  @override
+  String get noOfHours => 'घंटों की संख्या';
+
+  @override
+  String get toTime => 'तक (HH:MM)';
+
+  @override
+  String get ashaInchargeName => 'आशा प्रभारी का नाम';
+
+  @override
+  String get ashaFacilitatorName => 'आशा फैसिलिटेटर का नाम';
+
+  @override
+  String get subcenterName => 'उपकेंद्र का नाम';
+
+  @override
+  String get awwName => 'आँगनवाड़ी कार्यकर्ता का नाम';
+
+  @override
+  String get awcNumber => 'आँगनवाड़ी केंद्र संख्या';
+
+  @override
+  String get villageName => 'गाँव का नाम';
+
+  @override
+  String get wardName => 'वार्ड का नाम';
+
+  @override
+  String get wardNumber => 'वार्ड क्रमांक';
+
+  @override
+  String get blockName => 'ब्लॉक का नाम';
+
+  @override
+  String get dateOfMeeting => 'बैठक की तिथि';
+
+  @override
+  String get day => 'दिन';
+
+  @override
+  String get selectDay => 'दिन चुनें';
+
+  @override
+  String get fromTime => 'से (HH:MM)';
+
+  @override
+  String get selectDiscussionTopics => 'चर्चा विषय चुनें';
+
+  @override
+  String get selectMonthYear => 'माह और वर्ष चुनें';
+
+  @override
+  String get toTimeLabel => 'समय तक';
+
+  @override
+  String get fromTimeLabel => 'समय से';
+
+  @override
+  String get monday => 'सोमवार';
+
+  @override
+  String get tuesday => 'मंगलवार';
+
+  @override
+  String get wednesday => 'बुधवार';
+
+  @override
+  String get thursday => 'गुरुवार';
+
+  @override
+  String get friday => 'शुक्रवार';
+
+  @override
+  String get saturday => 'शनिवार';
+
+  @override
+  String get sunday => 'रविवार';
+
+  @override
+  String get immunization => 'टीकाकरण';
+
+  @override
+  String get deliveries => 'प्रसव';
+
+  @override
+  String get pnc => 'पीएनसी (प्रसवोत्तर देखभाल)';
+
+  @override
+  String get maternalChildHealth => 'मातृ एवं शिशु स्वास्थ्य';
+
+  @override
+  String get homeVisit => 'गृह भ्रमण';
+
+  @override
+  String get newBornCare => 'नवजात शिशु देखभाल';
+
+  @override
+  String get deaths => 'मृत्यु';
+
+  @override
+  String get adolescentHealth => 'किशोर स्वास्थ्य';
+
+  @override
+  String get familyPlanning => 'परिवार नियोजन';
+
+  @override
+  String get otherPublicHealthProgram => 'अन्य जन स्वास्थ्य कार्यक्रम';
+
+  @override
+  String get administrative => 'प्रशासनिक';
+
+  @override
+  String get trainingSupport => 'प्रशिक्षण एवं समर्थन';
+
+  @override
+  String get districtPatna => 'पटना';
+
+  @override
+  String get districtManer => 'मनियर';
+
+  @override
+  String get categoryANC => 'एएनसी';
+
+  @override
+  String get categoryPNC => 'पीएनसी';
+
+  @override
+  String get categoryRI => 'आरआई';
+
+  @override
+  String get enter10DigitNumber => '10 अंकों का नंबर दर्ज करें';
+
+  @override
+  String get viewRawData => 'रॉ डेटा देखें (कंसोल में जांचें)';
+
+  @override
+  String get searchResults => 'खोज परिणाम';
+
+  @override
+  String get noNotificationsFound => 'कोई सूचनाएँ नहीं मिलीं।';
 }

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 import '../../core/widgets/AppHeader/AppHeader.dart';
 import '../../data/Database/local_storage_dao.dart';
+import '../../l10n/app_localizations.dart';
 import 'ClusterMeetingScreenForm.dart';
 
 class ClusterMeetingScreen extends StatefulWidget {
@@ -95,9 +96,11 @@ class _ClusterMeetingScreenState extends State<ClusterMeetingScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: "ASHA Facilitator Cluster Meeting List",
+        screenTitle:  l10n?.ashaFacilitatorClusterMeetingList ?? "ASHA Facilitator Cluster Meeting List",
         showBack: true,
       ),
 
@@ -142,7 +145,7 @@ class _ClusterMeetingScreenState extends State<ClusterMeetingScreen> {
               ),
             ),
             child:  Text(
-              "ADD NEW CLUSTER MEETING",
+             l10n?.addNewClusterMeeting ??  "ADD NEW CLUSTER MEETING",
               style: TextStyle(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w600,
@@ -157,6 +160,7 @@ class _ClusterMeetingScreenState extends State<ClusterMeetingScreen> {
 
   Widget _meetingCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
 
     return InkWell(  // Makes it clickable with ripple effect
       borderRadius: BorderRadius.circular(4),
@@ -222,9 +226,9 @@ class _ClusterMeetingScreenState extends State<ClusterMeetingScreen> {
                 children: [
                   _rowSingle(data["facilitator"].toString().isNotEmpty
                       ? data["facilitator"]
-                      : "Facilitator not specified"),
+                      : (l10n?.facilitatorNotSpecified ?? "Facilitator not specified")),
                   const SizedBox(height: 4),
-                  _row("Date:", data["date"]),
+                  _row("${l10n?.dateLabel ?? "Date"}:", data["date"]),
                 ],
               ),
             ),

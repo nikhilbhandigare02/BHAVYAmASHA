@@ -407,10 +407,8 @@ class RegisterNewHouseholdBloc
               }
 
 
-              // --- INSERT SPOUSE BENEFICIARY IF MARRIED & SPOUSE NAME PRESENT ---
               if (hasSpouse && spouseKey != null) {
                 try {
-
                   Map<String, dynamic> spDetails = {};
                   final spRaw = headForm['spousedetails'];
                   if (spRaw is Map) {
@@ -446,17 +444,17 @@ class RegisterNewHouseholdBloc
                           ? 'Male'
                           : null),
                   'occupation': spDetails['occupation'] ?? headForm['sp_occupation'],
-                  'otherOccupation': spDetails['otherOccupation'] ?? headForm['sp_otherOccupation'],
+                  'other_occupation': spDetails['otherOccupation'] ?? headForm['sp_otherOccupation'],
                   'education': spDetails['education'] ?? headForm['sp_education'],
                   'religion': spDetails['religion'] ?? headForm['sp_religion'],
-                  'otherReligion': spDetails['otherReligion'] ?? headForm['sp_otherReligion'],
+                  'other_religion': spDetails['otherReligion'] ?? headForm['sp_otherReligion'],
                   'category': spDetails['category'] ?? headForm['sp_category'],
-                  'otherCategory': spDetails['otherCategory'] ?? headForm['sp_otherCategory'],
+                  'other_category': spDetails['otherCategory'] ?? headForm['sp_otherCategory'],
                   'abhaAddress': spDetails['abhaAddress'] ?? headForm['sp_abhaAddress'],
                   'abhaNumber': spDetails['abhaNumber'] ?? headForm['sp_abhaNumber'],
                   'mobileOwner': spDetails['mobileOwner'] ?? headForm['sp_mobileOwner'],
                   'mobileNo': spDetails['mobileNo'] ?? headForm['sp_mobileNo'],
-                  'mobileOwnerOtherRelation': spDetails['mobileOwnerOtherRelation'] ?? headForm['sp_mobileOwnerOtherRelation'],
+                  'mobile_owner_relation': spDetails['mobileOwnerOtherRelation'] ?? headForm['sp_mobileOwnerOtherRelation'],
                   'bankAcc': spDetails['bankAcc'] ?? headForm['sp_bankAcc'],
                   'ifsc': spDetails['ifsc'] ?? headForm['sp_ifsc'],
                   'voterId': spDetails['voterId'] ?? headForm['sp_voterId'],
@@ -952,15 +950,15 @@ class RegisterNewHouseholdBloc
                   'bankAcc': member['bankAcc'],
                   'ifsc': member['ifsc'],
                   'occupation': member['occupation'],
-                  'otherOccupation': member['otherOccupation'],
+                  'other_occupation': member['otherOccupation'],
                   'education': member['education'],
                   'religion': member['religion'],
-                  'otherReligion': member['otherReligion'],
+                  'other_religion': member['otherReligion'],
                   'category': member['category'],
-                  'otherCategory': member['otherCategory'],
+                  'other_category': member['otherCategory'],
                   'abhaAddress': member['abhaAddress'],
                   'mobileOwner': member['mobileOwner'],
-                  'mobileOwnerRelation': member['mobileOwnerRelation'],
+                  'mobile_owner_relation': member['mobileOwnerRelation'],
                   'mobileNo': member['mobileNo'],
                   'voterId': member['voterId'],
                   'rationId': member['rationId'],
@@ -1204,10 +1202,10 @@ class RegisterNewHouseholdBloc
                           'religion': spMap['religion'],
                           'category': spMap['category'],
                           'antraDate': spMap['antraDate'],
-                          'mobileOwnerOtherRelation': spMap['mobileOwnerOtherRelation'],
-                          'otherCategory': spMap['otherCategory'],
-                          'otherReligion': spMap['otherReligion'],
-                          'otherOccupation': spMap['otherOccupation'],
+                          'mobile_owner_relation': spMap['mobileOwnerOtherRelation'],
+                          'other_category': spMap['otherCategory'],
+                          'other_religion': spMap['otherReligion'],
+                          'other_occupation': spMap['otherOccupation'],
                           'abhaAddress': spMap['abhaAddress'],
                           'mobileOwner': spMap['mobileOwner'],
                           'mobileNo': spMap['mobileNo'],

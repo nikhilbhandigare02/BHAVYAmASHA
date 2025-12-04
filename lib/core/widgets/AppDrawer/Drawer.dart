@@ -153,7 +153,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    return Drawer(
+    final width = MediaQuery.of(context).size.width;
+    final bool isTablet = width >= 600;
+
+// Set responsive drawer width
+    final double drawerWidth = isTablet ? width * 0.55 : width * 0.75;
+    return SizedBox(
+        width: drawerWidth,
+        child: Drawer(
       backgroundColor: Colors.white,
       child: SafeArea(
         bottom: true,
@@ -381,7 +388,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             )],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildMenuItem(BuildContext context, String imagePath, String title, {VoidCallback? onTap}) {

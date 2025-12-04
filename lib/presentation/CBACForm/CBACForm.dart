@@ -90,7 +90,7 @@ class _CbacformState extends State<Cbacform> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    title: Text(l10n?.cbacConsentTitle ?? 'Consent Form', style: TextStyle(fontSize: 15.sp),),
+                    title: Text(l10n?.cbacConsentTitle ?? 'Consent Form', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),),
                     content: Text(
                       l10n?.cbacConsentBody ?? 'I have been explained by the ASHA, the purpose for which the information and measurement findings is being collected from me, in a language I understand and I give my consent to collect the information and measurement findings on my personal health profile.',
                       style:  TextStyle(fontSize: 15.sp),
@@ -306,35 +306,6 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
   }
 
 
-  String _fixJsonString(String invalidJson) {
-    try {
-      // Add quotes around keys and string values
-      String fixedJson = invalidJson
-          .replaceAllMapped(RegExp(r'(\w+):'), (match) => '"${match.group(1)}":')
-          .replaceAllMapped(RegExp(r':\s*([^",{}\[\]]+?)\s*(?=[,}])'), (match) {
-        final value = match.group(1)!.trim();
-        if (value == 'null' || value.isEmpty) {
-          return ': null';
-        }
-        // Check if it's a number
-        if (double.tryParse(value) != null) {
-          return ': $value';
-        }
-        // Check if it's a boolean
-        if (value == 'true' || value == 'false') {
-          return ': $value';
-        }
-        // It's a string, wrap in quotes
-        return ': "$value"';
-      });
-
-      debugPrint('🛠️ Fixed JSON: $fixedJson');
-      return fixedJson;
-    } catch (e) {
-      debugPrint('❌ Error fixing JSON: $e');
-      return invalidJson;
-    }
-  }
 
   Future<void> _loadUserData() async {
     try {
@@ -348,55 +319,59 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
       if (user != null) {
         debugPrint('✅ Found current user: ${user['user_name']}');
 
-        // Print the details string to see exact format
-        debugPrint('📦 DETAILS STRING: ${user['details']}');
-
+        // Handle the case where details might be a string or already a map
         Map<String, dynamic> userDetails = {};
-
-        // Parse the details field which contains the nested data
-        if (user['details'] != null && user['details'] is String) {
-          try {
-            String detailsString = user['details']!.toString().trim();
-
-            // Fix the invalid JSON format
-            String fixedJson = _fixJsonString(detailsString);
-
-            userDetails = jsonDecode(fixedJson);
-
-            debugPrint('📋 SUCCESSFULLY PARSED DETAILS:');
-            userDetails.forEach((key, value) {
-              debugPrint('   $key: $value (${value.runtimeType})');
-            });
-          } catch (e) {
-            debugPrint('❌ Error parsing user details: $e');
-            // Try alternative parsing method
-            _tryAlternativeParsing(user['details']!.toString());
+        
+        if (user['details'] != null) {
+          if (user['details'] is Map) {
+            userDetails = Map<String, dynamic>.from(user['details'] as Map);
+          } else if (user['details'] is String) {
+            try {
+              // Try to parse the string as JSON
+              userDetails = jsonDecode(user['details'] as String) as Map<String, dynamic>;
+            } catch (e) {
+              debugPrint('❌ Error parsing user details as JSON: $e');
+              // Try alternative parsing method if JSON parsing fails
+              _tryAlternativeParsing(user['details']!.toString());
+              return;
+            }
           }
         }
 
-        // Extract values using the exact structure from your console output
+        // Extract values from the provided JSON structure
         final name = userDetails['name'] is Map ? userDetails['name'] as Map<String, dynamic> : {};
-        final workingLocation = userDetails['working_location'] is Map ? userDetails['working_location'] as Map<String, dynamic> : {};
+        final workingLocation = userDetails['working_location'] is Map 
+            ? userDetails['working_location'] as Map<String, dynamic> 
+            : {};
 
-        // Extract name fields
+        // Extract name components
         final firstName = name['first_name']?.toString()?.trim() ?? '';
+        final middleName = name['middle_name']?.toString()?.trim() ?? '';
         final lastName = name['last_name']?.toString()?.trim() ?? '';
-        final fullName = '$firstName $lastName'.trim();
+        
+        // Construct full name with middle name if available
+        String fullName = '';
+        if (middleName.isNotEmpty) {
+          fullName = '$firstName $middleName $lastName'.trim();
+        } else {
+          fullName = '$firstName $lastName'.trim();
+        }
 
-        // Extract working location fields
+        // Extract location details
         final hscName = workingLocation['hsc_name']?.toString()?.trim() ?? '';
         final district = workingLocation['district']?.toString()?.trim() ?? '';
         final block = workingLocation['block']?.toString()?.trim() ?? '';
 
-        debugPrint('🎯 EXTRACTED VALUES FROM DETAILS:');
+        debugPrint('🎯 EXTRACTED VALUES FROM USER DETAILS:');
         debugPrint('   First Name: "$firstName"');
+        if (middleName.isNotEmpty) debugPrint('   Middle Name: "$middleName"');
         debugPrint('   Last Name: "$lastName"');
         debugPrint('   Full Name: "$fullName"');
         debugPrint('   HSC Name: "$hscName"');
         debugPrint('   District: "$district"');
         debugPrint('   Block: "$block"');
 
-        // Use the actual name from details instead of username
+        // Use the actual name from details or fallback to username
         final finalAshaName = fullName.isNotEmpty ? fullName : user['user_name']?.toString()?.trim() ?? '';
         final finalHscName = hscName;
         final finalDistrict = district;
@@ -741,7 +716,7 @@ class _PartATab extends StatelessWidget {
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5.sp)),
+                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
                 Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
               ],
             );
@@ -770,8 +745,8 @@ class _PartATab extends StatelessWidget {
                     width: 325,
                     child: ApiDropdown<String>(
                       labelText: question,
-                      hintText: '',
-                      labelFontSize: 15.sp,
+                      hintText: 'Select Option',
+                      labelFontSize: 13.sp,
                       items: items,
                       getLabel: (s) => s,
                       value: value,
@@ -783,7 +758,7 @@ class _PartATab extends StatelessWidget {
                   rowScore(score),
                 ],
               ),
-              const SizedBox(height: 6),
+              // const SizedBox(height: 6),
               const Divider(height: 0.5),
             ],
           );
@@ -811,7 +786,6 @@ class _PartATab extends StatelessWidget {
           l10n.cbacA_waistGT90,
         ];
 
-        // Compute scores from localized selections via indices
         final idxAge = age == null ? -1 : itemsAge.indexOf(age);
         final scoreAge = switch (idxAge) { 1 => 1, 2 => 2, 3 => 3, _ => 0 };
         final idxTob = tobacco == null ? -1 : itemsTobacco.indexOf(tobacco);
@@ -912,7 +886,7 @@ class _PartBTab extends StatelessWidget {
           child: Center(
             child: Text(
               text,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
             ),
           ),
         );
@@ -928,8 +902,8 @@ class _PartBTab extends StatelessWidget {
                   builder: (context, state) {
                     return ApiDropdown<String>(
                       labelText: question,
-                      hintText: '',
-                      labelFontSize: 15.sp,
+                      hintText: 'Select Option',
+                      labelFontSize: 13.sp,
                       items: [l10n.yes, l10n.no],
                       getLabel: (s) => s,
                       value: state.data[keyPath],
@@ -943,7 +917,7 @@ class _PartBTab extends StatelessWidget {
               const SizedBox(width: 28), // Placeholder for score to maintain alignment
             ],
           ),
-          const SizedBox(height: 4),
+          // const SizedBox(height: 4),
           const Divider(height: 0.5),
         ];
 
@@ -1021,14 +995,174 @@ class _PartCTab extends StatefulWidget {
   State<_PartCTab> createState() => _PartCTabState();
 }
 
+// In CBACForm.dart, replace the existing _PartCTabState class with this:
+
 class _PartCTabState extends State<_PartCTab> {
-  bool _fuelExpanded = false;
-  bool _businessExpanded = false;
+  Future<void> _showMultiSelectDialog({
+    required BuildContext context,
+    required String title,
+    required List<String> options,
+    required Set<String> selected,
+    required Function(Set<String>) onSelected,
+  }) async {
+    final current = Set<String>.from(selected);
+    final l10n = AppLocalizations.of(context)!;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+          backgroundColor: Colors.white,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style:  TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14.sp,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Divider(
+                color: Colors.grey.shade700,
+                thickness: 0.8,
+                height: 0,
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final option in options)
+                  StatefulBuilder(
+                    builder: (ctx2, setStateDialog) {
+                      final isChecked = current.contains(option);
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 6.0),
+                        child: Transform.scale(
+                          scale: 1.0,
+                          child: CheckboxListTile(
+                            dense: true,
+                            visualDensity: const VisualDensity(
+                              vertical: -2,
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              option,
+                              style:  TextStyle(fontSize: 15.sp),
+                            ),
+                            value: isChecked,
+                            controlAffinity: ListTileControlAffinity.leading,
+                            onChanged: (checked) {
+                              setStateDialog(() {
+                                if (checked == true) {
+                                  current.add(option);
+                                } else {
+                                  current.remove(option);
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel ?? 'Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                onSelected(current);
+                Navigator.of(ctx).pop();
+              },
+              child: Text(l10n.ok ?? 'OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMultiSelectField({
+    required BuildContext context,
+    required String label,
+    required String value,
+    required List<String> options,
+    required Function(String) onChanged,
+  }) {
+    final selected = value.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
+    final displayText = selected.isEmpty ? 'Select Option' : selected.join(', ');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 4),
+        InkWell(
+          onTap: () async {
+            await _showMultiSelectDialog(
+              context: context,
+              title: label,
+              options: options,
+              selected: selected,
+              onSelected: (newSelection) {
+                final joined = newSelection.join(', ');
+                onChanged(joined);
+              },
+            );
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  displayText,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    color: selected.isEmpty ? Colors.grey.shade700 : Colors.black87,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Icon(
+                Icons.arrow_drop_down,
+                color: Colors.grey.shade600,
+              ),
+            ],
+          ),
+        ),
+        const Divider(  // Added divider here
+          height: 1,
+          thickness: 0.5,
+          color: Colors.grey,  // You can adjust the color as needed
+        ),
+        // const SizedBox(height: 8),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<CbacFormBloc>();
     final l10n = AppLocalizations.of(context)!;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       children: [
@@ -1047,14 +1181,18 @@ class _PartCTabState extends State<_PartCTab> {
             ],
           ),
           child: Center(
-            child: Text(l10n.cbacHeaderLungRisk, style: const TextStyle(fontWeight: FontWeight.w600)),
+            child: Text(
+              l10n.cbacHeaderLungRisk,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
 
-        // Cooking fuel multi-select dropdown with checkboxes inside
+        // Cooking fuel multi-select
         BlocBuilder<CbacFormBloc, CbacFormState>(
-          buildWhen: (previous, current) => previous.data['partC.cookingFuel'] != current.data['partC.cookingFuel'],
+          buildWhen: (previous, current) =>
+          previous.data['partC.cookingFuel'] != current.data['partC.cookingFuel'],
           builder: (context, state) {
             final allOptions = [
               l10n.firewod,
@@ -1065,186 +1203,49 @@ class _PartCTabState extends State<_PartCTab> {
               l10n.cbacC_fuelKerosene,
             ];
 
-            final raw = (state.data['partC.cookingFuel'] ?? '').toString();
-            final selected = raw.isEmpty
-                ? <String>{}
-                : raw.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
-
-            final summary = selected.isEmpty ? (l10n.select) : selected.join(', ');
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.cbacC_fuelQ,
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      _fuelExpanded = !_fuelExpanded;
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: Colors.white,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            summary,
-                            style: const TextStyle(color: Colors.black87),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Icon(
-                          _fuelExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                          color: Colors.black54,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (_fuelExpanded) ...[
-                  const SizedBox(height: 4),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Column(
-                      children: [
-                        ...allOptions.map((opt) {
-                          final checked = selected.contains(opt);
-                          return CheckboxListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            dense: true,
-                            title: Text(opt),
-                            value: checked,
-                            onChanged: (val) {
-                              final next = Set<String>.from(selected);
-                              if (val == true) {
-                                next.add(opt);
-                              } else {
-                                next.remove(opt);
-                              }
-                              final joined = next.join(', ');
-                              bloc.add(CbacFieldChanged('partC.cookingFuel', joined));
-                            },
-                          );
-                        }).toList(),
-                      ],
-                    ),
-                  ),
-                ],
-                const Divider(height: 0.5),
-              ],
+            return _buildMultiSelectField(
+              context: context,
+              label: l10n.cbacC_fuelQ,
+              value: state.data['partC.cookingFuel']?.toString() ?? '',
+              options: allOptions,
+              onChanged: (value) {
+                bloc.add(CbacFieldChanged('partC.cookingFuel', value));
+              },
             );
           },
         ),
 
-        // Business/occupation risk multi-select dropdown with checkboxes inside
+        const SizedBox(height: 16),
+
+        // Business/occupation risk multi-select
         BlocBuilder<CbacFormBloc, CbacFormState>(
-          buildWhen: (previous, current) => previous.data['partC.businessRisk'] != current.data['partC.businessRisk'],
+          buildWhen: (previous, current) =>
+          previous.data['partC.businessRisk'] != current.data['partC.businessRisk'],
           builder: (context, state) {
             final allOptions = [
               l10n.cbacC_workingPollutedIndustries,
               l10n.burningOfGrabage,
               l10n.burningCrop,
               l10n.cbacC_workingSmokeyFactory,
+              // l10n.cbacC_workingMines,
+              // l10n.cbacC_workingConstruction,
+              // l10n.cbacC_workingBrickKilns,
+              // l10n.cbacC_workingStoneQuarries,
+              // l10n.cbacC_workingCementIndustries,
+              // l10n.cbacC_workingCottonIndustries,
+              // l10n.cbacC_workingChemicalIndustries,
+              // l10n.cbacC_workingTextileIndustries,
+              // l10n.cbacC_workingOtherIndustries,
             ];
 
-            final raw = (state.data['partC.businessRisk'] ?? '').toString();
-            final selected = raw.isEmpty
-                ? <String>{}
-                : raw.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
-
-            final summary = selected.isEmpty ? (l10n.select) : selected.join(', ');
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.cbacC_businessRiskQ,
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      _businessExpanded = !_businessExpanded;
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: Colors.white,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            summary,
-                            style: const TextStyle(color: Colors.black87),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Icon(
-                          _businessExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                          color: Colors.black54,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (_businessExpanded) ...[
-                  const SizedBox(height: 4),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        ...allOptions.map((opt) {
-                          final checked = selected.contains(opt);
-                          return CheckboxListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            dense: true,
-                            title: Text(opt),
-                            value: checked,
-                            onChanged: (val) {
-                              final next = Set<String>.from(selected);
-                              if (val == true) {
-                                next.add(opt);
-                              } else {
-                                next.remove(opt);
-                              }
-                              final joined = next.join(', ');
-                              bloc.add(CbacFieldChanged('partC.businessRisk', joined));
-                            },
-                          );
-                        }).toList(),
-                      ],
-                    ),
-                  ),
-                ],
-                const Divider(height: 0.5),
-              ],
+            return _buildMultiSelectField(
+              context: context,
+              label: l10n.cbacC_businessRiskQ,
+              value: state.data['partC.businessRisk']?.toString() ?? '',
+              options: allOptions,
+              onChanged: (value) {
+                bloc.add(CbacFieldChanged('partC.businessRisk', value));
+              },
             );
           },
         ),
@@ -1282,8 +1283,8 @@ class _PartDTab extends StatelessWidget {
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600,fontSize: 14.sp)),
-                Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
+                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600,fontSize: 15.sp)),
+                Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp)),
               ],
             );
 
@@ -1291,7 +1292,7 @@ class _PartDTab extends StatelessWidget {
               width: 28,
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Text(v == null ? '-' : '${scoreFromValue(v)}', style: const TextStyle(color: Colors.black54)),
+                child: Text(v == null ? '-' : '${scoreFromValue(v)}', style:  TextStyle(color: Colors.black54, fontSize: 14.sp)),
               ),
             );
 
@@ -1305,8 +1306,8 @@ class _PartDTab extends StatelessWidget {
                     width: 300,
                     child: ApiDropdown<String>(
                       labelText: question,
-                      hintText: '',
-                      labelFontSize: 15.sp,
+                      hintText: 'Select Option',
+                      labelFontSize: 13.sp,
                       items: options,
                       getLabel: (s) => s,
                       value: value,
@@ -1318,7 +1319,7 @@ class _PartDTab extends StatelessWidget {
                   scoreBox(value),
                 ],
               ),
-              const SizedBox(height: 6),
+              // const SizedBox(height: 6),
               const Divider(height: 0.5),
             ],
           );

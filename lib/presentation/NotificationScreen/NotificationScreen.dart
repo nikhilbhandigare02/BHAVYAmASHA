@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../core/config/themes/CustomColors.dart';
 import '../../data/Database/local_storage_dao.dart';
 import '../../data/repositories/NotificationRepository/Notification_Repository.dart';
+import '../../l10n/app_localizations.dart';
 
 class Notificationscreen extends StatefulWidget {
   const Notificationscreen({super.key});
@@ -58,6 +59,8 @@ class _NotificationscreenState extends State<Notificationscreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return WillPopScope(
       onWillPop: () async {
         Navigator.pop(context);
@@ -67,7 +70,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: AppColors.primary,
-          title: const Text("Notifications", style: TextStyle(color: Colors.white)),
+          title:  Text(l10n.notifications ?? "Notifications", style: TextStyle(color: Colors.white)),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.pop(context),
@@ -93,7 +96,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
             }).toList();
 
             if (notifications.isEmpty) {
-              return const Center(child: Text("No notifications found."));
+              return  Center(child: Text(l10n.noNotificationsFound ?? "No notifications found."));
             }
 
             return ListView.builder(
@@ -148,6 +151,7 @@ class _NotificationCardState extends State<NotificationCard> {
   @override
   Widget build(BuildContext context) {
     final bool needReadMore = widget.content.length > 80;
+    final l10n = AppLocalizations.of(context)!;
 
     final String formattedDate =
     DateFormat('dd-MM-yyyy').format(widget.date);
@@ -218,7 +222,7 @@ class _NotificationCardState extends State<NotificationCard> {
                 GestureDetector(
                   onTap: () => setState(() => isExpanded = !isExpanded),
                   child: Text(
-                    isExpanded ? "Read less" : "Read more",
+                    isExpanded ?(l10n.readLess ?? "Read less") : (l10n.readMore ?? "Read more"),
                     style:  TextStyle(
                       color:Colors.grey[500],
                       fontSize: 12,

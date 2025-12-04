@@ -301,7 +301,7 @@ class _FeatureCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(1.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start, // ✅ No forced spacing
@@ -321,7 +321,7 @@ class _FeatureCard extends StatelessWidget {
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13.sp,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ],

@@ -261,13 +261,13 @@ class _VideoCardState extends State<VideoCard> {
               ),
               const SizedBox(height: 12),
               Text(
-                l10n!.failedToLoadVideo ?? 'Failed to load video',
+                l10n?.failedToLoadVideo ?? 'Failed to load video',
                 style: GoogleFonts.roboto(fontSize: 14.sp, color: Colors.red),
               ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
                 icon: const Icon(Icons.refresh, size: 18),
-                label:  Text(l10n.tryAgain ?? 'Try Again'),
+                label:  Text(l10n?.tryAgain ?? 'Try Again'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1E88E5),
                   foregroundColor: Colors.white,
