@@ -20,5 +20,7 @@ class Endpoints {
   static const String getNotification = '${BaseUrls.baseUrl}/get_app_announcement_data';
   static const String searchBeneficiary = '${BaseUrls.baseUrl}/search_beneficiary5';
   static const String changePassword = '${BaseUrls.baseUrl}/change_password';
+  static const String getRCHDataForID = '${BaseUrls.baseUrl}/api/ccc/getRCHDataForID';
+
 
 }

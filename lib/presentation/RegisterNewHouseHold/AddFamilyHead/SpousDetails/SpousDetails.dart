@@ -13,10 +13,10 @@ import '../../../../core/config/routes/Route_Name.dart';
 import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/widgets/SnackBar/app_snackbar.dart';
 import '../../../../data/Database/local_storage_dao.dart';
+import '../../../../data/repositories/RegisterNewHouseHoldController/register_new_house_hold.dart';
 import 'bloc/spous_bloc.dart';
 
 final GlobalKey<FormState> spousFormKey = GlobalKey<FormState>();
-
 String? spousLastFormError;
 
 void clearSpousFormError() {
@@ -24,12 +24,119 @@ void clearSpousFormError() {
 }
 
 String? captureSpousError(String? message) {
-  if (message != null && spousLastFormError == null) {
+  if (message != null) {
+    // Always update the error message to show the most recent one
     spousLastFormError = message;
+    return message;
   }
-  return message;
+  return null;
+}
+bool validateAllSpousFields(SpousState state) {
+  final form = spousFormKey.currentState;
+
+  if (form == null) return false;
+
+  // Clear previous errors
+  spousLastFormError = null;
+
+  // Validate normal form fields
+  final isFormValid = form.validate();
+
+  // ===== Custom Manual Validations ======
+
+  if (state.mobileOwner == null || state.mobileOwner!.isEmpty) {
+    spousLastFormError = 'Whose mobile number is required';
+    scrollToFirstError();
+    return false;
+  }
+
+  if (state.mobileOwner == 'Other' &&
+      (state.mobileOwnerOtherRelation == null ||
+          state.mobileOwnerOtherRelation!.trim().isEmpty)) {
+    spousLastFormError =
+    'Please specify relation with mobile number holder';
+    scrollToFirstError();
+    return false;
+  }
+
+  if (state.mobileOwner != 'Family Head') {
+    if (state.mobileNo == null || state.mobileNo!.trim().isEmpty) {
+      spousLastFormError = 'Mobile number is required';
+      scrollToFirstError();
+      return false;
+    }
+    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(state.mobileNo!)) {
+      spousLastFormError =
+      'Mobile number must be 10 digits and start with 6-9';
+      scrollToFirstError();
+      return false;
+    }
+  }
+
+  if (state.gender == 'Female' &&
+      (state.isPregnant == null || state.isPregnant!.isEmpty)) {
+    spousLastFormError = 'Please select if the woman is pregnant';
+    scrollToFirstError();
+    return false;
+  }
+
+  if (state.isPregnant == 'Yes') {
+    if (state.lmp == null) {
+      spousLastFormError = 'Last menstrual period date is required';
+      scrollToFirstError();
+      return false;
+    }
+    if (state.edd == null) {
+      spousLastFormError = 'Expected delivery date is required';
+      scrollToFirstError();
+      return false;
+    }
+  }
+
+  // All validations passed
+  return isFormValid;
 }
 
+void scrollToFirstError() {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final errorField = _findFirstErrorField();
+    if (errorField != null && errorField.context != null) {
+      Scrollable.ensureVisible(
+        errorField.context!,
+        alignment: 0.1,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  });
+}
+
+FormFieldState<dynamic>? _findFirstErrorField() {
+  FormFieldState<dynamic>? firstErrorField;
+  BuildContext? formContext = spousFormKey.currentContext;
+
+  if (formContext == null) return null;
+
+  void visitElement(Element element) {
+    if (firstErrorField != null) return;
+
+    if (element.widget is FormField) {
+      final formField = element as StatefulElement;
+      final field = formField.state as FormFieldState<dynamic>?;
+
+      if (field != null && field.hasError) {
+        firstErrorField = field;
+        return;
+      }
+    }
+
+    element.visitChildren(visitElement);
+  }
+
+  // Start visiting from the form's context
+  formContext.visitChildElements(visitElement);
+  return firstErrorField;
+}
 class Spousdetails extends StatefulWidget {
   final SpousState? initial;
   final String? headMobileOwner;
@@ -37,11 +144,11 @@ class Spousdetails extends StatefulWidget {
   final String? hhId;
   final bool isMemberDetails;
   final bool syncFromHead;
-  
+
   const Spousdetails({
-    super.key, 
-    this.initial, 
-    this.headMobileOwner, 
+    super.key,
+    this.initial,
+    this.headMobileOwner,
     this.headMobileNo,
     this.hhId,
     this.isMemberDetails = false,
@@ -103,10 +210,33 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
   }
   final GlobalKey<FormState> _formKey = spousFormKey;
 
-  Widget _section(Widget child) => Padding(
-        padding: EdgeInsets.symmetric(vertical: 0.h),
-        child: child,
+  final RegisterNewHouseHold repository = RegisterNewHouseHold();
+
+  Future<Map<String, dynamic>?> fetchRCHDataForScreen(
+      int rchId, {
+        required int requestFor,
+      }) async {
+    try {
+      print('Calling API: getRCHData(rchId: $rchId, requestFor: $requestFor)');
+
+      final result = await repository.getRCHData(
+        requestFor: requestFor,
+        rchId: rchId,
       );
+
+      print('RCH API Raw Response: $result');
+
+      return result;
+    } catch (e) {
+      print('RCH API Exception: $e');
+      return null;
+    }
+  }
+
+  Widget _section(Widget child) => Padding(
+    padding: EdgeInsets.symmetric(vertical: 0.h),
+    child: child,
+  );
 
 
   final now = DateTime.now();
@@ -166,7 +296,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
     if (widget.syncFromHead) {
       return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
         listenWhen: (previous, current) =>
-            previous.headName != current.headName ||
+        previous.headName != current.headName ||
             previous.spouseName != current.spouseName ||
             previous.gender != current.gender ||
             previous.mobileNo != current.mobileNo ||
@@ -222,8 +352,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
   Widget _buildForm(AppLocalizations l) {
     return Form(
-      key: _formKey,
-      autovalidateMode: AutovalidateMode.always,
+      key: spousFormKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
 
       child: BlocBuilder<SpousBloc, SpousState>(
         builder: (context, state) {
@@ -231,358 +361,380 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
           return ListView(
             padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
             children: [
-                _section(
-                  ApiDropdown<String>(
-                    labelText: l.relationWithFamilyHead,
-                    items: widget.isMemberDetails
-                        ? [
-                      'Self',
-                      'Father',
-                      'Mother',
-                      'Husband',
-                      'Wife',
-                      'Brother',
-                      'Sister',
-                      'Nephew',
-                      'Niece',
-                      'Son',
-                      'Daughter',
-                      'Grand Father',
-                      'Grand Mother',
-                      'Father In Law',
-                      'Mother In Law',
-                      'Grand Son',
-                      'Grand Daughter',
-                      'Son In Law',
-                      'Daughter In Law',
-                      'Other',
-                    ]
-                        : const [
-                      'Husband',
-                      'Wife',
-                    ],
-
-                    getLabel: (s) {
-                      if (!widget.isMemberDetails) {
-                        return s == 'Husband' ? l.husbandLabel : l.wife;
-                      }
-
-                      switch (s) {
-                        case 'Self':
-                          return l.self ?? 'Self';
-                        case 'Father':
-                          return l.father ?? 'Father';
-                        case 'Mother':
-                          return l.mother ?? 'Mother';
-                        case 'Husband':
-                          return  'Husband';
-                        case 'Wife':
-                          return l.wife ?? 'Wife';
-                        case 'Brother':
-                          return 'Brother';
-                        case 'Sister':
-                          return  'Sister';
-                        case 'Nephew':
-                          return  'Nephew';
-                        case 'Niece':
-                          return  'Niece';
-                        case 'Son':
-                          return l.son ?? 'Son';
-                        case 'Daughter':
-                          return l.daughter ?? 'Daughter';
-                        case 'Grand Father':
-                          return  'Grand Father';
-                        case 'Grand Mother':
-                          return  'Grand Mother';
-                        case 'Father In Law':
-                          return l.fatherInLaw ?? 'Father In Law';
-                        case 'Mother In Law':
-                          return l.motherInLaw ?? 'Mother In Law';
-                        case 'Grand Son':
-                          return  'Grand Son';
-                        case 'Grand Daughter':
-                          return  'Grand Daughter';
-                        case 'Son In Law':
-                          return  'Son In Law';
-                        case 'Daughter In Law':
-                          return  'Daughter In Law';
-                        case 'Other':
-                          return l.other ?? 'Other';
-
-                        default:
-                          return s;
-                      }
-                    },
-
-                    value: widget.isMemberDetails
-                        ? state.relation // Use the existing relation or default to first item
-                        : (state.relation == 'Spouse'
-                            ? (state.gender == 'Female' ? 'Husband' : 'Wife')
-                            : (state.relation ?? (state.gender == 'Female' ? 'Husband' : 'Wife'))),
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRelation(v)),
-                  ),
-                ),
-
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
-                _section(
-                  CustomTextField(
-                    labelText: '${l.nameOfMember} *',
-                    hintText: l.nameOfMemberHint,
-                    initialValue: state.memberName,
-                    readOnly: false,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMemberName(v.trim())),
-                    validator: (value) => captureSpousError(Validations.validateNameofMember(l, value)),
-                  ),
-                ),
-
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
-                _section(
-                  CustomTextField(
-                    labelText: l.ageAtMarriage,
-                    hintText: l.ageAtMarriageHint,
-                    keyboardType: TextInputType.number,
-                    initialValue: state.ageAtMarriage,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateAgeAtMarriage(v.trim())),
-                  ),
-                ),
-
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
-                _section(
-                  CustomTextField(
-                    labelText: '${l.spouseName} *',
-                    hintText: l.spouseNameHint,
-                    initialValue: state.spouseName,
-                    readOnly: false,
-                    validator: (value) => captureSpousError(Validations.validateSpousName(l, value)),
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
-                  ),
-                ),
-
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
-                _section(
-                  CustomTextField(
-                    labelText: l.fatherName,
-                    hintText: l.fatherName,
-                    initialValue: state.fatherName,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateFatherName(v.trim())),
-                  ),
-                ),
-
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
-                Row(
-                  children: [
-                    Radio<bool>(
-                      value: true,
-                      groupValue: state.useDob,
-                      onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
-                    ),
-                    Text(l.dobShort, style: TextStyle(fontSize: 14.sp),),
-                    SizedBox(width: 4.w),
-                    Radio<bool>(
-                      value: false,
-                      groupValue: state.useDob,
-                      onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
-                    ),
-                    Text(l.ageApproximate, style: TextStyle(fontSize:14.sp),),
+              _section(
+                ApiDropdown<String>(
+                  key: const ValueKey('relation_with_head'),
+                  labelText: '${l.relationWithFamilyHead} *',
+                  items: widget.isMemberDetails
+                      ? [
+                    'Self',
+                    'Father',
+                    'Mother',
+                    'Husband',
+                    'Wife',
+                    'Brother',
+                    'Sister',
+                    'Nephew',
+                    'Niece',
+                    'Son',
+                    'Daughter',
+                    'Grand Father',
+                    'Grand Mother',
+                    'Father In Law',
+                    'Mother In Law',
+                    'Grand Son',
+                    'Grand Daughter',
+                    'Son In Law',
+                    'Daughter In Law',
+                    'Other',
+                  ]
+                      : const [
+                    'Husband',
+                    'Wife',
                   ],
-                ),
-                if (state.useDob)
-                  _section(
+                  validator: (value) => captureSpousError(
+                    value == null || value.isEmpty ? 'Relation with family head is required' : null,
+                  ),
 
-                      CustomDatePicker(
-                        labelText: '${l.dobLabel} *',
-                        hintText: l.dateHint,
-                        initialDate: state.dob,
-                        firstDate: DateTime(1915),
-                        lastDate: DateTime(now.year - 15, now.month, now.day),
-                        onDateChanged: (date) {
-                          if (date != null) {
-                            context.read<SpousBloc>().add(SpUpdateDob(date));
-                          }
-                        },
-                      )
-                  )
-                else
-                  _section(
+                  getLabel: (s) {
+                    if (!widget.isMemberDetails) {
+                      return s == 'Husband' ? l.husbandLabel : l.wife;
+                    }
+
+                    switch (s) {
+                      case 'Self':
+                        return l.self ?? 'Self';
+                      case 'Father':
+                        return l.father ?? 'Father';
+                      case 'Mother':
+                        return l.mother ?? 'Mother';
+                      case 'Husband':
+                        return  'Husband';
+                      case 'Wife':
+                        return l.wife ?? 'Wife';
+                      case 'Brother':
+                        return 'Brother';
+                      case 'Sister':
+                        return  'Sister';
+                      case 'Nephew':
+                        return  'Nephew';
+                      case 'Niece':
+                        return  'Niece';
+                      case 'Son':
+                        return l.son ?? 'Son';
+                      case 'Daughter':
+                        return l.daughter ?? 'Daughter';
+                      case 'Grand Father':
+                        return  'Grand Father';
+                      case 'Grand Mother':
+                        return  'Grand Mother';
+                      case 'Father In Law':
+                        return l.fatherInLaw ?? 'Father In Law';
+                      case 'Mother In Law':
+                        return l.motherInLaw ?? 'Mother In Law';
+                      case 'Grand Son':
+                        return  'Grand Son';
+                      case 'Grand Daughter':
+                        return  'Grand Daughter';
+                      case 'Son In Law':
+                        return  'Son In Law';
+                      case 'Daughter In Law':
+                        return  'Daughter In Law';
+                      case 'Other':
+                        return l.other ?? 'Other';
+
+                      default:
+                        return s;
+                    }
+                  },
+
+                  value: widget.isMemberDetails
+                      ? state.relation // Use the existing relation or default to first item
+                      : (state.relation == 'Spouse'
+                      ? (state.gender == 'Female' ? 'Husband' : 'Wife')
+                      : (state.relation ?? (state.gender == 'Female' ? 'Husband' : 'Wife'))),
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRelation(v)),
+                ),
+              ),
+
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
+              _section(
+                CustomTextField(
+                  key: const ValueKey('member_name'),
+                  labelText: '${l.nameOfMember} *',
+                  hintText: l.nameOfMemberHint,
+                  initialValue: state.memberName,
+                  readOnly: false,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMemberName(v.trim())),
+                  // validator: (value) => captureSpousError(
+                  //   value == null || value.trim().isEmpty ? 'Name of member is required' : null,
+                  // ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Name of member is required';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
+              _section(
+                CustomTextField(
+                  labelText: l.ageAtMarriage,
+                  hintText: l.ageAtMarriageHint,
+                  keyboardType: TextInputType.number,
+                  initialValue: state.ageAtMarriage,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateAgeAtMarriage(v.trim())),
+                ),
+              ),
+
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
+              _section(
+                CustomTextField(
+                  key: const ValueKey('spouse_name'),
+                  labelText: '${l.spouseName} *',
+                  hintText: l.spouseNameHint,
+                  initialValue: state.spouseName,
+                  readOnly: false,
+                  // validator: (value) => captureSpousError(
+                  //   value == null || value.trim().isEmpty ? 'Spouse name is required' : null,
+                  // ),
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Spouse name is required';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+  
+
+              _section(
+                CustomTextField(
+                  labelText: l.fatherName,
+                  hintText: l.fatherName,
+                  initialValue: state.fatherName,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateFatherName(v.trim())),
+                ),
+              ),
+
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
+              Row(
+                children: [
+                  Radio<bool>(
+                    value: true,
+                    groupValue: state.useDob,
+                    onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
+                  ),
+                  Text(l.dobShort, style: TextStyle(fontSize: 14.sp),),
+                  SizedBox(width: 4.w),
+                  Radio<bool>(
+                    value: false,
+                    groupValue: state.useDob,
+                    onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
+                  ),
+                  Text(l.ageApproximate, style: TextStyle(fontSize:14.sp),),
+                ],
+              ),
+              if (state.useDob)
+                _section(
+
+                    CustomDatePicker(
+                      labelText: '${l.dobLabel} *',
+                      hintText: l.dateHint,
+                      initialDate: state.dob,
+                      firstDate: DateTime(now.year - 110, now.month, now.day), // exactly 110 years ago
+                      lastDate: DateTime(now.year - 15, now.month, now.day),
+                      onDateChanged: (date) {
+                        if (date != null) {
+                          context.read<SpousBloc>().add(SpUpdateDob(date));
+                        }
+                      },
+                    )
+                )
+              else
+                _section(
                   Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 1.h, left: 1.3.h),
-                          child: Text(
-                            '${l.ageApproximate} *',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
-                            ),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 1.h, left: 1.3.h),
+                        child: Text(
+                          '${l.ageApproximate} *',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: CustomTextField(
-                                labelText: l.years,
-                                hintText: '0',
-                                maxLength: 3,
-                                initialValue: state.UpdateYears ?? '',
-                                keyboardType: TextInputType.number,
-                                onChanged: (v) {
-                                  context.read<SpousBloc>().add(UpdateYearsChanged(v.trim()));
-                                  final state = context.read<SpousBloc>().state;
-                                  _updateDobFromAge(v.trim(), state.UpdateMonths ?? '', state.UpdateDays ?? '');
-                                },
-                                validator: (value) => captureSpousError(
-                                  Validations.validateApproxAge(
-                                    l,
-                                    value,
-                                    state.UpdateMonths,
-                                    state.UpdateDays,
-                                  ),
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CustomTextField(
+                              labelText: l.years,
+                              hintText: '0',
+                              maxLength: 3,
+                              initialValue: state.UpdateYears ?? '',
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) {
+                                context.read<SpousBloc>().add(UpdateYearsChanged(v.trim()));
+                                final state = context.read<SpousBloc>().state;
+                                _updateDobFromAge(v.trim(), state.UpdateMonths ?? '', state.UpdateDays ?? '');
+                              },
+                              validator: (value) => captureSpousError(
+                                Validations.validateApproxAge(
+                                  l,
+                                  value,
+                                  state.UpdateMonths,
+                                  state.UpdateDays,
                                 ),
                               ),
                             ),
+                          ),
 
-                            // Container(
-                            //   width: 1,
-                            //   height: 4.h,
-                            //   color: Colors.grey.shade300,
-                            //   margin: EdgeInsets.symmetric(horizontal: 1.w),
-                            // ),
+                          // Container(
+                          //   width: 1,
+                          //   height: 4.h,
+                          //   color: Colors.grey.shade300,
+                          //   margin: EdgeInsets.symmetric(horizontal: 1.w),
+                          // ),
 
-                            // --- Months ---
-                            Expanded(
-                              child: CustomTextField(
-                                labelText: l.months,
-                                hintText: '0',
-                                maxLength: 2,
-                                initialValue: state.UpdateMonths ?? '',
-                                keyboardType: TextInputType.number,
-                                onChanged: (v) {
-                                  context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim()));
-                                  final state = context.read<SpousBloc>().state;
-                                  _updateDobFromAge(state.UpdateYears ?? '', v.trim(), state.UpdateDays ?? '');
-                                },
-                                validator: (value) => captureSpousError(
-                                  Validations.validateApproxAge(
-                                    l,
-                                    state.UpdateYears,
-                                    value,
-                                    state.UpdateDays,
-                                  ),
+                          // --- Months ---
+                          Expanded(
+                            child: CustomTextField(
+                              labelText: l.months,
+                              hintText: '0',
+                              maxLength: 2,
+                              initialValue: state.UpdateMonths ?? '',
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) {
+                                context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim()));
+                                final state = context.read<SpousBloc>().state;
+                                _updateDobFromAge(state.UpdateYears ?? '', v.trim(), state.UpdateDays ?? '');
+                              },
+                              validator: (value) => captureSpousError(
+                                Validations.validateApproxAge(
+                                  l,
+                                  state.UpdateYears,
+                                  value,
+                                  state.UpdateDays,
                                 ),
                               ),
                             ),
+                          ),
 
-                            // --- Divider between Months & Days ---
-                            // Container(
-                            //   width: 1,
-                            //   height: 4.h,
-                            //   color: Colors.grey.shade300,
-                            //   margin: EdgeInsets.symmetric(horizontal: 1.w),
-                            // ),
+                          // --- Divider between Months & Days ---
+                          // Container(
+                          //   width: 1,
+                          //   height: 4.h,
+                          //   color: Colors.grey.shade300,
+                          //   margin: EdgeInsets.symmetric(horizontal: 1.w),
+                          // ),
 
-                            // --- Days ---
-                            Expanded(
-                              child: CustomTextField(
-                                labelText: l.days,
-                                hintText: '0',
-                                maxLength: 2,
-                                initialValue: state.UpdateDays ?? '',
-                                keyboardType: TextInputType.number,
-                                onChanged: (v) {
-                                  context.read<SpousBloc>().add(UpdateDaysChanged(v.trim()));
-                                  final state = context.read<SpousBloc>().state;
-                                  _updateDobFromAge(state.UpdateYears ?? '', state.UpdateMonths ?? '', v.trim());
-                                },
-                                validator: (value) => captureSpousError(
-                                  Validations.validateApproxAge(
-                                    l,
-                                    state.UpdateYears,
-                                    state.UpdateMonths,
-                                    value,
-                                  ),
+                          // --- Days ---
+                          Expanded(
+                            child: CustomTextField(
+                              labelText: l.days,
+                              hintText: '0',
+                              maxLength: 2,
+                              initialValue: state.UpdateDays ?? '',
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) {
+                                context.read<SpousBloc>().add(UpdateDaysChanged(v.trim()));
+                                final state = context.read<SpousBloc>().state;
+                                _updateDobFromAge(state.UpdateYears ?? '', state.UpdateMonths ?? '', v.trim());
+                              },
+                              validator: (value) => captureSpousError(
+                                Validations.validateApproxAge(
+                                  l,
+                                  state.UpdateYears,
+                                  state.UpdateMonths,
+                                  value,
                                 ),
                               ),
                             ),
-                          ],
-                        )
+                          ),
+                        ],
+                      )
 
-                      ],
-                    ),
-                  ),
-
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
-                _section(
-                  ApiDropdown<String>(
-                    labelText: '${l.genderLabel} *',
-                    items: const ['Male', 'Female', 'Transgender'],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'Male':
-                          return l.genderMale;
-                        case 'Female':
-                          return l.genderFemale;
-                        case 'Transgender':
-                          return l.transgender;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: state.gender,
-                    onChanged: null,
-                    validator: (value) => Validations.validateGender(l, value),
+                    ],
                   ),
                 ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  ApiDropdown<String>(
-                    labelText: l.occupationLabel,
-                    items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'Unemployed':
-                          return l.occupationUnemployed;
-                        case 'Housewife':
-                          return l.occupationHousewife;
-                        case 'Daily Wage Labor':
-                          return l.occupationDailyWageLabor;
-                        case 'Agriculture':
-                          return l.occupationAgriculture;
-                        case 'Salaried':
-                          return l.occupationSalaried;
-                        case 'Business':
-                          return l.occupationBusiness;
-                        case 'Retired':
-                          return l.occupationRetired;
-                        case 'Other':
-                          return l.occupationOther;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: state.occupation,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateOccupation(v)),
-                  ),
+              _section(
+                ApiDropdown<String>(
+                  labelText: '${l.genderLabel} *',
+                  items: const ['Male', 'Female', 'Transgender'],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'Male':
+                        return l.genderMale;
+                      case 'Female':
+                        return l.genderFemale;
+                      case 'Transgender':
+                        return l.transgender;
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.gender,
+                  onChanged: null,
+                  validator: (value) => Validations.validateGender(l, value),
                 ),
+              ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                if (state.occupation == 'Other')
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
+              _section(
+                ApiDropdown<String>(
+                  labelText: l.occupationLabel,
+                  items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'Unemployed':
+                        return l.occupationUnemployed;
+                      case 'Housewife':
+                        return l.occupationHousewife;
+                      case 'Daily Wage Labor':
+                        return l.occupationDailyWageLabor;
+                      case 'Agriculture':
+                        return l.occupationAgriculture;
+                      case 'Salaried':
+                        return l.occupationSalaried;
+                      case 'Business':
+                        return l.occupationBusiness;
+                      case 'Retired':
+                        return l.occupationRetired;
+                      case 'Other':
+                        return l.occupationOther;
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.occupation,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateOccupation(v)),
+                ),
+              ),
+
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              if (state.occupation == 'Other')
 
                 if (state.occupation == 'Other')
                   _section(
@@ -595,79 +747,79 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           .add(SpUpdateOtherOccupation(v.trim())),
                     ),
                   ),
-                if (state.occupation == 'Other')
+              if (state.occupation == 'Other')
 
                 if (state.occupation == 'Other')
                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  ApiDropdown<String>(
-                    labelText: l.educationLabel,
-                    items: const ['No Schooling', 'Primary', 'Secondary', 'High School', 'Intermediate', 'Diploma', 'Graduate and above'],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'No Schooling':
-                          return l.educationNoSchooling;
-                        case 'Primary':
-                          return l.educationPrimary;
-                        case 'Secondary':
-                          return l.educationSecondary;
-                        case 'High School':
-                          return l.educationHighSchool;
-                        case 'Intermediate':
-                          return l.educationIntermediate;
-                        case 'Diploma':
-                          return l.educationDiploma;
-                        case 'Graduate and above':
-                          return l.educationGraduateAndAbove;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: state.education,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateEducation(v)),
-                  ),
+              _section(
+                ApiDropdown<String>(
+                  labelText: l.educationLabel,
+                  items: const ['No Schooling', 'Primary', 'Secondary', 'High School', 'Intermediate', 'Diploma', 'Graduate and above'],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'No Schooling':
+                        return l.educationNoSchooling;
+                      case 'Primary':
+                        return l.educationPrimary;
+                      case 'Secondary':
+                        return l.educationSecondary;
+                      case 'High School':
+                        return l.educationHighSchool;
+                      case 'Intermediate':
+                        return l.educationIntermediate;
+                      case 'Diploma':
+                        return l.educationDiploma;
+                      case 'Graduate and above':
+                        return l.educationGraduateAndAbove;
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.education,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateEducation(v)),
                 ),
+              ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  ApiDropdown<String>(
-                    labelText: l.religionLabel,
-                    items: const ['Do not want to disclose', 'Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhism', 'Jainism', 'Parsi', 'Other'],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'Do not want to disclose':
-                          return l.religionNotDisclosed;
-                        case 'Hindu':
-                          return l.religionHindu;
-                        case 'Muslim':
-                          return l.religionMuslim;
-                        case 'Christian':
-                          return l.religionChristian;
-                        case 'Sikh':
-                          return l.religionSikh;
-                        case 'Buddhism':
-                          return l.religionBuddhism;
-                        case 'Jainism':
-                          return l.religionJainism;
-                        case 'Parsi':
-                          return l.religionParsi;
-                        case 'Other':
-                          return l.religionOther;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: state.religion,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateReligion(v)),
-                  ),
+              _section(
+                ApiDropdown<String>(
+                  labelText: l.religionLabel,
+                  items: const ['Do not want to disclose', 'Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhism', 'Jainism', 'Parsi', 'Other'],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'Do not want to disclose':
+                        return l.religionNotDisclosed;
+                      case 'Hindu':
+                        return l.religionHindu;
+                      case 'Muslim':
+                        return l.religionMuslim;
+                      case 'Christian':
+                        return l.religionChristian;
+                      case 'Sikh':
+                        return l.religionSikh;
+                      case 'Buddhism':
+                        return l.religionBuddhism;
+                      case 'Jainism':
+                        return l.religionJainism;
+                      case 'Parsi':
+                        return l.religionParsi;
+                      case 'Other':
+                        return l.religionOther;
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.religion,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateReligion(v)),
                 ),
+              ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                if (state.religion == 'Other')
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              if (state.religion == 'Other')
 
                 if (state.religion == 'Other')
                   _section(
@@ -680,49 +832,49 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           .add(SpUpdateOtherReligion(v.trim())),
                     ),
                   ),
-                if (state.religion == 'Other')
+              if (state.religion == 'Other')
 
                 if (state.religion == 'Other')
                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  ApiDropdown<String>(
-                    labelText: l.categoryLabel,
-                    items: const ['NotDisclosed', 'General', 'OBC', 'SC', 'ST', 'PichdaVarg1', 'PichdaVarg2', 'AtyantPichdaVarg', 'DontKnow', 'Other'],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'NotDisclosed':
-                          return l.categoryNotDisclosed;
-                        case 'General':
-                          return l.categoryGeneral;
-                        case 'OBC':
-                          return l.categoryOBC;
-                        case 'SC':
-                          return l.categorySC;
-                        case 'ST':
-                          return l.categoryST;
-                        case 'PichdaVarg1':
-                          return l.categoryPichdaVarg1;
-                        case 'PichdaVarg2':
-                          return l.categoryPichdaVarg2;
-                        case 'AtyantPichdaVarg':
-                          return l.categoryAtyantPichdaVarg;
-                        case 'DontKnow':
-                          return l.categoryDontKnow;
-                        case 'Other':
-                          return l.religionOther;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: state.category,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateCategory(v)),
-                  ),
+              _section(
+                ApiDropdown<String>(
+                  labelText: l.categoryLabel,
+                  items: const ['NotDisclosed', 'General', 'OBC', 'SC', 'ST', 'PichdaVarg1', 'PichdaVarg2', 'AtyantPichdaVarg', 'DontKnow', 'Other'],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'NotDisclosed':
+                        return l.categoryNotDisclosed;
+                      case 'General':
+                        return l.categoryGeneral;
+                      case 'OBC':
+                        return l.categoryOBC;
+                      case 'SC':
+                        return l.categorySC;
+                      case 'ST':
+                        return l.categoryST;
+                      case 'PichdaVarg1':
+                        return l.categoryPichdaVarg1;
+                      case 'PichdaVarg2':
+                        return l.categoryPichdaVarg2;
+                      case 'AtyantPichdaVarg':
+                        return l.categoryAtyantPichdaVarg;
+                      case 'DontKnow':
+                        return l.categoryDontKnow;
+                      case 'Other':
+                        return l.religionOther;
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.category,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateCategory(v)),
                 ),
+              ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                if (state.category == 'Other')
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              if (state.category == 'Other')
 
                 if (state.category == 'Other')
                   _section(
@@ -735,49 +887,49 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           .add(SpUpdateOtherCategory(v.trim())),
                     ),
                   ),
-                if (state.category == 'Other')
+              if (state.category == 'Other')
 
                 if (state.category == 'Other')
                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
+              _section(
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        labelText: l.abhaAddressLabel,
+                        hintText: l.abhaAddressLabel,
+                        initialValue: state.abhaAddress,
+                        onChanged: (v) =>
+                            context.read<SpousBloc>().add(SpUpdateAbhaAddress(v.trim())),
+                      ),
+                    ),
+
+                    SizedBox(
+                      height: 3.5.h,
+                      child: RoundButton(
+                        title: l.linkAbha,
+                        width: 15.h,
+                        borderRadius: 8,
+                        fontSize: 14.sp,
+                        onPress: () {
+                          Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+
+              if (state.gender == 'Female') ...[
                 _section(
                   Row(
                     children: [
                       Expanded(
                         child: CustomTextField(
-                          labelText: l.abhaAddressLabel,
-                          hintText: l.abhaAddressLabel,
-                          initialValue: state.abhaAddress,
-                          onChanged: (v) =>
-                              context.read<SpousBloc>().add(SpUpdateAbhaAddress(v.trim())),
-                        ),
-                      ),
-
-                      SizedBox(
-                        height: 3.5.h,
-                        child: RoundButton(
-                          title: l.linkAbha,
-                          width: 15.h,
-                          borderRadius: 8,
-                          fontSize: 14.sp,
-                          onPress: () {
-                            Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
-
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-
-                if (state.gender == 'Female') ...[
-                  _section(
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomTextField(
                             labelText: 'RCH ID',
                             hintText: 'Enter 12 digit RCH ID',
                             keyboardType: TextInputType.number,
@@ -793,6 +945,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               final value = v.trim();
                               context.read<SpousBloc>().add(RichIDChanged(value));
 
+                              // Show error if not empty and not exactly 12 digits
                               if (value.isNotEmpty && value.length != 12) {
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
                                   if (mounted) {
@@ -810,127 +963,166 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               }
                               return null;
                             }
-                          ),
                         ),
+                      ),
 
-                        SizedBox(
-                          height: 3.5.h,
-                          width: 15.h,
-                          child: RoundButton(
-                            title: 'VERIFY',
-                            width: 160,
-                            borderRadius: 8,
-                            fontSize: 12,
-                            onPress: () {
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                      SizedBox(
+                        height: 3.5.h,
+                        width: 15.h,
+                        child: RoundButton(
+                          title: 'VERIFY',
+                          width: 160,
+                          borderRadius: 8,
+                          fontSize: 12,
+                          onPress: () async {
+                            final rchIdText = state.RichIDChanged?.trim() ?? '';
+                            if (rchIdText.isEmpty) {
+                              showAppSnackBar(context, 'Please enter RCH ID');
+                              return;
+                            }
+                            if (rchIdText.length != 12) {
+                              showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                              return;
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Verifying RCH ID...'), duration: Duration(seconds: 10)),
+                            );
+                            if (state.gender == 'Female') {
+                              final result = await fetchRCHDataForScreen(
+                                int.tryParse(rchIdText) ?? 0,
+                                requestFor: 1,
+                              );
+                              ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              if (result != null && result['status'] == true) {
+                                final data = result['data'];
+                                context.read<SpousBloc>().add(SpUpdateMemberName(data['name'] ?? ''));
+                                context.read<SpousBloc>().add(SpUpdateDob(data['dob'] != null
+                                    ? DateTime.tryParse(data['dob'])
+                                    : null));
 
-
-                _section(
-                  ApiDropdown<String>(
-                    labelText: '${l.whoseMobileLabel}? *',
-                    items: const [
-                      'Self',
-                      'Family Head',
-                      'Wife',
-                      'Father',
-                      'Mother',
-                      'Son',
-                      'Daughter',
-                      'Father in Law',
-                      'Mother in Law',
-                      'Neighbour',
-                      'Relative',
-                      'Other',
-                    ],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'Self':
-                          return l.self;
-                        case 'Wife':
-                          return l.wife;
-                        case 'Father':
-                          return l.father;
-                        case 'Mother':
-                          return l.mother;
-                        case 'Son':
-                          return l.son;
-                        case 'Daughter':
-                          return l.daughter;
-                        case 'Father in Law':
-                          return l.fatherInLaw;
-                        case 'Mother in Law':
-                          return l.motherInLaw;
-                        case 'Neighbour':
-                          return l.neighbour;
-                        case 'Relative':
-                          return l.relative;
-                        case 'Other':
-                          return l.other;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: state.mobileOwner,
-                    onChanged: (v) {
-                      if (v == null) return;
-                      final spBloc = context.read<SpousBloc>();
-                      spBloc.add(SpUpdateMobileOwner(v));
-
-                      if (v == 'Family Head') {
-                        print('🔵 [SpousDetails] Family Head selected, isMemberDetails: ${widget.isMemberDetails}, hhId: ${widget.hhId}');
-                        if (widget.isMemberDetails && widget.hhId != null) {
-                          print('🔄 [SpousDetails] Fetching head mobile number for household: ${widget.hhId}');
-                          LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!).then((headMobile) {
-                            print('📱 [SpousDetails] Received head mobile: $headMobile');
-                            if (headMobile != null && headMobile.isNotEmpty) {
-                              if (mounted) {
-                                print('✅ [SpousDetails] Dispatching mobile number update: $headMobile');
-                                spBloc.add(SpUpdateMobileNo(headMobile));
+                                showAppSnackBar(context, 'RCH ID verified and data loaded successfully!');
+                              } else {
+                                final message = result?['message'] ?? 'Invalid or not found RCH ID';
+                                showAppSnackBar(context, message);
                               }
                             } else {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('No mobile number found for the head of family')),
-                                );
-                              }
+                              showAppSnackBar(context, 'RCH ID is only applicable for female members');
                             }
-                          }).catchError((e) {
-                            if (mounted) {
-                              print('❌ [SpousDetails] Error fetching head mobile number: $e');
-                              print('Stack trace: ${e.stackTrace}');
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error loading head of family mobile number')),
-                              );
-                            }
-                          });
-                        }
-                        else {
-                          final headNo = (widget.headMobileNo?.trim() ??
-                              context.read<AddFamilyHeadBloc>().state.mobileNo?.trim());
-                          if (headNo != null && headNo.isNotEmpty) {
-                            spBloc.add(SpUpdateMobileNo(headNo));
-                          }
-                        }
-                      } else {
-                        spBloc.add(const SpUpdateMobileNo(''));
-                      }
-
-
-                    },
-                    validator: (value) => captureSpousError(Validations.validateWhoMobileNo(l, value)),
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ],
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                if (state.mobileOwner == 'Other')
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
+              _section(
+                ApiDropdown<String>(
+                  labelText: '${l.whoseMobileLabel} *',
+                  items: const [
+                    'Self',
+                    'Family Head',
+                    'Wife',
+                    'Father',
+                    'Mother',
+                    'Son',
+                    'Daughter',
+                    'Father in Law',
+                    'Mother in Law',
+                    'Neighbour',
+                    'Relative',
+                    'Other',
+                  ],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'Self':
+                        return l.self;
+                      case 'Wife':
+                        return l.wife;
+                      case 'Father':
+                        return l.father;
+                      case 'Mother':
+                        return l.mother;
+                      case 'Son':
+                        return l.son;
+                      case 'Daughter':
+                        return l.daughter;
+                      case 'Father in Law':
+                        return l.fatherInLaw;
+                      case 'Mother in Law':
+                        return l.motherInLaw;
+                      case 'Neighbour':
+                        return l.neighbour;
+                      case 'Relative':
+                        return l.relative;
+                      case 'Other':
+                        return l.other;
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.mobileOwner,
+                  onChanged: (v) {
+                    if (v == null) return;
+                    final spBloc = context.read<SpousBloc>();
+                    spBloc.add(SpUpdateMobileOwner(v));
+
+                    if (v == 'Family Head') {
+                      print('🔵 [SpousDetails] Family Head selected, isMemberDetails: ${widget.isMemberDetails}, hhId: ${widget.hhId}');
+                      if (widget.isMemberDetails && widget.hhId != null) {
+                        print('🔄 [SpousDetails] Fetching head mobile number for household: ${widget.hhId}');
+                        LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!).then((headMobile) {
+                          print('📱 [SpousDetails] Received head mobile: $headMobile');
+                          if (headMobile != null && headMobile.isNotEmpty) {
+                            if (mounted) {
+                              print('✅ [SpousDetails] Dispatching mobile number update: $headMobile');
+                              spBloc.add(SpUpdateMobileNo(headMobile));
+                            }
+                          } else {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('No mobile number found for the head of family')),
+                              );
+                            }
+                          }
+                        }).catchError((e) {
+                          if (mounted) {
+                            print('❌ [SpousDetails] Error fetching head mobile number: $e');
+                            print('Stack trace: ${e.stackTrace}');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error loading head of family mobile number')),
+                            );
+                          }
+                        });
+                      }
+                      else {
+                        final headNo = (widget.headMobileNo?.trim() ??
+                            context.read<AddFamilyHeadBloc>().state.mobileNo?.trim());
+                        if (headNo != null && headNo.isNotEmpty) {
+                          spBloc.add(SpUpdateMobileNo(headNo));
+                        }
+                      }
+                    } else {
+                      spBloc.add(const SpUpdateMobileNo(''));
+                    }
+
+
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return captureSpousError('Whose mobile number is required');
+                    }
+                    return captureSpousError(null);
+                  },
+                ),
+              ),
+
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              if (state.mobileOwner == 'Other')
 
                 if (state.mobileOwner == 'Other')
                   _section(
@@ -941,56 +1133,57 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       onChanged: (v) => context
                           .read<SpousBloc>()
                           .add(SpUpdateMobileOwnerOtherRelation(v.trim())),
-                      validator: (value) => state.mobileOwner == 'Other'
-                          ? captureSpousError(
-                              (value == null || value.trim().isEmpty)
-                                  ? 'Relation with mobile no. holder is required'
-                                  : null,
-                            )
-                          : null,
+                      validator: (value) {
+                        if (state.mobileOwner == 'Other') {
+                          if (value == null || value.trim().isEmpty) {
+                            return captureSpousError('Relation with mobile no. holder is required');
+                          }
+                          return captureSpousError(null);
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                if (state.mobileOwner == 'Other')
+              if (state.mobileOwner == 'Other')
 
                 if (state.mobileOwner == 'Other')
                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  CustomTextField(
-                    key: ValueKey('spouse_mobile'),
-                    labelText: '${l.mobileLabel} *',
-                    hintText: '${l.mobileLabel} *',
-                    keyboardType: TextInputType.number,
-                    maxLength: 10,
-                    initialValue: state.mobileNo,
-                    readOnly: state.mobileOwner == 'Family Head',
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMobileNo(v.trim())),
-                    validator: (value) {
-                      final owner = state.mobileOwner;
-                      final headOwner = widget.headMobileOwner;
-                      final headNo = widget.headMobileNo?.trim();
-
-                      if (owner == null || owner.isEmpty) {
-                        return captureSpousError(Validations.validateMobileNo(l, value));
-                      }
-
-                      final spouseSelectedFamilyHead = owner == 'Family Head';
-                      final matchesHeadOwner = (spouseSelectedFamilyHead && headOwner == 'Self') || (headOwner != null && owner == headOwner);
-
-                      if (matchesHeadOwner && (headNo == null || headNo.isEmpty)) {
-                        return captureSpousError('Enter mobile number');
-                      }
-
-                      return captureSpousError(Validations.validateMobileNo(l, value));
-                    },
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                  ),
+              _section(
+                CustomTextField(
+                  key: const ValueKey('spouse_mobile'),
+                  labelText: '${l.mobileLabel} *',
+                  hintText: '${l.mobileLabel} *',
+                  keyboardType: TextInputType.number,
+                  maxLength: 10,
+                  initialValue: state.mobileNo,
+                  readOnly: state.mobileOwner == 'Family Head',
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMobileNo(v.trim())),
+                  validator: (value) {
+                    if (state.mobileOwner == 'Family Head') {
+                      // Skip validation if mobile owner is Family Head
+                      return null;
+                    }
+                    
+                    if (value == null || value.trim().isEmpty) {
+                      return captureSpousError('Mobile number is required');
+                    }
+                    
+                    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(value)) {
+                      return captureSpousError('Mobile number must be 10 digits and start with 6-9');
+                    }
+                    
+                    // Clear any previous error if validation passes
+                    return captureSpousError(null);
+                  },
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
                 ),
+              ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
               _section(
@@ -1032,7 +1225,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 ),
               ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
               _section(
                 CustomTextField(
@@ -1074,245 +1267,272 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 ),
               ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  CustomTextField(
-                    labelText: l.voterId,
-                    hintText: l.voterIdHint,
-                    initialValue: state.voterId,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateVoterId(v.trim())),
-                  ),
+              _section(
+                CustomTextField(
+                  labelText: l.voterId,
+                  hintText: l.voterIdHint,
+                  initialValue: state.voterId,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateVoterId(v.trim())),
                 ),
+              ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  CustomTextField(
-                    labelText: l.rationCardId,
-                    hintText: l.rationCardIdHint,
-                    initialValue: state.rationId,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRationId(v.trim())),
-                  ),
+              _section(
+                CustomTextField(
+                  labelText: l.rationCardId,
+                  hintText: l.rationCardIdHint,
+                  initialValue: state.rationId,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRationId(v.trim())),
                 ),
+              ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  CustomTextField(
-                    labelText: l.personalHealthId,
-                    hintText: l.personalHealthIdHint,
-                    initialValue: state.phId,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdatePhId(v.trim())),
-                  ),
+              _section(
+                CustomTextField(
+                  labelText: l.personalHealthId,
+                  hintText: l.personalHealthIdHint,
+                  initialValue: state.phId,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdatePhId(v.trim())),
                 ),
+              ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
 
+              _section(
+                ApiDropdown<String>(
+                  labelText: l.beneficiaryTypeLabel,
+                  items: const ['StayingInHouse', 'SeasonalMigrant'],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'StayingInHouse':
+                        return l.migrationStayingInHouse;
+                      case 'SeasonalMigrant':
+                        return l.migrationSeasonalMigrant;
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.beneficiaryType,
+                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateBeneficiaryType(v)),
+                ),
+              ),
+
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+              if (state.gender == 'Female') ...[
                 _section(
                   ApiDropdown<String>(
-                    labelText: l.beneficiaryTypeLabel,
-                    items: const ['StayingInHouse', 'SeasonalMigrant'],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'StayingInHouse':
-                          return l.migrationStayingInHouse;
-                        case 'SeasonalMigrant':
-                          return l.migrationSeasonalMigrant;
-                        default:
-                          return s;
+                    key: ValueKey('spouse_isPreg_${state.gender}_${state.isPregnant ?? ''}'),
+                    labelText: '${l.isWomanPregnantQuestion} *',
+                    items: const ['Yes', 'No'],
+                    getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                    value: state.isPregnant,
+                    onChanged: (v) {
+                      final bloc = context.read<SpousBloc>();
+                      bloc.add(SpUpdateIsPregnant(v));
+                      if (v == 'No') {
+                        bloc.add(const SpLMPChange(null));
+                        bloc.add(const SpEDDChange(null));
                       }
+                      // Trigger validation after change
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        spousFormKey.currentState?.validate();
+                      });
                     },
-                    value: state.beneficiaryType,
-                    onChanged: (v) => context.read<SpousBloc>().add(SpUpdateBeneficiaryType(v)),
+                    // validator: (value) => captureSpousError(
+                    //   value == null || value.isEmpty ? 'Pregnancy status is required' : null,
+                    // ),
+                    validator: (value) {
+                      if (state.gender == 'Female' && (value == null || value.isEmpty)) {
+                        return 'Please select is the women pregnant';
+                      }
+                      return null;
+                    },
                   ),
                 ),
 
-                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
-                if (state.gender == 'Female') ...[
+                if (state.isPregnant == 'Yes')
                   _section(
-                    ApiDropdown<String>(
-                      key: ValueKey('spouse_isPreg_${state.gender}_${state.isPregnant ?? ''}'),
-                      labelText: '${l.isWomanPregnantQuestion} *',
-                      items: const ['Yes', 'No'],
-                      getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                      value: state.isPregnant,
-                      onChanged: (v) {
+                    CustomDatePicker(
+                      key: const ValueKey('lmp_date'),
+                      labelText: '${l.lmpDateLabel} *',
+                      hintText: l.dateHint,
+                      initialDate: state.lmp,
+                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                      lastDate: DateTime.now(),
+                      onDateChanged: (d) {
                         final bloc = context.read<SpousBloc>();
-                        bloc.add(SpUpdateIsPregnant(v));
-                        if (v == 'No') {
-                          bloc.add(const SpLMPChange(null));
+                        bloc.add(SpLMPChange(d));
+                        if (d != null) {
+                          final edd = d.add(const Duration(days: 277));
+                          bloc.add(SpEDDChange(edd));
+                        } else {
                           bloc.add(const SpEDDChange(null));
                         }
+                        // Trigger validation after change
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          spousFormKey.currentState?.validate();
+                        });
                       },
-                      validator: (value) {
-                        if (state.gender == 'Female') {
-                          return captureSpousError(Validations.validateIsPregnant(l, value));
+                      validator: (date) {
+                        if (state.isPregnant == 'Yes' && date == null) {
+                          return 'Last menstrual period date is required';
                         }
                         return null;
                       },
                     ),
                   ),
 
-                  Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-
-                  if (state.isPregnant == 'Yes') ...[
-                    _section(
-                      CustomDatePicker(
-                        labelText: '${l.lmpDateLabel} *',
-                        hintText: l.dateHint,
-                        initialDate: state.lmp,
-                        onDateChanged: (d) {
-                          final bloc = context.read<SpousBloc>();
-                          bloc.add(SpLMPChange(d));
-                          if (d != null) {
-                            final edd = d.add(const Duration(days: 277));
-                            bloc.add(SpEDDChange(edd));
-                          } else {
-                            bloc.add(const SpEDDChange(null));
-                          }
-                        },
-                        validator: (date) => captureSpousError(Validations.validateLMP(l, date)),
-                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                        lastDate: DateTime.now(),
-                      ),
+// For EDD when pregnant
+                if (state.isPregnant == 'Yes')
+                  _section(
+                    CustomDatePicker(
+                      key: const ValueKey('edd_date'),
+                      labelText: '${l.eddDateLabel} *',
+                      hintText: l.dateHint,
+                      initialDate: state.edd,
+                      onDateChanged: (d) {
+                        context.read<SpousBloc>().add(SpEDDChange(d));
+                        // Trigger validation after change
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          spousFormKey.currentState?.validate();
+                        });
+                      },
+                      validator: (date) {
+                        if (state.isPregnant == 'Yes' && date == null) {
+                          return 'Expected delivery date is required';
+                        }
+                        return null;
+                      },
+                      readOnly: true,
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                  ),
 
-                    _section(
-                      CustomDatePicker(
-                        labelText: '${l.eddDateLabel} *',
-                        hintText: l.dateHint,
-                        initialDate: state.edd,
-                        onDateChanged: (d) => context.read<SpousBloc>().add(SpEDDChange(d)),
-                        validator: (date) => captureSpousError(Validations.validateEDD(l, date)),
-                        readOnly: true,
-                      ),
+                if (state.isPregnant == 'No') ...[
+                  ApiDropdown<String>(
+                    labelText: 'Are you/your partner adopting family planning? *',
+                    items: const ['Select', 'Yes', 'No'],
+                    getLabel: (s) {
+                      switch (s) {
+                        case 'Yes':
+                          return l.yes;
+                        case 'No':
+                          return l.no;
+                        default:
+                          return s;
+                      }
+                    },
+                    value: state.familyPlanningCounseling ?? 'Select',
+                    onChanged: (v) {
+                      if (v == null) return;
+                      spBloc.add(FamilyPlanningCounselingChanged(v));
+                    },
+                    validator: (value) => captureSpousError(
+                      Validations.validateAdoptingPlan(l, value),
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                  ],
-
-                  if (state.isPregnant == 'No') ...[
+                  if (state.familyPlanningCounseling == 'Yes') ...[
+                    const SizedBox(height: 8),
                     ApiDropdown<String>(
-                      labelText: 'Are you/your partner adopting family planning? *',
-                      items: const ['Select', 'Yes', 'No'],
-                      getLabel: (s) {
-                        switch (s) {
-                          case 'Yes':
-                            return l.yes;
-                          case 'No':
-                            return l.no;
-                          default:
-                            return s;
+                      labelText: '${l.methodOfContra} *',
+                      items: const [
+
+                        'Condom',
+                        'Mala -N (Daily Contraceptive pill)',
+                        'Antra injection',
+                        'Copper -T (IUCD)',
+                        'Chhaya (Weekly Contraceptive pill)',
+                        'ECP (Emergency Contraceptive pill)',
+                        'Male Sterilization',
+                        'Female Sterilization',
+                        'Any Other Specify'
+                      ],
+                      getLabel: (value) => value,
+                      value: state.fpMethod ?? 'Select',
+                      onChanged: (value) {
+                        if (value != null) {
+                          spBloc.add(FpMethodChanged(value));
                         }
                       },
-                      value: state.familyPlanningCounseling ?? 'Select',
-                      onChanged: (v) {
-                        if (v == null) return;
-                        spBloc.add(FamilyPlanningCounselingChanged(v));
-                      },
-                      validator: (value) => captureSpousError(
-                        Validations.validateAdoptingPlan(l, value),
-                      ),
+                      validator: (value) => captureSpousError(Validations.validateAntra(l, value)),
+
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    if (state.familyPlanningCounseling == 'Yes') ...[
-                      const SizedBox(height: 8),
-                      ApiDropdown<String>(
-                        labelText: '${l.methodOfContra} *',
-                        items: const [
-
-                          'Condom',
-                          'Mala -N (Daily Contraceptive pill)',
-                          'Antra injection',
-                          'Copper -T (IUCD)',
-                          'Chhaya (Weekly Contraceptive pill)',
-                          'ECP (Emergency Contraceptive pill)',
-                          'Male Sterilization',
-                          'Female Sterilization',
-                          'Any Other Specify'
-                        ],
-                        getLabel: (value) => value,
-                        value: state.fpMethod ?? 'Select',
-                        onChanged: (value) {
-                          if (value != null) {
-                            spBloc.add(FpMethodChanged(value));
-                          }
-                        },
-                        validator: (value) => captureSpousError(Validations.validateAntra(l, value)),
-
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    ],
+                  ],
 
 
-                    if(state.fpMethod == 'Antra injection') ...[
-                      CustomDatePicker(
-                        labelText: 'Date of Antra',
-                        initialDate: state.antraDate ?? DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2100),
-                        onDateChanged: (date) {
-                          if (date != null) {
-                            spBloc.add(DateofAntraChanged(date));
-                          }
-                        },
+                  if(state.fpMethod == 'Antra injection') ...[
+                    CustomDatePicker(
+                      labelText: 'Date of Antra',
+                      initialDate: state.antraDate ?? DateTime.now(),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime(2100),
+                      onDateChanged: (date) {
+                        if (date != null) {
+                          spBloc.add(DateofAntraChanged(date));
+                        }
+                      },
 
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                    ],
-                    if (state.fpMethod == 'Copper -T (IUCD)') ...[
-                      CustomDatePicker(
-                        labelText: 'Removal Date',
-                        initialDate: state.removalDate ?? DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2100),
-                        onDateChanged: (date) {
-                          if (date != null) {
-                            spBloc.add(RemovalDateChanged(date));
-                          }
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                  ],
+                  if (state.fpMethod == 'Copper -T (IUCD)') ...[
+                    CustomDatePicker(
+                      labelText: 'Removal Date',
+                      initialDate: state.removalDate ?? DateTime.now(),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime(2100),
+                      onDateChanged: (date) {
+                        if (date != null) {
+                          spBloc.add(RemovalDateChanged(date));
+                        }
+                      },
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                      CustomTextField(
-                        labelText: 'Reason',
-                        hintText: 'reason ',
-                        initialValue: state.removalReason,
-                        onChanged: (value) {
-                          spBloc.add(RemovalReasonChanged(value ?? ''));
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                    CustomTextField(
+                      labelText: 'Reason',
+                      hintText: 'reason ',
+                      initialValue: state.removalReason,
+                      onChanged: (value) {
+                        spBloc.add(RemovalReasonChanged(value ?? ''));
+                      },
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                    ],
+                  ],
 
-                    if (state.fpMethod == 'Condom') ...[
-                      CustomTextField(
-                        labelText: 'Quantity of Condoms',
-                        hintText: 'Quantity of Condoms',
-                        keyboardType: TextInputType.number,
-                        initialValue: state.condomQuantity,
-                        onChanged: (value) {
-                          spBloc.add(CondomQuantityChanged(value ?? ''));
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                    ],
+                  if (state.fpMethod == 'Condom') ...[
+                    CustomTextField(
+                      labelText: 'Quantity of Condoms',
+                      hintText: 'Quantity of Condoms',
+                      keyboardType: TextInputType.number,
+                      initialValue: state.condomQuantity,
+                      onChanged: (value) {
+                        spBloc.add(CondomQuantityChanged(value ?? ''));
+                      },
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                  ],
 
-                  ]
-                ],
+                ]
               ],
-            );
+            ],
+          );
         },
       ),
     );

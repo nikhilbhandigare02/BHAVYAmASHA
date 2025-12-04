@@ -16,6 +16,7 @@ import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/utils/Validations.dart' show Validations;
 import '../../../core/utils/enums.dart';
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
+import '../../../data/repositories/RegisterNewHouseHoldController/register_new_house_hold.dart';
 import 'bloc/addnewfamilymember_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show MultiBlocProvider;
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/SpousDetails.dart';
@@ -175,6 +176,29 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     }
   }
 
+
+  final RegisterNewHouseHold repository = RegisterNewHouseHold();
+
+  Future<Map<String, dynamic>?> fetchRCHDataForScreen(
+      int rchId, {
+        required int requestFor,
+      }) async {
+    try {
+      print('Calling API: getRCHData(rchId: $rchId, requestFor: $requestFor)');
+
+      final result = await repository.getRCHData(
+        requestFor: requestFor,
+        rchId: rchId,
+      );
+
+      print('RCH API Raw Response: $result');
+
+      return result;
+    } catch (e) {
+      print('RCH API Exception: $e');
+      return null;
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -396,6 +420,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
       _currentStep = widget.initialStep;
     }
+
+
+    final childMinDate = DateTime(now.year - 15, now.month, now.day);
+    final childMaxDate = now;
+
+    final adultMinDate = DateTime(now.year - 110, now.month, now.day);
+    final adultMaxDate = DateTime(now.year - 15, now.month, now.day);
 
     if (widget.inlineEdit && !_initialApplied && widget.initial != null) {
       final data = widget.initial!;
@@ -1282,80 +1313,148 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                 if (state.memberType == 'Child') ...[
                                   _section(
                                     Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
                                             Expanded(
                                               child: CustomTextField(
                                                 labelText: "RCH ID",
-                                                hintText:
-                                                    'Enter 12 digit RCH ID',
-                                                keyboardType:
-                                                    TextInputType.number,
-                                                initialValue:
-                                                    state.RichIDChanged,
+                                                hintText: 'Enter 12 digit RCH ID',
+                                                keyboardType: TextInputType.number,
+                                                initialValue: state.RichIDChanged ?? '',
                                                 inputFormatters: [
-                                                  FilteringTextInputFormatter
-                                                      .digitsOnly,
-                                                  LengthLimitingTextInputFormatter(
-                                                    12,
-                                                  ),
+                                                  FilteringTextInputFormatter.digitsOnly,
+                                                  LengthLimitingTextInputFormatter(12),
                                                 ],
                                                 onChanged: (v) {
-                                                  // Clear previous snackbar
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).removeCurrentSnackBar();
-
+                                                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
                                                   final value = v?.trim() ?? '';
-                                                  context
-                                                      .read<
-                                                        AddnewfamilymemberBloc
-                                                      >()
-                                                      .add(
-                                                        RichIDChanged(value),
-                                                      );
+                                                  context.read<AddnewfamilymemberBloc>().add(RichIDChanged(value));
 
-                                                  // Show error if not empty and not exactly 12 digits
-                                                  if (value.isNotEmpty &&
-                                                      value.length != 12) {
-                                                    WidgetsBinding.instance
-                                                        .addPostFrameCallback((
-                                                          _,
-                                                        ) {
-                                                          if (mounted) {
-                                                            showAppSnackBar(
-                                                              context,
-                                                              'RCH ID must be exactly 12 digits',
-                                                            );
-                                                          }
-                                                        });
+                                                  if (value.isNotEmpty && value.length != 12) {
+                                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                      if (mounted) {
+                                                        showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                                                      }
+                                                    });
                                                   }
                                                 },
                                                 validator: (value) {
-                                                  if (value == null ||
-                                                      value.isEmpty) {
-                                                    return null; // Field is optional
-                                                  }
-                                                  if (value.length != 12) {
-                                                    return 'Must be 12 digits';
-                                                  }
+                                                  if (value == null || value.isEmpty) return null;
+                                                  if (value.length != 12) return 'Must be 12 digits';
                                                   return null;
                                                 },
                                               ),
                                             ),
                                             const SizedBox(width: 8),
                                             SizedBox(
-                                              height: 30,
+                                              height: 48,
                                               child: RoundButton(
                                                 title: 'VERIFY',
                                                 width: 100,
                                                 borderRadius: 8,
                                                 fontSize: 12,
-                                                onPress: () {
-                                                  // Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+                                                isLoading: _isLoading,
+                                                onPress: () async {
+                                                  final rchIdStr = state.RichIDChanged?.trim() ?? '';
+
+                                                  // --- Basic validation ---
+                                                  if (rchIdStr.isEmpty) {
+                                                    showAppSnackBar(context, 'Please enter RCH ID first');
+                                                    return;
+                                                  }
+                                                  if (rchIdStr.length != 12) {
+                                                    showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                                                    return;
+                                                  }
+
+                                                  final rchId = int.tryParse(rchIdStr);
+                                                  if (rchId == null) {
+                                                    showAppSnackBar(context, 'Invalid RCH ID');
+                                                    return;
+                                                  }
+                                                  setState(() => _isLoading = true);
+                                                  showAppSnackBar(context, 'Verifying RCH ID...');
+
+                                                  print('API REQUEST → getRCHData(rchId: $rchId, requestFor: 2)');
+                                                  try {
+                                                    final requestFor = state.memberType == 'Child' ? 2 : 1;
+
+                                                    final response = await fetchRCHDataForScreen(
+                                                      rchId,
+                                                      requestFor: requestFor,
+                                                    );
+                                                    print('API RESPONSE → $response');
+
+                                                    if (!mounted) return;
+
+                                                    setState(() => _isLoading = false);
+
+                                                    if (response == null) {
+                                                      showAppSnackBar(context, 'API returned null response');
+                                                      return;
+                                                    }
+
+                                                    if (response.isEmpty) {
+                                                      showAppSnackBar(context, 'No data found for this RCH ID');
+                                                      return;
+                                                    }
+
+                                                    // If API returns an "error" field
+                                                    if (response.containsKey('error')) {
+                                                      showAppSnackBar(context, 'Error: ${response['error']}');
+                                                      return;
+                                                    }
+
+                                                    // If API returns status parameter
+                                                    if (response['status'] == false) {
+                                                      showAppSnackBar(context, response['message'] ?? 'Failed to fetch RCH data');
+                                                      return;
+                                                    }
+
+                                                    // --- SAFE EXTRACTION ---
+                                                    final bloc = context.read<AddnewfamilymemberBloc>();
+
+                                                    final name = response['name']?.toString().trim();
+                                                    final genderRaw = response['gender']?.toString().trim();
+                                                    final dobStr = response['dob']?.toString().trim();
+
+                                                    // NAME
+                                                    if (name != null && name.isNotEmpty) {
+                                                      bloc.add(AnmUpdateName(name));
+                                                    }
+
+                                                    // GENDER
+                                                    if (genderRaw != null && genderRaw.isNotEmpty) {
+                                                      final gender = (genderRaw.toLowerCase() == 'm' || genderRaw == '1')
+                                                          ? 'Male'
+                                                          : (genderRaw.toLowerCase() == 'f' || genderRaw == '2'
+                                                          ? 'Female'
+                                                          : 'Transgender');
+
+                                                      bloc.add(AnmUpdateGender(gender));
+                                                    }
+
+                                                    // DOB
+                                                    if (dobStr != null && dobStr.isNotEmpty) {
+                                                      final dob = DateTime.tryParse(dobStr);
+                                                      if (dob != null) {
+                                                        bloc.add(AnmUpdateDob(dob));
+                                                        bloc.add(AnmToggleUseDob());
+                                                      }
+                                                    }
+
+                                                    showAppSnackBar(context, 'RCH data loaded successfully!');
+
+                                                  } catch (e) {
+                                                    print('API ERROR → $e');
+
+                                                    if (mounted) {
+                                                      setState(() => _isLoading = false);
+                                                      showAppSnackBar(context, 'Failed to fetch RCH data: $e');
+                                                    }
+                                                  }
                                                 },
                                               ),
                                             ),
@@ -1364,11 +1463,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       ],
                                     ),
                                   ),
-                                  Divider(
-                                    color: AppColors.divider,
-                                    thickness: 0.5,
-                                    height: 0,
-                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                 ],
 
                                 _section(
@@ -1773,7 +1868,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               top: 8,
                                             ),
                                             child: CustomTextField(
-                                              labelText: l.motherNameLabel,
+                                              labelText: "${l.motherNameLabel}*",
                                               hintText: l.motherNameLabel,
                                               initialValue:
                                               state.motherName ?? '',
@@ -2316,36 +2411,29 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   ),
                                 ),
                                 if (state.useDob)
+
+
                                   _section(
-                                    CustomDatePicker(
-                                      labelText: '${l.dobLabel}  *',
-                                      initialDate: state.dob,
-                                      firstDate:
-                                          (state.memberType.toLowerCase() ==
-                                              'child')
-                                          ? DateTime.now().subtract(
-                                              const Duration(days: 15 * 365),
-                                            )
-                                          : DateTime.now().subtract(
-                                              const Duration(days: 110 * 365),
-                                            ), // 110 years ago
-                                      lastDate:
-                                          (state.memberType.toLowerCase() ==
-                                              'child')
-                                          ? DateTime.now()
-                                          : DateTime(
-                                              now.year - 15,
-                                              now.month,
-                                              now.day,
-                                            ), // 15 years ago for adults
-                                      onDateChanged: (date) {
-                                        if (date != null) {
-                                          context
-                                              .read<AddnewfamilymemberBloc>()
-                                              .add(AnmUpdateDob(date));
-                                        }
-                                      },
-                                    ),
+                                      CustomDatePicker(
+                                        labelText: '${l.dobLabel}  *',
+                                        initialDate: state.dob,
+
+                                        firstDate: (state.memberType.toLowerCase() == 'child')
+                                            ? childMinDate       // child minimum age = today - 15 years
+                                            : adultMinDate,      // adult minimum age = today - 110 years
+
+                                        lastDate: (state.memberType.toLowerCase() == 'child')
+                                            ? childMaxDate       // child max = today
+                                            : adultMaxDate,      // adult max = today - 15 years
+
+                                        onDateChanged: (date) {
+                                          if (date != null) {
+                                            context
+                                                .read<AddnewfamilymemberBloc>()
+                                                .add(AnmUpdateDob(date));
+                                          }
+                                        },
+                                      ),
                                   )
                                 else
                                   _section(

@@ -675,34 +675,14 @@ class AddnewfamilymemberBloc
         final ts = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
         final deviceInfo = await DeviceInfo.getDeviceInfo();
 
-        String householdRefKey;
-        if (event.hhid != null && event.hhid!.isNotEmpty) {
-          householdRefKey = event.hhid!.toString();
-        } else {
-          final households = await LocalStorageDao.instance.getAllHouseholds();
-          if (households.isEmpty) {
-            emit(
-              state.copyWith(
-                postApiStatus: PostApiStatus.error,
-                errorMessage: 'No household found. Please create a household first.',
-              ),
-            );
-            return;
-          }
-          final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
-          if (beneficiaries.isEmpty) {
-            throw Exception('No existing beneficiary found to derive keys. Add a member first.');
-          }
-          final latestBeneficiary = beneficiaries.first;
-          householdRefKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
-        }
+        // Initialize with empty string or use provided hhid
+        String householdRefKey = event.hhid?.toString() ?? '';
 
-        final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
-        final latestBeneficiary = beneficiaries.isNotEmpty ? beneficiaries.first : null;
-        final uniqueKeyForSpouseFallback = (latestBeneficiary?['household_ref_key'] ?? householdRefKey).toString();
-
+        // Generate member and spouse keys without database checks
         final memberId = await IdGenerator.generateUniqueId(deviceInfo);
         final spousKey = await IdGenerator.generateUniqueId(deviceInfo);
+        // Use empty string as fallback for spouse key
+        final uniqueKeyForSpouseFallback = '';
 
         // Get current user info
         final currentUser = await UserInfo.getCurrentUser();
@@ -812,7 +792,6 @@ class AddnewfamilymemberBloc
                 resolvedFatherKey = headUnique;
                 resolvedMotherKey = spouseKeyLocal;
               } else if (state.relation == 'Child') {
-                // Infer parent keys based on genders of head and spouse
                 final headInfo = headRecord['beneficiary_info'] is Map
                     ? Map<String, dynamic>.from(headRecord['beneficiary_info'])
                     : <String, dynamic>{};

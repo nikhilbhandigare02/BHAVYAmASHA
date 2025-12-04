@@ -407,8 +407,10 @@ class RegisterNewHouseholdBloc
               }
 
 
+              // --- INSERT SPOUSE BENEFICIARY IF MARRIED & SPOUSE NAME PRESENT ---
               if (hasSpouse && spouseKey != null) {
                 try {
+
                   Map<String, dynamic> spDetails = {};
                   final spRaw = headForm['spousedetails'];
                   if (spRaw is Map) {
