@@ -10282,6 +10282,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No notifications found.'**
   String get noNotificationsFound;
+
+  /// No description provided for @syncStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Status'**
+  String get syncStatus;
+
+  /// No description provided for @household.
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get household;
+
+  /// No description provided for @beneficiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary'**
+  String get beneficiary;
+
+  /// No description provided for @followUpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow Up'**
+  String get followUpLabel;
+
+  /// No description provided for @lastSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced'**
+  String get lastSynced;
+
+  /// No description provided for @synced.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get synced;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

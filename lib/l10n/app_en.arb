@@ -1853,6 +1853,16 @@
   "enter10DigitNumber": "Enter 10 digit number",
   "viewRawData": "View Raw Data (Check Console)",
   "searchResults": "Search Results",
-  "noNotificationsFound": "No notifications found."
+  "noNotificationsFound": "No notifications found.",
+  "syncStatus": "Sync Status",
+  "household": "Household",
+  "beneficiary": "Beneficiary",
+  "followUpLabel": "Follow Up",
+  "lastSynced": "Last synced",
+  "synced": "Synced"
+
+
+
+
 
 }

@@ -5,6 +5,7 @@ import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../data/Database/database_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class SyncStatusScreen extends StatefulWidget {
   const SyncStatusScreen({super.key});
@@ -163,6 +164,8 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Sizer(
       builder: (context, orientation, deviceType) {
         return Scaffold(
@@ -171,7 +174,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
             backgroundColor: AppColors.primary,
             elevation: 0,
             title: Text(
-              'Sync Status',
+             l10n?.syncStatus ?? 'Sync Status',
               style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.background),
             ),
             leading: IconButton(
@@ -205,7 +208,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Sync Status',
+                              l10n?.syncStatus ?? 'Sync Status',
                               style: TextStyle(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
@@ -222,12 +225,12 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
                               crossAxisSpacing: 3.w,
                               childAspectRatio: 1.5,
                               children: [
-                                SyncCard(title: 'Household', total: _householdTotal, synced: _householdSynced),
-                                SyncCard(title: 'Beneficiary', total: _beneficiaryTotal, synced: _beneficiarySynced),
-                                SyncCard(title: 'Follow Up', total: _followupTotal, synced: _followupSynced),
-                                SyncCard(title: 'Eligible Couple', total: _eligibleCoupleTotal, synced: _eligibleCoupleSynced),
-                                SyncCard(title: 'Mother Care', total: _motherCareTotal, synced: _motherCareSynced),
-                                SyncCard(title: 'Child Care', total: _childCareTotal, synced: _childCareSynced),
+                                SyncCard(title:l10n?.household ?? 'Household', total: _householdTotal, synced: _householdSynced),
+                                SyncCard(title:l10n?.beneficiary ?? 'Beneficiary', total: _beneficiaryTotal, synced: _beneficiarySynced),
+                                SyncCard(title:l10n?.followUpLabel ?? 'Follow Up', total: _followupTotal, synced: _followupSynced),
+                                SyncCard(title:l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple', total: _eligibleCoupleTotal, synced: _eligibleCoupleSynced),
+                                SyncCard(title:l10n?.gridMotherCare ?? 'Mother Care', total: _motherCareTotal, synced: _motherCareSynced),
+                                SyncCard(title:l10n?.gridChildCare ?? 'Child Care', total: _childCareTotal, synced: _childCareSynced),
                               ],
                             ),
 
@@ -236,7 +239,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
                               Row(
                                 children: [
                                   Text(
-                                    'Last synced: ${_formatDateTime(_lastSyncedAt!)}',
+                                    '${l10n?.lastSynced ??"Last synced"}: ${_formatDateTime(_lastSyncedAt!)}',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 14.sp,
@@ -286,7 +289,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
   }
 }
 
-class SyncCard extends StatelessWidget {
+class SyncCard extends StatefulWidget {
   final String title;
   final int total;
   final int synced;
@@ -297,9 +300,15 @@ class SyncCard extends StatelessWidget {
     required this.total,
     required this.synced,
   });
+  @override
+  State<SyncCard> createState() => _SyncCardState();
+}
 
+class _SyncCardState extends State<SyncCard> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Card(
       color: Colors.white,
       elevation: 2,
@@ -310,7 +319,7 @@ class SyncCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              title,
+              widget.title,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15.sp,
@@ -323,7 +332,7 @@ class SyncCard extends StatelessWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: 'Total: ',
+                    text: '${l10n?.totalLabel ?? "Total"}: ',
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.blue[800],
@@ -331,7 +340,7 @@ class SyncCard extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: '$total',
+                    text: '${widget.total}',
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.black,
@@ -347,7 +356,7 @@ class SyncCard extends StatelessWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: 'Synced: ',
+                    text: '${l10n?.synced ?? "Synced"}: ',
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.blue[800],
@@ -355,7 +364,7 @@ class SyncCard extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: '$synced',
+                    text: '${widget.synced}',
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.black,
