@@ -418,7 +418,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                             key: ValueKey('asha_id_field_${state.ashaId}'),
                             labelText: l10n.ashaIdLabel,
                             hintText: l10n.ashaIdHint,
-                            initialValue: state.ashaId != null ? _toTitleCase(state.ashaId!.trim()) : '',
+                            initialValue: state.ashaId != null ? state.ashaId!.toUpperCase().trim() : '',
                             onChanged: (v) => bloc.add(AshaIdChanged(v)),
                             readOnly: true,
                           );
@@ -474,6 +474,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                           return CustomTextField(
                             labelText: l10n.ageLabel,
                             hintText: l10n.ageLabel,
+                            initialValue: ageText,
                             readOnly: true,
                           );
                         },

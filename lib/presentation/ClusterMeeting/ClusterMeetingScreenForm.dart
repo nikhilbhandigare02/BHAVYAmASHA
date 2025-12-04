@@ -875,7 +875,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
               ),
               Divider(color: AppColors.divider, thickness: 0.5),
               GestureDetector(
-                onTap: _showTopicsDialog,
+                onTap:  _showTopicsDialog,
                 child: AbsorbPointer(
                   child: Stack(
                     alignment: Alignment.centerRight,
