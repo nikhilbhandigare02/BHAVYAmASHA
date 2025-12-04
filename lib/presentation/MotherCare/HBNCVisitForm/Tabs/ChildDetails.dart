@@ -45,6 +45,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
             if (decoded is Map && decoded['form_data'] is Map) {
               final fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
               final outcome = fd['delivery_outcome']?.toString();
+              final number_of_children = fd['number_of_children']?.toString();
               final babyName = fd['baby1_name']?.toString();
               final babyGender = fd['baby1_gender']?.toString();
               final babyWeight = fd['baby1_weight']?.toString();
@@ -103,7 +104,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                 children: [
                   ApiDropdown<String>(
                     labelText: t.babyConditionLabel,
-                    items: const ['alive', 'dead'],
+                    items: const ['alive', 'death'],
                     getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                     value: s(c['babyCondition']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(

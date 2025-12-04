@@ -29,6 +29,10 @@ class HbncVisitState extends Equatable {
     this.validationTick = 0,
   })  : motherDetails = motherDetails ?? const {
           'motherStatus': null,
+          'dateOfDeath': null,
+          'deathPlace': null,
+          'reasonOfDeath': null,
+          'reasonOfDeathOther': null,
           'mcpCardAvailable': null,
           'mcpCardFilled': null,
           'postDeliveryProblems': null,

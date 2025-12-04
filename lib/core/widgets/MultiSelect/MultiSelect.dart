@@ -50,13 +50,109 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
   Future<void> _showMultiSelect() async {
     if (widget.isDisabled) return;
 
+    final localSelectedItems = List<T>.from(_selectedItems);
+
     final result = await showDialog<List<T>>(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        return MultiSelectDialog<T>(
-          title: widget.labelText,
-          items: widget.items,
-          selectedValues: _selectedItems,
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0.5.h),
+              ),
+              title: Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.labelText,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                    const Divider(height: 10),
+                  ],
+                ),
+              ),
+              content: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 40.h),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: widget.items.map((item) {
+                      final selected = localSelectedItems.contains(item.value);
+                      return CheckboxListTile(
+                        title: Text(
+                          item.label,
+                          style: TextStyle(fontSize: 15.sp),
+                        ),
+                        value: selected,
+                        onChanged: (bool? value) {
+                          setDialogState(() {
+                            if ((value ?? false)) {
+                              localSelectedItems.add(item.value);
+                            } else {
+                              localSelectedItems.remove(item.value);
+                            }
+                          });
+                        },
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
+                        dense: true,
+                        visualDensity: const VisualDensity(vertical: -4),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              actions: [
+                const Divider(height: 0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        FocusScope.of(context).unfocus();
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'CANCEL',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        FocusScope.of(context).unfocus();
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        Navigator.pop(context, localSelectedItems);
+                      },
+                      child: Text(
+                        'OK',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -79,25 +175,23 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
             text: TextSpan(
               text: widget.labelText,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontSize: 13.7.sp,
-              fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.87),
-                  ),
+                fontSize: 13.7.sp,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.87),
+              ),
               children: widget.isRequired
                   ? [
-                      TextSpan(
-                        text: ' *',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontWeight: FontWeight.bold,
-
-                        ),
-                      ),
-                    ]
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ]
                   : [],
             ),
           ),
-          // SizedBox(height: 0.0.h),
         ],
         InkWell(
           onTap: _showMultiSelect,
@@ -105,13 +199,14 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: widget.hintText,
-
-
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 12.0,
                 vertical: 8.0,
               ),
-              suffixIcon: Icon(Icons.arrow_drop_down, color: Colors.grey,),
+              suffixIcon: Icon(
+                Icons.arrow_drop_down,
+                color: Colors.grey,
+              ),
               filled: widget.isDisabled,
               fillColor: widget.isDisabled
                   ? Theme.of(context).disabledColor.withOpacity(0.04)
@@ -121,14 +216,12 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
               _selectedItems.isEmpty
                   ? widget.hintText
                   : _selectedItems
-                      .map((item) => widget.items
-                          .firstWhere((element) => element.value == item)
-                          .label)
-                      .join(', '),
+                  .map((item) => widget.items
+                  .firstWhere((element) => element.value == item)
+                  .label)
+                  .join(', '),
               style: TextStyle(
-                color: _selectedItems.isEmpty
-                    ? Theme.of(context).hintColor
-                    : null,
+                color: _selectedItems.isEmpty ? Theme.of(context).hintColor : null,
               ),
             ),
           ),
@@ -143,78 +236,12 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                 child: Text(
                   errorText,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                 ),
               );
             },
           ),
-      ],
-    );
-  }
-}
-
-class MultiSelectDialog<T> extends StatefulWidget {
-  final String title;
-  final List<MultiSelectItem<T>> items;
-  final List<T> selectedValues;
-
-  const MultiSelectDialog({
-    Key? key,
-    required this.title,
-    required this.items,
-    required this.selectedValues,
-  }) : super(key: key);
-
-  @override
-  _MultiSelectDialogState<T> createState() => _MultiSelectDialogState<T>();
-}
-
-class _MultiSelectDialogState<T> extends State<MultiSelectDialog<T>> {
-  late List<T> _selectedItems;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedItems = List<T>.from(widget.selectedValues);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: Colors.white,
-      title: Text(widget.title, style: TextStyle(fontSize: 16.sp),),
-      content: SingleChildScrollView(
-        child: Column(
-          children: widget.items.map((item) {
-            return CheckboxListTile(
-              title: Text(item.label,
-                style: TextStyle(fontSize: 15.sp),
-                  ),
-              value: _selectedItems.contains(item.value),
-              onChanged: (bool? selected) {
-                setState(() {
-                  if (selected == true) {
-                    _selectedItems.add(item.value);
-                  } else {
-                    _selectedItems.remove(item.value);
-                  }
-                });
-              },
-              controlAffinity: ListTileControlAffinity.leading,
-            );
-          }).toList(),
-        ),
-      ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('CANCEL', style: TextStyle(fontSize: 14.sp),),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, _selectedItems),
-          child: Text('OK',style: TextStyle(fontSize: 14.sp),),
-        ),
       ],
     );
   }
@@ -232,10 +259,10 @@ class MultiSelectItem<T> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MultiSelectItem &&
-          runtimeType == other.runtimeType &&
-          label == other.label &&
-          value == other.value;
+          other is MultiSelectItem &&
+              runtimeType == other.runtimeType &&
+              label == other.label &&
+              value == other.value;
 
   @override
   int get hashCode => label.hashCode ^ value.hashCode;

@@ -1018,6 +1018,19 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   value:  'Heart Disease',
                                 ),
                                 MultiSelectItem(
+                                  label:   'Liver Disease',
+                                  value:  'Liver Disease',
+                                ),
+                                MultiSelectItem(
+                                  label:   'Kidney Disease',
+                                  value:   'Kidney Disease',
+                                ),
+                                MultiSelectItem(
+                                  label:   'Epilepsy',
+                                  value:  'Epilepsy',
+                                ),
+
+                                MultiSelectItem(
                                   label: l10n?.diseaseOther ?? 'Other',
                                   value: l10n?.diseaseOther ?? 'Other',
                                 ),
@@ -1104,10 +1117,16 @@ class _AncvisitformState extends State<Ancvisitform> {
                               MultiSelect<String>(
                                 items: [
                                   'Severe Anemia',
-                                  'Hypertensive Disorder',
+                                  'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia',
                                   'Syphilis, HIV Positive, Hepatitis B, Hepatitis C',
                                   'Gestational Diabetes',
                                   'Hypothyroidism',
+                                  'Teenage Pregnancy (<20 year)/ Pregnancy after 35 Year',
+                                  'Pregnant With Twins Or More',
+                                  'Mal Presentation of baby(Breech/Transverse/Oblique)',
+                                  'Previous Cesarean Delivery',
+                                  'Previous History of Neo-Natal Death, Still Birth, Premature Birth, Repeated Abortion,PIH,PPH,APH,Obstructed Labour',
+                                  'RH Negative'
                                 ].map((risk) => MultiSelectItem<String>(
                                   label: risk,
                                   value: risk,
@@ -1120,16 +1139,17 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 },
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              const SizedBox(height: 16),
-                              ApiDropdown<String>(
-                                labelText: 'Any complication leading to abortion?',
-                                items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                                value: state.hasAbortionComplication.isEmpty ? null : state.hasAbortionComplication,
-                                getLabel: (s) => s,
-                                onChanged: (v) => bloc.add(HasAbortionComplicationChanged(v ?? '')),
-                                hintText: l10n?.select ?? 'Select',
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              if (!(int.tryParse(state.weeksOfPregnancy) != null && int.parse(state.weeksOfPregnancy) > 30)) ...[
+                                const SizedBox(height: 16),
+                                ApiDropdown<String>(
+                                  labelText: 'Any complication leading to abortion?',
+                                  items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
+                                  value: state.hasAbortionComplication.isEmpty ? null : state.hasAbortionComplication,
+                                  getLabel: (s) => s,
+                                  onChanged: (v) => bloc.add(HasAbortionComplicationChanged(v ?? '')),
+                                  hintText: l10n?.select ?? 'Select',
+                                ),
+                              ],
                               if (state.hasAbortionComplication == 'Yes') ...[
                                 const SizedBox(height: 16),
                                 CustomDatePicker(

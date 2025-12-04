@@ -200,7 +200,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Eligible Couple List',
+        screenTitle: 'HBNC List',
         showBack: true,
       ),
       drawer: const CustomDrawer(),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
+import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_bloc.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_event.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_state.dart';
@@ -34,7 +35,7 @@ class MotherDetailsTab extends StatelessWidget {
                 children: [
                   ApiDropdown<String>(
                     labelText: t.motherStatusLabel,
-                    items: const ['alive', 'dead'],
+                    items: const ['alive', 'death'],
                     getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                     value: _asString(m['motherStatus']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -42,8 +43,60 @@ class MotherDetailsTab extends StatelessWidget {
                     ),
                   ),
                   const Divider(height: 0),
-
-                  if (m['motherStatus'] == 'alive') ...[
+                  if (m['motherStatus'] == 'death') ...[
+                    CustomDatePicker(
+                      labelText: 'Date of death *',
+                      initialDate: m['dateOfDeath'] is DateTime ? m['dateOfDeath'] as DateTime : null,
+                      onDateChanged: (d) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(field: 'dateOfDeath', value: d),
+                      ),
+                    ),
+                    const Divider(),
+                    ApiDropdown<String>(
+                      labelText: 'Place of death *',
+                      items: const ['Home', 'Migrated Out', 'On the way', 'Facility', 'Other'],
+                      getLabel: (e) => e,
+                      value: _asString(m['deathPlace']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(field: 'deathPlace', value: val),
+                      ),
+                    ),
+                    const Divider(),
+                    ApiDropdown<String>(
+                      labelText: 'Reason of death *',
+                      items: const [
+                        'PH',
+                        'PPH',
+                        'Severe Anaemia',
+                        'Spesis',
+                        'Obstructed Labour',
+                        'Malpresentation',
+                        'Eclampsia/Severe Hypertension',
+                        'Unsafe Abortion',
+                        'Surgical Complication',
+                        'Other reason apart from maternal complication',
+                        'Other (Specify)'
+                      ],
+                      getLabel: (e) => e,
+                      value: _asString(m['reasonOfDeath']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(field: 'reasonOfDeath', value: val),
+                      ),
+                    ),
+                    const Divider(),
+                    if (m['reasonOfDeath'] == 'Other (Specify)') ...[
+                      CustomTextField(
+                        labelText: 'Other reason of death *',
+                        hintText: 'Specify other reason',
+                        initialValue: _asString(m['reasonOfDeathOther']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          MotherDetailsChanged(field: 'reasonOfDeathOther', value: val),
+                        ),
+                      ),
+                      const Divider(),
+                    ],
+                  ]
+                  else ...[
                     ApiDropdown<String>(
                       labelText: t.mcpCardAvailableLabelMother,
                       items: const ['Yes', 'No'],
@@ -59,7 +112,7 @@ class MotherDetailsTab extends StatelessWidget {
                     ),
                     const Divider(),
 
-                  ],
+
 
                   if (m['mcpCardAvailable'] == 'Yes') ...[
                     ApiDropdown<String>(
@@ -80,37 +133,10 @@ class MotherDetailsTab extends StatelessWidget {
                   ApiDropdown<String>(
                     labelText: t.postDeliveryProblemsLabel,
                     items: const [
-                      'None',
-                      'Excessive bleeding',
-                      'Severe headache/blurred vision',
-                      'Lower abdominal pain',
-                      'Foul-smelling discharge',
-                      'High fever',
-                      'Convulsions',
-                      'Other',
+                      'Yes',
+                      'No'
                     ],
-                    getLabel: (e) {
-                      switch (e) {
-                        case 'None':
-                          return t.postDeliveryProblemNone;
-                        case 'Excessive bleeding':
-                          return t.postDeliveryProblemExcessiveBleeding;
-                        case 'Severe headache/blurred vision':
-                          return t
-                              .postDeliveryProblemSevereHeadacheBlurredVision;
-                        case 'Lower abdominal pain':
-                          return t.postDeliveryProblemLowerAbdominalPain;
-                        case 'Foul-smelling discharge':
-                          return t.postDeliveryProblemFoulSmellingDischarge;
-                        case 'High fever':
-                          return t.postDeliveryProblemHighFever;
-                        case 'Convulsions':
-                          return t.postDeliveryProblemConvulsions;
-                        case 'Other':
-                        default:
-                          return t.other;
-                      }
-                    },
+                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: _asString(m['postDeliveryProblems']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       MotherDetailsChanged(
@@ -121,11 +147,11 @@ class MotherDetailsTab extends StatelessWidget {
                   ),
                   const Divider(),
 
-                  // Extra questions when there is any post-delivery problem
-                  if (m['postDeliveryProblems'] != null &&
-                      m['postDeliveryProblems'] != 'None') ...[
+
+                  if (
+                      m['postDeliveryProblems'] == 'Yes') ...[
                     ApiDropdown<String>(
-                      labelText: 'Excessive bleeding*',
+                      labelText: 'Excessive bleeding *',
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: _asString(m['excessiveBleeding']),
@@ -138,7 +164,7 @@ class MotherDetailsTab extends StatelessWidget {
                     ),
                     const Divider(),
                     ApiDropdown<String>(
-                      labelText: 'Unconsious / fits*',
+                      labelText: 'Unconsious / fits *',
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: _asString(m['unconsciousFits']),
@@ -181,26 +207,25 @@ class MotherDetailsTab extends StatelessWidget {
                       ),
                     ),
                     const Divider(),
-                    ApiDropdown<String>(
-                      labelText:
-                          'Is there is a problem in breastfeeding, help the mother to overcome it *',
-                      items: const ['Yes', 'No'],
-                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                      value: _asString(m['breastfeedingHelpGiven']),
+                    CustomTextField(
+                      labelText: 'Is there is a problem in breastfeeding, help the mother to overcome it *',
+                      hintText: 'Please write down the take action',
+                      initialValue: _asString(m['breastfeedingHelpGiven']),
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         MotherDetailsChanged(
                           field: 'breastfeedingHelpGiven',
                           value: val,
                         ),
                       ),
+
                     ),
-                    const Divider(),
+                    const Divider(height: 0),
                   ],
 
                   // Full meals count
                   ApiDropdown<int>(
                     labelText: "${t.mealsPerDayLabel} *",
-                    items: const [1, 2, 3, 4, 5, 6],
+                    items: const [1, 2, 3, 4, 5, 6, 7, 8, 9],
                     getLabel: (e) => e.toString(),
                     value: (m['mealsPerDay'] is int)
                         ? m['mealsPerDay'] as int
@@ -227,7 +252,7 @@ class MotherDetailsTab extends StatelessWidget {
 
                   ApiDropdown<int>(
                     labelText: t.padsPerDayLabel,
-                    items: const [0, 1, 2, 3, 4, 5, 6],
+                    items: const [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                     getLabel: (e) => e.toString(),
                     value: (m['padsPerDay'] is int)
                         ? m['padsPerDay'] as int
@@ -238,11 +263,14 @@ class MotherDetailsTab extends StatelessWidget {
                   ),
                   const Divider(),
 
-                  CustomTextField(
+                  ApiDropdown<String>(
                     labelText: t.mothersTemperatureLabel,
-                    hintText: t.mothersTemperatureLabel,
-                    keyboardType: TextInputType.number,
-                    initialValue: _asString(m['temperature']),
+                    items: const [
+                      'Temperature upto 102 degree F(38.9 degree C)',
+                      'Temperure More that102 degree F (38.9 degree C)'
+                    ],
+                    getLabel: (e) => e,
+                    value: _asString(m['temperature']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       MotherDetailsChanged(field: 'temperature', value: val),
                     ),
@@ -253,8 +281,8 @@ class MotherDetailsTab extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       final tempStr = _asString(m['temperature']) ?? '';
-                      final tempVal = double.tryParse(tempStr);
-                      if (tempVal != null && tempVal > 0 && tempVal <= 102) {
+                      final isUpto102 = tempStr == 'Temperature upto 102 degree F(38.9 degree C)';
+                      if (isUpto102) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -272,7 +300,7 @@ class MotherDetailsTab extends StatelessWidget {
                                     ),
                                   ),
                             ),
-                            const Divider(height: 0),
+
                           ],
                         );
                       }
@@ -280,7 +308,6 @@ class MotherDetailsTab extends StatelessWidget {
                     },
                   ),
 
-                  // Foul-smelling discharge & high fever
                   ApiDropdown<String>(
                     labelText: t.foulDischargeHighFeverLabel,
                     items: const ['Yes', 'No'],
@@ -296,18 +323,18 @@ class MotherDetailsTab extends StatelessWidget {
                   const Divider(height: 0),
 
                   // Abnormal speech or seizures
-                  ApiDropdown<String>(
-                    labelText: t.abnormalSpeechOrSeizureLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: _asString(m['abnormalSpeechOrSeizure']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(
-                        field: 'abnormalSpeechOrSeizure',
-                        value: val,
-                      ),
-                    ),
-                  ),
+                  // ApiDropdown<String>(
+                  //   labelText: t.abnormalSpeechOrSeizureLabel,
+                  //   items: const ['Yes', 'No'],
+                  //   getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                  //   value: _asString(m['abnormalSpeechOrSeizure']),
+                  //   onChanged: (val) => context.read<HbncVisitBloc>().add(
+                  //     MotherDetailsChanged(
+                  //       field: 'abnormalSpeechOrSeizure',
+                  //       value: val,
+                  //     ),
+                  //   ),
+                  // ),
                   const Divider(height: 0),
 
                   // New questions (as per request) - Yes/No
@@ -340,6 +367,19 @@ class MotherDetailsTab extends StatelessWidget {
                     ),
                     const Divider(height: 0),
                   ],
+                  ApiDropdown<String>(
+                    labelText: t.nippleCracksPainOrEngorgedLabel,
+                    items: const ['Yes', 'No'],
+                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                    value: _asString(m['nippleCracksPainOrEngorged']),
+                    onChanged: (val) => context.read<HbncVisitBloc>().add(
+                      MotherDetailsChanged(
+                        field: 'nippleCracksPainOrEngorged',
+                        value: val,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 0),
 
                   // Refer to Hospital & Refer to
                   ApiDropdown<String>(
@@ -359,8 +399,10 @@ class MotherDetailsTab extends StatelessWidget {
                       items: const [
                         'PHC',
                         'CHC',
-                        'District Hospital',
-                        'Private',
+                        'RH',
+                        'SDH',
+                        'DH',
+                        'MCH',
                       ],
                       getLabel: (e) => e,
                       value: _asString(m['referTo']),
@@ -371,19 +413,7 @@ class MotherDetailsTab extends StatelessWidget {
                     const Divider(height: 0),
                   ],
 
-                  ApiDropdown<String>(
-                    labelText: t.nippleCracksPainOrEngorgedLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: _asString(m['nippleCracksPainOrEngorged']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(
-                        field: 'nippleCracksPainOrEngorged',
-                        value: val,
-                      ),
-                    ),
-                  ),
-                  const Divider(height: 0),
+                  ],
                 ],
               ),
             ),

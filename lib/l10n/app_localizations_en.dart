@@ -2664,7 +2664,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alive => 'alive';
 
   @override
-  String get dead => 'dead';
+  String get dead => 'death';
 
   @override
   String get babyConditionLabel => 'Baby\'s condition *';
@@ -2781,7 +2781,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) *';
 
   @override
-  String get postDeliveryProblemsLabel => 'Does the mother have any problems after delivery? *';
+  String get postDeliveryProblemsLabel => 'Does the mother have any of the following problems post delivery? *';
 
   @override
   String get postDeliveryProblemNone => 'None';
@@ -2805,7 +2805,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'Convulsions';
 
   @override
-  String get breastfeedingProblemsLabel => 'Is the mother having problems breastfeeding? *';
+  String get breastfeedingProblemsLabel => 'Does the mother have breast feeding problem? *';
 
   @override
   String get mealsPerDayLabel => 'How many times does a mother take a full meal in 24 hours?';
@@ -2826,10 +2826,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get counselingAdviceLabel => 'Counseling / Advice *';
 
   @override
-  String get milkNotProducingOrLessLabel => 'After delivery, is the mother not producing milk or does she feel milk is less? *';
+  String get milkNotProducingOrLessLabel => 'Mother\'s milk is not being produced after delivery or she thinks less milk is being produced *';
 
   @override
-  String get nippleCracksPainOrEngorgedLabel => 'Does the mother have nipple cracks/pain and/or engorged breasts? *';
+  String get nippleCracksPainOrEngorgedLabel => 'is the mother having cracked nipples/ painful and / or engorged breasts *';
 
   @override
   String get outcomeFormTitle => 'Delivery Outcome';
@@ -3177,13 +3177,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prevVisitPncDay => 'PNC Day';
 
   @override
-  String get tabGeneralDetails => 'General Details';
+  String get tabGeneralDetails => 'BASIC DETAILS';
 
   @override
-  String get tabMotherDetails => 'Mother Details';
+  String get tabMotherDetails => 'MOTHER DETAILS';
 
   @override
-  String get tabNewbornDetails => 'Newborn Details';
+  String get tabNewbornDetails => 'CHIlD  DETAILS';
 
   @override
   String get confirmAttentionTitle => 'Confirm Action';

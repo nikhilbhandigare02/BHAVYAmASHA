@@ -138,7 +138,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                     color: AppColors.primary,
                     child: TabBar(
                       controller: _tabController,
-                      isScrollable: true, // ✅ makes the tabs scrollable
+                      isScrollable: true, 
                       labelColor: Colors.white,
                       unselectedLabelColor: Colors.white70,
                       indicatorColor: Colors.white,
@@ -149,7 +149,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                       tabs: [
                         Tab(text: t.tabGeneralDetails),
                         Tab(text: t.tabMotherDetails),
-                        Tab(text: t.tabNewbornDetails),
+                        Tab(text: t.tabNewbornDetails), 
                       ],
                       onTap: (index) =>
                           context.read<HbncVisitBloc>().add(TabChanged(index)),

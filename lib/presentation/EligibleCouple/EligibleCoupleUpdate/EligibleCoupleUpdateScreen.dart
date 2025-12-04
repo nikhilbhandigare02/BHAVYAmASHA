@@ -9,6 +9,7 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'bloc/eligible_coule_update_bloc.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 
 class EligibleCoupleUpdateScreen extends StatelessWidget {
   const EligibleCoupleUpdateScreen({super.key});
@@ -415,7 +416,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                   .textTheme
                                   .titleMedium),
                               SizedBox(height: 10,),
-                              // Youngest Child Age and Unit
+
                               Row(
                                 children: [
                                   Expanded(child: Text(
@@ -499,9 +500,31 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                             child: RoundButton(
                               title: state.isSubmitting ? 'UPDATING...' : (t
                                   ?.updateButton ?? 'UPDATE'),
-                              onPress: () =>
-                                  context.read<EligibleCouleUpdateBloc>().add(
-                                      const SubmitPressed()),
+                              onPress: () {
+                                final unit = state.youngestChildAgeUnit;
+                                final ageStr = state.youngestChildAge;
+                                final age = int.tryParse(ageStr);
+                                String? message;
+                                if (unit == 'Years') {
+                                  if (age == null || age < 1 || age > 90) {
+                                    message = 'Year: only 1 to 90 allowed';
+                                  }
+                                } else if (unit == 'Months') {
+                                  if (age == null || age < 1 || age > 12) {
+                                    message = 'Month: only 1 to 12 allowed';
+                                  }
+                                } else if (unit == 'Days') {
+                                  if (age == null || age < 1 || age > 31) {
+                                    message = 'Days: only 1 to 31 allowed';
+                                  }
+                                }
+                                if (message != null) {
+                                  showAppSnackBar(context, message);
+                                  return;
+                                }
+                                context.read<EligibleCouleUpdateBloc>().add(
+                                    const SubmitPressed());
+                              },
                               disabled: state.isSubmitting,
                             ),
                           ),
