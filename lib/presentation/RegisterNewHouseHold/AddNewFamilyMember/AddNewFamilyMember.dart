@@ -39,6 +39,8 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
   final bool maintainState;
   final Map<String, dynamic>? initial;
   final int initialStep;
+  final bool isAddMember;
+  final String? headMobileNumber;
 
   const AddNewFamilyMemberScreen({
     super.key,
@@ -52,6 +54,8 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
     this.maintainState = true,
     this.initial,
     this.initialStep = 0,
+    this.isAddMember = false,
+    this.headMobileNumber,
   });
 
   @override
@@ -199,9 +203,24 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
       return null;
     }
   }
+
   @override
   void initState() {
     super.initState();
+    _isEdit = widget.isEdit;
+
+    if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<AddnewfamilymemberBloc>().add(
+          AnmUpdateMobileNo(widget.headMobileNumber!),
+        );
+        // Set mobile owner to Family Head
+        context.read<AddnewfamilymemberBloc>().add(
+          const AnmUpdateMobileOwner('Family Head'),
+        );
+      });
+    }
+
     _bloc = AddnewfamilymemberBloc();
     _spousBloc = SpousBloc();
     _childrenBloc = ChildrenBloc();
@@ -305,6 +324,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         _bloc.add(AnmUpdateMotherName(_motherOption));
       }
     });
+
+
+
   }
 
   String? _firstFatherItem() {
@@ -4393,11 +4415,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                             // Handle based on the flow
                                             if (_isMemberDetails) {
-                                              // Edit mode is now handled above
-                                              if (!_isEdit) {
-                                                return;
-                                              }
-
                                               // In edit mode, we want to update the record directly without tab navigation
                                               if (_isEdit) {
                                                 print(
@@ -4498,17 +4515,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                               // Handle based on the flow
                                               if (_isMemberDetails) {
-                                                // Edit mode is now handled above
-                                                if (!_isEdit) {
-                                                } else {
-                                                  bloc.add(
-                                                    AnmSubmit(
-                                                      context,
-                                                      hhid: widget.hhId,
-                                                      extraData: memberData,
-                                                    ),
-                                                  );
-                                                }
+                                                // For member details flow, submit the form
+                                                bloc.add(
+                                                  AnmSubmit(
+                                                    context,
+                                                    hhid: widget.hhId,
+                                                    extraData: memberData,
+                                                  ),
+                                                );
                                                 return; // Don't navigate yet, wait for success state
                                               } else {
                                                 // In household flow, just return the data to parent

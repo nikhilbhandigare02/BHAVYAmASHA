@@ -940,6 +940,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     spouseGender: _headForm?['spouseGender']?.toString(),
                     inlineEdit: true,
                     isEdit: true,
+
                     initial: initialMember,
                     initialStep: initialStep,
                   ),

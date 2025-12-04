@@ -175,18 +175,18 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         children: [
           Text(
             text,
-            style: const TextStyle(
-              fontSize: _labelFontSize,
+            style:   TextStyle(
+              fontSize: 13.sp,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
           if (isRequired)
-            const Text(
+             Text(
               ' *',
               style: TextStyle(
                 color: Colors.red,
-                fontSize: _labelFontSize,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -595,7 +595,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         // _buildLabel('', isRequired: true),
-        const SizedBox(height: _verticalSpacing),
+        // const SizedBox(height: _verticalSpacing),
         ApiDropdown<String>(
           labelText: 'Select New Family Head',
           items: _selectedAdults,

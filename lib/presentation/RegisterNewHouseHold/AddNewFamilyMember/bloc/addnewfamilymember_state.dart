@@ -73,6 +73,7 @@ class AddnewfamilymemberState extends Equatable {
   final String? errorMessage;
 
 
+
   const AddnewfamilymemberState({
     this.status = AddnewfamilymemberStatus.initial,
     this.postApiStatus = PostApiStatus.initial,
