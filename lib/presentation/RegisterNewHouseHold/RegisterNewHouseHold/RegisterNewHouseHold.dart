@@ -93,7 +93,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   dynamic _convertYesNoDynamic(dynamic value) {
     if (value is String) {
       if (value == 'Yes') return 1;
-      if (value == 'No') return 0; 
+      if (value == 'No') return 0;
       return value;
     } else if (value is Map) {
       return _convertYesNoMap(Map<String, dynamic>.from(value as Map));
@@ -266,257 +266,257 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           ),
 
           body: SafeArea(
-        child: Column(
-          children: [
+            child: Column(
+              children: [
 
-            Material(
-              color: AppColors.primary,
-              child: TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                tabAlignment: TabAlignment.start, // 👈 ensures tabs start flush left
-                labelPadding: const EdgeInsets.symmetric(horizontal: 16), // spacing between tabs
-                indicatorColor: AppColors.onPrimary,
-                labelColor: AppColors.onPrimary,
-                unselectedLabelColor: AppColors.onPrimary,
-                labelStyle: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.3,
+                Material(
+                  color: AppColors.primary,
+                  child: TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start, // 👈 ensures tabs start flush left
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 16), // spacing between tabs
+                    indicatorColor: AppColors.onPrimary,
+                    labelColor: AppColors.onPrimary,
+                    unselectedLabelColor: AppColors.onPrimary,
+                    labelStyle: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.3,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    onTap: (index) {
+                      if (!headAdded && index > 0) {
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   SnackBar(
+                        //     content: Text(
+                        //       l10n?.rnhAddHeadFirstTabs ??
+                        //           'Please add a family head before accessing other sections.',
+                        //     ),
+                        //   ),
+                        // );
+                        _tabController.animateTo(0);
+                      } else {
+                        _tabController.animateTo(index);
+                      }
+                    },
+                    tabs: [
+                      _buildTab(l10n?.rnhTabMemberDetails ?? 'MEMBER DETAILS', 0),
+                      _buildTab(l10n?.rnhTabHouseholdDetails ?? 'HOUSEHOLD DETAILS', 1),
+                      _buildTab(l10n?.rnhTabHouseholdAmenities ?? 'HOUSEHOLD AMENITIES', 2),
+                    ],
+                  ),
                 ),
-                unselectedLabelStyle: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
+
+
+                Expanded(
+                  child: BlocProvider.value(
+                    value: _hhBloc,
+                    child: TabBarView(
+                      controller: _tabController,
+                      physics: (!headAdded)
+                          ? const NeverScrollableScrollPhysics()
+                          : null,
+                      children: [
+                        _buildMemberDetails(context),
+                        const HouseHoldDetails(),
+                        const HouseHoldAmenities(),
+                      ],
+                    ),
+                  ),
                 ),
-                onTap: (index) {
-                  if (!headAdded && index > 0) {
-                    // ScaffoldMessenger.of(context).showSnackBar(
-                    //   SnackBar(
-                    //     content: Text(
-                    //       l10n?.rnhAddHeadFirstTabs ??
-                    //           'Please add a family head before accessing other sections.',
-                    //     ),
-                    //   ),
-                    // );
-                    _tabController.animateTo(0);
-                  } else {
-                    _tabController.animateTo(index);
-                  }
-                },
-                tabs: [
-                  _buildTab(l10n?.rnhTabMemberDetails ?? 'MEMBER DETAILS', 0),
-                  _buildTab(l10n?.rnhTabHouseholdDetails ?? 'HOUSEHOLD DETAILS', 1),
-                  _buildTab(l10n?.rnhTabHouseholdAmenities ?? 'HOUSEHOLD AMENITIES', 2),
+              ],
+            ),
+          ),
+
+          bottomNavigationBar: SafeArea(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 4,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 0), // TOP shadow
+                  ),
                 ],
               ),
-            ),
-
-
-            Expanded(
-              child: BlocProvider.value(
-                value: _hhBloc,
-                child: TabBarView(
-                  controller: _tabController,
-                  physics: (!headAdded)
-                      ? const NeverScrollableScrollPhysics()
-                      : null,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildMemberDetails(context),
-                    const HouseHoldDetails(),
-                    const HouseHoldAmenities(),
+                    if (_tabController.index > 0)
+                      SizedBox(
+                        width: 25.5.w,
+                        height: 4.5.h,
+                        child: RoundButton(
+                          title: l10n?.previousButton ?? 'PREVIOUS',
+                          color: AppColors.primary,
+                          fontSize: 14.sp,
+                          borderRadius: 4,
+                          height: 44,
+                          onPress: () {
+                            final prev = (_tabController.index - 1).clamp(0, 2);
+                            _tabController.animateTo(prev);
+                          },
+                        ),
+                      )
+                    else
+                      const SizedBox(width: 120, height: 44),
+
+                    SizedBox(
+                      width: 25.5.w,
+                      height: 4.5.h,
+                      child: Builder(
+                        builder: (context) {
+                          final idx = _tabController.index;
+                          final bool disableNext = idx == 0 && !headAdded;
+
+                          String rightTitle;
+                          if (idx == 2) {
+                            rightTitle = widget.isEdit
+                                ? (l10n?.updateButton ?? 'UPDATE')
+                                : (l10n?.saveButton ?? 'SAVE');
+                          } else {
+                            rightTitle = (l10n?.nextButton ?? 'NEXT');
+                          }
+
+                          final householdBloc = context.read<RegisterNewHouseholdBloc>();
+
+                          return BlocConsumer<RegisterNewHouseholdBloc, RegisterHouseholdState>(
+                            listener: (context, state) {
+                              if (state.isSaved) {
+                                _skipExitConfirm = true;
+                                if (widget.showSuccessOnSave) {
+                                  showSuccessDialog(context).then((shouldNavigate) {
+                                    if (shouldNavigate == true && mounted) {
+                                      Navigator.pushNamedAndRemoveUntil(
+                                        context,
+                                        Route_Names.homeScreen,
+                                            (route) => false,
+                                      );
+                                    }
+                                  });
+                                } else {
+                                  if (mounted) {
+                                    Navigator.pushNamedAndRemoveUntil(
+                                      context,
+                                      Route_Names.homeScreen,
+                                          (route) => false,
+                                    );
+                                  }
+                                }
+                              } else if (state.error != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      state.error!,
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                    backgroundColor: Colors.redAccent,
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            },
+                            builder: (context, state) {
+                              return RoundButton(
+                                title: rightTitle,
+                                color: AppColors.primary,
+                                height: 44,
+                                isLoading: state.isSaving,
+                                onPress: () async {
+                                  if (disableNext) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Please add family head details',
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
+                                        backgroundColor: Colors.redAccent,
+                                        behavior: SnackBarBehavior.floating,
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  if (idx < 2) {
+                                    _tabController.animateTo(idx + 1);
+                                  } else {
+                                    try {
+                                      _hhBloc.emit(_hhBloc.state);
+                                      final amenitiesState = _hhBloc.state;
+                                      print(' Current Amenities State: ${amenitiesState.toString()}');
+
+                                      // Create a map with all the amenities data
+                                      final amenitiesData = {
+                                        'residentialArea': amenitiesState.residentialArea,
+                                        'otherResidentialArea': amenitiesState.otherResidentialArea,
+                                        'ownershipType': amenitiesState.ownershipType,
+                                        'otherOwnershipType': amenitiesState.otherOwnershipType,
+                                        'houseType': amenitiesState.houseType,
+                                        'otherHouseType': amenitiesState.otherHouseType,
+                                        'houseKitchen': amenitiesState.houseKitchen,
+                                        'cookingFuel': amenitiesState.cookingFuel,
+                                        'otherCookingFuel': amenitiesState.otherCookingFuel,
+                                        'waterSource': amenitiesState.waterSource,
+                                        'otherWaterSource': amenitiesState.otherWaterSource,
+                                        'electricity': amenitiesState.electricity,
+                                        'otherElectricity': amenitiesState.otherElectricity,
+                                        'toilet': amenitiesState.toilet,
+                                        'toiletType': amenitiesState.toiletType,
+                                        'typeOfToilet': amenitiesState.typeOfToilet,
+                                        'toiletPlace': amenitiesState.toiletPlace,
+                                      };
+
+
+                                      amenitiesData.removeWhere((key, value) =>
+                                      value == null ||
+                                          (value is String && value.isEmpty) ||
+                                          value == '');
+
+                                      print('📤 Prepared Amenities Data: $amenitiesData');
+
+                                      if (amenitiesData.isEmpty) {
+                                        print('⚠️ Warning: No amenities data to save');
+                                      }
+
+                                      householdBloc.add(
+                                        SaveHousehold(
+                                          headForm: _headForm,
+                                          memberForms: _memberForms,
+                                          amenitiesData: amenitiesData,
+                                        ),
+                                      );
+                                    } catch (e, stackTrace) {
+                                      print('❌ Error preparing amenities data:');
+                                      print('   Error: $e');
+                                      print('   Stack trace: $stackTrace');
+                                      // Re-throw to show error to user
+                                      rethrow;
+                                    }
+                                  }
+                                },
+                              );
+                            },
+                          );
+
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 4,
-                spreadRadius: 2,
-                offset: const Offset(0, 0), // TOP shadow
-              ),
-            ],
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (_tabController.index > 0)
-                  SizedBox(
-                    width: 25.5.w,
-                    height: 4.5.h,
-                    child: RoundButton(
-                      title: l10n?.previousButton ?? 'PREVIOUS',
-                      color: AppColors.primary,
-                      fontSize: 14.sp,
-                      borderRadius: 4,
-                      height: 44,
-                      onPress: () {
-                        final prev = (_tabController.index - 1).clamp(0, 2);
-                        _tabController.animateTo(prev);
-                      },
-                    ),
-                  )
-                else
-                  const SizedBox(width: 120, height: 44),
-
-            SizedBox(
-              width: 25.5.w,
-              height: 4.5.h,
-              child: Builder(
-                builder: (context) {
-                  final idx = _tabController.index;
-                  final bool disableNext = idx == 0 && !headAdded;
-
-                  String rightTitle;
-                  if (idx == 2) {
-                    rightTitle = widget.isEdit
-                        ? (l10n?.updateButton ?? 'UPDATE')
-                        : (l10n?.saveButton ?? 'SAVE');
-                  } else {
-                    rightTitle = (l10n?.nextButton ?? 'NEXT');
-                  }
-
-                  final householdBloc = context.read<RegisterNewHouseholdBloc>();
-
-                  return BlocConsumer<RegisterNewHouseholdBloc, RegisterHouseholdState>(
-                    listener: (context, state) {
-                      if (state.isSaved) {
-                        _skipExitConfirm = true;
-                        if (widget.showSuccessOnSave) {
-                          showSuccessDialog(context).then((shouldNavigate) {
-                            if (shouldNavigate == true && mounted) {
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                Route_Names.homeScreen,
-                                (route) => false,
-                              );
-                            }
-                          });
-                        } else {
-                          if (mounted) {
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              Route_Names.homeScreen,
-                              (route) => false,
-                            );
-                          }
-                        }
-                      } else if (state.error != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              state.error!,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            backgroundColor: Colors.redAccent,
-                            behavior: SnackBarBehavior.floating,
-                            duration: const Duration(seconds: 3),
-                          ),
-                        );
-                      }
-                    },
-                    builder: (context, state) {
-                      return RoundButton(
-                        title: rightTitle,
-                        color: AppColors.primary,
-                        height: 44,
-                        isLoading: state.isSaving,
-                        onPress: () async {
-                          if (disableNext) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Please add family head details',
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                                backgroundColor: Colors.redAccent,
-                                behavior: SnackBarBehavior.floating,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                            return;
-                          }
-
-                          if (idx < 2) {
-                            _tabController.animateTo(idx + 1);
-                          } else {
-                            try {
-                              _hhBloc.emit(_hhBloc.state);
-                              final amenitiesState = _hhBloc.state;
-                              print(' Current Amenities State: ${amenitiesState.toString()}');
-
-                              // Create a map with all the amenities data
-                              final amenitiesData = {
-                                'residentialArea': amenitiesState.residentialArea,
-                                'otherResidentialArea': amenitiesState.otherResidentialArea,
-                                'ownershipType': amenitiesState.ownershipType,
-                                'otherOwnershipType': amenitiesState.otherOwnershipType,
-                                'houseType': amenitiesState.houseType,
-                                'otherHouseType': amenitiesState.otherHouseType,
-                                'houseKitchen': amenitiesState.houseKitchen,
-                                'cookingFuel': amenitiesState.cookingFuel,
-                                'otherCookingFuel': amenitiesState.otherCookingFuel,
-                                'waterSource': amenitiesState.waterSource,
-                                'otherWaterSource': amenitiesState.otherWaterSource,
-                                'electricity': amenitiesState.electricity,
-                                'otherElectricity': amenitiesState.otherElectricity,
-                                'toilet': amenitiesState.toilet,
-                                'toiletType': amenitiesState.toiletType,
-                                'typeOfToilet': amenitiesState.typeOfToilet,
-                                'toiletPlace': amenitiesState.toiletPlace,
-                              };
-
-
-                              amenitiesData.removeWhere((key, value) =>
-                                  value == null ||
-                                  (value is String && value.isEmpty) ||
-                                  value == '');
-
-                              print('📤 Prepared Amenities Data: $amenitiesData');
-
-                              if (amenitiesData.isEmpty) {
-                                print('⚠️ Warning: No amenities data to save');
-                              }
-
-                              householdBloc.add(
-                                SaveHousehold(
-                                  headForm: _headForm,
-                                  memberForms: _memberForms,
-                                  amenitiesData: amenitiesData,
-                                ),
-                              );
-                            } catch (e, stackTrace) {
-                              print('❌ Error preparing amenities data:');
-                              print('   Error: $e');
-                              print('   Stack trace: $stackTrace');
-                              // Re-throw to show error to user
-                              rethrow;
-                            }
-                          }
-                        },
-                      );
-                    },
-                  );
-
-                },
-              ),
-            ),
-            ],
-            ),
-          ),
-        ),
-      ),
-    ));
+        ));
   }
 
   Future<void> _openAddHead() async {
@@ -582,9 +582,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         final String father = (result['fatherName'] ?? '').toString();
         final String spouse = (result['spouseName'] ?? '').toString();
         final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
-            ? (int.tryParse(result['children'].toString()) ?? 0) > 0 
-                ? result['children'].toString() 
-                : '0'
+            ? (int.tryParse(result['children'].toString()) ?? 0) > 0
+            ? result['children'].toString()
+            : '0'
             : '0';
 
         _members.add({
@@ -605,8 +605,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           final String spouseGender = (gender == 'Male')
               ? 'Female'
               : (gender == 'Female')
-                  ? 'Male'
-                  : '';
+              ? 'Male'
+              : '';
           // Calculate spouse age from spouse DOB / approx age
           String spouseAge = '';
           final bool spouseUseDob = (result['spouseUseDob'] == true);
@@ -646,36 +646,36 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
   Future<void> _openAddMember() async {
     try {
-      final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
-      if (beneficiaries.isEmpty) {
-        throw Exception('No existing beneficiary found to derive keys. Add a member first.');
-      }
-      final latestBeneficiary = beneficiaries.first;
-      final uniqueKey = (latestBeneficiary['household_ref_key'] ?? '').toString();
-      Map<String, String> head = {};
-      Map<String, String> spouse = {};
+      // Use empty values instead of checking database
+      final uniqueKey = _headForm?['hh_unique_key']?.toString() ?? '';
+      
+      Map<String, String> head = {
+        'Name': _headForm?['name']?.toString() ?? '',
+        'Gender': _headForm?['gender']?.toString() ?? '',
+      };
+      
+      Map<String, String> spouse = {
+        'Name': '',
+        'Gender': '',
+      };
+
+      // Try to find spouse info if available
       try {
-        head = Map<String, String>.from(
-          _members.firstWhere((m) => (m['Relation'] ?? '') == 'Self'),
+        final spouseMember = _members.firstWhere(
+          (m) => (m['Relation'] ?? '').toString().toLowerCase() == 'spouse' || 
+                 (m['Relation'] ?? '').toString().toLowerCase() == 'wife'
         );
-      } catch (_) {}
-      try {
-        spouse = Map<String, String>.from(
-          _members.firstWhere((m) {
-            final r = (m['Relation'] ?? '').toString();
-            return r == 'Wife' || r == 'Spouse';
-          }),
-        );
+        spouse = Map<String, String>.from(spouseMember);
       } catch (_) {}
 
       final result = await Navigator.of(context).push<Map<String, dynamic>>(
         MaterialPageRoute(
           builder: (_) => AddNewFamilyMemberScreen(
             hhId: uniqueKey,
-            headName: head['Name'],
-            headGender: head['Gender'],
-            spouseName: spouse['Name'],
-            spouseGender: spouse['Gender'],
+            headName: head['Name'] ?? '',
+            headGender: head['Gender'] ?? '',
+            spouseName: spouse['Name'] ?? '',
+            spouseGender: spouse['Gender'] ?? '',
           ),
         ),
       );
@@ -702,9 +702,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           final String father = (result['fatherName'] ?? '').toString();
           final String spouse = (result['spouseName'] ?? '').toString();
           final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
-              ? (int.tryParse(result['children'].toString()) ?? 0) > 0 
-                  ? result['children'].toString() 
-                  : '0'
+              ? (int.tryParse(result['children'].toString()) ?? 0) > 0
+              ? result['children'].toString()
+              : '0'
               : '0';
 
           _members.add({
@@ -728,8 +728,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             final String spouseGender = (gender == 'Male')
                 ? 'Female'
                 : (gender == 'Female')
-                    ? 'Male'
-                    : '';
+                ? 'Male'
+                : '';
             final bool spouseUseDob = (result['spouseUseDob'] == true);
             final String? spouseDobIso = result['spouseDob'] as String?;
             String spouseAge = '';
@@ -840,7 +840,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
           if (childrenTarget <= 0) return const SizedBox.shrink();
           return Padding(
-              padding: EdgeInsets.all(2.w),
+            padding: EdgeInsets.all(2.w),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -940,6 +940,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     spouseGender: _headForm?['spouseGender']?.toString(),
                     inlineEdit: true,
                     isEdit: true,
+
                     initial: initialMember,
                     initialStep: initialStep,
                   ),
@@ -965,8 +966,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   final String spouse = (result['spouseName'] ?? '').toString();
                   final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
                       ? (int.tryParse(result['children'].toString()) ?? 0) > 0
-                          ? result['children'].toString()
-                          : '0'
+                      ? result['children'].toString()
+                      : '0'
                       : '0';
                   final String maritalStatus = (result['maritalStatus'] ?? '').toString();
                   final String formIndexKey = formIndexStr.toString();
@@ -1106,8 +1107,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   final String spouse = (result['spouseName'] ?? '').toString();
                   final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
                       ? (int.tryParse(result['children'].toString()) ?? 0) > 0
-                          ? result['children'].toString()
-                          : '0'
+                      ? result['children'].toString()
+                      : '0'
                       : '0';
                   final int headIndex = _members.indexWhere((row) => row['Relation'] == 'Self');
                   if (headIndex >= 0) {
@@ -1273,7 +1274,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
                 const SizedBox(height: 8),
                 Text(
-                      'New house has been added successfully',
+                  'New house has been added successfully',
                   textAlign: TextAlign.center,
                   style:  TextStyle(
                     fontSize: 18,

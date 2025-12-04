@@ -25,6 +25,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
 
+import '../../../../data/repositories/RegisterNewHouseHoldController/register_new_house_hold.dart';
 import 'bloc/add_family_head_bloc.dart';
 
 
@@ -61,10 +62,61 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   }
 
   static String? _captureError(String? message) {
-    if (message != null && _lastFormError == null) {
-      _lastFormError = message;
+    if (message != null) {
+      if (_lastFormError == null) {
+        _lastFormError = message;
+      }
+      return message;
     }
-    return message;
+    return null;
+  }
+  
+  // Helper to find and scroll to the first error field in head form
+  void _scrollToFirstError() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final errorField = _findFirstErrorField();
+      if (errorField != null) {
+        Scrollable.ensureVisible(
+          errorField.context,
+          alignment: 0.1,
+          duration:  Duration(milliseconds: 300),
+        );
+      }
+    });
+  }
+  
+  // Helper method to find the first field with an error in head form
+  FormFieldState<dynamic>? _findFirstErrorField() {
+    FormFieldState<dynamic>? firstErrorField;
+    
+    void visitElement(Element element) {
+      if (firstErrorField != null) return;
+      
+      if (element.widget is FormField) {
+        final formField = element as StatefulElement;
+        final field = formField.state as FormFieldState<dynamic>?;
+        
+        if (field?.hasError == true) {
+          firstErrorField = field;
+          return;
+        }
+      }
+      
+      element.visitChildren(visitElement);
+    }
+    
+    // First check in the current form
+    final form = _formKey.currentState;
+    if (form != null && form.context != null) {
+      form.context.visitChildElements(visitElement);
+    }
+    
+    // If no error found in main form, check in spouse form if it exists
+    if (firstErrorField == null && spousFormKey.currentState?.context != null) {
+      spousFormKey.currentState!.context.visitChildElements(visitElement);
+    }
+    
+    return firstErrorField;
   }
 
   int _ageFromDob(DateTime dob) {
@@ -86,6 +138,30 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     return child;
   }
 
+
+
+  final RegisterNewHouseHold repository = RegisterNewHouseHold();
+
+  Future<Map<String, dynamic>?> fetchRCHDataForScreen(
+      int rchId, {
+        required int requestFor,
+      }) async {
+    try {
+      print('Calling API: getRCHData(rchId: $rchId, requestFor: $requestFor)');
+
+      final result = await repository.getRCHData(
+        requestFor: requestFor,
+        rchId: rchId,
+      );
+
+      print('RCH API Raw Response: $result');
+
+      return result;
+    } catch (e) {
+      print('RCH API Exception: $e');
+      return null;
+    }
+  }
   Widget _buildFamilyHeadForm(BuildContext context, AddFamilyHeadState state, AppLocalizations l) {
     return GestureDetector(
       onTap: () {
@@ -154,7 +230,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   labelText: '${l.dobLabel} *',
                   hintText: l.dateHint,
                   initialDate: state.dob,
-                  firstDate: DateTime(1915),
+                  firstDate: DateTime(now.year - 110, now.month, now.day), // exactly 110 years ago
                   lastDate: DateTime(now.year - 15, now.month, now.day), // 15 years ago
                   onDateChanged: (date) {
                     if (date != null) {
@@ -499,36 +575,38 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 children: [
                   Expanded(
                     child: CustomTextField(
-                      labelText: 'RCH ID',
-                      hintText: 'Enter 12 digit RCH ID',
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(12),
-                      ],
-                      onChanged: (v) {
-                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                        
-                        final value = v.trim();
-                        context.read<AddFamilyHeadBloc>().add(AfhRichIdChange(value));
-                        
-                        if (value.isNotEmpty && value.length != 12) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (mounted) {
-                              showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
-                            }
-                          });
+                        labelText: 'RCH ID',
+                        hintText: 'Enter 12 digit RCH ID',
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(12),
+                        ],
+                        onChanged: (v) {
+                          // Clear previous snackbar
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                          final value = v.trim();
+                          context.read<AddFamilyHeadBloc>().add(AfhRichIdChange(value));
+
+                          // Show error if not empty and not exactly 12 digits
+                          if (value.isNotEmpty && value.length != 12) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                              }
+                            });
+                          }
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return null; // Field is optional
+                          }
+                          if (value.length != 12) {
+                            return 'Must be 12 digits';
+                          }
+                          return null;
                         }
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return null; // Field is optional
-                        }
-                        if (value.length != 12) {
-                          return 'Must be 12 digits';
-                        }
-                        return null;
-                      }
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -540,7 +618,41 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       width: 40.w,
                       borderRadius: 1.h,
                       fontSize: 14.sp,
-                      onPress: () {
+                      onPress: () async {
+                        // Remove previous snackbar
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                        final rchId = state?.AfhRichIdChange?.trim() ?? "";
+
+                        // Validate
+                        if (rchId.isEmpty) {
+                          showAppSnackBar(context, "Please enter RCH ID");
+                          return;
+                        }
+
+                        if (rchId.length != 12) {
+                          showAppSnackBar(context, "RCH ID must be exactly 12 digits");
+                          return;
+                        }
+
+                        print("VERIFY PRESSED → Calling API…");
+                        print("RCH ID: $rchId");
+                        print("requestFor: 1");
+
+                        // 👉 CALL YOUR FUNCTION FROM SAME SCREEN
+                        final response = await fetchRCHDataForScreen(
+                          int.parse(rchId),
+                          requestFor: 1, // FEMALE
+                        );
+
+                        print("API Response → $response");
+
+                        if (response == null) {
+                          showAppSnackBar(context, "Failed to fetch RCH data");
+                        } else {
+                          showAppSnackBar(context, "RCH Verified Successfully!");
+                        }
+
                       },
                     ),
                   ),
@@ -914,7 +1026,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       }
                     },
                     validator: (date) => _captureError(Validations.validateLMP(l, date)),
-                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                    firstDate: DateTime.now().subtract( Duration(days: 365)),
                     lastDate: DateTime.now(),
                   ),
                 ),
@@ -1293,6 +1405,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             }
           },
           child: Scaffold(
+            backgroundColor: Colors.white,
             appBar: AppHeader(
               screenTitle: l.familyHeadDetailsTitle,
               showBack: true,
@@ -1568,8 +1681,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             final headForm = _formKey.currentState;
                                                             if (headForm == null || !headForm.validate()) {
                                                               canProceed = false;
-                                                              final msg = _lastFormError ?? 'Please correct the highlighted errors before continuing.';
-                                                              showAppSnackBar(context, msg);
+                                                              // The specific error messages will be shown by the individual field validators
                                                             }
                                                           } else if (i == 1) {
                                                             clearSpousFormError();
@@ -1578,57 +1690,67 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             if (spouseForm == null || !spousFormKey.currentState!.validate()) {
                                                               canProceed = false;
                                                               // Scroll to the first error in spouse form
-                                                              Scrollable.ensureVisible(
-                                                                context,
-                                                                alignment: 0.1, // Adjust this value as needed
-                                                                duration: const Duration(milliseconds: 300),
-                                                              );
-                                                              final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
-                                                              if (mounted) {
-                                                                showAppSnackBar(context, msg);
-                                                              }
-                                                            }
+                                                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                                final form = spousFormKey.currentContext?.findRenderObject() as RenderBox?;
+                                                                if (form != null) {
+                                                                  Scrollable.ensureVisible(
+                                                                    spousFormKey.currentContext!,
+                                                                  ) ;     }});}
                                                           }
+                                                          
                                                           if (!canProceed) return;
                                                           controller.animateTo(i + 1);
                                                         } else {
-
-                                                          if (last == 1) {
-                                                            clearSpousFormError();
-                                                            final spouseForm = spousFormKey.currentState;
-                                                            if (spouseForm == null || !spouseForm.validate()) {
-                                                              final msg = spousLastFormError ??
-                                                                  'Please correct the highlighted errors before continuing.';
-                                                              showAppSnackBar(context, msg);
-                                                              return;
-                                                              }
+                                                          bool isValid = true;
+                                                          
+                                                          _clearFormError();
+                                                          final headForm = _formKey.currentState;
+                                                          if (headForm == null || !headForm.validate()) {
+                                                            isValid = false;
+                                                            _scrollToFirstError();
                                                           }
-
+                                                          
+                                                          if (last >= 1) {
+                                                            clearSpousFormError();
+                                                            final state = context.read<SpousBloc>().state;
+                                                            final spouseForm = spousFormKey.currentState;
+                                                            
+                                                            final isSpouseFormValid = (spouseForm?.validate() ?? false) && 
+                                                                                    validateAllSpousFields(state);
+                                                            
+                                                            if (!isSpouseFormValid) {
+                                                              isValid = false;
+                                                              scrollToFirstError();
+                                                            }
+                                                          }
+                                                          
                                                           if (last == 2) {
-                                                            // Children tab present, validate children details
                                                             try {
                                                               final ch = context.read<ChildrenBloc>().state;
 
                                                               if (ch.totalLive > 0 &&
                                                                   (ch.totalMale + ch.totalFemale) !=
                                                                       ch.totalLive) {
-                                                                showAppSnackBar(
-                                                                    context, l.malePlusFemaleError);
+                                                                showAppSnackBar(context, l.malePlusFemaleError);
                                                                 return;
                                                               }
 
-                                                              final youngestErr =
-                                                                  _validateYoungestChild(ch, l);
+                                                              final youngestErr = _validateYoungestChild(ch, l);
                                                               if (youngestErr != null) {
                                                                 showAppSnackBar(context, youngestErr);
                                                                 return;
                                                               }
                                                             } catch (_) {}
-                                                            }
+                                                          }
+                                                          
+                                                          if (!isValid) {
+                                                            final msg = spousLastFormError ?? _lastFormError ?? 
+                                                                      'Please correct the highlighted errors before continuing.';
+                                                            showAppSnackBar(context, msg);
+                                                            return;
+                                                          }
 
-                                                          context
-                                                              .read<AddFamilyHeadBloc>()
-                                                              .add(AfhSubmit(context: context));
+                                                          context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
                                                         }
                                                       },
                                                       color: AppColors.primary,

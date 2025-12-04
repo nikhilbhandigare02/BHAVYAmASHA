@@ -183,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       try {
 
-        final ashaId = workingLocation['asha_id']?.toString() ?? '';
+        final ashaId = workingLocation['user_identifier']?.toString() ?? '';
         final firstName = name['first_name']?.toString().trim() ?? '';
         final middleName = name['middle_name']?.toString().trim() ?? '';
         final lastName = name['last_name']?.toString().trim() ?? '';

@@ -73,6 +73,7 @@ class AddFamilyHeadState extends Equatable {
   final PostApiStatus postApiStatus;
   final String? errorMessage;
 
+
   const AddFamilyHeadState({
     this.houseNo,
     this.headName,
@@ -141,6 +142,7 @@ class AddFamilyHeadState extends Equatable {
     this.spouseUniqueKey,
     this.postApiStatus = PostApiStatus.initial,
     this.errorMessage,
+
   });
 
   AddFamilyHeadState copyWith({
