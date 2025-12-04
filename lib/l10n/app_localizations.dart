@@ -5384,7 +5384,7 @@ abstract class AppLocalizations {
   /// No description provided for @dead.
   ///
   /// In en, this message translates to:
-  /// **'dead'**
+  /// **'death'**
   String get dead;
 
   /// No description provided for @babyConditionLabel.
@@ -5618,7 +5618,7 @@ abstract class AppLocalizations {
   /// No description provided for @postDeliveryProblemsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Does the mother have any problems after delivery? *'**
+  /// **'Does the mother have any of the following problems post delivery? *'**
   String get postDeliveryProblemsLabel;
 
   /// No description provided for @postDeliveryProblemNone.
@@ -5666,7 +5666,7 @@ abstract class AppLocalizations {
   /// No description provided for @breastfeedingProblemsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the mother having problems breastfeeding? *'**
+  /// **'Does the mother have breast feeding problem? *'**
   String get breastfeedingProblemsLabel;
 
   /// No description provided for @mealsPerDayLabel.
@@ -5708,13 +5708,13 @@ abstract class AppLocalizations {
   /// No description provided for @milkNotProducingOrLessLabel.
   ///
   /// In en, this message translates to:
-  /// **'After delivery, is the mother not producing milk or does she feel milk is less? *'**
+  /// **'Mother\'s milk is not being produced after delivery or she thinks less milk is being produced *'**
   String get milkNotProducingOrLessLabel;
 
   /// No description provided for @nippleCracksPainOrEngorgedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Does the mother have nipple cracks/pain and/or engorged breasts? *'**
+  /// **'is the mother having cracked nipples/ painful and / or engorged breasts *'**
   String get nippleCracksPainOrEngorgedLabel;
 
   /// No description provided for @outcomeFormTitle.
@@ -6410,19 +6410,19 @@ abstract class AppLocalizations {
   /// No description provided for @tabGeneralDetails.
   ///
   /// In en, this message translates to:
-  /// **'General Details'**
+  /// **'BASIC DETAILS'**
   String get tabGeneralDetails;
 
   /// No description provided for @tabMotherDetails.
   ///
   /// In en, this message translates to:
-  /// **'Mother Details'**
+  /// **'MOTHER DETAILS'**
   String get tabMotherDetails;
 
   /// No description provided for @tabNewbornDetails.
   ///
   /// In en, this message translates to:
-  /// **'Newborn Details'**
+  /// **'CHIlD  DETAILS'**
   String get tabNewbornDetails;
 
   /// No description provided for @confirmAttentionTitle.

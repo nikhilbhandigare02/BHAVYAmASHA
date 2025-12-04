@@ -33,7 +33,7 @@ class _Lbwrefered extends State<Lbwrefered> {
     final db = await DatabaseProvider.instance.database;
 
     try {
-      print('🔍 Loading LBW children from beneficiaries table (strict AND thresholds)');
+      print('🔍 Loading LBW children from beneficiaries table (flexible thresholds)');
 
       final rows = await db.query(
         'beneficiaries_new',
@@ -58,19 +58,30 @@ class _Lbwrefered extends State<Lbwrefered> {
             final decoded = jsonDecode(infoStr);
             if (decoded is Map) info = Map<String, dynamic>.from(decoded);
           } catch (_) {}
-          if (info == null || info!.isEmpty) continue;
+          if (info == null || info.isEmpty) continue;
 
+          var weight = _parseNumFlexible(info['weight'])?.toDouble();
+          var birthWeight = _parseNumFlexible(info['birthWeight'])?.toDouble();
 
-          var weight = _parseNumFlexible(info!['weight'])?.toDouble();
-          var birthWeight = _parseNumFlexible(info!['birthWeight'])?.toDouble();
+          // Flexible LBW condition logic
+          bool isLbw = false;
 
+          if (weight != null && birthWeight != null) {
+            // Both present: BOTH must satisfy their conditions
+            isLbw = (weight <= 1.6 && birthWeight <= 1600);
+          } else if (weight != null && birthWeight == null) {
+            // Only weight present: check weight condition only
+            isLbw = (weight <= 1.6);
+          } else if (weight == null && birthWeight != null) {
+            // Only birthWeight present: check birthWeight condition only
+            isLbw = (birthWeight <= 1600);
+          }
+          // If both are null, isLbw remains false
 
-
-          final isLbw = (weight != null && birthWeight != null && weight <= 1.2 && birthWeight <= 1200);
           if (!isLbw) continue;
           passed++;
 
-          final name = (info!['name'] ?? info['memberName'] ?? '').toString();
+          final name = (info['name'] ?? info['memberName'] ?? '').toString();
           final genderRaw = info['gender'];
           final dobRaw = info['dob'] ?? info['dateOfBirth'];
 
@@ -88,7 +99,7 @@ class _Lbwrefered extends State<Lbwrefered> {
         }
       }
 
-      print('✅ Beneficiaries passing strict LBW filter: $passed');
+      print('✅ Beneficiaries passing flexible LBW filter: $passed');
 
       setState(() {
         _filtered = lbwChildren;
@@ -178,7 +189,7 @@ class _Lbwrefered extends State<Lbwrefered> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.eligibleCoupleListTitle ?? 'Eligible Couple List',
+        screenTitle: 'LBW Referred',
         showBack: true,
       ),
       drawer: const CustomDrawer(),

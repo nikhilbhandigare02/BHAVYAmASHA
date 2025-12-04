@@ -129,7 +129,7 @@ class _Migratedout extends State<Migratedout> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.eligibleCoupleListTitle ?? 'Eligible Couple List',
+        screenTitle: 'Migrated Out',
         showBack: true,
       ),
       drawer: const CustomDrawer(),

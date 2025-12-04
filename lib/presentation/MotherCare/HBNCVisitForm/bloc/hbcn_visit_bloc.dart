@@ -136,7 +136,6 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         'device_id': deviceInfo.deviceId,
       };
 
-// Update the formData creation
       final formData = _convertDatesToStrings({
         'form_type': formType,
         'form_name': formName,
@@ -150,7 +149,6 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         'updated_at': now,
       });
 
-// Update the device_details in followupData
       final followupData = {
         'server_id': '',
         'forms_ref_key': formsRefKey,
@@ -333,12 +331,10 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingHelpGiven', 'Please answer breastfeeding help question');
       req('padsPerDay', 'Please select pads changed per day');
       req('mealsPerDay', 'Please select number of full meals per day');
-      req('temperature', 'Please enter mother\'s temperature');
-      // Paracetamol question only when temperature entered (up to 102 per requirement)
+      req('temperature', 'Please select mother\'s temperature');
       final _tempStr = (m['temperature'] ?? '').toString();
-      final _tempVal = double.tryParse(_tempStr);
-      reqIf(_tempVal != null && _tempVal > 0 && _tempVal <= 102,
-          'paracetamolGiven', 'Please answer Paracetamol tablet given');
+      final _isUpto102 = _tempStr == 'Temperature upto 102 degree F(38.9 degree C)';
+      reqIf(_isUpto102, 'paracetamolGiven', 'Please answer Paracetamol tablet given');
       req('foulDischargeHighFever', 'err_foul_discharge_high_fever_required');
       req('abnormalSpeechOrSeizure', 'err_abnormal_speech_or_seizure_required');
       // Newly added starred fields
@@ -348,6 +344,22 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       req('nippleCracksPainOrEngorged', 'Please answer cracked/painful/engorged breast question');
       req('referHospital', 'Please answer Refer to Hospital');
       reqIf(m['referHospital'] == 'Yes', 'referTo', 'Please select Refer to');
+      // If death selected, require death-specific fields and skip others
+      if (m['motherStatus'] == 'death') {
+        errors.clear();
+        void reqDeath(String key, String code) {
+          final val = m[key];
+          if (val == null || (val is String && val.trim().isEmpty)) {
+            errors.add(code);
+          }
+        }
+        reqDeath('dateOfDeath', 'Please enter date of death');
+        reqDeath('deathPlace', 'Please select place of death');
+        reqDeath('reasonOfDeath', 'Please select reason of death');
+        if (m['reasonOfDeath'] == 'Other (Specify)') {
+          reqDeath('reasonOfDeathOther', 'Please specify other reason of death');
+        }
+      }
     } else if (idx == 2) {
       final c = state.newbornDetails;
       void req(String key, String code) {
