@@ -5117,4 +5117,22 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get noNotificationsFound => 'कोई सूचनाएँ नहीं मिलीं।';
+
+  @override
+  String get syncStatus => 'Sync Status';
+
+  @override
+  String get household => 'Household';
+
+  @override
+  String get beneficiary => 'Beneficiary';
+
+  @override
+  String get followUpLabel => 'Follow Up';
+
+  @override
+  String get lastSynced => 'Last synced';
+
+  @override
+  String get synced => 'Synced';
 }

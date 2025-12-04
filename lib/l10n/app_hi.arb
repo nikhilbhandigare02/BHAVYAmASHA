@@ -1693,6 +1693,16 @@
   "enter10DigitNumber": "10 अंकों का नंबर दर्ज करें",
   "viewRawData": "रॉ डेटा देखें (कंसोल में जांचें)",
   "searchResults": "खोज परिणाम",
-  "noNotificationsFound": "कोई सूचनाएँ नहीं मिलीं।"
+  "noNotificationsFound": "कोई सूचनाएँ नहीं मिलीं।",
+  "syncStatus": "सिंक स्थिति",
+  "household": "परिवार",
+  "beneficiary": "लाभार्थी",
+  "followUpLabel": "फॉलो अप",
+  "lastSynced": "अंतिम सिंक",
+  "synced": "सिंक"
+
+
+
+
 
 }

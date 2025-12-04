@@ -234,11 +234,91 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 _section(
                   ApiDropdown<String>(
                     labelText: l.relationWithFamilyHead,
-                    items: const ['Husband', 'Wife'],
-                    getLabel: (s) => s == 'Husband' ? l.husbandLabel : l.wife,
-                    value: state.relation == 'Spouse'
-                        ? (state.gender == 'Female' ? 'Husband' : 'Wife')
-                        : (state.relation ?? (state.gender == 'Female' ? 'Husband' : 'Wife')),
+                    items: widget.isMemberDetails
+                        ? [
+                      'Self',
+                      'Father',
+                      'Mother',
+                      'Husband',
+                      'Wife',
+                      'Brother',
+                      'Sister',
+                      'Nephew',
+                      'Niece',
+                      'Son',
+                      'Daughter',
+                      'Grand Father',
+                      'Grand Mother',
+                      'Father In Law',
+                      'Mother In Law',
+                      'Grand Son',
+                      'Grand Daughter',
+                      'Son In Law',
+                      'Daughter In Law',
+                      'Other',
+                    ]
+                        : const [
+                      'Husband',
+                      'Wife',
+                    ],
+
+                    getLabel: (s) {
+                      if (!widget.isMemberDetails) {
+                        return s == 'Husband' ? l.husbandLabel : l.wife;
+                      }
+
+                      switch (s) {
+                        case 'Self':
+                          return l.self ?? 'Self';
+                        case 'Father':
+                          return l.father ?? 'Father';
+                        case 'Mother':
+                          return l.mother ?? 'Mother';
+                        case 'Husband':
+                          return  'Husband';
+                        case 'Wife':
+                          return l.wife ?? 'Wife';
+                        case 'Brother':
+                          return 'Brother';
+                        case 'Sister':
+                          return  'Sister';
+                        case 'Nephew':
+                          return  'Nephew';
+                        case 'Niece':
+                          return  'Niece';
+                        case 'Son':
+                          return l.son ?? 'Son';
+                        case 'Daughter':
+                          return l.daughter ?? 'Daughter';
+                        case 'Grand Father':
+                          return  'Grand Father';
+                        case 'Grand Mother':
+                          return  'Grand Mother';
+                        case 'Father In Law':
+                          return l.fatherInLaw ?? 'Father In Law';
+                        case 'Mother In Law':
+                          return l.motherInLaw ?? 'Mother In Law';
+                        case 'Grand Son':
+                          return  'Grand Son';
+                        case 'Grand Daughter':
+                          return  'Grand Daughter';
+                        case 'Son In Law':
+                          return  'Son In Law';
+                        case 'Daughter In Law':
+                          return  'Daughter In Law';
+                        case 'Other':
+                          return l.other ?? 'Other';
+
+                        default:
+                          return s;
+                      }
+                    },
+
+                    value: widget.isMemberDetails
+                        ? state.relation // Use the existing relation or default to first item
+                        : (state.relation == 'Spouse'
+                            ? (state.gender == 'Female' ? 'Husband' : 'Wife')
+                            : (state.relation ?? (state.gender == 'Female' ? 'Husband' : 'Wife'))),
                     onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRelation(v)),
                   ),
                 ),
@@ -713,7 +793,6 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               final value = v.trim();
                               context.read<SpousBloc>().add(RichIDChanged(value));
 
-                              // Show error if not empty and not exactly 12 digits
                               if (value.isNotEmpty && value.length != 12) {
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
                                   if (mounted) {
@@ -843,6 +922,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       } else {
                         spBloc.add(const SpUpdateMobileNo(''));
                       }
+
+
                     },
                     validator: (value) => captureSpousError(Validations.validateWhoMobileNo(l, value)),
                   ),
