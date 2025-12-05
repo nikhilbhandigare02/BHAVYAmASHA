@@ -27,11 +27,15 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
+  late int _childCount;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    final bd = (widget as dynamic).beneficiaryData;
+    final count = (bd?['child_tab_count'] as int?) ?? 1;
+    _childCount = count <= 0 ? 1 : (count > 3 ? 3 : count);
+    _tabController = TabController(length: 2 + _childCount, vsync: this);
   }
 
   @override
@@ -45,7 +49,8 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     final t = AppLocalizations.of(context)!;
 
     final beneficiaryData = (widget as dynamic).beneficiaryData;
-    
+    print(('from screen form',beneficiaryData?['child_tab_count'] as int?) ?? 1);
+
     return BlocProvider(
       create: (context) => HbncVisitBloc(),
       child: Builder(
@@ -149,7 +154,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                       tabs: [
                         Tab(text: t.tabGeneralDetails),
                         Tab(text: t.tabMotherDetails),
-                        Tab(text: t.tabNewbornDetails), 
+                        ...List.generate(_childCount, (i) => Tab(text: '${t.tabNewbornDetails} ${i + 1}')),
                       ],
                       onTap: (index) =>
                           context.read<HbncVisitBloc>().add(TabChanged(index)),
@@ -164,7 +169,11 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                         children: [
                           GeneralDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
                           const MotherDetailsTab(),
-                          ChildDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
+                          ...List.generate(_childCount, (i) => ChildDetailsTab(
+                                beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? '',
+                                childTabCount: (beneficiaryData?['child_tab_count'] as int?) ?? 1,
+                                childIndex: i + 1,
+                              )),
                         ],
                       ),
                     ),
@@ -277,7 +286,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
       'err_counseling_advice_required': t.err_counseling_advice_required,
       'err_milk_not_producing_or_less_required': t.err_milk_not_producing_or_less_required,
       'err_nipple_cracks_pain_or_engorged_required': t.err_nipple_cracks_pain_or_engorged_required,
-      'err_baby_condition_required': t.err_baby_condition_required,
+     'err_baby_condition_required': t.err_baby_condition_required, 
       'err_baby_name_required': t.err_baby_name_required,
       'err_baby_gender_required': t.err_baby_gender_required,
       'err_baby_weight_required': t.err_baby_weight_required,

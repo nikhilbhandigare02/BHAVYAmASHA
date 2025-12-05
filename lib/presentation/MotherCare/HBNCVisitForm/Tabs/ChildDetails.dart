@@ -13,7 +13,9 @@ import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
 
 class ChildDetailsTab extends StatefulWidget {
   final String beneficiaryId;
-  const ChildDetailsTab({super.key, required this.beneficiaryId});
+  final int childTabCount;
+  final int childIndex;
+  const ChildDetailsTab({super.key, required this.beneficiaryId, this.childTabCount = 1, this.childIndex = 1});
 
   @override
   State<ChildDetailsTab> createState() => _ChildDetailsTabState();
@@ -46,20 +48,22 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
               final fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
               final outcome = fd['delivery_outcome']?.toString();
               final number_of_children = fd['number_of_children']?.toString();
-              final babyName = fd['baby1_name']?.toString();
-              final babyGender = fd['baby1_gender']?.toString();
-              final babyWeight = fd['baby1_weight']?.toString();
+              final idx = widget.childIndex <= 1 ? 1 : (widget.childIndex >= 3 ? 3 : widget.childIndex);
+              final sfx = idx.toString();
+              final babyName = fd['baby${sfx}_name']?.toString();
+              final babyGender = fd['baby${sfx}_gender']?.toString();
+              final babyWeight = fd['baby${sfx}_weight']?.toString();
               if (mounted && outcome == 'Live birth') {
                 final bloc = context.read<HbncVisitBloc>();
-                bloc.add(NewbornDetailsChanged(field: 'babyCondition', value: 'alive'));
+                bloc.add(NewbornDetailsChanged(field: 'babyCondition', value: 'alive', childIndex: widget.childIndex));
                 if (babyName != null && babyName.isNotEmpty) {
-                  bloc.add(NewbornDetailsChanged(field: 'babyName', value: babyName));
+                  bloc.add(NewbornDetailsChanged(field: 'babyName', value: babyName, childIndex: widget.childIndex));
                 }
                 if (babyGender != null && babyGender.isNotEmpty) {
-                  bloc.add(NewbornDetailsChanged(field: 'gender', value: babyGender));
+                  bloc.add(NewbornDetailsChanged(field: 'gender', value: babyGender, childIndex: widget.childIndex));
                 }
                 if (babyWeight != null && babyWeight.isNotEmpty) {
-                  bloc.add(NewbornDetailsChanged(field: 'weightAtBirth', value: babyWeight));
+                  bloc.add(NewbornDetailsChanged(field: 'weightAtBirth', value: babyWeight, childIndex: widget.childIndex));
                 }
               }
             }
@@ -81,7 +85,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
   Widget build(BuildContext context) {
     return BlocBuilder<HbncVisitBloc, HbncVisitState>(
       builder: (context, state) {
-        final c = state.newbornDetails;
+        final i = widget.childIndex - 1;
+        final c = i >= 0 && i < state.newbornDetailsList.length ? state.newbornDetailsList[i] : const <String, dynamic>{};
         String? s(dynamic v) {
           if (v == null) return null;
           if (v is String && v.trim().isEmpty) return null;
@@ -108,7 +113,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                     value: s(c['babyCondition']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'babyCondition', value: val),
+                      NewbornDetailsChanged(field: 'babyCondition', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                   const Divider(height: 0,),
@@ -118,7 +123,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     hintText: t.babyNameLabel,
                     initialValue: s(c['babyName']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'babyName', value: val),
+                      NewbornDetailsChanged(field: 'babyName', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                   const Divider(height: 0,),
@@ -130,7 +135,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Male' ? t.male : (e == 'Female' ? t.female : t.other),
                     value: s(c['gender']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'gender', value: val),
+                      NewbornDetailsChanged(field: 'gender', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                   const Divider(height: 0,),
@@ -141,7 +146,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     keyboardType: TextInputType.number,
                     initialValue: s(c['weightAtBirth']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'weightAtBirth', value: val),
+                      NewbornDetailsChanged(field: 'weightAtBirth', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                   const Divider(height: 0,),
@@ -152,7 +157,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     keyboardType: TextInputType.number,
                     initialValue: s(c['temperature']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'temperature', value: val),
+                      NewbornDetailsChanged(field: 'temperature', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -164,7 +169,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Celsius' ? t.temperatureUnitCelsius : t.temperatureUnitFahrenheit,
                     value: s(c['tempUnit']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'tempUnit', value: val),
+                      NewbornDetailsChanged(field: 'tempUnit', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -176,7 +181,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? 'Yes' : 'No',
                     value: yn(c['weightColorMatch']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'weightColorMatch', value: val),
+                      NewbornDetailsChanged(field: 'weightColorMatch', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -188,7 +193,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Green' ? t.colorGreen : (e == 'Yellow' ? t.colorYellow : t.colorRed),
                     value: s(c['weighingScaleColor']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'weighingScaleColor', value: val),
+                      NewbornDetailsChanged(field: 'weighingScaleColor', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -201,7 +206,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['motherReportsTempOrChestIndrawing']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'motherReportsTempOrChestIndrawing', value: val),
+                      NewbornDetailsChanged(field: 'motherReportsTempOrChestIndrawing', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -214,7 +219,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['exclusiveBreastfeedingStarted']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'exclusiveBreastfeedingStarted', value: val),
+                      NewbornDetailsChanged(field: 'exclusiveBreastfeedingStarted', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -232,7 +237,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e,
                     value: c['firstBreastfeedTiming'] ?? '',
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'firstBreastfeedTiming', value: val),
+                      NewbornDetailsChanged(field: 'firstBreastfeedTiming', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -249,7 +254,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e,
                     value: c['howWasBreastfed'] ?? '',
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'howWasBreastfed', value: val),
+                      NewbornDetailsChanged(field: 'howWasBreastfed', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                    const Divider(height: 0,),
@@ -260,9 +265,20 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e,
                     value: s(c['firstFeedGivenAfterBirth']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'firstFeedGivenAfterBirth', value: val),
+                      NewbornDetailsChanged(field: 'firstFeedGivenAfterBirth', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                  if (c['firstFeedGivenAfterBirth'] == 'Other')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: CustomTextField(
+                        labelText: 'Please enter other option',
+                        initialValue: c['firstFeedOther'] ?? '',
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'firstFeedOther', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
+                    ),
                                       const Divider(height: 0,),
               
                   ApiDropdown<String>(
@@ -271,9 +287,22 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['adequatelyFedSevenToEightTimes']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'adequatelyFedSevenToEightTimes', value: val),
+                      NewbornDetailsChanged(field: 'adequatelyFedSevenToEightTimes', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                  if (c['adequatelyFedSevenToEightTimes'] == 'No')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: ApiDropdown<String>(
+                        labelText: 'Counselling/Advise needed?',
+                        items: const ['Yes', 'No'],
+                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                        value: yn(c['adequatelyFedCounseling']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'adequatelyFedCounseling', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
+                    ),
                      const Divider(height: 0,),
               
                   ApiDropdown<String>(
@@ -282,7 +311,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['babyDrinkingLessMilk']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'babyDrinkingLessMilk', value: val),
+                      NewbornDetailsChanged(field: 'babyDrinkingLessMilk', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -293,9 +322,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['breastfeedingStopped']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'breastfeedingStopped', value: val),
-                    ),
-                  ),
+                      NewbornDetailsChanged(field: 'breastfeedingStopped', value: val, childIndex: widget.childIndex),
+                    ),),
                                       const Divider(height: 0,),
               
                   ApiDropdown<String>(
@@ -304,7 +332,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['bloatedStomachOrFrequentVomiting']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'bloatedStomachOrFrequentVomiting', value: val),
+                      NewbornDetailsChanged(field: 'bloatedStomachOrFrequentVomiting', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -316,7 +344,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['bleedingUmbilicalCord']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'bleedingUmbilicalCord', value: val),
+                      NewbornDetailsChanged(field: 'bleedingUmbilicalCord', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -329,7 +357,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: yn(c['navelTiedByAshaAnm']),
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(field: 'navelTiedByAshaAnm', value: val),
+                        NewbornDetailsChanged(field: 'navelTiedByAshaAnm', value: val, childIndex: widget.childIndex),
                       ),
                     ),
                   if (c['bleedingUmbilicalCord'] == 'Yes')
@@ -341,7 +369,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['pusInNavel']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'pusInNavel', value: val),
+                      NewbornDetailsChanged(field: 'pusInNavel', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -353,7 +381,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['routineCareDone']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'routineCareDone', value: val),
+                      NewbornDetailsChanged(field: 'routineCareDone', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -365,7 +393,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['wipedWithCleanCloth']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'wipedWithCleanCloth', value: val),
+                      NewbornDetailsChanged(field: 'wipedWithCleanCloth', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -377,7 +405,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['keptWarm']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'keptWarm', value: val),
+                      NewbornDetailsChanged(field: 'keptWarm', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -389,7 +417,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['givenBath']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'givenBath', value: val),
+                      NewbornDetailsChanged(field: 'givenBath', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -401,7 +429,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['wrappedAndPlacedNearMother']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'wrappedAndPlacedNearMother', value: val),
+                      NewbornDetailsChanged(field: 'wrappedAndPlacedNearMother', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -412,7 +440,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['breathingRapid']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'breathingRapid', value: val),
+                      NewbornDetailsChanged(field: 'breathingRapid', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -424,7 +452,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['lethargic']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'lethargic', value: val),
+                      NewbornDetailsChanged(field: 'lethargic', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -436,7 +464,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['congenitalAbnormalities']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'congenitalAbnormalities', value: val),
+                      NewbornDetailsChanged(field: 'congenitalAbnormalities', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -448,9 +476,22 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['eyesNormal']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'eyesNormal', value: val),
+                      NewbornDetailsChanged(field: 'eyesNormal', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                  if (c['eyesNormal'] == 'No')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: ApiDropdown<String>(
+                        labelText: 'Select type of eye problem',
+                        items: const ['Swelling', 'Oozing pus'],
+                        getLabel: (e) => e,
+                        value: c['eyesProblemType'],
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'eyesProblemType', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
+                    ),
                                       const Divider(height: 0,),
               
               
@@ -460,7 +501,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['eyesSwollenOrPus']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'eyesSwollenOrPus', value: val),
+                      NewbornDetailsChanged(field: 'eyesSwollenOrPus', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -473,7 +514,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['skinFoldRedness']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'skinFoldRedness', value: val),
+                      NewbornDetailsChanged(field: 'skinFoldRedness', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -485,7 +526,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['jaundice']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'jaundice', value: val),
+                      NewbornDetailsChanged(field: 'jaundice', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -497,7 +538,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['pusBumpsOrBoil']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'pusBumpsOrBoil', value: val),
+                      NewbornDetailsChanged(field: 'pusBumpsOrBoil', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -509,7 +550,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['seizures']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'seizures', value: val),
+                      NewbornDetailsChanged(field: 'seizures', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -522,9 +563,22 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['cryingConstantlyOrLessUrine']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'cryingConstantlyOrLessUrine', value: val),
+                      NewbornDetailsChanged(field: 'cryingConstantlyOrLessUrine', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                  if (c['cryingConstantlyOrLessUrine'] == 'Yes')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: ApiDropdown<String>(
+                        labelText: 'Counselling/Advise needed for breastfeeding?',
+                        items: const ['Yes', 'No'],
+                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                        value: yn(c['cryingCounseling']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'cryingCounseling', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
+                    ),
                                       const Divider(height: 0,),
               
               
@@ -534,7 +588,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['cryingSoftly']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'cryingSoftly', value: val),
+                      NewbornDetailsChanged(field: 'cryingSoftly', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -546,7 +600,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['stoppedCrying']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'stoppedCrying', value: val),
+                      NewbornDetailsChanged(field: 'stoppedCrying', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -558,10 +612,22 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['referredByASHA']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'referredByASHA', value: val),
+                      NewbornDetailsChanged(field: 'referredByASHA', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
+                  if (c['referredByASHA'] == 'Yes') ...[
+                    const SizedBox(height: 8),
+                    ApiDropdown<String>(
+                      labelText: 'Referred by ASHA to',
+                      items: const ['HSC', 'APHC', 'PHC', 'CHC', 'RH', 'SDH', 'DH'],
+                      getLabel: (e) => e,
+                      value: s(c['referredByASHAFacility']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'referredByASHAFacility', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                  ],
+                  const Divider(height: 0,),
               
               
                   ApiDropdown<String>(
@@ -570,7 +636,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['birthRegistered']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'birthRegistered', value: val),
+                      NewbornDetailsChanged(field: 'birthRegistered', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -582,7 +648,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['birthCertificateIssued']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'birthCertificateIssued', value: val),
+                      NewbornDetailsChanged(field: 'birthCertificateIssued', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -594,7 +660,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['birthDoseVaccination']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'birthDoseVaccination', value: val),
+                      NewbornDetailsChanged(field: 'birthDoseVaccination', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
@@ -606,12 +672,12 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['mcpCardAvailable']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'mcpCardAvailable', value: val),
+                      NewbornDetailsChanged(field: 'mcpCardAvailable', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                                       const Divider(height: 0,),
               
-                  // Conditional dropdown for weight recorded in MCP card
+
                   if (c['mcpCardAvailable'] == 'Yes')
                     ApiDropdown<String>(
                       labelText: 'Is the weight of the new born baby recorded in the Mother Card Protection card?',
@@ -619,7 +685,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: yn(c['weightRecordedInMcpCard']),
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(field: 'weightRecordedInMcpCard', value: val),
+                        NewbornDetailsChanged(field: 'weightRecordedInMcpCard', value: val, childIndex: widget.childIndex),
                       ),
                     ),
                   if (c['mcpCardAvailable'] == 'Yes')
@@ -632,10 +698,22 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['referToHospital']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'referToHospital', value: val),
+                      NewbornDetailsChanged(field: 'referToHospital', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
+                  if (c['referToHospital'] == 'Yes') ...[
+                    const SizedBox(height: 8),
+                    ApiDropdown<String>(
+                      labelText: 'Refer to',
+                      items: const ['PHC', 'CHC', 'RH', 'SDH', 'DH', 'MCH'],
+                      getLabel: (e) => e,
+                      value: s(c['referToHospitalFacility']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'referToHospitalFacility', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                  ],
+                  const Divider(height: 0,),
               
                 ],
               ),

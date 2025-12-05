@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 class HbncVisitState extends Equatable {
   final int currentTabIndex;
   final Map<String, dynamic> motherDetails;
-  final Map<String, dynamic> newbornDetails;
+  final List<Map<String, dynamic>> newbornDetailsList;
   final Map<String, dynamic> visitDetails;
   final bool isSubmitting;
   final bool isSaving;
@@ -17,7 +17,7 @@ class HbncVisitState extends Equatable {
   const HbncVisitState({
     this.currentTabIndex = 0,
     Map<String, dynamic>? motherDetails,
-    Map<String, dynamic>? newbornDetails,
+    List<Map<String, dynamic>>? newbornDetailsList,
     Map<String, dynamic>? visitDetails,
     this.isSubmitting = false,
     this.isSaving = false,
@@ -54,7 +54,8 @@ class HbncVisitState extends Equatable {
           'referHospital': null,
           'referTo': null,
         },
-        newbornDetails = newbornDetails ?? const {
+        newbornDetailsList = newbornDetailsList ?? const [
+          {
           'babyCondition': null,
           'babyName': '',
           'gender': null,
@@ -87,6 +88,8 @@ class HbncVisitState extends Equatable {
           'birthCertificateIssued': null,
           'birthDoseVaccination': null,
           'mcpCardAvailable': null,
+          'referredByASHAFacility': null,
+          'referToHospitalFacility': null,
           'navelTiedByAshaAnm': null,
           'weightRecordedInMcpCard': null,
           'referToHospital': null,
@@ -94,11 +97,16 @@ class HbncVisitState extends Equatable {
           'firstBreastfeedTiming': null,
           'howWasBreastfed': null,
           'firstFeedGivenAfterBirth': null,
+          'firstFeedOther': '',
           'adequatelyFedSevenToEightTimes': null,
+          'adequatelyFedCounseling': null,
           'babyDrinkingLessMilk': null,
           'breastfeedingStopped': null,
           'bloatedStomachOrFrequentVomiting': null,
-        },
+          'eyesProblemType': null,
+          'cryingCounseling': null,
+          },
+        ],
         visitDetails = visitDetails ?? const {
           'visitDate': null,
           'nextVisitDate': null,
@@ -109,7 +117,7 @@ class HbncVisitState extends Equatable {
   HbncVisitState copyWith({
     int? currentTabIndex,
     Map<String, dynamic>? motherDetails,
-    Map<String, dynamic>? newbornDetails,
+    List<Map<String, dynamic>>? newbornDetailsList,
     Map<String, dynamic>? visitDetails,
     bool? isSubmitting,
     bool? isSaving,
@@ -123,7 +131,7 @@ class HbncVisitState extends Equatable {
     return HbncVisitState(
       currentTabIndex: currentTabIndex ?? this.currentTabIndex,
       motherDetails: motherDetails ?? this.motherDetails,
-      newbornDetails: newbornDetails ?? this.newbornDetails,
+      newbornDetailsList: newbornDetailsList ?? this.newbornDetailsList,
       visitDetails: visitDetails ?? this.visitDetails,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isSaving: isSaving ?? this.isSaving,
@@ -143,7 +151,7 @@ class HbncVisitState extends Equatable {
   List<Object?> get props => [
         currentTabIndex,
         motherDetails,
-        newbornDetails,
+        newbornDetailsList,
         visitDetails,
         isSubmitting,
         isSaving,

@@ -142,7 +142,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         'unique_key': formsRefKey,
         'hbyc_form': {
           'motherDetails': state.motherDetails,
-          'newbornDetails': state.newbornDetails,
+          'newbornDetailsList': state.newbornDetailsList,
           'visitDetails': state.visitDetails,
         },
         'created_at': now,
@@ -242,9 +242,65 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
 
   void _onNewbornDetailsChanged(
       NewbornDetailsChanged event, Emitter<HbncVisitState> emit) {
-    final updatedDetails = Map<String, dynamic>.from(state.newbornDetails);
-    updatedDetails[event.field] = event.value;
-    emit(state.copyWith(newbornDetails: updatedDetails));
+    final idx = (event.childIndex <= 0) ? 0 : event.childIndex - 1;
+    final list = List<Map<String, dynamic>>.from(state.newbornDetailsList);
+    while (list.length <= idx) {
+      list.add({
+        'babyCondition': null,
+        'babyName': '',
+        'gender': null,
+        'weightAtBirth': '',
+        'temperature': '',
+        'tempUnit': null,
+        'weightColorMatch': null,
+        'weighingScaleColor': null,
+        'motherReportsTempOrChestIndrawing': null,
+        'bleedingUmbilicalCord': null,
+        'pusInNavel': null,
+        'routineCareDone': null,
+        'wipedWithCleanCloth': null,
+        'keptWarm': null,
+        'givenBath': null,
+        'wrappedAndPlacedNearMother': null,
+        'breathingRapid': null,
+        'congenitalAbnormalities': null,
+        'eyesNormal': null,
+        'eyesSwollenOrPus': null,
+        'skinFoldRedness': null,
+        'jaundice': null,
+        'pusBumpsOrBoil': null,
+        'seizures': null,
+        'cryingConstantlyOrLessUrine': null,
+        'cryingSoftly': null,
+        'stoppedCrying': null,
+        'referredByASHA': null,
+        'birthRegistered': null,
+        'birthCertificateIssued': null,
+        'birthDoseVaccination': null,
+        'mcpCardAvailable': null,
+        'referredByASHAFacility': null,
+        'referToHospitalFacility': null,
+        'navelTiedByAshaAnm': null,
+        'weightRecordedInMcpCard': null,
+        'referToHospital': null,
+        'exclusiveBreastfeedingStarted': null,
+        'firstBreastfeedTiming': null,
+        'howWasBreastfed': null,
+        'firstFeedGivenAfterBirth': null,
+        'firstFeedOther': '',
+        'adequatelyFedSevenToEightTimes': null,
+        'adequatelyFedCounseling': null,
+        'babyDrinkingLessMilk': null,
+        'breastfeedingStopped': null,
+        'bloatedStomachOrFrequentVomiting': null,
+        'eyesProblemType': null,
+        'cryingCounseling': null,
+      });
+    }
+    final updated = Map<String, dynamic>.from(list[idx]);
+    updated[event.field] = event.value;
+    list[idx] = updated;
+    emit(state.copyWith(newbornDetailsList: list));
   }
 
   void _onVisitDetailsChanged(
@@ -268,7 +324,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
     try {
       print('Mother Details: ${jsonEncode(state.motherDetails)}');
       print('Visit Details: ${jsonEncode(state.visitDetails)}');
-      print('Newborn Details: ${jsonEncode(state.newbornDetails)}');
+      print('Newborn Details: ${jsonEncode(state.newbornDetailsList)}');
       await Future.delayed(const Duration(seconds: 2)); // Simulate API call
 
       emit(state.copyWith(
@@ -360,8 +416,9 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
           reqDeath('reasonOfDeathOther', 'Please specify other reason of death');
         }
       }
-    } else if (idx == 2) {
-      final c = state.newbornDetails;
+    } else if (idx >= 2) {
+      final ci = idx - 2;
+      final c = ci < state.newbornDetailsList.length ? state.newbornDetailsList[ci] : <String, dynamic>{};
       void req(String key, String code) {
         final val = c[key];
         if (val == null || (val is String && val.trim().isEmpty)) {
@@ -369,42 +426,44 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         }
       }
       req('babyCondition', 'err_baby_condition_required');
-      req('babyName', 'err_baby_name_required');
-      req('gender', 'err_baby_gender_required');
-      req('weightAtBirth', 'err_baby_weight_required');
-      req('temperature', 'err_newborn_temperature_required');
-      req('tempUnit', 'err_infant_temp_unit_required');
-      req('weightColorMatch', 'err_weight_color_match_required');
-      req('weighingScaleColor', 'err_weighing_scale_color_required');
-      req('motherReportsTempOrChestIndrawing', 'err_mother_reports_temp_or_chest_indrawing_required');
-      req('bleedingUmbilicalCord', 'err_bleeding_umbilical_cord_required');
-      req('pusInNavel', 'err_pus_in_navel_required');
-      req('routineCareDone', 'err_routine_care_done_required');
-      req('breathingRapid', 'err_breathing_rapid_required');
-      req('congenitalAbnormalities', 'err_congenital_abnormalities_required');
-      req('eyesNormal', 'err_eyes_normal_required');
-      req('eyesSwollenOrPus', 'err_eyes_swollen_or_pus_required');
-      req('skinFoldRedness', 'err_skin_fold_redness_required');
-      req('jaundice', 'err_newborn_jaundice_required');
-      req('pusBumpsOrBoil', 'err_pus_bumps_or_boil_required');
-      req('seizures', 'err_newborn_seizures_required');
-      req('cryingConstantlyOrLessUrine', 'err_crying_constant_or_less_urine_required');
-      req('cryingSoftly', 'err_crying_softly_required');
-      req('stoppedCrying', 'err_stopped_crying_required');
-      req('referredByASHA', 'err_referred_by_asha_required');
-      req('birthRegistered', 'err_birth_registered_required');
-      req('birthCertificateIssued', 'err_birth_certificate_issued_required');
-      req('birthDoseVaccination', 'err_birth_dose_vaccination_required');
-      req('mcpCardAvailable', 'err_mcp_child_required');
-      // Newly added breastfeeding section
-      req('exclusiveBreastfeedingStarted', 'err_exclusive_breastfeeding_started_required');
-      req('firstBreastfeedTiming', 'err_first_breastfeed_timing_required');
-      req('howWasBreastfed', 'err_how_was_breastfed_required');
-      req('firstFeedGivenAfterBirth', 'err_first_feed_given_after_birth_required');
-      req('adequatelyFedSevenToEightTimes', 'err_adequately_fed_seven_eight_required');
-      req('babyDrinkingLessMilk', 'err_baby_drinking_less_milk_required');
-      req('breastfeedingStopped', 'err_breastfeeding_stopped_required');
-      req('bloatedStomachOrFrequentVomiting', 'err_bloated_or_frequent_vomit_required');
+      final isAlive = c['babyCondition'] == 'alive';
+      if (isAlive) {
+        req('babyName', 'err_baby_name_required');
+        req('gender', 'err_baby_gender_required');
+        req('weightAtBirth', 'err_baby_weight_required');
+        req('temperature', 'err_newborn_temperature_required');
+        req('tempUnit', 'err_infant_temp_unit_required');
+        req('weightColorMatch', 'err_weight_color_match_required');
+        req('weighingScaleColor', 'err_weighing_scale_color_required');
+        req('motherReportsTempOrChestIndrawing', 'err_mother_reports_temp_or_chest_indrawing_required');
+        req('bleedingUmbilicalCord', 'err_bleeding_umbilical_cord_required');
+        req('pusInNavel', 'err_pus_in_navel_required');
+        req('routineCareDone', 'err_routine_care_done_required');
+        req('breathingRapid', 'err_breathing_rapid_required');
+        req('congenitalAbnormalities', 'err_congenital_abnormalities_required');
+        req('eyesNormal', 'err_eyes_normal_required');
+        req('eyesSwollenOrPus', 'err_eyes_swollen_or_pus_required');
+        req('skinFoldRedness', 'err_skin_fold_redness_required');
+        req('jaundice', 'err_newborn_jaundice_required');
+        req('pusBumpsOrBoil', 'err_pus_bumps_or_boil_required');
+        req('seizures', 'err_newborn_seizures_required');
+        req('cryingConstantlyOrLessUrine', 'err_crying_constant_or_less_urine_required');
+        req('cryingSoftly', 'err_crying_softly_required');
+        req('stoppedCrying', 'err_stopped_crying_required');
+        req('referredByASHA', 'err_referred_by_asha_required');
+        req('birthRegistered', 'err_birth_registered_required');
+        req('birthCertificateIssued', 'err_birth_certificate_issued_required');
+        req('birthDoseVaccination', 'err_birth_dose_vaccination_required');
+        req('mcpCardAvailable', 'err_mcp_child_required');
+        req('exclusiveBreastfeedingStarted', 'err_exclusive_breastfeeding_started_required');
+        req('firstBreastfeedTiming', 'err_first_breastfeed_timing_required');
+        req('howWasBreastfed', 'err_how_was_breastfed_required');
+        req('firstFeedGivenAfterBirth', 'err_first_feed_given_after_birth_required');
+        req('adequatelyFedSevenToEightTimes', 'err_adequately_fed_seven_eight_required');
+        req('babyDrinkingLessMilk', 'err_baby_drinking_less_milk_required');
+        req('breastfeedingStopped', 'err_breastfeeding_stopped_required');
+        req('bloatedStomachOrFrequentVomiting', 'err_bloated_or_frequent_vomit_required');
+      }
     }
 
     emit(state.copyWith(

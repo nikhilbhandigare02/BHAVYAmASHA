@@ -49,56 +49,48 @@ class _HBNCListScreenState
         return 0;
       }
 
-      print('🔍 Getting HBNC visit count for beneficiary: $beneficiaryId');
-
-      // Get database instance
       final db = await DatabaseProvider.instance.database;
-
-
       final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-
-       final List<Map<String, dynamic>> results = await db.query(
+      final countRows = await db.query(
         FollowupFormDataTable.table,
         where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
         whereArgs: [beneficiaryId, hbncVisitKey],
-        orderBy: 'created_date_time DESC',
+        columns: ['id'],
       );
-
-      if (results.isEmpty) {
-        print('ℹ️ No HBNC visit records found for beneficiary $beneficiaryId');
-        return 0;
-      }
-
-      // Log the latest record
-      final latestRecord = results.first;
-      print('\n📄 Latest HBNC Visit Record:');
-      print('   ID: ${latestRecord['id']}');
-      print('   Created: ${latestRecord['created_date_time']}');
-      print('   Modified: ${latestRecord['modified_date_time']}');
-
-      // Parse form data to get visit number
-      try {
-        final formJson = jsonDecode(latestRecord['form_json'] as String? ?? '{}');
-        final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-        
-        // Extract visit number from visitDetails
-        if (formData.containsKey('visitDetails')) {
-          final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
-          final visitNumber = visitDetails['visitNumber'] as int? ?? 0;
-          
-          print('   Visit Number: $visitNumber');
-          return visitNumber;
-        }
-      } catch (e) {
-        print('   Error parsing form data: $e');
-      }
-
-      // Fallback: return the count of all HBNC visit records if visitNumber not found
-      print('   Using fallback visit count: ${results.length}');
-      return results.length;
+      final count = countRows.length;
+      print('🔢 HBNC visit record count for $beneficiaryId: $count');
+      return count;
     } catch (e) {
       print('❌ Error in _getVisitCount for $beneficiaryId: $e');
       return 0;
+    }
+  }
+
+  Future<int> _getChildTabCount(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) return 1;
+      final db = await DatabaseProvider.instance.database;
+      final refKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+      if (refKey.isEmpty) return 1;
+      final rows = await db.rawQuery(
+        'SELECT * FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 ORDER BY created_date_time DESC LIMIT 1',
+        [refKey, beneficiaryId],
+      );
+      if (rows.isEmpty) return 1;
+      final s = rows.first['form_json']?.toString() ?? '';
+      if (s.isEmpty) return 1;
+      final decoded = jsonDecode(s);
+      final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['form_data'] as Map? ?? {}) : <String, dynamic>{};
+      final raw = fd['number_of_children']?.toString().trim().toLowerCase() ?? '';
+      if (raw.isEmpty) return 1;
+      if (raw == 'one' || raw == 'single' || raw == '1') return 1;
+      if (raw == 'twins' || raw == 'twin' || raw == '2') return 2;
+      if (raw == 'triplets' || raw == 'triplet' || raw == '3') return 3;
+      final n = int.tryParse(raw);
+      return (n == null || n < 1) ? 1 : (n > 3 ? 3 : n);
+    } catch (e) {
+      print('❌ Error determining child_tab_count for $beneficiaryId: $e');
+      return 1;
     }
   }
 
@@ -200,7 +192,7 @@ class _HBNCListScreenState
           final householdRefKey = beneficiary['household_ref_key']?.toString() ?? 'N/A';
           final createdDateTime = beneficiary['created_date_time']?.toString() ?? '';
 
-          // Get HBNC visit dates
+           
           final visitCount = await _getVisitCount(beneficiaryRefKey);
           final previousHBNCDate = await _getLastVisitDate(beneficiaryRefKey);
           final nextHBNCDate = await _getNextVisitDate(beneficiaryRefKey, formData['delivery_date']?.toString());
@@ -259,7 +251,7 @@ class _HBNCListScreenState
     }
   }
 
-  // Helper to get last N digits
+
   String _getLastDigits(String value, int count) {
     if (value.isEmpty || value == 'N/A') return value;
     return value.length > count ? value.substring(value.length - count) : value;
@@ -502,14 +494,17 @@ class _HBNCListScreenState
         side: BorderSide(color: Colors.grey.shade200),
       ),
       child: InkWell(
-        onTap: () {
+        onTap: () async {
 
           print('🔵 Navigating to HbncVisitScreen');
           print('🆔 Complete Household ID: ${data['fullHhId']}');
           print('🆔 Complete Beneficiary ID: ${data['fullBeneficiaryId']}');
           print('👤 Name: ${data['name']}');
 
+
           // Pass only beneficiary ID, household ID, and name
+          final childTabCount = await _getChildTabCount(data['fullBeneficiaryId']?.toString() ?? '');
+          print('👤 tabcount: ${data['child_tab_count']}');
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -518,6 +513,7 @@ class _HBNCListScreenState
                   'unique_key': data['fullBeneficiaryId'],
                   'household_ref_key': data['fullHhId'],
                   'name': data['name'],
+                  'child_tab_count': childTabCount,
                 },
               ),
             ),

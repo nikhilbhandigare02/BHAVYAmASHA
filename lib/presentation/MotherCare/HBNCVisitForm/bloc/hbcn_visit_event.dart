@@ -29,11 +29,12 @@ class MotherDetailsChanged extends HbncVisitEvent {
 class NewbornDetailsChanged extends HbncVisitEvent {
   final String field;
   final dynamic value;
+  final int childIndex;
 
-  const NewbornDetailsChanged({required this.field, required this.value});
+  const NewbornDetailsChanged({required this.field, required this.value, this.childIndex = 1});
 
   @override
-  List<Object?> get props => [field, value];
+  List<Object?> get props => [field, value, childIndex];
 }
 
 class VisitDetailsChanged extends HbncVisitEvent {

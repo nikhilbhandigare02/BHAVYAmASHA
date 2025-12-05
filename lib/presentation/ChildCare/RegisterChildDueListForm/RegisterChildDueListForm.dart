@@ -26,6 +26,7 @@ class BeneficiaryData {
   final String? createdDate;
   final String? weightGrams;
   final String? birthWeightGrams;
+  final String? birthCertificate;
 
   BeneficiaryData({
     this.name,
@@ -41,6 +42,7 @@ class BeneficiaryData {
     this.createdDate,
     this.weightGrams,
     this.birthWeightGrams,
+    this.birthCertificate,
   });
 
   factory BeneficiaryData.fromJson(Map<String, dynamic> json) {
@@ -58,6 +60,8 @@ class BeneficiaryData {
       createdDate: json['createdDate']?.toString(),
       weightGrams: json['weightGrams']?.toString(),
       birthWeightGrams: json['birthWeightGrams']?.toString(),
+      birthCertificate: json['birthCertificate']?.toString(),
+
     );
   }
 
@@ -75,6 +79,7 @@ class BeneficiaryData {
     'createdDate': createdDate,
     'weightGrams': weightGrams,
     'birthWeightGrams': birthWeightGrams,
+    'birthCertificate': birthCertificate,
   };
 
   @override
@@ -168,6 +173,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
             createdDate: row['created_date_time']?.toString(),
             weightGrams: (info['weight']?.toString()),
             birthWeightGrams: (info['birthWeight']?.toString()),
+            birthCertificate: info['birthCertificate']?.toString(),
+
           );
 
           setState(() {
@@ -356,6 +363,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       }
       if (data.birthWeightGrams != null && data.birthWeightGrams!.isNotEmpty) {
         bloc.add(BirthWeightGramsChanged(data.birthWeightGrams!));
+      }
+      if (data.birthCertificate != null && data.birthCertificate!.isNotEmpty) {
+        bloc.add(BirthCertificateIssuedChanged(data.birthCertificate!));
       }
     } else if (args.isNotEmpty) {
       if (args['name'] != null) bloc.add(ChildNameChanged(args['name'].toString()));
@@ -641,7 +651,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               child: ApiDropdown<String>(
                                 labelText: l10n?.birthCertificateIssuedLabel ?? 'Has the birth certificate been issued?',
                                 items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                                value: state.birthCertificateIssued.isEmpty ? null : state.birthCertificateIssued,
+                                value: _beneficiaryData?.birthCertificate?.isNotEmpty == true
+                                    ? _beneficiaryData?.birthCertificate
+                                    : (state.birthCertificateIssued.isEmpty ? null : state.birthCertificateIssued),
                                 getLabel: (s) => s,
                                 onChanged: (v) => bloc.add(BirthCertificateIssuedChanged(v ?? '')),
                                 hintText: l10n?.choose ?? 'choose',
