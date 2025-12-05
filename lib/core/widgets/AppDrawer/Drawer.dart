@@ -42,6 +42,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
       });
     }
   }
+  int? _appRoleId;
   Future<void> _loadUserData() async {
     if (mounted) {
       setState(() => isLoading = true);
@@ -49,35 +50,46 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
     try {
       developer.log('Loading user data from secure storage...', name: 'Drawer');
-      
-      // First try to get current user data
+
+      // Fetch user data
       Map<String, dynamic>? data = await SecureStorageService.getCurrentUserData();
-      
-      // If no data found, try the legacy format
+
+      // If not found, try legacy format
       if (data == null || data.isEmpty) {
-        developer.log('No current user data found, trying legacy format...', name: 'Drawer');
-        final legacyData = await SecureStorageService.getUserData();
-        if (legacyData != null && legacyData.isNotEmpty) {
-          try {
-            data = jsonDecode(legacyData) as Map<String, dynamic>?;
-          } catch (e) {
-            developer.log('Error parsing legacy user data: $e', name: 'Drawer', error: e);
-          }
+        final legacy = await SecureStorageService.getUserData();
+        if (legacy != null && legacy.isNotEmpty) {
+          data = jsonDecode(legacy) as Map<String, dynamic>?;
         }
       }
 
+      int extractedRoleId = 0;
+
+      try {
+        extractedRoleId = int.tryParse(data?['app_role_id']?.toString() ?? "") ?? 0;
+
+        developer.log("APP ROLE ID = $extractedRoleId", name: "Drawer");
+
+        if (mounted) {
+          setState(() {
+            _appRoleId = extractedRoleId;
+          });
+        }
+      } catch (e) {
+        developer.log("Error reading app_role_id: $e", name: "Drawer");
+      }
+
+      // Set user data and stop loader
       if (mounted) {
         setState(() {
           userData = data;
           isLoading = false;
         });
       }
+
     } catch (e) {
       developer.log('Error in _loadUserData: $e', name: 'Drawer', error: e);
       if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
+        setState(() => isLoading = false);
       }
     }
   }
@@ -94,7 +106,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           name['last_name']
         ].where((part) => part != null).join(' ').trim();
       }
-      
+
       // Try direct fields
       return [
         userData!['first_name'],
@@ -161,234 +173,236 @@ class _CustomDrawerState extends State<CustomDrawer> {
     return SizedBox(
         width: drawerWidth,
         child: Drawer(
-      backgroundColor: Colors.white,
-      child: SafeArea(
-        bottom: true,
-        child: Column(
-          children: [
-            // 🔹 Top Logo
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 2.w),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 0.5.h),
-                    child: Image.asset(
-                      'assets/images/bhabya-logo.png',
-                      width: 30.w,
-                      height: 13.h,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  Divider(
-                    color: Theme.of(context).colorScheme.primary,
-                    thickness: 0.8,
-                  ),
-                ],
-              ),
-            ),
-
-            // 🔹 Drawer Items List
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.only(bottom: 0), // Remove bottom padding
-                children: [
-                  _buildMenuItem(context, 'assets/images/home.png', l10n.drawerHome, onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeScreen(initialTabIndex: 1),
-                      ),
-                    );
-                  }),
-                  _buildMenuItem(context, 'assets/images/sam_mgmt.png', l10n.drawerProfile, onTap: () {
-                    Navigator.pushNamed(context, Route_Names.profileScreen);
-                  }),
-                  _buildMenuItem(context, 'assets/images/notes.png', l10n.drawerMisReport, onTap: () {
-                    Navigator.pushNamed(context, Route_Names.MISScreen);
-                  }),
-                  _buildMenuItem(context, 'assets/images/rupee.png', l10n.drawerIncentivePortal, onTap: () {
-                    Navigator.pushNamed(context, Route_Names.incentivePortal);
-                  }),
-                  _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () async {
-                    final onCompleted = widget.onSyncCompleted;
-                    if (isSyncing) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Sync already in progress')),
-                      );
-                      return;
-                    }
-                    setState(() {
-                      isSyncing = true;
-                    });
-                    
-                    final scaffoldMessenger = ScaffoldMessenger.of(context);
-                    scaffoldMessenger.hideCurrentSnackBar();
-                    final controller = scaffoldMessenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('Data is being fetched...'),
-                        duration: Duration(seconds: 5), // Show for 20 seconds
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-
-                    try {
-                      // Start the sync operation
-                      await SyncService.instance.runFullSyncOnce();
-                      
-                      // If still mounted and sync completed successfully
-                      if (mounted) {
-                        // Remove the loading snackbar if still showing
-                        scaffoldMessenger.hideCurrentSnackBar();
-                        
-                        // Show success message
-                        scaffoldMessenger.showSnackBar(
-                          const SnackBar(
-                            content: Text('Data sync completed'),
-                            duration: Duration(seconds: 3),
-                          ),
-                        );
-
-                        // Close drawer if it's open
-                        final scaffoldState = Scaffold.maybeOf(context);
-                        if (scaffoldState != null && scaffoldState.isDrawerOpen) {
-                          Navigator.pop(context);
-                        }
-                      }
-
-                      // Notify parent (HomeScreen)
-                      onCompleted?.call();
-                    } catch (e) {
-                      if (!mounted) return;
-                      
-                      // Remove loading snackbar and show error
-                      scaffoldMessenger
-                        ..hideCurrentSnackBar()
-                        ..showSnackBar(
-                          SnackBar(
-                            content: Text('Sync failed: ${e.toString()}'),
-                            duration: const Duration(seconds: 4),
-                          ),
-                        );
-                    } finally {
-                      if (mounted) {
-                        setState(() {
-                          isSyncing = false;
-                        });
-                      }
-                    }
-                  }),
-                  _buildMenuItem(context, 'assets/images/refresh-button.png', l10n.drawerSyncedData, onTap: () {
-                    Navigator.pushNamed(context, Route_Names.SyncStatusScreen);
-                  }),
-                  _buildMenuItem(context, 'assets/images/reset_password.png', l10n.drawerResetPassword, onTap: () {
-                    Navigator.pushNamed(context, Route_Names.Resetpassword);
-                  }),
-                  _buildMenuItem(context, 'assets/images/setting.png', l10n.drawerSettings, onTap: () {
-                    Navigator.pushNamed(context, Route_Names.setting);
-                  }),
-                  _buildMenuItem(context, 'assets/images/information.png', l10n.drawerAboutUs, onTap: () {
-                    Navigator.pushNamed(context, Route_Names.aboutUs);
-                  }),
-                  Divider(
-                    color: Theme.of(context).colorScheme.primary,
-                    thickness: 0.8,
-                  ),
-
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.3.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (isLoading)
-                          _buildLoadingState()
-                        else if (userData != null && userData!.isNotEmpty)
-                          ...[
-                            _UserInfoRow(
-                              label: l10n.userNameLabel,
-                              value: _getFullName(),
-                            ),
-                            _UserInfoRow(
-                              label: l10n.userRoleLabel,
-                              value: userData!['role_name']?.toString() ?? 'ASHA Worker',
-                            ),
-                            _UserInfoRow(
-                              label: l10n.userVillageLabel,
-                              value: _getWorkingLocation('village'),
-                            ),
-                            _UserInfoRow(
-                              label: l10n.userHscLabel,
-                              value: _getWorkingLocation('hsc_name'),
-                            ),
-                            _UserInfoRow(
-                              label: l10n.userHfrIdLabel,
-                              value: _getWorkingLocation('hsc_hfr_id'),
-                            ),
-                          ]
-                        else
-                          _buildErrorState('User data not available'),
-                        SizedBox(height: 1.h),
-                        Text(
-                          _appVersion,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontSize: 14.sp,
-                          ),
+          backgroundColor: Colors.white,
+          child: SafeArea(
+            bottom: true,
+            child: Column(
+              children: [
+                // 🔹 Top Logo
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2.w),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                        child: Image.asset(
+                          'assets/images/bhabya-logo.png',
+                          width: 30.w,
+                          height: 13.h,
+                          fit: BoxFit.contain,
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 0), // Remove any top margin
-              width: double.infinity,
-              height: 4.5.h, // responsive height
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  elevation: 0,
-                  padding: EdgeInsets.zero,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(0),
-                      topRight: Radius.circular(0),
-                    ),
+                      ),
+                      Divider(
+                        color: Theme.of(context).colorScheme.primary,
+                        thickness: 0.8,
+                      ),
+                    ],
                   ),
                 ),
-                onPressed: () {
-                  showConfirmationDialog(
-                    context: context,
-                    title: l10n.logoutTitle,
-                    message: l10n.logoutMessage,
-                    yesText: l10n.yes,
-                    noText: l10n.no,
-                    onYes: () async {
-                      await SecureStorageService.setLoginFlag(0);
 
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        Route_Names.loginScreen,
-                            (Route<dynamic> route) => false,
+                // 🔹 Drawer Items List
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.only(bottom: 0), // Remove bottom padding
+                    children: [
+                      _buildMenuItem(context, 'assets/images/home.png', l10n.drawerHome, onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(initialTabIndex: 1),
+                          ),
+                        );
+                      }),
+                      _buildMenuItem(context, 'assets/images/sam_mgmt.png', l10n.drawerProfile, onTap: () {
+                        Navigator.pushNamed(context, Route_Names.profileScreen);
+                      }),
+                      _buildMenuItem(context, 'assets/images/notes.png', l10n.drawerMisReport, onTap: () {
+                        Navigator.pushNamed(context, Route_Names.MISScreen);
+                      }),
+                      _buildMenuItem(context, 'assets/images/rupee.png', l10n.drawerIncentivePortal, onTap: () {
+                        Navigator.pushNamed(context, Route_Names.incentivePortal);
+                      }),
+                      _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () async {
+                        final onCompleted = widget.onSyncCompleted;
+                        if (isSyncing) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Sync already in progress')),
+                          );
+                          return;
+                        }
+                        setState(() {
+                          isSyncing = true;
+                        });
+
+                        final scaffoldMessenger = ScaffoldMessenger.of(context);
+                        scaffoldMessenger.hideCurrentSnackBar();
+                        final controller = scaffoldMessenger.showSnackBar(
+                          const SnackBar(
+                            content: Text('Data is being fetched...'),
+                            duration: Duration(seconds: 5), // Show for 20 seconds
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+
+                        try {
+                          // Start the sync operation
+                          await SyncService.instance.runFullSyncOnce();
+
+                          // If still mounted and sync completed successfully
+                          if (mounted) {
+                            // Remove the loading snackbar if still showing
+                            scaffoldMessenger.hideCurrentSnackBar();
+
+                            // Show success message
+                            scaffoldMessenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Data sync completed'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+
+                            // Close drawer if it's open
+                            final scaffoldState = Scaffold.maybeOf(context);
+                            if (scaffoldState != null && scaffoldState.isDrawerOpen) {
+                              Navigator.pop(context);
+                            }
+                          }
+
+                          // Notify parent (HomeScreen)
+                          onCompleted?.call();
+                        } catch (e) {
+                          if (!mounted) return;
+
+                          // Remove loading snackbar and show error
+                          scaffoldMessenger
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(
+                              SnackBar(
+                                content: Text('Sync failed: ${e.toString()}'),
+                                duration: const Duration(seconds: 4),
+                              ),
+                            );
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              isSyncing = false;
+                            });
+                          }
+                        }
+                      }),
+                      _buildMenuItem(context, 'assets/images/refresh-button.png', l10n.drawerSyncedData, onTap: () {
+                        Navigator.pushNamed(context, Route_Names.SyncStatusScreen);
+                      }),
+                      _buildMenuItem(context, 'assets/images/reset_password.png', l10n.drawerResetPassword, onTap: () {
+                        Navigator.pushNamed(context, Route_Names.Resetpassword);
+                      }),
+                      _buildMenuItem(context, 'assets/images/setting.png', l10n.drawerSettings, onTap: () {
+                        Navigator.pushNamed(context, Route_Names.setting);
+                      }),
+                      _buildMenuItem(context, 'assets/images/information.png', l10n.drawerAboutUs, onTap: () {
+                        Navigator.pushNamed(context, Route_Names.aboutUs);
+                      }),
+                      Divider(
+                        color: Theme.of(context).colorScheme.primary,
+                        thickness: 0.8,
+                      ),
+
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.3.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (isLoading)
+                              _buildLoadingState()
+                            else if (userData != null && userData!.isNotEmpty)
+                              ...[
+                                _UserInfoRow(
+                                  label: l10n.userNameLabel,
+                                  value: _getFullName(),
+                                ),
+                                _UserInfoRow(
+                                  label: l10n.userRoleLabel,
+                                  value: userData!['role_name']?.toString() ?? 'ASHA Worker',
+                                ),
+                                if (_appRoleId != 4) ...[
+                                  _UserInfoRow(
+                                    label: l10n.userVillageLabel,
+                                    value: _getWorkingLocation('village'),
+                                  ),
+                                  _UserInfoRow(
+                                    label: l10n.userHscLabel,
+                                    value: _getWorkingLocation('hsc_name'),
+                                  ),
+                                  _UserInfoRow(
+                                    label: l10n.userHfrIdLabel,
+                                    value: _getWorkingLocation('hsc_hfr_id'),
+                                  ),
+                                ],
+                              ]
+                            else
+                              _buildErrorState('User data not available'),
+                            SizedBox(height: 1.h),
+                            Text(
+                              _appVersion,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 0), // Remove any top margin
+                  width: double.infinity,
+                  height: 4.5.h, // responsive height
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      elevation: 0,
+                      padding: EdgeInsets.zero,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(0),
+                          topRight: Radius.circular(0),
+                        ),
+                      ),
+                    ),
+                    onPressed: () {
+                      showConfirmationDialog(
+                        context: context,
+                        title: l10n.logoutTitle,
+                        message: l10n.logoutMessage,
+                        yesText: l10n.yes,
+                        noText: l10n.no,
+                        onYes: () async {
+                          await SecureStorageService.setLoginFlag(0);
+
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            Route_Names.loginScreen,
+                                (Route<dynamic> route) => false,
+                          );
+                        },
                       );
                     },
-                  );
-                },
-                child: Text(
-                  l10n.drawerLogout,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
+                    child: Text(
+                      l10n.drawerLogout,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            )],
-        ),
-      ),
-    ));
+                )],
+            ),
+          ),
+        ));
   }
 
   Widget _buildMenuItem(BuildContext context, String imagePath, String title, {VoidCallback? onTap}) {

@@ -20,14 +20,12 @@ class UpdateMemberDetailScreen extends StatefulWidget {
   final int memberId;
   final String? hhId;
 
-  const UpdateMemberDetailScreen({
-    Key? key,
-    required this.memberId,
-    this.hhId,
-  }) : super(key: key);
+  const UpdateMemberDetailScreen({Key? key, required this.memberId, this.hhId})
+    : super(key: key);
 
   @override
-  State<UpdateMemberDetailScreen> createState() => _UpdateMemberDetailScreenState();
+  State<UpdateMemberDetailScreen> createState() =>
+      _UpdateMemberDetailScreenState();
 }
 
 class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
@@ -49,15 +47,14 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
     super.dispose();
   }
 
-  Widget _section(Widget child) => Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: child,
-  );
+  Widget _section(Widget child) =>
+      Padding(padding: const EdgeInsets.only(bottom: 4), child: child);
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-
+    _motherOption = l.select;
+    _fatherOption = l.select;
     return BlocProvider.value(
       value: _bloc,
       child: BlocListener<UpdateMemberDetailBloc, UpdateMemberDetailState>(
@@ -68,9 +65,9 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
             );
             Navigator.of(context).pop(true);
           } else if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
           }
         },
         child: WillPopScope(
@@ -87,7 +84,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
           },
           child: Scaffold(
             appBar: AppHeader(
-              screenTitle: 'Update Member Details',
+              screenTitle: l.updateMemberDetails ?? 'Update Member Details',
               showBack: true,
               onBackTap: () async {
                 if (_bloc.state.isSubmitting) return;
@@ -134,12 +131,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     if (v != null) {
                                       context
                                           .read<UpdateMemberDetailBloc>()
-                                          .add(UpdateMemberDetailMemberTypeChanged(v));
+                                          .add(
+                                            UpdateMemberDetailMemberTypeChanged(
+                                              v,
+                                            ),
+                                          );
                                       // Clear marital status when changing to Child
                                       if (v == 'Child') {
-                                        context
-                                            .read<UpdateMemberDetailBloc>()
-                                            .add(const UpdateMemberDetailMaritalStatusChanged(''));
+                                        context.read<UpdateMemberDetailBloc>().add(
+                                          const UpdateMemberDetailMaritalStatusChanged(
+                                            '',
+                                          ),
+                                        );
                                       }
                                     }
                                   },
@@ -147,25 +150,36 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                       Validations.validateMemberType(l, value),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // RICH ID for Child
                               if (state.memberType == 'Child') ...[
                                 _section(
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
                                           Expanded(
                                             child: CustomTextField(
-                                              labelText: "RICH ID",
-                                              hintText: 'RICH ID',
+                                              labelText: l.richId ?? "RICH ID",
+                                              hintText: l.richId ?? 'RICH ID',
                                               initialValue: state.richID,
                                               onChanged: (v) {
                                                 context
-                                                    .read<UpdateMemberDetailBloc>()
-                                                    .add(UpdateMemberDetailRichIDChanged(v ?? ''));
+                                                    .read<
+                                                      UpdateMemberDetailBloc
+                                                    >()
+                                                    .add(
+                                                      UpdateMemberDetailRichIDChanged(
+                                                        v ?? '',
+                                                      ),
+                                                    );
                                               },
                                             ),
                                           ),
@@ -173,13 +187,15 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                           SizedBox(
                                             height: 30,
                                             child: RoundButton(
-                                              title: 'VERIFY',
+                                              title: l.verifyLabel ?? 'VERIFY',
                                               width: 100,
                                               borderRadius: 8,
                                               fontSize: 12,
                                               onPress: () {
                                                 Navigator.pushNamed(
-                                                    context, Route_Names.Abhalinkscreen);
+                                                  context,
+                                                  Route_Names.Abhalinkscreen,
+                                                );
                                               },
                                             ),
                                           ),
@@ -188,7 +204,11 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     ],
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
                               ],
 
                               // Relation with Head
@@ -203,7 +223,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     'Mother',
                                     'Brother',
                                     'Sister',
-                                    'Other'
+                                    'Other',
                                   ],
                                   getLabel: (s) {
                                     switch (s) {
@@ -230,12 +250,20 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   value: state.relation,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailRelationChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailRelationChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
                                   validator: (value) =>
                                       Validations.validateFamilyHead(l, value),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Name
                               _section(
@@ -245,12 +273,21 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   initialValue: state.name,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailNameChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailNameChanged(v ?? ''),
+                                      ),
                                   validator: (value) =>
-                                      Validations.validateNameofMember(l, value),
+                                      Validations.validateNameofMember(
+                                        l,
+                                        value,
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Mother's Name
                               _section(
@@ -271,11 +308,19 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                         if (v != 'Select' && v != 'Other') {
                                           context
                                               .read<UpdateMemberDetailBloc>()
-                                              .add(UpdateMemberDetailMotherNameChanged(v));
+                                              .add(
+                                                UpdateMemberDetailMotherNameChanged(
+                                                  v,
+                                                ),
+                                              );
                                         } else {
                                           context
                                               .read<UpdateMemberDetailBloc>()
-                                              .add(const UpdateMemberDetailMotherNameChanged(''));
+                                              .add(
+                                                const UpdateMemberDetailMotherNameChanged(
+                                                  '',
+                                                ),
+                                              );
                                         }
                                       },
                                     ),
@@ -288,13 +333,21 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                           initialValue: state.motherName,
                                           onChanged: (v) => context
                                               .read<UpdateMemberDetailBloc>()
-                                              .add(UpdateMemberDetailMotherNameChanged(v ?? '')),
+                                              .add(
+                                                UpdateMemberDetailMotherNameChanged(
+                                                  v ?? '',
+                                                ),
+                                              ),
                                         ),
                                       ),
                                   ],
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Father's Name
                               _section(
@@ -302,7 +355,8 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     ApiDropdown<String>(
-                                      labelText: '${l.fatherGuardianNameLabel} *',
+                                      labelText:
+                                          '${l.fatherGuardianNameLabel} *',
                                       items: ['Select', 'Other'],
                                       getLabel: (s) => s,
                                       value: _fatherOption,
@@ -314,15 +368,24 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                         if (v != 'Select' && v != 'Other') {
                                           context
                                               .read<UpdateMemberDetailBloc>()
-                                              .add(UpdateMemberDetailFatherNameChanged(v));
+                                              .add(
+                                                UpdateMemberDetailFatherNameChanged(
+                                                  v,
+                                                ),
+                                              );
                                         } else {
                                           context
                                               .read<UpdateMemberDetailBloc>()
-                                              .add(const UpdateMemberDetailFatherNameChanged(''));
+                                              .add(
+                                                const UpdateMemberDetailFatherNameChanged(
+                                                  '',
+                                                ),
+                                              );
                                         }
                                       },
                                       validator: (_) {
-                                        if (_fatherOption == 'Select') return l.select;
+                                        if (_fatherOption == 'Select')
+                                          return l.select;
                                         return null;
                                       },
                                     ),
@@ -335,8 +398,13 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                           initialValue: state.fatherName,
                                           onChanged: (v) => context
                                               .read<UpdateMemberDetailBloc>()
-                                              .add(UpdateMemberDetailFatherNameChanged(v ?? '')),
-                                          validator: (v) => (v == null || v.trim().isEmpty)
+                                              .add(
+                                                UpdateMemberDetailFatherNameChanged(
+                                                  v ?? '',
+                                                ),
+                                              ),
+                                          validator: (v) =>
+                                              (v == null || v.trim().isEmpty)
                                               ? l.requiredField
                                               : null,
                                         ),
@@ -344,13 +412,21 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   ],
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Gender
                               _section(
                                 ApiDropdown<String>(
                                   labelText: '${l.genderLabel} *',
-                                  items: const ['Male', 'Female', 'Transgender'],
+                                  items: const [
+                                    'Male',
+                                    'Female',
+                                    'Transgender',
+                                  ],
                                   getLabel: (s) {
                                     switch (s) {
                                       case 'Male':
@@ -366,12 +442,20 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   value: state.gender,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailGenderChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailGenderChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
                                   validator: (value) =>
                                       Validations.validateGender(l, value),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Whose Mobile
                               _section(
@@ -424,33 +508,59 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   value: state.mobileOwner,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailMobileOwnerChanged(v ?? '')),
-                                  validator: (value) => Validations.validateWhoMobileNo(l, value),
+                                      .add(
+                                        UpdateMemberDetailMobileOwnerChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
+                                  validator: (value) =>
+                                      Validations.validateWhoMobileNo(l, value),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Mobile Number
                               _section(
                                 CustomTextField(
-                                  key: ValueKey('member_mobile_${state.mobileOwner ?? ''}'),
-                                  controller: TextEditingController(text: state.mobileNumber ?? '')
-                                    ..selection = TextSelection.collapsed(offset: state.mobileNumber?.length ?? 0),
+                                  key: ValueKey(
+                                    'member_mobile_${state.mobileOwner ?? ''}',
+                                  ),
+                                  controller:
+                                      TextEditingController(
+                                          text: state.mobileNumber ?? '',
+                                        )
+                                        ..selection = TextSelection.collapsed(
+                                          offset:
+                                              state.mobileNumber?.length ?? 0,
+                                        ),
                                   hintText: '${l.mobileLabel} *',
                                   labelText: '${l.mobileLabel} *',
                                   keyboardType: TextInputType.number,
                                   maxLength: 10,
                                   onChanged: (value) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailMobileNumberChanged(value ?? '')),
-                                  validator: (value) => Validations.validateMobileNo(l, value),
+                                      .add(
+                                        UpdateMemberDetailMobileNumberChanged(
+                                          value ?? '',
+                                        ),
+                                      ),
+                                  validator: (value) =>
+                                      Validations.validateMobileNo(l, value),
                                   inputFormatters: [
                                     FilteringTextInputFormatter.digitsOnly,
                                     LengthLimitingTextInputFormatter(10),
                                   ],
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // DOB or Age Toggle
                               Padding(
@@ -462,7 +572,9 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                       groupValue: state.useDob,
                                       onChanged: (_) => context
                                           .read<UpdateMemberDetailBloc>()
-                                          .add(const UpdateMemberDetailToggleUseDob()),
+                                          .add(
+                                            const UpdateMemberDetailToggleUseDob(),
+                                          ),
                                     ),
                                     Text(l.dobShort),
                                     const SizedBox(width: 16),
@@ -471,7 +583,9 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                       groupValue: state.useDob,
                                       onChanged: (_) => context
                                           .read<UpdateMemberDetailBloc>()
-                                          .add(const UpdateMemberDetailToggleUseDob()),
+                                          .add(
+                                            const UpdateMemberDetailToggleUseDob(),
+                                          ),
                                     ),
                                     Text(l.ageApproximate),
                                   ],
@@ -484,26 +598,39 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   CustomDatePicker(
                                     labelText: '${l.dobLabel} *',
                                     hintText: l.dateHint,
-                                    initialDate: state.dob ?? DateTime.now().subtract(const Duration(days: 365 * 20)),
+                                    initialDate:
+                                        state.dob ??
+                                        DateTime.now().subtract(
+                                          const Duration(days: 365 * 20),
+                                        ),
                                     firstDate: DateTime(1900),
                                     lastDate: DateTime.now(),
                                     onDateChanged: (date) {
                                       if (date != null) {
                                         context
                                             .read<UpdateMemberDetailBloc>()
-                                            .add(UpdateMemberDetailDobChanged(date));
+                                            .add(
+                                              UpdateMemberDetailDobChanged(
+                                                date,
+                                              ),
+                                            );
                                       }
                                     },
-                                    validator: (date) => Validations.validateDOB(l, date),
+                                    validator: (date) =>
+                                        Validations.validateDOB(l, date),
                                   ),
                                 )
                               else
                                 _section(
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsets.only(bottom: 1.h, left: 1.3.h),
+                                        padding: EdgeInsets.only(
+                                          bottom: 1.h,
+                                          left: 1.3.h,
+                                        ),
                                         child: Text(
                                           '${l.ageApproximate} *',
                                           style: TextStyle(
@@ -517,55 +644,89 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                         children: [
                                           Expanded(
                                             child: CustomTextField(
-                                              labelText: 'Years',
-                                              hintText: 'Years',
-                                              initialValue: state.updateYear ?? '',
-                                              keyboardType: TextInputType.number,
+                                              labelText:
+                                                  l.yearsSuffix ?? 'Years',
+                                              hintText:
+                                                  l.yearsSuffix ?? 'Years',
+                                              initialValue:
+                                                  state.updateYear ?? '',
+                                              keyboardType:
+                                                  TextInputType.number,
                                               onChanged: (v) => context
-                                                  .read<UpdateMemberDetailBloc>()
-                                                  .add(UpdateMemberDetailYearChanged(v ?? '')),
+                                                  .read<
+                                                    UpdateMemberDetailBloc
+                                                  >()
+                                                  .add(
+                                                    UpdateMemberDetailYearChanged(
+                                                      v ?? '',
+                                                    ),
+                                                  ),
                                             ),
                                           ),
                                           Container(
                                             width: 1,
                                             height: 4.h,
                                             color: Colors.grey.shade300,
-                                            margin: EdgeInsets.symmetric(horizontal: 1.w),
+                                            margin: EdgeInsets.symmetric(
+                                              horizontal: 1.w,
+                                            ),
                                           ),
                                           Expanded(
                                             child: CustomTextField(
-                                              labelText: 'Months',
-                                              hintText: 'Months',
-                                              initialValue: state.updateMonth ?? '',
-                                              keyboardType: TextInputType.number,
+                                              labelText: l.months ?? 'Months',
+                                              hintText: l.months ?? 'Months',
+                                              initialValue:
+                                                  state.updateMonth ?? '',
+                                              keyboardType:
+                                                  TextInputType.number,
                                               onChanged: (v) => context
-                                                  .read<UpdateMemberDetailBloc>()
-                                                  .add(UpdateMemberDetailMonthChanged(v ?? '')),
+                                                  .read<
+                                                    UpdateMemberDetailBloc
+                                                  >()
+                                                  .add(
+                                                    UpdateMemberDetailMonthChanged(
+                                                      v ?? '',
+                                                    ),
+                                                  ),
                                             ),
                                           ),
                                           Container(
                                             width: 1,
                                             height: 4.h,
                                             color: Colors.grey.shade300,
-                                            margin: EdgeInsets.symmetric(horizontal: 1.w),
+                                            margin: EdgeInsets.symmetric(
+                                              horizontal: 1.w,
+                                            ),
                                           ),
                                           Expanded(
                                             child: CustomTextField(
-                                              labelText: 'Days',
-                                              hintText: 'Days',
-                                              initialValue: state.updateDay ?? '',
-                                              keyboardType: TextInputType.number,
+                                              labelText: l.days ?? 'Days',
+                                              hintText: l.days ?? 'Days',
+                                              initialValue:
+                                                  state.updateDay ?? '',
+                                              keyboardType:
+                                                  TextInputType.number,
                                               onChanged: (v) => context
-                                                  .read<UpdateMemberDetailBloc>()
-                                                  .add(UpdateMemberDetailDayChanged(v ?? '')),
+                                                  .read<
+                                                    UpdateMemberDetailBloc
+                                                  >()
+                                                  .add(
+                                                    UpdateMemberDetailDayChanged(
+                                                      v ?? '',
+                                                    ),
+                                                  ),
                                             ),
                                           ),
                                         ],
-                                      )
+                                      ),
                                     ],
                                   ),
                                 ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Birth Order
                               _section(
@@ -591,48 +752,85 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   value: state.birthOrder,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailBirthOrderChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailBirthOrderChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Child-specific fields
                               if (state.memberType == 'Child') ...[
                                 _section(
                                   CustomTextField(
-                                    labelText: 'Weight (1.2-90)Kg',
+                                    labelText:
+                                        l.weightRange ?? 'Weight (1.2-90)Kg',
                                     keyboardType: TextInputType.number,
                                     initialValue: state.weight,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailWeightChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailWeightChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
                                 _section(
                                   ApiDropdown<String>(
-                                    labelText: 'is birth certificate issued?',
+                                    labelText:
+                                        l.isBirthCertificateIssued ??
+                                        'is birth certificate issued?',
                                     items: const ['Yes', 'No'],
                                     getLabel: (s) => s == 'Yes' ? l.yes : l.no,
                                     value: state.birthCertificate,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailBirthCertificateChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailBirthCertificateChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
                                 _section(
                                   ApiDropdown<String>(
-                                    labelText: 'is He/She school going child',
+                                    labelText:
+                                        l.isSchoolGoingChild ??
+                                        'is He/She school going child',
                                     items: const ['Yes', 'No'],
                                     getLabel: (s) => s == 'Yes' ? l.yes : l.no,
                                     value: state.childSchool,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailChildSchoolChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailChildSchoolChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
                               ],
 
                               // Religion
@@ -648,7 +846,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     'Buddhism',
                                     'Jainism',
                                     'Parsi',
-                                    'Other'
+                                    'Other',
                                   ],
                                   getLabel: (s) {
                                     switch (s) {
@@ -677,10 +875,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   value: state.religion,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailReligionChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailReligionChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Category
                               _section(
@@ -696,7 +902,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     'PichdaVarg2',
                                     'AtyantPichdaVarg',
                                     'DontKnow',
-                                    'Other'
+                                    'Other',
                                   ],
                                   getLabel: (s) {
                                     switch (s) {
@@ -727,10 +933,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   value: state.category,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailCategoryChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailCategoryChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // ABHA Address
                               _section(
@@ -746,7 +960,11 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                             initialValue: state.abhaAddress,
                                             onChanged: (v) => context
                                                 .read<UpdateMemberDetailBloc>()
-                                                .add(UpdateMemberDetailAbhaAddressChanged(v ?? '')),
+                                                .add(
+                                                  UpdateMemberDetailAbhaAddressChanged(
+                                                    v ?? '',
+                                                  ),
+                                                ),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
@@ -758,7 +976,10 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                             borderRadius: 8,
                                             fontSize: 12,
                                             onPress: () {
-                                              Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+                                              Navigator.pushNamed(
+                                                context,
+                                                Route_Names.Abhalinkscreen,
+                                              );
                                             },
                                           ),
                                         ),
@@ -767,7 +988,11 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   ],
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Bank Account
                               _section(
@@ -778,10 +1003,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   initialValue: state.bankAccount,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailBankAccountChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailBankAccountChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // IFSC Code
                               _section(
@@ -791,10 +1024,16 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   initialValue: state.ifsc,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailIfscChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailIfscChanged(v ?? ''),
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Adult-specific fields
                               if (state.memberType == 'Adult') ...[
@@ -809,7 +1048,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                       'Salaried',
                                       'Business',
                                       'Retired',
-                                      'Other'
+                                      'Other',
                                     ],
                                     getLabel: (s) {
                                       switch (s) {
@@ -836,10 +1075,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     value: state.occupation,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailOccupationChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailOccupationChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
                                 _section(
                                   ApiDropdown<String>(
                                     labelText: l.educationLabel,
@@ -850,7 +1097,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                       'High School',
                                       'Intermediate',
                                       'Diploma',
-                                      'Graduate and above'
+                                      'Graduate and above',
                                     ],
                                     getLabel: (s) {
                                       switch (s) {
@@ -875,10 +1122,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     value: state.education,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailEducationChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailEducationChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
                               ],
 
                               // IDs
@@ -889,10 +1144,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   initialValue: state.voterId,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailVoterIdChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailVoterIdChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               _section(
                                 CustomTextField(
@@ -901,10 +1164,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   initialValue: state.rationId,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailRationIdChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailRationIdChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               _section(
                                 CustomTextField(
@@ -913,16 +1184,25 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   initialValue: state.phId,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailPhIdChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailPhIdChanged(v ?? ''),
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Beneficiary Type
                               _section(
                                 ApiDropdown<String>(
                                   labelText: l.beneficiaryTypeLabel,
-                                  items: const ['StayingInHouse', 'SeasonalMigrant'],
+                                  items: const [
+                                    'StayingInHouse',
+                                    'SeasonalMigrant',
+                                  ],
                                   getLabel: (s) {
                                     switch (s) {
                                       case 'StayingInHouse':
@@ -936,10 +1216,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                   value: state.beneficiaryType,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
-                                      .add(UpdateMemberDetailBeneficiaryTypeChanged(v ?? '')),
+                                      .add(
+                                        UpdateMemberDetailBeneficiaryTypeChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
                                 ),
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
                               // Marital Status (only for Adult)
                               if (state.memberType != 'Child')
@@ -951,7 +1239,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                       'Unmarried',
                                       'Widowed',
                                       'Separated',
-                                      'Divorced'
+                                      'Divorced',
                                     ],
                                     getLabel: (s) {
                                       switch (s) {
@@ -972,13 +1260,24 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     value: state.maritalStatus,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailMaritalStatusChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailMaritalStatusChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                     validator: (value) =>
-                                        Validations.validateMaritalStatus(l, value),
+                                        Validations.validateMaritalStatus(
+                                          l,
+                                          value,
+                                        ),
                                   ),
                                 ),
                               if (state.memberType != 'Child')
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
 
                               // Married-specific fields
                               if (state.maritalStatus == 'Married') ...[
@@ -990,10 +1289,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     initialValue: state.ageAtMarriage,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailAgeAtMarriageChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailAgeAtMarriageChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
 
                                 _section(
                                   CustomTextField(
@@ -1002,12 +1309,20 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     initialValue: state.spouseName,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailSpouseNameChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailSpouseNameChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                     validator: (value) =>
                                         Validations.validateSpousName(l, value),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
 
                                 _section(
                                   ApiDropdown<String>(
@@ -1017,10 +1332,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     value: state.hasChildren,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailHasChildrenChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailHasChildrenChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
 
                                 _section(
                                   ApiDropdown<String>(
@@ -1030,15 +1353,29 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     value: state.isPregnant,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailIsPregnantChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailIsPregnantChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                     validator: (value) =>
-                                        Validations.validateIsPregnant(l, value),
+                                        Validations.validateIsPregnant(
+                                          l,
+                                          value,
+                                        ),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
                               ] else if (state.maritalStatus != null &&
-                                  ['Widowed', 'Separated', 'Divorced']
-                                      .contains(state.maritalStatus)) ...[
+                                  [
+                                    'Widowed',
+                                    'Separated',
+                                    'Divorced',
+                                  ].contains(state.maritalStatus)) ...[
                                 _section(
                                   CustomTextField(
                                     labelText: l.haveChildrenQuestion,
@@ -1047,16 +1384,25 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                     initialValue: state.children,
                                     onChanged: (v) => context
                                         .read<UpdateMemberDetailBloc>()
-                                        .add(UpdateMemberDetailChildrenChanged(v ?? '')),
+                                        .add(
+                                          UpdateMemberDetailChildrenChanged(
+                                            v ?? '',
+                                          ),
+                                        ),
                                   ),
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
                               ],
-
 
                               if (state.errorMessage != null)
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0,
+                                  ),
                                   child: Text(
                                     state.errorMessage!,
                                     style: const TextStyle(color: Colors.red),
@@ -1074,25 +1420,31 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                       return Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: RoundButton(
-                          title: state.isSubmitting ? 'Saving...' : 'Save',
+                          title: state.isSubmitting
+                              ? (l.saving ?? 'Saving...')
+                              : (l.finalizeSave ?? 'Save'),
                           onPress: state.isSubmitting
                               ? () {}
                               : () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              context
-                                  .read<UpdateMemberDetailBloc>()
-                                  .add(const UpdateMemberDetailSubmitEvent());
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please correct the highlighted errors before continuing.'),
-                                  backgroundColor: Colors.redAccent,
-                                  behavior: SnackBarBehavior.floating,
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            }
-                          },
+                                  if (_formKey.currentState?.validate() ??
+                                      false) {
+                                    context.read<UpdateMemberDetailBloc>().add(
+                                      const UpdateMemberDetailSubmitEvent(),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          l.correctHighlightedErrors ??
+                                              'Please correct the highlighted errors before continuing.',
+                                        ),
+                                        backgroundColor: Colors.redAccent,
+                                        behavior: SnackBarBehavior.floating,
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  }
+                                },
                           isLoading: state.isSubmitting,
                         ),
                       );

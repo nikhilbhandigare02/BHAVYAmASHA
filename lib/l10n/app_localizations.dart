@@ -3614,7 +3614,7 @@ abstract class AppLocalizations {
   /// No description provided for @motherNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mother Name *'**
+  /// **'Mother Name'**
   String get motherNameLabel;
 
   /// No description provided for @mukhiyaMobileHint.
@@ -5240,7 +5240,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthCertificateIssuedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the birth certificate been issued?'**
+  /// **'IS birth certificate issued?'**
   String get birthCertificateIssuedLabel;
 
   /// No description provided for @birthCertificateNumberLabel.
@@ -5570,19 +5570,19 @@ abstract class AppLocalizations {
   /// No description provided for @birthRegisteredLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is birth registration complete*'**
+  /// **'Is birth registration completed? *'**
   String get birthRegisteredLabel;
 
   /// No description provided for @mcpCardAvailableLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is \'Matra Child Protection (MCP)\' card available? *'**
+  /// **'Is there availability of \'Mother Child Protection (MCP) card? *'**
   String get mcpCardAvailableLabel;
 
   /// No description provided for @birthDoseVaccinationLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby received the birth dose vaccination? *'**
+  /// **'Is the birthdose vaccination given to baby? *'**
   String get birthDoseVaccinationLabel;
 
   /// No description provided for @homeVisitDayLabel.

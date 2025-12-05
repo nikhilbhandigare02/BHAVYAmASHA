@@ -48,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Country(id: 1, name: 'Rural'),
     Country(id: 2, name: 'Urban'),
   ];
-  int? appRoleId;
+  int? _appRoleId;
 
   Country? selectedCountry;
   String _userFullName = '';
@@ -142,15 +142,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
 
       Map<String, dynamic> actualUserData = details;
+
       final appRoleId = actualUserData['app_role_id'] ?? '';
       print("APP ROLE ID: $appRoleId");
 
-      if (appRoleId != null) {
-        final roleId = int.tryParse(appRoleId.toString());
-        if (roleId != null) {
-          _profileBloc.add(RoleIdChanged(roleId));
-        }
+      final roleId = int.tryParse(appRoleId.toString());
+      if (roleId != null) {
+        _profileBloc.add(RoleIdChanged(roleId));
+        setState(() {
+          _appRoleId = roleId;
+        });
       }
+
+
       final name = actualUserData['name'] is Map ? Map<String, dynamic>.from(actualUserData['name']) : <String, dynamic>{};
       final workingLocation = actualUserData['working_location'] is Map
           ? Map<String, dynamic>.from(actualUserData['working_location'])
@@ -357,8 +361,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
         child: Scaffold(
           backgroundColor: AppColors.surface,
+
           appBar: AppHeader(
-            screenTitle: l10n.ashaProfile,
+            screenTitle: _appRoleId == 4
+                ? "Facilitator Profile"
+                :  l10n.ashaProfile,
             showBack: true,
             onBackTap: () {
               Navigator.of(context).pushNamedAndRemoveUntil(
@@ -412,12 +419,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5),
                       BlocBuilder<ProfileBloc, ProfileState>(
-                        buildWhen: (previous, current) => previous.ashaId != current.ashaId,
+                        buildWhen: (previous, current) => previous.ashaId != current.ashaId || previous.appRoleId != current.appRoleId,
                         builder: (context, state) {
+                          final bloc = context.read<ProfileBloc>();
+
+                          final isFacilitator = state.appRoleId == 4;
+
                           return CustomTextField(
                             key: ValueKey('asha_id_field_${state.ashaId}'),
-                            labelText: l10n.ashaIdLabel,
-                            hintText: l10n.ashaIdHint,
+                            labelText: isFacilitator ? "ASHA Facilitator ID" : l10n.ashaIdLabel,
+                            hintText: isFacilitator ? "Enter ASHA Facilitator ID" : l10n.ashaIdHint,
                             initialValue: state.ashaId != null ? state.ashaId!.toUpperCase().trim() : '',
                             onChanged: (v) => bloc.add(AshaIdChanged(v)),
                             readOnly: true,
@@ -426,12 +437,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5),
 
-                      Builder(
-                        builder: (context) {
+                      BlocBuilder<ProfileBloc, ProfileState>(
+                        buildWhen: (previous, current) => previous.ashaName != current.ashaName || previous.appRoleId != current.appRoleId,
+                        builder: (context, state) {
+                          final bloc = context.read<ProfileBloc>();
+
+                          final isFacilitator = state.appRoleId == 4;
+
                           return CustomTextField(
-                            key: ValueKey('asha_name_field_$_userFullName'),
-                            labelText: l10n.ashaNameLabel,
-                            hintText: l10n.ashaNameHint,
+                            key: ValueKey('asha_name_field_${_userFullName}'),
+                            labelText: isFacilitator ? "Name of ASHA Facilitator" : l10n.ashaNameLabel,
+                            hintText: isFacilitator ? "Enter Name of ASHA Facilitator" : l10n.ashaNameHint,
                             initialValue: state.ashaName != null ? _toTitleCase(state.ashaName!.trim()) : '',
                             onChanged: (v) {
                               _userFullName = v;
@@ -473,7 +489,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           final ageText = dob != null ? _calculateAge(dob) : '';
                           return CustomTextField(
                             labelText: l10n.ageLabel,
-                            hintText: l10n.ageLabel,
+                            hintText: l10n.ageLabelSimple,
                             initialValue: ageText,
                             readOnly: true,
                           );
@@ -783,47 +799,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Divider(color: AppColors.divider, thickness: 0.5),
                       const SizedBox(height: 12),
                       BlocBuilder<ProfileBloc, ProfileState>(
+                        buildWhen: (previous, current) =>
+                        previous.populationCovered != current.populationCovered ||
+                            previous.appRoleId != current.appRoleId,
                         builder: (context, state) {
+                          final isFacilitator = state.appRoleId == 4;
                           return CustomTextField(
                             key: const ValueKey('population_covered_field'),
-                            labelText: l10n.populationCoveredLabel,
-                            hintText: l10n.populationCoveredHint,
+                            labelText: isFacilitator
+                                ? "Population covered under ASHA Facilitator"
+                                : l10n.populationCoveredLabel,
+                            hintText: isFacilitator
+                                ? "Enter population covered under ASHA Facilitator"
+                                : l10n.populationCoveredHint,
                             initialValue: state.populationCovered,
                             keyboardType: TextInputType.number,
-                            onChanged: (v) => bloc.add(PopulationCoveredChanged(v)),
+                            onChanged: (v) =>
+                                context.read<ProfileBloc>().add(PopulationCoveredChanged(v)),
                           );
                         },
                       ),
                       Divider(color: AppColors.divider, thickness: 0.5),
-                      BlocBuilder<ProfileBloc, ProfileState>(
-                        buildWhen: (previous, current) => previous.ashaFacilitatorName != current.ashaFacilitatorName,
-                        builder: (context, state) {
-                          return CustomTextField(
-                            key: ValueKey('asha_facilitator_name_field_${state.ashaFacilitatorName}'),
-                            labelText: l10n.ashaFacilitatorNameLabel,
-                            hintText: l10n.ashaFacilitatorNameHint,
-                            initialValue: state.ashaFacilitatorName,
-                            onChanged: (v) => bloc.add(AshaFacilitatorNameChanged(v)),
-                            readOnly: true,
-                          );
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5),
-                      BlocBuilder<ProfileBloc, ProfileState>(
-                        buildWhen: (previous, current) => previous.ashaFacilitatorMobile != current.ashaFacilitatorMobile,
-                        builder: (context, state) {
-                          return CustomTextField(
-                            key: ValueKey('asha_facilitator_mobile_field_${state.ashaFacilitatorMobile}'),
-                            labelText: l10n.ashaFacilitatorMobileLabel,
-                            hintText: l10n.ashaFacilitatorMobileHint,
-                            initialValue: state.ashaFacilitatorMobile,
-                            keyboardType: TextInputType.phone,
-                            onChanged: (v) => bloc.add(AshaFacilitatorMobileChanged(v)),
-                            readOnly: true,
-                          );
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5),
+                      if (_appRoleId != 4) ...[
+                        BlocBuilder<ProfileBloc, ProfileState>(
+                          buildWhen: (previous, current) => previous.ashaFacilitatorName != current.ashaFacilitatorName,
+                          builder: (context, state) {
+                            return CustomTextField(
+                              key: ValueKey('asha_facilitator_name_field_${state.ashaFacilitatorName}'),
+                              labelText: l10n.ashaFacilitatorNameLabel,
+                              hintText: l10n.ashaFacilitatorNameHint,
+                              initialValue: state.ashaFacilitatorName,
+                              onChanged: (v) => bloc.add(AshaFacilitatorNameChanged(v)),
+                              readOnly: true,
+                            );
+                          },
+                        ),
+                        Divider(color: AppColors.divider, thickness: 0.5),
+                        BlocBuilder<ProfileBloc, ProfileState>(
+                          buildWhen: (previous, current) => previous.ashaFacilitatorMobile != current.ashaFacilitatorMobile,
+                          builder: (context, state) {
+                            return CustomTextField(
+                              key: ValueKey('asha_facilitator_mobile_field_${state.ashaFacilitatorMobile}'),
+                              labelText: l10n.ashaFacilitatorMobileLabel,
+                              hintText: l10n.ashaFacilitatorMobileHint,
+                              initialValue: state.ashaFacilitatorMobile,
+                              keyboardType: TextInputType.phone,
+                              onChanged: (v) => bloc.add(AshaFacilitatorMobileChanged(v)),
+                              readOnly: true,
+                            );
+                          },
+                        ),
+                        Divider(color: AppColors.divider, thickness: 0.5),
+                      ],
                       BlocBuilder<ProfileBloc, ProfileState>(
                         buildWhen: (previous, current) => previous.choName != current.choName,
                         builder: (context, state) {
@@ -1022,7 +1049,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (int.tryParse(roleId ?? "") != 4) {
                             return const SizedBox.shrink();
                           }
-
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
                             child: Row(
@@ -1032,7 +1058,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Text(
                                     l10n.noOfASHAUnderTheFacilitator ?? "No. of ASHA under the facilitator",
                                     style: TextStyle(
-                                        fontSize: 9,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w600
                                     ),
                                   ),
@@ -1048,7 +1074,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    "12",
+                                    "0",
                                     style:  TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,

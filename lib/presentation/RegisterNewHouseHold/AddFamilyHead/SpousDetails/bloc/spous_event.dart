@@ -22,9 +22,9 @@ class SpUpdateMemberName extends SpousEvent {
   List<Object?> get props => [value];
 }
 
-class RichIDChanged extends SpousEvent {
+class RchIDChanged extends SpousEvent {
   final String value;
-  const RichIDChanged(this.value);
+  const RchIDChanged(this.value);
   @override
   List<Object?> get props => [value];
 }

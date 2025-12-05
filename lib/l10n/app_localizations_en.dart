@@ -1779,7 +1779,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherInLaw => 'Mother in Law';
 
   @override
-  String get motherNameLabel => 'Mother Name *';
+  String get motherNameLabel => 'Mother Name';
 
   @override
   String get mukhiyaMobileHint => 'Mobile no. of mukhiya';
@@ -2592,7 +2592,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mothersRchIdLabel => 'Mother\'s RCH ID number';
 
   @override
-  String get birthCertificateIssuedLabel => 'Has the birth certificate been issued?';
+  String get birthCertificateIssuedLabel => 'IS birth certificate issued?';
 
   @override
   String get birthCertificateNumberLabel => 'birth certificate number';
@@ -2757,13 +2757,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newbornReferredByAshaLabel => 'In the above symptoms, weather the child is referred by ASHA? *';
 
   @override
-  String get birthRegisteredLabel => 'Is birth registration complete*';
+  String get birthRegisteredLabel => 'Is birth registration completed? *';
 
   @override
-  String get mcpCardAvailableLabel => 'Is \'Matra Child Protection (MCP)\' card available? *';
+  String get mcpCardAvailableLabel => 'Is there availability of \'Mother Child Protection (MCP) card? *';
 
   @override
-  String get birthDoseVaccinationLabel => 'Has the baby received the birth dose vaccination? *';
+  String get birthDoseVaccinationLabel => 'Is the birthdose vaccination given to baby? *';
 
   @override
   String get homeVisitDayLabel => 'Home Visit Day *';

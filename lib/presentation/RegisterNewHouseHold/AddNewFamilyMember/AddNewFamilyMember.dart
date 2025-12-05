@@ -387,6 +387,91 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   @override
   bool get wantKeepAlive => true;
 
+  List<String> _getMobileOwnerList(String gender) {
+    const common = [
+      'Father',
+      'Mother',
+      'Son',
+      'Daughter',
+      'Father In Law',
+      'Mother In Law',
+      'Neighbour',
+      'Relative',
+      'Other',
+    ];
+
+    gender = gender.toLowerCase();
+
+    if (gender == 'female') {
+      return [
+        'Self',
+        'Husband',
+        'Father',
+        'Mother',
+        'Son',
+        'Daughter',
+        'Father In Law',
+        'Mother In Law',
+        'Neighbour',
+        'Relative',
+        'Other',
+        ...common,
+      ];
+    }
+
+    if (gender == 'male') {
+      return [
+        'Self',
+        'Wife',
+        'Father',
+        'Mother',
+        'Son',
+        'Daughter',
+        'Father In Law',
+        'Mother In Law',
+        'Neighbour',
+        'Relative',
+        'Other',
+        ...common,
+      ];
+    }
+
+    if (gender == 'transgender') {
+      return [
+        'Self',
+        'Husband',
+        'Wife',
+        'Father',
+        'Mother',
+        'Son',
+        'Daughter',
+        'Father In Law',
+        'Mother In Law',
+        'Neighbour',
+        'Relative',
+        'Other',
+        ...common,
+      ];
+    }
+
+    return [
+      'Self',
+      'Husband',
+      'Wife',
+      'Father',
+      'Mother',
+      'Son',
+      'Daughter',
+      'Father In Law',
+      'Mother In Law',
+      'Neighbour',
+      'Relative',
+      'Other',
+      ...common,
+    ];
+  }
+
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Call super.build for AutomaticKeepAliveClientMixin
@@ -1101,15 +1186,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                         child: BlocBuilder<AddnewfamilymemberBloc, AddnewfamilymemberState>(
                           builder: (context, state) {
                             if (_currentStep == 1) {
-                              // In the member flow we do not want Spousdetails to
-                              // mirror AddFamilyHeadBloc (head form). Instead it
-                              // should rely purely on its own SpousBloc state,
-                              // which we hydrate from member data.
                               return SizedBox.expand(
                                 child: Spousdetails(
                                   syncFromHead: false,
                                   isMemberDetails: true,
+                                  isAddMember: widget.isAddMember,
                                   hhId: widget.hhId,
+                                  headMobileNo: widget.headMobileNumber,
+                                  headGender: widget.headGender,
                                 ),
                               );
                             }
@@ -1743,40 +1827,35 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           },
                                         ),
                                         if (_fatherOption == 'Other')
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 8,
-                                            ),
-                                            child: CustomTextField(
-                                              labelText:
-                                                  '${l.fatherGuardianNameLabel} *',
-                                              hintText:
-                                                  l.fatherGuardianNameLabel,
-                                              initialValue:
-                                                  state.fatherName ?? '',
-                                              onChanged: (v) {
-                                                final name = v.trim();
-                                                context
-                                                    .read<
-                                                      AddnewfamilymemberBloc
-                                                    >()
-                                                    .add(
-                                                      AnmUpdateFatherName(name),
-                                                    );
-                                                if (_formKey.currentState !=
-                                                    null) {
-                                                  _formKey.currentState!
-                                                      .validate();
-                                                }
-                                              },
-                                              validator: (value) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
-                                                }
-                                                return null;
-                                              },
-                                            ),
+                                          CustomTextField(
+                                            labelText:
+                                                '${l.fatherGuardianNameLabel} *',
+                                            hintText:
+                                                l.fatherGuardianNameLabel,
+                                            initialValue:
+                                                state.fatherName ?? '',
+                                            onChanged: (v) {
+                                              final name = v.trim();
+                                              context
+                                                  .read<
+                                                    AddnewfamilymemberBloc
+                                                  >()
+                                                  .add(
+                                                    AnmUpdateFatherName(name),
+                                                  );
+                                              if (_formKey.currentState !=
+                                                  null) {
+                                                _formKey.currentState!
+                                                    .validate();
+                                              }
+                                            },
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.trim().isEmpty) {
+                                                return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                              }
+                                              return null;
+                                            },
                                           ),
                                       ],
                                     ),
@@ -1850,12 +1929,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             );
                                           },
                                         ),
+                                        // Divider(
+                                        //   color: AppColors.divider,
+                                        //   thickness: 0.5,
+                                        //   height: 0,
+                                        // ),
+                                        if (_motherOption == 'Other') ...[
                                         Divider(
                                           color: AppColors.divider,
                                           thickness: 0.5,
                                           height: 0,
                                         ),
-                                        if (_motherOption == 'Other') ...[
                                           CustomTextField(
                                             labelText: "${l.motherNameLabel} *",
                                             hintText: l.motherNameLabel,
@@ -1882,10 +1966,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     ),
                                   ),
 
+                                ],
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
+                                if ((state.memberType ?? '').toLowerCase() ==
+                                    'child') ...[
                                   _section(
                                     Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Builder(
                                           builder: (context) {
@@ -1897,16 +1989,16 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               fatherItems.add('Other');
                                             } else {
                                               if ((_headName ?? '')
-                                                      .isNotEmpty &&
+                                                  .isNotEmpty &&
                                                   _formatGender(_headGender) ==
                                                       'Male') {
                                                 fatherItems.add(_headName!);
                                               }
                                               if ((_spouseName ?? '')
-                                                      .isNotEmpty &&
+                                                  .isNotEmpty &&
                                                   _formatGender(
-                                                        _spouseGender,
-                                                      ) ==
+                                                    _spouseGender,
+                                                  ) ==
                                                       'Male') {
                                                 fatherItems.add(_spouseName!);
                                               }
@@ -1914,7 +2006,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             }
                                             return ApiDropdown<String>(
                                               labelText:
-                                                  '${l.fatherGuardianNameLabel} *',
+                                              '${l.fatherGuardianNameLabel} *',
                                               items: fatherItems,
                                               getLabel: (s) => s,
                                               value: _fatherOption,
@@ -1934,19 +2026,19 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     v != 'Other') {
                                                   context
                                                       .read<
-                                                        AddnewfamilymemberBloc
-                                                      >()
+                                                      AddnewfamilymemberBloc
+                                                  >()
                                                       .add(
-                                                        AnmUpdateFatherName(v),
-                                                      );
+                                                    AnmUpdateFatherName(v),
+                                                  );
                                                 } else {
                                                   context
                                                       .read<
-                                                        AddnewfamilymemberBloc
-                                                      >()
+                                                      AddnewfamilymemberBloc
+                                                  >()
                                                       .add(
-                                                        AnmUpdateFatherName(''),
-                                                      );
+                                                    AnmUpdateFatherName(''),
+                                                  );
                                                 }
                                                 // Trigger form validation
                                                 if (_formKey.currentState !=
@@ -1958,42 +2050,42 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             );
                                           },
                                         ),
+
                                         if (_fatherOption == 'Other')
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 8,
-                                            ),
-                                            child: CustomTextField(
-                                              labelText:
-                                                  '${l.fatherGuardianNameLabel} *',
-                                              hintText:
-                                                  l.fatherGuardianNameLabel,
-                                              initialValue:
-                                                  state.fatherName ?? '',
-                                              onChanged: (v) {
-                                                final name = v.trim();
-                                                context
-                                                    .read<
-                                                      AddnewfamilymemberBloc
-                                                    >()
-                                                    .add(
-                                                      AnmUpdateFatherName(name),
-                                                    );
-                                                // Trigger form validation
-                                                if (_formKey.currentState !=
-                                                    null) {
-                                                  _formKey.currentState!
-                                                      .validate();
-                                                }
-                                              },
-                                              validator: (value) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
-                                                }
-                                                return null;
-                                              },
-                                            ),
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                          CustomTextField(
+                                            labelText:
+                                            '${l.fatherGuardianNameLabel} *',
+                                            hintText:
+                                            l.fatherGuardianNameLabel,
+                                            initialValue:
+                                            state.fatherName ?? '',
+                                            onChanged: (v) {
+                                              final name = v.trim();
+                                              context
+                                                  .read<
+                                                  AddnewfamilymemberBloc
+                                              >()
+                                                  .add(
+                                                AnmUpdateFatherName(name),
+                                              );
+                                              if (_formKey.currentState !=
+                                                  null) {
+                                                _formKey.currentState!
+                                                    .validate();
+                                              }
+                                            },
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.trim().isEmpty) {
+                                                return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                              }
+                                              return null;
+                                            },
                                           ),
                                       ],
                                     ),
@@ -2003,9 +2095,107 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     thickness: 0.5,
                                     height: 0,
                                   ),
-                                ],
-                                if ((state.memberType ?? '').toLowerCase() ==
-                                    'child') ...[
+                                  _section(
+                                    Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Builder(
+                                          builder: (context) {
+                                            final List<String> motherItems = [];
+                                            if (_isMemberDetails) {
+                                              motherItems.addAll(
+                                                _femaleAdultNames,
+                                              );
+                                              motherItems.add('Other');
+                                            } else {
+                                              if ((_headName ?? '')
+                                                  .isNotEmpty &&
+                                                  _formatGender(_headGender) ==
+                                                      'Female') {
+                                                motherItems.add(_headName!);
+                                              }
+                                              if ((_spouseName ?? '')
+                                                  .isNotEmpty &&
+                                                  _formatGender(
+                                                    _spouseGender,
+                                                  ) ==
+                                                      'Female') {
+                                                motherItems.add(_spouseName!);
+                                              }
+                                              motherItems.add('Other');
+                                            }
+                                            return ApiDropdown<String>(
+                                              labelText:
+                                              "${l.motherNameLabel} *",
+                                              hintText: "${l.motherNameLabel} ",
+                                              items: motherItems,
+                                              getLabel: (s) => s,
+                                              value: _motherOption,
+                                              onChanged: (v) {
+                                                if (v == null) return;
+                                                setState(() {
+                                                  _motherOption = v;
+                                                });
+                                                if (v != 'Select' &&
+                                                    v != 'Other') {
+                                                  context
+                                                      .read<
+                                                      AddnewfamilymemberBloc
+                                                  >()
+                                                      .add(
+                                                    AnmUpdateMotherName(v),
+                                                  );
+                                                } else {
+                                                  context
+                                                      .read<
+                                                      AddnewfamilymemberBloc
+                                                  >()
+                                                      .add(
+                                                    AnmUpdateMotherName(''),
+                                                  );
+                                                }
+                                              },
+                                            );
+                                          },
+                                        ),
+                                        // Divider(
+                                        //   color: AppColors.divider,
+                                        //   thickness: 0.5,
+                                        //   height: 0,
+                                        // ),
+                                        if (_motherOption == 'Other') ...[
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                          CustomTextField(
+                                            labelText: "${l.motherNameLabel} *",
+                                            hintText: l.motherNameLabel,
+                                            initialValue:
+                                            state.motherName ?? '',
+                                            onChanged: (v) => context
+                                                .read<
+                                                AddnewfamilymemberBloc
+                                            >()
+                                                .add(
+                                              AnmUpdateMotherName(
+                                                v.trim(),
+                                              ),
+                                            ),
+                                          ),
+
+                                        ]
+
+                                      ],
+                                    ),
+                                  ),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
                                   _section(
                                     ApiDropdown<String>(
                                       labelText: '${l.genderLabel} *',
@@ -2290,7 +2480,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           ),
                                           child: RichText(
                                             text: TextSpan(
-                                              text: l.ageApproximate,
+                                              text: "${l.ageApproximate}",
                                               style: TextStyle(
                                                 fontSize: 14.sp,
                                                 color: Colors.black87,
@@ -2298,7 +2488,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               ),
                                               children: const [
                                                 TextSpan(
-                                                  text: ' *',
+                                                  text: '*',
                                                   style: TextStyle(
                                                     color: Colors.red,   // Make asterisk red
                                                   ),
@@ -3022,50 +3212,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   _section(
                                     ApiDropdown<String>(
                                       labelText: '${l.whoseMobileLabel}? *',
-                                      items: const [
-                                        'Self',
-                                        'Family Head',
-                                        'Wife',
-                                        'Father',
-                                        'Mother',
-                                        'Son',
-                                        'Daughter',
-                                        'Father in Law',
-                                        'Mother in Law',
-                                        'Neighbour',
-                                        'Relative',
-                                        'Other',
-                                      ],
-                                      getLabel: (s) {
-                                        switch (s) {
-                                          case 'Self':
-                                            return l.self;
-                                          case 'Family Head':
-                                            return 'Family Head';
-                                          case 'Wife':
-                                            return l.wife;
-                                          case 'Father':
-                                            return l.father;
-                                          case 'Mother':
-                                            return l.mother;
-                                          case 'Son':
-                                            return l.son;
-                                          case 'Daughter':
-                                            return l.daughter;
-                                          case 'Father in Law':
-                                            return l.fatherInLaw;
-                                          case 'Mother in Law':
-                                            return l.motherInLaw;
-                                          case 'Neighbour':
-                                            return l.neighbour;
-                                          case 'Relative':
-                                            return l.relative;
-                                          case 'Other':
-                                            return l.other;
-                                          default:
-                                            return s;
-                                        }
-                                      },
+                                      items: _getMobileOwnerList(state.gender ?? ''),
+                                      getLabel: (s) => s,
                                       value: state.mobileOwner,
                                       onChanged: (v) async {
                                         if (v == null) return;
