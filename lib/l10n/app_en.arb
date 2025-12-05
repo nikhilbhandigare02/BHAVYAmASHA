@@ -1892,7 +1892,12 @@
   "saving": "Saving...",
   "correctHighlightedErrors": "Please correct the highlighted errors before continuing.",
   "selectOptionLabel": "Select Option",
-  "screeningDate": "Screening Date"
+  "screeningDate": "Screening Date",
+  "enterCategory": "Enter category",
+  "youngestChildDetail": "Youngest Child Detail",
+  "daysRangeValidation": "Days: only 1 to 31 allowed",
+  "monthRangeValidation": "Month: only 1 to 12 allowed",
+  "yearRangeValidation": "Year: only 1 to 90 allowed",
 
 
 }

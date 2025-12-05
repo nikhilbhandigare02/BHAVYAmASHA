@@ -60,7 +60,7 @@ class ApiDropdown<T> extends StatelessWidget {
     return RichText(
       text: TextSpan(
         style: TextStyle(
-          fontSize: 14.sp,
+          fontSize: 13.5.sp,
           color: AppColors.onSurface,
           fontWeight: FontWeight.w500,
         ),
@@ -81,7 +81,7 @@ class ApiDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 16.sp,
+      fontSize: 15.sp,
       fontWeight: FontWeight.w500,
       color: AppColors.onSurfaceVariant,
       height: 1,

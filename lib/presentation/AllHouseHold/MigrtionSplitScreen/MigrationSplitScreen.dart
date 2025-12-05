@@ -185,8 +185,8 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         children: [
           Text(
             text,
-            style: const TextStyle(
-              fontSize: _labelFontSize,
+            style:  TextStyle(
+              fontSize: 13.5.sp,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
@@ -473,7 +473,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
             Text(
               _selectedMemberLabel,
               style: TextStyle(
-                fontSize: _inputFontSize,
+                fontSize: 15.sp,
                 color: _isMemberTypeSelected ? Colors.black : Colors.grey[800],
               ),
               overflow: TextOverflow.ellipsis,
@@ -582,7 +582,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                 child: Text(
                   _selectedMemberLabel,
                   style: TextStyle(
-                    fontSize: _inputFontSize,
+                    fontSize: 15.sp,
                     color: _isMemberTypeSelected
                         ? Colors.black
                         : Colors.grey[800],
@@ -615,10 +615,10 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                   child: Text(
                     _selectedChildLabel,
                     style: TextStyle(
-                      fontSize: _inputFontSize,
+                      fontSize: 15.sp,
                       color: _selectedChildren.isNotEmpty
                           ? Colors.black
-                          : Colors.grey[800],
+                          : AppColors.onSurfaceVariant,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -632,7 +632,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         // _buildLabel('', isRequired: true),
-        const SizedBox(height: _verticalSpacing),
+        // const SizedBox(height: _verticalSpacing),
         ApiDropdown<String>(
           labelText: l10n?.selectNewFamilyHead ?? 'Select New Family Head',
           items: _selectedAdults,

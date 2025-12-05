@@ -2261,7 +2261,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   ),
                                   _section(
                                     ApiDropdown<String>(
-                                      labelText: '${l.whoseMobileLabel}? *',
+                                      labelText: '${l.whoseMobileLabel} *',
                                       items: const [
                                         'Self',
                                         'Family Head',
@@ -3217,7 +3217,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     'adult') ...[
                                   _section(
                                     ApiDropdown<String>(
-                                      labelText: '${l.whoseMobileLabel}? *',
+                                      labelText: '${l.whoseMobileLabel} *',
                                       items: _getMobileOwnerList(state.gender ?? ''),
                                       getLabel: (s) => s,
                                       value: state.mobileOwner,

@@ -1733,7 +1733,12 @@
   "saving": "सेव किया जा रहा है...",
   "correctHighlightedErrors": "जारी रखने से पहले कृपया हाइलाइट किए गए त्रुटियों को सुधारें।",
   "selectOptionLabel": "विकल्प चुनें",
-  "screeningDate": "स्क्रीनिंग तिथि"
+  "screeningDate": "स्क्रीनिंग तिथि",
+  "enterCategory": "वर्ग का नाम दर्ज करें",
+  "youngestChildDetail": "सबसे छोटे बच्चे का विवरण",
+  "daysRangeValidation": "दिन: केवल 1 से 31 की अनुमति है",
+  "monthRangeValidation": "महीना: केवल 1 से 12 की अनुमति है",
+  "yearRangeValidation": "साल: केवल 1 से 90 की अनुमति है",
 
 
 }

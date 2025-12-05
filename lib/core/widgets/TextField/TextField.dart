@@ -86,15 +86,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   List<TextSpan> _buildLabelTextSpans(String text) {
     if (!text.endsWith(' *')) {
-      return [TextSpan(text: text,style: const TextStyle(
-        fontSize: 14, // <-- Add your desired font size here
+      return [TextSpan(text: text,style:  TextStyle(
+        fontSize: 15.5.sp, // <-- Add your desired font size here
       ), )];
     }
 
     final parts = text.split(' *');
     return [
       TextSpan(text: parts[0], style:  TextStyle(
-        fontSize: 16.sp, // <-- Add your desired font size here
+        fontSize: 15.5.sp, // <-- Add your desired font size here
       )),
       const TextSpan(
         text: ' *',
@@ -168,7 +168,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 16.sp,
+      fontSize: 15.sp,
       color: AppColors.onSurfaceVariant,
       height: 1.5,
     );

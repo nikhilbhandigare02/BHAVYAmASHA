@@ -422,81 +422,123 @@ class RegisterNewHouseholdBloc
                   }
 
                   final spouseInfo = <String, dynamic>{
-                  'relation': spDetails['relation'] ?? headForm['sp_relation'] ?? 'spouse',
-                  'memberName': spDetails['memberName'] ?? headForm['sp_memberName'] ??
-                      headForm['spouseName'],
-                  'ageAtMarriage': spDetails['ageAtMarriage'] ?? headForm['sp_ageAtMarriage'] ??
-                      headForm['ageAtMarriage'],
-                  'RichIDChanged': spDetails['RichIDChanged'] ?? headForm['sp_RichIDChanged'],
-                  'spouseName': spDetails['spouseName'] ?? headForm['sp_spouseName'] ??
-                      headForm['headName'],
-                  'fatherName': spDetails['fatherName'] ?? headForm['sp_fatherName'],
-                  'useDob': spDetails['useDob'] ?? headForm['sp_useDob'],
-                  'dob': spDetails['dob'] ?? headForm['sp_dob'],
-                  'edd': spDetails['edd'] ?? headForm['sp_edd'],
-                  'lmp': spDetails['lmp'] ?? headForm['sp_lmp'],
-                  'years': spDetails['years'] ?? headForm['sp_years'],
-                  'months': spDetails['months'] ?? headForm['sp_months'],
-                  'days': spDetails['days'] ?? headForm['sp_days'],
-                  'approxAge': spDetails['approxAge'] ?? headForm['sp_approxAge'],
-                  'gender': spDetails['gender'] ?? headForm['sp_gender'] ??
-                      ((headForm['gender'] == 'Male')
-                          ? 'Female'
-                          : (headForm['gender'] == 'Female')
-                          ? 'Male'
-                          : null),
-                  'occupation': spDetails['occupation'] ?? headForm['sp_occupation'],
-                  'other_occupation': spDetails['otherOccupation'] ?? headForm['sp_otherOccupation'],
-                  'education': spDetails['education'] ?? headForm['sp_education'],
-                  'religion': spDetails['religion'] ?? headForm['sp_religion'],
-                  'other_religion': spDetails['otherReligion'] ?? headForm['sp_otherReligion'],
-                  'category': spDetails['category'] ?? headForm['sp_category'],
-                  'other_category': spDetails['otherCategory'] ?? headForm['sp_otherCategory'],
-                  'abhaAddress': spDetails['abhaAddress'] ?? headForm['sp_abhaAddress'],
-                  'abhaNumber': spDetails['abhaNumber'] ?? headForm['sp_abhaNumber'],
-                  'mobileOwner': spDetails['mobileOwner'] ?? headForm['sp_mobileOwner'],
-                  'mobileNo': spDetails['mobileNo'] ?? headForm['sp_mobileNo'],
-                  'mobile_owner_relation': spDetails['mobileOwnerOtherRelation'] ?? headForm['sp_mobileOwnerOtherRelation'],
-                  'bankAcc': spDetails['bankAcc'] ?? headForm['sp_bankAcc'],
-                  'ifsc': spDetails['ifsc'] ?? headForm['sp_ifsc'],
-                  'voterId': spDetails['voterId'] ?? headForm['sp_voterId'],
-                  'rationId': spDetails['rationId'] ?? headForm['sp_rationId'],
-                  'phId': spDetails['phId'] ?? headForm['sp_phId'],
-                  'beneficiaryType': spDetails['beneficiaryType'] ?? headForm['sp_beneficiaryType'],
-                  'isPregnant': spDetails['isPregnant'] ?? headForm['sp_isPregnant'],
-                  'familyPlanningCounseling': spDetails['familyPlanningCounseling'] ?? headForm['sp_familyPlanningCounseling'],
-                  'is_family_planning': ((spDetails['familyPlanningCounseling'] ?? headForm['sp_familyPlanningCounseling'])
-                          ?.toString()
-                          .toLowerCase() == 'yes')
-                      ? 1
-                      : 0,
-                  'fpMethod': spDetails['fpMethod'] ?? headForm['sp_fpMethod'],
-                  'removalDate': spDetails['removalDate'] is DateTime 
-                      ? (spDetails['removalDate'] as DateTime).toIso8601String() 
-                      : spDetails['removalDate'] ?? headForm['sp_removalDate'],
-                  'removalReason': spDetails['removalReason'] ?? headForm['sp_removalReason'],
-                  'condomQuantity': spDetails['condomQuantity'] ?? headForm['sp_condomQuantity'],
-                  'malaQuantity': spDetails['malaQuantity'] ?? headForm['sp_malaQuantity'],
-                  'chhayaQuantity': spDetails['chhayaQuantity'] ?? headForm['sp_chhayaQuantity'],
-                  'ecpQuantity': spDetails['ecpQuantity'] ?? headForm['sp_ecpQuantity'],
-                  'antraDate': spDetails['antraDate'] is DateTime 
-                      ? (spDetails['antraDate'] as DateTime).toIso8601String() 
-                      : spDetails['antraDate'] ?? headForm['sp_antraDate'],
-                  'maritalStatus': 'Married',
-                  'relation_to_head': 'spouse',
-                  // Children summary mirrored for spouse as in AddFamilyHeadBloc
-                  'totalBorn': headForm['totalBorn'],
-                  'totalLive': headForm['totalLive'],
-                  'totalMale': headForm['totalMale'],
-                  'totalFemale': headForm['totalFemale'],
-                  'youngestAge': headForm['youngestAge'],
-                  'ageUnit': headForm['ageUnit'],
-                  'youngestGender': headForm['youngestGender'],
-                  'children': headForm['children'],
-                  'isFamilyhead': false,
-                  'isFamilyheadWife': false,
-                }
-                  ..removeWhere((k, v) =>
+                    'relation': spDetails['relation'] ?? headForm['sp_relation'] ?? 'spouse',
+                    'relation_to_head': 'spouse',
+                    'maritalStatus': 'Married',
+
+                    'memberName': spDetails['memberName'] ??
+                        headForm['sp_memberName'] ??
+                        headForm['spouseName'],
+
+                    'ageAtMarriage': spDetails['ageAtMarriage'] ??
+                        headForm['sp_ageAtMarriage'] ??
+                        headForm['ageAtMarriage'],
+
+                    'RichIDChanged': spDetails['RichIDChanged'] ?? headForm['sp_RichIDChanged'],
+
+                    'spouseName': spDetails['spouseName'] ??
+                        headForm['sp_spouseName'] ??
+                        headForm['headName'],
+
+                    'fatherName': spDetails['fatherName'] ?? headForm['sp_fatherName'],
+
+                    'useDob': spDetails['useDob'] ?? headForm['sp_useDob'],
+                    'dob': spDetails['dob'] ?? headForm['sp_dob'],
+                    'edd': spDetails['edd'] ?? headForm['sp_edd'],
+                    'lmp': spDetails['lmp'] ?? headForm['sp_lmp'],
+
+                    'years': spDetails['years'] ?? headForm['sp_years'],
+                    'months': spDetails['months'] ?? headForm['sp_months'],
+                    'days': spDetails['days'] ?? headForm['sp_days'],
+
+                    'approxAge': spDetails['approxAge'] ?? headForm['sp_approxAge'],
+
+                    'gender': spDetails['gender'] ??
+                        headForm['sp_gender'] ??
+                        ((headForm['gender'] == 'Male')
+                            ? 'Female'
+                            : (headForm['gender'] == 'Female')
+                            ? 'Male'
+                            : null),
+
+                    'occupation': spDetails['occupation'] ?? headForm['sp_occupation'],
+                    'other_occupation':
+                    spDetails['otherOccupation'] ?? headForm['sp_otherOccupation'],
+
+                    'education': spDetails['education'] ?? headForm['sp_education'],
+
+                    'religion': spDetails['religion'] ?? headForm['sp_religion'],
+                    'other_religion':
+                    spDetails['otherReligion'] ?? headForm['sp_otherReligion'],
+
+                    'category': spDetails['category'] ?? headForm['sp_category'],
+                    'other_category':
+                    spDetails['otherCategory'] ?? headForm['sp_otherCategory'],
+
+                    'abhaAddress': spDetails['abhaAddress'] ?? headForm['sp_abhaAddress'],
+                    'abhaNumber': spDetails['abhaNumber'] ?? headForm['sp_abhaNumber'],
+
+                    'mobileOwner': spDetails['mobileOwner'] ?? headForm['sp_mobileOwner'],
+                    'mobileNo': spDetails['mobileNo'] ?? headForm['sp_mobileNo'],
+                    'mobile_owner_relation': spDetails['mobileOwnerOtherRelation'] ??
+                        headForm['sp_mobileOwnerOtherRelation'],
+
+                    'bankAcc': spDetails['bankAcc'] ?? headForm['sp_bankAcc'],
+                    'ifsc': spDetails['ifsc'] ?? headForm['sp_ifsc'],
+                    'voterId': spDetails['voterId'] ?? headForm['sp_voterId'],
+                    'rationId': spDetails['rationId'] ?? headForm['sp_rationId'],
+                    'phId': spDetails['phId'] ?? headForm['sp_phId'],
+
+                    'beneficiaryType':
+                    spDetails['beneficiaryType'] ?? headForm['sp_beneficiaryType'],
+
+                    'isPregnant': spDetails['isPregnant'] ?? headForm['sp_isPregnant'],
+
+                    'familyPlanningCounseling': spDetails['familyPlanningCounseling'] ??
+                        headForm['sp_familyPlanningCounseling'],
+
+                    'is_family_planning':
+                    ((spDetails['familyPlanningCounseling'] ??
+                        headForm['sp_familyPlanningCounseling'])
+                        ?.toString()
+                        .toLowerCase() ==
+                        'yes')
+                        ? 1
+                        : 0,
+
+                    'fpMethod': spDetails['fpMethod'] ?? headForm['sp_fpMethod'],
+
+                    'removalDate': spDetails['removalDate'] is DateTime
+                        ? (spDetails['removalDate'] as DateTime).toIso8601String()
+                        : spDetails['removalDate'] ?? headForm['sp_removalDate'],
+
+                    'removalReason':
+                    spDetails['removalReason'] ?? headForm['sp_removalReason'],
+
+                    'condomQuantity':
+                    spDetails['condomQuantity'] ?? headForm['sp_condomQuantity'],
+                    'malaQuantity': spDetails['malaQuantity'] ?? headForm['sp_malaQuantity'],
+                    'chhayaQuantity':
+                    spDetails['chhayaQuantity'] ?? headForm['sp_chhayaQuantity'],
+                    'ecpQuantity': spDetails['ecpQuantity'] ?? headForm['sp_ecpQuantity'],
+
+                    'antraDate': spDetails['antraDate'] is DateTime
+                        ? (spDetails['antraDate'] as DateTime).toIso8601String()
+                        : spDetails['antraDate'] ?? headForm['sp_antraDate'],
+
+                    // Children summary (mirrored)
+                    'totalBorn': headForm['totalBorn'],
+                    'totalLive': headForm['totalLive'],
+                    'totalMale': headForm['totalMale'],
+                    'totalFemale': headForm['totalFemale'],
+                    'youngestAge': headForm['youngestAge'],
+                    'ageUnit': headForm['ageUnit'],
+                    'youngestGender': headForm['youngestGender'],
+                    'children': headForm['children'],
+
+                    'isFamilyhead': false,
+                    'isFamilyheadWife': false,
+                  }..removeWhere((k, v) =>
                       v == null || (v is String && v.trim().isEmpty));
 
                   final spousePayload = {

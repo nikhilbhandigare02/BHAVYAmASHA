@@ -394,6 +394,38 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
             spBloc.add(SpUpdateMobileOwner('Family Head'));
           }
         }
+
+        if (curr.occupation != null && curr.occupation!.isNotEmpty) {
+          spBloc.add(SpUpdateOccupation(curr.occupation!));
+          if (curr.occupation == 'Other' &&
+              curr.otherOccupation != null &&
+              curr.otherOccupation!.isNotEmpty) {
+            spBloc.add(SpUpdateOtherOccupation(curr.otherOccupation!));
+          }
+        }
+
+        if (curr.religion != null && curr.religion!.isNotEmpty) {
+          spBloc.add(SpUpdateReligion(curr.religion!));
+          if (curr.religion == 'Other' &&
+              curr.otherReligion != null &&
+              curr.otherReligion!.isNotEmpty) {
+            spBloc.add(SpUpdateOtherReligion(curr.otherReligion!));
+          }
+        }
+
+        if (curr.category != null && curr.category!.isNotEmpty) {
+          spBloc.add(SpUpdateCategory(curr.category!));
+          if (curr.category == 'Other' &&
+              curr.otherCategory != null &&
+              curr.otherCategory!.isNotEmpty) {
+            spBloc.add(SpUpdateOtherCategory(curr.otherCategory!));
+          }
+        }
+
+        if (curr.mobileOwnerOtherRelation != null &&
+            curr.mobileOwnerOtherRelation!.isNotEmpty) {
+          spBloc.add(SpUpdateMobileOwnerOtherRelation(curr.mobileOwnerOtherRelation!));
+        }
       });
     }
   }
@@ -452,6 +484,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
           if (spouseName.isNotEmpty && spouseName != currSpouse) {
             spBloc.add(SpUpdateSpouseName(spouseName));
           }
+
+          
         },
         child: _buildForm(l),
       );
@@ -1536,7 +1570,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 if (state.isPregnant == 'No') ...[
                   ApiDropdown<String>(
                     labelText: 'Are you/your partner adopting family planning? *',
-                    items: const ['Select', 'Yes', 'No'],
+                    items: const ['Yes', 'No'],
                     getLabel: (s) {
                       switch (s) {
                         case 'Yes':

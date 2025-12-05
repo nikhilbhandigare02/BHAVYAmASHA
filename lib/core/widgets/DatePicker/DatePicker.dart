@@ -167,7 +167,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
       child: RichText(
         text: TextSpan(
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 13.5.sp,
             color: AppColors.onSurface,
             fontWeight: FontWeight.w500,
           ),
@@ -194,7 +194,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   Widget build(BuildContext context) {
     // Match the TextField's input style
     final TextStyle inputStyle = TextStyle(
-      fontSize: 16.sp,
+      fontSize: 15.sp,
       color: AppColors.onSurfaceVariant,
       height: 1.5,
     );
