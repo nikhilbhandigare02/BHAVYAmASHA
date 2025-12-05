@@ -405,6 +405,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     if (gender == 'female') {
       return [
         'Self',
+        'Family Head',
         'Husband',
         'Father',
         'Mother',
@@ -422,6 +423,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     if (gender == 'male') {
       return [
         'Self',
+        'Family Head',
         'Wife',
         'Father',
         'Mother',
@@ -439,6 +441,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     if (gender == 'transgender') {
       return [
         'Self',
+        'Family Head',
         'Husband',
         'Wife',
         'Father',
@@ -454,8 +457,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
       ];
     }
 
+    // Fallback if gender is unknown
     return [
       'Self',
+      'Family Head',
       'Husband',
       'Wife',
       'Father',
@@ -472,9 +477,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   }
 
 
+
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Call super.build for AutomaticKeepAliveClientMixin
+    super.build(context);
     final l = AppLocalizations.of(context)!;
     final now = DateTime.now();
 

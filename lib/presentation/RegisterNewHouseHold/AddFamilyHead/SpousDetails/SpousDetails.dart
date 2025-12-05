@@ -192,6 +192,7 @@ List<String> _getMobileOwnerList(String gender) {
   if (gender == 'female') {
     return [
       'Self',
+      'Family Head',
       'Husband',
       'Father',
       'Mother',
@@ -209,6 +210,7 @@ List<String> _getMobileOwnerList(String gender) {
   if (gender == 'male') {
     return [
       'Self',
+      'Family Head',
       'Wife',
       'Father',
       'Mother',
@@ -226,6 +228,7 @@ List<String> _getMobileOwnerList(String gender) {
   if (gender == 'transgender') {
     return [
       'Self',
+      'Family Head',
       'Husband',
       'Wife',
       'Father',
@@ -244,6 +247,7 @@ List<String> _getMobileOwnerList(String gender) {
   // Fallback if gender is unknown
   return [
     'Self',
+    'Family Head',
     'Husband',
     'Wife',
     'Father',
@@ -1150,32 +1154,42 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     final spBloc = context.read<SpousBloc>();
                     spBloc.add(SpUpdateMobileOwner(v));
 
-                    if (v == 'Husband') {
+                    if (v == 'Husband' || v == 'Wife') {
                       try {
-                        // Try to get the mobile number from AddNewFamilyMemberBloc
-                        final memberBloc = context.read<AddnewfamilymemberBloc>();
-                        final memberState = memberBloc.state;
+                        // Try to get the mobile number from AddNewFamilyMemberBloc in add member flow
+                        if (widget.isAddMember) {
+                          final memberBloc = context.read<AddnewfamilymemberBloc>();
+                          final memberState = memberBloc.state;
+                          if (memberState.mobileNo?.isNotEmpty == true) {
+                            print('📱 [SpousDetails] Using mobile from AddNewFamilyMember: ${memberState.mobileNo}');
+                            spBloc.add(SpUpdateMobileNo(memberState.mobileNo!));
+                            return;
+                          }
+                        }
 
-                        if (memberState.mobileNo?.isNotEmpty == true) {
-                          print('📱 [SpousDetails] Using mobile from AddNewFamilyMember: ${memberState.mobileNo}');
-                          spBloc.add(SpUpdateMobileNo(memberState.mobileNo!));
+                        // In regular flow, try to get from widget.headMobileNo or AddFamilyHeadBloc
+                        final headNo = (widget.headMobileNo?.trim() ??
+                            context.read<AddFamilyHeadBloc>().state.mobileNo?.trim());
+                        if (headNo != null && headNo.isNotEmpty) {
+                          print('📱 [SpousDetails] Using head mobile: $headNo');
+                          spBloc.add(SpUpdateMobileNo(headNo));
                         } else {
-                          print('ℹ️ [SpousDetails] No mobile number found in AddNewFamilyMember state');
+                          print('ℹ️ [SpousDetails] No mobile number found');
                           spBloc.add(const SpUpdateMobileNo(''));
                         }
                       } catch (e) {
-                        print('❌ [SpousDetails] Error getting mobile from AddNewFamilyMember: $e');
+                        print('❌ [SpousDetails] Error getting mobile: $e');
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Error loading member mobile number')),
+                            const SnackBar(content: Text('Error loading mobile number')),
                           );
                         }
                         spBloc.add(const SpUpdateMobileNo(''));
                       }
                     }
-                    // Keep existing logic for other options
+                    // Keep existing logic for Family Head and Father
                     else if (v == 'Family Head' || v == 'Father') {
-                      if (widget.isAddMember && widget.headMobileNo?.isNotEmpty == true) {
+                      if (widget.headMobileNo?.isNotEmpty == true) {
                         print('📱 [SpousDetails] Using head mobile from props: ${widget.headMobileNo}');
                         spBloc.add(SpUpdateMobileNo(widget.headMobileNo!));
                       } else if (widget.hhId != null) {
@@ -1197,7 +1211,13 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                             );
                           }
                         }
-                      }
+                      } else {
+                      if (v == 'Family Head' || v == 'Husband') {
+                        final headNo = context.read<AddFamilyHeadBloc>().state.mobileNo?.trim();
+                        if (headNo != null && headNo.isNotEmpty) {
+                          spBloc.add(SpUpdateMobileNo(headNo));
+                        }
+                      }}
                     } else {
                       spBloc.add(const SpUpdateMobileNo(''));
                     }
