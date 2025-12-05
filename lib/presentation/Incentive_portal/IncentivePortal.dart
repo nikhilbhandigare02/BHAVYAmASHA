@@ -374,7 +374,6 @@ class _LabeledDropdown<T> extends StatelessWidget {
               isExpanded: true,
               items: items,
               onChanged: onChanged,
-
             ),
           ),
         ),

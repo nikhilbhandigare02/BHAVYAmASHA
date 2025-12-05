@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import '../../core/widgets/Dropdown/Dropdown.dart';
 import '../../core/widgets/SnackBar/app_snackbar.dart';
 import '../../core/widgets/TextField/TextField.dart';
 import '../../data/Database/local_storage_dao.dart';
+import '../../data/SecureStorage/SecureStorage.dart';
 import '../../l10n/app_localizations.dart';
 import 'ClusterMeetingScreen.dart';
 
@@ -46,23 +48,49 @@ class ClusterMeetingScreenForm extends StatefulWidget {
 }
 
 class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
+  Widget _tableHeaderCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.all(3.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  Widget _tableCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.all(3.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
   int clusterMeetingsCount = 0;
   Set<String> _selectedTopics = {};
   List<DiscussionTopic> discussionTopics = [
-    /*  const DiscussionTopic(id: 1, name: "Immunization"),
-    const DiscussionTopic(id: 2, name: "Pregnant Women"),
-    const DiscussionTopic(id: 3, name: "Deliveries"),
-    const DiscussionTopic(id: 4, name: "PNC (Post Natal Care)"),
-    const DiscussionTopic(id: 5, name: "Maternal & Child Health"),
-    const DiscussionTopic(id: 6, name: "Home Visit"),
-    const DiscussionTopic(id: 7, name: "New Born Care"),
-    const DiscussionTopic(id: 8, name: "Deaths"),
-    const DiscussionTopic(id: 9, name: "Adolescent Health"),
-    const DiscussionTopic(id: 10, name: "Family Planning"),
-    const DiscussionTopic(id: 11, name: "Other Public Health Program"),
-    const DiscussionTopic(id: 12, name: "Administrative"),
-    const DiscussionTopic(id: 13, name: "Training and Support"),
-    const DiscussionTopic(id: 14, name: "Other"),*/
+    // const DiscussionTopic(id: 1, name: "Immunization"),
+    // const DiscussionTopic(id: 2, name: "Pregnant Women"),
+    // const DiscussionTopic(id: 3, name: "Deliveries"),
+    // const DiscussionTopic(id: 4, name: "PNC (Post Natal Care)"),
+    // const DiscussionTopic(id: 5, name: "Maternal & Child Health"),
+    // const DiscussionTopic(id: 6, name: "Home Visit"),
+    // const DiscussionTopic(id: 7, name: "New Born Care"),
+    // const DiscussionTopic(id: 8, name: "Deaths"),
+    // const DiscussionTopic(id: 9, name: "Adolescent Health"),
+    // const DiscussionTopic(id: 10, name: "Family Planning"),
+    // const DiscussionTopic(id: 11, name: "Other Public Health Program"),
+    // const DiscussionTopic(id: 12, name: "Administrative"),
+    // const DiscussionTopic(id: 13, name: "Training and Support"),
+    // const DiscussionTopic(id: 14, name: "Other"),
   ];
 
   // Add this variable in your state
@@ -85,10 +113,18 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
   TimeOfDay? _fromTime;
   TimeOfDay? _toTime;
   DateTime? _selectedMonthYear;
+
   Future<void> _selectMonthYear(BuildContext context) async {
     int selectedMonth = _selectedMonthYear?.month ?? DateTime.now().month;
     int selectedYear = _selectedMonthYear?.year ?? DateTime.now().year;
     final l10n = AppLocalizations.of(context);
+// Month Column index
+    int monthIndex = selectedMonth - 1;
+
+// Year Column index
+    int yearIndex = 2025 - selectedYear;
+    final monthController = FixedExtentScrollController(initialItem: monthIndex);
+    final yearController = FixedExtentScrollController(initialItem: yearIndex);
 
     await showDialog(
       context: context,
@@ -107,6 +143,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
               Expanded(
                 child: ListWheelScrollView.useDelegate(
                   itemExtent: 50,
+                  controller: monthController,
                   perspective: 0.005,
                   diameterRatio: 1.8,
                   physics: const FixedExtentScrollPhysics(),
@@ -139,6 +176,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
               Expanded(
                 child: ListWheelScrollView.useDelegate(
                   itemExtent: 50,
+                  controller: yearController,
                   perspective: 0.005,
                   diameterRatio: 1.8,
                   physics: const FixedExtentScrollPhysics(),
@@ -196,9 +234,13 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         ? (_fromTime?.hour ?? TimeOfDay.now().hour)
         : (_toTime?.hour ?? TimeOfDay.now().hour);
     int selectedMinute = isFromTime
-        ? (_fromTime?.minute ?? 0)
-        : (_toTime?.minute ?? 0);
+        ? (_fromTime?.minute ?? TimeOfDay.now().minute)
+        : (_toTime?.minute ?? TimeOfDay.now().minute);
     final l10n = AppLocalizations.of(context);
+
+    // Use controllers for exact initial position
+    final hourController = FixedExtentScrollController(initialItem: selectedHour);
+    final minuteController = FixedExtentScrollController(initialItem: selectedMinute);
 
     await showDialog(
       context: context,
@@ -215,9 +257,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
           height: 240,
           child: Row(
             children: [
-              // Hours Column
+              // Hour Wheel
               Expanded(
                 child: ListWheelScrollView.useDelegate(
+                  controller: hourController,
                   itemExtent: 50,
                   perspective: 0.005,
                   diameterRatio: 1.8,
@@ -228,45 +271,36 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     builder: (context, index) => Center(
                       child: Text(
                         index.toString().padLeft(2, '0'),
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
                   ":",
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
               ),
-              // Minutes Column
+              // Minute Wheel
               Expanded(
                 child: ListWheelScrollView.useDelegate(
+                  controller: minuteController,
                   itemExtent: 50,
                   perspective: 0.005,
                   diameterRatio: 1.8,
                   physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) =>
-                      selectedMinute = index * 5, // 5-minute steps
-                  childDelegate: ListWheelChildLoopingListDelegate(
-                    children: List.generate(12, (i) => i * 5)
-                        .map(
-                          (min) => Center(
-                            child: Text(
-                              min.toString().padLeft(2, '0'),
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
+                  onSelectedItemChanged: (index) => selectedMinute = index,
+                  childDelegate: ListWheelChildBuilderDelegate(
+                    childCount: 60, // 0 to 59 minutes
+                    builder: (context, index) => Center(
+                      child: Text(
+                        index.toString().padLeft(2, '0'),
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -278,18 +312,12 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               l10n?.cancel ?? "Cancel",
-              style: TextStyle(
-                fontWeight: FontWeight.normal,
-                color: AppColors.primary,
-              ),
+              style: TextStyle(fontWeight: FontWeight.normal, color: AppColors.primary),
             ),
           ),
           TextButton(
             onPressed: () {
-              final time = TimeOfDay(
-                hour: selectedHour,
-                minute: selectedMinute,
-              );
+              final time = TimeOfDay(hour: selectedHour, minute: selectedMinute);
               setState(() {
                 if (isFromTime) {
                   _fromTime = time;
@@ -301,10 +329,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
             },
             child: Text(
               l10n?.ok ?? "Ok",
-              style: TextStyle(
-                fontWeight: FontWeight.normal,
-                color: AppColors.primary,
-              ),
+              style: TextStyle(fontWeight: FontWeight.normal, color: AppColors.primary),
             ),
           ),
         ],
@@ -328,25 +353,98 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
   }
 
   List<Day> days = [
-    /* const Day(id: 1, name: 'Monday'),
-    const Day(id: 2, name: 'Tuesday'),
-    const Day(id: 3, name: 'Wednesday'),
-    const Day(id: 4, name: 'Thursday'),
-    const Day(id: 5, name: 'Friday'),
-    const Day(id: 6, name: 'Saturday'),
-    const Day(id: 7, name: 'Sunday'),*/
+    // const Day(id: 1, name: 'Monday'),
+    // const Day(id: 2, name: 'Tuesday'),
+    // const Day(id: 3, name: 'Wednesday'),
+    // const Day(id: 4, name: 'Thursday'),
+    // const Day(id: 5, name: 'Friday'),
+    // const Day(id: 6, name: 'Saturday'),
+    // const Day(id: 7, name: 'Sunday'),
   ];
   String? uniqueKey; // To store existing unique_key when editing
-
+  Map<String, dynamic>? userData;
+  bool isLoading = true;
   @override
   void initState() {
     super.initState();
-    print(
-      "📌 ClusterMeetingScreenForm → Received uniqueKey: ${widget.uniqueKey}",
-    );
-    print("📌 Is Edit Mode: ${widget.isEditMode}");
-    if (widget.isEditMode && widget.uniqueKey != null) {
-      _loadExistingMeeting();
+
+    print("ClusterMeetingScreenForm → Received uniqueKey: ${widget.uniqueKey}");
+    print("Is Edit Mode: ${widget.isEditMode}");
+
+    _loadUserData().then((_) {
+      if (!widget.isEditMode) {
+        _applyUserDataToForm();
+      }
+
+      // Then load existing data if in edit mode → this will safely override defaults
+      if (widget.isEditMode && widget.uniqueKey != null) {
+        _loadExistingMeeting();
+      }
+    });
+  }
+  void _applyUserDataToForm() {
+    if (userData == null) return;
+
+    final nameData = userData!['name'] as Map<String, dynamic>?;
+    final workingLocation = userData!['working_location'] as Map<String, dynamic>?;
+
+    final firstName = nameData?['first_name']?.toString().trim() ?? '';
+    final middleName = nameData?['middle_name']?.toString().trim() ?? '';
+    final lastName = nameData?['last_name']?.toString().trim() ?? '';
+
+    final fullName = [firstName, lastName]
+        .where((part) => part.isNotEmpty)
+        .join(' ');
+
+    final villageName = workingLocation?['village']?.toString().trim() ?? '';
+    final blockName = workingLocation?['block']?.toString().trim() ?? '';
+
+    // Only fill if the field is currently empty
+    if (_ashaFacilitatorNameController.text.trim().isEmpty) {
+      _ashaFacilitatorNameController.text = fullName;
+    }
+    if (_villageNameController.text.trim().isEmpty) {
+      _villageNameController.text = villageName;
+    }
+    // if (_blockNameController.text.trim().isEmpty) {
+    //   _blockNameController.text = blockName;
+    // }
+  }
+  Future<void> _loadUserData() async {
+    if (mounted) {
+      setState(() => isLoading = true);
+    }
+
+    try {
+      developer.log('Loading user data from secure storage...', name: 'Drawer');
+
+      Map<String, dynamic>? data = await SecureStorageService.getCurrentUserData();
+
+      if (data == null || data.isEmpty) {
+        developer.log('No current user data found, trying legacy format...', name: 'Drawer');
+        final legacyData = await SecureStorageService.getUserData();
+        if (legacyData != null && legacyData.isNotEmpty) {
+          try {
+            data = jsonDecode(legacyData) as Map<String, dynamic>?;
+          } catch (e) {
+            developer.log('Error parsing legacy user data: $e', name: 'Drawer', error: e);
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          userData = data;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      developer.log('Error in _loadUserData: $e', name: 'Drawer', error: e);
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -743,7 +841,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
               // Date of the Meeting
               CustomDatePicker(
                 labelText: l10n?.dateOfMeeting ?? "Date of the Meeting *",
-                hintText: l10n?.dateOfMeeting ?? "Date of the Meeting",
+                hintText: l10n?.dateOfMeeting ?? "Date of the Meeting*",
                 initialDate: _meetingDate,
                 onDateChanged: (date) {
                   setState(() {
@@ -861,7 +959,6 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 ],
               ),
               Divider(color: AppColors.divider, thickness: 0.5),
-              // 3. No. of ASHA present in this meeting
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -894,7 +991,43 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 ],
               ),
               Divider(color: AppColors.divider, thickness: 0.5),
-              // 4. No. of ASHA absent in this meeting
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Table(
+                  columnWidths: const {
+                    0: FixedColumnWidth(60),  // Sr.No.
+                    1: FlexColumnWidth(),     // Name
+                    2: FixedColumnWidth(90),  // Present?
+                  },
+                  border: TableBorder(
+                    horizontalInside: BorderSide(color: Colors.grey),
+                    verticalInside: BorderSide(color: Colors.grey),
+                  ),
+                  children: [
+                    /// Header Row
+                    TableRow(
+                      children: [
+                        _tableHeaderCell("Sr.No."),
+                        _tableHeaderCell("Name"),
+                        _tableHeaderCell("Present?"),
+                      ],
+                    ),
+                    // TableRow(
+                    //   children: [
+                    //     _tableCell("1"),
+                    //     _tableCell("Sitaa"),
+                    //     _tableCell("Yes"),   // or Checkbox if needed
+                    //   ],
+                    // ),
+                  ],
+                ),
+              ),
+
+              Divider(color: AppColors.divider, thickness: 0.5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -972,12 +1105,12 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                         ),
                       ),
 
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 2),
 
                       // Count Box
                       Container(
-                        width: 36,
-                        height: 36,
+                        width: 30,
+                        height: 30,
                         decoration: BoxDecoration(
                           border: Border.all(color: AppColors.divider),
                           borderRadius: BorderRadius.circular(8),
@@ -993,7 +1126,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                         ),
                       ),
 
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 2),
 
                       // Plus Button
                       GestureDetector(

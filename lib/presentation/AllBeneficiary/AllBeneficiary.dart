@@ -50,7 +50,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
     try {
       // Only get non-migrated beneficiaries (is_migrated = 0)
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries(isMigrated: 0);
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries(
+        isMigrated: 0,
+      );
       print('=== AllBeneficiary Screen - Data Loading ===');
       print('Total records from database: ${rows.length}');
       for (int i = 0; i < rows.length; i++) {
@@ -67,7 +69,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         Map<String, dynamic> info;
         try {
           if (row['beneficiary_info'] is String) {
-            info = jsonDecode(row['beneficiary_info'] as String) as Map<String, dynamic>;
+            info =
+                jsonDecode(row['beneficiary_info'] as String)
+                    as Map<String, dynamic>;
           } else if (row['beneficiary_info'] is Map) {
             info = Map<String, dynamic>.from(row['beneficiary_info'] as Map);
           } else {
@@ -82,11 +86,14 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         final String createdDate = row['created_date_time']?.toString() ?? '';
         final String gender = (info['gender']?.toString().toLowerCase() ?? '');
         final String richId =
-            info['RichIDChanged']?.toString() ?? info['richIdChanged']?.toString() ?? '';
+            info['RichIDChanged']?.toString() ??
+            info['richIdChanged']?.toString() ??
+            '';
 
         // Unified display name: prefer name -> memberName -> headName
         final String displayName =
-            (info['name'] ?? info['memberName'] ?? info['headName'] ?? '').toString();
+            (info['name'] ?? info['memberName'] ?? info['headName'] ?? '')
+                .toString();
 
         final String uniqueKey = row['unique_key']?.toString() ?? '';
         final String beneficiaryId = uniqueKey.length > 11
@@ -94,7 +101,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             : uniqueKey;
 
         final String relation =
-            info['relation_to_head']?.toString() ?? info['relation']?.toString() ?? 'N/A';
+            info['relation_to_head']?.toString() ??
+            info['relation']?.toString() ??
+            'N/A';
         final String village = info['village']?.toString() ?? '';
         final String mohalla = info['mohalla']?.toString() ?? '';
 
@@ -203,7 +212,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'All Beneficiaries',
+        screenTitle: l10n?.gridAllBeneficiaries ?? 'All Beneficiaries',
         showBack: false,
         icon2Image: 'assets/images/home.png',
         onIcon2Tap: () => Navigator.pushReplacement(
@@ -218,79 +227,93 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       body: _isLoading
           ? const CenterBoxLoader()
           : Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText:  l10n!.searchBeneficiaries,
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    decoration: InputDecoration(
+                      hintText:
+                          l10n?.searchBeneficiaries ?? "Beneficiaries Search",
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppColors.outlineVariant),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-          ),
 
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
-          ),
-
-          // ➕ Add New Button
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-              child: SizedBox(
-                width: double.infinity,
-                height: 40,
-                child: RoundButton(
-                  title: ( 'New Household Registration').toUpperCase(),
-                  color: AppColors.primary,
-                  borderRadius: 8,
-                  height: 45,
-                  onPress: () {
-                    Navigator.pushNamed(context, Route_Names.addFamilyHead);
-                  },
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    itemCount: _filtered.length,
+                    itemBuilder: (context, index) {
+                      final data = _filtered[index];
+                      return _householdCard(context, data);
+                    },
+                  ),
                 ),
-              ),
+
+                // ➕ Add New Button
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0,
+                      vertical: 8,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 40,
+                      child: RoundButton(
+                        title:
+                            (l10n?.gridNewHouseholdRegister ??
+                                    'New Household Registration')
+                                .toUpperCase(),
+                        color: AppColors.primary,
+                        borderRadius: 8,
+                        height: 45,
+                        onPress: () {
+                          Navigator.pushNamed(
+                            context,
+                            Route_Names.addFamilyHead,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
   String _formatDate(String dateString) {
     if (dateString.isEmpty) return 'N/A';
-    
+
     try {
-      
       DateTime? date = DateTime.tryParse(dateString);
- 
+
       if (date == null && dateString.contains('-')) {
         final parts = dateString.split(' ');
         final datePart = parts[0]; // Get just the date part
         final dateSegments = datePart.split('-');
-        
+
         if (dateSegments.length == 3) {
           // If it's already in dd-mm-yyyy format, just return it as is
           if (dateSegments[0].length == 2 && dateSegments[2].length == 4) {
@@ -302,7 +325,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           }
         }
       }
-      
+
       // If we have a valid date, format it
       if (date != null) {
         final day = date.day.toString().padLeft(2, '0');
@@ -310,11 +333,13 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         final year = date.year.toString();
         return '$day-$month-$year';
       }
-      
+
       // If all else fails, return the original string (or N/A if empty)
       return dateString.isNotEmpty ? dateString : 'N/A';
     } catch (e) {
-      return dateString.isNotEmpty ? dateString : 'N/A'; // Return original or N/A if empty
+      return dateString.isNotEmpty
+          ? dateString
+          : 'N/A'; // Return original or N/A if empty
     }
   }
 
@@ -324,13 +349,18 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
     final gender = (data['Gender']?.toString().toLowerCase() ?? '');
     final isFemale = gender == 'female' || gender == 'f';
-    final isChild = data['RegitrationType']?.toString().toLowerCase() == 'child';
+    final isChild =
+        data['RegitrationType']?.toString().toLowerCase() == 'child';
 
     // Store the complete beneficiary ID from unique_key (not from BeneficiaryID which is trimmed)
-    final String completeBeneficiaryId = data['unique_key']?.toString() ?? data['BeneficiaryID']?.toString() ?? 'N/A';
+    final String completeBeneficiaryId =
+        data['unique_key']?.toString() ??
+        data['BeneficiaryID']?.toString() ??
+        'N/A';
 
     // Create display version (last 11 digits)
-    final String displayBeneficiaryId = (completeBeneficiaryId.length > 11 && completeBeneficiaryId != 'N/A')
+    final String displayBeneficiaryId =
+        (completeBeneficiaryId.length > 11 && completeBeneficiaryId != 'N/A')
         ? completeBeneficiaryId.substring(completeBeneficiaryId.length - 11)
         : completeBeneficiaryId;
 
@@ -364,7 +394,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
             debugPrint(' Navigation to AddFamilyMember:');
             debugPrint('   HHID: ${data['hhId']}');
-            debugPrint('   Complete Beneficiary ID (from unique_key): $completeBeneficiaryId');
+            debugPrint(
+              '   Complete Beneficiary ID (from unique_key): $completeBeneficiaryId',
+            );
 
             debugPrint('   Head Name: ${data['Name']}');
             debugPrint('   Spouse Name: ${data['SpouseName']}');
@@ -393,7 +425,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 Container(
                   decoration: const BoxDecoration(
                     color: AppColors.background,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(6),
+                    ),
                   ),
                   padding: const EdgeInsets.all(6),
                   child: Row(
@@ -403,12 +437,14 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       Expanded(
                         child: Text(
                           (data['hhId']?.toString().length ?? 0) > 11
-                              ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
+                              ? data['hhId'].toString().substring(
+                                  data['hhId'].toString().length - 11,
+                                )
                               : (data['hhId'] ?? ''),
                           style: TextStyle(
-                              color: primary,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14.sp
+                            color: primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.sp,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -431,32 +467,74 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: primary.withOpacity(0.95),
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(6)),
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(6),
+                    ),
                   ),
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildRow([
-                        _rowText('Registration Date', _formatDate(data['RegitrationDate']?.toString() ?? '')),
-                        _rowText('Registration Type', isChild ? 'Child' : 'General'),
-                        _rowText('Beneficiary ID', displayBeneficiaryId), // Display trimmed version
+                        _rowText(
+                          l10n?.registrationDateLabel ?? 'Registration Date',
+                          _formatDate(
+                            data['RegitrationDate']?.toString() ?? '',
+                          ),
+                        ),
+                        _rowText(
+                          l10n?.registrationTypeLabel ?? 'Registration Type',
+                          isChild
+                              ? (l10n?.memberTypeChild ?? 'Child')
+                              : (l10n?.categoryGeneral ?? 'General'),
+                        ),
+                        _rowText(
+                          l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                          displayBeneficiaryId,
+                        ), // Display trimmed version
                       ]),
                       const SizedBox(height: 8),
 
                       // Second row: Name, Age|Gender, Mobile
                       _buildRow([
-                        _rowText('Name', data['Name']?.toString().isNotEmpty == true ? data['Name'] : 'N/A'),
-                        _rowText('Age | Gender', data['Age|Gender']?.toString().isNotEmpty == true ? data['Age|Gender'] : 'N/A'),
-                        _rowText('Mobile No.', data['Mobileno.']?.toString().isNotEmpty == true ? data['Mobileno.'] : 'N/A'),
+                        _rowText(
+                          l10n?.nameLabel ?? 'Name',
+                          data['Name']?.toString().isNotEmpty == true
+                              ? data['Name']
+                              : (l10n?.na ?? 'N/A'),
+                        ),
+                        _rowText(
+                          l10n?.ageGenderLabel ?? 'Age | Gender',
+                          data['Age|Gender']?.toString().isNotEmpty == true
+                              ? data['Age|Gender']
+                              : (l10n?.na ?? 'N/A'),
+                        ),
+                        _rowText(
+                          l10n?.mobileLabelSimple ?? 'Mobile No.',
+                          data['Mobileno.']?.toString().isNotEmpty == true
+                              ? data['Mobileno.']
+                              : (l10n?.na ?? 'N/A'),
+                        ),
                       ]),
                       const SizedBox(height: 8),
 
                       if (isChild) ...[
                         // For Child records
                         _buildRow([
-                          _rowText('RCH ID', isFemale ? (data['RichID']?.toString().isNotEmpty == true ? data['RichID'] : 'Not Available') : 'N/A'),
-                          _rowText('Father Name', data['FatherName']?.toString().isNotEmpty == true ? data['FatherName'] : 'Not Available'),
+                          _rowText(
+                            l10n?.rchIdLabel ?? 'RCH ID',
+                            isFemale
+                                ? (data['RichID']?.toString().isNotEmpty == true
+                                      ? data['RichID']
+                                      : (l10n?.notAvailable ?? 'Not Available'))
+                                : (l10n?.na ?? 'N/A'),
+                          ),
+                          _rowText(
+                            l10n?.fatherName ?? 'Father Name',
+                            data['FatherName']?.toString().isNotEmpty == true
+                                ? data['FatherName']
+                                : (l10n?.notAvailable ?? 'Not Available'),
+                          ),
                           _rowText('', ''), // Empty cell for layout
                         ]),
                       ] else ...[
@@ -464,15 +542,22 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         if (data['SpouseName']?.toString().isNotEmpty == true)
                           _buildRow([
                             _rowText(
-                                data['SpouseGender'] == 'female' ? 'Wife Name' : 'Husband Name',
-                                data['SpouseName']
+                              data['SpouseGender'] == 'female'
+                                  ? (l10n?.wifeName ?? 'Wife Name')
+                                  : (l10n?.husbandName ?? 'Husband Name'),
+                              data['SpouseName'],
                             ),
                             _rowText('', ''), // Empty cell for layout
                             _rowText('', ''), // Empty cell for layout
                           ])
                         else
                           _buildRow([
-                            _rowText('Relation', data['Relation']?.toString().isNotEmpty == true ? data['Relation'] : 'N/A'),
+                            _rowText(
+                              l10n?.thRelation ?? 'Relation',
+                              data['Relation']?.toString().isNotEmpty == true
+                                  ? data['Relation']
+                                  : (l10n?.na ?? 'N/A'),
+                            ),
                             _rowText('', ''),
                             _rowText('', ''),
                           ]),
@@ -480,8 +565,18 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       const SizedBox(height: 8),
 
                       _buildRow([
-                        _rowText('Village', data['village']?.toString().isNotEmpty == true ? data['village'] : 'N/A'),
-                        _rowText('Tola/Mohalla', data['Tola/Mohalla']?.toString().isNotEmpty == true ? data['Tola/Mohalla'] : 'N/A'),
+                        _rowText(
+                          l10n?.userVillageLabel ?? 'Village',
+                          data['village']?.toString().isNotEmpty == true
+                              ? data['village']
+                              : (l10n?.na ?? 'N/A'),
+                        ),
+                        _rowText(
+                          l10n?.tolaMohalla ?? 'Tola/Mohalla',
+                          data['Tola/Mohalla']?.toString().isNotEmpty == true
+                              ? data['Tola/Mohalla']
+                              : (l10n?.na ?? 'N/A'),
+                        ),
                         _rowText('', ''), // Empty cell for layout
                       ]),
                     ],
@@ -504,10 +599,13 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 width: 100,
                 onPress: () {
                   final beneficiaryData = {
-                    'beneficiaryId': data['unique_key']?.toString() ?? '', // Use complete ID from unique_key
+                    'beneficiaryId':
+                        data['unique_key']?.toString() ??
+                        '', // Use complete ID from unique_key
                     'hhid': data['hhId']?.toString() ?? '',
                     'name': data['Name']?.toString() ?? '',
-                    'age': data['Age|Gender']?.toString().split(' ').first ?? '',
+                    'age':
+                        data['Age|Gender']?.toString().split(' ').first ?? '',
                     'gender': data['Gender']?.toString().toLowerCase() ?? '',
                     'mobile': data['Mobileno.']?.toString() ?? '',
                     'village': data['village']?.toString() ?? '',
@@ -518,8 +616,11 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                     'relation': data['Relation']?.toString() ?? '',
                   };
 
-                  if (beneficiaryData['beneficiaryId']!.isEmpty || beneficiaryData['hhid']!.isEmpty) {
-                    debugPrint('Warning: Missing required data for CBAC - BeneficiaryID: ${beneficiaryData['beneficiaryId']}, hhId: ${beneficiaryData['hhid']}');
+                  if (beneficiaryData['beneficiaryId']!.isEmpty ||
+                      beneficiaryData['hhid']!.isEmpty) {
+                    debugPrint(
+                      'Warning: Missing required data for CBAC - BeneficiaryID: ${beneficiaryData['beneficiaryId']}, hhId: ${beneficiaryData['hhid']}',
+                    );
                     debugPrint('Available data keys: ${data.keys.join(', ')}');
                   }
 
@@ -529,16 +630,21 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                     arguments: beneficiaryData,
                   );
 
-                  if (beneficiaryData['beneficiaryId']!.isNotEmpty && beneficiaryData['hhid']!.isNotEmpty) {
+                  if (beneficiaryData['beneficiaryId']!.isNotEmpty &&
+                      beneficiaryData['hhid']!.isNotEmpty) {
                     debugPrint('✅ CBAC Navigation Data:');
-                    debugPrint('   Beneficiary ID: ${beneficiaryData['beneficiaryId']}');
+                    debugPrint(
+                      '   Beneficiary ID: ${beneficiaryData['beneficiaryId']}',
+                    );
                     debugPrint('   Household ID: ${beneficiaryData['hhid']}');
                     debugPrint('   Name: ${beneficiaryData['name']}');
                     debugPrint('   Age: ${beneficiaryData['age']}');
                     debugPrint('   Gender: ${beneficiaryData['gender']}');
                     debugPrint('   Mobile: ${beneficiaryData['mobile']}');
                   } else {
-                    debugPrint('❌ Missing data - BeneficiaryID: ${beneficiaryData['beneficiaryId']}, hhId: ${beneficiaryData['hhid']}');
+                    debugPrint(
+                      '❌ Missing data - BeneficiaryID: ${beneficiaryData['beneficiaryId']}, hhId: ${beneficiaryData['hhid']}',
+                    );
                   }
                 },
               ),
@@ -554,7 +660,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         for (int i = 0; i < children.length; i++) ...[
           Expanded(child: children[i]),
           if (i < children.length - 1) const SizedBox(width: 10),
-        ]
+        ],
       ],
     );
   }
@@ -565,16 +671,25 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       children: [
         Text(
           title,
-          style: TextStyle(color: AppColors.background, fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.background,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: TextStyle(color: AppColors.background, fontWeight: FontWeight.w400, fontSize: 13.sp),
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w400,
+            fontSize: 13.sp,
+          ),
         ),
       ],
     );
   }
+
   bool _isEligibleForCBAC(String ageGender) {
     try {
       final ageStr = ageGender.split(' ').first;
@@ -585,6 +700,4 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       return false;
     }
   }
-
-
 }

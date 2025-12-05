@@ -103,9 +103,25 @@ class _ClusterMeetingScreenState extends State<ClusterMeetingScreen> {
         screenTitle:  l10n?.ashaFacilitatorClusterMeetingList ?? "ASHA Facilitator Cluster Meeting List",
         showBack: true,
       ),
-
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
+          : meetings.isEmpty
+          ? Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(height: 20), // space below app bar
+          Center(
+            child: Text(
+              l10n?.noRecordFound ?? "No Record Found",
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ),
+        ],
+      )
           : Column(
         children: [
           Expanded(
@@ -119,6 +135,8 @@ class _ClusterMeetingScreenState extends State<ClusterMeetingScreen> {
           ),
         ],
       ),
+
+
 
 
       bottomNavigationBar: Padding(
@@ -165,8 +183,7 @@ class _ClusterMeetingScreenState extends State<ClusterMeetingScreen> {
     return InkWell(  // Makes it clickable with ripple effect
       borderRadius: BorderRadius.circular(4),
       onTap: () {
-        final String uniqueKey = data["title"];
-
+        final String uniqueKey = data["fullTitle"];
         Navigator.push(
           context,
           MaterialPageRoute(

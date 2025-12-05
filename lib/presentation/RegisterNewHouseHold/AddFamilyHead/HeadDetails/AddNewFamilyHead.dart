@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
+import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/utils/Validations.dart';
-import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
+import 'package:medixcel_new/core/widgets/Dropdown/Dropdown.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
-import 'package:medixcel_new/core/widgets/Dropdown/Dropdown.dart';
-import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
-import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/SpousDetails.dart';
-import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/bloc/spous_bloc.dart';
-import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/ChildrenDetaills.dart';
-import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Children_Details/bloc/children_bloc.dart';
-import 'package:medixcel_new/data/Database/User_Info.dart';
-import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
-import 'package:sizer/sizer.dart';
-import '../../../../core/config/themes/CustomColors.dart';
-import '../../../../core/utils/enums.dart';
-import '../../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
-import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
 
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/SpousDetails.dart' show spousFormKey, clearSpousFormError, spousLastFormError, scrollToFirstError, Spousdetails, validateAllSpousFields;
+
+import '../../../../data/Database/User_Info.dart';
+import '../../../../data/SecureStorage/SecureStorage.dart';
 import '../../../../data/repositories/RegisterNewHouseHoldController/register_new_house_hold.dart';
+import '../Children_Details/ChildrenDetaills.dart';
+import '../Children_Details/bloc/children_bloc.dart';
+import '../SpousDetails/bloc/spous_bloc.dart';
 import 'bloc/add_family_head_bloc.dart';
 
-
+import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/core/utils/enums.dart';
+import 'package:medixcel_new/core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
+import 'package:sizer/sizer.dart';
 
 class AddNewFamilyHeadScreen extends StatefulWidget {
   final bool isEdit;
@@ -62,12 +66,20 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   }
 
   static String? _captureError(String? message) {
-    if (message != null) {
+    debugPrint('_captureError called with: $message (${DateTime.now().toIso8601String()})');
+    if (message != null && message.isNotEmpty) {
+      debugPrint('❌ Validation Error: $message');
+      // Only update if we don't have an error yet
       if (_lastFormError == null) {
         _lastFormError = message;
+        debugPrint('📌 Setting first validation error: $message');
+      } else {
+        debugPrint('ℹ️ Not updating error message, already have: $_lastFormError');
       }
       return message;
     }
+    debugPrint('✅ Validation passed for field');
+    // Don't clear _lastFormError here to preserve the first error
     return null;
   }
   
@@ -162,6 +174,92 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       return null;
     }
   }
+
+  List<String> _getMobileOwnerList(String gender) {
+    const common = [
+      'Father',
+      'Mother',
+      'Son',
+      'Daughter',
+      'Father In Law',
+      'Mother In Law',
+      'Neighbour',
+      'Relative',
+      'Other',
+    ];
+
+    gender = gender.toLowerCase();
+
+    if (gender == 'female') {
+      return [
+        'Self',
+        'Husband',
+        'Father',
+        'Mother',
+        'Son',
+        'Daughter',
+        'Father In Law',
+        'Mother In Law',
+        'Neighbour',
+        'Relative',
+        'Other',
+        ...common,
+      ];
+    }
+
+    if (gender == 'male') {
+      return [
+        'Self',
+        'Wife',
+        'Father',
+        'Mother',
+        'Son',
+        'Daughter',
+        'Father In Law',
+        'Mother In Law',
+        'Neighbour',
+        'Relative',
+        'Other',
+        ...common,
+      ];
+    }
+
+    if (gender == 'transgender') {
+      return [
+        'Self',
+        'Husband',
+        'Wife',
+        'Father',
+        'Mother',
+        'Son',
+        'Daughter',
+        'Father In Law',
+        'Mother In Law',
+        'Neighbour',
+        'Relative',
+        'Other',
+        ...common,
+      ];
+    }
+
+    // Fallback if gender is unknown
+    return [
+      'Self',
+      'Husband',
+      'Wife',
+      'Father',
+      'Mother',
+      'Son',
+      'Daughter',
+      'Father In Law',
+      'Mother In Law',
+      'Neighbour',
+      'Relative',
+      'Other',
+      ...common,
+    ];
+  }
+
   Widget _buildFamilyHeadForm(BuildContext context, AddFamilyHeadState state, AppLocalizations l) {
     return GestureDetector(
       onTap: () {
@@ -245,13 +343,26 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(bottom: 1.h, left: 1.3.h),
-                    child: Text(
-                      '${l.ageApproximate} *',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w500,
+                    padding: EdgeInsets.only(
+                      bottom: 1.h,
+                      left: 1.3.h,
+                    ),
+                    child: RichText(
+                      text: TextSpan(
+                        text: "${l.ageApproximate}",
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        children: const [
+                          TextSpan(
+                            text: '*',
+                            style: TextStyle(
+                              color: Colors.red,   // Make asterisk red
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -664,51 +775,20 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
           _Section(
             child: _Section(
-              child:ApiDropdown<String>(
+              child: ApiDropdown<String>(
                 labelText: 'Whose Mobile No.? *',
-                items: state.gender == 'Female'
-                    ? const [
-                  'Self',
-                  'Husband',
-                  'Father',
-                  'Mother',
-                  'Son',
-                  'Daughter',
-                  'Father In Law',
-                  'Mother In Law',
-                  'Neighbour',
-                  'Relative',
-                  'Other',
-                ]
-                    : const [
-                  'Self',
-                  'Wife',
-                  'Father',
-                  'Mother',
-                  'Son',
-                  'Daughter',
-                  'Father In Law',
-                  'Mother In Law',
-                  'Neighbour',
-                  'Relative',
-                  'Other',
-                ],
-                getLabel: (s) {
-                  // Return same value because label = value
-                  return s;
-                },
+                items: _getMobileOwnerList(state.gender ?? ''),
+                getLabel: (s) => s,
                 value: state.mobileOwner,
                 onChanged: (v) => context
                     .read<AddFamilyHeadBloc>()
                     .add(AfhUpdateMobileOwner(v)),
-
                 validator: (value) =>
                     _captureError(Validations.validateWhoMobileNo(l, value)),
               ),
-
             ),
-
           ),
+
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           if (state.mobileOwner == 'Other')
@@ -1638,28 +1718,28 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                         height: 4.5.h,
                                                         width: 25.5.w,
                                                         child: OutlinedButton(
-                                                            style: OutlinedButton.styleFrom(
-                                                              minimumSize: Size(25.w, 4.5.h),
-                                                              backgroundColor: AppColors.primary,
-                                                              foregroundColor: Colors.white,
-                                                              side: BorderSide(color: AppColors.primary, width: 0.2.w), // 👈 matching border
-                                                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                                                              shape: RoundedRectangleBorder(
-                                                                borderRadius: BorderRadius.circular(4), // rounded edges
-                                                              ),
-                                                              elevation: 0.5, // subtle elevation for depth
-                                                              shadowColor: AppColors.primary.withOpacity(0.4),
+                                                          style: OutlinedButton.styleFrom(
+                                                            minimumSize: Size(25.w, 4.5.h),
+                                                            backgroundColor: AppColors.primary,
+                                                            foregroundColor: Colors.white,
+                                                            side: BorderSide(color: AppColors.primary, width: 0.2.w), // 👈 matching border
+                                                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(4), // rounded edges
                                                             ),
-                                                            onPressed: () => controller.animateTo(i - 1),
-                                                            child: Text(
-                                                              l.previousButton,
-                                                              style:  TextStyle(
+                                                            elevation: 0.5, // subtle elevation for depth
+                                                            shadowColor: AppColors.primary.withOpacity(0.4),
+                                                          ),
+                                                          onPressed: () => controller.animateTo(i - 1),
+                                                          child: Text(
+                                                            l.previousButton,
+                                                            style:  TextStyle(
                                                                 fontWeight: FontWeight.w600,
                                                                 letterSpacing: 0.5,
                                                                 fontSize: 14.sp
-                                                              ),
                                                             ),
-                                                          )
+                                                          ),
+                                                        )
                                                     )
                                                   else
                                                     const SizedBox.shrink(),
@@ -1670,9 +1750,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                       title: i < last
                                                           ? l.nextButton
                                                           : (isLoading
-                                                              ? l.addingButton
-                                                              : l.addButton),
-
+                                                          ? l.addingButton
+                                                          : l.addButton),
                                                       onPress: () {
                                                         if (i < last) {
                                                           bool canProceed = true;
@@ -1681,82 +1760,105 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             final headForm = _formKey.currentState;
                                                             if (headForm == null || !headForm.validate()) {
                                                               canProceed = false;
-                                                              // The specific error messages will be shown by the individual field validators
+                                                              final msg = _lastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                                              showAppSnackBar(context, msg);
                                                             }
                                                           } else if (i == 1) {
                                                             clearSpousFormError();
                                                             final spouseForm = spousFormKey.currentState;
-
-                                                            if (spouseForm == null || !spousFormKey.currentState!.validate()) {
+                                                            final spousState = context.read<SpousBloc>().state;
+                                                            
+                                                            // First validate the form fields
+                                                            final isFormValid = spouseForm?.validate() ?? false;
+                                                            
+                                                            // Then validate all fields including custom validations
+                                                            final areAllFieldsValid = validateAllSpousFields(spousState);
+                                                            
+                                                            if (!isFormValid || !areAllFieldsValid) {
                                                               canProceed = false;
-                                                              // Scroll to the first error in spouse form
+                                                              final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
+                                                              showAppSnackBar(context, msg);
+                                                              
+                                                              // Scroll to the first error in the form
                                                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                                                 final form = spousFormKey.currentContext?.findRenderObject() as RenderBox?;
                                                                 if (form != null) {
                                                                   Scrollable.ensureVisible(
                                                                     spousFormKey.currentContext!,
-                                                                  ) ;     }});}
+                                                                    duration: const Duration(milliseconds: 300),
+                                                                    curve: Curves.easeInOut,
+                                                                  );
+                                                                }
+                                                              });
+                                                            }
                                                           }
-                                                          
                                                           if (!canProceed) return;
                                                           controller.animateTo(i + 1);
                                                         } else {
-                                                          bool isValid = true;
-                                                          
-                                                          _clearFormError();
-                                                          final headForm = _formKey.currentState;
-                                                          if (headForm == null || !headForm.validate()) {
-                                                            isValid = false;
-                                                            _scrollToFirstError();
-                                                          }
-                                                          
-                                                          if (last >= 1) {
+
+                                                          if (last == 1) {
                                                             clearSpousFormError();
-                                                            final state = context.read<SpousBloc>().state;
                                                             final spouseForm = spousFormKey.currentState;
+                                                            final spousState = context.read<SpousBloc>().state;
                                                             
-                                                            final isSpouseFormValid = (spouseForm?.validate() ?? false) && 
-                                                                                    validateAllSpousFields(state);
+                                                            // First validate the form fields
+                                                            final isFormValid = spouseForm?.validate() ?? false;
                                                             
-                                                            if (!isSpouseFormValid) {
-                                                              isValid = false;
-                                                              scrollToFirstError();
+                                                            // Then validate all fields including custom validations
+                                                            final areAllFieldsValid = validateAllSpousFields(spousState);
+                                                            
+                                                            if (!isFormValid || !areAllFieldsValid) {
+                                                              final msg = spousLastFormError ??
+                                                                  'Please correct the highlighted errors before continuing.';
+                                                              showAppSnackBar(context, msg);
+                                                              
+                                                              // Scroll to the first error in the form
+                                                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                                final form = spousFormKey.currentContext?.findRenderObject() as RenderBox?;
+                                                                if (form != null) {
+                                                                  Scrollable.ensureVisible(
+                                                                    spousFormKey.currentContext!,
+                                                                    duration: const Duration(milliseconds: 300),
+                                                                    curve: Curves.easeInOut,
+                                                                  );
+                                                                }
+                                                              });
+                                                              
+                                                              return;
                                                             }
                                                           }
-                                                          
+
                                                           if (last == 2) {
+                                                            // Children tab present, validate children details
                                                             try {
                                                               final ch = context.read<ChildrenBloc>().state;
 
                                                               if (ch.totalLive > 0 &&
                                                                   (ch.totalMale + ch.totalFemale) !=
                                                                       ch.totalLive) {
-                                                                showAppSnackBar(context, l.malePlusFemaleError);
+                                                                showAppSnackBar(
+                                                                    context, l.malePlusFemaleError);
                                                                 return;
                                                               }
 
-                                                              final youngestErr = _validateYoungestChild(ch, l);
+                                                              final youngestErr =
+                                                              _validateYoungestChild(ch, l);
                                                               if (youngestErr != null) {
                                                                 showAppSnackBar(context, youngestErr);
                                                                 return;
                                                               }
                                                             } catch (_) {}
                                                           }
-                                                          
-                                                          if (!isValid) {
-                                                            final msg = spousLastFormError ?? _lastFormError ?? 
-                                                                      'Please correct the highlighted errors before continuing.';
-                                                            showAppSnackBar(context, msg);
-                                                            return;
-                                                          }
 
-                                                          context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
+                                                          context
+                                                              .read<AddFamilyHeadBloc>()
+                                                              .add(AfhSubmit(context: context));
                                                         }
                                                       },
                                                       color: AppColors.primary,
                                                       borderRadius:4,
                                                       isLoading: isLoading,
-                                                      fontSize: 15.sp,
+                                                      fontSize: 14.sp,
                                                     ),
                                                   ),
                                                 ],

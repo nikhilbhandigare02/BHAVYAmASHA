@@ -1779,7 +1779,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherInLaw => 'Mother in Law';
 
   @override
-  String get motherNameLabel => 'Mother Name *';
+  String get motherNameLabel => 'Mother Name';
 
   @override
   String get mukhiyaMobileHint => 'Mobile no. of mukhiya';
@@ -2592,7 +2592,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mothersRchIdLabel => 'Mother\'s RCH ID number';
 
   @override
-  String get birthCertificateIssuedLabel => 'Has the birth certificate been issued?';
+  String get birthCertificateIssuedLabel => 'IS birth certificate issued?';
 
   @override
   String get birthCertificateNumberLabel => 'birth certificate number';
@@ -2664,7 +2664,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alive => 'alive';
 
   @override
-  String get dead => 'death';
+  String get dead => 'dead';
 
   @override
   String get babyConditionLabel => 'Baby\'s condition *';
@@ -2757,13 +2757,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newbornReferredByAshaLabel => 'In the above symptoms, weather the child is referred by ASHA? *';
 
   @override
-  String get birthRegisteredLabel => 'Is birth registration complete*';
+  String get birthRegisteredLabel => 'Is birth registration completed? *';
 
   @override
-  String get mcpCardAvailableLabel => 'Is \'Matra Child Protection (MCP)\' card available? *';
+  String get mcpCardAvailableLabel => 'Is there availability of \'Mother Child Protection (MCP) card? *';
 
   @override
-  String get birthDoseVaccinationLabel => 'Has the baby received the birth dose vaccination? *';
+  String get birthDoseVaccinationLabel => 'Is the birthdose vaccination given to baby? *';
 
   @override
   String get homeVisitDayLabel => 'Home Visit Day *';
@@ -2781,7 +2781,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) *';
 
   @override
-  String get postDeliveryProblemsLabel => 'Does the mother have any of the following problems post delivery? *';
+  String get postDeliveryProblemsLabel => 'Does the mother have any problems after delivery? *';
 
   @override
   String get postDeliveryProblemNone => 'None';
@@ -2805,7 +2805,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'Convulsions';
 
   @override
-  String get breastfeedingProblemsLabel => 'Does the mother have breast feeding problem? *';
+  String get breastfeedingProblemsLabel => 'Is the mother having problems breastfeeding? *';
 
   @override
   String get mealsPerDayLabel => 'How many times does a mother take a full meal in 24 hours?';
@@ -2826,10 +2826,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get counselingAdviceLabel => 'Counseling / Advice *';
 
   @override
-  String get milkNotProducingOrLessLabel => 'Mother\'s milk is not being produced after delivery or she thinks less milk is being produced *';
+  String get milkNotProducingOrLessLabel => 'After delivery, is the mother not producing milk or does she feel milk is less? *';
 
   @override
-  String get nippleCracksPainOrEngorgedLabel => 'is the mother having cracked nipples/ painful and / or engorged breasts *';
+  String get nippleCracksPainOrEngorgedLabel => 'Does the mother have nipple cracks/pain and/or engorged breasts? *';
 
   @override
   String get outcomeFormTitle => 'Delivery Outcome';
@@ -3177,13 +3177,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prevVisitPncDay => 'PNC Day';
 
   @override
-  String get tabGeneralDetails => 'BASIC DETAILS';
+  String get tabGeneralDetails => 'General Details';
 
   @override
-  String get tabMotherDetails => 'MOTHER DETAILS';
+  String get tabMotherDetails => 'Mother Details';
 
   @override
-  String get tabNewbornDetails => 'CHIlD  DETAILS';
+  String get tabNewbornDetails => 'Newborn Details';
 
   @override
   String get confirmAttentionTitle => 'Confirm Action';
@@ -5135,4 +5135,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get synced => 'Synced';
+
+  @override
+  String get noDataFound => 'No data found';
+
+  @override
+  String get newHouseholdRegistration => 'NEW HOUSEHOLD REGISTRATION';
+
+  @override
+  String get noMatchingBeneficiariesFound => 'No matching beneficiaries found.';
+
+  @override
+  String get noBeneficiariesFoundAddNew => 'No beneficiaries found. Add a new beneficiary to get started.';
+
+  @override
+  String get richId => 'RICH ID';
+
+  @override
+  String get mothersName => 'Mother\'s Name';
+
+  @override
+  String get wifesName => 'Wife\'s Name';
+
+  @override
+  String get splitMigration => 'Split / Migration';
+
+  @override
+  String get splitUpdated => 'Split updated';
+
+  @override
+  String get splitFailed => 'Split failed';
+
+  @override
+  String get migration => 'Migration';
+
+  @override
+  String get split => 'Split';
+
+  @override
+  String get failedToLoadMembers => 'Failed to load members';
+
+  @override
+  String get loadingMembers => 'Loading members...';
+
+  @override
+  String get selectMember => 'Select Member';
+
+  @override
+  String get selectChild => 'Select Child';
+
+  @override
+  String get selectAMember => 'Select a member';
+
+  @override
+  String get migrate => 'MIGRATE';
+
+  @override
+  String get selectMemberType => 'Select Member Type';
+
+  @override
+  String get selectChildOptional => 'Select Child (Optional)';
+
+  @override
+  String get enterHouseNumber => 'Enter house number';
+
+  @override
+  String get splitLabel => 'SPLIT';
+
+  @override
+  String get selectNewFamilyHead => 'Select New Family Head';
+
+  @override
+  String get noAdultMembersFound => 'No adult members found for this household';
+
+  @override
+  String get doYouWantToContinue => 'Do you want to continue?';
+
+  @override
+  String get updateMemberDetails => 'Update Member Details';
+
+  @override
+  String get verifyLabel => 'VERIFY';
+
+  @override
+  String get weightRange => 'Weight (1.2-90)Kg';
+
+  @override
+  String get isBirthCertificateIssued => 'Is birth certificate issued?';
+
+  @override
+  String get isSchoolGoingChild => 'Is He/She school going child?';
+
+  @override
+  String get saving => 'Saving...';
+
+  @override
+  String get correctHighlightedErrors => 'Please correct the highlighted errors before continuing.';
+
+  @override
+  String get selectOptionLabel => 'Select Option';
+
+  @override
+  String get screeningDate => 'Screening Date';
 }

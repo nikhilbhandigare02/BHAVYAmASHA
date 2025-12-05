@@ -3614,7 +3614,7 @@ abstract class AppLocalizations {
   /// No description provided for @motherNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mother Name *'**
+  /// **'Mother Name'**
   String get motherNameLabel;
 
   /// No description provided for @mukhiyaMobileHint.
@@ -5240,7 +5240,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthCertificateIssuedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the birth certificate been issued?'**
+  /// **'IS birth certificate issued?'**
   String get birthCertificateIssuedLabel;
 
   /// No description provided for @birthCertificateNumberLabel.
@@ -5384,7 +5384,7 @@ abstract class AppLocalizations {
   /// No description provided for @dead.
   ///
   /// In en, this message translates to:
-  /// **'death'**
+  /// **'dead'**
   String get dead;
 
   /// No description provided for @babyConditionLabel.
@@ -5570,19 +5570,19 @@ abstract class AppLocalizations {
   /// No description provided for @birthRegisteredLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is birth registration complete*'**
+  /// **'Is birth registration completed? *'**
   String get birthRegisteredLabel;
 
   /// No description provided for @mcpCardAvailableLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is \'Matra Child Protection (MCP)\' card available? *'**
+  /// **'Is there availability of \'Mother Child Protection (MCP) card? *'**
   String get mcpCardAvailableLabel;
 
   /// No description provided for @birthDoseVaccinationLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby received the birth dose vaccination? *'**
+  /// **'Is the birthdose vaccination given to baby? *'**
   String get birthDoseVaccinationLabel;
 
   /// No description provided for @homeVisitDayLabel.
@@ -5618,7 +5618,7 @@ abstract class AppLocalizations {
   /// No description provided for @postDeliveryProblemsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Does the mother have any of the following problems post delivery? *'**
+  /// **'Does the mother have any problems after delivery? *'**
   String get postDeliveryProblemsLabel;
 
   /// No description provided for @postDeliveryProblemNone.
@@ -5666,7 +5666,7 @@ abstract class AppLocalizations {
   /// No description provided for @breastfeedingProblemsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Does the mother have breast feeding problem? *'**
+  /// **'Is the mother having problems breastfeeding? *'**
   String get breastfeedingProblemsLabel;
 
   /// No description provided for @mealsPerDayLabel.
@@ -5708,13 +5708,13 @@ abstract class AppLocalizations {
   /// No description provided for @milkNotProducingOrLessLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mother\'s milk is not being produced after delivery or she thinks less milk is being produced *'**
+  /// **'After delivery, is the mother not producing milk or does she feel milk is less? *'**
   String get milkNotProducingOrLessLabel;
 
   /// No description provided for @nippleCracksPainOrEngorgedLabel.
   ///
   /// In en, this message translates to:
-  /// **'is the mother having cracked nipples/ painful and / or engorged breasts *'**
+  /// **'Does the mother have nipple cracks/pain and/or engorged breasts? *'**
   String get nippleCracksPainOrEngorgedLabel;
 
   /// No description provided for @outcomeFormTitle.
@@ -6410,19 +6410,19 @@ abstract class AppLocalizations {
   /// No description provided for @tabGeneralDetails.
   ///
   /// In en, this message translates to:
-  /// **'BASIC DETAILS'**
+  /// **'General Details'**
   String get tabGeneralDetails;
 
   /// No description provided for @tabMotherDetails.
   ///
   /// In en, this message translates to:
-  /// **'MOTHER DETAILS'**
+  /// **'Mother Details'**
   String get tabMotherDetails;
 
   /// No description provided for @tabNewbornDetails.
   ///
   /// In en, this message translates to:
-  /// **'CHIlD  DETAILS'**
+  /// **'Newborn Details'**
   String get tabNewbornDetails;
 
   /// No description provided for @confirmAttentionTitle.
@@ -10318,6 +10318,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Synced'**
   String get synced;
+
+  /// No description provided for @noDataFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No data found'**
+  String get noDataFound;
+
+  /// No description provided for @newHouseholdRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'NEW HOUSEHOLD REGISTRATION'**
+  String get newHouseholdRegistration;
+
+  /// No description provided for @noMatchingBeneficiariesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching beneficiaries found.'**
+  String get noMatchingBeneficiariesFound;
+
+  /// No description provided for @noBeneficiariesFoundAddNew.
+  ///
+  /// In en, this message translates to:
+  /// **'No beneficiaries found. Add a new beneficiary to get started.'**
+  String get noBeneficiariesFoundAddNew;
+
+  /// No description provided for @richId.
+  ///
+  /// In en, this message translates to:
+  /// **'RICH ID'**
+  String get richId;
+
+  /// No description provided for @mothersName.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother\'s Name'**
+  String get mothersName;
+
+  /// No description provided for @wifesName.
+  ///
+  /// In en, this message translates to:
+  /// **'Wife\'s Name'**
+  String get wifesName;
+
+  /// No description provided for @splitMigration.
+  ///
+  /// In en, this message translates to:
+  /// **'Split / Migration'**
+  String get splitMigration;
+
+  /// No description provided for @splitUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Split updated'**
+  String get splitUpdated;
+
+  /// No description provided for @splitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Split failed'**
+  String get splitFailed;
+
+  /// No description provided for @migration.
+  ///
+  /// In en, this message translates to:
+  /// **'Migration'**
+  String get migration;
+
+  /// No description provided for @split.
+  ///
+  /// In en, this message translates to:
+  /// **'Split'**
+  String get split;
+
+  /// No description provided for @failedToLoadMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load members'**
+  String get failedToLoadMembers;
+
+  /// No description provided for @loadingMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading members...'**
+  String get loadingMembers;
+
+  /// No description provided for @selectMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Member'**
+  String get selectMember;
+
+  /// No description provided for @selectChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Child'**
+  String get selectChild;
+
+  /// No description provided for @selectAMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a member'**
+  String get selectAMember;
+
+  /// No description provided for @migrate.
+  ///
+  /// In en, this message translates to:
+  /// **'MIGRATE'**
+  String get migrate;
+
+  /// No description provided for @selectMemberType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Member Type'**
+  String get selectMemberType;
+
+  /// No description provided for @selectChildOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Child (Optional)'**
+  String get selectChildOptional;
+
+  /// No description provided for @enterHouseNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter house number'**
+  String get enterHouseNumber;
+
+  /// No description provided for @splitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SPLIT'**
+  String get splitLabel;
+
+  /// No description provided for @selectNewFamilyHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Select New Family Head'**
+  String get selectNewFamilyHead;
+
+  /// No description provided for @noAdultMembersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No adult members found for this household'**
+  String get noAdultMembersFound;
+
+  /// No description provided for @doYouWantToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to continue?'**
+  String get doYouWantToContinue;
+
+  /// No description provided for @updateMemberDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Member Details'**
+  String get updateMemberDetails;
+
+  /// No description provided for @verifyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'VERIFY'**
+  String get verifyLabel;
+
+  /// No description provided for @weightRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (1.2-90)Kg'**
+  String get weightRange;
+
+  /// No description provided for @isBirthCertificateIssued.
+  ///
+  /// In en, this message translates to:
+  /// **'Is birth certificate issued?'**
+  String get isBirthCertificateIssued;
+
+  /// No description provided for @isSchoolGoingChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Is He/She school going child?'**
+  String get isSchoolGoingChild;
+
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get saving;
+
+  /// No description provided for @correctHighlightedErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Please correct the highlighted errors before continuing.'**
+  String get correctHighlightedErrors;
+
+  /// No description provided for @selectOptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Option'**
+  String get selectOptionLabel;
+
+  /// No description provided for @screeningDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Screening Date'**
+  String get screeningDate;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

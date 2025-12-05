@@ -14,6 +14,7 @@ import '../../../../core/config/themes/CustomColors.dart';
 import '../../../../core/widgets/SnackBar/app_snackbar.dart';
 import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/repositories/RegisterNewHouseHoldController/register_new_house_hold.dart';
+import '../../AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart';
 import 'bloc/spous_bloc.dart';
 
 final GlobalKey<FormState> spousFormKey = GlobalKey<FormState>();
@@ -24,8 +25,7 @@ void clearSpousFormError() {
 }
 
 String? captureSpousError(String? message) {
-  if (message != null) {
-    // Always update the error message to show the most recent one
+  if (message != null && message.isNotEmpty) {
     spousLastFormError = message;
     return message;
   }
@@ -33,68 +33,77 @@ String? captureSpousError(String? message) {
 }
 bool validateAllSpousFields(SpousState state) {
   final form = spousFormKey.currentState;
-
-  if (form == null) return false;
+  bool isValid = true;
 
   // Clear previous errors
   spousLastFormError = null;
 
-  // Validate normal form fields
-  final isFormValid = form.validate();
-
-  // ===== Custom Manual Validations ======
+  // Validate form fields if form exists
+  if (form != null) {
+    isValid = form.validate();
+  }
 
   if (state.mobileOwner == null || state.mobileOwner!.isEmpty) {
     spousLastFormError = 'Whose mobile number is required';
-    scrollToFirstError();
-    return false;
+    if (isValid) {
+      scrollToFirstError();
+    }
+    isValid = false;
   }
 
   if (state.mobileOwner == 'Other' &&
       (state.mobileOwnerOtherRelation == null ||
           state.mobileOwnerOtherRelation!.trim().isEmpty)) {
-    spousLastFormError =
-    'Please specify relation with mobile number holder';
-    scrollToFirstError();
-    return false;
+    spousLastFormError = 'Please specify relation with mobile number holder';
+    if (isValid) {
+      scrollToFirstError();
+    }
+    isValid = false;
   }
 
   if (state.mobileOwner != 'Family Head') {
     if (state.mobileNo == null || state.mobileNo!.trim().isEmpty) {
       spousLastFormError = 'Mobile number is required';
-      scrollToFirstError();
-      return false;
-    }
-    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(state.mobileNo!)) {
-      spousLastFormError =
-      'Mobile number must be 10 digits and start with 6-9';
-      scrollToFirstError();
-      return false;
+      if (isValid) {
+        scrollToFirstError();
+      }
+      isValid = false;
+    } else if (!RegExp(r'^[6-9]\d{9}$').hasMatch(state.mobileNo!)) {
+      spousLastFormError = 'Mobile number must be 10 digits and start with 6-9';
+      if (isValid) {
+        scrollToFirstError();
+      }
+      isValid = false;
     }
   }
 
   if (state.gender == 'Female' &&
       (state.isPregnant == null || state.isPregnant!.isEmpty)) {
     spousLastFormError = 'Please select if the woman is pregnant';
-    scrollToFirstError();
-    return false;
+    if (isValid) {
+      scrollToFirstError();
+    }
+    isValid = false;
   }
 
   if (state.isPregnant == 'Yes') {
     if (state.lmp == null) {
       spousLastFormError = 'Last menstrual period date is required';
-      scrollToFirstError();
-      return false;
+      if (isValid) {
+        scrollToFirstError();
+      }
+      isValid = false;
     }
     if (state.edd == null) {
       spousLastFormError = 'Expected delivery date is required';
-      scrollToFirstError();
-      return false;
+      if (isValid) {
+        scrollToFirstError();
+      }
+      isValid = false;
     }
   }
 
-  // All validations passed
-  return isFormValid;
+  return isValid;
 }
 
 void scrollToFirstError() {
@@ -133,6 +142,8 @@ FormFieldState<dynamic>? _findFirstErrorField() {
     element.visitChildren(visitElement);
   }
 
+
+
   // Start visiting from the form's context
   formContext.visitChildElements(visitElement);
   return firstErrorField;
@@ -144,6 +155,8 @@ class Spousdetails extends StatefulWidget {
   final String? hhId;
   final bool isMemberDetails;
   final bool syncFromHead;
+  final bool isAddMember;
+  final String? headGender;
 
   const Spousdetails({
     super.key,
@@ -153,14 +166,101 @@ class Spousdetails extends StatefulWidget {
     this.hhId,
     this.isMemberDetails = false,
     this.syncFromHead = true,
+    this.isAddMember = false,
+    this.headGender,
   });
 
   @override
   State<Spousdetails> createState() => _SpousdetailsState();
 }
 
+List<String> _getMobileOwnerList(String gender) {
+  const common = [
+    'Father',
+    'Mother',
+    'Son',
+    'Daughter',
+    'Father In Law',
+    'Mother In Law',
+    'Neighbour',
+    'Relative',
+    'Other',
+  ];
+
+  gender = gender.toLowerCase();
+
+  if (gender == 'female') {
+    return [
+      'Self',
+      'Husband',
+      'Father',
+      'Mother',
+      'Son',
+      'Daughter',
+      'Father In Law',
+      'Mother In Law',
+      'Neighbour',
+      'Relative',
+      'Other',
+      ...common,
+    ];
+  }
+
+  if (gender == 'male') {
+    return [
+      'Self',
+      'Wife',
+      'Father',
+      'Mother',
+      'Son',
+      'Daughter',
+      'Father In Law',
+      'Mother In Law',
+      'Neighbour',
+      'Relative',
+      'Other',
+      ...common,
+    ];
+  }
+
+  if (gender == 'transgender') {
+    return [
+      'Self',
+      'Husband',
+      'Wife',
+      'Father',
+      'Mother',
+      'Son',
+      'Daughter',
+      'Father In Law',
+      'Mother In Law',
+      'Neighbour',
+      'Relative',
+      'Other',
+      ...common,
+    ];
+  }
+
+  // Fallback if gender is unknown
+  return [
+    'Self',
+    'Husband',
+    'Wife',
+    'Father',
+    'Mother',
+    'Son',
+    'Daughter',
+    'Father In Law',
+    'Mother In Law',
+    'Neighbour',
+    'Relative',
+    'Other',
+    ...common,
+  ];
+}
+
+
 class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClientMixin {
-  // Calculate DOB based on entered years, months, and days
   void _updateDobFromAge(String years, String months, String days) {
     // If any field is empty, clear the DOB and return
     if (years.trim().isEmpty || months.trim().isEmpty || days.trim().isEmpty) {
@@ -244,10 +344,17 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
   @override
   void initState() {
     super.initState();
-    // Prefill once on first mount using current AddHead state to avoid
-    // first-time partial sync. This is only needed when used inside the
-    // head form; for member flows we skip it.
-    if (widget.syncFromHead) {
+    if (widget.isAddMember && widget.headMobileNo != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final spBloc = context.read<SpousBloc>();
+          // spBloc.add(SpUpdateMobileNo(widget.headMobileNo!));
+          // spBloc.add(SpUpdateMobileOwner('Family Head'));
+        }
+      });
+    }
+
+    else if (widget.syncFromHead) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final headBloc = context.read<AddFamilyHeadBloc>();
@@ -255,7 +362,6 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
         final spBloc = context.read<SpousBloc>();
         final curr = spBloc.state;
 
-        // Set relation and opposite gender based on head's gender
         if (head.gender != null) {
           final isMale = head.gender == 'Male';
           final relation = isMale ? 'Wife' : 'Husband';
@@ -570,13 +676,26 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(bottom: 1.h, left: 1.3.h),
-                        child: Text(
-                          '${l.ageApproximate} *',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w500,
+                        padding: EdgeInsets.only(
+                          bottom: 1.h,
+                          left: 1.3.h,
+                        ),
+                        child: RichText(
+                          text: TextSpan(
+                            text: "${l.ageApproximate}",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            children: const [
+                              TextSpan(
+                                text: '*',
+                                style: TextStyle(
+                                  color: Colors.red,   // Make asterisk red
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -943,7 +1062,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
                               final value = v.trim();
-                              context.read<SpousBloc>().add(RichIDChanged(value));
+                              context.read<SpousBloc>().add(RchIDChanged(value));
 
                               // Show error if not empty and not exactly 12 digits
                               if (value.isNotEmpty && value.length != 12) {
@@ -1023,95 +1142,69 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
               _section(
                 ApiDropdown<String>(
                   labelText: '${l.whoseMobileLabel} *',
-                  items: const [
-                    'Self',
-                    'Family Head',
-                    'Wife',
-                    'Father',
-                    'Mother',
-                    'Son',
-                    'Daughter',
-                    'Father in Law',
-                    'Mother in Law',
-                    'Neighbour',
-                    'Relative',
-                    'Other',
-                  ],
-                  getLabel: (s) {
-                    switch (s) {
-                      case 'Self':
-                        return l.self;
-                      case 'Wife':
-                        return l.wife;
-                      case 'Father':
-                        return l.father;
-                      case 'Mother':
-                        return l.mother;
-                      case 'Son':
-                        return l.son;
-                      case 'Daughter':
-                        return l.daughter;
-                      case 'Father in Law':
-                        return l.fatherInLaw;
-                      case 'Mother in Law':
-                        return l.motherInLaw;
-                      case 'Neighbour':
-                        return l.neighbour;
-                      case 'Relative':
-                        return l.relative;
-                      case 'Other':
-                        return l.other;
-                      default:
-                        return s;
-                    }
-                  },
+                  items: _getMobileOwnerList(state.gender ?? ''),
+                  getLabel: (s) => s,
                   value: state.mobileOwner,
-                  onChanged: (v) {
+                  onChanged: (v) async {
                     if (v == null) return;
                     final spBloc = context.read<SpousBloc>();
                     spBloc.add(SpUpdateMobileOwner(v));
 
-                    if (v == 'Family Head') {
-                      print('🔵 [SpousDetails] Family Head selected, isMemberDetails: ${widget.isMemberDetails}, hhId: ${widget.hhId}');
-                      if (widget.isMemberDetails && widget.hhId != null) {
-                        print('🔄 [SpousDetails] Fetching head mobile number for household: ${widget.hhId}');
-                        LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!).then((headMobile) {
-                          print('📱 [SpousDetails] Received head mobile: $headMobile');
+                    if (v == 'Husband') {
+                      try {
+                        // Try to get the mobile number from AddNewFamilyMemberBloc
+                        final memberBloc = context.read<AddnewfamilymemberBloc>();
+                        final memberState = memberBloc.state;
+
+                        if (memberState.mobileNo?.isNotEmpty == true) {
+                          print('📱 [SpousDetails] Using mobile from AddNewFamilyMember: ${memberState.mobileNo}');
+                          spBloc.add(SpUpdateMobileNo(memberState.mobileNo!));
+                        } else {
+                          print('ℹ️ [SpousDetails] No mobile number found in AddNewFamilyMember state');
+                          spBloc.add(const SpUpdateMobileNo(''));
+                        }
+                      } catch (e) {
+                        print('❌ [SpousDetails] Error getting mobile from AddNewFamilyMember: $e');
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Error loading member mobile number')),
+                          );
+                        }
+                        spBloc.add(const SpUpdateMobileNo(''));
+                      }
+                    }
+                    // Keep existing logic for other options
+                    else if (v == 'Family Head' || v == 'Father') {
+                      if (widget.isAddMember && widget.headMobileNo?.isNotEmpty == true) {
+                        print('📱 [SpousDetails] Using head mobile from props: ${widget.headMobileNo}');
+                        spBloc.add(SpUpdateMobileNo(widget.headMobileNo!));
+                      } else if (widget.hhId != null) {
+                        try {
+                          final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                          print('📱 [SpousDetails] Fetched mobile from DB: $headMobile');
                           if (headMobile != null && headMobile.isNotEmpty) {
-                            if (mounted) {
-                              print('✅ [SpousDetails] Dispatching mobile number update: $headMobile');
-                              spBloc.add(SpUpdateMobileNo(headMobile));
-                            }
-                          } else {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('No mobile number found for the head of family')),
-                              );
-                            }
-                          }
-                        }).catchError((e) {
-                          if (mounted) {
-                            print('❌ [SpousDetails] Error fetching head mobile number: $e');
-                            print('Stack trace: ${e.stackTrace}');
+                            spBloc.add(SpUpdateMobileNo(headMobile));
+                          } else if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error loading head of family mobile number')),
+                              const SnackBar(content: Text('No mobile number found for the head of family')),
                             );
                           }
-                        });
-                      }
-                      else {
-                        final headNo = (widget.headMobileNo?.trim() ??
-                            context.read<AddFamilyHeadBloc>().state.mobileNo?.trim());
-                        if (headNo != null && headNo.isNotEmpty) {
-                          spBloc.add(SpUpdateMobileNo(headNo));
+                        } catch (e) {
+                          print('❌ [SpousDetails] Error fetching from DB: $e');
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Error loading head of family mobile number')),
+                            );
+                          }
                         }
                       }
                     } else {
                       spBloc.add(const SpUpdateMobileNo(''));
                     }
-
-
                   },
+                  // validator: (value) => captureSpousError(
+                  //   value == null || value.isEmpty ? 'Relation with family head is required' : null,
+                  // ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return captureSpousError('Whose mobile number is required');
@@ -1165,15 +1258,15 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       // Skip validation if mobile owner is Family Head
                       return null;
                     }
-                    
+
                     if (value == null || value.trim().isEmpty) {
                       return captureSpousError('Mobile number is required');
                     }
-                    
+
                     if (!RegExp(r'^[6-9]\d{9}$').hasMatch(value)) {
                       return captureSpousError('Mobile number must be 10 digits and start with 6-9');
                     }
-                    
+
                     // Clear any previous error if validation passes
                     return captureSpousError(null);
                   },
@@ -1353,9 +1446,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     // ),
                     validator: (value) {
                       if (state.gender == 'Female' && (value == null || value.isEmpty)) {
-                        return 'Please select is the women pregnant';
+                        return captureSpousError('Please select is the women pregnant');
                       }
-                      return null;
+                      return captureSpousError(null);
                     },
                   ),
                 ),
@@ -1387,9 +1480,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       },
                       validator: (date) {
                         if (state.isPregnant == 'Yes' && date == null) {
-                          return 'Last menstrual period date is required';
+                          return captureSpousError('Last menstrual period date is required');
                         }
-                        return null;
+                        return captureSpousError(null);
                       },
                     ),
                   ),
@@ -1411,9 +1504,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       },
                       validator: (date) {
                         if (state.isPregnant == 'Yes' && date == null) {
-                          return 'Expected delivery date is required';
+                          return captureSpousError('Expected delivery date is required');
                         }
-                        return null;
+                        return captureSpousError(null);
                       },
                       readOnly: true,
                     ),

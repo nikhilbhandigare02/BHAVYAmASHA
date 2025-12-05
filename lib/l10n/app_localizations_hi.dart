@@ -1779,7 +1779,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get motherInLaw => 'सास';
 
   @override
-  String get motherNameLabel => 'माता का नाम *';
+  String get motherNameLabel => 'माता का नाम';
 
   @override
   String get mukhiyaMobileHint => 'मुखिया का मोबाइल नंबर';
@@ -5135,4 +5135,106 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get synced => 'सिंक';
+
+  @override
+  String get noDataFound => 'कोई डेटा नहीं मिला';
+
+  @override
+  String get newHouseholdRegistration => 'नया परिवार पंजीकरण';
+
+  @override
+  String get noMatchingBeneficiariesFound => 'कोई मिलते-जुलते लाभार्थी नहीं मिले।';
+
+  @override
+  String get noBeneficiariesFoundAddNew => 'कोई लाभार्थी नहीं मिला। शुरू करने के लिए एक नया लाभार्थी जोड़ें।';
+
+  @override
+  String get richId => 'RICH आईडी';
+
+  @override
+  String get mothersName => 'माता का नाम';
+
+  @override
+  String get wifesName => 'पत्नी का नाम';
+
+  @override
+  String get splitMigration => 'विभाजन / प्रवास';
+
+  @override
+  String get splitUpdated => 'विभाजन अपडेट किया गया';
+
+  @override
+  String get splitFailed => 'विभाजन विफल हुआ';
+
+  @override
+  String get migration => 'माइग्रेशन';
+
+  @override
+  String get split => 'विभाजन';
+
+  @override
+  String get failedToLoadMembers => 'सदस्यों को लोड करने में विफल';
+
+  @override
+  String get loadingMembers => 'सदस्यों को लोड किया जा रहा है...';
+
+  @override
+  String get selectMember => 'सदस्य चुनें';
+
+  @override
+  String get selectChild => 'बच्चे का चयन करें';
+
+  @override
+  String get selectAMember => 'किसी सदस्य का चयन करें';
+
+  @override
+  String get migrate => 'स्थानांतरित करें';
+
+  @override
+  String get selectMemberType => 'सदस्य प्रकार चुनें';
+
+  @override
+  String get selectChildOptional => 'बच्चा चुनें (वैकल्पिक)';
+
+  @override
+  String get enterHouseNumber => 'घर का नंबर दर्ज करें';
+
+  @override
+  String get splitLabel => 'विभाजित करें';
+
+  @override
+  String get selectNewFamilyHead => 'नए परिवार प्रमुख का चयन करें';
+
+  @override
+  String get noAdultMembersFound => 'इस परिवार के लिए कोई वयस्क सदस्य नहीं मिला';
+
+  @override
+  String get doYouWantToContinue => 'क्या आप आगे जाना चाहते हैं?';
+
+  @override
+  String get updateMemberDetails => 'सदस्य विवरण अपडेट करें';
+
+  @override
+  String get verifyLabel => 'सत्यापित करें';
+
+  @override
+  String get weightRange => 'वजन (1.2-90) किग्रा';
+
+  @override
+  String get isBirthCertificateIssued => 'क्या जन्म प्रमाण पत्र जारी किया गया है?';
+
+  @override
+  String get isSchoolGoingChild => 'क्या यह स्कूल जाने वाला बच्चा है?';
+
+  @override
+  String get saving => 'सेव किया जा रहा है...';
+
+  @override
+  String get correctHighlightedErrors => 'जारी रखने से पहले कृपया हाइलाइट किए गए त्रुटियों को सुधारें।';
+
+  @override
+  String get selectOptionLabel => 'विकल्प चुनें';
+
+  @override
+  String get screeningDate => 'स्क्रीनिंग तिथि';
 }
