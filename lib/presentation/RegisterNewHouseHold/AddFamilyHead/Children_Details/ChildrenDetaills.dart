@@ -35,7 +35,7 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: Text(label, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600),)),
+          Expanded(child: Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),)),
           Row(
             children: [
               SizedBox(

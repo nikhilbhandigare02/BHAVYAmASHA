@@ -167,7 +167,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
       child: RichText(
         text: TextSpan(
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 14.sp,
             color: AppColors.onSurface,
             fontWeight: FontWeight.w500,
           ),
@@ -194,7 +194,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   Widget build(BuildContext context) {
     // Match the TextField's input style
     final TextStyle inputStyle = TextStyle(
-      fontSize: 15.sp,
+      fontSize: 16.sp,
       color: AppColors.onSurfaceVariant,
       height: 1.5,
     );
@@ -208,7 +208,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
       onTap: widget.isEditable && !widget.readOnly ? () => _pickDate(context) : null,
       child: AbsorbPointer(
         child: Padding(
-          padding: const EdgeInsets.only(top: 6.0),
+          padding: const EdgeInsets.only(top: 6.0, bottom: 6),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -250,7 +250,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                       focusedBorder: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: 1.w,
-                        vertical: 1.h
+                        // vertical: 0.3.h
                       ),
                       isDense: true,
                     ),

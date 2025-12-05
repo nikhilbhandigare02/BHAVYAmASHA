@@ -1506,6 +1506,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       },
                     ),
                   ),
+                Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
 // For EDD when pregnant
                 if (state.isPregnant == 'Yes')
