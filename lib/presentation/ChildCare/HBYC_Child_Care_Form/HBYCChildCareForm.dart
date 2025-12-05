@@ -10,6 +10,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../l10n/app_localizations.dart';
 import 'bloc/hbyc_child_care_bloc.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 
 class HBYCChildCareFormScreen extends StatelessWidget {
   final String hhid;
@@ -97,8 +98,11 @@ class _HbycFormViewState extends State<_HbycFormView> {
             );
           }
           if (state.status == HbycFormStatus.success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.saveButton)),
+            showAppSnackBar(context, 'Form saved sucessfully');
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              Route_Names.HBYCList,
+              (Route<dynamic> route) => false,
             );
           }
         },
@@ -130,7 +134,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                              // validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            if (state.beneficiaryAbsent == 'Yes') ...[ 
+                            if (state.beneficiaryAbsent == 'Yes') ...[
                               const SizedBox(height: 8),
                               CustomTextField(
                                 key: const ValueKey('beneficiaryAbsentReason'),
@@ -159,7 +163,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ApiDropdown<String>(
-                              labelText: 'HYBC home visit?',
+                              labelText: 'HYBC home visit? *',
                               items: _hbycVisitMonthOptions,
                               getLabel: (s) => s,
                               value: state.hbycBhraman.isNotEmpty ? state.hbycBhraman : null,
@@ -806,7 +810,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                           const SizedBox(width: 30),
                           Expanded(
                             child: RoundButton(
-                              title: 'Save Form',
+                              title: 'Save Form', 
                               height: 4.5.h,
                               isLoading: busy,
                               disabled: busy,

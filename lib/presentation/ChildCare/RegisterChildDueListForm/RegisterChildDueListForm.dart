@@ -27,6 +27,7 @@ class BeneficiaryData {
   final String? weightGrams;
   final String? birthWeightGrams;
   final String? birthCertificate;
+  final String? village;
 
   BeneficiaryData({
     this.name,
@@ -43,6 +44,7 @@ class BeneficiaryData {
     this.weightGrams,
     this.birthWeightGrams,
     this.birthCertificate,
+    this.village,
   });
 
   factory BeneficiaryData.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,7 @@ class BeneficiaryData {
       weightGrams: json['weightGrams']?.toString(),
       birthWeightGrams: json['birthWeightGrams']?.toString(),
       birthCertificate: json['birthCertificate']?.toString(),
+      village: json['village']?.toString(),
 
     );
   }
@@ -80,6 +83,7 @@ class BeneficiaryData {
     'weightGrams': weightGrams,
     'birthWeightGrams': birthWeightGrams,
     'birthCertificate': birthCertificate,
+    'village': village,
   };
 
   @override
@@ -135,7 +139,6 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
   Future<void> _loadBeneficiaryData() async {
     if (!mounted) return;
 
-    // Don't wrap in addPostFrameCallback since we're already in initState
     debugPrint('Loading member details...');
 
     try {
@@ -158,6 +161,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
           try {
             info = Map<String, dynamic>.from(jsonDecode(infoStr));
           } catch (_) {}
+          final headDetails = (info['head_details'] is Map)
+              ? Map<String, dynamic>.from(info['head_details'])
+              : <String, dynamic>{};
 
           final data = BeneficiaryData(
             name: (info['memberName']?.toString() ?? info['name']?.toString()),
@@ -174,6 +180,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
             weightGrams: (info['weight']?.toString()),
             birthWeightGrams: (info['birthWeight']?.toString()),
             birthCertificate: info['birthCertificate']?.toString(),
+            village: (info['village']?.toString() ?? headDetails['village']?.toString()),
 
           );
 
@@ -241,6 +248,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
               religion: headDetails['religion']?.toString(),
               socialClass: headDetails['category']?.toString(),
               uniqueKey: row['unique_key']?.toString(),
+              village: (beneficiaryInfo['village']?.toString() ?? headDetails['village']?.toString()),
             );
             break;
           }
@@ -268,6 +276,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                   religion: member['religion']?.toString(),
                   socialClass: member['category']?.toString(),
                   uniqueKey: member['unique_key']?.toString(),
+                  village: (beneficiaryInfo['village']?.toString() ?? headDetails['village']?.toString()),
                 );
                 break;
               }
@@ -366,6 +375,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       }
       if (data.birthCertificate != null && data.birthCertificate!.isNotEmpty) {
         bloc.add(BirthCertificateIssuedChanged(data.birthCertificate!));
+      }
+      if (data.village != null && data.village!.trim().isNotEmpty) {
+        bloc.add(AddressChanged(data.village!.trim()));
       }
     } else if (args.isNotEmpty) {
       if (args['name'] != null) bloc.add(ChildNameChanged(args['name'].toString()));
