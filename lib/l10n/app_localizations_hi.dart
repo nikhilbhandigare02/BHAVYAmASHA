@@ -2607,12 +2607,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get headOfFamily => 'परिवार प्रमुख';
 
   @override
-  String get male => 'पुरुष';
-
-  @override
-  String get female => 'महिला';
-
-  @override
   String get casteGeneral => 'सामान्य';
 
   @override
@@ -2664,9 +2658,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get alive => 'जीवित';
 
   @override
-  String get dead => 'मृत';
-
-  @override
   String get babyConditionLabel => 'शिशु की स्थिति *';
 
   @override
@@ -2691,9 +2682,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get temperatureUnitFahrenheit => 'फॉरेनहाइट';
 
   @override
-  String get weightColorMatchLabel => 'वजन किस रंग से मेल खाता है? *';
-
-  @override
   String get weighingScaleColorLabel => 'वजन मापने की मशीन के स्केल का रंग *';
 
   @override
@@ -2712,60 +2700,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bleedingUmbilicalCordLabel => 'क्या नाभि से रक्तस्राव हो रहा है? *';
 
   @override
-  String get pusInNavelLabel => 'क्या नाभि में मवाद है?*';
-
-  @override
-  String get routineCareDoneLabel => 'क्या नियमित नवजात देखभाल कार्य निष्पादित किये गए हैं? *';
-
-  @override
-  String get breathingRapidLabel => 'क्या शिशु की सांस तेज (प्रति मिनट 60 या अधिक) चल रही है? *';
-
-  @override
-  String get lethargicLabel => 'क्या शिशु सुस्त है?';
-
-  @override
-  String get congenitalAbnormalitiesLabel => 'क्या शिशु में कोई जन्मजात शारीरिक असामान्यता है? *';
-
-  @override
-  String get eyesNormalLabel => 'आंखें: सामान्य*';
-
-  @override
-  String get eyesSwollenOrPusLabel => 'क्या आंखें सूजी हैं? क्या आंखों से मवाद आ रहा है? *';
-
-  @override
-  String get skinFoldRednessLabel => 'क्या त्वचा की तह पर कोई दरार/लालिमा है? (जांघ / बगल / नितंब) *';
-
-  @override
-  String get newbornJaundiceLabel => 'त्वचा/हथेलियों/तलवों/आंखों में पीलापन: पीलिया*';
-
-  @override
-  String get pusBumpsOrBoilLabel => 'त्वचा में 10 से अधिक मवाद भरी फुंसियां या एक बड़ा फोड़ा? *';
-
-  @override
-  String get newbornSeizuresLabel => 'क्या बच्चे को दौरे पड़ रहे हैं?*';
-
-  @override
-  String get cryingConstantlyOrLessUrineLabel => 'क्या शिशु लगातार रो रहा है या वह दिन में 6 बार से कम पेशाब कर रहा/रही है? *';
-
-  @override
-  String get cryingSoftlyLabel => 'क्या शिशु धीरे-धीरे रो रहा/रही है? *';
-
-  @override
-  String get stoppedCryingLabel => 'क्या शिशु ने रोना बंद कर दिया है? *';
-
-  @override
-  String get newbornReferredByAshaLabel => 'क्या ऊपर बताए लक्षणों के लिए बच्चे को आशा द्वारा रेफर किया गया है?*';
-
-  @override
-  String get birthRegisteredLabel => 'क्या जन्म का पंजीकरण हो गया है?*';
-
-  @override
-  String get mcpCardAvailableLabel => 'क्या \'मात्र शिशु संरक्षण (एमसीपी)\' कार्ड की उपलब्धता है? *';
-
-  @override
-  String get birthDoseVaccinationLabel => 'क्या शिशु को जन्म की खुराक टीकाकरण दिया गया है? *';
-
-  @override
   String get homeVisitDayLabel => 'गृह भ्रमण का दिन *';
 
   @override
@@ -2779,9 +2713,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get mcpCardAvailableLabelMother => 'क्या \'मात्र शिशु संरक्षण (एमसीपी)\' कार्ड की उपलब्धता है? *';
-
-  @override
-  String get postDeliveryProblemsLabel => 'क्या प्रसव के बाद मां को निम्नलिखित में से कोई समस्या है? *';
 
   @override
   String get postDeliveryProblemNone => 'कोई नहीं';
@@ -2805,9 +2736,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'दौरे';
 
   @override
-  String get breastfeedingProblemsLabel => 'क्या मां को स्तनपान कराते समय समस्या है? *';
-
-  @override
   String get mealsPerDayLabel => '24 घंटे में मां पूर्ण भोजन कितनी बार करती है?';
 
   @override
@@ -2826,16 +2754,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get counselingAdviceLabel => 'परामर्श / सलाह *';
 
   @override
-  String get milkNotProducingOrLessLabel => 'प्रसव के बाद माँ का दूध नहीं बन रहा है या वह समझती है कि कम दूध बन रहा है। *';
-
-  @override
-  String get nippleCracksPainOrEngorgedLabel => 'क्या माँ के निप्पल में दरार/दर्द और/या कड़े स्तन हैं? *';
-
-  @override
   String get outcomeFormTitle => 'Delivery Outcome';
-
-  @override
-  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
 
   @override
   String get deliveryDateLabel => 'Date of Delivery *';
@@ -2934,6 +2853,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dataSavedSuccessMessage => 'Data saved successfully';
 
   @override
+  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
+
+  @override
   String get deliveryDate => 'Date of Delivery *';
 
   @override
@@ -2995,12 +2917,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get pleaseFillAllFields => 'Please fill all required fields';
-
-  @override
-  String get exclusiveBreastfeedingStartedLabel => 'क्या केवल स्तनपान की शुरुआत हो गई है? *';
-
-  @override
-  String get firstBreastfeedTimingLabel => 'शिशु को पहली बार स्तनपान किस समय कराया गया था? *';
 
   @override
   String get howWasBreastfedLabel => 'शिशु ने स्तनपान कैसे किया था? *';
@@ -3175,15 +3091,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get prevVisitPncDay => 'पी.एन.सी. की दिन';
-
-  @override
-  String get tabGeneralDetails => 'सामान्य विवरण';
-
-  @override
-  String get tabMotherDetails => 'माता का विवरण';
-
-  @override
-  String get tabNewbornDetails => 'बच्चे का विवरण';
 
   @override
   String get confirmAttentionTitle => 'कार्रवाई की पुष्टि करें';
@@ -3805,6 +3712,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get gender => 'लिंग';
+
+  @override
+  String get male => 'पुरुष';
+
+  @override
+  String get female => 'महिला';
 
   @override
   String get isGuardianPresent => 'क्या अभिभावक उपस्थित है?';
@@ -5237,4 +5150,100 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get screeningDate => 'स्क्रीनिंग तिथि';
+
+  @override
+  String get enterCategory => 'वर्ग का नाम दर्ज करें';
+
+  @override
+  String get youngestChildDetail => 'सबसे छोटे बच्चे का विवरण';
+
+  @override
+  String get daysRangeValidation => 'दिन: केवल 1 से 31 की अनुमति है';
+
+  @override
+  String get monthRangeValidation => 'महीना: केवल 1 से 12 की अनुमति है';
+
+  @override
+  String get yearRangeValidation => 'साल: केवल 1 से 90 की अनुमति है';
+
+  @override
+  String get postDeliveryProblemsLabel => 'क्या प्रसव के बाद मां को निम्नलिखित में से कोई समस्या है? *';
+
+  @override
+  String get breastfeedingProblemsLabel => 'क्या मां को स्तनपान कराते समय समस्या है? *';
+
+  @override
+  String get milkNotProducingOrLessLabel => 'प्रसव के बाद माँ का दूध नहीं बन रहा है या वह समझती है कि कम दूध बन रहा है। *';
+
+  @override
+  String get nippleCracksPainOrEngorgedLabel => 'क्या माँ के निप्पल में दरार/दर्द और/या कड़े स्तन हैं? *';
+
+  @override
+  String get tabGeneralDetails => 'सामान्य विवरण';
+
+  @override
+  String get tabMotherDetails => 'माता का विवरण';
+
+  @override
+  String get tabNewbornDetails => 'बच्चे का विवरण';
+
+  @override
+  String get dead => 'मृत';
+
+  @override
+  String get weightColorMatchLabel => 'वजन किस रंग से मेल खाता है? *';
+
+  @override
+  String get exclusiveBreastfeedingStartedLabel => 'क्या केवल स्तनपान की शुरुआत हो गई है? *';
+
+  @override
+  String get firstBreastfeedTimingLabel => 'शिशु को पहली बार स्तनपान किस समय कराया गया था? *';
+
+  @override
+  String get breathingRapidLabel => 'क्या शिशु की सांस तेज (प्रति मिनट 60 या अधिक) चल रही है? *';
+
+  @override
+  String get lethargicLabel => 'क्या शिशु सुस्त है?';
+
+  @override
+  String get congenitalAbnormalitiesLabel => 'क्या शिशु में कोई जन्मजात शारीरिक असामान्यता है? *';
+
+  @override
+  String get eyesNormalLabel => 'आंखें: सामान्य*';
+
+  @override
+  String get eyesSwollenOrPusLabel => 'क्या आंखें सूजी हैं? क्या आंखों से मवाद आ रहा है? *';
+
+  @override
+  String get skinFoldRednessLabel => 'क्या त्वचा की तह पर कोई दरार/लालिमा है? (जांघ / बगल / नितंब) *';
+
+  @override
+  String get newbornJaundiceLabel => 'त्वचा/हथेलियों/तलवों/आंखों में पीलापन: पीलिया*';
+
+  @override
+  String get pusBumpsOrBoilLabel => 'त्वचा में 10 से अधिक मवाद भरी फुंसियां या एक बड़ा फोड़ा? *';
+
+  @override
+  String get pusInNavelLabel => 'क्या नाभि में मवाद है?*';
+
+  @override
+  String get routineCareDoneLabel => 'क्या नियमित नवजात देखभाल कार्य निष्पादित किये गए हैं? *';
+
+  @override
+  String get cryingConstantlyOrLessUrineLabel => 'क्या शिशु लगातार रो रहा है या वह दिन में 6 बार से कम पेशाब कर रहा/रही है? *';
+
+  @override
+  String get cryingSoftlyLabel => 'क्या शिशु धीरे-धीरे रो रहा/रही है? *';
+
+  @override
+  String get newbornReferredByAshaLabel => 'क्या ऊपर बताए लक्षणों के लिए बच्चे को आशा द्वारा रेफर किया गया है?*';
+
+  @override
+  String get birthRegisteredLabel => 'क्या जन्म का पंजीकरण हो गया है?*';
+
+  @override
+  String get birthDoseVaccinationLabel => 'क्या शिशु को जन्म की खुराक टीकाकरण दिया गया है? *';
+
+  @override
+  String get mcpCardAvailableLabel => 'क्या \'मात्र शिशु संरक्षण (एमसीपी)\' कार्ड की उपलब्धता है? *';
 }

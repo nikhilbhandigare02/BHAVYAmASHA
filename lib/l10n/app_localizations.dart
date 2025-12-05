@@ -5240,7 +5240,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthCertificateIssuedLabel.
   ///
   /// In en, this message translates to:
-  /// **'IS birth certificate issued?'**
+  /// **'Has the birth certificate been issued?'**
   String get birthCertificateIssuedLabel;
 
   /// No description provided for @birthCertificateNumberLabel.
@@ -5266,18 +5266,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Head of the family'**
   String get headOfFamily;
-
-  /// No description provided for @male.
-  ///
-  /// In en, this message translates to:
-  /// **'Male'**
-  String get male;
-
-  /// No description provided for @female.
-  ///
-  /// In en, this message translates to:
-  /// **'Female'**
-  String get female;
 
   /// No description provided for @casteGeneral.
   ///
@@ -5381,12 +5369,6 @@ abstract class AppLocalizations {
   /// **'alive'**
   String get alive;
 
-  /// No description provided for @dead.
-  ///
-  /// In en, this message translates to:
-  /// **'dead'**
-  String get dead;
-
   /// No description provided for @babyConditionLabel.
   ///
   /// In en, this message translates to:
@@ -5435,12 +5417,6 @@ abstract class AppLocalizations {
   /// **'Fahrenheit'**
   String get temperatureUnitFahrenheit;
 
-  /// No description provided for @weightColorMatchLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Weghing matches with colour? *'**
-  String get weightColorMatchLabel;
-
   /// No description provided for @weighingScaleColorLabel.
   ///
   /// In en, this message translates to:
@@ -5474,116 +5450,8 @@ abstract class AppLocalizations {
   /// No description provided for @bleedingUmbilicalCordLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is umbilical cord bleeding? *'**
+  /// **'Is there bleeding from the umbilical cord? *'**
   String get bleedingUmbilicalCordLabel;
-
-  /// No description provided for @pusInNavelLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is pus in the navel! ? *'**
-  String get pusInNavelLabel;
-
-  /// No description provided for @routineCareDoneLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Whether the Routine Newborn care tasks was performed? *'**
-  String get routineCareDoneLabel;
-
-  /// No description provided for @breathingRapidLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is the breath of the baby going fast (60 or more per minute) *'**
-  String get breathingRapidLabel;
-
-  /// No description provided for @lethargicLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is the baby lethargic?'**
-  String get lethargicLabel;
-
-  /// No description provided for @congenitalAbnormalitiesLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is the baby having any congenital physical abnormality *'**
-  String get congenitalAbnormalitiesLabel;
-
-  /// No description provided for @eyesNormalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Eyes: Normal *'**
-  String get eyesNormalLabel;
-
-  /// No description provided for @eyesSwollenOrPusLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Are the eyes swollen? Is there pus coming out of the eyes? *'**
-  String get eyesSwollenOrPusLabel;
-
-  /// No description provided for @skinFoldRednessLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock) *'**
-  String get skinFoldRednessLabel;
-
-  /// No description provided for @newbornJaundiceLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Yellowness in skin/ palm/ sole/eyes: Jaudice *'**
-  String get newbornJaundiceLabel;
-
-  /// No description provided for @pusBumpsOrBoilLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'More than ten pus- filled pustules or large boil *'**
-  String get pusBumpsOrBoilLabel;
-
-  /// No description provided for @newbornSeizuresLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is the child having seizures? *'**
-  String get newbornSeizuresLabel;
-
-  /// No description provided for @cryingConstantlyOrLessUrineLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is the baby crying continuously or passing usrine less than 6 times a day? *'**
-  String get cryingConstantlyOrLessUrineLabel;
-
-  /// No description provided for @cryingSoftlyLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is the baby crying weak? *'**
-  String get cryingSoftlyLabel;
-
-  /// No description provided for @stoppedCryingLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Has the baby stopped crying? *'**
-  String get stoppedCryingLabel;
-
-  /// No description provided for @newbornReferredByAshaLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'In the above symptoms, weather the child is referred by ASHA? *'**
-  String get newbornReferredByAshaLabel;
-
-  /// No description provided for @birthRegisteredLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is birth registration completed? *'**
-  String get birthRegisteredLabel;
-
-  /// No description provided for @mcpCardAvailableLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is there availability of \'Mother Child Protection (MCP) card? *'**
-  String get mcpCardAvailableLabel;
-
-  /// No description provided for @birthDoseVaccinationLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is the birthdose vaccination given to baby? *'**
-  String get birthDoseVaccinationLabel;
 
   /// No description provided for @homeVisitDayLabel.
   ///
@@ -5614,12 +5482,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Is there availability of \'Mother Child Protection (MCP) *'**
   String get mcpCardAvailableLabelMother;
-
-  /// No description provided for @postDeliveryProblemsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Does the mother have any problems after delivery? *'**
-  String get postDeliveryProblemsLabel;
 
   /// No description provided for @postDeliveryProblemNone.
   ///
@@ -5663,12 +5525,6 @@ abstract class AppLocalizations {
   /// **'Convulsions'**
   String get postDeliveryProblemConvulsions;
 
-  /// No description provided for @breastfeedingProblemsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Is the mother having problems breastfeeding? *'**
-  String get breastfeedingProblemsLabel;
-
   /// No description provided for @mealsPerDayLabel.
   ///
   /// In en, this message translates to:
@@ -5705,29 +5561,11 @@ abstract class AppLocalizations {
   /// **'Counseling / Advice *'**
   String get counselingAdviceLabel;
 
-  /// No description provided for @milkNotProducingOrLessLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'After delivery, is the mother not producing milk or does she feel milk is less? *'**
-  String get milkNotProducingOrLessLabel;
-
-  /// No description provided for @nippleCracksPainOrEngorgedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Does the mother have nipple cracks/pain and/or engorged breasts? *'**
-  String get nippleCracksPainOrEngorgedLabel;
-
   /// No description provided for @outcomeFormTitle.
   ///
   /// In en, this message translates to:
   /// **'Delivery Outcome'**
   String get outcomeFormTitle;
-
-  /// No description provided for @deliveryOutcomeDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivery Outcome Details'**
-  String get deliveryOutcomeDetails;
 
   /// No description provided for @deliveryDateLabel.
   ///
@@ -5921,6 +5759,12 @@ abstract class AppLocalizations {
   /// **'Data saved successfully'**
   String get dataSavedSuccessMessage;
 
+  /// No description provided for @deliveryOutcomeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Outcome Details'**
+  String get deliveryOutcomeDetails;
+
   /// No description provided for @deliveryDate.
   ///
   /// In en, this message translates to:
@@ -6047,18 +5891,6 @@ abstract class AppLocalizations {
   /// **'Please fill all required fields'**
   String get pleaseFillAllFields;
 
-  /// No description provided for @exclusiveBreastfeedingStartedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Has exclusive breastfeeding initaited? *'**
-  String get exclusiveBreastfeedingStartedLabel;
-
-  /// No description provided for @firstBreastfeedTimingLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'At what time was the baby first breastfed? *'**
-  String get firstBreastfeedTimingLabel;
-
   /// No description provided for @howWasBreastfedLabel.
   ///
   /// In en, this message translates to:
@@ -6068,7 +5900,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstFeedGivenAfterBirthLabel.
   ///
   /// In en, this message translates to:
-  /// **'What was given as the first feed after birth? *'**
+  /// **'What was given to the baby as the first feed after birth? *'**
   String get firstFeedGivenAfterBirthLabel;
 
   /// No description provided for @adequatelyFedSevenToEightTimesLabel.
@@ -6406,24 +6238,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PNC Day'**
   String get prevVisitPncDay;
-
-  /// No description provided for @tabGeneralDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'General Details'**
-  String get tabGeneralDetails;
-
-  /// No description provided for @tabMotherDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Mother Details'**
-  String get tabMotherDetails;
-
-  /// No description provided for @tabNewbornDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Newborn Details'**
-  String get tabNewbornDetails;
 
   /// No description provided for @confirmAttentionTitle.
   ///
@@ -7666,6 +7480,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gender'**
   String get gender;
+
+  /// No description provided for @male.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get male;
+
+  /// No description provided for @female.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get female;
 
   /// No description provided for @isGuardianPresent.
   ///
@@ -10522,6 +10348,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Screening Date'**
   String get screeningDate;
+
+  /// No description provided for @enterCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter category'**
+  String get enterCategory;
+
+  /// No description provided for @youngestChildDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Youngest Child Detail'**
+  String get youngestChildDetail;
+
+  /// No description provided for @daysRangeValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Days: only 1 to 31 allowed'**
+  String get daysRangeValidation;
+
+  /// No description provided for @monthRangeValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Month: only 1 to 12 allowed'**
+  String get monthRangeValidation;
+
+  /// No description provided for @yearRangeValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Year: only 1 to 90 allowed'**
+  String get yearRangeValidation;
+
+  /// No description provided for @postDeliveryProblemsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Does the mother have any of the following problems post delivery? *'**
+  String get postDeliveryProblemsLabel;
+
+  /// No description provided for @breastfeedingProblemsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Does the mother have breast feeding problem? *'**
+  String get breastfeedingProblemsLabel;
+
+  /// No description provided for @milkNotProducingOrLessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother\'s milk is not being produced after delivery or she thinks less milk is being produced *'**
+  String get milkNotProducingOrLessLabel;
+
+  /// No description provided for @nippleCracksPainOrEngorgedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'is the mother having cracked nipples/ painful and / or engorged breasts *'**
+  String get nippleCracksPainOrEngorgedLabel;
+
+  /// No description provided for @tabGeneralDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'BASIC DETAILS'**
+  String get tabGeneralDetails;
+
+  /// No description provided for @tabMotherDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'MOTHER DETAILS'**
+  String get tabMotherDetails;
+
+  /// No description provided for @tabNewbornDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'CHIlD  DETAILS'**
+  String get tabNewbornDetails;
+
+  /// No description provided for @dead.
+  ///
+  /// In en, this message translates to:
+  /// **'death'**
+  String get dead;
+
+  /// No description provided for @weightColorMatchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighing matches with colour? *'**
+  String get weightColorMatchLabel;
+
+  /// No description provided for @exclusiveBreastfeedingStartedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'At what time was the baby first breastfed? *'**
+  String get exclusiveBreastfeedingStartedLabel;
+
+  /// No description provided for @firstBreastfeedTimingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'At what time was the baby first breastfed? *'**
+  String get firstBreastfeedTimingLabel;
+
+  /// No description provided for @breathingRapidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the breath of the baby going fast (60 or more per minute) *'**
+  String get breathingRapidLabel;
+
+  /// No description provided for @lethargicLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the baby lethargic?'**
+  String get lethargicLabel;
+
+  /// No description provided for @congenitalAbnormalitiesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the baby having any congenital physical abnormality *'**
+  String get congenitalAbnormalitiesLabel;
+
+  /// No description provided for @eyesNormalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Eyes: Normal *'**
+  String get eyesNormalLabel;
+
+  /// No description provided for @eyesSwollenOrPusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Are the eyes swollen? Is there pus coming out of the eyes? *'**
+  String get eyesSwollenOrPusLabel;
+
+  /// No description provided for @skinFoldRednessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock) *'**
+  String get skinFoldRednessLabel;
+
+  /// No description provided for @newbornJaundiceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellowness in skin/ palm/ sole/eyes: Jaudice *'**
+  String get newbornJaundiceLabel;
+
+  /// No description provided for @pusBumpsOrBoilLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'More than ten pus- filled pustules or large boil *'**
+  String get pusBumpsOrBoilLabel;
+
+  /// No description provided for @pusInNavelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is pus in the navel! ? *'**
+  String get pusInNavelLabel;
+
+  /// No description provided for @routineCareDoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Whether the Routine Newborn care tasks was performed? *'**
+  String get routineCareDoneLabel;
+
+  /// No description provided for @cryingConstantlyOrLessUrineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the baby crying continuously or passing usrine less than 6 times a day? *'**
+  String get cryingConstantlyOrLessUrineLabel;
+
+  /// No description provided for @cryingSoftlyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the baby crying weak? *'**
+  String get cryingSoftlyLabel;
+
+  /// No description provided for @newbornReferredByAshaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'In the above symptoms, weather the child is referred by ASHA? *'**
+  String get newbornReferredByAshaLabel;
+
+  /// No description provided for @birthRegisteredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is birth registration completed? *'**
+  String get birthRegisteredLabel;
+
+  /// No description provided for @birthDoseVaccinationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the birthdose vaccination given to baby? *'**
+  String get birthDoseVaccinationLabel;
+
+  /// No description provided for @mcpCardAvailableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is there availability of \'Mother Child Protection (MCP) card? *'**
+  String get mcpCardAvailableLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

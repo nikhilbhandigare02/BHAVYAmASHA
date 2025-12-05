@@ -2592,7 +2592,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mothersRchIdLabel => 'Mother\'s RCH ID number';
 
   @override
-  String get birthCertificateIssuedLabel => 'IS birth certificate issued?';
+  String get birthCertificateIssuedLabel => 'Has the birth certificate been issued?';
 
   @override
   String get birthCertificateNumberLabel => 'birth certificate number';
@@ -2605,12 +2605,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get headOfFamily => 'Head of the family';
-
-  @override
-  String get male => 'Male';
-
-  @override
-  String get female => 'Female';
 
   @override
   String get casteGeneral => 'General';
@@ -2664,9 +2658,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alive => 'alive';
 
   @override
-  String get dead => 'dead';
-
-  @override
   String get babyConditionLabel => 'Baby\'s condition *';
 
   @override
@@ -2691,9 +2682,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get temperatureUnitFahrenheit => 'Fahrenheit';
 
   @override
-  String get weightColorMatchLabel => 'Weghing matches with colour? *';
-
-  @override
   String get weighingScaleColorLabel => 'Weighing Scale Color *';
 
   @override
@@ -2709,61 +2697,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold to the touch, or that the child\'s temperature is 37.5°C or higher or less than 35.5°C, and that the chest draws inward when breathing. *';
 
   @override
-  String get bleedingUmbilicalCordLabel => 'Is umbilical cord bleeding? *';
-
-  @override
-  String get pusInNavelLabel => 'Is pus in the navel! ? *';
-
-  @override
-  String get routineCareDoneLabel => 'Whether the Routine Newborn care tasks was performed? *';
-
-  @override
-  String get breathingRapidLabel => 'Is the breath of the baby going fast (60 or more per minute) *';
-
-  @override
-  String get lethargicLabel => 'Is the baby lethargic?';
-
-  @override
-  String get congenitalAbnormalitiesLabel => 'Is the baby having any congenital physical abnormality *';
-
-  @override
-  String get eyesNormalLabel => 'Eyes: Normal *';
-
-  @override
-  String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming out of the eyes? *';
-
-  @override
-  String get skinFoldRednessLabel => 'Is there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock) *';
-
-  @override
-  String get newbornJaundiceLabel => 'Yellowness in skin/ palm/ sole/eyes: Jaudice *';
-
-  @override
-  String get pusBumpsOrBoilLabel => 'More than ten pus- filled pustules or large boil *';
-
-  @override
-  String get newbornSeizuresLabel => 'Is the child having seizures? *';
-
-  @override
-  String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying continuously or passing usrine less than 6 times a day? *';
-
-  @override
-  String get cryingSoftlyLabel => 'Is the baby crying weak? *';
-
-  @override
-  String get stoppedCryingLabel => 'Has the baby stopped crying? *';
-
-  @override
-  String get newbornReferredByAshaLabel => 'In the above symptoms, weather the child is referred by ASHA? *';
-
-  @override
-  String get birthRegisteredLabel => 'Is birth registration completed? *';
-
-  @override
-  String get mcpCardAvailableLabel => 'Is there availability of \'Mother Child Protection (MCP) card? *';
-
-  @override
-  String get birthDoseVaccinationLabel => 'Is the birthdose vaccination given to baby? *';
+  String get bleedingUmbilicalCordLabel => 'Is there bleeding from the umbilical cord? *';
 
   @override
   String get homeVisitDayLabel => 'Home Visit Day *';
@@ -2779,9 +2713,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) *';
-
-  @override
-  String get postDeliveryProblemsLabel => 'Does the mother have any problems after delivery? *';
 
   @override
   String get postDeliveryProblemNone => 'None';
@@ -2805,9 +2736,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'Convulsions';
 
   @override
-  String get breastfeedingProblemsLabel => 'Is the mother having problems breastfeeding? *';
-
-  @override
   String get mealsPerDayLabel => 'How many times does a mother take a full meal in 24 hours?';
 
   @override
@@ -2826,16 +2754,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get counselingAdviceLabel => 'Counseling / Advice *';
 
   @override
-  String get milkNotProducingOrLessLabel => 'After delivery, is the mother not producing milk or does she feel milk is less? *';
-
-  @override
-  String get nippleCracksPainOrEngorgedLabel => 'Does the mother have nipple cracks/pain and/or engorged breasts? *';
-
-  @override
   String get outcomeFormTitle => 'Delivery Outcome';
-
-  @override
-  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
 
   @override
   String get deliveryDateLabel => 'Date of Delivery *';
@@ -2934,6 +2853,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataSavedSuccessMessage => 'Data saved successfully';
 
   @override
+  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
+
+  @override
   String get deliveryDate => 'Date of Delivery *';
 
   @override
@@ -2997,16 +2919,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
-  String get exclusiveBreastfeedingStartedLabel => 'Has exclusive breastfeeding initaited? *';
-
-  @override
-  String get firstBreastfeedTimingLabel => 'At what time was the baby first breastfed? *';
-
-  @override
   String get howWasBreastfedLabel => 'How was the baby breastfed? *';
 
   @override
-  String get firstFeedGivenAfterBirthLabel => 'What was given as the first feed after birth? *';
+  String get firstFeedGivenAfterBirthLabel => 'What was given to the baby as the first feed after birth? *';
 
   @override
   String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)? *';
@@ -3175,15 +3091,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prevVisitPncDay => 'PNC Day';
-
-  @override
-  String get tabGeneralDetails => 'General Details';
-
-  @override
-  String get tabMotherDetails => 'Mother Details';
-
-  @override
-  String get tabNewbornDetails => 'Newborn Details';
 
   @override
   String get confirmAttentionTitle => 'Confirm Action';
@@ -3805,6 +3712,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gender => 'Gender';
+
+  @override
+  String get male => 'Male';
+
+  @override
+  String get female => 'Female';
 
   @override
   String get isGuardianPresent => 'Is the guardian present?';
@@ -5237,4 +5150,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screeningDate => 'Screening Date';
+
+  @override
+  String get enterCategory => 'Enter category';
+
+  @override
+  String get youngestChildDetail => 'Youngest Child Detail';
+
+  @override
+  String get daysRangeValidation => 'Days: only 1 to 31 allowed';
+
+  @override
+  String get monthRangeValidation => 'Month: only 1 to 12 allowed';
+
+  @override
+  String get yearRangeValidation => 'Year: only 1 to 90 allowed';
+
+  @override
+  String get postDeliveryProblemsLabel => 'Does the mother have any of the following problems post delivery? *';
+
+  @override
+  String get breastfeedingProblemsLabel => 'Does the mother have breast feeding problem? *';
+
+  @override
+  String get milkNotProducingOrLessLabel => 'Mother\'s milk is not being produced after delivery or she thinks less milk is being produced *';
+
+  @override
+  String get nippleCracksPainOrEngorgedLabel => 'is the mother having cracked nipples/ painful and / or engorged breasts *';
+
+  @override
+  String get tabGeneralDetails => 'BASIC DETAILS';
+
+  @override
+  String get tabMotherDetails => 'MOTHER DETAILS';
+
+  @override
+  String get tabNewbornDetails => 'CHIlD  DETAILS';
+
+  @override
+  String get dead => 'death';
+
+  @override
+  String get weightColorMatchLabel => 'Weighing matches with colour? *';
+
+  @override
+  String get exclusiveBreastfeedingStartedLabel => 'At what time was the baby first breastfed? *';
+
+  @override
+  String get firstBreastfeedTimingLabel => 'At what time was the baby first breastfed? *';
+
+  @override
+  String get breathingRapidLabel => 'Is the breath of the baby going fast (60 or more per minute) *';
+
+  @override
+  String get lethargicLabel => 'Is the baby lethargic?';
+
+  @override
+  String get congenitalAbnormalitiesLabel => 'Is the baby having any congenital physical abnormality *';
+
+  @override
+  String get eyesNormalLabel => 'Eyes: Normal *';
+
+  @override
+  String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming out of the eyes? *';
+
+  @override
+  String get skinFoldRednessLabel => 'Is there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock) *';
+
+  @override
+  String get newbornJaundiceLabel => 'Yellowness in skin/ palm/ sole/eyes: Jaudice *';
+
+  @override
+  String get pusBumpsOrBoilLabel => 'More than ten pus- filled pustules or large boil *';
+
+  @override
+  String get pusInNavelLabel => 'Is pus in the navel! ? *';
+
+  @override
+  String get routineCareDoneLabel => 'Whether the Routine Newborn care tasks was performed? *';
+
+  @override
+  String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying continuously or passing usrine less than 6 times a day? *';
+
+  @override
+  String get cryingSoftlyLabel => 'Is the baby crying weak? *';
+
+  @override
+  String get newbornReferredByAshaLabel => 'In the above symptoms, weather the child is referred by ASHA? *';
+
+  @override
+  String get birthRegisteredLabel => 'Is birth registration completed? *';
+
+  @override
+  String get birthDoseVaccinationLabel => 'Is the birthdose vaccination given to baby? *';
+
+  @override
+  String get mcpCardAvailableLabel => 'Is there availability of \'Mother Child Protection (MCP) card? *';
 }
