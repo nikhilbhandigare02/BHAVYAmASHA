@@ -889,7 +889,8 @@
   "choose": "choose",
   "headOfFamily": "Head of the family"
 ,
-
+  "male": "Male",
+  "female": "Female",
   "casteGeneral": "General",
   "casteObc": "OBC",
   "casteSc": "SC",
@@ -924,6 +925,10 @@
   "motherReportsTempOrChestIndrawingLabel": "The mother reports that the child feels hot or cold to the touch, or that the child's temperature is 37.5°C or higher or less than 35.5°C, and that the chest draws inward when breathing. *",
   "bleedingUmbilicalCordLabel": "Is there bleeding from the umbilical cord? *",
 
+  "newbornSeizuresLabel": "Is the child having seizures?*",
+
+  "stoppedCryingLabel": "Has the baby stopped crying? *",
+
   "homeVisitDayLabel": "Home Visit Day *",
   "highRisk": "High-Risk Pregnancy List",
   "dateOfHomeVisitLabel": "Date of home visit *",
@@ -944,6 +949,7 @@
   "counselingAdviceLabel": "Counseling / Advice *",
 
   "outcomeFormTitle": "Delivery Outcome",
+  "deliveryOutcomeDetails": "Delivery Outcome Details",
   "deliveryDateLabel": "Date of Delivery *",
   "pregnancyWeeksLabel": "Number of weeks of pregnancy during delivery.",
   "outcomeTypeLabel": "Type of Outcome *",
@@ -1066,7 +1072,7 @@
   "prevVisitPncDate": "PNC Date",
   "prevVisitPncDay": "PNC Day"
 ,
-  "confirmAttentionTitle": "Attention!",
+
   "confirmBackLoseDetailsMsg": "If you go back, details will be lost. Do you want to go back?",
   "confirmYesExit": "Yes, Exit",
   "confirmNo": "No",

@@ -2607,6 +2607,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get headOfFamily => 'Head of the family';
 
   @override
+  String get male => 'Male';
+
+  @override
+  String get female => 'Female';
+
+  @override
   String get casteGeneral => 'General';
 
   @override
@@ -2700,6 +2706,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bleedingUmbilicalCordLabel => 'Is there bleeding from the umbilical cord? *';
 
   @override
+  String get newbornSeizuresLabel => 'Is the child having seizures?*';
+
+  @override
+  String get stoppedCryingLabel => 'Has the baby stopped crying? *';
+
+  @override
   String get homeVisitDayLabel => 'Home Visit Day *';
 
   @override
@@ -2755,6 +2767,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get outcomeFormTitle => 'Delivery Outcome';
+
+  @override
+  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
 
   @override
   String get deliveryDateLabel => 'Date of Delivery *';
@@ -2851,9 +2866,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataSavedSuccessMessage => 'Data saved successfully';
-
-  @override
-  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
 
   @override
   String get deliveryDate => 'Date of Delivery *';
@@ -3093,9 +3105,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prevVisitPncDay => 'PNC Day';
 
   @override
-  String get confirmAttentionTitle => 'Confirm Action';
-
-  @override
   String get confirmBackLoseDetailsMsg => 'If you go back, details will be lost. Do you want to go back?';
 
   @override
@@ -3286,6 +3295,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get personalHealthIdHint => 'Enter 14-digit Personal Health ID';
+
+  @override
+  String get confirmAttentionTitle => 'Confirm Action';
 
   @override
   String get memberRemainsToAdd => 'No. of members remains to be added';
@@ -3712,12 +3724,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gender => 'Gender';
-
-  @override
-  String get male => 'Male';
-
-  @override
-  String get female => 'Female';
 
   @override
   String get isGuardianPresent => 'Is the guardian present?';

@@ -5267,6 +5267,18 @@ abstract class AppLocalizations {
   /// **'Head of the family'**
   String get headOfFamily;
 
+  /// No description provided for @male.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get male;
+
+  /// No description provided for @female.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get female;
+
   /// No description provided for @casteGeneral.
   ///
   /// In en, this message translates to:
@@ -5453,6 +5465,18 @@ abstract class AppLocalizations {
   /// **'Is there bleeding from the umbilical cord? *'**
   String get bleedingUmbilicalCordLabel;
 
+  /// No description provided for @newbornSeizuresLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the child having seizures?*'**
+  String get newbornSeizuresLabel;
+
+  /// No description provided for @stoppedCryingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Has the baby stopped crying? *'**
+  String get stoppedCryingLabel;
+
   /// No description provided for @homeVisitDayLabel.
   ///
   /// In en, this message translates to:
@@ -5566,6 +5590,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delivery Outcome'**
   String get outcomeFormTitle;
+
+  /// No description provided for @deliveryOutcomeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Outcome Details'**
+  String get deliveryOutcomeDetails;
 
   /// No description provided for @deliveryDateLabel.
   ///
@@ -5758,12 +5788,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Data saved successfully'**
   String get dataSavedSuccessMessage;
-
-  /// No description provided for @deliveryOutcomeDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivery Outcome Details'**
-  String get deliveryOutcomeDetails;
 
   /// No description provided for @deliveryDate.
   ///
@@ -6239,12 +6263,6 @@ abstract class AppLocalizations {
   /// **'PNC Day'**
   String get prevVisitPncDay;
 
-  /// No description provided for @confirmAttentionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Action'**
-  String get confirmAttentionTitle;
-
   /// No description provided for @confirmBackLoseDetailsMsg.
   ///
   /// In en, this message translates to:
@@ -6628,6 +6646,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter 14-digit Personal Health ID'**
   String get personalHealthIdHint;
+
+  /// No description provided for @confirmAttentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Action'**
+  String get confirmAttentionTitle;
 
   /// No description provided for @memberRemainsToAdd.
   ///
@@ -7480,18 +7504,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gender'**
   String get gender;
-
-  /// No description provided for @male.
-  ///
-  /// In en, this message translates to:
-  /// **'Male'**
-  String get male;
-
-  /// No description provided for @female.
-  ///
-  /// In en, this message translates to:
-  /// **'Female'**
-  String get female;
 
   /// No description provided for @isGuardianPresent.
   ///

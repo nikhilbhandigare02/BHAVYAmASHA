@@ -71,21 +71,16 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                   showAppSnackBar(context, localized);
                 }
 
-                // Handle successful save
                 if (state.saveSuccess && !state.isSaving) {
-                  // Show success message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(AppLocalizations.of(context)!.dataSavedSuccessfully),
-                      backgroundColor: Colors.green,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-
+                  showAppSnackBar(context, 'Form save succsefully');
                   if (mounted) {
-                    Future.delayed(const Duration(milliseconds: 2200), () {
+                    Future.delayed(const Duration(milliseconds: 2000), () {
                       if (mounted) {
-                        Navigator.pushNamedAndRemoveUntil(context, Route_Names.HBNCScreen,  (route) => false,);
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          Route_Names.HBNCScreen,
+                          (route) => false,
+                        );
                       }
                     });
                   }
@@ -220,13 +215,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                               Expanded(
                                 child: isLast
                                     ? BlocConsumer<HbncVisitBloc, HbncVisitState>(
-                                  listener: (context, state) {
-                                    // Handle any state changes after save
-                                    if (state.saveSuccess) {
-                                      // Reset form or navigate away
-                                      Navigator.pop(context, true);
-                                    }
-                                  },
+                                  listener: (context, state) {},
                                   builder: (context, state) {
                                     return RoundButton(
                                       height: 34,
@@ -286,7 +275,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
       'err_counseling_advice_required': t.err_counseling_advice_required,
       'err_milk_not_producing_or_less_required': t.err_milk_not_producing_or_less_required,
       'err_nipple_cracks_pain_or_engorged_required': t.err_nipple_cracks_pain_or_engorged_required,
-     'err_baby_condition_required': t.err_baby_condition_required, 
+      'err_baby_condition_required': t.err_baby_condition_required, 
       'err_baby_name_required': t.err_baby_name_required,
       'err_baby_gender_required': t.err_baby_gender_required,
       'err_baby_weight_required': t.err_baby_weight_required,

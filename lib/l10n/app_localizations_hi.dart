@@ -2607,6 +2607,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get headOfFamily => 'परिवार प्रमुख';
 
   @override
+  String get male => 'पुरुष';
+
+  @override
+  String get female => 'महिला';
+
+  @override
   String get casteGeneral => 'सामान्य';
 
   @override
@@ -2700,6 +2706,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bleedingUmbilicalCordLabel => 'क्या नाभि से रक्तस्राव हो रहा है? *';
 
   @override
+  String get newbornSeizuresLabel => 'क्या बच्चे को दौरे पड़ रहे हैं?*';
+
+  @override
+  String get stoppedCryingLabel => 'क्या शिशु ने रोना बंद कर दिया है? *';
+
+  @override
   String get homeVisitDayLabel => 'गृह भ्रमण का दिन *';
 
   @override
@@ -2755,6 +2767,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get outcomeFormTitle => 'Delivery Outcome';
+
+  @override
+  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
 
   @override
   String get deliveryDateLabel => 'Date of Delivery *';
@@ -2851,9 +2866,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dataSavedSuccessMessage => 'Data saved successfully';
-
-  @override
-  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
 
   @override
   String get deliveryDate => 'Date of Delivery *';
@@ -3093,9 +3105,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get prevVisitPncDay => 'पी.एन.सी. की दिन';
 
   @override
-  String get confirmAttentionTitle => 'कार्रवाई की पुष्टि करें';
-
-  @override
   String get confirmBackLoseDetailsMsg => 'If you go back, details will be lost. Do you want to go back?';
 
   @override
@@ -3286,6 +3295,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get personalHealthIdHint => '14 अंकों की व्यक्तिगत स्वास्थ्य आईडी दर्ज करें';
+
+  @override
+  String get confirmAttentionTitle => 'कार्रवाई की पुष्टि करें';
 
   @override
   String get memberRemainsToAdd => 'जोड़ने के लिए बचे हुए सदस्यों की संख्या';
@@ -3712,12 +3724,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get gender => 'लिंग';
-
-  @override
-  String get male => 'पुरुष';
-
-  @override
-  String get female => 'महिला';
 
   @override
   String get isGuardianPresent => 'क्या अभिभावक उपस्थित है?';
