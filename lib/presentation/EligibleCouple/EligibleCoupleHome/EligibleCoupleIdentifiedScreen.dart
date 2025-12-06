@@ -180,7 +180,7 @@ class _EligibleCoupleIdentifiedScreenState
     // Prefer woman's own marital status, fall back to head's if missing
     final maritalStatusRaw =
         person['maritalStatus']?.toString().toLowerCase() ??
-        head?['maritalStatus']?.toString().toLowerCase() ?? '';
+            head?['maritalStatus']?.toString().toLowerCase() ?? '';
     final isMarried = maritalStatusRaw == 'married';
     if (!isMarried) return false;
 
@@ -351,7 +351,7 @@ class _EligibleCoupleIdentifiedScreenState
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final primary = Theme.of(context).primaryColor;
-    final t = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final rowData = data['_rawRow'] ?? {};
     final beneficiaryInfo = rowData['beneficiary_info'] is String
@@ -476,33 +476,33 @@ class _EligibleCoupleIdentifiedScreenState
                     children: [
                       Row(
                         children: [
-                          Expanded(child: _rowText('Registration Date', data['RegistrationDate'] ?? '')),
+                          Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegistrationDate'] ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Registration Type', data['RegistrationType'] ?? '')),
+                          Expanded(child: _rowText(l10n?.registrationTypeLabel ??'Registration Type', data['RegistrationType'] ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Beneficiary ID', data['BeneficiaryIDShort'] ?? data['BeneficiaryID'] ?? '')),
+                          Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', data['BeneficiaryIDShort'] ?? data['BeneficiaryID'] ?? '')),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Expanded(child: _rowText(  'Name', data['Name'] ?? '')),
+                          Expanded(child: _rowText(l10n?.nameLabel ??  'Name', data['Name'] ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText( 'Age | Gender', data['age']?.toString() ?? '')),
+                          Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['age']?.toString() ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('RCH ID', data['RCH ID']?.toString() ?? '')),
+                          Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RCH ID']?.toString() ?? '')),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
                           Expanded(
-                              child: _rowText( 'Mobile No.', data['mobileno']?.toString() ?? '')),
+                              child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['mobileno']?.toString() ?? '')),
                           const SizedBox(width: 12),
                           Expanded(child: SizedBox.shrink()),
                           const SizedBox(width: 12),
                           Expanded(
-                              child: _rowText('Husband Name', data['HusbandName'] ?? '')),
+                              child: _rowText(l10n?.husbandName ?? 'Husband Name', data['HusbandName'] ?? '')),
                         ],
                       ),
                     ],

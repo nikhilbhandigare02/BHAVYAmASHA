@@ -157,6 +157,12 @@ class Spousdetails extends StatefulWidget {
   final bool syncFromHead;
   final bool isAddMember;
   final String? headGender;
+  final String? otherOccupation;
+  final String? otherCategory;
+  final String? otherReligion;
+  final String? occupation;
+  final String? category;
+  final String? religion;
 
   const Spousdetails({
     super.key,
@@ -168,6 +174,12 @@ class Spousdetails extends StatefulWidget {
     this.syncFromHead = true,
     this.isAddMember = false,
     this.headGender,
+    this.otherOccupation,
+    this.otherCategory,
+    this.otherReligion,
+    this.occupation,
+    this.category,
+    this.religion,
   });
 
   @override

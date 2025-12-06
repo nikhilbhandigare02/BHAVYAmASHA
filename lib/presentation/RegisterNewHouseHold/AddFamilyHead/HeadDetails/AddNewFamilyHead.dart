@@ -1206,7 +1206,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   category: m['category'] == 'Other' ? 'Other' : m['category'],
                   otherCategory: m['category'] == 'Other' ? m['other_category'] : null,
                   mobileOwner: m['mobileOwner'],
-                  mobileOwnerOtherRelation: m['mobileOwner'] == 'Other' ? m['mobileOwnerOtherRelation'] : null,
+                  mobileOwnerOtherRelation: m['mobile_owner_relation'] == 'Other'
+                      ? m['mobile_owner_relation']
+                      : m['mobile_owner_relation'],
                   mobileNo: m['mobileNo'],
                   village: m['village'],
                   ward: m['ward'],
@@ -1282,11 +1284,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           final m = widget.initial;
           if (m == null || m.isEmpty) return SpousBloc();
 
+          // Helper function to get value with fallback to non-prefixed key
+          dynamic getValue(String key) => m['sp_$key'] ?? m[key];
+
           DateTime? _parseDate(String? iso) =>
               (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
 
-          // Extract years, months, days from stored approximate age string, e.g.
-          // "15 years 2 months 10 days" -> ("15","2","10")
+          // Extract years, months, days from stored approximate age string
           String? _approxPart(String? approx, int index) {
             if (approx == null) return null;
             final s = approx.trim();
@@ -1296,53 +1300,98 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             return matches[index].group(0);
           }
 
-          final approx = m['sp_approxAge'];
+          final approx = getValue('approxAge');
           final updateYears = _approxPart(approx, 0);
           final updateMonths = _approxPart(approx, 1);
           final updateDays = _approxPart(approx, 2);
 
+          // Get values for fields with "Other" options
+          final occupation = getValue('occupation');
+          final otherOccupation = getValue('other_occupation');
+          final religion = getValue('religion');
+          final otherReligion = getValue('other_religion');
+          final category = getValue('category');
+          final otherCategory = getValue('other_category');
+          final mobileOwner = getValue('mobileOwner');
+          final mobileOwnerOtherRelation = getValue('mobile_owner_relation');
+
+          // Additional fields
+          final familyPlanningCounseling = getValue('familyPlanningCounseling');
+          final isFamilyPlanning = (familyPlanningCounseling?.toString().toLowerCase() == 'yes') ? 1 : 0;
+          final fpMethod = getValue('fpMethod');
+          final removalDate = getValue('removalDate');
+          final removalReason = getValue('removalReason');
+          final condomQuantity = getValue('condomQuantity');
+          final malaQuantity = getValue('malaQuantity');
+          final chhayaQuantity = getValue('chhayaQuantity');
+          final ecpQuantity = getValue('ecpQuantity');
+          final antraDate = getValue('antraDate');
+
           final spState = SpousState(
-            relation: m['sp_relation'],
-            memberName: m['sp_memberName'],
-            ageAtMarriage: m['sp_ageAtMarriage'],
-            RichIDChanged: m['sp_RichIDChanged'],
-            spouseName: m['sp_spouseName'],
-            fatherName: m['sp_fatherName'],
-            useDob: m['sp_useDob'] == 'true' || m['sp_useDob'] == true,
-            dob: _parseDate(m['sp_dob']),
-            edd: _parseDate(m['sp_edd']),
-            lmp: _parseDate(m['sp_lmp']),
+            relation: getValue('relation') ?? 'spouse',
+            memberName: getValue('memberName') ?? getValue('spouseName'),
+            ageAtMarriage: getValue('ageAtMarriage'),
+            RichIDChanged: getValue('RichIDChanged'),
+            spouseName: getValue('spouseName') ?? getValue('headName'),
+            fatherName: getValue('fatherName'),
+            useDob: (getValue('useDob') == true || getValue('useDob') == 'true'),
+            dob: _parseDate(getValue('dob')?.toString()),
+            edd: _parseDate(getValue('edd')?.toString()),
+            lmp: _parseDate(getValue('lmp')?.toString()),
             approxAge: approx,
             UpdateYears: updateYears,
             UpdateMonths: updateMonths,
             UpdateDays: updateDays,
-            gender: m['sp_gender'],
-            occupation: m['sp_occupation'],
-            education: m['sp_education'],
-            religion: m['sp_religion'],
-            category: m['sp_category'],
-            abhaAddress: m['sp_abhaAddress'],
-            mobileOwner: m['sp_mobileOwner'],
-            otherOccupation: m['sp_otherOccupation'],
-            otherReligion: m['sp_otherReligion'],
-            otherCategory: m['sp_otherCategory'],
-            mobileOwnerOtherRelation: m['sp_mobileOwnerOtherRelation'],
-            mobileNo: m['sp_mobileNo'],
-            bankAcc: m['sp_bankAcc'],
-            ifsc: m['sp_ifsc'],
-            voterId: m['sp_voterId'],
-            rationId: m['sp_rationId'],
-            phId: m['sp_phId'],
-            beneficiaryType: m['sp_beneficiaryType'],
-            isPregnant: m['sp_isPregnant'],
-            familyPlanningCounseling: m['sp_familyPlanningCounseling'],
-            fpMethod: m['sp_fpMethod'],
-            removalDate: _parseDate(m['sp_removalDate']),
-            removalReason: m['sp_removalReason'],
-            condomQuantity: m['sp_condomQuantity'],
-            malaQuantity: m['sp_malaQuantity'],
-            chhayaQuantity: m['sp_chhayaQuantity'],
-            ecpQuantity: m['sp_ecpQuantity'],
+            gender: getValue('gender') ??
+                ((getValue('gender') == 'Male') ? 'Female' :
+                (getValue('gender') == 'Female') ? 'Male' : null),
+
+            // Occupation fields
+            occupation: occupation,
+            otherOccupation: otherOccupation,
+
+            education: getValue('education'),
+
+            // Religion fields
+            religion: religion,
+            otherReligion: otherReligion,
+
+            // Category fields
+            category: category,
+            otherCategory: otherCategory,
+
+            abhaAddress: getValue('abhaAddress'),
+
+            // Mobile owner fields
+            mobileOwner: mobileOwner,
+            mobileOwnerOtherRelation: mobileOwnerOtherRelation,
+
+            mobileNo: getValue('mobileNo'),
+            bankAcc: getValue('bankAcc'),
+            ifsc: getValue('ifsc'),
+            voterId: getValue('voterId'),
+            rationId: getValue('rationId'),
+            phId: getValue('phId'),
+            beneficiaryType: getValue('beneficiaryType'),
+            isPregnant: getValue('isPregnant'),
+
+            // Family planning fields
+            familyPlanningCounseling: familyPlanningCounseling,
+            // familyPlanningCounseling: isFamilyPlanning,
+            fpMethod: fpMethod,
+
+            // Removal related fields
+            removalDate: _parseDate(removalDate is String ? removalDate : removalDate?.toString()),
+            removalReason: removalReason,
+
+            // Quantity fields
+            condomQuantity: condomQuantity,
+            malaQuantity: malaQuantity,
+            chhayaQuantity: chhayaQuantity,
+            ecpQuantity: ecpQuantity,
+
+            // Antra date field
+            antraDate: _parseDate(antraDate is String ? antraDate : antraDate?.toString()),
           );
 
           return SpousBloc(initial: spState);

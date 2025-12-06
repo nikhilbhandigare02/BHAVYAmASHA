@@ -77,25 +77,33 @@ class RegisterNewHouseholdBloc
       
       final isChild = data['Relation']?.toLowerCase() == 'son' ||
                      data['Relation']?.toLowerCase() == 'daughter' ||
-                     data['Type']?.toLowerCase() == 'child' ||
-                     data['Type']?.toLowerCase() == 'Adult';
+                     data['Type']?.toLowerCase() == 'child';
+      
+      final isAdult = data['Type']?.toLowerCase() == 'adult';
 
       if (isChild) {
         if (newRemainingChildrenCount > 0) {
           newRemainingChildrenCount--;
         }
-      } else if (isUnmarried && !isHeadOrSpouse) {
-        // Only decrease the unmarried count if it's greater than 0
+      } else if (isAdult && isUnmarried && !isHeadOrSpouse) {
+        // For unmarried adults who are not head or spouse
         if (newUnmarriedCount > 0) {
           newUnmarriedCount--;
         }
+      }
+      
+      // Decrease total members count if we have remaining children or unmarried members
+      int newTotalMembers = current.totalMembers;
+      if ((isChild && newRemainingChildrenCount > 0) || 
+          (isAdult && newUnmarriedCount > 0)) {
+        newTotalMembers--;
       }
 
       updated.add(data);
 
       emit(
         current.copyWith(
-          totalMembers: current.totalMembers + 1,
+          totalMembers: newTotalMembers + 1, // Always add 1 for the new member
           members: updated,
           unmarriedMemberCount: newUnmarriedCount,
           remainingChildrenCount: newRemainingChildrenCount,

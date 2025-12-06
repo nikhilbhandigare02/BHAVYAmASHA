@@ -211,47 +211,47 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                   key: const ValueKey('whoseMobileField'),
                                   labelText: "${t?.whoseMobileLabel} *" ??
                                       'Whose mobile no.',
-                                items: const [
-                                  'Self',
-                                  'Wife',
-                                  'Father',
-                                  'Mother',
-                                  'Son',
-                                  'Daughter',
-                                  'Father in Law',
-                                  'Mother in Law',
-                                  'Neighbour',
-                                  'Relative',
-                                  'Other',
-                                ],
-                                getLabel: (s) {
-                                  switch (s) {
-                                    case 'Self':
-                                      return t!.self;
-                                    case 'Wife':
-                                      return t!.wife;
-                                    case 'Father':
-                                      return t!.father;
-                                    case 'Mother':
-                                      return t!.mother;
-                                    case 'Son':
-                                      return t!.son;
-                                    case 'Daughter':
-                                      return t!.daughter;
-                                    case 'Father in Law':
-                                      return t!.fatherInLaw;
-                                    case 'Mother in Law':
-                                      return t!.motherInLaw;
-                                    case 'Neighbour':
-                                      return t!.neighbour;
-                                    case 'Relative':
-                                      return t!.relative;
-                                    case 'Other':
-                                      return t!.other;
-                                    default:
-                                      return s;
-                                  }
-                                },
+                                  items: const [
+                                    'Self',
+                                    'Wife',
+                                    'Father',
+                                    'Mother',
+                                    'Son',
+                                    'Daughter',
+                                    'Father in Law',
+                                    'Mother in Law',
+                                    'Neighbour',
+                                    'Relative',
+                                    'Other',
+                                  ],
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Self':
+                                        return t!.self;
+                                      case 'Wife':
+                                        return t!.wife;
+                                      case 'Father':
+                                        return t!.father;
+                                      case 'Mother':
+                                        return t!.mother;
+                                      case 'Son':
+                                        return t!.son;
+                                      case 'Daughter':
+                                        return t!.daughter;
+                                      case 'Father in Law':
+                                        return t!.fatherInLaw;
+                                      case 'Mother in Law':
+                                        return t!.motherInLaw;
+                                      case 'Neighbour':
+                                        return t!.neighbour;
+                                      case 'Relative':
+                                        return t!.relative;
+                                      case 'Other':
+                                        return t!.other;
+                                      default:
+                                        return s;
+                                    }
+                                  },
                                   value: state.whoseMobile.isEmpty ? null : state
                                       .whoseMobile,
                                   onChanged: null, // Readonly
@@ -283,17 +283,17 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 child: ApiDropdown<String>(
                                   key: const ValueKey('religionField'),
                                   labelText: t?.religionLabel ?? 'Religion',
-                                items: const [
-                                  'Do not want to disclose',
-                                  'Hindu',
-                                  'Muslim',
-                                  'Christian',
-                                  'Sikh',
-                                  'Buddhism',
-                                  'Jainism',
-                                  'Parsi',
-                                  'Other'
-                                ],
+                                  items: const [
+                                    'Do not want to disclose',
+                                    'Hindu',
+                                    'Muslim',
+                                    'Christian',
+                                    'Sikh',
+                                    'Buddhism',
+                                    'Jainism',
+                                    'Parsi',
+                                    'Other'
+                                  ],
                                   getLabel: (s) => s,
                                   value: state.religion.isEmpty ? null : state
                                       .religion,
@@ -304,11 +304,11 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
                                 height: 0,),
-                              
+
                               // Category Field
                               CustomTextField(
-                                labelText: 'Category',
-                                hintText: 'Enter category',
+                                labelText:t?.categoryLabel ?? 'Category',
+                                hintText: t?.enterCategory ??'Enter category',
                                 initialValue: state.category,
                                 onChanged: (value) => context.read<EligibleCouleUpdateBloc>().add(CategoryChanged(value)),
                                 readOnly: true,
@@ -410,7 +410,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 thickness: 0.5,
                                 height: 8,),
                               // Youngest Child Details
-                              Text("yougest child detail" ??
+                              Text(t?.youngestChildDetail ?? "yougest child detail" ??
                                   'Youngest Child Details', style: Theme
                                   .of(context)
                                   .textTheme
@@ -431,7 +431,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                     thickness: 0.5,
                                     height: 8,),                                  Expanded(
                                     child: ApiDropdown<String>(
-                                      key: const ValueKey(
+                                      key: ValueKey(
                                           'youngestChildAgeUnit'),
                                       labelText: '',
                                       items: const ['Years', 'Months', 'Days'],
@@ -507,15 +507,15 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 String? message;
                                 if (unit == 'Years') {
                                   if (age == null || age < 1 || age > 90) {
-                                    message = 'Year: only 1 to 90 allowed';
+                                    message = t?.yearRangeValidation ?? 'Year: only 1 to 90 allowed';
                                   }
                                 } else if (unit == 'Months') {
                                   if (age == null || age < 1 || age > 12) {
-                                    message = 'Month: only 1 to 12 allowed';
+                                    message =t?.monthRangeValidation ?? 'Month: only 1 to 12 allowed';
                                   }
                                 } else if (unit == 'Days') {
                                   if (age == null || age < 1 || age > 31) {
-                                    message = 'Days: only 1 to 31 allowed';
+                                    message =t?.daysRangeValidation ?? 'Days: only 1 to 31 allowed';
                                   }
                                 }
                                 if (message != null) {
