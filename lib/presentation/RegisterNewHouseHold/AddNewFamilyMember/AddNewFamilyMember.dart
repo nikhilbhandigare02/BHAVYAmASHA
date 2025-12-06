@@ -4221,17 +4221,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           _clearAnmFormError();
                                           clearSpousFormError();
 
-                                          // When on the spouse step (index 1), validate the
-                                          // Spousdetails form using its own GlobalKey. This
-                                          // ensures member spouse validations run and only
-                                          // a single message (the first error) is shown.
-                                          // Calculate the last step based on the form state
+
                                           final bool showSpouse = state.memberType != 'Child' &&
                                               state.maritalStatus == 'Married';
                                           final bool showChildren = showSpouse && state.hasChildren == 'Yes';
                                           final int lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
 
-// When on the spouse step (index 1), validate the Spouse form
                                           if (_currentStep == 1) {
                                             final spouseForm = spousFormKey.currentState;
                                             if (spouseForm == null || !spouseForm.validate()) {
@@ -4241,7 +4236,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             }
                                           }
 
-                                          if (_currentStep < lastStep) {
+                                          if (!_isEdit && _currentStep < lastStep) {
                                             final newStep = _currentStep + 1;
                                             setState(() {
                                               _currentStep = newStep;
@@ -4249,7 +4244,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                             // Get the tab controller and animate to the new step
                                             final tabController = DefaultTabController.of(context);
-                                            if (tabController != null) {
+                                            if (tabController != null && newStep < tabController.length) {
                                               tabController.animateTo(newStep);
                                             }
                                             return;
@@ -4384,125 +4379,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               'Submitting member data: ${jsonEncode(memberData)}',
                                             );
 
-                                            // Handle based on the flow
                                             if (_isMemberDetails) {
-                                              // In edit mode, we want to update the record directly without tab navigation
                                               if (_isEdit) {
-                                                print(
-                                                  '=== Form Submission (Edit Mode) ===',
-                                                );
-                                                print('HHID: ${widget.hhId}');
-                                                print(
-                                                  'isMemberDetails: $_isMemberDetails',
-                                                );
-
-                                                // Show loading
-                                                setState(
-                                                  () => _isLoading = true,
-                                                );
-
-                                                // Trigger the update
-                                                bloc.add(
-                                                  AnmUpdateSubmit(
-                                                    hhid: widget.hhId ?? '',
-                                                  ),
-                                                );
-                                                return;
-                                              }
-
-                                              // For new entries, handle tab navigation
-                                              final showSpouse =
-                                                  state.memberType != 'Child' &&
-                                                  state.maritalStatus ==
-                                                      'Married';
-                                              final showChildren =
-                                                  showSpouse &&
-                                                  state.hasChildren == 'Yes';
-                                              final lastStep = showChildren
-                                                  ? 2
-                                                  : (showSpouse ? 1 : 0);
-
-                                              // If we're not on the last step yet, go to the next step
-                                              if (_currentStep < lastStep) {
-                                                setState(() {
-                                                  _currentStep += 1;
-                                                });
-                                                final ctrl =
-                                                    DefaultTabController.of(
-                                                      context,
-                                                    );
-                                                ctrl?.animateTo(_currentStep);
-                                                return;
-                                              }
-
-                                              // Collect spouse data if applicable
-                                              if (showSpouse) {
-                                                try {
-                                                  final spState =
-                                                      _spousBloc.state;
-                                                  final spJson = spState
-                                                      .toJson();
-
-                                                  final hasSpouseData = spJson
-                                                      .values
-                                                      .any((v) {
-                                                        if (v == null)
-                                                          return false;
-                                                        if (v is String)
-                                                          return v
-                                                              .trim()
-                                                              .isNotEmpty;
-                                                        return true;
-                                                      });
-
-                                                  if (hasSpouseData) {
-                                                    memberData['spouseUseDob'] =
-                                                        spState.useDob;
-                                                    memberData['spouseDob'] =
-                                                        spState.dob
-                                                            ?.toIso8601String();
-                                                    memberData['spouseApproxAge'] =
-                                                        spState.approxAge;
-                                                    memberData['spousedetails'] =
-                                                        jsonEncode(spJson);
-                                                  }
-                                                } catch (e) {
-                                                  print(
-                                                    'Error processing spouse data: $e',
-                                                  );
-                                                }
-                                              }
-
-                                              // Add children data if applicable
-                                              try {
-                                                final ch = _childrenBloc.state;
-                                                memberData['childrendetails'] =
-                                                    ch.toJson();
-                                              } catch (e) {
-                                                print(
-                                                  'Error processing children data: $e',
-                                                );
-                                              }
-
-                                              // Handle based on the flow
-                                              if (_isMemberDetails) {
-                                                // For member details flow, submit the form
-                                                bloc.add(
-                                                  AnmSubmit(
-                                                    context,
-                                                    hhid: widget.hhId,
-                                                    extraData: memberData,
-                                                  ),
-                                                );
-                                                return; // Don't navigate yet, wait for success state
+                                                bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
                                               } else {
-                                                // In household flow, just return the data to parent
-                                                // The parent will handle saving when the final Save button is clicked
-                                                Navigator.of(
-                                                  context,
-                                                ).pop(memberData);
-                                                return;
+                                                bloc.add(AnmSubmit(context, hhid: widget.hhId, extraData: memberData));
                                               }
+                                              return; // Don't navigate yet, wait for success state
                                             } else {
                                               // In household flow, just return the data to parent
                                               // The parent will handle saving when the final Save button is clicked

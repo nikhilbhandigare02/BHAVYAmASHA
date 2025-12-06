@@ -288,21 +288,23 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
       final errors = <String>[];
       if (state.houseNo == null || state.houseNo!.trim().isEmpty)
-        errors.add('House no is required');
+        errors.add('Please enter house number');
       if (state.headName == null || state.headName!.trim().isEmpty)
-        errors.add('Head name is required');
+        errors.add('Please enter name of family head');
       if (state.mobileNo == null || state.mobileNo!.trim().length < 10)
-        errors.add('Valid mobile no is required');
+        errors.add('Please enter valid mobile number');
+      // if (state.mobileOwner == null || state.mobileOwner!.trim().length < 10)
+      //   errors.add('Please select whose mobile number');
       if (state.useDob) {
-        if (state.dob == null) errors.add('DOB required');
+        if (state.dob == null) errors.add('Please select date of birth');
       } else {
         if (state.approxAge == null || state.approxAge!.trim().isEmpty)
-          errors.add('Age required');
+          errors.add('please enter Age required');
       }
       if (state.gender == null || state.gender!.isEmpty)
-        errors.add('Gender required');
+        errors.add('Please select gender');
       if (state.maritalStatus == null || state.maritalStatus!.isEmpty) {
-        errors.add('Marital status required');
+        errors.add('Please select Marital status ');
       }
 
       // Pregnancy validations: only when Female + Married
@@ -310,10 +312,10 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       final isMarried = state.maritalStatus == 'Married';
       if (isFemale && isMarried) {
         if (state.isPregnant == null || state.isPregnant!.isEmpty) {
-          errors.add('Is women pregnant is required');
+          errors.add('Please enter is women pregnant ');
         } else if (state.isPregnant == 'Yes') {
-          if (state.lmp == null) errors.add('LMP is required');
-          if (state.edd == null) errors.add('EDD is required');
+          if (state.lmp == null) errors.add('Please enter LMP');
+          if (state.edd == null) errors.add('Please enter EDD is required');
         }
       }
 

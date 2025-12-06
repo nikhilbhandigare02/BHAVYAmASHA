@@ -472,7 +472,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               },
               value: state.gender,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateGender(v)),
-              validator: (v) => _captureError(v == null ? '${l.genderLabel} ${l.requiredField}' : null),
+              validator: (v) => _captureError(v == null ? 'Gender is required ' : null),
+
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),

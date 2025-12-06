@@ -35,7 +35,7 @@ class Validations {
     }
     return null;
   }
-  
+
   // Youngest child age validation used in Children details and Head submit.
   // rawAge is the numeric string, unit is one of l10n.days / l10n.months / l10n.years.
   static String? validateYoungestChildAge(AppLocalizations l10n, String? rawAge, String? unit) {
@@ -67,7 +67,7 @@ class Validations {
   }
   static String? validateHouseNo(AppLocalizations l10n, String? houseNo) {
     if (houseNo == null || houseNo.isEmpty) {
-      return 'House number is required';
+      return 'Please enter House number';
     }
 
     // Allow only letters, numbers, space, dash, and slash
@@ -109,7 +109,7 @@ class Validations {
 
   static String? validateDOB(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
-      return 'Date of birth is required';
+      return 'Please enter Date of birth';
     }
 
     final today = DateTime.now();
@@ -156,8 +156,8 @@ class Validations {
     const int maxDays = 30; // Using 30 as an average month length for validation
 
     // Check if all fields are empty
-    if ((years?.trim().isEmpty ?? true) && 
-        (months?.trim().isEmpty ?? true) && 
+    if ((years?.trim().isEmpty ?? true) &&
+        (months?.trim().isEmpty ?? true) &&
         (days?.trim().isEmpty ?? true)) {
       return 'Please enter age between 15 to 110 years';
     }
@@ -189,11 +189,11 @@ class Validations {
     if (totalYears < minAgeYears) {
       return 'Minimum age must be $minAgeYears years';
     }
-    
+
     if (totalYears > maxAgeYears) {
       return 'Maximum age is $maxAgeYears years';
     }
-    
+
     return null;
   }
 
@@ -223,7 +223,7 @@ class Validations {
   }
   static String? validateLMP(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
-      return 'LMP is required'; // or l10n.dobRequired
+      return 'Please enter LMP'; // or l10n.dobRequired
     }
 
 
@@ -232,14 +232,14 @@ class Validations {
   }
   static String? validateAntra(AppLocalizations l10n, String? antra) {
     if (antra == null || antra.trim().isEmpty || antra == 'Select') {
-      return 'Method of contraception is required';
+      return 'Please enter Method of contraception';
     }
 
     return null;
   }
   static String? validateEDD(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
-      return 'Expected Delivery Date is required';
+      return 'Please enter Expected Delivery Date ';
     }
 
 
@@ -248,7 +248,7 @@ class Validations {
   }
   static String? validateAdoptingPlan(AppLocalizations l10n, String? dob) {
     if (dob == null || dob.trim().isEmpty || dob == 'Select') {
-      return 'Are you/your partner adopting family planning is required';
+      return 'Please enter Are you/your partner adopting family planning';
     }
 
     return null; // ✅ valid
@@ -256,21 +256,21 @@ class Validations {
 
   static String? validateGender(AppLocalizations l10n, String? gender) {
     if (gender == null || gender.isEmpty) {
-      return 'Gender is required';
+      return 'Please enter Gender';
     }
 
     return null;
   }
   static String? validateWhoMobileNo(AppLocalizations l10n, String? mobileNo) {
     if (mobileNo == null || mobileNo.isEmpty) {
-      return 'Whose mobile is required';
+      return 'Please enter Whose mobile';
     }
 
     return null;
   }
   static String? validateMobileNo(AppLocalizations l10n, String? mobileNo) {
     if (mobileNo == null || mobileNo.isEmpty) {
-      return 'Mobile no. is required';
+      return 'Please enter Mobile no.';
     }
 
     final regex = RegExp(r'^[6-9]\d{9}$');
@@ -283,14 +283,14 @@ class Validations {
 
   static String? validateMaritalStatus(AppLocalizations l10n, String? maritalStatus) {
     if (maritalStatus == null || maritalStatus.isEmpty) {
-      return 'Marital Status is required';
+      return 'Please enter Marital Status';
     }
 
     return null;
   }
   static String? validateFamilyHead(AppLocalizations l10n, String? familyHead) {
     if (familyHead == null || familyHead.isEmpty) {
-      return 'Family Head is required';
+      return 'Please enter Family Head';
     }
 
     // Only letters and spaces allowed between words
@@ -304,7 +304,7 @@ class Validations {
 
   static String? validateFamilyHeadRelation(AppLocalizations l10n, String? familyHead) {
     if (familyHead == null || familyHead.isEmpty) {
-      return 'Relation with family head is required';
+      return 'Please Enter Relation with family head';
     }
 
 
@@ -314,28 +314,28 @@ class Validations {
 
   static String? validateSpousName(AppLocalizations l10n, String? spousName) {
     if (spousName == null || spousName.isEmpty) {
-      return 'FSpous Name is required';
+      return 'Please enter FSpous Name';
     }
 
     return null;
   }
   static String? validateIsPregnant(AppLocalizations l10n, String? isPregnant) {
     if (isPregnant == null || isPregnant.isEmpty) {
-      return 'Is Woman Pregnant is required';
+      return 'Please enter Is Woman Pregnant';
     }
 
     return null;
   }
   static String? validateRelationWithHead(AppLocalizations l10n, String? relation) {
     if (relation == null || relation.isEmpty) {
-      return 'Relation head is required';
+      return 'Please enter Relation head';
     }
 
     return null;
   }
   static String? validateNameofMember(AppLocalizations l10n, String? name) {
     if (name == null || name.isEmpty) {
-      return 'Name of Member is required';
+      return 'Please enter Name of Member';
     }
 
     return null;
@@ -343,7 +343,7 @@ class Validations {
 
   static String? validateMemberType(AppLocalizations l10n, String? memberType) {
     if (memberType == null || memberType.isEmpty) {
-      return 'Member type is required';
+      return 'Please enter Member type';
     }
     if (!['Adult', 'Child'].contains(memberType)) {
       return 'Invalid member type';
@@ -359,7 +359,7 @@ class Validations {
 
     // Remove any non-digit characters
     final digitsOnly = accountNumber.replaceAll(RegExp(r'[^0-9]'), '');
-    
+
     // If something is entered, it must be at least 10 digits
     if (digitsOnly.length < 10) {
       return 'Account number must be at least 10 digits';

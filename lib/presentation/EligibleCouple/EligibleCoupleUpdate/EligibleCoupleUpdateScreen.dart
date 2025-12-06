@@ -69,11 +69,8 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                     );
                   }
                   if (state.isSuccess) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(
-                          t?.profileUpdated ?? 'Updated successfully')),
-                    );
-                    // Add navigation back after a short delay to show the success message
+                    SnackBar(content: Text( 'Form updated successfully'));
+
                     Future.delayed(const Duration(milliseconds: 1500), () {
                       if (context.mounted) {
                         Navigator.of(context).pop(true); // Pass true to indicate success

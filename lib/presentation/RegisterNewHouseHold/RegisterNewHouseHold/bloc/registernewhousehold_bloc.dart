@@ -67,8 +67,8 @@ class RegisterNewHouseholdBloc
       data['#'] = '${updated.length + 1}';
       
       // Check if this is an unmarried member (not head or spouse)
-      final isUnmarried = data['marital_status']?.toLowerCase() == 'unmarried' ||
-                         data['maritalStatus']?.toLowerCase() == 'unmarried';
+      // final isUnmarried = data['marital_status']?.toLowerCase() == 'unmarried' ||
+      //                    data['maritalStatus']?.toLowerCase() == 'unmarried';
       final isHeadOrSpouse = data['relation']?.toLowerCase() == 'self' || 
                             data['relation']?.toLowerCase() == 'spouse';
       
@@ -85,7 +85,7 @@ class RegisterNewHouseholdBloc
         if (newRemainingChildrenCount > 0) {
           newRemainingChildrenCount--;
         }
-      } else if (isAdult && isUnmarried && !isHeadOrSpouse) {
+      } else if (isAdult  && !isHeadOrSpouse) {
         // For unmarried adults who are not head or spouse
         if (newUnmarriedCount > 0) {
           newUnmarriedCount--;
