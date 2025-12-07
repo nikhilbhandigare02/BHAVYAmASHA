@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
+import 'package:medixcel_new/core/config/routes/Routes.dart' as AppRoutes;
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 
@@ -43,7 +44,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with RouteAware {
   int selectedIndex = 0;
   int? selectedGridIndex;
 
@@ -177,6 +178,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _uiRefreshTimer?.cancel();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      AppRoutes.Routes.routeObserver.unsubscribe(this);
+    }
     super.dispose();
   }
   final ExistingAbhaCreatedRepository _repositoryABHA = ExistingAbhaCreatedRepository();
@@ -984,5 +989,27 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      AppRoutes.Routes.routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPopNext() {
+    _loadHouseholdCount();
+    _loadBeneficiariesCount();
+    _loadEligibleCouplesCount();
+    _loadPregnantWomenCount();
+    _loadAncVisitCount();
+    _loadChildRegisteredCount();
+    _loadHighRiskCount();
+    _loadNotificationCount();
+    _loadNcdCount();
   }
 }
