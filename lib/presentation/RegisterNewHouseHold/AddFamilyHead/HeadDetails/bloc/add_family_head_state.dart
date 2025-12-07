@@ -72,6 +72,14 @@ class AddFamilyHeadState extends Equatable {
   final String? spouseUniqueKey; // beneficiaries.unique_key for spouse (if any)
   final PostApiStatus postApiStatus;
   final String? errorMessage;
+  
+  // Family Planning Fields
+  final String? hpfamilyPlanningCounseling;
+  final String? hpMethod;
+  final DateTime? hpantraDate;
+  final DateTime? hpremovalDate;
+  final String? hpremovalReason;
+  final String? hpcondomQuantity;
 
 
   const AddFamilyHeadState({
@@ -142,7 +150,12 @@ class AddFamilyHeadState extends Equatable {
     this.spouseUniqueKey,
     this.postApiStatus = PostApiStatus.initial,
     this.errorMessage,
-
+    this.hpfamilyPlanningCounseling,
+    this.hpMethod,
+    this.hpantraDate,
+    this.hpremovalDate,
+    this.hpremovalReason,
+    this.hpcondomQuantity,
   });
 
   AddFamilyHeadState copyWith({
@@ -190,8 +203,8 @@ class AddFamilyHeadState extends Equatable {
     String? maritalStatus,
     String? ageAtMarriage,
     String? spouseName,
-    String? hasChildren,
     String? AfhRichIdChange,
+    String? hasChildren,
     String? isPregnant,
     bool? abhaVerified,
     bool? voterIdVerified,
@@ -213,6 +226,12 @@ class AddFamilyHeadState extends Equatable {
     String? spouseUniqueKey,
     PostApiStatus? postApiStatus,
     String? errorMessage,
+    String? hpfamilyPlanningCounseling,
+    String? hpMethod,
+    DateTime? hpantraDate,
+    DateTime? hpremovalDate,
+    String? hpremovalReason,
+    String? hpcondomQuantity,
     bool clearError = false,
   }) {
     return AddFamilyHeadState(
@@ -284,6 +303,12 @@ class AddFamilyHeadState extends Equatable {
       spouseUniqueKey: spouseUniqueKey ?? this.spouseUniqueKey,
       postApiStatus: postApiStatus ?? this.postApiStatus,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      hpfamilyPlanningCounseling: hpfamilyPlanningCounseling ?? this.hpfamilyPlanningCounseling,
+      hpMethod: hpMethod ?? this.hpMethod,
+      hpantraDate: hpantraDate ?? this.hpantraDate,
+      hpremovalDate: hpremovalDate ?? this.hpremovalDate,
+      hpremovalReason: hpremovalReason ?? this.hpremovalReason,
+      hpcondomQuantity: hpcondomQuantity ?? this.hpcondomQuantity,
     );
   }
 
@@ -356,6 +381,12 @@ class AddFamilyHeadState extends Equatable {
     spouseUniqueKey,
     postApiStatus,
     errorMessage,
+    hpfamilyPlanningCounseling,
+    hpMethod,
+    hpantraDate,
+    hpremovalDate,
+    hpremovalReason,
+    hpcondomQuantity,
   ];
 
   Map<String, dynamic> toJson() {
@@ -370,6 +401,9 @@ class AddFamilyHeadState extends Equatable {
       'edd': edd?.toIso8601String(),
       'lmp': lmp?.toIso8601String(),
       'approxAge': approxAge,
+      'years': years,
+      'months': months,
+      'days': days,
       'gender': gender,
       'occupation': occupation,
       'education': education,
@@ -383,12 +417,20 @@ class AddFamilyHeadState extends Equatable {
       'mobileNo': mobileNo,
       'village': village,
       'ward': ward,
+      'wardNo': wardNo,
       'mohalla': mohalla,
+      'mohallaTola': mohallaTola,
       'bankAcc': bankAcc,
+      'bankAccountNumber': bankAccountNumber,
       'ifsc': ifsc,
+      'ifscCode': ifscCode,
       'voterId': voterId,
       'rationId': rationId,
+      'rationCardId': rationCardId,
       'phId': phId,
+      'personalHealthId': personalHealthId,
+      'abhaNumber': abhaNumber,
+      'abhaAddress': abhaAddress,
       'beneficiaryType': beneficiaryType,
       'maritalStatus': maritalStatus,
       'ageAtMarriage': ageAtMarriage,
@@ -396,8 +438,30 @@ class AddFamilyHeadState extends Equatable {
       'AfhRichIdChange': AfhRichIdChange,
       'hasChildren': hasChildren,
       'isPregnant': isPregnant,
-      'postApiStatus': postApiStatus.toString(),
-      'errorMessage': errorMessage,
-    };
+      'abhaVerified': abhaVerified,
+      'voterIdVerified': voterIdVerified,
+      'rationCardVerified': rationCardVerified,
+      'bankAccountVerified': bankAccountVerified,
+      'isMigrantWorker': isMigrantWorker,
+      'migrantState': migrantState,
+      'migrantDistrict': migrantDistrict,
+      'migrantBlock': migrantBlock,
+      'migrantPanchayat': migrantPanchayat,
+      'migrantVillage': migrantVillage,
+      'migrantContactNo': migrantContactNo,
+      'migrantDuration': migrantDuration,
+      'migrantWorkType': migrantWorkType,
+      'migrantWorkPlace': migrantWorkPlace,
+      'migrantRemarks': migrantRemarks,
+      'householdRefKey': householdRefKey,
+      'headUniqueKey': headUniqueKey,
+      'spouseUniqueKey': spouseUniqueKey,
+      'hpfamilyPlanningCounseling': hpfamilyPlanningCounseling,
+      'hpMethod': hpMethod,
+      'hpantraDate': hpantraDate?.toIso8601String(),
+      'hpremovalDate': hpremovalDate?.toIso8601String(),
+      'hpremovalReason': hpremovalReason,
+      'hpcondomQuantity': hpcondomQuantity,
+    }..removeWhere((key, value) => value == null || (value is String && value.trim().isEmpty));
   }
 }

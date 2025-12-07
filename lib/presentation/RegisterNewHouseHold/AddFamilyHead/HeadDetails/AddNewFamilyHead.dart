@@ -1124,10 +1124,111 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-              ] else if (state.isPregnant == 'No') ...[
+              ] else
+                if (state.isPregnant == 'No') ...[
+                  _Section(
+                    child: ApiDropdown<String>(
+                      labelText: 'Are you/your partner adopting family planning? *',
+                      items: const ['Yes', 'No'],
+                      getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                      value: state.hpfamilyPlanningCounseling,
+                      onChanged: (v) {
+                        context.read<AddFamilyHeadBloc>().add(HeadFamilyPlanningCounselingChanged(v!));
+                      },
+                      validator: (value) => _captureError(Validations.validateAdoptingPlan(l, value,)),
+                    ),
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
-                Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-              ],
+                  if (state.hpfamilyPlanningCounseling == 'Yes') ...[
+                    _Section(
+                      child: ApiDropdown<String>(
+                        labelText: '${l.methodOfContra} *',
+                        items: const [
+                          'Condom',
+                          'Mala -N (Daily Contraceptive pill)',
+                          'Antra injection',
+                          'Copper -T (IUCD)',
+                          'Chhaya (Weekly Contraceptive pill)',
+                          'ECP (Emergency Contraceptive pill)',
+                          'Male Sterilization',
+                          'Female Sterilization',
+                          'Any Other Specify'
+                        ],
+                        getLabel: (s) => s,
+                        value: state.hpMethod,
+                        onChanged: (v) {
+                          if (v != null) {
+                            context.read<AddFamilyHeadBloc>().add(hpMethodChanged(v));
+                          }
+                        },
+                        validator: (value) => _captureError(Validations.validateAntra(l, value, )),
+                      ),
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
+                    if (state.hpMethod == 'Antra injection') ...[
+                      _Section(
+                        child: CustomDatePicker(
+                          labelText: 'Date of Antra',
+                          initialDate: state.hpantraDate,
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime(2100),
+                          onDateChanged: (date) {
+                            if (date != null) {
+                              context.read<AddFamilyHeadBloc>().add(hpDateofAntraChanged(date));
+                            }
+                          },
+                        ),
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                    ],
+
+                    if (state.hpMethod == 'Copper -T (IUCD)') ...[
+                      _Section(
+                        child: CustomDatePicker(
+                          labelText: 'Removal Date',
+                          initialDate: state.hpremovalDate,
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime(2100),
+                          onDateChanged: (date) {
+                            if (date != null) {
+                              context.read<AddFamilyHeadBloc>().add(hpRemovalDateChanged(date));
+                            }
+                          },
+                        ),
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
+                      _Section(
+                        child: CustomTextField(
+                          labelText: 'Reason for Removal',
+                          hintText: 'Enter reason for removal',
+                          initialValue: state.hpremovalReason,
+                          onChanged: (value) {
+                            context.read<AddFamilyHeadBloc>().add(hpRemovalReasonChanged(value ?? ''));
+                          },
+                        ),
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                    ],
+
+                    if (state.hpMethod == 'Condom') ...[
+                      _Section(
+                        child: CustomTextField(
+                          labelText: 'Quantity of Condoms',
+                          hintText: 'Enter quantity',
+                          keyboardType: TextInputType.number,
+                          initialValue: state.hpcondomQuantity,
+                          onChanged: (value) {
+                            context.read<AddFamilyHeadBloc>().add(hpCondomQuantityChanged(value ?? ''));
+                          },
+                        ),
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                    ],
+                  ],
+                ],
             ],
           ],
 
@@ -1229,6 +1330,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   householdRefKey: m['hh_unique_key'],
                   headUniqueKey: m['head_unique_key'],
                   spouseUniqueKey: m['spouse_unique_key'],
+                  hpfamilyPlanningCounseling: m['hpfamilyPlanningCounseling'],
+                  hpMethod: m['hpMethod'],
+                  hpantraDate: _parseDate(m['hpantraDate'] as String?),
+                  hpremovalDate: _parseDate(m['hpremovalDate'] as String?),
+                  hpremovalReason: m['hpremovalReason'],
+                  hpcondomQuantity: m['hpcondomQuantity'],
                 ),
               ),
             );
@@ -1463,8 +1570,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               try {
                 final ch = context.read<ChildrenBloc>().state;
                 result['childrendetails'] = ch.toJson();
-                // Also flatten children summary fields into the head form so
-                // they are persisted in DB and available for future prefill.
+
                 result['totalBorn'] = ch.totalBorn.toString();
                 result['totalLive'] = ch.totalLive.toString();
                 result['totalMale'] = ch.totalMale.toString();

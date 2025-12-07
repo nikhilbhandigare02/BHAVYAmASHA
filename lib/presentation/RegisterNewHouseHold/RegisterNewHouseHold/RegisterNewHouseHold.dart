@@ -51,7 +51,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int totalMembers = 0;
-  int remainingMembers = 0; // Counter for remaining members to be added
   bool headAdded = false;
   final List<Map<String, String>> _members = [];
   Map<String, dynamic>? _headForm;
@@ -75,8 +74,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       _members.addAll(widget.initialMembers!
           .map((m) => Map<String, String>.from(m)));
       totalMembers = _members.length;
-      // Initialize remainingMembers with the initial count
-      remainingMembers = totalMembers;
     }
 
     // When coming from an edit flow (AllHouseHold or Today's Programme),
@@ -577,10 +574,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             }
           } catch (_) {}
 
-          // Initialize totalMembers with 1 for the head
-          totalMembers = 1;
-          // Initialize remainingMembers with the total count (e.g., 6) minus 1 for the head
-          remainingMembers = 5; // Assuming initial count is 6 (5 remaining after head)
+          // Initialize totalMembers count
+          totalMembers = 1; // Start with 1 for the head
 
           final bool useDob = (result['useDob'] == true);
           final String? dobIso = result['dob'] as String?;
@@ -651,11 +646,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               'Spouse': name,
               'Total Children': totalChildren,
             });
-            // Add spouse to total count and decrease remaining
-            totalMembers = totalMembers + 1;
-            if (remainingMembers > 0) {
-              remainingMembers = remainingMembers - 1;
-            }
+            // Increment totalMembers for spouse
+            totalMembers++;
           }
         });
       }
@@ -715,10 +707,10 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         setState(() {
           _memberForms.add(Map<String, dynamic>.from(result));
           final int formIndex = _memberForms.length - 1;
-          // Increment total members count and decrease remaining
-          totalMembers = totalMembers + 1;
-          if (remainingMembers > 0) {
-            remainingMembers = remainingMembers - 1;
+          // Only increment total members if it's a new member (not head or spouse)
+          // The count will be decreased when adding a new member with a relation to head
+          if (result['relation'] != 'Self' && result['relation'] != 'Spouse') {
+            totalMembers++;
           }
           final String type = (result['memberType'] ?? 'Adult').toString();
           final String name = (result['name'] ?? '').toString();
@@ -868,9 +860,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           final int childrenTarget = headChildren + memberChildren;
 
           final int childrenAdded = _members.where((m) {
-            final t = (m['Type'] ?? '');
-            final r = (m['Relation'] ?? '');
-            return t ==  'Child' || t == 'Infant' || r == 'Son' || r == 'Daughter';
+            final t = (m['Type'] ?? '').toString();
+            final r = (m['Relation'] ?? '').toString();
+            // Only count children/infants and relations that should be counted
+            return t == 'Child' || t == 'Infant' || 
+                   ['Son', 'Daughter', 'Brother', 'Sister', 'Nephew', 'Niece', 
+                    'Grand Son', 'Grand Daughter', 'Son In Law', 'Daughter In Law',
+                    'Other'].contains(r);
           }).length;
 
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);

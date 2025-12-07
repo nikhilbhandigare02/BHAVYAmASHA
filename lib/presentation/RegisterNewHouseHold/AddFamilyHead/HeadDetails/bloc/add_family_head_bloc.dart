@@ -89,6 +89,31 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
   }
 
   AddFamilyHeadBloc() : super(AddFamilyHeadState()) {
+    // Family Planning Event Handlers
+    on<HeadFamilyPlanningCounselingChanged>((event, emit) {
+      emit(state.copyWith(hpfamilyPlanningCounseling: event.value));
+    });
+
+    on<hpMethodChanged>((event, emit) {
+      emit(state.copyWith(hpMethod: event.value));
+    });
+
+    on<hpDateofAntraChanged>((event, emit) {
+      emit(state.copyWith(hpantraDate: event.value));
+    });
+
+    on<hpRemovalDateChanged>((event, emit) {
+      emit(state.copyWith(hpremovalDate: event.value));
+    });
+
+    on<hpRemovalReasonChanged>((event, emit) {
+      emit(state.copyWith(hpremovalReason: event.value));
+    });
+
+    on<hpCondomQuantityChanged>((event, emit) {
+      emit(state.copyWith(hpcondomQuantity: event.value));
+    });
+
     on<AfhHydrate>((event, emit) => emit(event.value));
     on<AfhToggleUseDob>((event, emit) {
       emit(state.copyWith(useDob: !state.useDob));

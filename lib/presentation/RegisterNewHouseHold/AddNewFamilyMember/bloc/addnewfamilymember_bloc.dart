@@ -267,22 +267,59 @@ class AddnewfamilymemberBloc
         final rawMobileOwnerRelation = allData['mobileOwnerRelation'] as String?;
         
         // Check if the field is 'Other' in the database
-        final isReligionOther = rawReligion == 'Other';
-        final isCategoryOther = rawCategory == 'Other';
-        final isOccupationOther = rawOccupation == 'Other';
-        final isRelationOther = rawMobileOwnerRelation == 'Other';
+        // final isReligionOther = rawReligion == 'Other';
+        // final isCategoryOther = rawCategory == 'Other';
+        // final isOccupationOther = rawOccupation == 'Other';
+        // final isRelationOther = rawMobileOwnerRelation == 'Other';
+
         
-        // Get the 'other' values from the database fields with underscore naming
-        final otherReligionValue = allData['other_religion'] as String?;
-        final otherCategoryValue = allData['other_category'] as String?;
-        final otherOccupationValue = allData['other_occupation'] as String?;
-        final otherRelationValue = allData['other_relation'] as String?;
+        // Variables to store the processed values
+        String? religionValue = rawReligion;
+        String? otherReligionValue;
+        String? categoryValue = rawCategory;
+        String? otherCategoryValue;
+        String? occupationValue = rawOccupation;
+        String? otherOccupationValue;
+        String? mobileOwnerRelationValue = rawMobileOwnerRelation;
+        String? otherRelationValue;
         
-        // Debug log to see what values we're getting from the database
-        print('Religion: $rawReligion, Other: $otherReligionValue');
-        print('Category: $rawCategory, Other: $otherCategoryValue');
-        print('Occupation: $rawOccupation, Other: $otherOccupationValue');
-        print('Relation: $rawMobileOwnerRelation, Other: $otherRelationValue');
+        // Process religion field
+        if (rawReligion != null && rawReligion.endsWith('_other')) {
+          religionValue = 'Other';
+          otherReligionValue = rawReligion.replaceAll('_other', '');
+        } else {
+          otherReligionValue = allData['other_religion'] as String?;
+        }
+        
+        // Process category field
+        if (rawCategory != null && rawCategory.endsWith('_other')) {
+          categoryValue = 'Other';
+          otherCategoryValue = rawCategory.replaceAll('_other', '');
+        } else {
+          otherCategoryValue = allData['other_category'] as String?;
+        }
+        
+        // Process occupation field
+        if (rawOccupation != null && rawOccupation.endsWith('_other')) {
+          occupationValue = 'Other';
+          otherOccupationValue = rawOccupation.replaceAll('_other', '');
+        } else {
+          otherOccupationValue = allData['other_occupation'] as String?;
+        }
+        
+        // Process mobile owner relation field
+        if (rawMobileOwnerRelation != null && rawMobileOwnerRelation.endsWith('_other')) {
+          mobileOwnerRelationValue = 'Other';
+          otherRelationValue = rawMobileOwnerRelation.replaceAll('_other', '');
+        } else {
+          otherRelationValue = allData['other_relation'] as String?;
+        }
+        
+        // // Debug log to see what values we're getting from the database
+        // print('Religion: $religionValue, Other: $otherReligionValue');
+        // print('Category: $categoryValue, Other: $otherCategoryValue');
+        // print('Occupation: $occupationValue, Other: $otherOccupationValue');
+        // print('Relation: $mobileOwnerRelationValue, Other: $otherRelationValue');
         
         // Update the state with all the data
         emit(state.copyWith(
@@ -302,17 +339,17 @@ class AddnewfamilymemberBloc
           bankAcc: allData['bankAcc'] as String?,
           ifsc: allData['ifsc'] as String?,
           // Handle occupation and other occupation
-          occupation: rawOccupation,
+          occupation: occupationValue,
           otherOccupation: otherOccupationValue,
           
           education: allData['education'] as String?,
           
           // Handle religion and other religion
-          religion: rawReligion,
+          religion: religionValue,
           otherReligion: otherReligionValue,
           
           // Handle category and other category
-          category: rawCategory,
+          category: categoryValue,
           otherCategory: otherCategoryValue,
           
           abhaAddress: allData['abhaAddress'] as String?,
@@ -1736,6 +1773,11 @@ class AddnewfamilymemberBloc
           ..['abhaAddress'] = state.abhaAddress
           ..['mobileOwner'] = state.mobileOwner
           ..['mobileOwnerRelation'] = state.mobileOwnerRelation == 'Other' && state.otherRelation != null && state.otherRelation!.isNotEmpty ? '${state.otherRelation}_other' : state.mobileOwnerRelation
+          // Add other_* fields for proper prefill
+          ..['other_religion'] = state.religion == 'Other' ? state.otherReligion : null
+          ..['other_category'] = state.category == 'Other' ? state.otherCategory : null
+          ..['other_occupation'] = state.occupation == 'Other' ? state.otherOccupation : null
+          ..['other_relation'] = state.mobileOwnerRelation == 'Other' ? state.otherRelation : null
           ..['mobileNo'] = state.mobileNo
           ..['voterId'] = state.voterId
           ..['rationId'] = state.rationId
