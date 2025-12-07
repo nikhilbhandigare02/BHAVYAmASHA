@@ -385,9 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadBeneficiariesCount() async {
     try {
-      // Use the same source as AllBeneficiaryScreen so the
-      // dashboard count matches what the user actually sees.
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries(isMigrated: 0);
       final count = rows.length;
       if (mounted) {
         setState(() {
@@ -396,10 +394,9 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       print('Error loading beneficiaries count: $e');
-      // In case of error, show the count of rows as fallback
       if (mounted) {
         setState(() {
-          beneficiariesCount = 0; // Reset to 0 to avoid showing incorrect count
+          beneficiariesCount = 0;
         });
       }
     }
@@ -886,7 +883,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(width: 1, height: 50, color: AppColors.divider),
                     Expanded(
                       child: InkWell(
-                        onTap: () => setState(() => selectedIndex = 1),
+                        onTap: () async {
+                          setState(() => selectedIndex = 1);
+                          await _loadBeneficiariesCount();
+                        },
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
