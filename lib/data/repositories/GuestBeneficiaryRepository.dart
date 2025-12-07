@@ -140,15 +140,42 @@ class GuestBeneficiaryRepository {
           if (existing == null || existing.isEmpty) {
             await LocalStorageDao.instance.insertBeneficiary(benRow);
             benInserted++;
+            try {
+              await LocalStorageDao.instance.updateBeneficiaryParentUserByUniqueKey(
+                uniqueKey: uniqueKey,
+                parentUser: Map<String, dynamic>.from(benRow['parent_user'] as Map),
+              );
+            } catch (e) {
+              print('Error enforcing parent_user after insert: $e');
+            }
           } else {
             final updated = Map<String, dynamic>.from(existing)..addAll(benRow);
             updated['id'] = existing['id'];
             await LocalStorageDao.instance.updateBeneficiary(updated);
             benUpdated++;
+            try {
+              await LocalStorageDao.instance.updateBeneficiaryParentUserByUniqueKey(
+                uniqueKey: uniqueKey,
+                parentUser: Map<String, dynamic>.from(benRow['parent_user'] as Map),
+              );
+            } catch (e) {
+              print('Error enforcing parent_user after update: $e');
+            }
           }
         } else {
           await LocalStorageDao.instance.insertBeneficiary(benRow);
           benInserted++;
+          try {
+            final uk = benRow['unique_key']?.toString() ?? '';
+            if (uk.isNotEmpty) {
+              await LocalStorageDao.instance.updateBeneficiaryParentUserByUniqueKey(
+                uniqueKey: uk,
+                parentUser: Map<String, dynamic>.from(benRow['parent_user'] as Map),
+              );
+            }
+          } catch (e) {
+            print('Error enforcing parent_user after insert (no uniqueKey in rec): $e');
+          }
         }
 
         if (householdDetails != null && householdDetails.isNotEmpty) {

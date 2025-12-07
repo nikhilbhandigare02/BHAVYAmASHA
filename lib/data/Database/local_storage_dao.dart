@@ -570,6 +570,26 @@ class LocalStorageDao {
     }
   }
 
+  Future<int> updateBeneficiaryParentUserByUniqueKey({required String uniqueKey, required Map<String, dynamic> parentUser}) async {
+    try {
+      final db = await _db;
+      final changes = await db.update(
+        'beneficiaries_new',
+        {
+          'parent_user': jsonEncode(parentUser),
+          'modified_date_time': DateTime.now().toIso8601String(),
+          'is_synced': 0,
+        },
+        where: 'unique_key = ?',
+        whereArgs: [uniqueKey],
+      );
+      return changes;
+    } catch (e) {
+      print('Error updating beneficiary parent_user by unique_key: $e');
+      rethrow;
+    }
+  }
+
   dynamic _encodeIfObject(dynamic v) {
     if (v == null) return null;
     if (v is Map || v is List) return jsonEncode(v);
@@ -754,7 +774,9 @@ class LocalStorageDao {
       'is_separated': data['is_separated'] ?? 0,
       'device_details': _encodeIfObject(data['device_details']),
       'app_details': _encodeIfObject(data['app_details']),
-      'parent_user': _encodeIfObject(data['parent_user']),
+      'parent_user': data['parent_user'] is String
+          ? data['parent_user']
+          : jsonEncode(data['parent_user'] ?? {}),
       'current_user_key': data['current_user_key'],
       'facility_id': data['facility_id'],
       'created_date_time': data['created_date_time'],
@@ -1335,9 +1357,7 @@ class LocalStorageDao {
       if (row['app_details'] is Map) {
         row['app_details'] = jsonEncode(row['app_details']);
       }
-      if (row['parent_user'] is Map) {
-        row['parent_user'] = jsonEncode(row['parent_user']);
-      }
+
 
       row['modified_date_time'] = DateTime.now().toIso8601String();
       // Any local update should mark record as needing re-sync
