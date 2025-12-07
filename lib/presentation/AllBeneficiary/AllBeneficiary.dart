@@ -132,6 +132,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           'SpouseName': '',
           'SpouseGender': '',
           'Relation': relation,
+          'is_synced': row['is_synced'] ?? 1, // Default to 1 (synced) if not set
         });
       }
     } catch (e) {
@@ -456,6 +457,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                           'assets/images/sync.png',
                           width: 25,
                           height: 25,
+                          color: (data['is_synced'] == 1) ? null : Colors.grey,
+                          colorBlendMode: (data['is_synced'] == 1) ? null : BlendMode.saturation,
                           fit: BoxFit.cover,
                         ),
                       ),
