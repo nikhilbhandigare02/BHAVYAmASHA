@@ -1916,6 +1916,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               items: motherItems,
                                               getLabel: (s) => s,
                                               value: _motherOption,
+                                              validator: (value) {
+                                                if (_motherOption == 'Select' ||
+                                                    _motherOption.isEmpty) {
+                                                  return 'Please select or enter ${l.motherNameLabel.toLowerCase()}';
+                                                }
+                                                return null;
+                                              },
                                               onChanged: (v) {
                                                 if (v == null) return;
                                                 setState(() {
@@ -1938,9 +1945,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                       .add(
                                                         AnmUpdateMotherName(''),
                                                       );
+
+
                                                 }
+                                                if (_formKey.currentState !=
+                                                    null) {
+                                                  _formKey.currentState!
+                                                      .validate();
+                                                }
+
                                               },
                                             );
+
                                           },
                                         ),
                                         // Divider(
@@ -1970,6 +1986,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     v.trim(),
                                                   ),
                                                 ),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.trim().isEmpty) {
+                                                return 'Please enter ${l.motherNameLabel.toLowerCase()}';
+                                              }
+                                              return null;
+                                            },
+
                                           ),
                                           Divider(
                                             color: AppColors.divider,
@@ -2099,6 +2123,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     items: motherItems,
                                                     getLabel: (s) => s,
                                                     value: _motherOption,
+                                                    validator: (value) {
+                                                      if (_motherOption == 'Select' || _motherOption.isEmpty) {
+                                                        return 'Please select or enter ${l.motherNameLabel.toLowerCase()}';
+                                                      }
+                                                      return null;
+                                                    },
                                                     onChanged: (v) {
                                                       if (v == null) return;
                                                       setState(() {
@@ -2122,6 +2152,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                           AnmUpdateMotherName(''),
                                                         );
                                                       }
+                                                      if (_formKey.currentState != null) {
+                                                        _formKey.currentState!.validate();
+                                                      }
                                                     },
                                                   );
                                                 },
@@ -2144,15 +2177,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   hintText: l.motherNameLabel,
                                                   initialValue:
                                                   state.motherName ?? '',
-                                                  onChanged: (v) => context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateMotherName(
-                                                      v.trim(),
-                                                    ),
-                                                  ),
+                                                  onChanged: (v) {
+                                                    final name = v.trim();
+                                                    context
+                                                        .read<AddnewfamilymemberBloc>()
+                                                        .add(AnmUpdateMotherName(name));
+                                                    if (_formKey.currentState != null) {
+                                                      _formKey.currentState!.validate();
+                                                    }
+                                                  },
+                                                  validator: (value) {
+                                                    if (_motherOption == 'Other' && (value == null || value.trim().isEmpty)) {
+                                                      return 'Please enter ${l.motherNameLabel.toLowerCase()}';
+                                                    }
+                                                    return null;
+                                                  },
                                                 ),
                                                 Divider(
                                                   color: AppColors.divider,
