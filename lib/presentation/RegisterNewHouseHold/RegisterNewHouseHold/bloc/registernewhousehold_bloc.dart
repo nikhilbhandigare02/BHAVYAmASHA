@@ -1189,6 +1189,66 @@ class RegisterNewHouseholdBloc
                 await LocalStorageDao.instance
                     .insertBeneficiary(memberPayload);
 
+                int age = 0;
+                if (member['dob'] != null) {
+                  try {
+                    final dob = DateTime.parse(member['dob']);
+                    final now = DateTime.now();
+                    age = now.year - dob.year;
+                    if (now.month < dob.month ||
+                        (now.month == dob.month && now.day < dob.day)) {
+                      age--;
+                    }
+                  } catch (e) {
+                    print('Error parsing DOB: $e');
+                  }
+                }
+
+                final isEligibleForCouple =
+                    maritalStatus == 'Married' && age >= 15 && age <= 49;
+
+                if (isEligibleForCouple) {
+                  try {
+                    final db = await DatabaseProvider.instance.database;
+                    final eligibleCoupleActivityData = {
+                      'server_id': '',
+                      'household_ref_key': uniqueKey,
+                      'beneficiary_ref_key': memberId,
+                      'eligible_couple_state': 'eligible_couple',
+                      'device_details': jsonEncode({
+                        'id': deviceInfo.deviceId,
+                        'platform': deviceInfo.platform,
+                        'version': deviceInfo.osVersion,
+                      }),
+                      'app_details': jsonEncode({
+                        'app_version': deviceInfo.appVersion.split('+').first,
+                        'form_data': {
+                          'created_at': DateTime.now().toIso8601String(),
+                          'updated_at': DateTime.now().toIso8601String(),
+                        },
+                      }),
+                      'parent_user': '',
+                      'current_user_key': ashaUniqueKey,
+                      'facility_id': facilityId,
+                      'created_date_time': ts,
+                      'modified_date_time': ts,
+                      'is_synced': 0,
+                      'is_deleted': 0,
+                    };
+
+                    print('Inserting eligible couple activity for head: $headId');
+                    await db.insert(
+                      'eligible_couple_activities',
+                      eligibleCoupleActivityData,
+                      conflictAlgorithm: ConflictAlgorithm.replace,
+                    );
+                  } catch (e) {
+                    print(
+                      'Error inserting eligible couple activity for head: $e',
+                    );
+                  }
+                }
+
                 // If this is a female member who is pregnant, insert into mother_care_activities
                 final isFemale = (member['gender']?.toString().toLowerCase() == 'female');
                 final isPregnant = (member['isPregnant']?.toString().toLowerCase() == 'yes' ||
@@ -1233,41 +1293,8 @@ class RegisterNewHouseholdBloc
                 // final isPregnant = (member['isPregnant']?.toString().toLowerCase() == 'yes' ||
                 //                   member['isPregnant']?.toString().toLowerCase() == 'true');
                 //
-                if (isFemale && isPregnant) {
-                  try {
-                    final motherCareActivityData = {
-                      'server_id': null,
-                      'household_ref_key': uniqueKey,
-                      'beneficiary_ref_key': memberId,
-                      'mother_care_state': 'anc_due',
-                      'device_details': jsonEncode({
-                        'id': deviceInfo.deviceId,
-                        'platform': deviceInfo.platform,
-                        'version': deviceInfo.osVersion,
-                      }),
-                      'app_details': jsonEncode({
-                        'app_version': deviceInfo.appVersion.split('+').first,
-                        'app_name': deviceInfo.appName,
-                        'build_number': deviceInfo.buildNumber,
-                        'package_name': deviceInfo.packageName,
-                      }),
-                      'parent_user': jsonEncode({}),
-                      'current_user_key': ashaUniqueKey,
-                      'facility_id': facilityId,
-                      'created_date_time': ts,
-                      'modified_date_time': ts,
-                      'is_synced': 0,
-                      'is_deleted': 0,
-                    };
 
-                    print('Inserting mother care activity for pregnant woman: ${jsonEncode(motherCareActivityData)}');
-                    await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
-                  } catch (e) {
-                    print('Error inserting mother care activity: $e');
-                  }
-                }
 
-                // If this is a child with registration_due status, insert into child_care_activities
                 if (memberType.toLowerCase() == 'child' && beneficiaryState == 'registration_due') {
                   try {
                     final childCareActivityData = {
@@ -1427,6 +1454,9 @@ class RegisterNewHouseholdBloc
                                 '${jsonEncode(spousePayload)}');
                         await LocalStorageDao.instance
                             .insertBeneficiary(spousePayload);
+
+
+
                       }
                     }
                   } catch (e) {

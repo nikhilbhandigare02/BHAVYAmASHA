@@ -1,135 +1,117 @@
+// In MotherCareApiHelper.dart
 import 'dart:convert';
-
 import 'package:medixcel_new/data/Database/database_provider.dart';
-import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Database/tables/mother_care_activities_table.dart';
+import 'package:medixcel_new/data/Database/User_Info.dart';
 import 'package:medixcel_new/data/repositories/MotherCareRepository/MotherCareRepository.dart';
+
+import '../../Database/local_storage_dao.dart';
 
 class MotherCareApiHelper {
   final MotherCareRepository _repo = MotherCareRepository();
+  final LocalStorageDao _dao = LocalStorageDao.instance;
 
 
-  Future<void> syncAncByFollowupFormId(int formId) async {
-    final db = await DatabaseProvider.instance.database;
-    final rows = await db.query(
-      FollowupFormDataTable.table,
-      where: 'id = ?',
-      whereArgs: [formId],
-      limit: 1,
-    );
-
-    if (rows.isEmpty) return;
-
-    final saved = Map<String, dynamic>.from(rows.first);
-
-    Map<String, dynamic> deviceJson = {};
-    Map<String, dynamic> appJson = {};
-    Map<String, dynamic> geoJson = {};
-    Map<String, dynamic> formRoot = {};
-    Map<String, dynamic> formDataJson = {};
-
+  Future<void> syncMotherCareActivities() async {
     try {
-      if (saved['device_details'] is String && (saved['device_details'] as String).isNotEmpty) {
-        deviceJson = Map<String, dynamic>.from(jsonDecode(saved['device_details']));
+      // Get current user info
+      final currentUser = await UserInfo.getCurrentUser();
+      if (currentUser == null) {
+        print('MC Sync: No current user found');
+        return;
       }
-    } catch (_) {}
 
-    try {
-      if (saved['app_details'] is String && (saved['app_details'] as String).isNotEmpty) {
-        appJson = Map<String, dynamic>.from(jsonDecode(saved['app_details']));
+      // Get user details
+      final userDetails = currentUser['details'] is String
+          ? jsonDecode(currentUser['details'] as String)
+          : currentUser['details'] ?? {};
+
+      final userId = userDetails['unique_key']?.toString() ?? '';
+      final facilityId = userDetails['working_location']?['facility_id']?.toString() ??
+          userDetails['facility_id']?.toString() ?? '';
+      final appRoleId = int.tryParse(userDetails['app_role_id']?.toString() ?? '1') ?? 1;
+
+      if (userId.isEmpty || facilityId.isEmpty) {
+        print('MC Sync: Missing required user details (user_id or facility_id)');
+        return;
       }
-    } catch (_) {}
 
-    try {
-      if (saved['form_json'] is String && (saved['form_json'] as String).isNotEmpty) {
-        final fj = jsonDecode(saved['form_json']);
-        if (fj is Map) {
-          formRoot = Map<String, dynamic>.from(fj);
-          if (fj['form_data'] is Map) {
-            formDataJson = Map<String, dynamic>.from(fj['form_data']);
+      final unsyncedActivities = await _dao.getUnsyncedMotherCareActivities();
+      if (unsyncedActivities.isEmpty) {
+        print('MC Sync: No unsynced activities found');
+        return;
+      }
+
+      print('MC Sync: Found ${unsyncedActivities.length} unsynced activities');
+
+      // Process each activity
+      for (final activity in unsyncedActivities) {
+        try {
+          final deviceDetails = activity['device_details'] is String
+              ? jsonDecode(activity['device_details'] as String)
+              : activity['device_details'] ?? {};
+
+          final appDetails = activity['app_details'] is String
+              ? jsonDecode(activity['app_details'] as String)
+              : activity['app_details'] ?? {};
+
+          final geoLocation = activity['geo_location'] is Map
+              ? Map<String, dynamic>.from(activity['geo_location'] as Map)
+              : <String, dynamic>{};
+
+          // Build payload according to the provided structure
+          final payload = {
+            "unique_key": activity['household_ref_key'] ?? '',
+            "beneficiaries_registration_ref_key": activity['beneficiary_ref_key'] ?? '',
+            "mother_care_type": activity['mother_care_state'] ?? 'anc_due',
+            "user_id": activity['current_user_key'],
+            "facility_id": activity['facility_id'],
+            "is_deleted": 0,
+            "created_by": activity['current_user_key'],
+            "created_date_time": activity['created_date_time'] ?? DateTime.now().toIso8601String(),
+            "modified_by": activity['current_user_key'],
+            "modified_date_time": DateTime.now().toIso8601String(),
+            "parent_added_by": '0',
+            "parent_facility_id": '0',
+            "app_role_id": appRoleId,
+            "is_guest": 0,
+            "pregnancy_count": activity['pregnancy_count'] ?? 1,
+            "device_details": {
+              'device_id': deviceDetails['deviceId'] ?? deviceDetails['device_id'] ?? '',
+              'device_plateform': deviceDetails['platform'] ?? deviceDetails['device_plateform'] ?? 'Android',
+              'device_plateform_version': deviceDetails['version'] ?? deviceDetails['device_plateform_version'] ?? '',
+            },
+            "app_details": {
+              "app_version": appDetails['app_version'] ?? '1.0.0',
+              "app_name": appDetails['app_name'] ?? 'BHAVYA mASHA Training',
+            },
+            'geolocation_details': {
+              'latitude': (geoLocation['latitude'] ?? '').toString(),
+              'longitude': (geoLocation['longitude'] ?? '').toString(),
+            },
+          };
+
+          print('MC Sync: Sending payload: ${jsonEncode(payload)}');
+          final response = await _repo.addMotherCareActivity([payload]);
+
+          if (response is Map && response['success'] == true) {
+            final id = activity['id'] as int?;
+            if (id != null) {
+              await _dao.markMotherCareActivitySyncedById(id);
+              print('MC Sync: Successfully synced activity $id');
+            }
+          } else {
+            print('MC Sync: API call failed for activity ${activity['id']}: $response');
           }
-          if (fj['geolocation_details'] is Map) {
-            geoJson = Map<String, dynamic>.from(fj['geolocation_details']);
-          } else if (formDataJson['geolocation_details'] is Map) {
-            geoJson = Map<String, dynamic>.from(formDataJson['geolocation_details']);
-          }
+        } catch (e, stackTrace) {
+          print('MC Sync: Error processing activity ${activity['id']}: $e');
+          print('Stack trace: $stackTrace');
         }
       }
-    } catch (_) {}
-
-    final String userId = (saved['current_user_key'] ?? formRoot['user_id'] ?? formDataJson['user_id'] ?? '').toString();
-    final String facility = (saved['facility_id']?.toString() ?? formRoot['facility_id']?.toString() ?? formDataJson['facility_id']?.toString() ?? '');
-    final String appRoleId = (formRoot['app_role_id'] ?? formDataJson['app_role_id'] ?? '').toString();
-    final String createdAt = (saved['created_date_time'] ?? formRoot['created_date_time'] ?? formDataJson['created_date_time'] ?? '').toString();
-    final String modifiedAt = (saved['modified_date_time'] ?? formRoot['modified_date_time'] ?? formDataJson['modified_date_time'] ?? '').toString();
-
-    final dbHouseholdRefKey = (saved['household_ref_key'] ?? '').toString();
-    final dbBeneficiaryRefKey = (saved['beneficiary_ref_key'] ?? '').toString();
-
-    if (dbHouseholdRefKey.isEmpty || dbBeneficiaryRefKey.isEmpty) {
-      return;
-    }
-
-    final motherCarePayload = [
-      {
-        'unique_key': dbHouseholdRefKey,
-        'beneficiaries_registration_ref_key': dbBeneficiaryRefKey,
-        'mother_care_type': 'anc_due',
-        'user_id': userId,
-        'facility_id': facility,
-        'is_deleted': 0,
-        'created_by': userId,
-        'created_date_time': createdAt,
-        'modified_by': userId,
-        'modified_date_time': modifiedAt,
-        'parent_added_by': userId,
-        'parent_facility_id': int.tryParse(facility) ?? facility,
-        'app_role_id': appRoleId,
-        'is_guest': 0,
-        'pregnancy_count': 1,
-        'device_details': {
-          'device_id': deviceJson['id'] ?? deviceJson['device_id'],
-          'device_plateform': deviceJson['platform'] ?? deviceJson['device_plateform'],
-          'device_plateform_version': deviceJson['version'] ?? deviceJson['device_plateform_version'],
-        },
-        'app_details': {
-          'app_version': appJson['app_version'],
-          'app_name': appJson['app_name'],
-        },
-        'geolocation_details': {
-          'latitude': geoJson['lat']?.toString() ?? '',
-          'longitude': geoJson['long']?.toString() ?? '',
-        },
-      },
-    ];
-
-    try {
-      final apiResp = await _repo.addMotherCareActivity(motherCarePayload);
-      try {
-        if (apiResp is Map && apiResp['success'] == true && apiResp['data'] is List) {
-          final List data = apiResp['data'];
-          Map? rec = data.cast<Map>().firstWhere(
-            (e) => (e['mother_care_type']?.toString() ?? '') == 'anc_due',
-            orElse: () => {},
-          );
-          final serverId = (rec?['_id'] ?? '').toString();
-          if (serverId.isNotEmpty) {
-            final updated = await db.update(
-              FollowupFormDataTable.table,
-              {
-                'server_id': serverId,
-                // keep modified_date_time as stored in DB, no new timestamp
-              },
-              where: 'id = ?',
-              whereArgs: [formId],
-            );
-            print('MotherCareApiHelper: Updated followup_form_data with mother care server_id=$serverId rows=$updated');
-          }
-        }
-      } catch (e) {
-        print('MotherCareApiHelper: Error updating followup_form_data with mother care server_id: $e');
-      }
-    } catch (e) {
-      print('MotherCareApiHelper: Mother care API call failed: $e');
+    } catch (e, stackTrace) {
+      print('MC Sync: Error in syncMotherCareActivities: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
     }
   }
 }

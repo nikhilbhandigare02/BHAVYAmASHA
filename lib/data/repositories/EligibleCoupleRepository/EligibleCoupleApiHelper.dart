@@ -4,6 +4,7 @@ import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/data/repositories/EligibleCoupleRepository/EligibleCoupleRepository.dart';
+import 'package:medixcel_new/data/Database/User_Info.dart';
 
 class EligibleCoupleApiHelper {
   final EligibleCoupleRepository _repo = EligibleCoupleRepository();
@@ -112,6 +113,104 @@ class EligibleCoupleApiHelper {
       }
     } catch (e) {
       print('EligibleCoupleApiHelper: EC API call failed: $e');
+    }
+  }
+
+  Future<void> syncUnsyncedEligibleCoupleActivities() async {
+    try {
+      // Get current user info for required fields
+      final currentUser = await UserInfo.getCurrentUser();
+      final userDetails = currentUser?['details'] is String
+          ? jsonDecode(currentUser?['details'] ?? '{}')
+          : currentUser?['details'] ?? {};
+
+      final ashaId = userDetails['asha_id']?.toString();
+      final facilityId = userDetails['facility_id']?.toString();
+      final userId = userDetails['asha_id']?.toString() ?? '';
+      final createdBy = userDetails['first_name' + 'last_name']?.toString() ?? userId;
+
+      if (ashaId == null || ashaId.isEmpty || facilityId == null || facilityId.isEmpty) {
+        print('EC Sync: Missing required user details (asha_id or facility_id)');
+        return;
+      }
+
+      final unsyncedActivities = await _dao.getUnsyncedEligibleCoupleActivities();
+
+      if (unsyncedActivities.isEmpty) {
+        print('EC Sync: No unsynced activities found');
+        return;
+      }
+
+      print('EC Sync: Found ${unsyncedActivities.length} unsynced activities');
+
+      // Build payload for API
+      final nowIso = DateTime.now().toIso8601String();
+      final payload = unsyncedActivities.map((activity) {
+        // Extract device details with fallbacks
+        final deviceDetails = activity['device_details'] is Map
+            ? Map<String, dynamic>.from(activity['device_details'] as Map)
+            : <String, dynamic>{};
+        final appRoleId = int.tryParse(userDetails['app_role_id']?.toString() ?? '1') ?? 1;
+
+        final appDetails = activity['app_details'] is Map
+            ? Map<String, dynamic>.from(activity['app_details'] as Map)
+            : <String, dynamic>{};
+
+        final geoLocation = activity['geo_location'] is Map
+            ? Map<String, dynamic>.from(activity['geo_location'] as Map)
+            : <String, dynamic>{};
+
+        return {
+          'unique_key': activity['household_ref_key'] ?? '',
+          'beneficiaries_registration_ref_key': activity['beneficiary_ref_key'] ?? '',
+          'eligible_couple_type': activity['eligible_couple_state'] ?? '',
+          'user_id': activity['current_user_key'],
+          'facility_id': activity['facility_id'],
+          'is_deleted': 0,
+          'created_by': activity['current_user_key'],
+          'created_date_time': activity['created_date_time'] ?? nowIso,
+          'modified_by': activity['current_user_key'],
+          'modified_date_time': activity['modified_date_time'] ?? nowIso,
+          'parent_added_by': createdBy,
+          'parent_facility_id': [] ?? 0,
+          'app_role_id': appRoleId,
+          'is_guest': 0,
+          'device_details': {
+            'device_id': deviceDetails['deviceId'] ?? deviceDetails['device_id'] ?? '',
+            'device_plateform': deviceDetails['platform'] ?? deviceDetails['device_plateform'] ?? 'Android',
+            'device_plateform_version': deviceDetails['version'] ?? deviceDetails['device_plateform_version'] ?? '',
+          },
+          'app_details': {
+            'app_version': appDetails['app_version'] ?? '1.0.0',
+            'app_name': appDetails['app_name'] ?? 'BHAVYA mASHA Training',
+          },
+          'geolocation_details': {
+            'latitude': (geoLocation['latitude'] ?? '').toString(),
+            'longitude': (geoLocation['longitude'] ?? '').toString(),
+          },
+        };
+      }).toList();
+
+      // Send to API
+      print('EC Sync: Sending payload: ${jsonEncode(payload)}');
+      final response = await _repo.trackEligibleCouple(payload);
+
+      if (response is Map && response['success'] == true) {
+        // Mark activities as synced
+        for (final activity in unsyncedActivities) {
+          final id = activity['id'] as int?;
+          if (id != null) {
+            await _dao.markEligibleCoupleActivitySyncedById(id);
+          }
+        }
+        print('EC Sync: Successfully synced ${unsyncedActivities.length} activities');
+      } else {
+        print('EC Sync: API call failed or returned error: $response');
+      }
+    } catch (e, stackTrace) {
+      print('EC Sync: Error syncing eligible couple activities: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
     }
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
+import 'package:sqflite/sqflite.dart' show ConflictAlgorithm;
 import '../../../../core/utils/device_info_utils.dart';
 import '../../../../core/utils/enums.dart';
 import '../../../../core/utils/geolocation_utils.dart';
@@ -970,6 +971,69 @@ class AddnewfamilymemberBloc
 
         print('Saving new family member with payload: ${jsonEncode(memberPayload)}');
         await LocalStorageDao.instance.insertBeneficiary(memberPayload);
+
+        int age = 0;
+        if (state.dob != null) {
+          try {
+            final now = DateTime.now();
+            final dob = state.dob!;
+            age = now.year - dob.year;
+            if (now.month < dob.month ||
+                (now.month == dob.month && now.day < dob.day)) {
+              age--;
+            }
+          } catch (e) {
+            print('Error calculating age from DOB: $e');
+          }
+        }
+
+        // Check if member is female, married, and within childbearing age
+        final isEligibleForCouple = state.gender?.toLowerCase() == 'female' &&
+            state.maritalStatus == 'Married' && 
+            age >= 15 && 
+            age <= 49;
+
+        if (isEligibleForCouple) {
+          try {
+            final db = await DatabaseProvider.instance.database;
+            final eligibleCoupleActivityData = {
+              'server_id': '',
+              'household_ref_key': householdRefKey,
+              'beneficiary_ref_key': memberId,
+              'eligible_couple_state': 'eligible_couple',
+              'device_details': jsonEncode({
+                'id': deviceInfo.deviceId,
+                'platform': deviceInfo.platform,
+                'version': deviceInfo.osVersion,
+              }),
+              'app_details': jsonEncode({
+                'app_version': deviceInfo.appVersion.split('+').first,
+                'form_data': {
+                  'created_at': DateTime.now().toIso8601String(),
+                  'updated_at': DateTime.now().toIso8601String(),
+                },
+              }),
+              'parent_user': '',
+              'current_user_key': ashaUniqueKey,
+              'facility_id': facilityId,
+              'created_date_time': ts,
+              'modified_date_time': ts,
+              'is_synced': 0,
+              'is_deleted': 0,
+            };
+
+            print('Inserting eligible couple activity for member: $memberId');
+            await db.insert(
+              'eligible_couple_activities',
+              eligibleCoupleActivityData,
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          } catch (e) {
+            print(
+              'Error inserting eligible couple activity for member: $e',
+            );
+          }
+        }
         
         // Check if member is female and pregnant, then insert ANC due status
         if (state.gender?.toLowerCase() == 'female' && 
@@ -1131,6 +1195,70 @@ class AddnewfamilymemberBloc
             };
 
             await LocalStorageDao.instance.insertBeneficiary(spousePayload);
+
+            int age = 0;
+            if (spousState.dob != null) {
+              try {
+                final now = DateTime.now();
+                final dob = spousState.dob!;
+                age = now.year - dob.year;
+                if (now.month < dob.month ||
+                    (now.month == dob.month && now.day < dob.day)) {
+                  age--;
+                }
+              } catch (e) {
+                print('Error calculating age from DOB: $e');
+              }
+            }
+
+            // Check if member is female, married, and within childbearing age
+            final isEligibleForCouple = spousState.gender?.toLowerCase() == 'female' &&
+                state.maritalStatus == 'Married' &&
+                age >= 15 &&
+                age <= 49;
+
+            if (isEligibleForCouple) {
+              try {
+                final db = await DatabaseProvider.instance.database;
+                final eligibleCoupleActivityData = {
+                  'server_id': '',
+                  'household_ref_key': householdRefKey,
+                  'beneficiary_ref_key': memberId,
+                  'eligible_couple_state': 'eligible_couple',
+                  'device_details': jsonEncode({
+                    'id': deviceInfo.deviceId,
+                    'platform': deviceInfo.platform,
+                    'version': deviceInfo.osVersion,
+                  }),
+                  'app_details': jsonEncode({
+                    'app_version': deviceInfo.appVersion.split('+').first,
+                    'form_data': {
+                      'created_at': DateTime.now().toIso8601String(),
+                      'updated_at': DateTime.now().toIso8601String(),
+                    },
+                  }),
+                  'parent_user': '',
+                  'current_user_key': ashaUniqueKey,
+                  'facility_id': facilityId,
+                  'created_date_time': ts,
+                  'modified_date_time': ts,
+                  'is_synced': 0,
+                  'is_deleted': 0,
+                };
+
+                print('Inserting eligible couple activity for member: $memberId');
+                await db.insert(
+                  'eligible_couple_activities',
+                  eligibleCoupleActivityData,
+                  conflictAlgorithm: ConflictAlgorithm.replace,
+                );
+              } catch (e) {
+                print(
+                  'Error inserting eligible couple activity for member: $e',
+                );
+              }
+            }
+
           } catch (e) {
             print('Error saving spouse: $e');
             // Continue even if spouse save fails

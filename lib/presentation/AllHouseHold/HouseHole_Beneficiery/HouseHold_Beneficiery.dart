@@ -665,14 +665,12 @@ class _HouseHold_BeneficiaryScreenState
                         ),
                       ),
                       const SizedBox(width: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.asset(
-                          'assets/images/sync.png',
-                          width: 6.w,
-                          height: 6.w,
-                          fit: BoxFit.cover,
-                        ),
+                      Image.asset(
+                        'assets/images/sync.png',
+                        width: 6.w,
+                        height: 6.w,
+                        color: (data['_raw']?['is_synced'] == 1) ? null : Colors.grey,
+                        fit: BoxFit.cover,
                       ),
                     ],
                   ),
