@@ -273,7 +273,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
 
     final maritalStatusRaw =
         person['maritalStatus']?.toString().toLowerCase() ??
-        head?['maritalStatus']?.toString().toLowerCase() ?? '';
+            head?['maritalStatus']?.toString().toLowerCase() ?? '';
     final isMarried = maritalStatusRaw == 'married';
     if (!isMarried) return false;
 
@@ -365,7 +365,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
           MaterialPageRoute(
             builder: (context) => HomeScreen(initialTabIndex: 1),
           ),
-      ),
+        ),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

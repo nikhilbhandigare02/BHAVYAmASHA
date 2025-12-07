@@ -520,127 +520,149 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   }
 
   Future<void> _openAddHead() async {
-    final result = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(builder: (_) => AddNewFamilyHeadScreen()),
-    );
-    if (result != null) {
-      setState(() {
-        _headForm = Map<String, dynamic>.from(result);
+    try {
+      final result = await Navigator.of(context).push<Map<String, dynamic>>(
+        MaterialPageRoute(
+          builder: (_) => AddNewFamilyHeadScreen(),
+        ),
+      );
 
+      if (result != null) {
+        setState(() {
+          _headForm = Map<String, dynamic>.from(result);
+          headAdded = true;
+          _members.clear();
+          _memberForms.clear();
 
-        try {
-          final spRaw = result['spousedetails'];
-          Map<String, dynamic>? spMap;
-          if (spRaw is Map) {
-            spMap = Map<String, dynamic>.from(spRaw);
-          } else if (spRaw is String && spRaw.isNotEmpty) {
-            spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
+          final String name = (result['name'] ?? '').toString();
+          final String gender = (result['gender'] ?? '').toString();
+          final String spouse = (result['spouseName'] ?? '').toString();
+
+          try {
+            final spRaw = result['spousedetails'];
+            Map<String, dynamic>? spMap;
+            if (spRaw is Map) {
+              spMap = Map<String, dynamic>.from(spRaw);
+            } else if (spRaw is String && spRaw.isNotEmpty) {
+              spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
+            }
+            if (spMap != null) {
+              spMap.forEach((key, value) {
+                if (value != null) {
+                  _headForm!['sp_$key'] = value.toString();
+                }
+              });
+            }
+          } catch (_) {}
+
+          // Flatten children JSON details (if any) into children-related keys
+          // so ChildrenBloc can hydrate on reopen.
+          try {
+            final chRaw = result['childrendetails'];
+            Map<String, dynamic>? chMap;
+            if (chRaw is Map) {
+              chMap = Map<String, dynamic>.from(chRaw);
+            } else if (chRaw is String && chRaw.isNotEmpty) {
+              chMap = Map<String, dynamic>.from(jsonDecode(chRaw));
+            }
+            if (chMap != null) {
+              chMap.forEach((key, value) {
+                if (value != null) {
+                  _headForm![key] = value;
+                }
+              });
+            }
+          } catch (_) {}
+
+          // Initialize totalMembers count
+          totalMembers = 1; // Start with 1 for the head
+
+          final bool useDob = (result['useDob'] == true);
+          final String? dobIso = result['dob'] as String?;
+          String age = '';
+          if (useDob && dobIso != null && dobIso.isNotEmpty) {
+            final dob = DateTime.tryParse(dobIso);
+            age = dob != null
+                ? (DateTime.now().year - dob.year).toString()
+                : _extractYearsFromApprox(result['approxAge']);
+          } else {
+            age = _extractYearsFromApprox(result['approxAge']);
           }
-          if (spMap != null) {
-            spMap.forEach((key, value) {
-              if (value != null) {
-                _headForm!['sp_$key'] = value.toString();
+          final String father = (result['fatherName'] ?? '').toString();
+          final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
+              ? (int.tryParse(result['children'].toString()) ?? 0) > 0
+              ? result['children'].toString()
+              : '0'
+              : '0';
+
+          _members.add({
+            '#': '1',
+            'Type': 'Adult',
+            'Name': name,
+            'Age': age,
+            'Gender': gender,
+            'Relation': 'Self',
+            'Father': father,
+            'Spouse': spouse,
+            'Total Children': totalChildren,
+          });
+
+          // Add spouse row if married and spouse details exist
+          final String maritalStatus = (result['maritalStatus'] ?? '').toString();
+          if (maritalStatus == 'Married' && spouse.isNotEmpty) {
+            final String spouseGender = (gender == 'Male')
+                ? 'Female'
+                : (gender == 'Female')
+                ? 'Male'
+                : '';
+            // Calculate spouse age from spouse DOB / approx age
+            String spouseAge = '';
+            final bool spouseUseDob = (result['spouseUseDob'] == true);
+            final String? spouseDobIso = result['spouseDob'] as String?;
+            if (spouseUseDob && spouseDobIso != null && spouseDobIso.isNotEmpty) {
+              final dob = DateTime.tryParse(spouseDobIso);
+              if (dob != null) {
+                final today = DateTime.now();
+                int years = today.year - dob.year;
+                if (today.month < dob.month ||
+                    (today.month == dob.month && today.day < dob.day)) {
+                  years--;
+                }
+                spouseAge = years.toString();
+              } else {
+                spouseAge = _extractYearsFromApprox(result['spouseApproxAge']);
               }
-            });
-          }
-        } catch (_) {}
-
-        // Flatten children JSON details (if any) into children-related keys
-        // so ChildrenBloc can hydrate on reopen.
-        try {
-          final chRaw = result['childrendetails'];
-          Map<String, dynamic>? chMap;
-          if (chRaw is Map) {
-            chMap = Map<String, dynamic>.from(chRaw);
-          } else if (chRaw is String && chRaw.isNotEmpty) {
-            chMap = Map<String, dynamic>.from(jsonDecode(chRaw));
-          }
-          if (chMap != null) {
-            chMap.forEach((key, value) {
-              if (value != null) {
-                _headForm![key] = value;
-              }
-            });
-          }
-        } catch (_) {}
-
-        headAdded = true;
-        totalMembers = totalMembers + 1;
-        final String name = (result['headName'] ?? '').toString();
-        final bool useDob = (result['useDob'] == true);
-        final String? dobIso = result['dob'] as String?;
-        String age = '';
-        if (useDob && dobIso != null && dobIso.isNotEmpty) {
-          final dob = DateTime.tryParse(dobIso);
-          age = dob != null
-              ? (DateTime.now().year - dob.year).toString()
-              : _extractYearsFromApprox(result['approxAge']);
-        } else {
-          age = _extractYearsFromApprox(result['approxAge']);
-        }
-        final String gender = (result['gender'] ?? '').toString();
-        final String father = (result['fatherName'] ?? '').toString();
-        final String spouse = (result['spouseName'] ?? '').toString();
-        final String totalChildren = (result['children'] != null && result['children'].toString().isNotEmpty)
-            ? (int.tryParse(result['children'].toString()) ?? 0) > 0
-            ? result['children'].toString()
-            : '0'
-            : '0';
-
-        _members.add({
-          '#': '${_members.length + 1}',
-          'Type': 'Adult',
-          'Name': name,
-          'Age': age,
-          'Gender': gender,
-          'Relation': 'Self',
-          'Father': father,
-          'Spouse': spouse,
-          'Total Children': totalChildren,
-        });
-
-        // Add spouse row if married and spouse details exist
-        final String maritalStatus = (result['maritalStatus'] ?? '').toString();
-        if (maritalStatus == 'Married' && spouse.isNotEmpty) {
-          final String spouseGender = (gender == 'Male')
-              ? 'Female'
-              : (gender == 'Female')
-              ? 'Male'
-              : '';
-          // Calculate spouse age from spouse DOB / approx age
-          String spouseAge = '';
-          final bool spouseUseDob = (result['spouseUseDob'] == true);
-          final String? spouseDobIso = result['spouseDob'] as String?;
-          if (spouseUseDob && spouseDobIso != null && spouseDobIso.isNotEmpty) {
-            final dob = DateTime.tryParse(spouseDobIso);
-            if (dob != null) {
-              final today = DateTime.now();
-              int years = today.year - dob.year;
-              if (today.month < dob.month ||
-                  (today.month == dob.month && today.day < dob.day)) {
-                years--;
-              }
-              spouseAge = years.toString();
             } else {
               spouseAge = _extractYearsFromApprox(result['spouseApproxAge']);
             }
-          } else {
-            spouseAge = _extractYearsFromApprox(result['spouseApproxAge']);
+            _members.add({
+              '#': '${_members.length + 1}',
+              'Type': 'Adult',
+              'Name': spouse,
+              'Age': spouseAge,
+              'Gender': spouseGender,
+              'Relation': 'Wife',
+              'Father': '',
+              'Spouse': name,
+              'Total Children': totalChildren,
+            });
+            // Increment totalMembers for spouse
+            totalMembers++;
           }
-          _members.add({
-            '#': '${_members.length + 1}',
-            'Type': 'Adult',
-            'Name': spouse,
-            'Age': spouseAge,
-            'Gender': spouseGender,
-            'Relation': 'Wife',
-            'Father': '',
-            'Spouse': name,
-            'Total Children': totalChildren,
-          });
-          totalMembers = totalMembers + 1;
-        }
-      });
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -685,7 +707,11 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         setState(() {
           _memberForms.add(Map<String, dynamic>.from(result));
           final int formIndex = _memberForms.length - 1;
-          totalMembers = totalMembers + 1;
+          // Only increment total members if it's a new member (not head or spouse)
+          // The count will be decreased when adding a new member with a relation to head
+          if (result['relation'] != 'Self' && result['relation'] != 'Spouse') {
+            totalMembers++;
+          }
           final String type = (result['memberType'] ?? 'Adult').toString();
           final String name = (result['name'] ?? '').toString();
           final bool useDob = (result['useDob'] == true);
@@ -834,9 +860,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           final int childrenTarget = headChildren + memberChildren;
 
           final int childrenAdded = _members.where((m) {
-            final t = (m['Type'] ?? '');
-            final r = (m['Relation'] ?? '');
-            return t ==  'Child' || t == 'Infant' || r == 'Son' || r == 'Daughter';
+            final t = (m['Type'] ?? '').toString();
+            final r = (m['Relation'] ?? '').toString();
+            // Only count children/infants and relations that should be counted
+            return t == 'Child' || t == 'Infant' || 
+                   ['Son', 'Daughter', 'Brother', 'Sister', 'Nephew', 'Niece', 
+                    'Grand Son', 'Grand Daughter', 'Son In Law', 'Daughter In Law',
+                    'Other'].contains(r);
           }).length;
 
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);

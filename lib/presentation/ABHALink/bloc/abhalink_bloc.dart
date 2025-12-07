@@ -15,10 +15,9 @@ class AbhalinkBloc extends Bloc<AbhaLinkEvent, AbhaLinkState> {
       emit(state.copyWith(submitting: true, clearError: true));
       final address = (state.address ?? '').trim();
       if (address.isEmpty) {
-        emit(state.copyWith(submitting: false, errorMessage: 'ABHA Address is required'));
+        emit(state.copyWith(submitting: false, errorMessage: 'Please enter ABHA Address'));
         return;
       }
-      // Example: ensure it does not contain domain part already
       if (address.contains('@')) {
         emit(state.copyWith(submitting: false, errorMessage: 'Enter ABHA without domain'));
         return;

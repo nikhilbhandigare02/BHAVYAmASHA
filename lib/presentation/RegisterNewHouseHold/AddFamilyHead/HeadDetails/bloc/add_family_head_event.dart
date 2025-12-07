@@ -4,6 +4,37 @@ part of 'add_family_head_bloc.dart';
 @immutable
 sealed class AddFamilyHeadEvent {}
 
+// Family Planning Events
+class HeadFamilyPlanningCounselingChanged extends AddFamilyHeadEvent {
+  final String value;
+  HeadFamilyPlanningCounselingChanged(this.value);
+}
+
+class hpMethodChanged extends AddFamilyHeadEvent {
+  final String value;
+  hpMethodChanged(this.value);
+}
+
+class hpDateofAntraChanged extends AddFamilyHeadEvent {
+  final DateTime value;
+  hpDateofAntraChanged(this.value);
+}
+
+class hpRemovalDateChanged extends AddFamilyHeadEvent {
+  final DateTime value;
+  hpRemovalDateChanged(this.value);
+}
+
+class hpRemovalReasonChanged extends AddFamilyHeadEvent {
+  final String value;
+  hpRemovalReasonChanged(this.value);
+}
+
+class hpCondomQuantityChanged extends AddFamilyHeadEvent {
+  final String value;
+  hpCondomQuantityChanged(this.value);
+}
+
 @immutable
 class AfhSubmit extends AddFamilyHeadEvent {
   final BuildContext context;

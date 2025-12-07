@@ -271,20 +271,60 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         }
         final int childrenTarget = declaredChildren;
 
-        // Calculate children added (total members - 2 for head and spouse)
-        // Only start counting after both head and spouse are added
-        int childrenAdded = membersForHousehold.length > 2
-            ? (membersForHousehold.length - 2)
+        // Calculate total children from all members (excluding head and spouse)
+        int childrenAdded = 0;
+        int headChildren = 0;
+        int memberChildren = 0;
+
+        for (final member in membersForHousehold) {
+          final memberInfo = member['beneficiary_info'] is String
+              ? jsonDecode(member['beneficiary_info'])
+              : member['beneficiary_info'] ?? {};
+          
+          final relation = (memberInfo['relation_to_head'] ?? memberInfo['relation'] ?? '').toString().toLowerCase();
+          
+          // Skip head and spouse for children count
+          if (relation == 'self' || relation == 'head' || relation == 'spouse') {
+            // Get head's children count
+            if (relation == 'self' || relation == 'head') {
+              final dynamic childrenField = memberInfo['children'];
+              if (childrenField is num) {
+                headChildren = childrenField.toInt();
+              } else if (childrenField is String && childrenField.trim().isNotEmpty) {
+                headChildren = int.tryParse(childrenField.trim()) ?? 0;
+              } else if (childrenField is List) {
+                headChildren = childrenField.length;
+              }
+            }
+            continue;
+          }
+          
+          // Count this as an added child
+          childrenAdded++;
+          
+          // If this is a member with children, add to memberChildren
+          final dynamic memberChildCount = memberInfo['children'];
+          if (memberChildCount != null) {
+            if (memberChildCount is num) {
+              memberChildren += memberChildCount.toInt();
+            } else if (memberChildCount is String && memberChildCount.trim().isNotEmpty) {
+              memberChildren += int.tryParse(memberChildCount.trim()) ?? 0;
+            } else if (memberChildCount is List) {
+              memberChildren += memberChildCount.length;
+            }
+          }
+        }
+
+        // Calculate total target children (head's children + member's children)
+        final int totalChildrenTarget = headChildren + memberChildren;
+        
+        // Calculate remaining children to add
+        final int remainingChildren = totalChildrenTarget > childrenAdded
+            ? (totalChildrenTarget - childrenAdded)
             : 0;
 
-        // Calculate remaining children to add (if any)
-        final int remainingChildren = childrenTarget > childrenAdded
-            ? (childrenTarget - childrenAdded)
-            : 0;
-
-        // Only show remaining count if both head and spouse are added and there's a target
-        final bool hasChildrenTarget =
-            childrenTarget > 0 && membersForHousehold.length >= 2;
+        // Show remaining count if there's a target or if we've added children
+        final bool hasChildrenTarget = totalChildrenTarget > 0 || childrenAdded > 0;
 
         return {
           'name': name,
@@ -292,6 +332,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           'hhId': headId,
           'houseNo': houseNo.isNotEmpty ? houseNo : 0,
           'totalMembers': totalMembers,
+          'remainingChildren': remainingChildren,
           'eligibleCouples': eligibleCouples,
           'elderly': elderly,
           'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
@@ -726,8 +767,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: _rowText(
-                          l10n?.rnhTotalMembers ?? 'No. of total members',
-                          data['totalMembers'].toString(),
+                          'Remaining to add',
+                          '${data['remainingChildren']}',
                         ),
                       ),
                     ],

@@ -1833,6 +1833,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           },
                                         ),
                                         if (_fatherOption == 'Other')
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+
+                                        if (_fatherOption == 'Other')
+
                                           CustomTextField(
                                             labelText:
                                                 '${l.fatherGuardianNameLabel} *',
@@ -1940,12 +1948,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         //   thickness: 0.5,
                                         //   height: 0,
                                         // ),
+                                        if (_motherOption == 'Other')
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
                                         if (_motherOption == 'Other') ...[
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
+
                                           CustomTextField(
                                             labelText: "${l.motherNameLabel} *",
                                             hintText: l.motherNameLabel,
@@ -1966,59 +1976,37 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             thickness: 0.5,
                                             height: 0,
                                           ),
-                                        ]
-
+                                        ],
+                                        Divider(
+                                          color: AppColors.divider,
+                                          thickness: 0.5,
+                                          height: 0,
+                                        ),
                                       ],
                                     ),
                                   ),
 
                                 ],
-                                Divider(
-                                  color: AppColors.divider,
-                                  thickness: 0.5,
-                                  height: 0,
-                                ),
-                                if ((state.memberType ?? '').toLowerCase() ==
-                                    'child') ...[
+
+                                if ((state.memberType ?? '').toLowerCase() == 'child') ...[
                                   _section(
                                     Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Builder(
                                           builder: (context) {
-                                            final List<String> fatherItems = [];
-                                            if (_isMemberDetails) {
-                                              fatherItems.addAll(
-                                                _maleAdultNames,
-                                              );
-                                              fatherItems.add('Other');
-                                            } else {
-                                              if ((_headName ?? '')
-                                                  .isNotEmpty &&
-                                                  _formatGender(_headGender) ==
-                                                      'Male') {
-                                                fatherItems.add(_headName!);
-                                              }
-                                              if ((_spouseName ?? '')
-                                                  .isNotEmpty &&
-                                                  _formatGender(
-                                                    _spouseGender,
-                                                  ) ==
-                                                      'Male') {
-                                                fatherItems.add(_spouseName!);
-                                              }
-                                              fatherItems.add('Other');
-                                            }
+                                            final List<String> fatherItems = [
+
+                                              ..._maleAdultNames,
+                                              'Other'
+                                            ];
                                             return ApiDropdown<String>(
-                                              labelText:
-                                              '${l.fatherGuardianNameLabel} *',
+                                              labelText: '${l.fatherGuardianNameLabel} *',
                                               items: fatherItems,
                                               getLabel: (s) => s,
                                               value: _fatherOption,
                                               validator: (value) {
-                                                if (_fatherOption == 'Select' ||
-                                                    _fatherOption.isEmpty) {
+                                                if (_fatherOption == 'Select' || _fatherOption.isEmpty) {
                                                   return 'Please select or enter ${l.fatherGuardianNameLabel.toLowerCase()}';
                                                 }
                                                 return null;
@@ -2028,400 +2016,162 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 setState(() {
                                                   _fatherOption = v;
                                                 });
-                                                if (v != 'Select' &&
-                                                    v != 'Other') {
-                                                  context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateFatherName(v),
-                                                  );
+                                                if (v != 'Select' && v != 'Other') {
+                                                  context.read<AddnewfamilymemberBloc>()
+                                                      .add(AnmUpdateFatherName(v));
                                                 } else {
-                                                  context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateFatherName(''),
-                                                  );
+                                                  context.read<AddnewfamilymemberBloc>()
+                                                      .add(AnmUpdateFatherName(''));
                                                 }
-                                                // Trigger form validation
-                                                if (_formKey.currentState !=
-                                                    null) {
-                                                  _formKey.currentState!
-                                                      .validate();
+                                                if (_formKey.currentState != null) {
+                                                  _formKey.currentState!.validate();
                                                 }
                                               },
                                             );
                                           },
                                         ),
-
                                         if (_fatherOption == 'Other')
                                           Divider(
                                             color: AppColors.divider,
                                             thickness: 0.5,
                                             height: 0,
                                           ),
+                                        if (_fatherOption == 'Other')
+
                                           CustomTextField(
-                                            labelText:
-                                            '${l.fatherGuardianNameLabel} *',
-                                            hintText:
-                                            l.fatherGuardianNameLabel,
-                                            initialValue:
-                                            state.fatherName ?? '',
+                                            labelText: '${l.fatherGuardianNameLabel} *',
+                                            hintText: l.fatherGuardianNameLabel,
+                                            initialValue: state.fatherName ?? '',
                                             onChanged: (v) {
                                               final name = v.trim();
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmUpdateFatherName(name),
-                                              );
-                                              if (_formKey.currentState !=
-                                                  null) {
-                                                _formKey.currentState!
-                                                    .validate();
+                                              context.read<AddnewfamilymemberBloc>()
+                                                  .add(AnmUpdateFatherName(name));
+                                              if (_formKey.currentState != null) {
+                                                _formKey.currentState!.validate();
                                               }
                                             },
                                             validator: (value) {
-                                              if (value == null ||
-                                                  value.trim().isEmpty) {
+                                              if (value == null || value.trim().isEmpty) {
                                                 return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
                                               }
                                               return null;
                                             },
                                           ),
-                                      ],
-                                    ),
-                                  ),
-                                  Divider(
-                                    color: AppColors.divider,
-                                    thickness: 0.5,
-                                    height: 0,
-                                  ),
-                                  _section(
-                                    Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Builder(
-                                          builder: (context) {
-                                            final List<String> motherItems = [];
-                                            if (_isMemberDetails) {
-                                              motherItems.addAll(
-                                                _femaleAdultNames,
-                                              );
-                                              motherItems.add('Other');
-                                            } else {
-                                              if ((_headName ?? '')
-                                                  .isNotEmpty &&
-                                                  _formatGender(_headGender) ==
-                                                      'Female') {
-                                                motherItems.add(_headName!);
-                                              }
-                                              if ((_spouseName ?? '')
-                                                  .isNotEmpty &&
-                                                  _formatGender(
-                                                    _spouseGender,
-                                                  ) ==
-                                                      'Female') {
-                                                motherItems.add(_spouseName!);
-                                              }
-                                              motherItems.add('Other');
-                                            }
-                                            return ApiDropdown<String>(
-                                              labelText:
-                                              "${l.motherNameLabel} *",
-                                              hintText: "${l.motherNameLabel} ",
-                                              items: motherItems,
-                                              getLabel: (s) => s,
-                                              value: _motherOption,
-                                              onChanged: (v) {
-                                                if (v == null) return;
-                                                setState(() {
-                                                  _motherOption = v;
-                                                });
-                                                if (v != 'Select' &&
-                                                    v != 'Other') {
-                                                  context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateMotherName(v),
-                                                  );
-                                                } else {
-                                                  context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateMotherName(''),
-                                                  );
-                                                }
-                                              },
-                                            );
-                                          },
+                                        Divider(
+                                          color: AppColors.divider,
+                                          thickness: 0.5,
+                                          height: 0,
                                         ),
-                                        // Divider(
-                                        //   color: AppColors.divider,
-                                        //   thickness: 0.5,
-                                        //   height: 0,
-                                        // ),
-                                        if (_motherOption == 'Other') ...[
-                                          Divider(
-                                            color: AppColors.divider,
-                                            thickness: 0.5,
-                                            height: 0,
-                                          ),
-                                          CustomTextField(
-                                            labelText: "${l.motherNameLabel} *",
-                                            hintText: l.motherNameLabel,
-                                            initialValue:
-                                            state.motherName ?? '',
-                                            onChanged: (v) => context
-                                                .read<
-                                                AddnewfamilymemberBloc
-                                            >()
-                                                .add(
-                                              AnmUpdateMotherName(
-                                                v.trim(),
+                                        _section(
+                                          Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                            children: [
+                                              Builder(
+                                                builder: (context) {
+                                                  final List<String> motherItems = [];
+                                                  if (_isMemberDetails) {
+                                                    motherItems.addAll(
+                                                      _femaleAdultNames,
+                                                    );
+                                                    motherItems.add('Other');
+                                                  } else {
+                                                    if ((_headName ?? '')
+                                                        .isNotEmpty &&
+                                                        _formatGender(_headGender) ==
+                                                            'Female') {
+                                                      motherItems.add(_headName!);
+                                                    }
+                                                    if ((_spouseName ?? '')
+                                                        .isNotEmpty &&
+                                                        _formatGender(
+                                                          _spouseGender,
+                                                        ) ==
+                                                            'Female') {
+                                                      motherItems.add(_spouseName!);
+                                                    }
+                                                    motherItems.add('Other');
+                                                  }
+                                                  return ApiDropdown<String>(
+                                                    labelText:
+                                                    "${l.motherNameLabel} *",
+                                                    hintText: "${l.motherNameLabel} ",
+                                                    items: motherItems,
+                                                    getLabel: (s) => s,
+                                                    value: _motherOption,
+                                                    onChanged: (v) {
+                                                      if (v == null) return;
+                                                      setState(() {
+                                                        _motherOption = v;
+                                                      });
+                                                      if (v != 'Select' &&
+                                                          v != 'Other') {
+                                                        context
+                                                            .read<
+                                                            AddnewfamilymemberBloc
+                                                        >()
+                                                            .add(
+                                                          AnmUpdateMotherName(v),
+                                                        );
+                                                      } else {
+                                                        context
+                                                            .read<
+                                                            AddnewfamilymemberBloc
+                                                        >()
+                                                            .add(
+                                                          AnmUpdateMotherName(''),
+                                                        );
+                                                      }
+                                                    },
+                                                  );
+                                                },
                                               ),
-                                            ),
-                                          ),
-
-                                        ]
-
-                                      ],
-                                    ),
-                                  ),
-                                  Divider(
-                                    color: AppColors.divider,
-                                    thickness: 0.5,
-                                    height: 0,
-                                  ),
-                                  _section(
-                                    ApiDropdown<String>(
-                                      labelText: '${l.genderLabel} *',
-                                      items: const [
-                                        'Male',
-                                        'Female',
-                                        'Transgender',
-                                      ],
-                                      getLabel: (s) {
-                                        switch (s) {
-                                          case 'Male':
-                                            return l.genderMale;
-                                          case 'Female':
-                                            return l.genderFemale;
-                                          case 'Transgender':
-                                            return l.transgender;
-                                          default:
-                                            return s;
-                                        }
-                                      },
-                                      value: state.gender,
-                                      onChanged: (v) {
-                                        if (v == null) return;
-                                        final memberGender = v;
-                                        context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(AnmUpdateGender(memberGender));
-                                        try {
-                                          if (_syncingGender) return;
-                                          _syncingGender = true;
-                                          final opposite = _oppositeGender(
-                                            memberGender,
-                                          );
-                                          final spBloc = context
-                                              .read<SpousBloc>();
-                                          if (spBloc.state.gender != opposite) {
-                                            spBloc.add(
-                                              SpUpdateGender(opposite),
-                                            );
-                                          }
-                                        } finally {
-                                          WidgetsBinding.instance
-                                              .addPostFrameCallback((_) {
-                                                _syncingGender = false;
-                                              });
-                                        }
-                                      },
-                                      validator: (value) => _captureAnmError(
-                                        Validations.validateGender(l, value),
-                                      ),
-                                    ),
-                                  ),
-                                  Divider(
-                                    color: AppColors.divider,
-                                    thickness: 0.5,
-                                    height: 0,
-                                  ),
-                                  _section(
-                                    ApiDropdown<String>(
-                                      labelText: '${l.whoseMobileLabel} *',
-                                      items: const [
-                                        'Self',
-                                        'Family Head',
-                                        'Wife',
-                                        'Father',
-                                        'Mother',
-                                        'Son',
-                                        'Daughter',
-                                        'Father in Law',
-                                        'Mother in Law',
-                                        'Neighbour',
-                                        'Relative',
-                                        'Other',
-                                      ],
-                                      getLabel: (s) {
-                                        switch (s) {
-                                          case 'Self':
-                                            return l.self;
-                                          case 'Family Head':
-                                            return 'Family Head';
-                                          case 'Wife':
-                                            return l.wife;
-                                          case 'Father':
-                                            return l.father;
-                                          case 'Mother':
-                                            return l.mother;
-                                          case 'Son':
-                                            return l.son;
-                                          case 'Daughter':
-                                            return l.daughter;
-                                          case 'Father in Law':
-                                            return l.fatherInLaw;
-                                          case 'Mother in Law':
-                                            return l.motherInLaw;
-                                          case 'Neighbour':
-                                            return l.neighbour;
-                                          case 'Relative':
-                                            return l.relative;
-                                          case 'Other':
-                                            return l.other;
-                                          default:
-                                            return s;
-                                        }
-                                      },
-                                      value: state.mobileOwner,
-                                      onChanged: (v) async {
-                                        if (v == null) return;
-                                        final bloc = context
-                                            .read<AddnewfamilymemberBloc>();
-                                        bloc.add(AnmUpdateMobileOwner(v));
-
-                                        if (v == 'Family Head' || v == 'Father') {
-                                          if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
-                                            print('📱 [AddNewMember] Using head mobile from props: ${widget.headMobileNumber}');
-                                            bloc.add(AnmUpdateMobileNo(widget.headMobileNumber!));
-                                          } else if (_isMemberDetails && widget.hhId != null) {
-                                            try {
-                                              final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
-                                              print('📱 [AddNewMember] Fetched mobile from DB: $headMobile');
-                                              if (headMobile != null && headMobile.isNotEmpty) {
-                                                bloc.add(AnmUpdateMobileNo(headMobile));
-                                              } else if (mounted) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(content: Text('No mobile number found for the head of family')),
-                                                );
-                                              }
-                                            } catch (e) {
-                                              print('❌ [AddNewMember] Error fetching from DB: $e');
-                                              if (mounted) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(content: Text('Error loading head of family mobile number')),
-                                                );
-                                              }
-                                            }
-                                          }
-                                        } else {
-                                          // Clear mobile number if not Family Head
-                                          bloc.add(AnmUpdateMobileNo(''));
-                                        }
-                                      },
-                                      validator: (value) => _captureAnmError(
-                                        Validations.validateWhoMobileNo(
-                                          l,
-                                          value,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Divider(
-                                    color: AppColors.divider,
-                                    thickness: 0.5,
-                                    height: 0,
-                                  ),
-                                  if (state.mobileOwner == 'Other')
-                                    _section(
-                                      CustomTextField(
-                                        labelText:
-                                            'Enter relation with mobile no. holder',
-                                        hintText:
-                                            'Enter relation with mobile no. holder',
-                                        onChanged: (v) => context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(
-                                              AnmUpdateMobileOwnerRelation(
-                                                v.trim(),
-                                              ),
-                                            ),
-                                        validator: (value) =>
-                                            state.mobileOwner == 'Other'
-                                            ? _captureAnmError(
-                                                (value == null ||
-                                                        value.trim().isEmpty)
-                                                    ? 'Relation with mobile no. holder is required'
-                                                    : null,
-                                              )
-                                            : null,
-                                      ),
-                                    ),
-                                  if (state.mobileOwner == 'Other')
-                                    Divider(
-                                      color: AppColors.divider,
-                                      thickness: 0.5,
-                                      height: 0,
-                                    ),
-                                  _section(
-                                    CustomTextField(
-                                      key: ValueKey(
-                                        'member_mobile_${state.mobileOwner ?? ''}',
-                                      ),
-                                      controller:
-                                          TextEditingController(
-                                              text: state.mobileNo ?? '',
-                                            )
-                                            ..selection =
-                                                TextSelection.collapsed(
-                                                  offset:
-                                                      state.mobileNo?.length ??
-                                                      0,
+                                              // Divider(
+                                              //   color: AppColors.divider,
+                                              //   thickness: 0.5,
+                                              //   height: 0,
+                                              // ),
+                                              if (_motherOption == 'Other')
+                                                Divider(
+                                                  color: AppColors.divider,
+                                                  thickness: 0.5,
+                                                  height: 0,
                                                 ),
-                                      labelText: '${l.mobileLabel} *',
-                                      hintText: '${l.mobileLabel} *',
-                                      keyboardType: TextInputType.number,
-                                      maxLength: 10,
-                                      onChanged: (v) => context
-                                          .read<AddnewfamilymemberBloc>()
-                                          .add(AnmUpdateMobileNo(v.trim())),
-                                      validator: (value) => _captureAnmError(
-                                        Validations.validateMobileNo(l, value),
-                                      ),
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly,
-                                        LengthLimitingTextInputFormatter(10),
+                                              if (_motherOption == 'Other') ...[
+
+                                                CustomTextField(
+                                                  labelText: "${l.motherNameLabel} *",
+                                                  hintText: l.motherNameLabel,
+                                                  initialValue:
+                                                  state.motherName ?? '',
+                                                  onChanged: (v) => context
+                                                      .read<
+                                                      AddnewfamilymemberBloc
+                                                  >()
+                                                      .add(
+                                                    AnmUpdateMotherName(
+                                                      v.trim(),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Divider(
+                                                  color: AppColors.divider,
+                                                  thickness: 0.5,
+                                                  height: 0,
+                                                ),
+                                              ],
+                                              Divider(
+                                                color: AppColors.divider,
+                                                thickness: 0.5,
+                                                height: 0,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
-                                  Divider(
-                                    color: AppColors.divider,
-                                    thickness: 0.5,
-                                    height: 0,
-                                  ),
+
                                 ],
 
                                 Padding(
@@ -4221,17 +3971,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           _clearAnmFormError();
                                           clearSpousFormError();
 
-                                          // When on the spouse step (index 1), validate the
-                                          // Spousdetails form using its own GlobalKey. This
-                                          // ensures member spouse validations run and only
-                                          // a single message (the first error) is shown.
-                                          // Calculate the last step based on the form state
+
                                           final bool showSpouse = state.memberType != 'Child' &&
                                               state.maritalStatus == 'Married';
                                           final bool showChildren = showSpouse && state.hasChildren == 'Yes';
                                           final int lastStep = showChildren ? 2 : (showSpouse ? 1 : 0);
 
-// When on the spouse step (index 1), validate the Spouse form
                                           if (_currentStep == 1) {
                                             final spouseForm = spousFormKey.currentState;
                                             if (spouseForm == null || !spouseForm.validate()) {
@@ -4241,7 +3986,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             }
                                           }
 
-                                          if (_currentStep < lastStep) {
+                                          if (!_isEdit && _currentStep < lastStep) {
                                             final newStep = _currentStep + 1;
                                             setState(() {
                                               _currentStep = newStep;
@@ -4249,7 +3994,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                             // Get the tab controller and animate to the new step
                                             final tabController = DefaultTabController.of(context);
-                                            if (tabController != null) {
+                                            if (tabController != null && newStep < tabController.length) {
                                               tabController.animateTo(newStep);
                                             }
                                             return;
@@ -4384,125 +4129,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               'Submitting member data: ${jsonEncode(memberData)}',
                                             );
 
-                                            // Handle based on the flow
                                             if (_isMemberDetails) {
-                                              // In edit mode, we want to update the record directly without tab navigation
                                               if (_isEdit) {
-                                                print(
-                                                  '=== Form Submission (Edit Mode) ===',
-                                                );
-                                                print('HHID: ${widget.hhId}');
-                                                print(
-                                                  'isMemberDetails: $_isMemberDetails',
-                                                );
-
-                                                // Show loading
-                                                setState(
-                                                  () => _isLoading = true,
-                                                );
-
-                                                // Trigger the update
-                                                bloc.add(
-                                                  AnmUpdateSubmit(
-                                                    hhid: widget.hhId ?? '',
-                                                  ),
-                                                );
-                                                return;
-                                              }
-
-                                              // For new entries, handle tab navigation
-                                              final showSpouse =
-                                                  state.memberType != 'Child' &&
-                                                  state.maritalStatus ==
-                                                      'Married';
-                                              final showChildren =
-                                                  showSpouse &&
-                                                  state.hasChildren == 'Yes';
-                                              final lastStep = showChildren
-                                                  ? 2
-                                                  : (showSpouse ? 1 : 0);
-
-                                              // If we're not on the last step yet, go to the next step
-                                              if (_currentStep < lastStep) {
-                                                setState(() {
-                                                  _currentStep += 1;
-                                                });
-                                                final ctrl =
-                                                    DefaultTabController.of(
-                                                      context,
-                                                    );
-                                                ctrl?.animateTo(_currentStep);
-                                                return;
-                                              }
-
-                                              // Collect spouse data if applicable
-                                              if (showSpouse) {
-                                                try {
-                                                  final spState =
-                                                      _spousBloc.state;
-                                                  final spJson = spState
-                                                      .toJson();
-
-                                                  final hasSpouseData = spJson
-                                                      .values
-                                                      .any((v) {
-                                                        if (v == null)
-                                                          return false;
-                                                        if (v is String)
-                                                          return v
-                                                              .trim()
-                                                              .isNotEmpty;
-                                                        return true;
-                                                      });
-
-                                                  if (hasSpouseData) {
-                                                    memberData['spouseUseDob'] =
-                                                        spState.useDob;
-                                                    memberData['spouseDob'] =
-                                                        spState.dob
-                                                            ?.toIso8601String();
-                                                    memberData['spouseApproxAge'] =
-                                                        spState.approxAge;
-                                                    memberData['spousedetails'] =
-                                                        jsonEncode(spJson);
-                                                  }
-                                                } catch (e) {
-                                                  print(
-                                                    'Error processing spouse data: $e',
-                                                  );
-                                                }
-                                              }
-
-                                              // Add children data if applicable
-                                              try {
-                                                final ch = _childrenBloc.state;
-                                                memberData['childrendetails'] =
-                                                    ch.toJson();
-                                              } catch (e) {
-                                                print(
-                                                  'Error processing children data: $e',
-                                                );
-                                              }
-
-                                              // Handle based on the flow
-                                              if (_isMemberDetails) {
-                                                // For member details flow, submit the form
-                                                bloc.add(
-                                                  AnmSubmit(
-                                                    context,
-                                                    hhid: widget.hhId,
-                                                    extraData: memberData,
-                                                  ),
-                                                );
-                                                return; // Don't navigate yet, wait for success state
+                                                bloc.add(AnmUpdateSubmit(hhid: widget.hhId ?? ''));
                                               } else {
-                                                // In household flow, just return the data to parent
-                                                // The parent will handle saving when the final Save button is clicked
-                                                Navigator.of(
-                                                  context,
-                                                ).pop(memberData);
-                                                return;
+                                                bloc.add(AnmSubmit(context, hhid: widget.hhId, extraData: memberData));
                                               }
+                                              return; // Don't navigate yet, wait for success state
                                             } else {
                                               // In household flow, just return the data to parent
                                               // The parent will handle saving when the final Save button is clicked

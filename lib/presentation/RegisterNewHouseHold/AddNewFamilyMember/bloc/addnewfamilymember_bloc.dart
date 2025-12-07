@@ -267,22 +267,59 @@ class AddnewfamilymemberBloc
         final rawMobileOwnerRelation = allData['mobileOwnerRelation'] as String?;
         
         // Check if the field is 'Other' in the database
-        final isReligionOther = rawReligion == 'Other';
-        final isCategoryOther = rawCategory == 'Other';
-        final isOccupationOther = rawOccupation == 'Other';
-        final isRelationOther = rawMobileOwnerRelation == 'Other';
+        // final isReligionOther = rawReligion == 'Other';
+        // final isCategoryOther = rawCategory == 'Other';
+        // final isOccupationOther = rawOccupation == 'Other';
+        // final isRelationOther = rawMobileOwnerRelation == 'Other';
+
         
-        // Get the 'other' values from the database fields with underscore naming
-        final otherReligionValue = allData['other_religion'] as String?;
-        final otherCategoryValue = allData['other_category'] as String?;
-        final otherOccupationValue = allData['other_occupation'] as String?;
-        final otherRelationValue = allData['other_relation'] as String?;
+        // Variables to store the processed values
+        String? religionValue = rawReligion;
+        String? otherReligionValue;
+        String? categoryValue = rawCategory;
+        String? otherCategoryValue;
+        String? occupationValue = rawOccupation;
+        String? otherOccupationValue;
+        String? mobileOwnerRelationValue = rawMobileOwnerRelation;
+        String? otherRelationValue;
         
-        // Debug log to see what values we're getting from the database
-        print('Religion: $rawReligion, Other: $otherReligionValue');
-        print('Category: $rawCategory, Other: $otherCategoryValue');
-        print('Occupation: $rawOccupation, Other: $otherOccupationValue');
-        print('Relation: $rawMobileOwnerRelation, Other: $otherRelationValue');
+        // Process religion field
+        if (rawReligion != null && rawReligion.endsWith('_other')) {
+          religionValue = 'Other';
+          otherReligionValue = rawReligion.replaceAll('_other', '');
+        } else {
+          otherReligionValue = allData['other_religion'] as String?;
+        }
+        
+        // Process category field
+        if (rawCategory != null && rawCategory.endsWith('_other')) {
+          categoryValue = 'Other';
+          otherCategoryValue = rawCategory.replaceAll('_other', '');
+        } else {
+          otherCategoryValue = allData['other_category'] as String?;
+        }
+        
+        // Process occupation field
+        if (rawOccupation != null && rawOccupation.endsWith('_other')) {
+          occupationValue = 'Other';
+          otherOccupationValue = rawOccupation.replaceAll('_other', '');
+        } else {
+          otherOccupationValue = allData['other_occupation'] as String?;
+        }
+        
+        // Process mobile owner relation field
+        if (rawMobileOwnerRelation != null && rawMobileOwnerRelation.endsWith('_other')) {
+          mobileOwnerRelationValue = 'Other';
+          otherRelationValue = rawMobileOwnerRelation.replaceAll('_other', '');
+        } else {
+          otherRelationValue = allData['other_relation'] as String?;
+        }
+        
+        // // Debug log to see what values we're getting from the database
+        // print('Religion: $religionValue, Other: $otherReligionValue');
+        // print('Category: $categoryValue, Other: $otherCategoryValue');
+        // print('Occupation: $occupationValue, Other: $otherOccupationValue');
+        // print('Relation: $mobileOwnerRelationValue, Other: $otherRelationValue');
         
         // Update the state with all the data
         emit(state.copyWith(
@@ -302,17 +339,17 @@ class AddnewfamilymemberBloc
           bankAcc: allData['bankAcc'] as String?,
           ifsc: allData['ifsc'] as String?,
           // Handle occupation and other occupation
-          occupation: rawOccupation,
+          occupation: occupationValue,
           otherOccupation: otherOccupationValue,
           
           education: allData['education'] as String?,
           
           // Handle religion and other religion
-          religion: rawReligion,
+          religion: religionValue,
           otherReligion: otherReligionValue,
           
           // Handle category and other category
-          category: rawCategory,
+          category: categoryValue,
           otherCategory: otherCategoryValue,
           
           abhaAddress: allData['abhaAddress'] as String?,
@@ -646,7 +683,7 @@ class AddnewfamilymemberBloc
         errors.add('Gender required');
       if (state.mobileOwner == 'Other' && (state.mobileOwnerRelation == null || state.mobileOwnerRelation!.trim().isEmpty))
         errors.add('Enter relation with mobile holder');
-      
+
       // Marital status is only required for Adults, not for Children
       if (state.memberType != 'Child') {
         if (state.maritalStatus == null || state.maritalStatus!.isEmpty) {
@@ -1493,18 +1530,18 @@ class AddnewfamilymemberBloc
 
       final errors = <String>[];
       if (state.relation == null || state.relation!.trim().isEmpty)
-        errors.add('Relation with family head is required');
+        errors.add('Please Enter Relation with family head');
       if (state.relation == 'Other' && (state.otherRelation == null || state.otherRelation!.trim().isEmpty))
         errors.add('Enter relation with family head');
       if (state.name == null || state.name!.trim().isEmpty)
-        errors.add('Member name is required');
+        errors.add('Please enter Member name');
       if (state.gender == null || state.gender!.isEmpty)
-        errors.add('Gender is required');
+        errors.add('Please enter Gender ');
       if (state.useDob) {
         if (state.dob == null) errors.add('Date of birth is required');
       } else {
         if (state.approxAge == null || state.approxAge!.trim().isEmpty)
-          errors.add('Approximate age is required');
+          errors.add('Please enter Approximate age ');
       }
       if (state.mobileOwner == 'Other' && (state.mobileOwnerRelation == null || state.mobileOwnerRelation!.trim().isEmpty))
         errors.add('Enter relation with mobile holder');
@@ -1589,7 +1626,7 @@ class AddnewfamilymemberBloc
         String? resolvedFatherKey2;
         try {
           if (state.relation == 'Mother' || state.relation == 'Father' || state.relation == 'Child') {
-             final hhBeneficiaries2 = await LocalStorageDao.instance
+            final hhBeneficiaries2 = await LocalStorageDao.instance
                 .getBeneficiariesByHousehold(householdRefKey.toString());
 
             if (headId == null || headId.isEmpty) {
@@ -1687,7 +1724,7 @@ class AddnewfamilymemberBloc
                 resolvedFatherKey2 = spouseKeyLocal;
               }
             }
- 
+
             if (resolvedMotherKey2 != null && resolvedMotherKey2.trim().isEmpty) {
               resolvedMotherKey2 = null;
             }
@@ -1703,8 +1740,8 @@ class AddnewfamilymemberBloc
         final Map<String, dynamic> existingInfo = existingInfoRaw is Map
             ? Map<String, dynamic>.from(existingInfoRaw)
             : (existingInfoRaw is String && existingInfoRaw.isNotEmpty)
-                ? Map<String, dynamic>.from(jsonDecode(existingInfoRaw))
-                : <String, dynamic>{};
+            ? Map<String, dynamic>.from(jsonDecode(existingInfoRaw))
+            : <String, dynamic>{};
 
         existingInfo
           ..['memberType'] = state.memberType
@@ -1736,6 +1773,11 @@ class AddnewfamilymemberBloc
           ..['abhaAddress'] = state.abhaAddress
           ..['mobileOwner'] = state.mobileOwner
           ..['mobileOwnerRelation'] = state.mobileOwnerRelation == 'Other' && state.otherRelation != null && state.otherRelation!.isNotEmpty ? '${state.otherRelation}_other' : state.mobileOwnerRelation
+          // Add other_* fields for proper prefill
+          ..['other_religion'] = state.religion == 'Other' ? state.otherReligion : null
+          ..['other_category'] = state.category == 'Other' ? state.otherCategory : null
+          ..['other_occupation'] = state.occupation == 'Other' ? state.otherOccupation : null
+          ..['other_relation'] = state.mobileOwnerRelation == 'Other' ? state.otherRelation : null
           ..['mobileNo'] = state.mobileNo
           ..['voterId'] = state.voterId
           ..['rationId'] = state.rationId
@@ -1766,7 +1808,7 @@ class AddnewfamilymemberBloc
           try {
             final existingAnc = await LocalStorageDao.instance
                 .getMotherCareActivityByBeneficiary(_editingBeneficiaryKey!);
-                
+
             if (existingAnc == null) {
               // Get device info and current user details
               final deviceInfo = await DeviceInfo.getDeviceInfo();
@@ -1805,7 +1847,7 @@ class AddnewfamilymemberBloc
                 'is_synced': 0,
                 'is_deleted': 0,
               };
-              
+
               print('Inserting mother care activity for updated pregnant member: ${jsonEncode(motherCareActivityData)}');
               await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
             } else {
@@ -1826,8 +1868,8 @@ class AddnewfamilymemberBloc
               final Map<String, dynamic> partnerInfo = partnerInfoRaw is Map
                   ? Map<String, dynamic>.from(partnerInfoRaw)
                   : (partnerInfoRaw is String && partnerInfoRaw.isNotEmpty)
-                      ? Map<String, dynamic>.from(jsonDecode(partnerInfoRaw))
-                      : <String, dynamic>{};
+                  ? Map<String, dynamic>.from(jsonDecode(partnerInfoRaw))
+                  : <String, dynamic>{};
 
               // Store edited member's name as spouseName on partner row
               partnerInfo['spouseName'] = currentName;

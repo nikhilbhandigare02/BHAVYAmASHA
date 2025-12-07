@@ -378,10 +378,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: BlocConsumer<ProfileBloc, ProfileState>(
               listener: (context, state) {
                 if (state.success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.profileUpdated)),
-                  );
-                  Navigator.pushNamedAndRemoveUntil(
+                  SnackBar(content: Text("Form Submitted Successfully"));
+                Navigator.pushNamedAndRemoveUntil(
                     context,
                     Route_Names.homeScreen,
                         (Route<dynamic> route) => false,
