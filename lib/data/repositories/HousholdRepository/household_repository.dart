@@ -22,7 +22,7 @@ class HouseholdRepository {
         token = userDetails['token']?.toString();
       } catch (_) {}
     }
-    print('User token present: ${token != null && token.isNotEmpty}');
+    //print('User token present: ${token != null && token.isNotEmpty}');
 
     final headers = <String, String>{
       'Content-Type': 'application/json',

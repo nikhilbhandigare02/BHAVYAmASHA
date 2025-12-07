@@ -27,6 +27,8 @@ class BeneficiaryInfo {
   final String? relationToHead;
   final String? uniqueKey;
   final String? householdRefKey;
+  final String? village;
+  final String? voterId;
 
   BeneficiaryInfo({
     this.name,
@@ -39,6 +41,8 @@ class BeneficiaryInfo {
     this.relationToHead,
     this.uniqueKey,
     this.householdRefKey,
+    this.village,
+    this.voterId,
   });
 
   factory BeneficiaryInfo.fromMap(Map<String, dynamic> data) {
@@ -63,6 +67,8 @@ class BeneficiaryInfo {
       relationToHead: info?['relation_to_head'],
       uniqueKey: data['unique_key']?.toString(),
       householdRefKey: data['household_ref_key']?.toString(),
+      village: info?['village']?.toString(),
+      voterId: info?['voterId']?.toString(),
     );
   }
 
@@ -128,23 +134,16 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       // Load beneficiary data if ID is provided
       if (this.beneficiaryId?.isNotEmpty == true) {
         try {
-          final db = await _database;
-          print('🔍 Querying beneficiary with key: ${this.beneficiaryId}');
-          final List<Map<String, dynamic>> results = await db.query(
-            'beneficiaries',
-            where: 'unique_key = ?',
-            whereArgs: [this.beneficiaryId],
-          );
-          print('🔍 Found ${results.length} matching beneficiaries');
-          
-          if (results.isNotEmpty) {
-            final beneficiary = BeneficiaryInfo.fromMap(results.first);
+          print('🔍 Querying beneficiaries_new with key: ${this.beneficiaryId}');
+          final rec = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(this.beneficiaryId!);
+          if (rec != null) {
+            final beneficiary = BeneficiaryInfo.fromMap(rec);
             add(CbacBeneficiaryLoaded({
               'name': beneficiary.name,
               'gender': beneficiary.gender,
               'age': beneficiary.age,
               'mobile': beneficiary.mobile,
-              'address': beneficiary.address,
+              'address': beneficiary.village ?? beneficiary.address,
               'fatherName': beneficiary.fatherName,
               'spouseName': beneficiary.spouseName,
               'relationToHead': beneficiary.relationToHead,
@@ -152,14 +151,10 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
               'householdRefKey': beneficiary.householdRefKey,
             }));
           } else {
-            print('⚠️ No beneficiary found with ID: ${this.beneficiaryId}');
-            // Even if beneficiary not found, we can still proceed with the form
-            // The user can manually enter the required information
+            print('⚠️ No beneficiary found in beneficiaries_new with ID: ${this.beneficiaryId}');
           }
         } catch (e) {
-          debugPrint('Error loading beneficiary data: $e');
-          // Even if there's an error, we can still proceed with the form
-          // The user can manually enter the required information
+          debugPrint('Error loading beneficiary data from beneficiaries_new: $e');
         }
       }
     });
@@ -170,19 +165,28 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       
       // Map beneficiary data to form fields
       data['personal.name'] = beneficiary['name'];
-      data['personal.gender'] = beneficiary['gender'] == 'male' 
-          ? 'Male' 
-          : beneficiary['gender'] == 'female' 
-              ? 'Female' 
-              : 'Other';
+      final g = beneficiary['gender']?.toString().toLowerCase();
+      data['personal.gender'] =
+          (g == 'm' || g == 'male')
+              ? 'Male'
+              : (g == 'f' || g == 'female')
+                  ? 'Female'
+                  : 'Other';
+      data['personal.gender_code'] =
+          (g == 'm' || g == 'male')
+              ? 'M'
+              : (g == 'f' || g == 'female')
+                  ? 'F'
+                  : 'O';
       data['personal.age'] = beneficiary['age']?.toString();
       data['personal.mobile'] = beneficiary['mobile'];
       data['personal.address'] = beneficiary['address'];
+      data['beneficiary.voterId'] = beneficiary['voterId'];
       
-      // Set father/husband name based on gender and relation
-      if (beneficiary['gender'] == 'female' && beneficiary['spouseName'] != null) {
+      // Prefer spouseName, otherwise fallback to fatherName
+      if ((beneficiary['spouseName']?.toString().trim() ?? '').isNotEmpty) {
         data['personal.father'] = beneficiary['spouseName'];
-      } else if (beneficiary['fatherName'] != null) {
+      } else if ((beneficiary['fatherName']?.toString().trim() ?? '').isNotEmpty) {
         data['personal.father'] = beneficiary['fatherName'];
       }
       
@@ -229,18 +233,27 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
           break;
         case 3:
           {
-            final req = [
+            final reqB1 = [
               'partB.b1.cough2w',
               'partB.b1.bloodMucus',
               'partB.b1.fever2w',
               'partB.b1.weightLoss',
               'partB.b1.nightSweat',
-              'partB.b2.excessBleeding',
-              'partB.b2.depression',
-              'partB.b2.uterusProlapse',
             ];
-            for (final k in req) {
+            for (final k in reqB1) {
               if (!has(k)) missing.add(k);
+            }
+            final genderCode = state.data['personal.gender_code']?.toString();
+            final isFemale = genderCode == 'F';
+            if (isFemale) {
+              final reqB2 = [
+                'partB.b2.excessBleeding',
+                'partB.b2.depression',
+                'partB.b2.uterusProlapse',
+              ];
+              for (final k in reqB2) {
+                if (!has(k)) missing.add(k);
+              }
             }
           }
           break;
@@ -563,76 +576,138 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
   }
 
   int _calculatePartAScore(CbacFormState state) {
-    final itemsAge = [
-      'Less than 30 years',
-      '30-39 years',
-      '40-49 years',
-      '50-69 years',
-    ];
-    
-    final itemsTobacco = [
-      'Never consumed',
-      'Sometimes',
-      'Daily',
-    ];
-    
-    final itemsActivity = [
-      'Less than 150 minutes per week',
-      '150 minutes or more per week',
-    ];
-    
-    final itemsWaist = [
-      '≤ 80 cm',
-      '81-90 cm',
-      '> 90 cm',
-    ];
+    // Prefer code-based fields when available to avoid localization mismatches
+    final ageCode = state.data['partA.age_code'] as String?;
+    final tobCode = state.data['partA.tobacco_code'] as String?;
+    final alcoholCode = state.data['partA.alcohol_code'] as String?;
+    final activityCode = state.data['partA.activity_code'] as String?;
+    final waistCode = state.data['partA.waist_code'] as String?;
+    final familyCode = state.data['partA.familyHistory_code'] as String?;
 
-    // Calculate Part A scores
-    final age = state.data['partA.age'] as String?;
-    final tobacco = state.data['partA.tobacco'] as String?;
-    final alcohol = state.data['partA.alcohol'] as String?;
-    final activity = state.data['partA.activity'] as String?;
-    final waist = state.data['partA.waist'] as String?;
-    final familyHx = state.data['partA.familyHistory'] as String?;
+    int scoreAge;
+    if (ageCode != null) {
+      switch (ageCode) {
+        case 'AGE_30_39':
+          scoreAge = 1;
+          break;
+        case 'AGE_40_49':
+          scoreAge = 2;
+          break;
+        case 'AGE_50_69':
+          scoreAge = 3;
+          break;
+        default:
+          scoreAge = 0;
+      }
+    } else {
+      // Fallback to label matching for legacy data
+      final itemsAge = [
+        'Less than 30 years',
+        '30-39 years',
+        '40-49 years',
+        '50-69 years',
+      ];
+      final age = state.data['partA.age'] as String?;
+      final idx = age == null ? -1 : itemsAge.indexOf(age);
+      scoreAge = switch (idx) { 1 => 1, 2 => 2, 3 => 3, _ => 0 };
+    }
 
-    final idxAge = age == null ? -1 : itemsAge.indexOf(age);
-    final scoreAge = switch (idxAge) { 1 => 1, 2 => 2, 3 => 3, _ => 0 };
-    
-    final idxTob = tobacco == null ? -1 : itemsTobacco.indexOf(tobacco);
-    final scoreTobacco = idxTob <= 0 ? 0 : 1;
-    
-    final idxAlcohol = alcohol == null ? -1 : (alcohol.toLowerCase() == 'yes' ? 0 : 1);
-    final scoreAlcohol = idxAlcohol == 0 ? 1 : 0;
-    
-    final idxActivity = activity == null ? -1 : itemsActivity.indexOf(activity);
-    final scoreActivity = idxActivity == 0 ? 1 : 0;
-    
-    final idxWaist = waist == null ? -1 : itemsWaist.indexOf(waist);
-    final scoreWaist = switch (idxWaist) { 1 => 1, 2 => 2, _ => 0 };
-    
-    final idxFamily = familyHx == null ? -1 : (familyHx.toLowerCase() == 'yes' ? 0 : 1);
-    final scoreFamily = idxFamily == 0 ? 2 : 0;
+    int scoreTobacco;
+    if (tobCode != null) {
+      scoreTobacco = tobCode == 'TOB_NEVER' ? 0 : 1;
+    } else {
+      final itemsTobacco = ['Never consumed','Sometimes','Daily'];
+      final v = state.data['partA.tobacco'] as String?;
+      final idx = v == null ? -1 : itemsTobacco.indexOf(v);
+      scoreTobacco = idx <= 0 ? 0 : 1;
+    }
+
+    int scoreAlcohol;
+    if (alcoholCode != null) {
+      scoreAlcohol = alcoholCode == 'YES' ? 1 : 0;
+    } else {
+      final v = state.data['partA.alcohol'] as String?;
+      final isYes = v != null && v.toLowerCase() == 'yes';
+      scoreAlcohol = isYes ? 1 : 0;
+    }
+
+    int scoreActivity;
+    if (activityCode != null) {
+      scoreActivity = activityCode == 'ACT_LT150' ? 1 : 0;
+    } else {
+      final itemsActivity = ['Less than 150 minutes per week','150 minutes or more per week'];
+      final v = state.data['partA.activity'] as String?;
+      final idx = v == null ? -1 : itemsActivity.indexOf(v);
+      scoreActivity = idx == 0 ? 1 : 0;
+    }
+
+    int scoreWaist;
+    if (waistCode != null) {
+      switch (waistCode) {
+        case 'WAIST_81_90':
+          scoreWaist = 1;
+          break;
+        case 'WAIST_GT90':
+          scoreWaist = 2;
+          break;
+        default:
+          scoreWaist = 0;
+      }
+    } else {
+      final itemsWaist = ['≤ 80 cm','81-90 cm','> 90 cm'];
+      final v = state.data['partA.waist'] as String?;
+      final idx = v == null ? -1 : itemsWaist.indexOf(v);
+      scoreWaist = switch (idx) { 1 => 1, 2 => 2, _ => 0 };
+    }
+
+    int scoreFamily;
+    if (familyCode != null) {
+      scoreFamily = familyCode == 'YES' ? 2 : 0;
+    } else {
+      final v = state.data['partA.familyHistory'] as String?;
+      final isYes = v != null && v.toLowerCase() == 'yes';
+      scoreFamily = isYes ? 2 : 0;
+    }
 
     return scoreAge + scoreTobacco + scoreAlcohol + scoreActivity + scoreWaist + scoreFamily;
   }
 
   int _calculatePartDScore(CbacFormState state) {
-    final q1 = state.data['partD.q1'] as String?;
-    final q2 = state.data['partD.q2'] as String?;
-    
-    final options = [
-      'Not at all',
-      'Several days',
-      'More than half the days',
-      'Nearly every day',
-    ];
-
-    int scoreFromValue(String? v) {
-      if (v == null) return 0;
-      final idx = options.indexOf(v);
-      return idx < 0 ? 0 : idx;
+    final q1c = state.data['partD.q1_code'] as String?;
+    final q2c = state.data['partD.q2_code'] as String?;
+    int scoreFromCode(String? c) {
+      switch (c) {
+        case 'D_OPT0':
+          return 0;
+        case 'D_OPT1':
+          return 1;
+        case 'D_OPT2':
+          return 2;
+        case 'D_OPT3':
+          return 3;
+        default:
+          return -1;
+      }
     }
-
-    return scoreFromValue(q1) + scoreFromValue(q2);
+    int s1 = scoreFromCode(q1c);
+    int s2 = scoreFromCode(q2c);
+    if (s1 < 0 || s2 < 0) {
+      final options = [
+        'Not at all',
+        'Several days',
+        'More than half the days',
+        'Nearly every day',
+      ];
+      int scoreFromValue(String? v) {
+        if (v == null) return 0;
+        final idx = options.indexOf(v);
+        return idx < 0 ? 0 : idx;
+      }
+      final q1 = state.data['partD.q1'] as String?;
+      final q2 = state.data['partD.q2'] as String?;
+      s1 = s1 >= 0 ? s1 : scoreFromValue(q1);
+      s2 = s2 >= 0 ? s2 : scoreFromValue(q2);
+    }
+    return s1 + s2;
   }
 }

@@ -43,7 +43,7 @@ class _CbacformState extends State<Cbacform> {
     print('🚀 Initializing CBAC Form with - beneficiaryId: $beneficiaryId, hhid: $hhid');
     
     return BlocProvider(
-      create: (_) => CbacFormBloc(
+      create: (_) => CbacFormBloc( 
         beneficiaryId: beneficiaryId,
         householdId: hhid,
       )..add(CbacOpened(
@@ -68,15 +68,7 @@ class _CbacformState extends State<Cbacform> {
               
               // Handle form submission success
               if (state.isSuccess) {
-                ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(
-                    SnackBar(
-                      content: Text( 'Form saved successfully'),
-                      behavior: SnackBarBehavior.floating,
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                showAppSnackBar(context, 'form submitted successfully');
                 
                 Future.delayed(const Duration(milliseconds: 500), () {
                   Navigator.of(context).pop();
@@ -345,7 +337,7 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
             ? userDetails['working_location'] as Map<String, dynamic> 
             : {};
 
-        // Extract name components
+
         final firstName = name['first_name']?.toString()?.trim() ?? '';
         final middleName = name['middle_name']?.toString()?.trim() ?? '';
         final lastName = name['last_name']?.toString()?.trim() ?? '';
@@ -525,7 +517,7 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
             ),
             const Divider(height: 0.5),
 
-            // PHC/District Field - Should show "Muzaffarpur"
+
             CustomTextField(
               key: ValueKey('phc_${_district}'),
               hintText: l10n.phcNameLabel,
@@ -545,7 +537,6 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
             ),
             const Divider(height: 0.5),
 
-            // HSC Name Field - Should show "HSC Bandra"
             CustomTextField(
               key: ValueKey('hsc_${_hscName}'),
               hintText: l10n.hscNameLabel,
@@ -581,43 +572,84 @@ class _PersonalInfoTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       children: [
-        CustomTextField(
-          hintText: l10n.nameLabelSimple,
-          labelText: l10n.nameLabelSimple,
-          onChanged: (v) => bloc.add(CbacFieldChanged('personal.name', v.trim())),
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (p, c) => p.data['personal.name'] != c.data['personal.name'],
+          builder: (context, state) {
+            return CustomTextField(
+              hintText: l10n.nameLabelSimple,
+              labelText: l10n.nameLabelSimple,
+              initialValue: state.data['personal.name']?.toString() ?? '',
+              onChanged: (v) => bloc.add(CbacFieldChanged('personal.name', v.trim())),
+            );
+          },
         ),
         const Divider(height: 0.5),
-        CustomTextField(
-          hintText: l10n.husbandFatherNameLabel,
-          labelText: l10n.husbandFatherNameLabel,
-          onChanged: (v) => bloc.add(CbacFieldChanged('personal.father', v.trim())),
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (p, c) => p.data['personal.father'] != c.data['personal.father'],
+          builder: (context, state) {
+            return CustomTextField(
+              hintText: l10n.husbandFatherNameLabel,
+              labelText: l10n.husbandFatherNameLabel,
+              initialValue: state.data['personal.father']?.toString() ?? '',
+              onChanged: (v) => bloc.add(CbacFieldChanged('personal.father', v.trim())),
+            );
+          },
         ),
         const Divider(height: 0.5),
-        CustomTextField(
-          hintText: l10n.ageLabel,
-          labelText: l10n.ageLabel,
-          keyboardType: TextInputType.number,
-          onChanged: (v) => bloc.add(CbacFieldChanged('personal.age', v.trim())),
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (p, c) => p.data['personal.age'] != c.data['personal.age'],
+          builder: (context, state) {
+            return CustomTextField(
+              hintText: l10n.ageLabel,
+              labelText: l10n.ageLabel,
+              keyboardType: TextInputType.number,
+              initialValue: state.data['personal.age']?.toString() ?? '',
+              onChanged: (v) => bloc.add(CbacFieldChanged('personal.age', v.trim())),
+            );
+          },
         ),
         const Divider(height: 0.5),
         BlocBuilder<CbacFormBloc, CbacFormState>(
           buildWhen: (previous, current) => previous.data['personal.gender'] != current.data['personal.gender'],
           builder: (context, state) {
+            final codeGender = ['M','F','O'];
+            final labelGender = [l10n.genderMale, l10n.genderFemale, l10n.genderOther];
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final v = state.data['personal.gender'] as String?;
+              if (state.data['personal.gender_code'] == null && v != null) {
+                final idx = labelGender.indexOf(v);
+                if (idx >= 0) {
+                  context.read<CbacFormBloc>().add(CbacFieldChanged('personal.gender_code', codeGender[idx]));
+                }
+              }
+            });
             return ApiDropdown<String>(
               hintText: l10n.genderLabel,
               labelText: l10n.genderLabel,
-              items: [l10n.genderMale, l10n.genderFemale, l10n.genderOther],
+              items: labelGender,
               value: state.data['personal.gender'],
               getLabel: (s) => s,
-              onChanged: (v) => bloc.add(CbacFieldChanged('personal.gender', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('personal.gender', v));
+                final idx = v == null ? -1 : labelGender.indexOf(v);
+                if (idx >= 0) {
+                  bloc.add(CbacFieldChanged('personal.gender_code', codeGender[idx]));
+                }
+              },
             );
           },
         ),
         const Divider(height: 0.5),
-        CustomTextField(
-          hintText: l10n.addressLabel,
-          labelText: l10n.addressLabel,
-          onChanged: (v) => bloc.add(CbacFieldChanged('personal.address', v.trim())),
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (p, c) => p.data['personal.address'] != c.data['personal.address'],
+          builder: (context, state) {
+            return CustomTextField(
+              hintText: l10n.addressLabel,
+              labelText: l10n.addressLabel,
+              initialValue: state.data['personal.address']?.toString() ?? '',
+              onChanged: (v) => bloc.add(CbacFieldChanged('personal.address', v.trim())),
+            );
+          },
         ),
         const Divider(height: 0.5),
         BlocBuilder<CbacFormBloc, CbacFormState>(
@@ -629,7 +661,16 @@ class _PersonalInfoTab extends StatelessWidget {
               items: [l10n.idTypeAadhaar, l10n.idTypeVoterId, l10n.uid,],
               value: state.data['personal.idType'],
               getLabel: (s) => s,
-              onChanged: (v) => bloc.add(CbacFieldChanged('personal.idType', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('personal.idType', v));
+                if ((v ?? '') == l10n.idTypeVoterId) {
+                  final s = context.read<CbacFormBloc>().state;
+                  final voter = s.data['beneficiary.voterId']?.toString();
+                  if (voter != null && voter.isNotEmpty) {
+                    bloc.add(CbacFieldChanged('personal.idNumber', voter));
+                  }
+                }
+              },
             );
           },
         ),
@@ -674,11 +715,17 @@ class _PersonalInfoTab extends StatelessWidget {
           },
         ),
         const Divider(height: 0.5),
-        CustomTextField(
-          hintText: l10n.mobileTelephoneLabel,
-          labelText: l10n.mobileTelephoneLabel,
-          keyboardType: TextInputType.number,
-          onChanged: (v) => bloc.add(CbacFieldChanged('personal.mobile', v.trim())),
+        BlocBuilder<CbacFormBloc, CbacFormState>(
+          buildWhen: (p, c) => p.data['personal.mobile'] != c.data['personal.mobile'],
+          builder: (context, state) {
+            return CustomTextField(
+              hintText: l10n.mobileTelephoneLabel,
+              labelText: l10n.mobileTelephoneLabel,
+              keyboardType: TextInputType.number,
+              initialValue: state.data['personal.mobile']?.toString() ?? '',
+              onChanged: (v) => bloc.add(CbacFieldChanged('personal.mobile', v.trim())),
+            );
+          },
         ),
         const Divider(height: 0.5),
         BlocBuilder<CbacFormBloc, CbacFormState>(
@@ -725,7 +772,7 @@ class _PartATab extends StatelessWidget {
               // width: 20,
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Text('$score', style: const TextStyle(color: Colors.black54)),
+               child: Text('$score', style: const TextStyle(color: Colors.black54)),
               ),
             );
 
@@ -786,6 +833,51 @@ class _PartATab extends StatelessWidget {
           l10n.cbacA_waist81to90,
           l10n.cbacA_waistGT90,
         ];
+        
+        final codeAge = <String>['AGE_LT30','AGE_30_39','AGE_40_49','AGE_50_69'];
+        final codeTob = <String>['TOB_NEVER','TOB_SOMETIMES','TOB_DAILY'];
+        final codeYesNo = <String>['YES','NO'];
+        final codeActivity = <String>['ACT_LT150','ACT_GE150'];
+        final codeWaist = <String>['WAIST_LE80','WAIST_81_90','WAIST_GT90'];
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (state.data['partA.age_code'] == null && age != null) {
+            final idx = itemsAge.indexOf(age);
+            if (idx >= 0) {
+              bloc.add(CbacFieldChanged('partA.age_code', codeAge[idx]));
+            }
+          }
+          if (state.data['partA.tobacco_code'] == null && tobacco != null) {
+            final idx = itemsTobacco.indexOf(tobacco);
+            if (idx >= 0) {
+              bloc.add(CbacFieldChanged('partA.tobacco_code', codeTob[idx]));
+            }
+          }
+          if (state.data['partA.alcohol_code'] == null && alcohol != null) {
+            final idx = itemsYesNo.indexOf(alcohol);
+            if (idx >= 0) {
+              bloc.add(CbacFieldChanged('partA.alcohol_code', codeYesNo[idx]));
+            }
+          }
+          if (state.data['partA.activity_code'] == null && activity != null) {
+            final idx = itemsActivity.indexOf(activity);
+            if (idx >= 0) {
+              bloc.add(CbacFieldChanged('partA.activity_code', codeActivity[idx]));
+            }
+          }
+          if (state.data['partA.waist_code'] == null && waist != null) {
+            final idx = itemsWaist.indexOf(waist);
+            if (idx >= 0) {
+              bloc.add(CbacFieldChanged('partA.waist_code', codeWaist[idx]));
+            }
+          }
+          if (state.data['partA.familyHistory_code'] == null && familyHx != null) {
+            final idx = itemsYesNo.indexOf(familyHx);
+            if (idx >= 0) {
+              bloc.add(CbacFieldChanged('partA.familyHistory_code', codeYesNo[idx]));
+            }
+          }
+        });
 
         final idxAge = age == null ? -1 : itemsAge.indexOf(age);
         final scoreAge = switch (idxAge) { 1 => 1, 2 => 2, 3 => 3, _ => 0 };
@@ -811,7 +903,13 @@ class _PartATab extends StatelessWidget {
               question: l10n.cbacA_ageQ,
               items: itemsAge,
               value: age,
-              onChanged: (v) => bloc.add(CbacFieldChanged('partA.age', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('partA.age', v));
+                final idx = v == null ? -1 : itemsAge.indexOf(v);
+                if (idx >= 0) {
+                  bloc.add(CbacFieldChanged('partA.age_code', codeAge[idx]));
+                }
+              },
               score: scoreAge,
             ),
 
@@ -819,7 +917,13 @@ class _PartATab extends StatelessWidget {
               question: l10n.cbacA_tobaccoQ,
               items: itemsTobacco,
               value: tobacco,
-              onChanged: (v) => bloc.add(CbacFieldChanged('partA.tobacco', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('partA.tobacco', v));
+                final idx = v == null ? -1 : itemsTobacco.indexOf(v);
+                if (idx >= 0) {
+                  bloc.add(CbacFieldChanged('partA.tobacco_code', codeTob[idx]));
+                }
+              },
               score: scoreTobacco,
             ),
  
@@ -827,7 +931,13 @@ class _PartATab extends StatelessWidget {
               question: l10n.cbacA_alcoholQ,
               items: itemsYesNo,
               value: alcohol,
-              onChanged: (v) => bloc.add(CbacFieldChanged('partA.alcohol', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('partA.alcohol', v));
+                final idx = v == null ? -1 : itemsYesNo.indexOf(v);
+                if (idx >= 0) {
+                  bloc.add(CbacFieldChanged('partA.alcohol_code', codeYesNo[idx]));
+                }
+              },
               score: scoreAlcohol,
             ),
 
@@ -835,7 +945,13 @@ class _PartATab extends StatelessWidget {
               question: l10n.cbacA_waistQ,
               items: itemsWaist,
               value: waist,
-              onChanged: (v) => bloc.add(CbacFieldChanged('partA.waist', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('partA.waist', v));
+                final idx = v == null ? -1 : itemsWaist.indexOf(v);
+                if (idx >= 0) {
+                  bloc.add(CbacFieldChanged('partA.waist_code', codeWaist[idx]));
+                }
+              },
               score: scoreWaist,
             ),
 
@@ -843,7 +959,13 @@ class _PartATab extends StatelessWidget {
               question: l10n.cbacA_activityQ,
               items: itemsActivity,
               value: activity,
-              onChanged: (v) => bloc.add(CbacFieldChanged('partA.activity', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('partA.activity', v));
+                final idx = v == null ? -1 : itemsActivity.indexOf(v);
+                if (idx >= 0) {
+                  bloc.add(CbacFieldChanged('partA.activity_code', codeActivity[idx]));
+                }
+              },
               score: scoreActivity,
             ),
            
@@ -851,7 +973,13 @@ class _PartATab extends StatelessWidget {
               question: l10n.cbacA_familyQ,
               items: itemsYesNo,
               value: familyHx,
-              onChanged: (v) => bloc.add(CbacFieldChanged('partA.familyHistory', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('partA.familyHistory', v));
+                final idx = v == null ? -1 : itemsYesNo.indexOf(v);
+                if (idx >= 0) {
+                  bloc.add(CbacFieldChanged('partA.familyHistory_code', codeYesNo[idx]));
+                }
+              },
               score: scoreFamily,
             ),
 
@@ -1272,6 +1400,22 @@ class _PartDTab extends StatelessWidget {
           l10n.cbacD_opt2,
           l10n.cbacD_opt3,
         ];
+        final codeOptions = ['D_OPT0','D_OPT1','D_OPT2','D_OPT3'];
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (state.data['partD.q1_code'] == null && q1 != null) {
+            final idx = options.indexOf(q1);
+            if (idx >= 0) {
+              bloc.add(CbacFieldChanged('partD.q1_code', codeOptions[idx]));
+            }
+          }
+          if (state.data['partD.q2_code'] == null && q2 != null) {
+            final idx = options.indexOf(q2);
+            if (idx >= 0) {
+              bloc.add(CbacFieldChanged('partD.q2_code', codeOptions[idx]));
+            }
+          }
+        });
 
         int scoreFromValue(String? v) {
           if (v == null) return 0;
@@ -1334,12 +1478,24 @@ class _PartDTab extends StatelessWidget {
             row(
               question: l10n.cbacD_q1,
               value: q1,
-              onChanged: (v) => bloc.add(CbacFieldChanged('partD.q1', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('partD.q1', v));
+                final idx = v == null ? -1 : options.indexOf(v);
+                if (idx >= 0) {
+                  bloc.add(CbacFieldChanged('partD.q1_code', codeOptions[idx]));
+                }
+              },
             ),
             row(
               question: l10n.cbacD_q2,
               value: q2,
-              onChanged: (v) => bloc.add(CbacFieldChanged('partD.q2', v)),
+              onChanged: (v) {
+                bloc.add(CbacFieldChanged('partD.q2', v));
+                final idx = v == null ? -1 : options.indexOf(v);
+                if (idx >= 0) {
+                  bloc.add(CbacFieldChanged('partD.q2_code', codeOptions[idx]));
+                }
+              },
             ),
             const SizedBox(height: 12),
             Text(l10n.cbacTotalScorePartD(total), style: const TextStyle(fontWeight: FontWeight.w600)),

@@ -493,10 +493,10 @@ class SyncService {
       final unsynced = await _dao.getUnsyncedBeneficiaries();
       final count = unsynced.length;
       if (count == 0) {
-        print('Beneficiary Sync: No unsynced records found');
+      //  print('Beneficiary Sync: No unsynced records found');
         return;
       }
-      print('Beneficiary Sync: Found $count unsynced record(s)');
+      //print('Beneficiary Sync: Found $count unsynced record(s)');
       for (final b in unsynced) {
         try {
           Map<String, dynamic> _asMap(dynamic v) {
@@ -522,7 +522,7 @@ class SyncService {
 
           if ((payload['unique_key'] as String).isEmpty) continue;
           final uniqueKey = payload['unique_key'] as String;
-          print('Beneficiary Sync: syncing unique_key=$uniqueKey');
+         // print('Beneficiary Sync: syncing unique_key=$uniqueKey');
           final resp = await _beneficiaryRepo.addBeneficiary(payload);
 
           String? serverIdFromResp;
@@ -541,7 +541,7 @@ class SyncService {
               }
             }
           } catch (e) {
-            print('Beneficiary Sync: response parse error for unique_key=$uniqueKey -> $e');
+           // print('Beneficiary Sync: response parse error for unique_key=$uniqueKey -> $e');
           }
 
           if (success) {
@@ -549,21 +549,21 @@ class SyncService {
               uniqueKey: uniqueKey,
               serverId: serverIdFromResp,
             );
-            print(
-              'Beneficiary Sync: SYNCED unique_key=$uniqueKey (rows=$updated) '
-              '+ server_id ${serverIdFromResp == null || serverIdFromResp.isEmpty ? 'NOT set' : 'set to '+serverIdFromResp!}'
-            );
+            // print(
+            //   'Beneficiary Sync: SYNCED unique_key=$uniqueKey (rows=$updated) '
+            //   '+ server_id ${serverIdFromResp == null || serverIdFromResp.isEmpty ? 'NOT set' : 'set to '+serverIdFromResp!}'
+            // );
           } else {
-            print('Beneficiary Sync: NOT SYNCED unique_key=$uniqueKey (API not successful), will retry later');
+            //print('Beneficiary Sync: NOT SYNCED unique_key=$uniqueKey (API not successful), will retry later');
           }
         } catch (e) {
           // keep unsynced on failure
-          print('Beneficiary Sync: failed for a record -> $e');
+         // print('Beneficiary Sync: failed for a record -> $e');
         }
       }
     } catch (e) {
       // ignore
-      print('Beneficiary Sync: error during batch -> $e');
+     // print('Beneficiary Sync: error during batch -> $e');
     }
   }
 

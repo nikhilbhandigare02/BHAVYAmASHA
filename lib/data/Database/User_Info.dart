@@ -80,7 +80,7 @@ class UserInfo {
         }
       }
       
-      print('Successfully retrieved user: ${user['user_name']}');
+   //   print('Successfully retrieved user: ${user['user_name']}');
       return user;
     } catch (e) {
       print('Error getting current user: $e');
