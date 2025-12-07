@@ -85,6 +85,7 @@ import '../../../presentation/myBeneficiary/Beneficiaries/PregnantWomanList.dart
 import 'Route_Name.dart' show Route_Names;
 
 class Routes{
+  static final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
   static Route<dynamic> generateRoute(RouteSettings setting){
     switch (setting.name){
       case Route_Names.splashScreen:

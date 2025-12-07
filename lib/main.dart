@@ -99,6 +99,7 @@ class MyApp extends StatelessWidget {
           themeMode: ThemeMode.light,
           initialRoute: Route_Names.splashScreen,
           onGenerateRoute: Routes.generateRoute,
+          navigatorObservers: [Routes.routeObserver],
         );
       },
     );

@@ -60,11 +60,21 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
           final rawInfo = row['beneficiary_info'] as String? ?? '{}';
           final info = jsonDecode(rawInfo) as Map<String, dynamic>;
           final parentUserRaw = row['parent_user']?.toString() ?? '';
+          print('parent_user TEXT: ' + parentUserRaw);
           Map<String, dynamic> parentUser = {};
           if (parentUserRaw.isNotEmpty) {
             try {
-              parentUser = jsonDecode(parentUserRaw) as Map<String, dynamic>;
-              print('parentUser: $parentUser');
+              final first = jsonDecode(parentUserRaw);
+              if (first is Map) {
+                parentUser = Map<String, dynamic>.from(first as Map);
+              } else if (first is String) {
+                try {
+                  final second = jsonDecode(first);
+                  if (second is Map) {
+                    parentUser = Map<String, dynamic>.from(second as Map);
+                  }
+                } catch (_) {}
+              }
             } catch (_) {}
           }
 
@@ -88,9 +98,19 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
               info['mobile_number']?.toString() ??
               '');
 
-          // ASHA / HSC from parent_user JSON
           final ashaName = parentUser['asha_name']?.toString() ?? '';
           final hscName = parentUser['hsc_name']?.toString() ?? '';
+          final ashaDisplay = ashaName.isNotEmpty
+              ? ashaName
+              : (info['facilitator_name']?.toString() ??
+                 info['ashaName']?.toString() ??
+                 info['asha']?.toString() ??
+                 '').trim();
+          final hscDisplay = hscName.isNotEmpty
+              ? hscName
+              : (info['hsc_name']?.toString() ??
+                 info['hsc']?.toString() ??
+                 (info['hsc_id']?.toString() ?? '')).trim();
 
           // RCH ID from beneficiary info
           final rchId = (info['RCH_ID']?.toString() ??
@@ -123,9 +143,11 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
             'status': status.isNotEmpty ? status : 'Guest',
             'father_spouse': fatherSpouse,
             'mobileNo': mobile,
-            'asha_name': ashaName,
-            'hsc_name': hscName,
+            'asha_name': ashaDisplay,
+            'hsc_name': hscDisplay,
             'rchId': rchId,
+            'GUEST': 'Guest',
+
           });
         } catch (e) {
           print('Error decoding beneficiary_info for a guest row: $e');
@@ -308,7 +330,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      data['status'] ?? '',
+                      data['GUEST'] ?? '',
                       style: const TextStyle(
                         color: Colors.green, // ✅ Text color
                         fontWeight: FontWeight.bold,
@@ -346,7 +368,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
                   const SizedBox(height: 10),
                   _buildRow([
                     _rowText('Mobile Number', (data['mobileNo'] ?? data['mobile'] ?? data['mobile_number'] ?? data['Mobileno.'] ?? '').toString()),
-                    _rowText('Status', (data['status'] ?? '').toString()),
+                    _rowText('Status', (data['status'] ?? '').toString(), isStatus: true),
                     const SizedBox.shrink(),
                   ]),
                 ],
@@ -371,7 +393,12 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
     );
   }
 
-  Widget _rowText(String title, String value) {
+  Widget _rowText(String title, String value, {bool isStatus = false}) {
+    String displayValue = (value.trim().isEmpty || value.trim().toLowerCase() == 'n/a' || value.trim().toLowerCase() == 'null') ? 'Not Available' : value;
+    if (isStatus && displayValue != 'Not Available') {
+      List<String> words = displayValue.split(' ');
+      displayValue = words.length > 2 ? '${words.sublist(0, 2).join(' ')}\n${words.sublist(2).join(' ')}' : displayValue;
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -386,12 +413,13 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
         ),
         const SizedBox(height: 2),
         Text(
-          (value.trim().isEmpty || value.trim().toLowerCase() == 'n/a' || value.trim().toLowerCase() == 'null') ? 'Not Available' : value,
+          displayValue,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w400,
             fontSize: 13.sp,
           ),
+          maxLines: isStatus ? 3 : 1,
           overflow: TextOverflow.ellipsis,
         ),
       ],

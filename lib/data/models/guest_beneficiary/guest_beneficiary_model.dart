@@ -44,6 +44,13 @@ class GuestBeneficiary {
   });
 
   factory GuestBeneficiary.fromJson(Map<String, dynamic> json) {
+    final hd = _convertToMapStringDynamic(json['household_details']);
+    final parent = <String, dynamic>{
+      'hsc_name': (hd['hsc_name'] ?? json['hsc_name'])?.toString(),
+      'asha_name': (hd['asha_name'] ?? json['asha_name'])?.toString(),
+      'ashwin_id': (hd['ashwin_id'] ?? json['ashwin_id'])?.toString(),
+    }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
+
     return GuestBeneficiary(
       id: json['_id'] as String?,
       uniqueKey: json['unique_key'] as String? ?? '',
@@ -60,11 +67,9 @@ class GuestBeneficiary {
       isSeparated: _toInt(json['is_separated']),
       deviceDetails: _convertToMapStringDynamic(json['device_details']),
       appDetails: _convertToMapStringDynamic(json['app_details']),
-      parentUser: _convertToMapStringDynamic(json['parent_user'] ?? {
-        'parent_added_by': json['parent_added_by'],
-        'created_by': json['created_by'],
-        'added_by': json['added_by'],
-      }),
+      parentUser: parent.isNotEmpty
+          ? parent
+          : _convertToMapStringDynamic(json['parent_user']),
       currentUserKey: json['current_user_key']?.toString(),
       facilityId: _toInt(json['facility_id']),
       deathDetails: json['death_details'],
