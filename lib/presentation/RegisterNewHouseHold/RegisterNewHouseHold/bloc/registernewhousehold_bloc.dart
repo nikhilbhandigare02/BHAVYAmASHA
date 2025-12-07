@@ -1045,117 +1045,105 @@ class RegisterNewHouseholdBloc
 
             for (final member in event.memberForms) {
               try {
-                final String memberType = (member['memberType'] ?? 'Adult')
-                    .toString();
+                final String memberType =
+                (member['memberType'] ?? 'Adult').toString();
                 final String relation =
-                    (member['relation'] ?? member['Relation'] ?? '').toString();
-                final String name = (member['name'] ?? member['Name'] ?? '')
+                (member['relation'] ?? member['Relation'] ?? '')
                     .toString();
+                final String name =
+                (member['name'] ?? member['Name'] ?? '').toString();
                 if (name.isEmpty) continue; // skip invalid rows
 
-                final String memberId = await IdGenerator.generateUniqueId(
-                  deviceInfo,
-                );
+                final String memberId =
+                await IdGenerator.generateUniqueId(deviceInfo);
 
-                final String maritalStatus = (member['maritalStatus'] ?? '')
-                    .toString();
+                final String maritalStatus =
+                (member['maritalStatus'] ?? '').toString();
                 final dynamic spRaw = member['spousedetails'];
                 final bool hasInlineSpouse =
                     maritalStatus == 'Married' && spRaw != null;
 
                 String? memberSpouseKey;
                 if (hasInlineSpouse) {
-                  memberSpouseKey = await IdGenerator.generateUniqueId(
-                    deviceInfo,
-                  );
+                  memberSpouseKey = await IdGenerator.generateUniqueId(deviceInfo);
                 }
 
                 final String beneficiaryState =
-                    memberType.toLowerCase() == 'child'
+                memberType.toLowerCase() == 'child'
                     ? 'registration_due'
                     : 'active';
                 final int isAdult = memberType.toLowerCase() == 'child' ? 0 : 1;
 
-                final String memberStatus = (member['memberStatus'] ?? '')
-                    .toString();
-                final bool isDeathFlag = memberStatus.toLowerCase() == 'death';
+                final String memberStatus =
+                (member['memberStatus'] ?? '').toString();
+                final bool isDeathFlag =
+                    memberStatus.toLowerCase() == 'death';
 
                 final Map<String, dynamic> deathDetails = isDeathFlag
                     ? {
-                        'dateOfDeath': member['dateOfDeath'],
-                        'deathReason': member['deathReason'],
-                        'otherDeathReason': member['otherDeathReason'],
-                        'deathPlace': member['deathPlace'],
-                      }
+                  'dateOfDeath': member['dateOfDeath'],
+                  'deathReason': member['deathReason'],
+                  'otherDeathReason': member['otherDeathReason'],
+                  'deathPlace': member['deathPlace'],
+                }
                     : <String, dynamic>{};
 
-                final memberInfo =
-                    <String, dynamic>{
-                      'memberType': memberType,
-                      'relation': relation,
-                      'otherRelation': member['otherRelation'],
-                      'memberStatus': member['memberStatus'] ?? 'active',
-                      'name': name,
-                      'fatherName': member['fatherName'],
-                      'motherName': member['motherName'],
-                      'updateYear': member['updateYear'],
-                      'updateMonth': member['updateMonth'],
-                      'updateDay': member['updateDay'],
-                      'useDob': member['useDob'] ?? true,
-                      'dob': member['dob'],
-                      'approxAge': member['approxAge'],
-                      'birthOrder': member['birthOrder'],
-                      'gender': member['gender'],
-                      'bankAcc': member['bankAcc'],
-                      'ifsc': member['ifsc'],
-                      'occupation': member['occupation'],
-                      'other_occupation': member['otherOccupation'],
-                      'education': member['education'],
-                      'religion': member['religion'],
-                      'other_religion': member['otherReligion'],
-                      'category': member['category'],
-                      'other_category': member['otherCategory'],
-                      'abhaAddress': member['abhaAddress'],
-                      'mobileOwner': member['mobileOwner'],
-                      'mobile_owner_relation': member['mobileOwnerRelation'],
-                      'mobileNo': member['mobileNo'],
-                      'voterId': member['voterId'],
-                      'rationId': member['rationId'],
-                      'phId': member['phId'],
-                      'beneficiaryType': member['beneficiaryType'],
-                      'maritalStatus': member['maritalStatus'],
-                      'ageAtMarriage': member['ageAtMarriage'],
-                      'spouseName': member['spouseName'],
-                      'hasChildren': member['hasChildren'],
-                      'isPregnant': member['isPregnant'],
-                      'isFamilyPlanning': member['isFamilyPlanning'],
-                      'familyPlanningMethod': member['familyPlanningMethod'],
-                      'fpMethod': member['fpMethod'],
-                      'antraDate': member['antraDate'],
-                      'removalDate': member['removalDate'],
-                      'removalReason': member['removalReason'],
-                      'condomQuantity': member['condomQuantity'],
-                      'malaQuantity': member['malaQuantity'],
-                      'chhayaQuantity': member['chhayaQuantity'],
-                      'ecpQuantity': member['ecpQuantity'],
-                      'lmp': member['lmp'],
-                      'edd': member['edd'],
-                      'dateOfDeath': member['dateOfDeath'],
-                      'deathPlace': member['deathPlace'],
-                      'deathReason': member['deathReason'],
-                      'otherDeathReason': member['otherDeathReason'],
-                      'weight': member['weight'],
-                      'birthWeight': member['birthWeight'],
-                      'ChildSchool': member['ChildSchool'],
-                      'birthCertificate': member['birthCertificate'],
-                      'RichIDChanged': member['RichIDChanged'],
-                      'children': member['children'],
-                      'relation_to_head': relation,
-                      'isFamilyhead': false,
-                      'isFamilyheadWife': false,
-                    }..removeWhere(
-                      (k, v) => v == null || (v is String && v.trim().isEmpty),
-                    );
+                final memberInfo = <String, dynamic>{
+                  'memberType': memberType,
+                  'relation': relation,
+                  'otherRelation': member['otherRelation'],
+                  'name': name,
+                  'fatherName': member['fatherName'],
+                  'motherName': member['motherName'],
+                  'useDob': member['useDob'],
+                  'dob': member['dob'],
+                  'approxAge': member['approxAge'],
+                  'updateDay': member['updateDay'],
+                  'updateMonth': member['updateMonth'],
+                  'updateYear': member['updateYear'],
+                  'children': member['children'],
+                  'birthOrder': member['birthOrder'],
+                  'gender': member['gender'],
+                  'bankAcc': member['bankAcc'],
+                  'ifsc': member['ifsc'],
+                  'occupation': member['occupation'],
+                  'education': member['education'],
+                  'religion': member['religion'],
+                  'category': member['category'],
+                  'weight': member['WeightChange'] ?? member['weight'],
+                  'childSchool':
+                  member['ChildSchool'] ?? member['childSchool'],
+                  'birthCertificate': member['BirthCertificateChange'] ??
+                      member['birthCertificate'],
+                  'birthWeight': member['birthWeight'],
+                  'abhaAddress': member['abhaAddress'],
+                  'mobileOwner': member['mobileOwner'],
+                  'mobileOwnerRelation': member['mobileOwnerRelation'],
+                  'mobileNo': member['mobileNo'],
+                  'voterId': member['voterId'],
+                  'rationId': member['rationId'],
+                  'phId': member['phId'],
+                  'beneficiaryType': member['beneficiaryType'],
+                  'maritalStatus': member['maritalStatus'],
+                  'ageAtMarriage': member['ageAtMarriage'],
+                  'spouseName': member['spouseName'],
+                  'hasChildren': member['hasChildren'],
+                  'isPregnant': member['isPregnant'],
+
+                  // Inline member spouse details captured in AddNewFamilyMember
+                  // so they are not lost when saving the household.
+                  'spousedetails': member['spousedetails'],
+                  'spouseUseDob': member['spouseUseDob'],
+                  'spouseDob': member['spouseDob'],
+                  'spouseApproxAge': member['spouseApproxAge'],
+
+                  'memberStatus': memberStatus,
+                  'relation_to_head': relation,
+                  'isFamilyhead': false,
+                  'isFamilyheadWife': false,
+                }
+                  ..removeWhere((k, v) =>
+                  v == null || (v is String && v.trim().isEmpty));
 
                 final memberPayload = {
                   'server_id': null,
@@ -1196,17 +1184,74 @@ class RegisterNewHouseholdBloc
                   'is_deleted': 0,
                 };
 
-                print(
-                  '🧑‍👩‍👧 Inserting additional member from memberForms: '
-                  '${jsonEncode(memberPayload)}',
-                );
-                await LocalStorageDao.instance.insertBeneficiary(memberPayload);
+                print('🧑‍👩‍👧 Inserting additional member from memberForms: '
+                    '${jsonEncode(memberPayload)}');
+                await LocalStorageDao.instance
+                    .insertBeneficiary(memberPayload);
+
+                int age = 0;
+                if (member['dob'] != null) {
+                  try {
+                    final dob = DateTime.parse(member['dob']);
+                    final now = DateTime.now();
+                    age = now.year - dob.year;
+                    if (now.month < dob.month ||
+                        (now.month == dob.month && now.day < dob.day)) {
+                      age--;
+                    }
+                  } catch (e) {
+                    print('Error parsing DOB: $e');
+                  }
+                }
+
+                final isEligibleForCouple =
+                    maritalStatus == 'Married' && age >= 15 && age <= 49;
+
+                if (isEligibleForCouple) {
+                  try {
+                    final db = await DatabaseProvider.instance.database;
+                    final eligibleCoupleActivityData = {
+                      'server_id': '',
+                      'household_ref_key': uniqueKey,
+                      'beneficiary_ref_key': memberId,
+                      'eligible_couple_state': 'eligible_couple',
+                      'device_details': jsonEncode({
+                        'id': deviceInfo.deviceId,
+                        'platform': deviceInfo.platform,
+                        'version': deviceInfo.osVersion,
+                      }),
+                      'app_details': jsonEncode({
+                        'app_version': deviceInfo.appVersion.split('+').first,
+                        'form_data': {
+                          'created_at': DateTime.now().toIso8601String(),
+                          'updated_at': DateTime.now().toIso8601String(),
+                        },
+                      }),
+                      'parent_user': '',
+                      'current_user_key': ashaUniqueKey,
+                      'facility_id': facilityId,
+                      'created_date_time': ts,
+                      'modified_date_time': ts,
+                      'is_synced': 0,
+                      'is_deleted': 0,
+                    };
+
+                    print('Inserting eligible couple activity for head: $headId');
+                    await db.insert(
+                      'eligible_couple_activities',
+                      eligibleCoupleActivityData,
+                      conflictAlgorithm: ConflictAlgorithm.replace,
+                    );
+                  } catch (e) {
+                    print(
+                      'Error inserting eligible couple activity for head: $e',
+                    );
+                  }
+                }
 
                 // If this is a female member who is pregnant, insert into mother_care_activities
-                final isFemale =
-                    (member['gender']?.toString().toLowerCase() == 'female');
-                final isPregnant =
-                    (member['isPregnant']?.toString().toLowerCase() == 'yes' ||
+                final isFemale = (member['gender']?.toString().toLowerCase() == 'female');
+                final isPregnant = (member['isPregnant']?.toString().toLowerCase() == 'yes' ||
                     member['isPregnant']?.toString().toLowerCase() == 'true');
 
                 if (isFemale && isPregnant) {
@@ -1236,12 +1281,8 @@ class RegisterNewHouseholdBloc
                       'is_deleted': 0,
                     };
 
-                    print(
-                      'Inserting mother care activity for pregnant woman: ${jsonEncode(motherCareActivityData)}',
-                    );
-                    await LocalStorageDao.instance.insertMotherCareActivity(
-                      motherCareActivityData,
-                    );
+                    print('Inserting mother care activity for pregnant woman: ${jsonEncode(motherCareActivityData)}');
+                    await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
                   } catch (e) {
                     print('Error inserting mother care activity: $e');
                   }
@@ -1252,56 +1293,16 @@ class RegisterNewHouseholdBloc
                 // final isPregnant = (member['isPregnant']?.toString().toLowerCase() == 'yes' ||
                 //                   member['isPregnant']?.toString().toLowerCase() == 'true');
                 //
-                if (isFemale && isPregnant) {
-                  try {
-                    final motherCareActivityData = {
-                      'server_id': null,
-                      'household_ref_key': uniqueKey,
-                      'beneficiary_ref_key': memberId,
-                      'mother_care_state': 'anc_due',
-                      'device_details': jsonEncode({
-                        'id': deviceInfo.deviceId,
-                        'platform': deviceInfo.platform,
-                        'version': deviceInfo.osVersion,
-                      }),
-                      'app_details': jsonEncode({
-                        'app_version': deviceInfo.appVersion.split('+').first,
-                        'app_name': deviceInfo.appName,
-                        'build_number': deviceInfo.buildNumber,
-                        'package_name': deviceInfo.packageName,
-                      }),
-                      'parent_user': jsonEncode({}),
-                      'current_user_key': ashaUniqueKey,
-                      'facility_id': facilityId,
-                      'created_date_time': ts,
-                      'modified_date_time': ts,
-                      'is_synced': 0,
-                      'is_deleted': 0,
-                    };
 
-                    print(
-                      'Inserting mother care activity for pregnant woman: ${jsonEncode(motherCareActivityData)}',
-                    );
-                    await LocalStorageDao.instance.insertMotherCareActivity(
-                      motherCareActivityData,
-                    );
-                  } catch (e) {
-                    print('Error inserting mother care activity: $e');
-                  }
-                }
 
-                // If this is a child with registration_due status, insert into child_care_activities
-                if (memberType.toLowerCase() == 'child' &&
-                    beneficiaryState == 'registration_due') {
+                if (memberType.toLowerCase() == 'child' && beneficiaryState == 'registration_due') {
                   try {
                     final childCareActivityData = {
                       'server_id': null,
                       'household_ref_key': uniqueKey,
                       'beneficiary_ref_key': memberId,
-                      'mother_key':
-                          null, // These would need to be set if available
-                      'father_key':
-                          null, // These would need to be set if available
+                      'mother_key': null, // These would need to be set if available
+                      'father_key': null, // These would need to be set if available
                       'child_care_state': 'registration_due',
                       'device_details': jsonEncode({
                         'id': deviceInfo.deviceId,
@@ -1323,12 +1324,8 @@ class RegisterNewHouseholdBloc
                       'is_deleted': 0,
                     };
 
-                    print(
-                      'Inserting child care activity: ${jsonEncode(childCareActivityData)}',
-                    );
-                    await LocalStorageDao.instance.insertChildCareActivity(
-                      childCareActivityData,
-                    );
+                    print('Inserting child care activity: ${jsonEncode(childCareActivityData)}');
+                    await LocalStorageDao.instance.insertChildCareActivity(childCareActivityData);
                   } catch (e) {
                     print('Error inserting child care activity: $e');
                   }
@@ -1348,79 +1345,69 @@ class RegisterNewHouseholdBloc
 
                     if (spMap != null) {
                       final String spouseName =
-                          (spMap['memberName'] ?? spMap['spouseName'] ?? '')
-                              .toString();
+                      (spMap['memberName'] ?? spMap['spouseName'] ?? '')
+                          .toString();
                       if (spouseName.isNotEmpty) {
                         final String spouseGender =
-                            (spMap['gender'] ?? '').toString().isNotEmpty
+                        (spMap['gender'] ?? '').toString().isNotEmpty
                             ? spMap['gender'].toString()
                             : ((member['gender'] == 'Male')
-                                  ? 'Female'
-                                  : (member['gender'] == 'Female')
-                                  ? 'Male'
-                                  : '');
+                            ? 'Female'
+                            : (member['gender'] == 'Female')
+                            ? 'Male'
+                            : '');
 
-                        final spouseInfo =
-                            <String, dynamic>{
-                              'relation': spMap['relation'] ?? 'spouse',
-                              'memberName': spouseName,
-                              'ageAtMarriage':
-                                  spMap['ageAtMarriage'] ??
-                                  member['ageAtMarriage'],
-                              'RichIDChanged': spMap['RichIDChanged'],
-                              'spouseName': spMap['spouseName'] ?? name,
-                              'fatherName': spMap['fatherName'],
-                              'useDob': spMap['useDob'],
-                              'dob': spMap['dob'],
-                              'edd': spMap['edd'],
-                              'lmp': spMap['lmp'],
-                              'approxAge': spMap['approxAge'],
-                              'gender': spouseGender,
-                              'occupation': spMap['occupation'],
-                              'education': spMap['education'],
-                              'religion': spMap['religion'],
-                              'category': spMap['category'],
-                              'antraDate': spMap['antraDate'],
-                              'mobile_owner_relation':
-                                  spMap['mobileOwnerOtherRelation'],
-                              'other_category': spMap['otherCategory'],
-                              'other_religion': spMap['otherReligion'],
-                              'other_occupation': spMap['otherOccupation'],
-                              'abhaAddress': spMap['abhaAddress'],
-                              'mobileOwner': spMap['mobileOwner'],
-                              'mobileNo': spMap['mobileNo'],
-                              'bankAcc': spMap['bankAcc'],
-                              'ifsc': spMap['ifsc'],
-                              'voterId': spMap['voterId'],
-                              'rationId': spMap['rationId'],
-                              'phId': spMap['phId'],
-                              'beneficiaryType': spMap['beneficiaryType'],
-                              'isPregnant': spMap['isPregnant'],
-                              'familyPlanningCounseling':
-                                  spMap['familyPlanningCounseling'],
-                              'is_family_planning':
-                                  (spMap['familyPlanningCounseling']
-                                          ?.toString()
-                                          .toLowerCase() ==
-                                      'yes')
-                                  ? 1
-                                  : 0,
-                              'fpMethod': spMap['fpMethod'],
-                              'removalDate': spMap['removalDate'],
-                              'removalReason': spMap['removalReason'],
-                              'condomQuantity': spMap['condomQuantity'],
-                              'malaQuantity': spMap['malaQuantity'],
-                              'chhayaQuantity': spMap['chhayaQuantity'],
-                              'ecpQuantity': spMap['ecpQuantity'],
-                              'maritalStatus': 'Married',
-                              'relation_to_head': 'spouse',
-                              'isFamilyhead': false,
-                              'isFamilyheadWife': false,
-                            }..removeWhere(
-                              (k, v) =>
-                                  v == null ||
-                                  (v is String && v.trim().isEmpty),
-                            );
+                        final spouseInfo = <String, dynamic>{
+                          'relation': spMap['relation'] ?? 'spouse',
+                          'memberName': spouseName,
+                          'ageAtMarriage': spMap['ageAtMarriage'] ??
+                              member['ageAtMarriage'],
+                          'RichIDChanged': spMap['RichIDChanged'],
+                          'spouseName': spMap['spouseName'] ?? name,
+                          'fatherName': spMap['fatherName'],
+                          'useDob': spMap['useDob'],
+                          'dob': spMap['dob'],
+                          'edd': spMap['edd'],
+                          'lmp': spMap['lmp'],
+                          'approxAge': spMap['approxAge'],
+                          'gender': spouseGender,
+                          'occupation': spMap['occupation'],
+                          'education': spMap['education'],
+                          'religion': spMap['religion'],
+                          'category': spMap['category'],
+                          'abhaAddress': spMap['abhaAddress'],
+                          'mobileOwner': spMap['mobileOwner'],
+                          'mobileNo': spMap['mobileNo'],
+                          'bankAcc': spMap['bankAcc'],
+                          'ifsc': spMap['ifsc'],
+                          'voterId': spMap['voterId'],
+                          'rationId': spMap['rationId'],
+                          'phId': spMap['phId'],
+                          'beneficiaryType': spMap['beneficiaryType'],
+                          'isPregnant': spMap['isPregnant'],
+                          'familyPlanningCounseling':
+                          spMap['familyPlanningCounseling'],
+                          'is_family_planning':
+                          (spMap['familyPlanningCounseling']
+                              ?.toString()
+                              .toLowerCase() ==
+                              'yes')
+                              ? 1
+                              : 0,
+                          'fpMethod': spMap['fpMethod'],
+                          'removalDate': spMap['removalDate'],
+                          'removalReason': spMap['removalReason'],
+                          'condomQuantity': spMap['condomQuantity'],
+                          'malaQuantity': spMap['malaQuantity'],
+                          'chhayaQuantity': spMap['chhayaQuantity'],
+                          'ecpQuantity': spMap['ecpQuantity'],
+                          'maritalStatus': 'Married',
+                          'relation_to_head': 'spouse',
+                          'isFamilyhead': false,
+                          'isFamilyheadWife': false,
+                        }
+                          ..removeWhere((k, v) =>
+                          v == null || (v is String && v.trim().isEmpty));
 
                         final spousePayload = {
                           'server_id': null,
@@ -1434,7 +1421,7 @@ class RegisterNewHouseholdBloc
                           'mother_key': null,
                           'father_key': null,
                           'is_family_planning':
-                              spouseInfo['is_family_planning'] ?? 0,
+                          spouseInfo['is_family_planning'] ?? 0,
                           'is_adult': 1,
                           'is_guest': 0,
                           'is_death': 0,
@@ -1447,9 +1434,8 @@ class RegisterNewHouseholdBloc
                             'version': deviceInfo.osVersion,
                           }),
                           'app_details': jsonEncode({
-                            'app_version': deviceInfo.appVersion
-                                .split('+')
-                                .first,
+                            'app_version':
+                            deviceInfo.appVersion.split('+').first,
                             'app_name': deviceInfo.appName,
                             'build_number': deviceInfo.buildNumber,
                             'package_name': deviceInfo.packageName,
@@ -1464,18 +1450,20 @@ class RegisterNewHouseholdBloc
                         };
 
                         print(
-                          '🧑‍🤝‍🧑 Inserting inline spouse beneficiary for member: '
-                          '${jsonEncode(spousePayload)}',
-                        );
-                        await LocalStorageDao.instance.insertBeneficiary(
-                          spousePayload,
-                        );
+                            '🧑‍🤝‍🧑 Inserting inline spouse beneficiary for member: '
+                                '${jsonEncode(spousePayload)}');
+                        await LocalStorageDao.instance
+                            .insertBeneficiary(spousePayload);
+
+
+
                       }
                     }
                   } catch (e) {
                     print('Error inserting inline member spouse: $e');
                   }
                 }
+
               } catch (e) {
                 print('Error inserting additional member: $e');
               }

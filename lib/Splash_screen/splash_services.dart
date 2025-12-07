@@ -13,7 +13,7 @@ class SplashServices {
         context,
         //loginFlag == 1 ? Route_Names.homeScreen : Route_Names.loginScreen,
         loginFlag == 1 ? Route_Names.homeScreen : Route_Names.loginScreen,
-       // Route_Names.homeScreen,
+        // Route_Names.homeScreen,
         (route) => false,
       ),
     );

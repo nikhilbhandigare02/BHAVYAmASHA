@@ -506,6 +506,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     );
   }
 
+
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
@@ -564,33 +565,19 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   const Icon(Icons.home, color: Colors.black54, size: 18),
                   Expanded(
                     child: Text(
-                      (data['_raw']['household_ref_key']?.toString().length ??
-                                  0) >
-                              11
-                          ? data['_raw']['household_ref_key']
-                                .toString()
-                                .substring(
-                                  data['_raw']['household_ref_key']
-                                          .toString()
-                                          .length -
-                                      11,
-                                )
-                          : (data['_raw']['household_ref_key']?.toString() ??
-                                ''),
+                      (data['_raw']['household_ref_key']?.toString().length ?? 0) > 11 ? data['_raw']['household_ref_key'].toString().substring(data['_raw']['household_ref_key'].toString().length - 11) : (data['_raw']['household_ref_key']?.toString() ?? ''),
                       style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14.sp,
-                      ),
+                          color: primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp),
                     ),
                   ),
                   Text(
                     '${l10n?.houseNoLabel ?? 'House No.'} : ${data['houseNo'] ?? data['_raw']['beneficiary_info']?['houseNo'] ?? ''}',
                     style: TextStyle(
-                      color: primary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14.sp,
-                    ),
+                        color: primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14.sp),
                   ),
                   const SizedBox(width: 8),
                   SizedBox(
@@ -606,27 +593,21 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                       fontSize: 14.sp,
                       onPress: () async {
                         try {
-                          final hhKey =
-                              data['_raw']['household_ref_key']?.toString() ??
-                              '';
+                          final hhKey = data['_raw']['household_ref_key']?.toString() ?? '';
                           if (hhKey.isEmpty) {
                             return;
                           }
 
-                          final members = await LocalStorageDao.instance
-                              .getBeneficiariesByHousehold(hhKey);
+                          final members = await LocalStorageDao.instance.getBeneficiariesByHousehold(hhKey);
                           if (members.isEmpty) {
                             return;
                           }
 
                           Map<String, dynamic>? headRow;
-                          final configuredHeadKey = data['_raw']['unique_key']
-                              ?.toString();
-                          if (configuredHeadKey != null &&
-                              configuredHeadKey.isNotEmpty) {
+                          final configuredHeadKey = data['_raw']['unique_key']?.toString();
+                          if (configuredHeadKey != null && configuredHeadKey.isNotEmpty) {
                             for (final m in members) {
-                              if ((m['unique_key'] ?? '').toString() ==
-                                  configuredHeadKey) {
+                              if ((m['unique_key'] ?? '').toString() == configuredHeadKey) {
                                 headRow = m;
                                 break;
                               }
@@ -640,9 +621,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                           if (rawInfo is Map<String, dynamic>) {
                             info = rawInfo;
                           } else if (rawInfo is String && rawInfo.isNotEmpty) {
-                            info = Map<String, dynamic>.from(
-                              jsonDecode(rawInfo) as Map,
-                            );
+                            info = Map<String, dynamic>.from(jsonDecode(rawInfo) as Map);
                           } else {
                             info = <String, dynamic>{};
                           }
@@ -655,8 +634,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                           });
 
                           map['hh_unique_key'] = hhKey;
-                          map['head_unique_key'] =
-                              headRow['unique_key']?.toString() ?? '';
+                          map['head_unique_key'] = headRow['unique_key']?.toString() ?? '';
                           if (headRow['id'] != null) {
                             map['head_id_pk'] = headRow['id'].toString();
                           }
@@ -669,12 +647,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                               Map<String, dynamic> sInfo;
                               if (rawSpInfo is Map<String, dynamic>) {
                                 sInfo = rawSpInfo;
-                              } else if (rawSpInfo is String &&
-                                  rawSpInfo.isNotEmpty) {
+                              } else if (rawSpInfo is String && rawSpInfo.isNotEmpty) {
                                 try {
-                                  sInfo = Map<String, dynamic>.from(
-                                    jsonDecode(rawSpInfo) as Map,
-                                  );
+                                  sInfo = Map<String, dynamic>.from(jsonDecode(rawSpInfo) as Map);
                                 } catch (_) {
                                   continue;
                                 }
@@ -682,11 +657,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                                 continue;
                               }
 
-                              final rel =
-                                  (sInfo['relation_to_head'] ??
-                                          sInfo['relation'])
-                                      ?.toString()
-                                      .toLowerCase();
+                              final rel = (sInfo['relation_to_head'] ?? sInfo['relation'])
+                                  ?.toString()
+                                  .toLowerCase();
                               if (rel == 'spouse') {
                                 spouseRow = m;
                                 break;
@@ -698,20 +671,15 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                               Map<String, dynamic> spInfo;
                               if (rawSpInfo is Map<String, dynamic>) {
                                 spInfo = rawSpInfo;
-                              } else if (rawSpInfo is String &&
-                                  rawSpInfo.isNotEmpty) {
-                                spInfo = Map<String, dynamic>.from(
-                                  jsonDecode(rawSpInfo) as Map,
-                                );
+                              } else if (rawSpInfo is String && rawSpInfo.isNotEmpty) {
+                                spInfo = Map<String, dynamic>.from(jsonDecode(rawSpInfo) as Map);
                               } else {
                                 spInfo = <String, dynamic>{};
                               }
 
-                              map['spouse_unique_key'] =
-                                  spouseRow['unique_key']?.toString() ?? '';
+                              map['spouse_unique_key'] = spouseRow['unique_key']?.toString() ?? '';
                               if (spouseRow['id'] != null) {
-                                map['spouse_id_pk'] = spouseRow['id']
-                                    .toString();
+                                map['spouse_id_pk'] = spouseRow['id'].toString();
                               }
 
                               spInfo.forEach((key, value) {
@@ -744,9 +712,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(0),
-                ),
+                borderRadius:
+                const BorderRadius.vertical(bottom: Radius.circular(0)),
               ),
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -755,77 +722,63 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: _rowText(l10n?.thName ?? 'Name', data['name']),
-                      ),
+                          child:
+                          _rowText(l10n?.thName ?? 'Name', data['name'])),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: _rowText(
-                          l10n?.mobileLabelSimple ?? 'Mobile no.',
-                          data['mobile'],
-                        ),
-                      ),
+                          child: _rowText(
+                              l10n?.mobileLabelSimple ?? 'Mobile no.',
+                              data['mobile'])),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: _rowText(
-                          'Remaining to add',
-                          '${data['remainingChildren']}',
-                        ),
-                      ),
+                          child: _rowText(
+                              l10n?.rnhTotalMembers ??
+                                  'No. of total members',
+                              data['totalMembers'].toString())),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
-                        child: _rowText(
-                          l10n?.eligibleCouples ?? 'Eligible couples',
-                          data['eligibleCouples'].toString(),
-                        ),
-                      ),
+                          child: _rowText(
+                              l10n?.eligibleCouples ?? 'Eligible couples',
+                              data['eligibleCouples'].toString())),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: _rowText(
-                          l10n?.pregnantWomen ?? 'Pregnant women',
-                          data['pregnantWomen'].toString(),
-                        ),
-                      ),
+                          child: _rowText(
+                              l10n?.pregnantWomen ?? 'Pregnant women',
+                              data['pregnantWomen'].toString())),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: _rowText(
-                          l10n?.elderlyAbove65 ?? 'Elderly (>65 Y)',
-                          data['elderly'].toString(),
-                        ),
-                      ),
+                          child: _rowText(
+                              l10n?.elderlyAbove65 ?? 'Elderly (>65 Y)',
+                              data['elderly'].toString())),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
-                        child: _rowText(
-                          l10n?.children0to1 ?? '0-1 year old children',
-                          data['child0to1'].toString(),
-                        ),
-                      ),
+                          child: _rowText(
+                              l10n?.children0to1 ?? '0-1 year old children',
+                              data['child0to1'].toString())),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: _rowText(
-                          l10n?.children1to2 ?? '1-2 year old children',
-                          data['child1to2'].toString(),
-                        ),
-                      ),
+                          child: _rowText(
+                              l10n?.children1to2 ?? '1-2 year old children',
+                              data['child1to2'].toString())),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: _rowText(
-                          l10n?.children2to5 ?? '2-5 year old children',
-                          data['child2to5'].toString(),
-                        ),
-                      ),
+                          child: _rowText(
+                              l10n?.children2to5 ?? '2-5 year old children',
+                              data['child2to5'].toString())),
                     ],
                   ),
                 ],
               ),
             ),
+
 
             if (data['hasChildrenTarget'] == true &&
                 ((data['remainingChildren'] ?? 0) as int) > 0)
@@ -833,35 +786,27 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(8),
-                  ),
+                  borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(8)),
                   border: Border(
-                    top: BorderSide(
-                      color: AppColors.outlineVariant,
-                      width: 0.5,
-                    ),
-                  ),
+                      top: BorderSide(
+                          color: AppColors.outlineVariant, width: 0.5)),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 child: Row(
+
                   children: [
                     Text(
                       '${l10n?.memberRemainsToAdd ?? 'Remaining to add'}: ',
                       style: TextStyle(
-                        color: AppColors.warning,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13.sp,
-                      ),
+                          color: AppColors.warning,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13.sp),
                     ),
-                    SizedBox(width: 15.w),
-                    Text(
-                      '${data['remainingChildren']} '
-                      '${data['remainingChildren'] > 1 ? '' : ''}',
-                    ),
+                    SizedBox(width: 15.w,),
+                    Text( '${data['remainingChildren']} '
+                        '${data['remainingChildren'] > 1 ? '' : ''}',)
                   ],
                 ),
               ),
@@ -870,7 +815,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       ),
     );
   }
-
   Widget _rowText(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -47,6 +47,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     });
 
     final beneficiaries = <Map<String, dynamic>>[];
+    final dao = LocalStorageDao();
 
     try {
       // Only get non-migrated beneficiaries (is_migrated = 0)
@@ -132,6 +133,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           'SpouseName': '',
           'SpouseGender': '',
           'Relation': relation,
+          'is_synced': row['is_synced'] ?? 0,
         });
       }
     } catch (e) {
@@ -450,14 +452,12 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.asset(
-                          'assets/images/sync.png',
-                          width: 25,
-                          height: 25,
-                          fit: BoxFit.cover,
-                        ),
+                      Image.asset(
+                        'assets/images/sync.png',
+                        width: 25,
+                        height: 25,
+                        color: (data['is_synced'] == 1) ? null : Colors.grey,
+                        fit: BoxFit.cover,
                       ),
                     ],
                   ),

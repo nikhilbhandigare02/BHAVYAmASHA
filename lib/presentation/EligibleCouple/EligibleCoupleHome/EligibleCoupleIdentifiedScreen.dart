@@ -455,10 +455,11 @@ class _EligibleCoupleIdentifiedScreenState
                         ),
                       ),
                       const SizedBox(width: 8),
-                      SizedBox(
-                        width: 60,
+                      Image.asset(
+                        'assets/images/sync.png',
+                        width: 24,
                         height: 24,
-                        child: Image.asset('assets/images/sync.png'),
+                        color: (data['_rawRow']?['is_synced'] == 1) ? null : Colors.grey,
                       ),
                     ],
                   ),

@@ -557,7 +557,7 @@ class LocalStorageDao {
         'beneficiaries_new',
         {
           'server_id': serverId,
-          // 'is_synced': 1,
+          'is_synced': 1,
           'modified_date_time': DateTime.now().toIso8601String(),
         },
         where: 'unique_key = ?',
@@ -703,7 +703,7 @@ class LocalStorageDao {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getUnsyncedHouseholds() async {
+  Future<List<Map<String, dynamic>>> getUnsyncedHouseholds  () async {
     try {
       final db = await _db;
       final rows = await db.query(
@@ -966,15 +966,28 @@ class LocalStorageDao {
     }
   }
 
+// In local_storage_dao.dart
   Future<List<Map<String, dynamic>>> getUnsyncedMotherCareActivities() async {
     final db = await _db;
     final rows = await db.query(
       'mother_care_activities',
       where: 'is_synced = 0 AND is_deleted = 0',
     );
-    return rows;
+    return rows.map((row) => Map<String, dynamic>.from(row)).toList();
   }
 
+  Future<int> markMotherCareActivitySyncedById(int id) async {
+    final db = await _db;
+    return db.update(
+      'mother_care_activities',
+      {
+        'is_synced': 1,
+        'modified_date_time': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 
   Future<List<Map<String, dynamic>>> getUnsyncedMotherCareAncForms() async {
     try {
@@ -1410,7 +1423,7 @@ class LocalStorageDao {
       final db = await _db;
       final rows = await db.query(
         'beneficiaries_new',
-        where: 'is_deleted = 0 AND (is_synced IS NULL OR is_synced = 1)',
+        where: 'is_deleted = 0 AND is_synced = 0',
         orderBy: 'created_date_time ASC',
       );
       return rows.map((row) {

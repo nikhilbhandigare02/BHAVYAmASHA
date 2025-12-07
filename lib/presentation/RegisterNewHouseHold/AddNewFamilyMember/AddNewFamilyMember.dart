@@ -2173,7 +2173,176 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   ),
 
                                 ],
+                                if ((state.memberType ?? '').toLowerCase() == 'child') ...[
+                                  _section(
+                                    ApiDropdown<String>(
+                                      labelText: '${l.genderLabel} *',
+                                      items: const ['Male', 'Female', 'Transgender'],
+                                      getLabel: (s) {
+                                        switch (s) {
+                                          case 'Male':
+                                            return l.genderMale;
+                                          case 'Female':
+                                            return l.genderFemale;
+                                          case 'Transgender':
+                                            return l.transgender;
+                                          default:
+                                            return s;
+                                        }
+                                      },
+                                      value: state.gender,
+                                      onChanged: (v) {
+                                        if (v == null) return;
+                                        final memberGender = v;
+                                        context.read<AddnewfamilymemberBloc>().add(AnmUpdateGender(memberGender));
+                                        try {
+                                          if (_syncingGender) return;
+                                          _syncingGender = true;
+                                          final opposite = _oppositeGender(memberGender);
+                                          final spBloc = context.read<SpousBloc>();
+                                          if (spBloc.state.gender != opposite) {
+                                            spBloc.add(SpUpdateGender(opposite));
+                                          }
+                                        } finally {
+                                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                                            _syncingGender = false;
+                                          });
+                                        }
+                                      },
+                                      validator: (value) => _captureAnmError(Validations.validateGender(l, value)),
 
+                                    ),
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  _section(
+                                    ApiDropdown<String>(
+                                      labelText: '${l.whoseMobileLabel} *',
+                                      items: const [
+                                        'Self',
+                                        'Family Head',
+                                        'Wife',
+                                        'Father',
+                                        'Mother',
+                                        'Son',
+                                        'Daughter',
+                                        'Father in Law',
+                                        'Mother in Law',
+                                        'Neighbour',
+                                        'Relative',
+                                        'Other',
+                                      ],
+                                      getLabel: (s) {
+                                        switch (s) {
+                                          case 'Self':
+                                            return l.self;
+                                          case 'Family Head':
+                                            return l.headOfFamily;
+                                          case 'Wife':
+                                            return l.wife;
+                                          case 'Father':
+                                            return l.father;
+                                          case 'Mother':
+                                            return l.mother;
+                                          case 'Son':
+                                            return l.son;
+                                          case 'Daughter':
+                                            return l.daughter;
+                                          case 'Father in Law':
+                                            return l.fatherInLaw;
+                                          case 'Mother in Law':
+                                            return l.motherInLaw;
+                                          case 'Neighbour':
+                                            return l.neighbour;
+                                          case 'Relative':
+                                            return l.relative;
+                                          case 'Other':
+                                            return l.other;
+                                          default:
+                                            return s;
+                                        }
+                                      },
+                                      value: state.mobileOwner,
+                                      onChanged: (v) async {
+                                        if (v == null) return;
+                                        final bloc = context.read<AddnewfamilymemberBloc>();
+                                        bloc.add(AnmUpdateMobileOwner(v));
+
+                                        if (v == 'Family Head') {
+                                          if (_isMemberDetails && widget.hhId != null) {
+                                            try {
+                                              final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                              print('📱 [AddNewMember] Fetched mobile from DB: $headMobile');
+                                              if (headMobile != null && headMobile.isNotEmpty) {
+                                                bloc.add(AnmUpdateMobileNo(headMobile));
+                                              } else if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('No mobile number found for the head of family')),
+                                                );
+                                              }
+                                            } catch (e) {
+                                              print('❌ [AddNewMember] Error fetching from DB: $e');
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Error loading head of family mobile number')),
+                                                );
+                                              }
+                                            }
+                                          } else {
+                                            final headNo = context.read<AddFamilyHeadBloc>().state.mobileNo?.trim();
+                                            print('📱 [AddNewMember] Using mobile from head details state: $headNo');
+                                            if (headNo != null && headNo.isNotEmpty) {
+                                              bloc.add(AnmUpdateMobileNo(headNo));
+                                            }
+                                          }
+                                        } else {
+                                          // Clear mobile number if not Family Head
+                                          print('🔄 [AddNewMember] Clearing mobile number');
+                                          bloc.add(const AnmUpdateMobileNo(''));
+                                        }
+                                      },
+                                      validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
+
+                                    ),
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  if (state.mobileOwner == 'Other')
+                                    _section(
+                                      CustomTextField(
+                                        labelText: 'Enter relation with mobile no. holder',
+                                        hintText: 'Enter relation with mobile no. holder',
+                                        onChanged: (v) => context
+                                            .read<AddnewfamilymemberBloc>()
+                                            .add(AnmUpdateMobileOwnerRelation(v.trim())),
+                                        validator: (value) => state.mobileOwner == 'Other'
+                                            ? _captureAnmError(
+                                          (value == null || value.trim().isEmpty)
+                                              ? 'Relation with mobile no. holder is required'
+                                              : null,
+                                        )
+                                            : null,
+                                      ),
+                                    ),
+                                  if (state.mobileOwner == 'Other')
+                                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  _section(
+                                    CustomTextField(
+                                      key: ValueKey('member_mobile_${state.mobileOwner ?? ''}'),
+                                      controller: TextEditingController(text: state.mobileNo ?? '')
+                                        ..selection = TextSelection.collapsed(offset: state.mobileNo?.length ?? 0),
+                                      labelText: '${l.mobileLabel} *',
+                                      hintText: '${l.mobileLabel}',
+                                      keyboardType: TextInputType.number,
+                                      maxLength: 10,
+                                      onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(v.trim())),
+                                      validator: (value) => _captureAnmError(Validations.validateMobileNo(l, value)),
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                        LengthLimitingTextInputFormatter(10),
+                                      ],
+                                    ),
+                                  ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                ],
                                 Padding(
                                   padding: const EdgeInsets.only(top: 4),
                                   child: Row(
@@ -3560,7 +3729,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         key: const ValueKey('family_planning'),
                                         labelText:
                                             'Are you/your partner adopting family planning? *',
-                                        items: const ['Select', 'Yes', 'No'],
+                                        items: const [ 'Yes', 'No'],
                                         getLabel: (item) => item,
                                         value: state.isFamilyPlanning,
                                         onChanged: (v) => context
@@ -4074,6 +4243,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               }
                                             }
 
+                                            // Prepare base member data
                                             final memberData = {
                                               'memberType': state.memberType,
                                               'name': state.name,
@@ -4082,13 +4252,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               'motherName': state.motherName,
                                               'gender': state.gender,
                                               'useDob': state.useDob,
-                                              'dob': state.dob
-                                                  ?.toIso8601String(),
+                                              'dob': state.dob?.toIso8601String(),
                                               'approxAge': state.approxAge,
                                               'children': state.children,
                                               'birthOrder': state.birthOrder,
-                                              'maritalStatus':
-                                                  state.maritalStatus,
+                                              'maritalStatus': state.maritalStatus,
                                               'mobileNo': state.mobileNo,
                                               'mobileOwner': state.mobileOwner,
                                               'education': state.education,
@@ -4100,23 +4268,69 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               'voterId': state.voterId,
                                               'rationId': state.rationId,
                                               'phId': state.phId,
-                                              'beneficiaryType':
-                                                  state.beneficiaryType,
+                                              'beneficiaryType': state.beneficiaryType,
                                               'abhaAddress': state.abhaAddress,
                                               'richId': state.RichIDChanged,
-                                              'birthCertificate':
-                                                  state.BirthCertificateChange,
+                                              'birthCertificate': state.BirthCertificateChange,
                                               'weight': state.WeightChange,
                                               'birthWeight': state.birthWeight,
                                               'school': state.ChildSchool,
                                               'hasChildren': state.hasChildren,
                                               'isPregnant': state.isPregnant,
-                                              'ageAtMarriage':
-                                                  state.ageAtMarriage,
+                                              'ageAtMarriage': state.ageAtMarriage,
                                               'spouseName': state.spouseName,
-                                              'createdAt': DateTime.now()
-                                                  .toIso8601String(),
+                                              'createdAt': DateTime.now().toIso8601String(),
                                             };
+
+                                            // Add spouse details if married
+                                            if (state.maritalStatus?.toLowerCase() == 'married' && 
+                                                state.spouseName != null && 
+                                                state.spouseName!.isNotEmpty) {
+                                              memberData['spousedetails'] = {
+                                                'relation': state.relation ?? 'spouse',
+                                                'memberName': state.spouseName,
+                                                'ageAtMarriage': state.ageAtMarriage,
+                                                'RichIDChanged': state.RichIDChanged,
+                                                'spouseName': state.name, // Original member's name
+                                                'fatherName': state.fatherName,
+                                                'useDob': state.useDob,
+                                                'dob': state.dob?.toIso8601String(),
+                                                'edd': state.edd?.toIso8601String(),
+                                                'lmp': state.lmp?.toIso8601String(),
+                                                'approxAge': state.approxAge,
+                                                'gender': _oppositeGender(state.gender),
+                                                'occupation': state.occupation,
+                                                'education': state.education,
+                                                'religion': state.religion,
+                                                'category': state.category,
+                                                'abhaAddress': state.abhaAddress,
+                                                'mobileOwner': state.mobileOwner,
+                                                'mobileNo': state.mobileNo,
+                                                'bankAcc': state.bankAcc,
+                                                'ifsc': state.ifsc,
+                                                'voterId': state.voterId,
+                                                'rationId': state.rationId,
+                                                'phId': state.phId,
+                                                'beneficiaryType': state.beneficiaryType,
+                                                'isPregnant': state.isPregnant,
+                                                'familyPlanningCounseling': state.isFamilyPlanning,
+                                                'is_family_planning': (state.isFamilyPlanning?.toLowerCase() == 'yes') ? 1 : 0,
+                                                'fpMethod': state.fpMethod,
+                                                'removalDate': state.removalDate?.toIso8601String(),
+                                                'removalReason': state.removalReason,
+                                                'condomQuantity': state.condomQuantity,
+                                                'malaQuantity': state.malaQuantity,
+                                                'chhayaQuantity': state.chhayaQuantity,
+                                                'ecpQuantity': state.ecpQuantity,
+                                                'maritalStatus': 'Married',
+                                                'relation_to_head': state.relation,
+                                                'isFamilyhead': false,
+                                                'isFamilyheadWife': false,
+                                                'createdAt': DateTime.now().toIso8601String(),
+                                                'updatedAt': DateTime.now().toIso8601String(),
+                                                'isSynced': false,
+                                              };
+                                            }
 
                                          
                                             try {
@@ -4137,8 +4351,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               }
                                               return; // Don't navigate yet, wait for success state
                                             } else {
-                                              // In household flow, just return the data to parent
-                                              // The parent will handle saving when the final Save button is clicked
+
                                               Navigator.of(
                                                 context,
                                               ).pop(memberData);

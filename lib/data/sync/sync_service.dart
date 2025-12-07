@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:device_info_plus/device_info_plus.dart';
+
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryRepository.dart';
+import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryApiHelper.dart';
 import 'package:medixcel_new/data/repositories/HousholdRepository/household_repository.dart';
 import 'package:medixcel_new/data/repositories/AddBeneficiary/BeneficiaryRepository.dart';
 
 import 'package:medixcel_new/data/Database/User_Info.dart';
+import 'package:medixcel_new/data/repositories/MotherCareRepository/MotherCareApiHelper.dart';
 
 import '../repositories/ChildCareRepository/ChildCareRepository.dart';
 import '../repositories/EligibleCoupleRepository/EligibleCoupleApiHelper.dart';
@@ -22,17 +26,20 @@ class SyncService {
   final _dao = LocalStorageDao.instance;
   final _householdRepo = HouseholdRepository();
   final _beneficiaryRepo = AddBeneficiaryRepository();
+  final _beneficiaryApiHelper = AddBeneficiaryApiHelper();
   final _beneficiaryPullRepo = BeneficiaryRepository();
   final _ecRepo = EligibleCoupleRepository();
   final _ccRepo = ChildCareRepository();
   final _followupRepo = FollowupFormsRepository();
   final _mcRepo = MotherCareRepository();
   final _notificationRepo = NotificationRepository();
+  final _eligibleCoupleApiHelper = EligibleCoupleApiHelper();
+  final _motherCareApiHelper = MotherCareApiHelper();
 
   Timer? _timer;
   bool _running = false;
 
-  void start({Duration    interval = const Duration(minutes: 1)}) {
+  void start({Duration    interval = const Duration(minutes: 5)}) {
     stop();
 
     print('SyncService: starting with interval ${interval.inMinutes} minute(s)');
@@ -130,41 +137,12 @@ class SyncService {
     }
   }
 
+  // In sync_service.dart
   Future<void> syncUnsyncedEligibleCoupleActivities() async {
     try {
-      final ids = await _getUserWorkingIds();
-      if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
-      final list = await _dao.getUnsyncedEligibleCoupleActivities();
-      if (list.isEmpty) {
-        print('EC Push: No unsynced activities');
-        return;
-      }
-      print('EC Push: Found ${list.length} unsynced activity(ies)');
-      // Build payload for API
-      final payload = list.map((r) => {
-            'facility_id': r['facility_id'],
-            'asha_id': ids['ashaId'],
-            'unique_key': r['household_ref_key'],
-            'beneficiaries_registration_ref_key': r['beneficiary_ref_key'],
-            'eligible_couple_type': r['eligible_couple_state'],
-            'device_details': r['device_details'] ?? {},
-            'app_details': r['app_details'] ?? {},
-            'parent_user': r['parent_user'] ?? {},
-            'created_date_time': r['created_date_time'],
-            'modified_date_time': r['modified_date_time'],
-          }).toList();
-      final resp = await _ecRepo.trackEligibleCouple(payload);
-      final success = resp is Map && resp['success'] == true;
-      if (success) {
-        for (final r in list) {
-          await _dao.markEligibleCoupleActivitySyncedById(r['id'] as int? ?? 0);
-        }
-        print('EC Push: Marked ${list.length} activity(ies) as synced');
-      } else {
-        print('EC Push: API not successful, will retry later');
-      }
+      await _eligibleCoupleApiHelper.syncUnsyncedEligibleCoupleActivities();
     } catch (e) {
-      print('EC Push: error -> $e');
+      print('EC Sync: Error in sync service: $e');
     }
   }
 
@@ -334,6 +312,14 @@ class SyncService {
     }
   }
 
+  Future<void> syncMotherCareActivities() async {
+    try {
+      await _motherCareApiHelper.syncMotherCareActivities();
+    } catch (e) {
+      print('SyncService: Error syncing mother care activities: $e');
+    }
+  }
+
   Future<void> syncUnsyncedFollowupForms() async {
     try {
       final list = await _dao.getUnsyncedFollowupForms();
@@ -488,82 +474,48 @@ class SyncService {
     }
   }
 
-  Future<void> syncUnsyncedBeneficiaries() async {
+  Future<void> syncUnsyncedBeneficiaries () async {
     try {
       final unsynced = await _dao.getUnsyncedBeneficiaries();
-      final count = unsynced.length;
+      
+      final pendingSync = unsynced.where((b) => (b['is_synced'] ?? 0) == 0).toList();
+      final count = pendingSync.length;
+      
       if (count == 0) {
-      //  print('Beneficiary Sync: No unsynced records found');
+        print('Beneficiary Sync: No pending sync records found (is_synced = 0)');
         return;
       }
-      //print('Beneficiary Sync: Found $count unsynced record(s)');
-      for (final b in unsynced) {
+      print('Beneficiary Sync: Found $count unsynced record(s)');
+      
+      // Process each unsynced beneficiary
+      for (final beneficiary in unsynced) {
         try {
-          Map<String, dynamic> _asMap(dynamic v) {
-            if (v is Map<String, dynamic>) return v;
-            if (v is String && v.isNotEmpty) {
-              try { return Map<String, dynamic>.from(jsonDecode(v)); } catch (_) {}
-            }
-            return <String, dynamic>{};
+          final uniqueKey = beneficiary['unique_key']?.toString();
+          if (uniqueKey == null || uniqueKey.isEmpty) {
+            print('Beneficiary Sync: Skipping beneficiary with empty unique_key');
+            continue;
           }
-
-          final payload = <String, dynamic>{
-            'unique_key': (b['unique_key'] ?? '').toString(),
-            'household_ref_key': b['household_ref_key'],
-            'beneficiary_info': _asMap(b['beneficiary_info']),
-            'geo_location': _asMap(b['geo_location']),
-            'death_details': _asMap(b['death_details']),
-            'device_details': _asMap(b['device_details']),
-            'app_details': _asMap(b['app_details']),
-            'parent_user': _asMap(b['parent_user']),
-            'current_user_key': b['current_user_key'],
-            'facility_id': b['facility_id'],
-          }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
-
-          if ((payload['unique_key'] as String).isEmpty) continue;
-          final uniqueKey = payload['unique_key'] as String;
-         // print('Beneficiary Sync: syncing unique_key=$uniqueKey');
-          final resp = await _beneficiaryRepo.addBeneficiary(payload);
-
-          String? serverIdFromResp;
-          bool success = false;
-          try {
-            if (resp is Map && resp['success'] == true) {
-              success = true;
-              if (resp['data'] is List && (resp['data'] as List).isNotEmpty) {
-                final first = (resp['data'] as List).first;
-                if (first is Map) {
-                  serverIdFromResp = (first['_id'] ?? first['id'])?.toString();
-                }
-              } else if (resp['data'] is Map) {
-                final d = resp['data'] as Map;
-                serverIdFromResp = (d['_id'] ?? d['id'])?.toString();
-              }
-            }
-          } catch (e) {
-           // print('Beneficiary Sync: response parse error for unique_key=$uniqueKey -> $e');
-          }
-
-          if (success) {
-            final updated = await _dao.markBeneficiarySyncedByUniqueKey(
-              uniqueKey: uniqueKey,
-              serverId: serverIdFromResp,
-            );
-            // print(
-            //   'Beneficiary Sync: SYNCED unique_key=$uniqueKey (rows=$updated) '
-            //   '+ server_id ${serverIdFromResp == null || serverIdFromResp.isEmpty ? 'NOT set' : 'set to '+serverIdFromResp!}'
-            // );
-          } else {
-            //print('Beneficiary Sync: NOT SYNCED unique_key=$uniqueKey (API not successful), will retry later');
-          }
-        } catch (e) {
-          // keep unsynced on failure
-         // print('Beneficiary Sync: failed for a record -> $e');
+          
+          print('Beneficiary Sync: Starting sync for unique_key=$uniqueKey');
+          
+          // Let the helper handle device info and timestamp
+          await _beneficiaryApiHelper.syncBeneficiaryByUniqueKey(
+            uniqueKey: uniqueKey,
+          );
+          
+          print('Beneficiary Sync: Successfully processed unique_key=$uniqueKey');
+        } catch (e, stackTrace) {
+          print('Beneficiary Sync: Error syncing beneficiary ${beneficiary['unique_key']}');
+          print('Error details: $e');
+          print('Stack trace: $stackTrace');
         }
       }
-    } catch (e) {
-      // ignore
-     // print('Beneficiary Sync: error during batch -> $e');
+      
+      print('Beneficiary Sync: Completed processing $count record(s)');
+    } catch (e, stackTrace) {
+      print('Beneficiary Sync: Critical error during sync process');
+      print('Error details: $e');
+      print('Stack trace: $stackTrace');
     }
   }
 

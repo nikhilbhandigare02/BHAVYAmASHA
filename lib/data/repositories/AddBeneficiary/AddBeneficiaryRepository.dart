@@ -9,32 +9,62 @@ import '../../Database/User_Info.dart';
 class AddBeneficiaryRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
+  /// Adds a new beneficiary using the provided payload
+  /// The payload should be constructed by AddBeneficiaryApiHelper
   Future<dynamic> addBeneficiary(Map<String, dynamic> payload) async {
-    final currentUser = await UserInfo.getCurrentUser();
-    final userDetails = currentUser?['details'] is String
-        ? jsonDecode(currentUser?['details'] ?? '{}')
-        : currentUser?['details'] ?? {};
+    try {
+      // Get authentication token
+      String? token = await _getAuthToken();
+      
+      // Set up headers with auth token
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      };
 
-    String? token = await SecureStorageService.getToken();
-    if ((token == null || token.isEmpty) && userDetails is Map) {
-      try {
-        token = userDetails['token']?.toString();
-      } catch (_) {}
+      print('Sending beneficiary data to API...');
+      
+      // Make the API call
+      final response = await _api.postApi(
+        Endpoints.addBeneficiary,
+        payload,
+        headers: headers,
+      );
+
+
+      final result = response is String ? jsonDecode(response) : response;
+      print('API Response: ${result.toString()}');
+      
+      return result;
+    } catch (e, stackTrace) {
+      print('Error in addBeneficiary: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
     }
-   // print('User token present: ${token != null && token.isNotEmpty}');
+  }
 
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-    };
-
-    final response = await _api.postApi(
-      Endpoints.addBeneficiary,
-      payload,
-      headers: headers,
-    );
-
-    return response is String ? jsonDecode(response) : response;
+  /// Helper method to get authentication token
+  Future<String?> _getAuthToken() async {
+    try {
+      // First try to get from secure storage
+      String? token = await SecureStorageService.getToken();
+      
+      // If not found in secure storage, try to get from user details
+      if (token == null || token.isEmpty) {
+        final currentUser = await UserInfo.getCurrentUser();
+        if (currentUser != null && currentUser['details'] != null) {
+          final userDetails = currentUser['details'] is String 
+              ? jsonDecode(currentUser['details']) 
+              : currentUser['details'];
+          token = userDetails['token']?.toString();
+        }
+      }
+      
+      return token;
+    } catch (e) {
+      print('Error getting auth token: $e');
+      return null;
+    }
   }
 }

@@ -8,65 +8,90 @@ import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryRepo
 class AddBeneficiaryApiHelper {
   final AddBeneficiaryRepository _repo = AddBeneficiaryRepository();
 
+
   Future<void> syncBeneficiaryByUniqueKey({
     required String uniqueKey,
-    required dynamic deviceInfo,
-    required String ts,
   }) async {
-    final saved = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
-    if (saved == null) return;
-
-    final currentUser = await UserInfo.getCurrentUser();
-    final userDetails = currentUser?['details'] is String
-        ? jsonDecode(currentUser?['details'] ?? '{}')
-        : currentUser?['details'] ?? {};
-    final working = userDetails['working_location'] ?? {};
-    final facilityId = working['asha_associated_with_facility_id'] ??
-        userDetails['asha_associated_with_facility_id'] ?? 0;
-    final ashaUniqueKey = userDetails['unique_key'] ?? {};
-
-    final payload = _buildBeneficiaryApiPayload(
-      Map<String, dynamic>.from(saved),
-      Map<String, dynamic>.from(userDetails is Map ? userDetails : {}),
-      Map<String, dynamic>.from(working is Map ? working : {}),
-      deviceInfo,
-      ts,
-      ashaUniqueKey,
-      facilityId,
-    );
-
+    // Get current timestamp
+    final ts = DateTime.now().toIso8601String();
+    // Device info will be extracted from the saved beneficiary data
     try {
+      // 1. Fetch beneficiary data from local storage
+      final saved = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
+      if (saved == null) {
+        print('Beneficiary with uniqueKey $uniqueKey not found in local database');
+        return;
+      }
+
+      // 2. Get user and working location details
+      final currentUser = await UserInfo.getCurrentUser();
+      final userDetails = currentUser?['details'] is String
+          ? jsonDecode(currentUser?['details'] ?? '{}')
+          : currentUser?['details'] ?? {};
+          
+      final working = userDetails['working_location'] ?? {};
+      final facilityId = working['asha_associated_with_facility_id'] ??
+          userDetails['asha_associated_with_facility_id'] ?? 0;
+      final ashaUniqueKey = userDetails['unique_key'] ?? '';
+
+      final deviceInfo = {
+        'deviceId': saved['device_details']?['deviceId'] ?? '',
+        'model': saved['device_details']?['model'] ?? 'Unknown',
+        'manufacturer': saved['device_details']?['manufacturer'] ?? 'Unknown',
+        'deviceName': saved['device_details']?['deviceName'] ?? 'Unknown',
+        'systemName': saved['device_details']?['systemName'] ?? 'Unknown',
+        'systemVersion': saved['device_details']?['systemVersion'] ?? 'Unknown',
+      };
+          
+      // 4. Build the API payload
+      final payload = _buildBeneficiaryApiPayload(
+        Map<String, dynamic>.from(saved),
+        Map<String, dynamic>.from(userDetails is Map ? userDetails : {}),
+        Map<String, dynamic>.from(working is Map ? working : {}),
+        deviceInfo, // Structured device info
+        ts,
+        ashaUniqueKey,
+        facilityId,
+      );
+
+      print('Synchronizing beneficiary with payload: ${jsonEncode(payload)}');
+
+
       final reqUniqueKey = (saved['unique_key'] ?? '').toString();
       final resp = await _repo.addBeneficiary(payload);
-      try {
-        if (resp is Map && (resp['success'] == true)) {
-          if (resp['data'] is List && (resp['data'] as List).isNotEmpty) {
-            final first = resp['data'][0];
-            if (first is Map) {
-              final sid = (first['_id'] ?? first['id'] ?? '').toString();
-              if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
-                final updated = await LocalStorageDao.instance
-                    .updateBeneficiaryServerIdByUniqueKey(
-                        uniqueKey: reqUniqueKey, serverId: sid);
-                print('Updated beneficiary with server_id=$sid rows=$updated');
-              }
-            }
-          } else if (resp['data'] is Map) {
-            final map = Map<String, dynamic>.from(resp['data']);
-            final sid = (map['_id'] ?? map['id'] ?? '').toString();
-            if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
-              final updated = await LocalStorageDao.instance
-                  .updateBeneficiaryServerIdByUniqueKey(
-                      uniqueKey: reqUniqueKey, serverId: sid);
-              print('Updated beneficiary with server_id=$sid rows=$updated');
-            }
+
+
+      if (resp is Map && (resp['success'] == true)) {
+        String? serverId;
+        
+
+        if (resp['data'] is List && (resp['data'] as List).isNotEmpty) {
+          final first = resp['data'][0];
+          if (first is Map) {
+            serverId = (first['_id'] ?? first['id'] ?? '').toString();
           }
+        } else if (resp['data'] is Map) {
+          final map = Map<String, dynamic>.from(resp['data']);
+          serverId = (map['_id'] ?? map['id'] ?? '').toString();
         }
-      } catch (e) {
-        print('Error updating local beneficiary after API: $e');
+
+        // Update local database with server ID if available
+        if (serverId != null && serverId.isNotEmpty && reqUniqueKey.isNotEmpty) {
+          final updated = await LocalStorageDao.instance.updateBeneficiaryServerIdByUniqueKey(
+            uniqueKey: reqUniqueKey, 
+            serverId: serverId,
+          );
+          print('Successfully updated beneficiary with server_id=$serverId, rows_updated=$updated');
+        } else {
+          print('Warning: No server ID found in API response for beneficiary $reqUniqueKey');
+        }
+      } else {
+        print('API call was not successful for beneficiary $reqUniqueKey. Response: $resp');
       }
-    } catch (apiErr) {
-      print('add_beneficiary API failed, will sync later: $apiErr');
+    } catch (e, stackTrace) {
+      print('Error syncing beneficiary $uniqueKey: $e');
+      print('Stack trace: $stackTrace');
+      rethrow; // Re-throw to allow retry logic in the sync service
     }
   }
 
@@ -206,7 +231,7 @@ class AddBeneficiaryApiHelper {
         },
       ],
       'pregnancy_count': row['pregnancy_count'] ?? 0,
-      'beneficiary_info': beneficiaryInfoApi,
+      'beneficiary_info':beneficiaryInfoApi,
       'geo_location': _apiGeo(row['geo_location']),
       'spouse_key': row['spouse_key'],
       'mother_key': row['mother_key'],
@@ -218,11 +243,13 @@ class AddBeneficiaryApiHelper {
       'death_details': row['death_details'] is Map ? row['death_details'] : {},
       'is_migrated': row['is_migrated'] ?? 0,
       'is_separated': row['is_separated'] ?? 0,
-      'device_details': {
-        'device_id': deviceInfo.deviceId,
-        'model': deviceInfo.model,
-        'os': deviceInfo.platform + ' ' + (deviceInfo.osVersion ?? ''),
-        'app_version': deviceInfo.appVersion.split('+').first,
+      'device_details': row['device_details'] is Map
+          ? Map<String, dynamic>.from(row['device_details'])
+          : {
+        'device_id': deviceInfo['deviceId'] ?? '',
+        'model': deviceInfo['model'] ?? 'Unknown',
+        'os': '${deviceInfo['systemName'] ?? 'Unknown'} ${deviceInfo['systemVersion'] ?? ''}'.trim(),
+        'app_version': '1.0.0',
       },
       'app_details': {
         'captured_by_user': userDetails['user_identifier'] ?? '',
@@ -238,5 +265,6 @@ class AddBeneficiaryApiHelper {
       'created_date_time': row['created_date_time'] ?? ts,
       'modified_date_time': row['modified_date_time'] ?? ts,
     };
+
   }
 }
