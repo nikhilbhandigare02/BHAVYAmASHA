@@ -12,12 +12,12 @@ class NetworkServiceApi extends BaseApiServices{
       {Map<String, String>? headers, Map<String, dynamic>? queryParams}) async {
     try {
       final uri = Uri.parse(url).replace(queryParameters: queryParams);
-      print('🌍 GET Request → $uri');
-      print('📦 Headers → $headers');
+   //   print('🌍 GET Request → $uri');
+   //   print('📦 Headers → $headers');
 
       final response = await http.get(uri, headers: headers);
-      print('📥 Response Code: ${response.statusCode}');
-      print('📥 Response Body: ${response.body}');
+     // print('📥 Response Code: ${response.statusCode}');
+     // print('📥 Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -55,8 +55,8 @@ class NetworkServiceApi extends BaseApiServices{
       final streamed = await req.send().timeout(const Duration(seconds: 50));
       final response = await http.Response.fromStream(streamed);
 
-      print('📥 Response Code: ${response.statusCode}');
-      print('📥 Response Body: ${response.body}');
+   //   print('📥 Response Code: ${response.statusCode}');
+    //  print('📥 Response Body: ${response.body}');
 
       return returnResponse(response);
     } on SocketException {
@@ -77,9 +77,9 @@ class NetworkServiceApi extends BaseApiServices{
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       };
-      print('🌍 POST Request → $url');
-      print('📦 Headers → $reqHeaders');
-      print('📝 Body → $body');
+     // print('🌍 POST Request → $url');
+    //  print('📦 Headers → $reqHeaders');
+    //  print('📝 Body → $body');
 
       final response = await http
           .post(
@@ -89,8 +89,8 @@ class NetworkServiceApi extends BaseApiServices{
           )
           .timeout(const Duration(seconds: 50));
 
-      print('📥 Response Code: ${response.statusCode}');
-      print('📥 Response Body: ${response.body}');
+      //print('📥 Response Code: ${response.statusCode}');
+    //  print('📥 Response Body: ${response.body}');
 
       return returnResponse(response);
     } on SocketException {

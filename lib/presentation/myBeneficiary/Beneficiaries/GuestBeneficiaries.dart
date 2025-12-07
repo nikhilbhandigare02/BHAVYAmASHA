@@ -59,6 +59,14 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
         try {
           final rawInfo = row['beneficiary_info'] as String? ?? '{}';
           final info = jsonDecode(rawInfo) as Map<String, dynamic>;
+          final parentUserRaw = row['parent_user']?.toString() ?? '';
+          Map<String, dynamic> parentUser = {};
+          if (parentUserRaw.isNotEmpty) {
+            try {
+              parentUser = jsonDecode(parentUserRaw) as Map<String, dynamic>;
+              print('parentUser: $parentUser');
+            } catch (_) {}
+          }
 
           final name = (info['member_name']?.toString() ??
               info['memberName']?.toString() ??
@@ -74,6 +82,34 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
               info['spouseName']?.toString() ??
               'N/A');
 
+          final mobile = (info['mobile_no']?.toString() ??
+              info['mobileNo']?.toString() ??
+              info['mobile']?.toString() ??
+              info['mobile_number']?.toString() ??
+              '');
+
+          // ASHA / HSC from parent_user JSON
+          final ashaName = parentUser['asha_name']?.toString() ?? '';
+          final hscName = parentUser['hsc_name']?.toString() ?? '';
+
+          // RCH ID from beneficiary info
+          final rchId = (info['RCH_ID']?.toString() ??
+              info['rch_number']?.toString() ??
+              info['richId']?.toString() ??
+              info['RichID']?.toString() ??
+              '');
+
+          // beneficiary_state can be string or JSON array
+          String status = (row['beneficiary_state']?.toString() ?? '').trim();
+          if (status.startsWith('[')) {
+            try {
+              final decoded = jsonDecode(status);
+              if (decoded is List) {
+                status = decoded.whereType<String>().join(', ');
+              }
+            } catch (_) {}
+          }
+
           final uniqueKey = row['unique_key']?.toString() ?? '';
           final displayHhId = uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey;
 
@@ -84,8 +120,12 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
             'hhId': displayHhId,
             'name': name,
             'age | gender': '$ageShort | $gender',
-            'status': 'Guest',
+            'status': status.isNotEmpty ? status : 'Guest',
             'father_spouse': fatherSpouse,
+            'mobileNo': mobile,
+            'asha_name': ashaName,
+            'hsc_name': hscName,
+            'rchId': rchId,
           });
         } catch (e) {
           print('Error decoding beneficiary_info for a guest row: $e');
@@ -293,9 +333,21 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildRow([
-                    _rowText('Name', (data['name'] ?? 'N/A').toString()),
-                    _rowText('Age | Gender', (data['age | gender'] ?? 'N/A').toString()),
-                    _rowText('Father/Spouse', (data['father_spouse'] ?? 'N/A').toString()),
+                    _rowText('Name', (data['name'] ?? data['Name'] ?? '').toString()),
+                    _rowText('RCH ID', (data['rchId'] ?? data['RchID'] ?? data['richId'] ?? data['RichID'] ?? '').toString()),
+                    _rowText('ASHA', (data['asha_name'] ?? data['ashaName'] ?? data['asha'] ?? data['facilitator_name'] ?? '').toString()),
+                  ]),
+                  const SizedBox(height: 10),
+                  _buildRow([
+                    _rowText('Father/Spouse Name', (data['father_spouse'] ?? data['FatherName'] ?? data['fatherName'] ?? data['Husband'] ?? data['spouseName'] ?? '').toString()),
+                    _rowText('Age | Gender', (data['age | gender'] ?? data['Age|Gender'] ?? '').toString()),
+                    _rowText('HSC', (data['hsc_name'] ?? data['hsc'] ?? (data['hsc_id']?.toString() ?? '')).toString()),
+                  ]),
+                  const SizedBox(height: 10),
+                  _buildRow([
+                    _rowText('Mobile Number', (data['mobileNo'] ?? data['mobile'] ?? data['mobile_number'] ?? data['Mobileno.'] ?? '').toString()),
+                    _rowText('Status', (data['status'] ?? '').toString()),
+                    const SizedBox.shrink(),
                   ]),
                 ],
               ),
@@ -306,26 +358,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
     );
   }
 
-  Widget _infoRow(String value,{bool isWrappable = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              value.isEmpty ? 'N/A' : value,
-              style:  TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w400,
-                fontSize: 13.sp,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  
 
   Widget _buildRow(List<Widget> children) {
     return Row(
@@ -347,13 +380,13 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
           style: TextStyle(
             color: Colors.white.withOpacity(0.9),
             fontWeight: FontWeight.w600,
-            fontSize: 11.sp,
+            fontSize: 14.sp,
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
-          value.isEmpty ? 'N/A' : value,
+          (value.trim().isEmpty || value.trim().toLowerCase() == 'n/a' || value.trim().toLowerCase() == 'null') ? 'Not Available' : value,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w400,
