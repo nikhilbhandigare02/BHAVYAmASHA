@@ -1916,6 +1916,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               items: motherItems,
                                               getLabel: (s) => s,
                                               value: _motherOption,
+                                              validator: (value) {
+                                                if (_motherOption == 'Select' ||
+                                                    _motherOption.isEmpty) {
+                                                  return 'Please select or enter ${l.motherNameLabel.toLowerCase()}';
+                                                }
+                                                return null;
+                                              },
                                               onChanged: (v) {
                                                 if (v == null) return;
                                                 setState(() {
@@ -1938,9 +1945,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                       .add(
                                                         AnmUpdateMotherName(''),
                                                       );
+
+
                                                 }
+                                                if (_formKey.currentState !=
+                                                    null) {
+                                                  _formKey.currentState!
+                                                      .validate();
+                                                }
+
                                               },
                                             );
+
                                           },
                                         ),
                                         // Divider(
@@ -1970,6 +1986,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     v.trim(),
                                                   ),
                                                 ),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.trim().isEmpty) {
+                                                return 'Please enter ${l.motherNameLabel.toLowerCase()}';
+                                              }
+                                              return null;
+                                            },
+
                                           ),
                                           Divider(
                                             color: AppColors.divider,
@@ -2099,6 +2123,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     items: motherItems,
                                                     getLabel: (s) => s,
                                                     value: _motherOption,
+                                                    validator: (value) {
+                                                      if (_motherOption == 'Select' || _motherOption.isEmpty) {
+                                                        return 'Please select or enter ${l.motherNameLabel.toLowerCase()}';
+                                                      }
+                                                      return null;
+                                                    },
                                                     onChanged: (v) {
                                                       if (v == null) return;
                                                       setState(() {
@@ -2122,6 +2152,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                           AnmUpdateMotherName(''),
                                                         );
                                                       }
+                                                      if (_formKey.currentState != null) {
+                                                        _formKey.currentState!.validate();
+                                                      }
                                                     },
                                                   );
                                                 },
@@ -2144,15 +2177,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   hintText: l.motherNameLabel,
                                                   initialValue:
                                                   state.motherName ?? '',
-                                                  onChanged: (v) => context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateMotherName(
-                                                      v.trim(),
-                                                    ),
-                                                  ),
+                                                  onChanged: (v) {
+                                                    final name = v.trim();
+                                                    context
+                                                        .read<AddnewfamilymemberBloc>()
+                                                        .add(AnmUpdateMotherName(name));
+                                                    if (_formKey.currentState != null) {
+                                                      _formKey.currentState!.validate();
+                                                    }
+                                                  },
+                                                  validator: (value) {
+                                                    if (_motherOption == 'Other' && (value == null || value.trim().isEmpty)) {
+                                                      return 'Please enter ${l.motherNameLabel.toLowerCase()}';
+                                                    }
+                                                    return null;
+                                                  },
                                                 ),
                                                 Divider(
                                                   color: AppColors.divider,
@@ -2217,58 +2256,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   _section(
                                     ApiDropdown<String>(
                                       labelText: '${l.whoseMobileLabel} *',
-                                      items: const [
-                                        'Self',
-                                        'Family Head',
-                                        'Wife',
-                                        'Father',
-                                        'Mother',
-                                        'Son',
-                                        'Daughter',
-                                        'Father in Law',
-                                        'Mother in Law',
-                                        'Neighbour',
-                                        'Relative',
-                                        'Other',
-                                      ],
-                                      getLabel: (s) {
-                                        switch (s) {
-                                          case 'Self':
-                                            return l.self;
-                                          case 'Family Head':
-                                            return l.headOfFamily;
-                                          case 'Wife':
-                                            return l.wife;
-                                          case 'Father':
-                                            return l.father;
-                                          case 'Mother':
-                                            return l.mother;
-                                          case 'Son':
-                                            return l.son;
-                                          case 'Daughter':
-                                            return l.daughter;
-                                          case 'Father in Law':
-                                            return l.fatherInLaw;
-                                          case 'Mother in Law':
-                                            return l.motherInLaw;
-                                          case 'Neighbour':
-                                            return l.neighbour;
-                                          case 'Relative':
-                                            return l.relative;
-                                          case 'Other':
-                                            return l.other;
-                                          default:
-                                            return s;
-                                        }
-                                      },
+                                      items: _getMobileOwnerList(state.gender ?? ''),
+                                      getLabel: (s) => s,
                                       value: state.mobileOwner,
                                       onChanged: (v) async {
                                         if (v == null) return;
-                                        final bloc = context.read<AddnewfamilymemberBloc>();
+                                        final bloc = context
+                                            .read<AddnewfamilymemberBloc>();
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        if (v == 'Family Head') {
-                                          if (_isMemberDetails && widget.hhId != null) {
+                                        if (v == 'Family Head' || v == "Father") {
+                                          if (widget.isAddMember && widget.headMobileNumber != null && widget.headMobileNumber!.isNotEmpty) {
+                                            print('📱 [AddNewMember] Using head mobile from props: ${widget.headMobileNumber}');
+                                            bloc.add(AnmUpdateMobileNo(widget.headMobileNumber!));
+                                          } else if (_isMemberDetails && widget.hhId != null) {
                                             try {
                                               final headMobile = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
                                               print('📱 [AddNewMember] Fetched mobile from DB: $headMobile');
@@ -2287,35 +2288,44 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 );
                                               }
                                             }
-                                          } else {
-                                            final headNo = context.read<AddFamilyHeadBloc>().state.mobileNo?.trim();
-                                            print('📱 [AddNewMember] Using mobile from head details state: $headNo');
-                                            if (headNo != null && headNo.isNotEmpty) {
-                                              bloc.add(AnmUpdateMobileNo(headNo));
-                                            }
                                           }
                                         } else {
                                           // Clear mobile number if not Family Head
-                                          print('🔄 [AddNewMember] Clearing mobile number');
-                                          bloc.add(const AnmUpdateMobileNo(''));
+                                          bloc.add(AnmUpdateMobileNo(''));
                                         }
                                       },
-                                      validator: (value) => _captureAnmError(Validations.validateWhoMobileNo(l, value)),
-
+                                      validator: (value) => _captureAnmError(
+                                        Validations.validateWhoMobileNo(
+                                          l,
+                                          value,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
                                   if (state.mobileOwner == 'Other')
                                     _section(
                                       CustomTextField(
-                                        labelText: 'Enter relation with mobile no. holder',
-                                        hintText: 'Enter relation with mobile no. holder',
+                                        labelText:
+                                        'Enter relation with mobile no. holder *',
+                                        hintText:
+                                        'Enter relation with mobile no. holder',
                                         onChanged: (v) => context
                                             .read<AddnewfamilymemberBloc>()
-                                            .add(AnmUpdateMobileOwnerRelation(v.trim())),
-                                        validator: (value) => state.mobileOwner == 'Other'
+                                            .add(
+                                          AnmUpdateMobileOwnerRelation(
+                                            v.trim(),
+                                          ),
+                                        ),
+                                        validator: (value) =>
+                                        state.mobileOwner == 'Other'
                                             ? _captureAnmError(
-                                          (value == null || value.trim().isEmpty)
+                                          (value == null ||
+                                              value.trim().isEmpty)
                                               ? 'Relation with mobile no. holder is required'
                                               : null,
                                         )
@@ -2323,18 +2333,36 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       ),
                                     ),
                                   if (state.mobileOwner == 'Other')
-                                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                    Divider(
+                                      color: AppColors.divider,
+                                      thickness: 0.5,
+                                      height: 0,
+                                    ),
                                   _section(
                                     CustomTextField(
-                                      key: ValueKey('member_mobile_${state.mobileOwner ?? ''}'),
-                                      controller: TextEditingController(text: state.mobileNo ?? '')
-                                        ..selection = TextSelection.collapsed(offset: state.mobileNo?.length ?? 0),
+                                      key: ValueKey(
+                                        'member_mobile_${state.mobileOwner ?? ''}',
+                                      ),
+                                      controller:
+                                      TextEditingController(
+                                        text: state.mobileNo ?? '',
+                                      )
+                                        ..selection =
+                                        TextSelection.collapsed(
+                                          offset:
+                                          state.mobileNo?.length ??
+                                              0,
+                                        ),
                                       labelText: '${l.mobileLabel} *',
-                                      hintText: '${l.mobileLabel}',
+                                      hintText: '${l.mobileLabel} *',
                                       keyboardType: TextInputType.number,
                                       maxLength: 10,
-                                      onChanged: (v) => context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(v.trim())),
-                                      validator: (value) => _captureAnmError(Validations.validateMobileNo(l, value)),
+                                      onChanged: (v) => context
+                                          .read<AddnewfamilymemberBloc>()
+                                          .add(AnmUpdateMobileNo(v.trim())),
+                                      validator: (value) => _captureAnmError(
+                                        Validations.validateMobileNo(l, value),
+                                      ),
                                       inputFormatters: [
                                         FilteringTextInputFormatter.digitsOnly,
                                         LengthLimitingTextInputFormatter(10),
