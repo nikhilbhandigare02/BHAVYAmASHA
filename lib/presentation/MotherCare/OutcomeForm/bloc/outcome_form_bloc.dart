@@ -334,7 +334,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                 'form_data': formDataForDb,
               };
 
-              // Save to secure storage for offline access
+
               await SecureStorageService.saveDeliveryOutcome(outcomeData);
 
               // Update submission status

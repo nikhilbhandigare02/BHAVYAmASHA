@@ -359,7 +359,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 Container(
                   margin: EdgeInsets.only(top: 0), // Remove any top margin
                   width: double.infinity,
-                  height: 4.5.h, // responsive height
+                  height: 4.5.h,  
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -380,13 +380,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
                         yesText: l10n.yes,
                         noText: l10n.no,
                         onYes: () async {
+                          // Clear all secure storage data
+                          await SecureStorageService.clearAll();
+                          // Set login flag to 0
                           await SecureStorageService.setLoginFlag(0);
 
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            Route_Names.loginScreen,
-                                (Route<dynamic> route) => false,
-                          );
+                          if (mounted) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              Route_Names.loginScreen,
+                              (Route<dynamic> route) => false,
+                            );
+                          }
                         },
                       );
                     },

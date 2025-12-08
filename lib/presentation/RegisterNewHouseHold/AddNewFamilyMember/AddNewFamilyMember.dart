@@ -72,7 +72,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   bool _isMemberDetails = false;
   String _fatherOption = 'Select';
   String _motherOption = 'Select';
-  int _currentStep = 0; // 0: member, 1: spouse, 2: children
+  int _currentStep = 0;  
   bool _tabListenerAttached = false;
   bool _syncingGender = false;
   bool _syncingSpouseName = false;
@@ -115,8 +115,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   bool _isFirstLoad = true;
   // Ensure inline initial data is applied only once.
   bool _initialApplied = false;
-
-  // Controllers for form fields
+ 
   final TextEditingController _memberTypeController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
   final TextEditingController _maritalStatusController =
@@ -1762,29 +1761,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       children: [
                                         Builder(
                                           builder: (context) {
-                                            final List<String> fatherItems = [];
-                                            if (_isMemberDetails) {
-                                              fatherItems.addAll(
-                                                _maleAdultNames,
-                                              );
-                                              fatherItems.add('Other');
-                                            } else {
-                                              if ((_headName ?? '')
-                                                      .isNotEmpty &&
-                                                  _formatGender(_headGender) ==
-                                                      'Male') {
-                                                fatherItems.add(_headName!);
-                                              }
-                                              if ((_spouseName ?? '')
-                                                      .isNotEmpty &&
-                                                  _formatGender(
-                                                        _spouseGender,
-                                                      ) ==
-                                                      'Male') {
-                                                fatherItems.add(_spouseName!);
-                                              }
-                                              fatherItems.add('Other');
+                                            final Set<String> fatherSet = {
+                                              ..._maleAdultNames,
+                                            };
+                                            if ((_headName ?? '').isNotEmpty &&
+                                                _formatGender(_headGender) == 'Male') {
+                                              fatherSet.add(_headName!);
                                             }
+                                            if ((_spouseName ?? '').isNotEmpty &&
+                                                _formatGender(_spouseGender) == 'Male') {
+                                              fatherSet.add(_spouseName!);
+                                            }
+                                            final List<String> fatherItems = [...fatherSet, 'Other'];
                                             return ApiDropdown<String>(
                                               labelText:
                                                   '${l.fatherGuardianNameLabel} *',
@@ -1885,29 +1873,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       children: [
                                         Builder(
                                           builder: (context) {
-                                            final List<String> motherItems = [];
-                                            if (_isMemberDetails) {
-                                              motherItems.addAll(
-                                                _femaleAdultNames,
-                                              );
-                                              motherItems.add('Other');
-                                            } else {
-                                              if ((_headName ?? '')
-                                                      .isNotEmpty &&
-                                                  _formatGender(_headGender) ==
-                                                      'Female') {
-                                                motherItems.add(_headName!);
-                                              }
-                                              if ((_spouseName ?? '')
-                                                      .isNotEmpty &&
-                                                  _formatGender(
-                                                        _spouseGender,
-                                                      ) ==
-                                                      'Female') {
-                                                motherItems.add(_spouseName!);
-                                              }
-                                              motherItems.add('Other');
+                                            final Set<String> motherSet = {
+                                              ..._femaleAdultNames,
+                                            };
+                                            if ((_headName ?? '').isNotEmpty &&
+                                                _formatGender(_headGender) == 'Female') {
+                                              motherSet.add(_headName!);
                                             }
+                                            if ((_spouseName ?? '').isNotEmpty &&
+                                                _formatGender(_spouseGender) == 'Female') {
+                                              motherSet.add(_spouseName!);
+                                            }
+                                            final List<String> motherItems = [...motherSet, 'Other'];
                                             return ApiDropdown<String>(
                                               labelText:
                                                   "${l.motherNameLabel} *",

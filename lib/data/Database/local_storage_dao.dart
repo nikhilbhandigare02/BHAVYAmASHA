@@ -7,6 +7,7 @@ import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
 import 'package:medixcel_new/data/Database/tables/notification_table.dart';
 import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
 import '../models/guest_beneficiary/guest_beneficiary_model.dart';
 import 'database_provider.dart';
@@ -1409,8 +1410,24 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAllBeneficiaries({int? isMigrated}) async {
     try {
       final db = await _db;
-      final where = isMigrated != null ? 'is_migrated = ?' : null;
-      final whereArgs = isMigrated != null ? [isMigrated] : null;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      String? where;
+      List<Object?>? whereArgs;
+      if (isMigrated != null && ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where = 'is_migrated = ? AND current_user_key = ?';
+        whereArgs = [isMigrated, ashaUniqueKey];
+      } else if (isMigrated != null) {
+        where = 'is_migrated = ?';
+        whereArgs = [isMigrated];
+      } else if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where = 'current_user_key = ?';
+        whereArgs = [ashaUniqueKey];
+      } else {
+        where = null;
+        whereArgs = null;
+      }
       
       final rows = await db.query(
         'beneficiaries_new',

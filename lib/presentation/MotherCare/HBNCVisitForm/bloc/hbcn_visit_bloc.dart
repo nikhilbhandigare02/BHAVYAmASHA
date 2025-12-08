@@ -254,7 +254,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         rethrow;
       }
     } catch (e, stackTrace) {
-      print('❌ Error in _onSaveHbncVisit: $e');
+      print(' Error in _onSaveHbncVisit: $e');
       print('Stack trace: $stackTrace');
       emit(state.copyWith(
         isSaving: false,
