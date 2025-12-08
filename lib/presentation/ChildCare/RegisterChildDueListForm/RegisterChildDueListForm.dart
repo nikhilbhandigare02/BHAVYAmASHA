@@ -734,7 +734,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-                            // Religion Dropdown with Other Option
+
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4.0),
                               child: Column(

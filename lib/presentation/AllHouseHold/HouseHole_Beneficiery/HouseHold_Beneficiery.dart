@@ -480,7 +480,6 @@ class _HouseHold_BeneficiaryScreenState
                         'headGender': formatGender(head['Gender']),
                         'spouseName': spouse['Name']?.toString() ?? '',
                         'spouseGender': formatGender(spouse['Gender']),
-                        // Direct add-from-household flow: save immediately on Add.
                         'isMemberDetails': true,
                       },
                     );
@@ -575,20 +574,20 @@ class _HouseHold_BeneficiaryScreenState
             'isBeneficiary': true,
             'isEdit': true,
             'isMemberDetails':
-                true, // Add this flag to match AllBeneficiary behavior
+                true,
             'beneficiaryId': completeBeneficiaryId,
             'hhId': data['hhId']?.toString() ?? '',
-            // Use the overall head & spouse information for consistency
+
             'headName': head['Name']?.toString() ?? '',
             'headGender': isHeadMale ? 'Male' : 'Female',
             'spouseName': spouse['Name']?.toString() ?? '',
             'spouseGender': isHeadMale ? 'Female' : 'Male',
-            // Relation of the tapped member inside the household
+
             'relation': data['Relation']?.toString() ?? '',
-            // Village & Tola/Mohalla from header (if available), otherwise from data
+
             'village': _village?.toString() ?? '',
             'tolaMohalla': _mohalla?.toString() ?? '',
-            // Raw card data for any additional use
+
             'householdData': data,
           },
         );

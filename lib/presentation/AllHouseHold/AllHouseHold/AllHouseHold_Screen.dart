@@ -208,7 +208,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             ? householdRefKey.substring(householdRefKey.length - 11)
             : householdRefKey;
 
-        // Fetch all beneficiaries related to this household_ref_key
         final membersForHousehold = rows.where((b) {
           final ref = (b['household_ref_key'] ?? '').toString();
           final isDeleted = b['is_deleted'] == 1;
