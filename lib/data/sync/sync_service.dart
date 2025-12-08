@@ -185,132 +185,132 @@ class SyncService {
     }
   }
 
-  Future<void> syncUnsyncedMotherCareAncActivities() async {
-    try {
-      final list = await _dao.getUnsyncedMotherCareActivities();
-      if (list.isEmpty) {
-        print('MotherCare ANC Push: No unsynced forms');
-        return;
-      }
-
-      print('MotherCare ANC Push: Found ${list.length} unsynced form(s)');
-
-      List<Map<String, dynamic>> payload = [];
-
-      for (final r in list) {
-        try {
-          Map<String, dynamic> deviceJson = {};
-          Map<String, dynamic> appJson = {};
-          Map<String, dynamic> geoJson = {};
-          Map<String, dynamic> formRoot = {};
-          Map<String, dynamic> formDataJson = {};
-
-          final deviceStr = r['device_details']?.toString();
-          if (deviceStr != null && deviceStr.isNotEmpty) {
-            try {
-              final dj = jsonDecode(deviceStr);
-              if (dj is Map) deviceJson = Map<String, dynamic>.from(dj);
-            } catch (_) {}
-          }
-
-          final appStr = r['app_details']?.toString();
-          if (appStr != null && appStr.isNotEmpty) {
-            try {
-              final aj = jsonDecode(appStr);
-              if (aj is Map) appJson = Map<String, dynamic>.from(aj);
-            } catch (_) {}
-          }
-
-          final formStr = r['form_json']?.toString();
-          if (formStr != null && formStr.isNotEmpty) {
-            try {
-              final fj = jsonDecode(formStr);
-              if (fj is Map) {
-                formRoot = Map<String, dynamic>.from(fj);
-                if (fj['form_data'] is Map) {
-                  formDataJson = Map<String, dynamic>.from(fj['form_data']);
-                }
-                if (fj['geolocation_details'] is Map) {
-                  geoJson = Map<String, dynamic>.from(fj['geolocation_details']);
-                } else if (formDataJson['geolocation_details'] is Map) {
-                  geoJson = Map<String, dynamic>.from(formDataJson['geolocation_details']);
-                }
-              }
-            } catch (_) {}
-          }
-
-          final String userId = (r['current_user_key'] ?? formRoot['user_id'] ?? formDataJson['user_id'] ?? '').toString();
-          final String facility = (r['facility_id']?.toString() ?? formRoot['facility_id']?.toString() ?? formDataJson['facility_id']?.toString() ?? '');
-          final String appRoleId = (formRoot['app_role_id'] ?? formDataJson['app_role_id'] ?? '').toString();
-          final String createdAt = (r['created_date_time'] ?? formRoot['created_date_time'] ?? formDataJson['created_date_time'] ?? '').toString();
-          final String modifiedAt = (r['modified_date_time'] ?? formRoot['modified_date_time'] ?? formDataJson['modified_date_time'] ?? '').toString();
-
-          final String hhRef = (r['household_ref_key'] ?? '').toString();
-          final String benRef = (r['beneficiary_ref_key'] ?? '').toString();
-
-          if (hhRef.isEmpty || benRef.isEmpty) {
-            continue; // skip invalid rows
-          }
-
-          payload.add({
-            'unique_key': hhRef,
-            'beneficiaries_registration_ref_key': benRef,
-            'mother_care_type': 'anc_due',
-            'user_id': userId,
-            'facility_id': facility,
-            'is_deleted': 0,
-            'created_by': userId,
-            'created_date_time': createdAt,
-            'modified_by': userId,
-            'modified_date_time': modifiedAt,
-            'parent_added_by': userId,
-            'parent_facility_id': int.tryParse(facility) ?? facility,
-            'app_role_id': appRoleId,
-            'is_guest': 0,
-            'pregnancy_count': 1,
-            'device_details': {
-              'device_id': deviceJson['id'] ?? deviceJson['device_id'],
-              'device_plateform': deviceJson['platform'] ?? deviceJson['device_plateform'],
-              'device_plateform_version': deviceJson['version'] ?? deviceJson['device_plateform_version'],
-            },
-            'app_details': {
-              'app_version': appJson['app_version'],
-              'app_name': appJson['app_name'],
-            },
-            'geolocation_details': {
-              'latitude': geoJson['lat']?.toString() ?? '',
-              'longitude': geoJson['long']?.toString() ?? '',
-            },
-          });
-        } catch (e) {
-          print('MotherCare ANC Push: error building payload for a form -> $e');
-        }
-      }
-
-      if (payload.isEmpty) {
-        print('MotherCare ANC Push: No valid payload items after filtering');
-        return;
-      }
-
-      final resp = await _mcRepo.addMotherCareActivity(payload);
-      final success = resp is Map && resp['success'] == true;
-
-      if (success) {
-        for (final r in list) {
-          try {
-            await _dao.markMotherCareAncFormSyncedById(r['id'] as int? ?? 0);
-          } catch (e) {
-            print('MotherCare ANC Push: error marking form ${r['id']} as synced -> $e');
-          }
-        }
-        print('MotherCare ANC Push: Marked ${list.length} form(s) as synced');
-      } else {
-        print('MotherCare ANC Push: API not successful, will retry later');
-      }
-    } catch (e) {
-      print('MotherCare ANC Push: error -> $e');
-    }
-  }
+  // Future<void> syncUnsyncedMotherCareAncActivities() async {
+  //   try {
+  //     final list = await _dao.getUnsyncedMotherCareActivities();
+  //     if (list.isEmpty) {
+  //       print('MotherCare ANC Push: No unsynced forms');
+  //       return;
+  //     }
+  //
+  //     print('MotherCare ANC Push: Found ${list.length} unsynced form(s)');
+  //
+  //     List<Map<String, dynamic>> payload = [];
+  //
+  //     for (final r in list) {
+  //       try {
+  //         Map<String, dynamic> deviceJson = {};
+  //         Map<String, dynamic> appJson = {};
+  //         Map<String, dynamic> geoJson = {};
+  //         Map<String, dynamic> formRoot = {};
+  //         Map<String, dynamic> formDataJson = {};
+  //
+  //         final deviceStr = r['device_details']?.toString();
+  //         if (deviceStr != null && deviceStr.isNotEmpty) {
+  //           try {
+  //             final dj = jsonDecode(deviceStr);
+  //             if (dj is Map) deviceJson = Map<String, dynamic>.from(dj);
+  //           } catch (_) {}
+  //         }
+  //
+  //         final appStr = r['app_details']?.toString();
+  //         if (appStr != null && appStr.isNotEmpty) {
+  //           try {
+  //             final aj = jsonDecode(appStr);
+  //             if (aj is Map) appJson = Map<String, dynamic>.from(aj);
+  //           } catch (_) {}
+  //         }
+  //
+  //         final formStr = r['form_json']?.toString();
+  //         if (formStr != null && formStr.isNotEmpty) {
+  //           try {
+  //             final fj = jsonDecode(formStr);
+  //             if (fj is Map) {
+  //               formRoot = Map<String, dynamic>.from(fj);
+  //               if (fj['form_data'] is Map) {
+  //                 formDataJson = Map<String, dynamic>.from(fj['form_data']);
+  //               }
+  //               if (fj['geolocation_details'] is Map) {
+  //                 geoJson = Map<String, dynamic>.from(fj['geolocation_details']);
+  //               } else if (formDataJson['geolocation_details'] is Map) {
+  //                 geoJson = Map<String, dynamic>.from(formDataJson['geolocation_details']);
+  //               }
+  //             }
+  //           } catch (_) {}
+  //         }
+  //
+  //         final String userId = (r['current_user_key'] ?? formRoot['user_id'] ?? formDataJson['user_id'] ?? '').toString();
+  //         final String facility = (r['facility_id']?.toString() ?? formRoot['facility_id']?.toString() ?? formDataJson['facility_id']?.toString() ?? '');
+  //         final String appRoleId = (formRoot['app_role_id'] ?? formDataJson['app_role_id'] ?? '').toString();
+  //         final String createdAt = (r['created_date_time'] ?? formRoot['created_date_time'] ?? formDataJson['created_date_time'] ?? '').toString();
+  //         final String modifiedAt = (r['modified_date_time'] ?? formRoot['modified_date_time'] ?? formDataJson['modified_date_time'] ?? '').toString();
+  //
+  //         final String hhRef = (r['household_ref_key'] ?? '').toString();
+  //         final String benRef = (r['beneficiary_ref_key'] ?? '').toString();
+  //
+  //         if (hhRef.isEmpty || benRef.isEmpty) {
+  //           continue; // skip invalid rows
+  //         }
+  //
+  //         payload.add({
+  //           'unique_key': hhRef,
+  //           'beneficiaries_registration_ref_key': benRef,
+  //           'mother_care_type': 'anc_due',
+  //           'user_id': userId,
+  //           'facility_id': facility,
+  //           'is_deleted': 0,
+  //           'created_by': userId,
+  //           'created_date_time': createdAt,
+  //           'modified_by': userId,
+  //           'modified_date_time': modifiedAt,
+  //           'parent_added_by': userId,
+  //           'parent_facility_id': int.tryParse(facility) ?? facility,
+  //           'app_role_id': appRoleId,
+  //           'is_guest': 0,
+  //           'pregnancy_count': 1,
+  //           'device_details': {
+  //             'device_id': deviceJson['id'] ?? deviceJson['device_id'],
+  //             'device_plateform': deviceJson['platform'] ?? deviceJson['device_plateform'],
+  //             'device_plateform_version': deviceJson['version'] ?? deviceJson['device_plateform_version'],
+  //           },
+  //           'app_details': {
+  //             'app_version': appJson['app_version'],
+  //             'app_name': appJson['app_name'],
+  //           },
+  //           'geolocation_details': {
+  //             'latitude': geoJson['lat']?.toString() ?? '',
+  //             'longitude': geoJson['long']?.toString() ?? '',
+  //           },
+  //         });
+  //       } catch (e) {
+  //         print('MotherCare ANC Push: error building payload for a form -> $e');
+  //       }
+  //     }
+  //
+  //     if (payload.isEmpty) {
+  //       print('MotherCare ANC Push: No valid payload items after filtering');
+  //       return;
+  //     }
+  //
+  //     final resp = await _mcRepo.addMotherCareActivity(payload);
+  //     final success = resp is Map && resp['success'] == true;
+  //
+  //     if (success) {
+  //       for (final r in list) {
+  //         try {
+  //           await _dao.markMotherCareAncFormSyncedById(r['id'] as int? ?? 0);
+  //         } catch (e) {
+  //           print('MotherCare ANC Push: error marking form ${r['id']} as synced -> $e');
+  //         }
+  //       }
+  //       print('MotherCare ANC Push: Marked ${list.length} form(s) as synced');
+  //     } else {
+  //       print('MotherCare ANC Push: API not successful, will retry later');
+  //     }
+  //   } catch (e) {
+  //     print('MotherCare ANC Push: error -> $e');
+  //   }
+  // }
 
   Future<void> syncMotherCareActivities() async {
     try {
@@ -370,7 +370,7 @@ class SyncService {
       await fetchHouseholdsFromServer();
       await syncUnsyncedEligibleCoupleActivities();
       await syncUnsyncedChildCareActivities();
-      await syncUnsyncedMotherCareAncActivities();
+      await syncMotherCareActivities();
       await syncUnsyncedFollowupForms();
       await fetchEligibleCoupleActivitiesFromServer();
       await fetchChildCareActivitiesFromServer();

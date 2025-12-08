@@ -282,10 +282,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           
           final relation = (memberInfo['relation_to_head'] ?? memberInfo['relation'] ?? '').toString().toLowerCase();
           
-          // Skip head and spouse for children count
           if (relation == 'self' || relation == 'head' || relation == 'spouse') {
             // Get head's children count
-            if (relation == 'self' || relation == 'head') {
+            if (relation == 'self' || relation == 'head' || relation == 'spouse' || relation == 'wife') {
               final dynamic childrenField = memberInfo['children'];
               if (childrenField is num) {
                 headChildren = childrenField.toInt();

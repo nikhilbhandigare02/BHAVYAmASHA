@@ -77,28 +77,63 @@ class NetworkServiceApi extends BaseApiServices{
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       };
-     // print('🌍 POST Request → $url');
-    //  print('📦 Headers → $reqHeaders');
-    //  print('📝 Body → $body');
+
+      print('🌍 POST Request → $url');
+      print('📦 Headers → $reqHeaders');
+      print('📝 Body → $body');
 
       final response = await http
           .post(
-            Uri.parse(url),
-            body: body,
-            headers: reqHeaders,
-          )
+        Uri.parse(url),
+        body: body,
+        headers: reqHeaders,
+      )
           .timeout(const Duration(seconds: 50));
 
-      //print('📥 Response Code: ${response.statusCode}');
-    //  print('📥 Response Body: ${response.body}');
+      print('📥 Response Code: ${response.statusCode}');
+      print('📥 Response Body: ${response.body}');
 
-      return returnResponse(response);
+      // First, check if the response is successful
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        try {
+          // Try to parse the JSON response
+          final jsonResponse = jsonDecode(response.body);
+          // Check if the response indicates success
+          if (jsonResponse is Map && jsonResponse['success'] == true) {
+            return jsonResponse;
+          } else {
+            // Server returned success status code but API indicates failure
+            final errorMsg = jsonResponse['msg'] ?? 'Unknown error occurred';
+            throw FetchDataException('API Error: $errorMsg');
+          }
+        } catch (e) {
+          // If we can't parse the JSON, return the raw response
+          return response.body;
+        }
+      } else {
+        // Handle different HTTP error statuses
+        switch (response.statusCode) {
+          case 400:
+            throw BadRequestException('Bad request: ${response.body}');
+          case 401:
+          case 403:
+            throw UnAuthorizedException('Unauthorised: ${response.body}');
+          case 404:
+            throw FetchDataException('Resource not found: $url');
+          case 500:
+          default:
+            throw FetchDataException(
+                'Error occurred while communicating with server. Status code: ${response.statusCode}');
+        }
+      }
     } on SocketException {
       throw NoInternetException('No Internet Connection');
     } on TimeoutException {
       throw NoInternetException('Request Timed Out');
-    } on FetchDataException catch (e) {
-      throw e;
+    } on FormatException catch (e) {
+      throw FetchDataException('Invalid response format: $e');
+    } catch (e) {
+      throw FetchDataException('Unexpected error: $e');
     }
   }
 }

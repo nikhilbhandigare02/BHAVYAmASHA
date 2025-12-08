@@ -119,7 +119,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             break;
         }
       }
-
+      
       emit(state.copyWith(
         numberOfChildren: e.value,
         baby1Name: baby1Name,
@@ -175,7 +175,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'ANC Due Registration';
       final formsRefKey = 'bt7gs9rl1a5d26mz';
 
-
+      
       final formData = {
         'form_type': formType,
         'form_name': formName,
@@ -401,43 +401,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           print('✅ New submission count: $newCount');
         } catch (e) {
           print('❌ Error updating submission count: $e');
-        }
-
-        if (state.givesBirthToBaby == 'Yes') {
-          try {
-            final deviceInfo = await DeviceInfo.getDeviceInfo();
-            final ts = DateTime.now().toIso8601String();
-            final motherCareActivityData = {
-              'server_id': null,
-              'household_ref_key': householdRefKey,
-              'beneficiary_ref_key': beneficiaryId,
-              'mother_care_state': 'delivery_outcome',
-              'device_details': jsonEncode({
-                'id': deviceInfo.deviceId,
-                'platform': deviceInfo.platform,
-                'version': deviceInfo.osVersion,
-              }),
-              'app_details': jsonEncode({
-                'app_version': deviceInfo.appVersion.split('+').first,
-                'app_name': deviceInfo.appName,
-                'build_number': deviceInfo.buildNumber,
-                'package_name': deviceInfo.packageName,
-              }),
-              'parent_user': jsonEncode({}),
-              'current_user_key': ashaUniqueKey,
-              'facility_id': facilityId,
-              'created_date_time': ts,
-              'modified_date_time': ts,
-              'is_synced': 0,
-              'is_deleted': 0,
-            };
-
-            print('Inserting mother care activity for pregnant head: ${jsonEncode(motherCareActivityData)}');
-            await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
-            print('✅ Successfully inserted mother care activity');
-          } catch (e) {
-            print('❌ Error inserting mother care activity: $e');
-          }
         }
 
         emit(state.copyWith(isSubmitting: false, isSuccess: true, error: null));

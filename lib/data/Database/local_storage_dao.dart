@@ -966,7 +966,6 @@ class LocalStorageDao {
     }
   }
 
-// In local_storage_dao.dart
   Future<List<Map<String, dynamic>>> getUnsyncedMotherCareActivities() async {
     final db = await _db;
     final rows = await db.query(
