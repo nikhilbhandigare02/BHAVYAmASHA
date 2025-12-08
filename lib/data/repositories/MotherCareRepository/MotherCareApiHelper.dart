@@ -26,15 +26,15 @@ class MotherCareApiHelper {
           ? jsonDecode(currentUser['details'] as String)
           : currentUser['details'] ?? {};
 
-      // final userId = userDetails['unique_key']?.toString() ?? '';
-      // final facilityId = userDetails['working_location']?['facility_id']?.toString() ??
-      //     userDetails['facility_id']?.toString() ?? '';
+      final userId = userDetails['unique_key']?.toString() ?? '';
+      final facilityId = userDetails['working_location']?['asha_associated_with_facility_id']?.toString() ??
+          userDetails['facility_id']?.toString() ?? '';
       final appRoleId = int.tryParse(userDetails['app_role_id']?.toString() ?? '1') ?? 1;
 
-      // if (userId.isEmpty || facilityId.isEmpty) {
-      //   print('MC Sync: Missing required user details (user_id or facility_id)');
-      //   return;
-      // }
+      if (userId.isEmpty || facilityId.isEmpty) {
+        print('MC Sync: Missing required user details (user_id or facility_id)');
+        return;
+      }
 
       final unsyncedActivities = await _dao.getUnsyncedMotherCareActivities();
       if (unsyncedActivities.isEmpty) {

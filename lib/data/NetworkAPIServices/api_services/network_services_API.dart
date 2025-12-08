@@ -67,73 +67,79 @@ class NetworkServiceApi extends BaseApiServices{
       throw e;
     }
   }
-
   @override
   Future<dynamic> postApi(String url, dynamic data, {Map<String, String>? headers}) async {
     try {
+      print('🚀 Starting POST request to: $url');
+      print('📦 Request data type: ${data.runtimeType}');
+
+      // Ensure data is properly encoded
       final body = data is String ? data : jsonEncode(data);
+      print('📝 Request body: $body');
+
       final reqHeaders = {
         ...?headers,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       };
 
-      print('🌍 POST Request → $url');
-      print('📦 Headers → $reqHeaders');
-      print('📝 Body → $body');
+      print('🔑 Headers: $reqHeaders');
 
-      final response = await http
-          .post(
+      final response = await http.post(
         Uri.parse(url),
         body: body,
         headers: reqHeaders,
-      )
-          .timeout(const Duration(seconds: 50));
+      ).timeout(
+        const Duration(seconds: 50),
+        onTimeout: () {
+          print('⏰ Request timed out after 50 seconds');
+          throw TimeoutException('Request timed out after 50 seconds');
+        },
+      );
 
-      print('📥 Response Code: ${response.statusCode}');
-      print('📥 Response Body: ${response.body}');
+      print('📥 Response status: ${response.statusCode}');
+      print('📥 Response headers: ${response.headers}');
+      print('📥 Response body: ${response.body}');
 
-      // First, check if the response is successful
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        try {
-          // Try to parse the JSON response
-          final jsonResponse = jsonDecode(response.body);
-          // Check if the response indicates success
-          if (jsonResponse is Map && jsonResponse['success'] == true) {
-            return jsonResponse;
-          } else {
-            // Server returned success status code but API indicates failure
-            final errorMsg = jsonResponse['msg'] ?? 'Unknown error occurred';
-            throw FetchDataException('API Error: $errorMsg');
+      // Handle different status codes
+      switch (response.statusCode) {
+        case 200:
+        case 201:
+          try {
+            return jsonDecode(response.body);
+          } catch (e) {
+            print('⚠️ Error parsing JSON response: $e');
+            return response.body;
           }
-        } catch (e) {
-          // If we can't parse the JSON, return the raw response
-          return response.body;
-        }
-      } else {
-        // Handle different HTTP error statuses
-        switch (response.statusCode) {
-          case 400:
-            throw BadRequestException('Bad request: ${response.body}');
-          case 401:
-          case 403:
-            throw UnAuthorizedException('Unauthorised: ${response.body}');
-          case 404:
-            throw FetchDataException('Resource not found: $url');
-          case 500:
-          default:
-            throw FetchDataException(
-                'Error occurred while communicating with server. Status code: ${response.statusCode}');
-        }
+        case 400:
+          throw BadRequestException('Bad Request: ${response.body}');
+        case 401:
+          throw UnAuthorizedException('Unauthorized: ${response.body}');
+        case 403:
+          throw UnAuthorizedException('Forbidden: ${response.body}');
+        case 404:
+          throw FetchDataException('Not Found: $url');
+        case 500:
+        default:
+          print('❌ Server error: ${response.statusCode}');
+          print('Response body: ${response.body}');
+          throw FetchDataException(
+            'Error occurred while communicating with server. Status code: ${response.statusCode}',
+          );
       }
-    } on SocketException {
-      throw NoInternetException('No Internet Connection');
-    } on TimeoutException {
-      throw NoInternetException('Request Timed Out');
+    } on SocketException catch (e) {
+      print('🌐 Network error: $e');
+      throw NoInternetException('No Internet Connection: $e');
+    } on TimeoutException catch (e) {
+      print('⏰ Request timeout: $e');
+      throw NoInternetException('Request timed out: $e');
     } on FormatException catch (e) {
+      print('📄 Format exception: $e');
       throw FetchDataException('Invalid response format: $e');
-    } catch (e) {
-      throw FetchDataException('Unexpected error: $e');
+    } catch (e, stackTrace) {
+      print('❌ Unexpected error: $e');
+      print('Stack trace: $stackTrace');
+      throw FetchDataException('Unexpected error occurred: $e');
     }
   }
 }

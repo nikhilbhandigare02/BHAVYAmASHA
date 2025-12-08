@@ -54,21 +54,17 @@ class _EligibleCoupleIdentifiedScreenState
 
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
     try {
-      // Get all eligible couple activities
       final allActivities = await LocalStorageDao.instance.getEligibleCoupleActivities();
 
-      // Find all activities for this beneficiary
       final beneficiaryActivities = allActivities
           .where((activity) =>
       activity['beneficiary_ref_key'] == beneficiaryRefKey)
           .toList();
 
       if (beneficiaryActivities.isNotEmpty) {
-        // Sort by created_date_time in descending order to get the most recent
         beneficiaryActivities.sort((a, b) =>
             (b['created_date_time'] ?? '').compareTo(a['created_date_time'] ?? ''));
 
-        // Return the status of the most recent activity
         final latestActivity = beneficiaryActivities.first;
         return {
           'is_synced': latestActivity['is_synced'] == 1,
@@ -76,13 +72,13 @@ class _EligibleCoupleIdentifiedScreenState
         };
       }
 
-      // No activities found for this beneficiary
       return {'is_synced': false, 'server_id': null};
     } catch (e) {
       print('Error fetching sync status: $e');
       return {'is_synced': false, 'server_id': null};
     }
   }
+
   Future<void> _loadEligibleCouples() async {
     setState(() { _isLoading = true; });
     final rows = await LocalStorageDao.instance.getAllBeneficiaries();

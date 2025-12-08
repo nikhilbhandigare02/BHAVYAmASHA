@@ -15,31 +15,70 @@ class EligibleCoupleRepository {
   Timer? _ecSyncTimer;
 
   Future<dynamic> trackEligibleCouple(List<dynamic> payload) async {
-    final currentUser = await UserInfo.getCurrentUser();
-    final userDetails = currentUser?['details'] is String
-        ? jsonDecode(currentUser?['details'] ?? '{}')
-        : currentUser?['details'] ?? {};
+    try {
+      print('🔍 Starting trackEligibleCouple with payload: $payload');
 
-    String? token = await SecureStorageService.getToken();
-    if ((token == null || token.isEmpty) && userDetails is Map) {
+      // 1. Get user details
+      final currentUser = await UserInfo.getCurrentUser();
+      print('👤 Current user: ${currentUser?.toString() ?? 'null'}');
+
+      final userDetails = currentUser?['details'] is String
+          ? jsonDecode(currentUser?['details'] ?? '{}')
+          : currentUser?['details'] ?? {};
+      print('📝 User details: $userDetails');
+
+      // 2. Get token
+      String? token = await SecureStorageService.getToken();
+      print('🔑 Initial token from storage: $token');
+
+      if ((token == null || token.isEmpty) && userDetails is Map) {
+        try {
+          token = userDetails['token']?.toString();
+          print('🔄 Using token from user details: ${token != null ? 'Token found' : 'No token found'}');
+        } catch (e, stackTrace) {
+          print('⚠️ Error getting token from user details: $e');
+          print('Stack trace: $stackTrace');
+        }
+      }
+
+      if (token == null || token.isEmpty) {
+        print('❌ No authentication token available');
+        throw Exception('Authentication token is required');
+      }
+
+      // 3. Prepare headers
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+      print('📋 Request headers: $headers');
+
+      // 4. Log the full URL and payload
+      final fullUrl = Endpoints.trackEligibleCouple;
+      print('🌐 Sending POST request to: $fullUrl');
+      print('📤 Request payload: ${jsonEncode(payload)}');
+
+      // 5. Make the API call
       try {
-        token = userDetails['token']?.toString();
-      } catch (_) {}
+        final response = await _api.postApi(
+          fullUrl,
+          payload,
+          headers: headers,
+        );
+
+        print('✅ API Response: $response');
+        return response is String ? jsonDecode(response) : response;
+      } catch (e, stackTrace) {
+        print('❌ Error in API call: $e');
+        print('Stack trace: $stackTrace');
+        rethrow;
+      }
+    } catch (e, stackTrace) {
+      print('🔥 Error in trackEligibleCouple: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
     }
-
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-    };
-
-    final response = await _api.postApi(
-      Endpoints.trackEligibleCouple,
-      payload,
-      headers: headers,
-    );
-
-    return response is String ? jsonDecode(response) : response;
   }
 
   Future<Map<String, dynamic>> fetchAndStoreEligibleCoupleActivities({
