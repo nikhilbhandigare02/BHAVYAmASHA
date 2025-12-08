@@ -276,6 +276,43 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
         print('✅ ANC visit form saved successfully with ID: $formId');
 
+        if (state.givesBirthToBaby == 'Yes') {
+          try {
+            final deviceInfo = await DeviceInfo.getDeviceInfo();
+            final ts = DateTime.now().toIso8601String();
+            final motherCareActivityData = {
+              'server_id': null,
+              'household_ref_key': householdRefKey,
+              'beneficiary_ref_key': beneficiaryId,
+              'mother_care_state': 'delivery_outcome',
+              'device_details': jsonEncode({
+                'id': deviceInfo.deviceId,
+                'platform': deviceInfo.platform,
+                'version': deviceInfo.osVersion,
+              }),
+              'app_details': jsonEncode({
+                'app_version': deviceInfo.appVersion.split('+').first,
+                'app_name': deviceInfo.appName,
+                'build_number': deviceInfo.buildNumber,
+                'package_name': deviceInfo.packageName,
+              }),
+              'parent_user': jsonEncode({}),
+              'current_user_key': ashaUniqueKey,
+              'facility_id': facilityId,
+              'created_date_time': ts,
+              'modified_date_time': ts,
+              'is_synced': 0,
+              'is_deleted': 0,
+            };
+
+            print('Inserting mother care activity for pregnant head: ${jsonEncode(motherCareActivityData)}');
+            await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
+            print('✅ Successfully inserted mother care activity');
+          } catch (e) {
+            print('❌ Error inserting mother care activity: $e');
+          }
+        }
+
         try {
           // After a successful ANC submission, mark this beneficiary as
           // logically deleted for local lists and flag it as unsynced so

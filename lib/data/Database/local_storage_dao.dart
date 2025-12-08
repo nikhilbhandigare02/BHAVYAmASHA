@@ -304,6 +304,25 @@ class LocalStorageDao {
     }).toList();
   }
 
+
+  Future<List<Map<String, dynamic>>> getEligibleCoupleActivities() async {
+    final db = await _db;
+    final rows = await db.query(
+      'eligible_couple_activities',
+      where: 'is_deleted = 0',
+      orderBy: 'created_date_time ASC',
+    );
+    return rows.map((row) {
+      final mapped = Map<String, dynamic>.from(row);
+      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+      return mapped;
+    }).toList();
+  }
+
+
+
   Future<int> markEligibleCoupleActivitySyncedById(int id, {String? serverId}) async {
     final db = await _db;
     final values = <String, Object?>{
