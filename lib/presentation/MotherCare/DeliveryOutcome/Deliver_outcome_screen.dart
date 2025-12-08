@@ -66,6 +66,11 @@ class _DeliveryOutcomeScreenState
       final db = await DatabaseProvider.instance.database;
 
       const ancRefKey = 'bt7gs9rl1a5d26mz';
+      String? ashaUniqueKey = await SecureStorageService.getCurrentUserKey();
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        final data = await SecureStorageService.getCurrentUserData();
+        ashaUniqueKey = data?['unique_key']?.toString();
+      }
 
       print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
 
@@ -79,11 +84,12 @@ class _DeliveryOutcomeScreenState
           f.id as form_id
         FROM ${FollowupFormDataTable.table} f
         WHERE 
-          f.forms_ref_key = '$ancRefKey'
-          AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+          f.forms_ref_key = ?
+          AND f.form_json LIKE ?
           AND f.is_deleted = 0
+          AND f.current_user_key = ?
         ORDER BY f.created_date_time DESC
-      ''');
+      ''', [ancRefKey, '%"gives_birth_to_baby":"Yes"%', ashaUniqueKey ?? '']);
 
       print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
       // After line 61 in Deliver_outcome_screen.dart, add this code:
@@ -171,8 +177,8 @@ class _DeliveryOutcomeScreenState
           final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome];
           final existingOutcome = await db.query(
             FollowupFormDataTable.table,
-            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0',
-            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey],
+            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 AND current_user_key = ?',
+            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey, ashaUniqueKey],
             limit: 1,
           );
           if (existingOutcome.isNotEmpty) {
