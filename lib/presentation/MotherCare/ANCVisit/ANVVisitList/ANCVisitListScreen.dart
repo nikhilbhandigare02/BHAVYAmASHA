@@ -69,7 +69,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           }),
         };
 
-        // Combine MCA record with beneficiary info
+
         return {
           ...record,
           'beneficiary_info': jsonEncode(beneficiaryInfo),
@@ -96,7 +96,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     });
     
     try {
-      // Get regular pregnant women
+
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final pregnantWomen = <Map<String, dynamic>>[];
       final Set<String> processedBeneficiaries = {}; // To track already processed beneficiaries

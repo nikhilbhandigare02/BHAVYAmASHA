@@ -242,6 +242,15 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               fatherKey = beneficiary['father_key'] as String? ?? '';
             }
           }
+          final currentUser = await UserInfo.getCurrentUser();
+          final userDetails = currentUser?['details'] is String
+              ? jsonDecode(currentUser?['details'] ?? '{}')
+              : currentUser?['details'] ?? {};
+
+          final working = userDetails['working_location'] ?? {};
+          final facilityId = working['asha_associated_with_facility_id'] ??
+              userDetails['asha_associated_with_facility_id'] ?? 0;
+          final ashaUniqueKey = userDetails['unique_key'] ?? '';
 
           final formDataForDb = {
             'server_id': '',
@@ -263,7 +272,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
             }),
             'parent_user': '',
-            'current_user_key': '',
+            'current_user_key':ashaUniqueKey,
             'facility_id': await UserInfo.getCurrentUser().then((value) {
               if (value != null) {
                 if (value['details'] is String) {
@@ -353,15 +362,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                     final deviceInfo = await DeviceInfo.getDeviceInfo();
                     final ts = DateTime.now().toIso8601String();
 
-                    final currentUser = await UserInfo.getCurrentUser();
-                    final userDetails = currentUser?['details'] is String
-                        ? jsonDecode(currentUser?['details'] ?? '{}')
-                        : currentUser?['details'] ?? {};
 
-                    final working = userDetails['working_location'] ?? {};
-                    final facilityId = working['asha_associated_with_facility_id'] ??
-                        userDetails['asha_associated_with_facility_id'] ?? 0;
-                    final ashaUniqueKey = userDetails['unique_key'] ?? '';
 
                     final motherCareActivityData = {
                       'server_id': null,

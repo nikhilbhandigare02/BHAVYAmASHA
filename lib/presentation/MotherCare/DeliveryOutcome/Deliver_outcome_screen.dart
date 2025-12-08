@@ -66,12 +66,8 @@ class _DeliveryOutcomeScreenState
       final db = await DatabaseProvider.instance.database;
 
       const ancRefKey = 'bt7gs9rl1a5d26mz';
-      String? ashaUniqueKey = await SecureStorageService.getCurrentUserKey();
-      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
-        final data = await SecureStorageService.getCurrentUserData();
-        ashaUniqueKey = data?['unique_key']?.toString();
-      }
-
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
 
       final ancForms = await db.rawQuery('''
