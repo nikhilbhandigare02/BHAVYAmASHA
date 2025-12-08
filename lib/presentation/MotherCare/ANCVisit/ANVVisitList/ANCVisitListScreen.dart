@@ -155,8 +155,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             print('  ⏩ Skipping - Already has delivery outcome');
             continue;
           }
-          
-          // Include if pregnant or in anc_due and no delivery outcome
+
           if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
             print('  🤰 Found ${isAncDue ? 'anc_due ' : ''}pregnant woman: $name (${isPregnant ? 'pregnant' : 'anc_due only'})');
             final personData = _processPerson(row, info, isPregnant: isPregnant || isAncDue);

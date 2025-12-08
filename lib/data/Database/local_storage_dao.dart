@@ -1391,8 +1391,34 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAllBeneficiaries({int? isMigrated}) async {
     try {
       final db = await _db;
-      final where = isMigrated != null ? 'is_migrated = ?' : null;
-      final whereArgs = isMigrated != null ? [isMigrated] : null;
+      final currentUser = await getCurrentUserFromDb();
+      String? ashaUniqueKey;
+      if (currentUser != null) {
+        final detailsRaw = currentUser['details'];
+        final details = detailsRaw is String
+            ? jsonDecode(detailsRaw)
+            : (detailsRaw is Map ? detailsRaw : {});
+        if (details is Map && details['unique_key'] != null) {
+          ashaUniqueKey = details['unique_key']?.toString();
+          print(ashaUniqueKey);
+        }
+      }
+
+      String? where;
+      List<Object?>? whereArgs;
+      if (isMigrated != null && ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where = 'is_migrated = ? AND current_user_key = ?';
+        whereArgs = [isMigrated, ashaUniqueKey];
+      } else if (isMigrated != null) {
+        where = 'is_migrated = ?';
+        whereArgs = [isMigrated];
+      } else if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where = 'current_user_key = ?';
+        whereArgs = [ashaUniqueKey];
+      } else {
+        where = null;
+        whereArgs = null;
+      }
       
       final rows = await db.query(
         'beneficiaries_new',

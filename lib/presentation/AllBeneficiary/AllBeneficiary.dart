@@ -50,7 +50,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     final dao = LocalStorageDao();
 
     try {
-      // Only get non-migrated beneficiaries (is_migrated = 0)
+
       final rows = await LocalStorageDao.instance.getAllBeneficiaries(
         isMigrated: 0,
       );
