@@ -187,6 +187,8 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
         }
         print('User Details: $userDetails');
       }
+      final ashaUniqueKey = userDetails['unique_key'] ?? {};
+
 
       // Try different possible keys for facility ID
       final facilityId = userDetails['asha_associated_with_facility_id'] ??
@@ -217,7 +219,7 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
           'package_name': deviceInfo.packageName,
         }),
         'parent_user': '',
-        'current_user_key': '',
+        'current_user_key': ashaUniqueKey,
         'facility_id': facilityId, 
         'form_json': formJson,
         'created_date_time': now,

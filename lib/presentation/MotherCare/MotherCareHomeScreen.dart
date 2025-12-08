@@ -11,6 +11,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/utils/anc_utils.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../data/SecureStorage/SecureStorage.dart';
 import '../HomeScreen/HomeScreen.dart';
 
 class Mothercarehomescreen extends StatefulWidget {
@@ -166,9 +167,15 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
       // CRITICAL: Same ANC ref key used in DeliveryOutcomeScreen
       const ancRefKey = 'bt7gs9rl1a5d26mz';
 
+      // ✅ ADD THIS: Get current user data (matching first function)
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       print('🔍 Loading Delivery Outcome count...');
+      print('🔍 Using current_user_key: $ashaUniqueKey');
 
       // Step 1: Get all ANC forms with gives_birth_to_baby = "Yes"
+      // ✅ UPDATED: Added current_user_key condition and parameterized query
       final ancForms = await db.rawQuery('''
       SELECT 
         f.beneficiary_ref_key,
@@ -179,11 +186,12 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
         f.id as form_id
       FROM ${FollowupFormDataTable.table} f
       WHERE 
-        f.forms_ref_key = '$ancRefKey'
-        AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+        f.forms_ref_key = ?
+        AND f.form_json LIKE ?
         AND f.is_deleted = 0
+        AND f.current_user_key = ?
       ORDER BY f.created_date_time DESC
-    ''');
+    ''', [ancRefKey, '%"gives_birth_to_baby":"Yes"%', ashaUniqueKey ?? '']);
 
       print('📊 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
 
@@ -226,11 +234,11 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
 
           beneficiariesProcessed.add(beneficiaryRefKey);
 
-          // Check if delivery outcome already exists for this beneficiary
+          // ✅ UPDATED: Added current_user_key condition to match first function
           final existingOutcome = await db.query(
             FollowupFormDataTable.table,
-            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0',
-            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey],
+            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 AND current_user_key = ?',
+            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey, ashaUniqueKey],
             limit: 1,
           );
 

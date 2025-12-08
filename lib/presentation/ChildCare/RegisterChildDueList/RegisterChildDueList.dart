@@ -9,6 +9,7 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import '../RegisterChildDueListForm/RegisterChildDueListForm.dart';
 
 class RegisterChildDueList extends StatefulWidget {
@@ -48,11 +49,23 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // First, get all child care activities with registration_due status
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      String whereClause;
+      List<Object?> whereArgs;
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        whereClause = 'child_care_state = ? AND current_user_key = ?';
+        whereArgs = ['registration_due', ashaUniqueKey];
+      } else {
+        whereClause = 'child_care_state = ?';
+        whereArgs = ['registration_due'];
+      }
+
       final List<Map<String, dynamic>> childActivities = await db.query(
         'child_care_activities',
-        where: 'child_care_state = ?',
-        whereArgs: ['registration_due'],
+        where: whereClause,
+        whereArgs: whereArgs,
         orderBy: 'created_date_time DESC',
       );
 
