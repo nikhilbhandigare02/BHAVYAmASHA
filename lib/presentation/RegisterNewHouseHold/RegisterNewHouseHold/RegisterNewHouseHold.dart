@@ -574,7 +574,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             }
           } catch (_) {}
 
-          // Initialize totalMembers count
           totalMembers = 1; // Start with 1 for the head
 
           final bool useDob = (result['useDob'] == true);

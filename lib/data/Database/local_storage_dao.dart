@@ -7,6 +7,7 @@ import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
 import 'package:medixcel_new/data/Database/tables/notification_table.dart';
 import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
 import '../models/guest_beneficiary/guest_beneficiary_model.dart';
 import 'database_provider.dart';
@@ -966,7 +967,6 @@ class LocalStorageDao {
     }
   }
 
-// In local_storage_dao.dart
   Future<List<Map<String, dynamic>>> getUnsyncedMotherCareActivities() async {
     final db = await _db;
     final rows = await db.query(
@@ -1391,18 +1391,8 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAllBeneficiaries({int? isMigrated}) async {
     try {
       final db = await _db;
-      final currentUser = await getCurrentUserFromDb();
-      String? ashaUniqueKey;
-      if (currentUser != null) {
-        final detailsRaw = currentUser['details'];
-        final details = detailsRaw is String
-            ? jsonDecode(detailsRaw)
-            : (detailsRaw is Map ? detailsRaw : {});
-        if (details is Map && details['unique_key'] != null) {
-          ashaUniqueKey = details['unique_key']?.toString();
-          print(ashaUniqueKey);
-        }
-      }
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       String? where;
       List<Object?>? whereArgs;

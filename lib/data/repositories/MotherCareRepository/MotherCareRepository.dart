@@ -12,33 +12,59 @@ class MotherCareRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
   Future<dynamic> addMotherCareActivity(List<dynamic> payload) async {
-    final currentUser = await UserInfo.getCurrentUser();
-    final userDetails = currentUser?['details'] is String
-        ? jsonDecode(currentUser?['details'] ?? '{}')
-        : currentUser?['details'] ?? {};
+    try {
+      final currentUser = await UserInfo.getCurrentUser();
+      if (currentUser == null) {
+        throw Exception('No current user found');
+      }
 
-    String? token = await SecureStorageService.getToken();
-    if ((token == null || token.isEmpty) && userDetails is Map) {
-      try {
-        token = userDetails['token']?.toString();
-      } catch (_) {}
+      final userDetails = currentUser['details'] is String
+          ? jsonDecode(currentUser['details'] as String)
+          : currentUser['details'] ?? {};
+
+      String? token = await SecureStorageService.getToken();
+      if ((token == null || token.isEmpty) && userDetails is Map) {
+        try {
+          token = userDetails['token']?.toString();
+        } catch (e) {
+          print('MC: Error getting token from user details: $e');
+        }
+      }
+
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      };
+
+      print('MC: Sending request to ${Endpoints.addMotherCareActivity}');
+      print('MC: Headers: $headers');
+      print('MC: Payload: $payload');
+
+      final response = await _api.postApi(
+        Endpoints.addMotherCareActivity,
+        payload,
+        headers: headers,
+      );
+
+      print('MC: Response received: $response');
+
+      // If the response is a string, try to parse it as JSON
+      if (response is String) {
+        try {
+          return jsonDecode(response);
+        } catch (e) {
+          return {'success': false, 'msg': 'Invalid response format', 'raw': response};
+        }
+      }
+
+      return response;
+    } catch (e, stackTrace) {
+      print('MC: Error in addMotherCareActivity: $e');
+      print('MC: Stack trace: $stackTrace');
+      rethrow;
     }
-
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-    };
-
-    final response = await _api.postApi(
-      Endpoints.addMotherCareActivity,
-      payload,
-      headers: headers,
-    );
-
-    return response is String ? jsonDecode(response) : response;
   }
-
   Future<Map<String, dynamic>> fetchAndStoreMotherCareActivities({
     required String facilityId,
     required String ashaId,

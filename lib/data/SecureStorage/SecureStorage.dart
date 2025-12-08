@@ -125,21 +125,6 @@ class SecureStorageService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getHbncVisits(String beneficiaryId) async {
-    try {
-      final data = await _storage.read(key: _keyHbncVisits);
-      if (data == null) return [];
-      
-      final List<dynamic> visits = jsonDecode(data);
-      return visits
-          .where((visit) => visit['beneficiary_id'] == beneficiaryId)
-          .map((visit) => Map<String, dynamic>.from(visit))
-          .toList();
-    } catch (e) {
-      print('Error retrieving HBNC visits: $e');
-      return [];
-    }
-  }
 
   // Delete specific data
   static Future<void> delete(String key) async {
@@ -301,16 +286,6 @@ class SecureStorageService {
   }
 
 
-  static Future<List<dynamic>> getDeliveryOutcomes() async {
-    try {
-      final data = await _storage.read(key: _keydelivery_outcome);
-      if (data == null) return [];
-      return jsonDecode(data);
-    } catch (e) {
-      print('Error getting ANC visits: $e');
-      return [];
-    }
-  }
 
   // Check if user is logged in
   static Future<bool> isLoggedIn() async {
@@ -354,7 +329,7 @@ class SecureStorageService {
       await _storage.write(key: userDataKey, value: userDataString);
       await _storage.write(key: _keyCurrentUser, value: uniqueKey);
       
-      // Verify the data was saved
+
       final savedData = await _storage.read(key: userDataKey);
       print('Data saved successfully. Verification: ${savedData != null}');
     } catch (e) {

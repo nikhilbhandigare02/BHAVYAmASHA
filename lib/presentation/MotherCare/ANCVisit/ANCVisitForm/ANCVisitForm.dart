@@ -1471,11 +1471,25 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     color: AppColors.primary,
                                     borderRadius: 4,
                                     onPress: () {
+                                      final visitType = state.visitType;
+
                                       if (_formKey.currentState!.validate()) {
                                         bloc.add(const SubmitPressed());
                                       } else {
+                                        if (visitType.isEmpty) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text("Please select visit type"),
+                                              duration: Duration(seconds: 2),
+                                            ),
+                                          );
+                                          return;
+                                        }
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('Please fill all required fields correctly')),
+                                          const SnackBar(
+                                            content: Text("Please fill all required fields correctly"),
+                                            duration: Duration(seconds: 2),
+                                          ),
                                         );
                                       }
                                     },
