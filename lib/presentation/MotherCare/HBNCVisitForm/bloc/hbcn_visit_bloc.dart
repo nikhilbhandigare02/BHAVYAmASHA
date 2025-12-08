@@ -7,6 +7,7 @@ import '../../../../core/utils/device_info_utils.dart';
 import '../../../../data/Database/User_Info.dart';
 import '../../../../data/Database/database_provider.dart';
 
+import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../../data/SecureStorage/SecureStorage.dart';
 
@@ -200,11 +201,46 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         print('  - Beneficiary Ref Key: ${savedData.first['beneficiary_ref_key']}');
         print('  - Created: ${savedData.first['created_date_time']}');
 
-        // Update HBNC visit count for this beneficiary so that next
-        // visit defaults to the next scheduled day (1,3,7,14,21,28,42).
         if (beneficiaryId.isNotEmpty) {
-          await SecureStorageService.incrementVisitCount(beneficiaryId);
+          try {
+            final visitCount = await SecureStorageService.getVisitCount(beneficiaryId) ?? 0;
+            final deviceInfo = await DeviceInfo.getDeviceInfo();
+            final ts = DateTime.now().toIso8601String();
+
+            final motherCareActivityData = {
+              'server_id': null,
+              'household_ref_key': householdRefKey,
+              'beneficiary_ref_key': beneficiaryId,
+              'mother_care_state': 'hbnc_visit_$visitCount',
+              'device_details': jsonEncode({
+                'id': deviceInfo.deviceId,
+                'platform': deviceInfo.platform,
+                'version': deviceInfo.osVersion,
+              }),
+              'app_details': jsonEncode({
+                'app_version': deviceInfo.appVersion.split('+').first,
+                'app_name': deviceInfo.appName,
+                'build_number': deviceInfo.buildNumber,
+                'package_name': deviceInfo.packageName,
+              }),
+              'parent_user': jsonEncode({}),
+              'current_user_key': currentUserKey,
+              'facility_id': int.tryParse(facilityId) ?? 0,
+              'created_date_time': ts,
+              'modified_date_time': ts,
+              'is_synced': 0,
+              'is_deleted': 0,
+            };
+
+            print('Inserting mother care activity for HBNC visit: ${jsonEncode(motherCareActivityData)}');
+            await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
+            print('✅ Successfully inserted mother care activity for HBNC visit $visitCount');
+          } catch (e) {
+            print('❌ Error inserting mother care activity: $e');
+          }
         }
+
+
 
         emit(state.copyWith(
           isSaving: false,
@@ -400,7 +436,6 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       req('nippleCracksPainOrEngorged', 'Please answer cracked/painful/engorged breast question');
       req('referHospital', 'Please answer Refer to Hospital');
       reqIf(m['referHospital'] == 'Yes', 'referTo', 'Please select Refer to');
-      // If death selected, require death-specific fields and skip others
       if (m['motherStatus'] == 'death') {
         errors.clear();
         void reqDeath(String key, String code) {

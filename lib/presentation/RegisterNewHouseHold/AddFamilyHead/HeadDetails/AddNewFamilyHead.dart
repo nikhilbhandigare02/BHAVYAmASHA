@@ -328,13 +328,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   labelText: '${l.dobLabel} *',
                   hintText: l.dateHint,
                   initialDate: state.dob,
-                  firstDate: DateTime(now.year - 110, now.month, now.day), // exactly 110 years ago
-                  lastDate: DateTime(now.year - 15, now.month, now.day), // 15 years ago
+                  firstDate: DateTime(now.year - 110, now.month, now.day),
+                  lastDate: DateTime(now.year - 15, now.month, now.day),
                   onDateChanged: (date) {
                     if (date != null) {
                       context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(date));
                     }
                   },
+                  validator: (date) =>
+                      _captureError(Validations.validateDOB(l, date)),
                 )
             )
           else
@@ -1924,10 +1926,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             final spouseForm = spousFormKey.currentState;
                                                             final spousState = context.read<SpousBloc>().state;
                                                             
-                                                            // First validate the form fields
                                                             final isFormValid = spouseForm?.validate() ?? false;
                                                             
-                                                            // Then validate all fields including custom validations
                                                             final areAllFieldsValid = validateAllSpousFields(spousState);
                                                             
                                                             if (!isFormValid || !areAllFieldsValid) {
@@ -1935,7 +1935,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
                                                               showAppSnackBar(context, msg);
                                                               
-                                                              // Scroll to the first error in the form
                                                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                                                 final form = spousFormKey.currentContext?.findRenderObject() as RenderBox?;
                                                                 if (form != null) {
