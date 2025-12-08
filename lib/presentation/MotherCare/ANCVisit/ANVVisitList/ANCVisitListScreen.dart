@@ -90,6 +90,32 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     }
   }
 
+  Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        'mother_care_activities',
+        columns: ['is_synced', 'server_id', 'created_date_time'],
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0 ',
+        whereArgs: [beneficiaryRefKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (rows.isNotEmpty) {
+        return {
+          'is_synced': rows.first['is_synced'] == 1,
+          'server_id': rows.first['server_id']
+        };
+      }
+
+      return {'is_synced': false, 'server_id': null};
+    } catch (e) {
+      print('Error fetching sync status: $e');
+      return {'is_synced': false, 'server_id': null};
+    }
+  }
+
   Future<void> _loadPregnantWomen() async {
     setState(() {
       _isLoading = true;
@@ -650,9 +676,16 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     },
                   ),
                   const SizedBox(width: 6),
-                  SizedBox(
-                    width: 25,
-                    child: Image.asset('assets/images/sync.png'),
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: _getSyncStatus(beneficiaryId),
+                    builder: (context, snapshot) {
+                      final isSynced = snapshot.data?['is_synced'] == true;
+                      return Image.asset(
+                        'assets/images/sync.png',
+                        width: 25,
+                        color: isSynced ? null : Colors.grey[500],
+                      );
+                    },
                   )
                 ],
               ),

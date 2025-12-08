@@ -269,6 +269,28 @@ class _DeliveryOutcomeScreenState
     }
   }
 
+  // Add this new method to check sync status
+  Future<bool> _isSynced(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final result = await db.query(
+        'mother_care_activities',
+        where: 'beneficiary_ref_key = ? AND mother_care_state = ? ',
+        whereArgs: [beneficiaryRefKey, 'delivery_outcome'],
+        orderBy: 'created_date_time DESC',
+        // limit: 1,
+      );
+
+      if (result.isNotEmpty) {
+        return result.first['is_synced'] == 1;
+      }
+      return false;
+    } catch (e) {
+      print('Error checking sync status: $e');
+      return false;
+    }
+  }
+
   bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     if (person.isEmpty) return false;
 
@@ -660,10 +682,19 @@ class _DeliveryOutcomeScreenState
                       ),
 
                       const SizedBox(width: 8),
-                      SizedBox(
-                        width: 60,
-                        height: 24,
-                        child: Image.asset('assets/images/sync.png'),
+                      FutureBuilder<bool>(
+                        future: _isSynced(beneficiaryId),
+                        builder: (context, snapshot) {
+                          final isSynced = snapshot.data ?? false;
+                          return SizedBox(
+                            width: 60,
+                            height: 24,
+                            child: Image.asset(
+                              'assets/images/sync.png',
+                              color: isSynced ? null : Colors.grey[500],
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),

@@ -9,6 +9,7 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
+import '../../../data/Database/database_provider.dart';
 import '../../HomeScreen/HomeScreen.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../EligibleCoupleUpdate/EligibleCoupleUpdateScreen.dart';
@@ -54,21 +55,20 @@ class _EligibleCoupleIdentifiedScreenState
 
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
     try {
-      final allActivities = await LocalStorageDao.instance.getEligibleCoupleActivities();
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        'eligible_couple_activities',
+        columns: ['is_synced', 'server_id', 'created_date_time'],
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
 
-      final beneficiaryActivities = allActivities
-          .where((activity) =>
-      activity['beneficiary_ref_key'] == beneficiaryRefKey)
-          .toList();
-
-      if (beneficiaryActivities.isNotEmpty) {
-        beneficiaryActivities.sort((a, b) =>
-            (b['created_date_time'] ?? '').compareTo(a['created_date_time'] ?? ''));
-
-        final latestActivity = beneficiaryActivities.first;
+      if (rows.isNotEmpty) {
         return {
-          'is_synced': latestActivity['is_synced'] == 1,
-          'server_id': latestActivity['server_id']
+          'is_synced': rows.first['is_synced'] == 1,
+          'server_id': rows.first['server_id']
         };
       }
 
@@ -80,126 +80,111 @@ class _EligibleCoupleIdentifiedScreenState
   }
 
   Future<void> _loadEligibleCouples() async {
-    setState(() { _isLoading = true; });
-    final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-    final couples = <Map<String, dynamic>>[];
-    final households = <String, List<Map<String, dynamic>>>{};
-    for (final row in rows) {
-      final hhKey = row['household_ref_key']?.toString() ?? '';
-      households.putIfAbsent(hhKey, () => []).add(row);
+    if (mounted) {
+      setState(() => _isLoading = true);
     }
 
-    for (final household in households.values) {
-      Map<String, dynamic>? head;
-      Map<String, dynamic>? spouse;
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final couples = <Map<String, dynamic>>[];
+      final households = <String, List<Map<String, dynamic>>>{};
 
-      for (final member in household) {
-        final info = _toStringMap(member['beneficiary_info']);
-        String rawRelation =
-            (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
-        rawRelation = rawRelation.replaceAll('_', ' ');
-        if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
-          rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+      // Group by household
+      for (final row in rows) {
+        final hhKey = row['household_ref_key']?.toString() ?? '';
+        households.putIfAbsent(hhKey, () => []).add(row);
+      }
+
+      // Process each household
+      for (final household in households.values) {
+        Map<String, dynamic>? head;
+        Map<String, dynamic>? spouse;
+
+        // First pass: identify head and spouse
+        for (final member in household) {
+          final info = _toStringMap(member['beneficiary_info']);
+          String rawRelation = (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
+          rawRelation = rawRelation.replaceAll('_', ' ');
+
+          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
+            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
+          }
+
+          final relation = () {
+            if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
+              return 'self';
+            }
+            if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') {
+              return 'spouse';
+            }
+            return rawRelation;
+          }();
+
+          if (relation == 'self') {
+            head = info;
+            head!['_row'] = _toStringMap(member);
+          } else if (relation == 'spouse') {
+            spouse = info;
+            spouse!['_row'] = _toStringMap(member);
+          }
         }
 
-        final relation = () {
-          if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
-            return 'self';
-          }
-          if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') {
-            return 'spouse';
-          }
-          return rawRelation;
-        }();
+        // Second pass: process eligible females
+        for (final member in household) {
+          final info = _toStringMap(member['beneficiary_info']);
 
-        if (relation == 'self') {
-          head = info;
-          head['_row'] = _toStringMap(member);
-        } else if (relation == 'spouse') {
-          spouse = info;
-          spouse['_row'] = _toStringMap(member);
+          // Only consider females 15-49 and married
+          if (!_isEligibleFemale(info, head: head)) {
+            continue;
+          }
+
+          final uniqueKey = member['unique_key']?.toString() ?? '';
+          final syncStatus = await _getSyncStatus(uniqueKey);
+
+          // Get the most recent sync status
+          final db = await DatabaseProvider.instance.database;
+          final syncResult = await db.query(
+            'eligible_couple_activities',
+            columns: ['is_synced', 'server_id'],
+            where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+            whereArgs: [uniqueKey],
+            orderBy: 'created_date_time DESC',
+            limit: 1,
+          );
+
+          bool isSynced = false;
+          String? serverId;
+
+          if (syncResult.isNotEmpty) {
+            isSynced = syncResult.first['is_synced'] == 1;
+            serverId = syncResult.first['server_id']?.toString();
+          }
+
+          // Format the couple data with the latest sync status
+          couples.add(await _formatCoupleData(
+            _toStringMap(member),
+            info,
+            spouse ?? head ?? {},
+            isHead: head?['_row']?['unique_key'] == member['unique_key'],
+            isSynced: isSynced,
+            serverId: serverId,
+          ));
         }
       }
 
-      const allowedRelations = <String>{
-        'self',
-        'spouse',
-        'husband',
-        'son',
-        'daughter',
-        'father',
-        'mother',
-        'brother',
-        'sister',
-        'wife',
-        'nephew',
-        'niece',
-        'grand father',
-        'grand mother',
-        'father in law',
-        'mother in low',
-        'grand son',
-        'grand daughter',
-        'son in law',
-        'daughter in law',
-        'other',
-      };
-
-      for (final member in household) {
-        final info = _toStringMap(member['beneficiary_info']);
-        String rawRelation =
-            (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
-        rawRelation = rawRelation.replaceAll('_', ' ');
-        if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
-          rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
-        }
-
-        if (!allowedRelations.contains(rawRelation)) {
-          continue;
-        }
-
-        // Only consider females 15-49 and married
-        if (!_isEligibleFemale(info, head: head)) {
-          continue;
-        }
-
-        // Decide counterpart and isHead flag
-        final bool isHeadRelation =
-            rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head';
-        final bool isSpouseRelation =
-            rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband';
-
-        final counterpart = () {
-          if (isHeadRelation) {
-            return spouse ?? <String, dynamic>{};
-          }
-          if (isSpouseRelation) {
-            return head ?? <String, dynamic>{};
-          }
-          // For other relations, use head as counterpart if available
-          return head ?? <String, dynamic>{};
-        }();
-
-        final uniqueKey = member['unique_key']?.toString() ?? '';
-      final syncStatus = await _getSyncStatus(uniqueKey);
-      
-      couples.add(_formatCoupleData(
-        _toStringMap(member),
-        info,
-        counterpart,
-        isHead: isHeadRelation,
-        isSynced: syncStatus['is_synced'] as bool,
-        serverId: syncStatus['server_id'] as String?,
-      ));
+      if (mounted) {
+        setState(() {
+          _filtered = couples;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading eligible couples: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
-
-    setState(() {
-      _filtered = couples;
-      _isLoading = false;
-    });
   }
-
   bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     if (person.isEmpty) return false;
 
@@ -499,7 +484,7 @@ class _EligibleCoupleIdentifiedScreenState
                         'assets/images/sync.png',
                         width: 24,
                         height: 24,
-                        color: (data['is_synced'] == 1) ? null : Colors.grey,
+                        color: data['is_synced'] == true ? null : Colors.grey[500],
                       ),
                     ],
                   ),

@@ -352,7 +352,7 @@ class RegisterNewHouseholdBloc
                       'server_id': null,
                       'household_ref_key': uniqueKey,
                       'beneficiary_ref_key': headId,
-                      'mother_care_state': 'anc_due',
+                      'mother_care_state': 'anc_due_state',
                       'device_details': jsonEncode({
                         'id': deviceInfo.deviceId,
                         'platform': deviceInfo.platform,
@@ -634,7 +634,7 @@ class RegisterNewHouseholdBloc
                           'server_id': null,
                           'household_ref_key': uniqueKey,
                           'beneficiary_ref_key': spouseKey!,
-                          'mother_care_state': 'anc_due',
+                          'mother_care_state': 'anc_due_state',
                           'device_details': jsonEncode({
                             'id': deviceInfo.deviceId,
                             'platform': deviceInfo.platform,
@@ -836,8 +836,7 @@ class RegisterNewHouseholdBloc
                       ? Map<String, dynamic>.from(jsonDecode(spInfoRaw))
                       : <String, dynamic>{};
 
-                  // Prefer updated details from SpousBloc (spousedetails) when
-                  // available in headForm, otherwise fall back to sp_* keys.
+
                   Map<String, dynamic> spDetails = {};
                   final spRaw = headForm['spousedetails'];
                   if (spRaw is Map) {
@@ -1261,7 +1260,7 @@ class RegisterNewHouseholdBloc
                       'server_id': null,
                       'household_ref_key': uniqueKey,
                       'beneficiary_ref_key': memberId,
-                      'mother_care_state': 'anc_due',
+                      'mother_care_state': 'anc_due_state',
                       'device_details': jsonEncode({
                         'id': deviceInfo.deviceId,
                         'platform': deviceInfo.platform,

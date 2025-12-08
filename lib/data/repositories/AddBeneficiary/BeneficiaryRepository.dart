@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'package:medixcel_new/data/NetworkAPIServices/APIs_Urls/Endpoints.dart';
 import 'package:medixcel_new/data/NetworkAPIServices/api_services/network_services_API.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/core/utils/device_info_utils.dart';
 import 'package:medixcel_new/data/Database/User_Info.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 
@@ -154,6 +158,116 @@ class BeneficiaryRepository {
           }
         }
         await LocalStorageDao.instance.insertBeneficiary(row);
+        
+        // Check if this beneficiary is female and pregnant
+        try {
+          final beneficiaryInfo = _mapBeneficiaryInfo(rec);
+          final gender = beneficiaryInfo['gender']?.toString().toLowerCase();
+          final isPregnant = (beneficiaryInfo['isPregnant']?.toString().toLowerCase() == 'yes' ||
+                            beneficiaryInfo['isPregnant']?.toString().toLowerCase() == 'true');
+          
+          if (gender == 'female' && isPregnant) {
+            final currentUser = await UserInfo.getCurrentUser();
+            final userDetails = currentUser?['details'] is String
+                ? jsonDecode(currentUser?['details'] ?? '{}')
+                : currentUser?['details'] ?? {};
+            
+            final ashaUniqueKey = userDetails['unique_key']?.toString() ?? '';
+            final facilityId = userDetails['facility_id']?.toString() ?? '';
+            final uniqueKey = row['unique_key']?.toString() ?? '';
+            final householdKey = row['household_ref_key']?.toString() ?? '';
+            
+            if (uniqueKey.isNotEmpty && householdKey.isNotEmpty) {
+              final ts = DateTime.now().toIso8601String();
+              
+              final motherCareActivityData = {
+                'server_id': null,
+                'household_ref_key': householdKey,
+                'beneficiary_ref_key': uniqueKey,
+                'mother_care_state': 'anc_due',
+                'device_details': jsonEncode(rec['device_details'] ?? {}),
+                'app_details': jsonEncode(rec['app_details'] ?? {}),
+                'parent_user': jsonEncode({}),
+                'current_user_key': ashaUniqueKey,
+                'facility_id': facilityId,
+                'created_date_time': ts,
+                'modified_date_time': ts,
+                'is_synced': 0,
+                'is_deleted': 0,
+              };
+
+              print('Inserting mother care activity for pregnant beneficiary: ${jsonEncode(motherCareActivityData)}');
+              await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
+            }
+          }
+          
+          // Check for eligible couple
+          final maritalStatus = beneficiaryInfo['maritalStatus']?.toString().toLowerCase() ?? 
+                              beneficiaryInfo['marital_status']?.toString().toLowerCase() ?? '';
+          final age = _calculateAge(beneficiaryInfo['dob']?.toString() ?? '');
+          final isEligibleForCouple = maritalStatus == 'married' && age >= 15 && age <= 49;
+
+          if (isEligibleForCouple) {
+            try {
+              final currentUser = await UserInfo.getCurrentUser();
+              final userDetails = currentUser?['details'] is String
+                  ? jsonDecode(currentUser?['details'] ?? '{}')
+                  : currentUser?['details'] ?? {};
+              
+              final ashaUniqueKey = userDetails['unique_key']?.toString() ?? '';
+              final facilityId = userDetails['facility_id']?.toString() ?? '';
+              final uniqueKey = row['unique_key']?.toString() ?? '';
+              final householdKey = row['household_ref_key']?.toString() ?? '';
+              final spouseKey = row['spouse_key']?.toString() ?? '';
+              
+              if (uniqueKey.isNotEmpty && householdKey.isNotEmpty) {
+                final ts = DateTime.now().toIso8601String();
+                final deviceInfo = await DeviceInfo.getDeviceInfo();
+                final deviceDetails = {
+                  'id': deviceInfo.deviceId,
+                  'platform': deviceInfo.platform,
+                  'version': deviceInfo.osVersion,
+                  'model': deviceInfo.model,
+                };
+                
+                final eligibleCoupleActivityData = {
+                  'server_id': '',
+                  'household_ref_key': householdKey,
+                  'beneficiary_ref_key': uniqueKey,
+                  'eligible_couple_state': 'eligible_couple',
+                  'device_details': jsonEncode(deviceDetails),
+                  'app_details': jsonEncode({
+                    'app_version': deviceInfo.appVersion.split('+').first,
+                    'form_data': {
+                      'created_at': ts,
+                      'updated_at': ts,
+                    },
+                  }),
+                  'parent_user': '',
+                  'current_user_key': ashaUniqueKey,
+                  'facility_id': facilityId,
+                  'created_date_time': ts,
+                  'modified_date_time': ts,
+                  'is_synced': 0,
+                  'is_deleted': 0,
+                };
+
+                print('Inserting eligible couple activity for beneficiary: $uniqueKey');
+                final db = await DatabaseProvider.instance.database;
+                await db.insert(
+                  'eligible_couple_activities',
+                  eligibleCoupleActivityData,
+                  conflictAlgorithm: ConflictAlgorithm.replace,
+                );
+              }
+            } catch (e) {
+              print('Error inserting eligible couple activity: $e');
+            }
+          }
+        } catch (e) {
+          print('Error checking/inserting mother care activity or eligible couple: $e');
+        }
+        
         inserted++;
       } catch (e) {
         print('Error inserting beneficiary: $e');
@@ -176,6 +290,28 @@ class BeneficiaryRepository {
     if (v is int) return v;
     if (v is bool) return v ? 1 : 0;
     return int.tryParse(v.toString()) ?? 0;
+  }
+
+  int _calculateAge(String dobString) {
+    if (dobString.isEmpty) return 0;
+    
+    try {
+      final dob = DateTime.tryParse(dobString);
+      if (dob == null) return 0;
+      
+      final now = DateTime.now();
+      int age = now.year - dob.year;
+      
+      // Adjust age if birthday hasn't occurred yet this year
+      if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+        age--;
+      }
+      
+      return age < 0 ? 0 : age;
+    } catch (e) {
+      print('Error calculating age: $e');
+      return 0;
+    }
   }
 
   Map<String, dynamic> _mapBeneficiaryInfo(Map<String, dynamic> rec) {

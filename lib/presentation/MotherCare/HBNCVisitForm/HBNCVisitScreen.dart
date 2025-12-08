@@ -44,6 +44,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
