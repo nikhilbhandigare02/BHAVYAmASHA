@@ -862,10 +862,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           final int childrenAdded = _members.where((m) {
             final t = (m['Type'] ?? '').toString();
             final r = (m['Relation'] ?? '').toString();
-            // Only count children/infants and relations that should be counted
-            return t == 'Child' || t == 'Infant' || 
+            return t == 'Child' || t == 'Infant' ||
                    ['Son', 'Daughter', 'Brother', 'Sister', 'Nephew', 'Niece', 
-                    'Grand Son', 'Grand Daughter', 'Son In Law', 'Daughter In Law',
+                    'Grand Son', 'Grand Daughter', 'Son In Law', 'Daughter In Law','Father','Mother','Grand Father','Grand Mother', 'Father In Law', 'Mother In Law','Husband',
                     'Other'].contains(r);
           }).length;
 

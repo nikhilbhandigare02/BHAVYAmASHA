@@ -29,7 +29,6 @@ class RegisterNewHouseholdBloc
       data['#'] = '${updated.length + 1}';
       data['Relation'] = data['Relation'] ?? 'Self';
 
-      // Check if this is a spouse being added (relation is 'Spouse')
       final isSpouse = data['Relation']?.toLowerCase() == 'spouse';
       final isUnmarried =
           data['marital_status']?.toLowerCase() == 'unmarried' ||
@@ -37,14 +36,12 @@ class RegisterNewHouseholdBloc
 
       int newUnmarriedCount = current.unmarriedMemberCount;
 
-      // Only increment unmarried count if it's a spouse and unmarried
       if (isSpouse && isUnmarried) {
         newUnmarriedCount++;
       }
 
       updated.add(data);
 
-      // Calculate remaining children count based on head's children count
       final headChildren =
           int.tryParse((data['children'] ?? '0').toString()) ?? 0;
 
@@ -55,7 +52,7 @@ class RegisterNewHouseholdBloc
           members: updated,
           unmarriedMemberCount: newUnmarriedCount,
           remainingChildrenCount:
-              headChildren, // Initialize with head's children count
+              headChildren,
         ),
       );
     });
@@ -100,7 +97,7 @@ class RegisterNewHouseholdBloc
 
       emit(
         current.copyWith(
-          totalMembers: newTotalMembers + 1, // Always add 1 for the new member
+          totalMembers: newTotalMembers + 1,
           members: updated,
           unmarriedMemberCount: newUnmarriedCount,
           remainingChildrenCount: newRemainingChildrenCount,
