@@ -483,7 +483,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               onDateChanged: (d) => bloc.add(DateOfBirthChanged(d)),
                               validator: (date) {
                                 if (date == null) {
-                                  return _captureError('Date of Birth is required');
+                                  return _captureError('Please enter Date of Birth');
                                 }
                                 return null;
                               },
@@ -496,8 +496,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               onDateChanged: (d) => bloc.add(DateOfRegistrationChanged(d)),
                               validator: (date) {
                                 if (date == null) {
-                                  return _captureError('Date of Registration is required');
-                                }
+                                  return _captureError('Please enter Date of Registration');
+
+                                  }
                                 return null;
                               },
                             ),
@@ -510,7 +511,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               onChanged: (v) => bloc.add(ChildNameChanged(v)),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return _captureError("Child's name is required");
+                                  return _captureError("Please enter Child's name");
                                 }
                                 return null;
                               },
@@ -528,7 +529,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 hintText: l10n?.select ?? 'Select',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return _captureError('Gender is required');
+                                    return _captureError('Please enter Gender');
                                   }
                                   return null;
                                 },
@@ -543,7 +544,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               onChanged: (v) => bloc.add(MotherNameChanged(v)),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return _captureError("Mother's name is required");
+                                  return _captureError("Please enter Mother's name");
                                 }
                                 return null;
                               },
@@ -566,7 +567,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               maxLines: 2,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return _captureError('Address is required');
+                                  return _captureError('Please enter Address');
                                 }
                                 return null;
                               },
@@ -589,7 +590,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 hintText: l10n?.select ?? 'Select',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return _captureError('Whose mobile number is required');
+                                    return _captureError('Please enter Whose mobile number');
                                   }
                                   return null;
                                 },
@@ -606,7 +607,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               validator: (value) {
                                 final text = value?.trim() ?? '';
                                 if (text.isEmpty) {
-                                  return _captureError('Mobile number is required');
+                                  return _captureError('Please enter Mobile number');
                                 }
                                 final regex = RegExp(r'^[6-9]\d{9}$');
                                 if (!regex.hasMatch(text)) {
@@ -725,7 +726,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 }
 
                                 if (parsed < 1200 || parsed > 4000) {
-                                  return _captureError('Birth weight must be between 1200 and 4000 grams');
+                                  return _captureError('Please enter a valid birth weight in grams');
                                 }
 
                                 return null;
