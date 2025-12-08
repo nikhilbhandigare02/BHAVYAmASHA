@@ -98,11 +98,13 @@ class _HBNCListScreenState
     try {
       final db = await DatabaseProvider.instance.database;
       final deliveryOutcomeKey = '4r7twnycml3ej1vg';
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       final results = await db.query(
         'followup_form_data',
-        where: 'forms_ref_key = ?',
-        whereArgs: [deliveryOutcomeKey],
+        where: 'forms_ref_key = ? AND current_user_key = ?',
+        whereArgs: [deliveryOutcomeKey, ashaUniqueKey],
       );
 
       print('Fetched ${results.length} delivery outcome records');
@@ -117,7 +119,6 @@ class _HBNCListScreenState
     setState(() => _isLoading = true);
     _filtered = [];
 
-    // Track which beneficiaries have already been added to avoid duplicate cards
     final Set<String> processedBeneficiaries = <String>{};
 
     try {
