@@ -595,7 +595,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         if (s == 'false' || s == '0') useDobBool = false;
       }
       if (useDobBool != null && useDobBool != b.state.useDob) {
-        // Toggle once so bloc state matches stored preference
         b.add(AnmToggleUseDob());
       }
 
@@ -2385,8 +2384,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             : adultMinDate,      // adult minimum age = today - 110 years
 
                                         lastDate: (state.memberType.toLowerCase() == 'child')
-                                            ? childMaxDate       // child max = today
-                                            : adultMaxDate,      // adult max = today - 15 years
+                                            ? childMaxDate
+                                            : adultMaxDate,
 
                                         onDateChanged: (date) {
                                           if (date != null) {
@@ -2395,6 +2394,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 .add(AnmUpdateDob(date));
                                           }
                                         },
+                                        validator: (date) =>
+                                            _captureAnmError(Validations.validateDOB(l, date)),
                                       ),
                                   )
                                 else
@@ -4106,10 +4107,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       height: 4.5.h,
                                       child: RoundButton(
                                         title: () {
-                                          // Use the _isEdit flag (driven by widget.isEdit and
-                                          // route args) to decide whether this is an update
-                                          // context. inlineEdit still controls behavior (pop
-                                          // vs DB save) but not the label.
+
                                           final bool isUpdateContext = _isEdit;
 
                                           if (isLoading) {
@@ -4193,9 +4191,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 .read<AddnewfamilymemberBloc>();
                                             final state = bloc.state;
 
-                                            // Extra DOB safety check using bloc state to
-                                            // ensure invalid DOB never passes even if the
-                                            // DOB field widget is not currently mounted.
+
                                             if (state.useDob == true) {
                                               if (state.dob == null) {
                                                 showAppSnackBar(

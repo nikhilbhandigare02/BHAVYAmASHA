@@ -32,6 +32,18 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   final FocusNode _usernameFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   String _appVersion = '';
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.black,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -260,9 +272,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           hintText: l10n.usernameHint,
                                           prefixIcon: Icons.person,
                                           keyboardType: TextInputType.text,
-                                          validator: (value) => state.showValidationErrors 
-                                              ? Validations.validateUsername(l10n, value)
-                                              : null,
+
                                           onChanged: (value) {
                                             context.read<LoginBloc>().add(UsernameChanged(username: value));
                                           },
@@ -285,9 +295,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           obscureText: true,
                                           keyboardType: TextInputType.visiblePassword,
                                           textInputAction: TextInputAction.done,
-                                          validator: (value) => state.showValidationErrors 
-                                              ? Validations.validatePassword(l10n, value) 
-                                              : null,
                                           onChanged: (value) {
                                             context.read<LoginBloc>().add(PasswordChange(password: value));
                                           },
@@ -303,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         if (state.postApiStatus == PostApiStatus.success) {
                                           final message = state.error.isNotEmpty
                                               ? state.error 
-                                              : l10n.loginSuccess;
+                                              : "Login Sucessfully";
                                               
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
@@ -311,7 +318,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                                 message,
                                                 style: const TextStyle(color: Colors.white),
                                               ),
-                                              backgroundColor: Colors.green,
+                                              backgroundColor: Colors.black,
                                               duration: const Duration(seconds: 3),
                                             ),
                                           );
@@ -338,28 +345,23 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                             }
                                           });
                                         } else if (state.postApiStatus == PostApiStatus.error) {
-                                          final errorMessage = state.error.isNotEmpty
-                                              ? state.error 
-                                              : l10n.loginFailed;
-                                              
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                errorMessage,
-                                                style: const TextStyle(color: Colors.white),
-                                              ),
-                                              backgroundColor: Colors.red,
-                                              duration: const Duration(seconds: 3),
-                                              action: SnackBarAction(
-                                                label: l10n.dismiss,
-                                                textColor: Colors.white,
-                                                onPressed: () {
-                                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                                },
-                                              ),
-                                            ),
-                                          );
+                                          String errorMessage;
+
+                                          if (state.error.contains("invalid") ||
+                                              state.error.contains("not match") ||
+                                              state.error.contains("not exist")) {
+                                            errorMessage = "User does not exist. Please enter valid credentials";
+                                          } else if (state.error.contains("timeout") ||
+                                              state.error.contains("no response") ||
+                                              state.error.isEmpty) {
+                                            errorMessage = "Something went wrong, please try again later";
+                                          } else {
+                                            errorMessage = state.error;
+                                          }
+
+                                          _showSnackBar(context, errorMessage);
                                         }
+
                                       },
                                       child: BlocBuilder<LoginBloc, LoginState>(
                                         buildWhen: (current, previous) => false,
@@ -371,19 +373,27 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                               title: l10n.loginButton,
                                               color: AppColors.primary,
                                               isLoading: state.postApiStatus == PostApiStatus.loading,
-                                              onPress: () {
-                                                // Show validation errors when login button is pressed
-                                                context.read<LoginBloc>().add(ShowValidationErrors());
-                                                
-                                                // Validate the form
-                                                if (_formKey.currentState!.validate()) {
-                                                  // Only proceed with login if form is valid
-                                                  context.read<LoginBloc>().add(LoginButton());
-                                                } else {
-                                                  // Just show validation errors without proceeding
+                                                onPress: () {
                                                   context.read<LoginBloc>().add(ShowValidationErrors());
+
+                                                  final username = context.read<LoginBloc>().state.username;
+                                                  final password = context.read<LoginBloc>().state.password;
+
+                                                  if (username.isEmpty && password.isEmpty) {
+                                                    _showSnackBar(context, "Please enter valid username");
+                                                    return;
+                                                  }
+
+                                                  if (username.isNotEmpty && password.isEmpty) {
+                                                    _showSnackBar(context, "Please enter valid password");
+                                                    return;
+                                                  }
+
+                                                  if (_formKey.currentState!.validate()) {
+                                                    context.read<LoginBloc>().add(LoginButton());
+                                                  }
                                                 }
-                                              },
+
                                             ),
                                           );
                                         },

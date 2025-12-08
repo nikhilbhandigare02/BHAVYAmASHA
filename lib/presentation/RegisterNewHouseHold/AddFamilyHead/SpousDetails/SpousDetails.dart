@@ -718,6 +718,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           context.read<SpousBloc>().add(SpUpdateDob(date));
                         }
                       },
+                      validator: (date) =>
+                          captureSpousError(Validations.validateDOB(l, date)),
                     )
                 )
               else

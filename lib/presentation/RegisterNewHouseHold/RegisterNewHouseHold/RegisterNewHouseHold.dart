@@ -534,7 +534,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           _members.clear();
           _memberForms.clear();
 
-          final String name = (result['name'] ?? '').toString();
+          final String name = (result['headName'] ?? result['name'] ?? '').toString();
+
           final String gender = (result['gender'] ?? '').toString();
           final String spouse = (result['spouseName'] ?? '').toString();
 
@@ -555,8 +556,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             }
           } catch (_) {}
 
-          // Flatten children JSON details (if any) into children-related keys
-          // so ChildrenBloc can hydrate on reopen.
+
           try {
             final chRaw = result['childrendetails'];
             Map<String, dynamic>? chMap;
@@ -598,7 +598,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           _members.add({
             '#': '1',
             'Type': 'Adult',
-            'Name': name,
+            'Name': name,  // This is coming from result['name']
             'Age': age,
             'Gender': gender,
             'Relation': 'Self',

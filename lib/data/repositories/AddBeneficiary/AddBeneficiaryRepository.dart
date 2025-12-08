@@ -9,8 +9,7 @@ import '../../Database/User_Info.dart';
 class AddBeneficiaryRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
-  /// Adds a new beneficiary using the provided payload
-  /// The payload should be constructed by AddBeneficiaryApiHelper
+
   Future<dynamic> addBeneficiary(Map<String, dynamic> payload) async {
     try {
       // Get authentication token

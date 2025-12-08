@@ -60,7 +60,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           final name = (e['name'] ?? '').toString().toLowerCase();
           final mobile = (e['mobile'] ?? '').toString().toLowerCase();
 
-          // Also search by the household_ref_key as shown on the card
           final raw = (e['_raw'] as Map<String, dynamic>? ?? const {});
           final fullHhRef = (raw['household_ref_key'] ?? '').toString();
           final searchHhRef = fullHhRef.length > 11
@@ -522,8 +521,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           ),
         );
 
-        // When returning from the beneficiary screen, reload data from DB
-        // so that remainingChildren and the message are updated.
         if (mounted) {
           _loadData();
         }

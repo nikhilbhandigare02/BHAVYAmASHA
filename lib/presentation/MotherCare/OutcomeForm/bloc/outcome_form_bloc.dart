@@ -155,7 +155,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
         try {
           final db = await DatabaseProvider.instance.database;
           final now = DateTime.now().toIso8601String();
-          final beneficiaryId = event.beneficiaryData != null 
+          final beneficiaryId = event.beneficiaryData != null
               ? (event.beneficiaryData!['unique_key']?.toString() ?? '')
               : '';
 
@@ -336,7 +336,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
 
               // Save to secure storage for offline access
               await SecureStorageService.saveDeliveryOutcome(outcomeData);
-              
+
               // Update submission status
               emit(state.copyWith(
                 submitting: false,
@@ -348,6 +348,52 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                 try {
                   final newCount = await SecureStorageService.incrementSubmissionCount(beneficiaryId);
                   print('Submission count for beneficiary $beneficiaryId: $newCount');
+
+                  try {
+                    final deviceInfo = await DeviceInfo.getDeviceInfo();
+                    final ts = DateTime.now().toIso8601String();
+
+                    final currentUser = await UserInfo.getCurrentUser();
+                    final userDetails = currentUser?['details'] is String
+                        ? jsonDecode(currentUser?['details'] ?? '{}')
+                        : currentUser?['details'] ?? {};
+
+                    final working = userDetails['working_location'] ?? {};
+                    final facilityId = working['asha_associated_with_facility_id'] ??
+                        userDetails['asha_associated_with_facility_id'] ?? 0;
+                    final ashaUniqueKey = userDetails['unique_key'] ?? '';
+
+                    final motherCareActivityData = {
+                      'server_id': null,
+                      'household_ref_key': householdRefKey,
+                      'beneficiary_ref_key': beneficiaryId,
+                      'mother_care_state': 'HBNC_Visit',
+                      'device_details': jsonEncode({
+                        'id': deviceInfo.deviceId,
+                        'platform': deviceInfo.platform,
+                        'version': deviceInfo.osVersion,
+                      }),
+                      'app_details': jsonEncode({
+                        'app_version': deviceInfo.appVersion.split('+').first,
+                        'app_name': deviceInfo.appName,
+                        'build_number': deviceInfo.buildNumber,
+                        'package_name': deviceInfo.packageName,
+                      }),
+                      'parent_user': jsonEncode({}),
+                      'current_user_key': ashaUniqueKey,
+                      'facility_id': facilityId,
+                      'created_date_time': ts,
+                      'modified_date_time': ts,
+                      'is_synced': 0,
+                      'is_deleted': 0,
+                    };
+
+                    print('Inserting mother care activity for delivery outcome: ${jsonEncode(motherCareActivityData)}');
+                    await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
+                    print('✅ Successfully inserted mother care activity for delivery outcome');
+                  } catch (e) {
+                    print('❌ Error inserting mother care activity: $e');
+                  }
                 } catch (e) {
                   print('Error updating submission count: $e');
                 }
