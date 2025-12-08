@@ -43,7 +43,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     _tabController.dispose();
     super.dispose();
   }
-
+// Add this new method to check sync status
 
   @override
   Widget build(BuildContext context) {

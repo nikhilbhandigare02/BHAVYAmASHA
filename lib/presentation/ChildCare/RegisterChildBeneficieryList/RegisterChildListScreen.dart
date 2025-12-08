@@ -200,6 +200,29 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       }
     }
   }
+// Add this new method to check sync status
+  Future<bool> _isSynced(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) return false;
+
+      final db = await DatabaseProvider.instance.database;
+      final result = await db.query(
+        'beneficiaries_new',
+        columns: ['is_synced'],
+        where: 'unique_key = ?',
+        whereArgs: [beneficiaryId],
+        limit: 1,
+      );
+
+      if (result.isNotEmpty) {
+        return result.first['is_synced'] == 1;
+      }
+      return false;
+    } catch (e) {
+      print('Error checking sync status: $e');
+      return false;
+    }
+  }
 
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return 'N/A';
@@ -488,14 +511,22 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                       ),
                     ),
                   ],
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.asset(
-                      'assets/images/sync.png',
-                      width: 6.w,
-                      height: 6.w,
-                      fit: BoxFit.cover,
-                    ),
+                  // Replace the existing sync icon with this code
+                  FutureBuilder<bool>(
+                    future: _isSynced(data['BeneficiaryID']?.toString() ?? ''),
+                    builder: (context, snapshot) {
+                      final isSynced = snapshot.data ?? false;
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.asset(
+                          'assets/images/sync.png',
+                          width: 6.w,
+                          height: 6.w,
+                          color: isSynced ? null : Colors.grey[500],
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
