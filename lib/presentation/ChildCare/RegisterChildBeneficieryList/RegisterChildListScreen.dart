@@ -9,6 +9,7 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 
 class RegisterChildScreen extends StatefulWidget {
   const RegisterChildScreen({super.key});
@@ -47,12 +48,27 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     try {
       final db = await DatabaseProvider.instance.database;
 
+      // Get current user key from secure storage
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       print('🔍 Fetching deceased beneficiaries...');
-      final deceasedChildren = await db.rawQuery('''
-        SELECT DISTINCT beneficiary_ref_key, form_json 
-        FROM followup_form_data 
-        WHERE form_json LIKE '%"reason_of_death":%' 
-      ''');
+
+      // Build where clause for deceased children query
+      String deceasedWhere = 'form_json LIKE ?';
+      List<Object?> deceasedWhereArgs = ['%"reason_of_death":%'];
+
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        deceasedWhere += ' AND current_user_key = ?';
+        deceasedWhereArgs.add(ashaUniqueKey);
+      }
+
+      final deceasedChildren = await db.query(
+        'followup_form_data',
+        columns: ['DISTINCT beneficiary_ref_key', 'form_json'],
+        where: deceasedWhere,
+        whereArgs: deceasedWhereArgs,
+      );
 
       print('✅ Found ${deceasedChildren.length} potential deceased records');
 
@@ -78,11 +94,20 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
 
       print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
 
+      // Build where clause for beneficiaries query
+      String where = 'is_deleted = ? AND is_adult = ?';
+      List<Object?> whereArgs = [0, 0]; // 0 for false, 1 for true
+
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where += ' AND current_user_key = ?';
+        whereArgs.add(ashaUniqueKey);
+      }
+
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries_new',
         columns: ['*', 'is_death'],
-        where: 'is_deleted = ? AND is_adult = ?',
-        whereArgs: [0, 0], // 0 for false, 1 for true
+        where: where,
+        whereArgs: whereArgs,
       );
 
       print('📊 Found ${rows.length} total beneficiaries');
