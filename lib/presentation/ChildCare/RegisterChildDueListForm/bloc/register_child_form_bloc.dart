@@ -86,14 +86,11 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
       final now = DateTime.now().toIso8601String();
 
       final formType = FollowupFormDataTable.childRegistrationDue;
-      final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Child Registration Due';
+      final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'child_registration_due_form';
       final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '2ol35gbp7rczyvn6';
 
       final formData = {
-        'form_type': formType,
-        'form_name': formName,
-        'unique_key': formsRefKey,
-        'form_data': {
+          "form_type": formType,
           'rch_id_child': state.rchIdChild,
           'register_serial_number': state.registerSerialNumber,
           'date_of_birth': state.dateOfBirth?.toIso8601String(),
@@ -110,14 +107,18 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
           'birth_certificate_number': state.birthCertificateNumber,
           'weight_grams': state.weightGrams,
           'birth_weight_grams': state.birthWeightGrams,
-          'religion': state.religion == 'Other' ? state.customReligion : state.religion,
-          'caste': state.caste == 'Other' ? state.customCaste : state.caste,
-        },
-        'created_at': now,
-        'updated_at': now,
+          'religion': state.religion == 'Other'
+              ? state.customReligion
+              : state.religion,
+          'caste': state.caste == 'Other'
+              ? state.customCaste
+              : state.caste,
+
       };
 
-
+      final wrappedFormJson = {
+        formType: formData,
+      };
       String householdRefKey = '';
       String motherKey = '';
       String fatherKey = '';
@@ -220,8 +221,8 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
         }),
         'parent_user': '',
         'current_user_key': ashaUniqueKey,
-        'facility_id': facilityId, 
-        'form_json': formJson,
+        'facility_id': facilityId,
+        'form_json': jsonEncode(wrappedFormJson),
         'created_date_time': now,
         'modified_date_time': now,
         'is_synced': 0,

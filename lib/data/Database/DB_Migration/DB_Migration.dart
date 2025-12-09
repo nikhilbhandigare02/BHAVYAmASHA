@@ -115,162 +115,219 @@ class DbMigration {
     // 🔹 Status
     "memberStatus": "member_status",
   };
+    static Future<void> runBeneficiaryTableMigration(Database db) async {
+      try {
+        final List<Map<String, dynamic>> oldRows = await db.query("beneficiaries");
 
-  static Future<void> runBeneficiaryTableMigration(Database db) async {
-    try {
-      final List<Map<String, dynamic>> oldRows = await db.query("beneficiaries");
+        const List<String> beneficiaryKeys = [
+          "houseNo",
+          "headName",
+          "fatherName",
+          "motherName",
+          "spouseName",
+          "name",
+          "memberName",
+          "relation",
+          "relation_to_head",
+          "gender",
+          "dob",
+          "approxAge",
+          "years",
+          "months",
+          "days",
+          "mobileNo",
+          "mobileOwner",
+          "maritalStatus",
+          "ageAtMarriage",
+          "education",
+          "occupation",
+          "religion",
+          "category",
+          "hasChildren",
+          "isPregnant",
+          "lmp",
+          "edd",
+          "village",
+          "ward",
+          "wardNo",
+          "mohalla",
+          "mohallaTola",
+          "beneficiaryType",
+          "abhaNumber",
+          "voterId",
+          "rationCardId",
+          "phId",
+          "personalHealthId",
+          "bankAccountNumber",
+          "ifscCode",
+          "memberType",
+          "memberStatus",
+          "birthOrder",
+          "children",
+          "isFamilyhead",
+          "isFamilyheadWife"
+        ];
 
-      const List<String> beneficiaryKeys = [
-        "houseNo",
-        "headName",
-        "fatherName",
-        "motherName",
-        "spouseName",
-        "name",
-        "memberName",
-        "relation",
-        "relation_to_head",
-        "gender",
-        "dob",
-        "approxAge",
-        "years",
-        "months",
-        "days",
-        "mobileNo",
-        "mobileOwner",
-        "maritalStatus",
-        "ageAtMarriage",
-        "education",
-        "occupation",
-        "religion",
-        "category",
-        "hasChildren",
-        "isPregnant",
-        "lmp",
-        "edd",
-        "village",
-        "ward",
-        "wardNo",
-        "mohalla",
-        "mohallaTola",
-        "beneficiaryType",
-        "abhaNumber",
-        "voterId",
-        "rationCardId",
-        "phId",
-        "personalHealthId",
-        "bankAccountNumber",
-        "ifscCode",
-        "memberType",
-        "memberStatus",
-        "birthOrder",
-        "children",
-        "isFamilyhead",
-        "isFamilyheadWife"
-      ];
+        final Map<String, String> keyMapping = {
+          "beneficiaryType": "type_of_beneficiary",
+          "memberType": "ben_type",
+          "relation": "relaton_with_family_head",
+          "relation_to_head": "relaton_with_family_head",
+          "name": "member_name",
+          "memberName": "member_name",
+          "motherName": "mother_name",
+          "fatherName": "father_name",
+          "spouseName": "father_or_spouse_name",
+          "dob": "date_of_birth",
+          "years": "dob_year",
+          "months": "dob_month",
+          "days": "dob_day",
+          "approxAge": "formated_age",
+          "birthOrder": "birth_order",
+          "mobileNo": "mobile_no",
+          "mobileOwner": "whose_mob_no",
+          "maritalStatus": "marital_status",
+          "ageAtMarriage": "age_at_marrige",
+          "education": "education",
+          "occupation": "occupation",
+          "religion": "religion",
+          "category": "category",
+          "hasChildren": "have_children",
+          "children": "total_children",
+          "isPregnant": "is_pregnant",
+          "lmp": "lmp",
+          "edd": "edd",
+          "houseNo": "house_no",
+          "village": "village_name",
+          "ward": "ward_name",
+          "wardNo": "ward_no",
+          "mohalla": "mohalla_name",
+          "mohallaTola": "mohalla_name",
+          "abhaNumber": "abha_no",
+          "personalHealthId": "personal_health_id",
+          "phId": "personal_health_id",
+          "bankAccountNumber": "account_number",
+          "ifscCode": "ifsc_code",
+          "voterId": "voter_id",
+          "rationCardId": "ration_card_id",
+          "memberStatus": "member_status",
+          "isFamilyhead": "isFamilyhead",
+          "isFamilyheadWife": "isFamilyheadWife"
+        };
 
-      final Map<String, String> keyMapping = {
-        "beneficiaryType": "type_of_beneficiary",
-        "memberType": "ben_type",
-        "relation": "relaton_with_family_head",
-        "relation_to_head": "relaton_with_family_head",
-        "name": "member_name",
-        "memberName": "member_name",
-        "motherName": "mother_name",
-        "fatherName": "father_name",
-        "spouseName": "father_or_spouse_name",
-        "dob": "date_of_birth",
-        "years": "dob_year",
-        "months": "dob_month",
-        "days": "dob_day",
-        "approxAge": "formated_age",
-        "birthOrder": "birth_order",
-        "mobileNo": "mobile_no",
-        "mobileOwner": "whose_mob_no",
-        "maritalStatus": "marital_status",
-        "ageAtMarriage": "age_at_marrige",
-        "education": "education",
-        "occupation": "occupation",
-        "religion": "religion",
-        "category": "category",
-        "hasChildren": "have_children",
-        "children": "total_children",
-        "isPregnant": "is_pregnant",
-        "lmp": "lmp",
-        "edd": "edd",
-        "houseNo": "house_no",
-        "village": "village_name",
-        "ward": "ward_name",
-        "wardNo": "ward_no",
-        "mohalla": "mohalla_name",
-        "mohallaTola": "mohalla_name",
-        "abhaNumber": "abha_no",
-        "personalHealthId": "personal_health_id",
-        "phId": "personal_health_id",
-        "bankAccountNumber": "account_number",
-        "ifscCode": "ifsc_code",
-        "voterId": "voter_id",
-        "rationCardId": "ration_card_id",
-        "memberStatus": "member_status",
-        "isFamilyhead":"isFamilyhead",
-        "isFamilyheadWife":"isFamilyheadWife"
-      };
+        const deathKeys = [
+          "reason_of_closer",
+          "date_of_death",
+          "cause_of_death",
+          "other_reason_of_death",
+          "death_place",
+          "reason_of_death",
+          "other_reason_for_death",
+          "remark",
+        ];
 
-      for (var row in oldRows) {
-        final form = row["form_json"] != null ? jsonDecode(row["form_json"]) : {};
-        final Map<String, dynamic> finalJson = {};
+        for (var row in oldRows) {
+          final form = row["form_json"] != null ? jsonDecode(row["form_json"]) : {};
+          final Map<String, dynamic> finalJson = {};
 
-        for (final key in beneficiaryKeys) {
-          if (form.containsKey(key) && form[key] != null) {
-            finalJson[key] = form[key];
-            continue;
-          }
+          for (final key in beneficiaryKeys) {
+            if (form.containsKey(key) &&
+                form[key] != null &&
+                form[key].toString().isNotEmpty &&
+                form[key].toString() != "null") {
+              finalJson[key] = form[key];
+              continue;
+            }
 
-          if (keyMapping.containsKey(key)) {
-            final sourceKey = keyMapping[key]!;
-            if (form.containsKey(sourceKey) && form[sourceKey] != null) {
-              finalJson[key] = form[sourceKey];
+            if (keyMapping.containsKey(key)) {
+              final mapped = keyMapping[key]!;
+              if (form.containsKey(mapped) &&
+                  form[mapped] != null &&
+                  form[mapped].toString().isNotEmpty &&
+                  form[mapped].toString() != "null") {
+                finalJson[key] = form[mapped];
+              }
             }
           }
-        }
 
-        // ❌ Check if the record already exists
-        final existing = await db.query(
-          "beneficiaries_new",
-          where: "unique_key = ?",
-          whereArgs: [row["unique_key"]],
-        );
 
-        if (existing.isEmpty) {
-          await db.insert(
+          Map<String, dynamic> deathJson = {};
+          bool hasDeath = false;
+
+// Fix broken remark
+          if (form["remark"] != null && form["remark"].toString().trim() == "}") {
+            form["remark"] = "";
+          }
+
+          for (final dk in deathKeys) {
+            if (form.containsKey(dk) &&
+                form[dk] != null &&
+                form[dk].toString().trim().isNotEmpty &&
+                form[dk].toString() != "null") {
+              deathJson[dk] = form[dk];
+              hasDeath = true;
+            }
+          }
+
+
+          // for (final dk in deathKeys) {
+          //   if (row.containsKey(dk) &&
+          //       row[dk] != null &&
+          //       row[dk].toString().trim().isNotEmpty &&
+          //       row[dk].toString() != "null") {
+          //     deathJson[dk] = row[dk];
+          //     hasDeath = true;
+          //   }
+          // }
+
+          if (row["reason_of_closer"] != null &&
+              row["reason_of_closer"].toString().isNotEmpty &&
+              row["reason_of_closer"].toString() != "null") {
+            deathJson["reason_of_closer"] = row["reason_of_closer"];
+            hasDeath = true;
+          }
+
+          final int isDeathFlag = hasDeath ? 1 : 0;
+          final String? deathJsonToStore = hasDeath ? jsonEncode(deathJson) : null;
+
+          // 🔹 Check if the record already exists
+          final existing = await db.query(
             "beneficiaries_new",
-            {
-              "server_id": row["_id"],
-              "household_ref_key": row["household_registrations_ref_key"],
-              "unique_key": row["unique_key"],
-              "beneficiary_info": jsonEncode(finalJson),
-              "spouse_key": row["spouse_ben_key"],
-              "mother_key": row["mother_ben_key"],
-              "father_key": row["father_ben_key"],
-              "is_family_planning": row["is_family_planning"],
-              "is_adult": row["is_adult"],
-              "is_guest": row["is_guest"],
-              "is_death": row["is_death"],
-              "is_migrated": row["is_migrated"],
-              "current_user_key": row["added_by"],
-              "created_date_time": row["created_date_time"],
-              "modified_date_time": row["modified_date_time"],
-              "is_synced": row["is_synced"],
-              "is_deleted": row["is_deleted"],
-              "is_separated": row["is_separated"],
-            },
+            where: "unique_key = ?",
+            whereArgs: [row["unique_key"]],
           );
+
+          if (existing.isEmpty) {
+            await db.insert(
+              "beneficiaries_new",
+              {
+                "server_id": row["_id"],
+                "household_ref_key": row["household_registrations_ref_key"],
+                "unique_key": row["unique_key"],
+                "beneficiary_info": jsonEncode(finalJson),
+                "spouse_key": row["spouse_ben_key"],
+                "mother_key": row["mother_ben_key"],
+                "father_key": row["father_ben_key"],
+                "is_family_planning": row["is_family_planning"],
+                "is_adult": row["is_adult"],
+                "is_guest": row["is_guest"],
+                "is_death": isDeathFlag,
+                "death_details": hasDeath ? jsonEncode(deathJson) : null,
+                "is_migrated": row["is_migrated"],
+                "current_user_key": row["added_by"],
+                "created_date_time": row["created_date_time"],
+                "modified_date_time": row["modified_date_time"],
+                "is_synced": row["is_synced"],
+                "is_deleted": row["is_deleted"],
+                "is_separated": row["is_separated"],
+              },
+            );
+          }
         }
+      } catch (e) {
+        print("❌ Beneficiary Migration Error: $e");
       }
-    } catch (e) {
-      print("❌ Beneficiary Migration Error: $e");
     }
-  }
 
 
   static Future<void> runHouseholdTableMigration(Database db) async {

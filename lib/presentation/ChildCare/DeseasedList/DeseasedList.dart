@@ -6,6 +6,8 @@ import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
+import '../../../data/Database/database_provider.dart';
+import '../../../data/Database/tables/beneficiaries_table.dart';
 
 class DeseasedList extends StatefulWidget {
   const DeseasedList({super.key});
@@ -35,135 +37,157 @@ class _DeseasedListState extends State<DeseasedList> {
         _isLoading = true;
       });
 
-      final deceasedChildren = await _storageDao.getFollowupFormsWithCaseClosure(
-        FollowupFormDataTable.childTrackingDue,
-      );
+      // Get database instance
+      final db = await DatabaseProvider.instance.database;
 
-      final transformed = deceasedChildren.map((child) {
-        Map<String, dynamic> safeCastMap(dynamic map) {
-          if (map == null) return {};
-          if (map is Map<String, dynamic>) return map;
-          if (map is Map) return Map<String, dynamic>.from(map);
-          return {};
+      // Query to get deceased beneficiaries with their details
+      final List<Map<String, dynamic>> deceasedBeneficiaries = await db.rawQuery('''
+      SELECT 
+        b.*,
+        h.household_info as household_data,
+        h.created_date_time as household_created_date,
+        h.household_info as hh_info
+      FROM ${BeneficiariesTable.table} b
+      LEFT JOIN households h ON b.household_ref_key = h.unique_key
+      WHERE b.is_death = 1
+      ORDER BY b.created_date_time DESC
+    ''');
+
+      final transformed = deceasedBeneficiaries.map((beneficiary) {
+        // Parse JSON data
+        final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info']?.toString() ?? '{}');
+        final householdData = jsonDecode(beneficiary['hh_info']?.toString() ?? '{}');
+        final deathDetails = jsonDecode(beneficiary['death_details']?.toString() ?? '{}');
+
+        // Helper function to safely get values
+        String getValue(dynamic value, [String defaultValue = 'N/A']) {
+          if (value == null ||
+              (value is String && value.trim().isEmpty) ||
+              value == 'null') {
+            return defaultValue;
+          }
+          return value.toString();
         }
 
-        final formData = safeCastMap(child['form_data']);
-        final childDetails = safeCastMap(child['child_details']);
-        final caseClosure = safeCastMap(child['case_closure']);
-        final registrationData = safeCastMap(child['registration_data']);
-        final beneficiaryData = safeCastMap(child['beneficiary_data']);
-
-        String formatAge(dynamic age) {
-          if (age == null) return 'N/A';
-          if (age is int || age is double) {
-            return '$age Y';
+        // Format date
+        String formatDate(dynamic dateValue, [String defaultValue = 'N/A']) {
+          if (dateValue == null) return defaultValue;
+          try {
+            final dateString = dateValue.toString();
+            if (dateString.isEmpty) return defaultValue;
+            final date = DateTime.parse(dateString);
+            return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+          } catch (e) {
+            return dateValue.toString();
           }
-          return age.toString();
         }
 
+        // Get registration date (from household creation date or beneficiary creation date)
+        final registrationDate = beneficiary['household_created_date'] ??
+            beneficiary['created_date_time'];
 
-        Map<String, dynamic> registrationFollowup = {};
-        if (beneficiaryData['registration_type_followup'] is Map) {
-          registrationFollowup = beneficiaryData['registration_type_followup'] as Map<String, dynamic>;
-        }
-
-
-        String getName() {
-
-          if (registrationFollowup['name'] != null && registrationFollowup['name'].toString().isNotEmpty) {
-            return registrationFollowup['name'].toString();
-          }
-
-          if (registrationFollowup['child_name'] != null && registrationFollowup['child_name'].toString().isNotEmpty) {
-            return registrationFollowup['child_name'].toString();
-          }
-
-          if (beneficiaryData['name'] != null && beneficiaryData['name'].toString().isNotEmpty) {
-            return beneficiaryData['name'].toString();
-          }
-
-          return child['name']?.toString() ?? 'Unknown';
-        }
-
+        // Get age - try to calculate from DOB if available
         String getAge() {
-          var age = registrationFollowup['age'] ?? beneficiaryData['age'] ?? child['age'];
-          if (age == null) return 'N/A';
-          return age.toString();
+          // First try to get age directly
+          if (beneficiaryInfo['age'] != null) {
+            return getValue(beneficiaryInfo['age']);
+          }
+
+          // If no direct age, try to calculate from DOB
+          if (beneficiaryInfo['dob'] != null) {
+            try {
+              final dob = DateTime.parse(beneficiaryInfo['dob']);
+              final now = DateTime.now();
+              int age = now.year - dob.year;
+              if (now.month < dob.month ||
+                  (now.month == dob.month && now.day < dob.day)) {
+                age--;
+              }
+              return age > 0 ? age.toString() : 'N/A';
+            } catch (e) {
+              return 'N/A';
+            }
+          }
+          return 'N/A';
         }
 
-        String getGender() {
-          return registrationFollowup['gender']?.toString() ?? 
-                 beneficiaryData['gender']?.toString() ?? 
-                 child['gender']?.toString() ?? 
-                 'N/A';
-        }
-
-        String getRchId() {
-          return registrationFollowup['rch_id']?.toString() ?? 
-                 registrationFollowup['rchId']?.toString() ?? 
-                 beneficiaryData['rch_id']?.toString() ?? 
-                 formData['rch_id']?.toString() ?? 
-                 'N/A';
-        }
-
-        String getBeneficiaryId() {
-          return registrationFollowup['beneficiary_id']?.toString() ??
-                 beneficiaryData['beneficiary_id']?.toString() ?? 
-                 formData['beneficiary_id']?.toString() ?? 
-                 formData['beneficiary_ref_key']?.toString() ?? 
-                 'N/A';
-        }
-
+        // Get registration type (from beneficiary type or default to 'Child')
         String getRegistrationType() {
-          return registrationFollowup['registration_type']?.toString() ?? 
-                 registrationData['registration_type']?.toString() ?? 
-                 'General';
+          return getValue(
+              beneficiaryInfo['beneficiaryType'] ??
+                  (beneficiary['is_adult'] == 1 ? 'Adult' : 'Child')
+          );
         }
 
-        String getRegistrationDate() {
-          var date = registrationFollowup['registration_date'] ?? 
-                    registrationFollowup['date_of_registration'] ??
-                    registrationData['registration_date'] ?? 
-                    formData['registration_date'];
-          return _formatDate(date) ?? 'N/A';
+        // Get father's name - check multiple possible fields
+        String getFatherName() {
+          return getValue(
+              beneficiaryInfo['fatherName'] ??
+                  beneficiaryInfo['father_name'] ??
+                  householdData['father_name']
+          );
         }
+
+        // Get mobile number - check multiple possible fields
+        String getMobileNumber() {
+          return getValue(
+              beneficiaryInfo['mobileNo'] ??
+                  beneficiaryInfo['mobile_number'] ??
+                  beneficiaryInfo['contact_number'] ??
+                  householdData['mobile_number'] ??
+                  householdData['contact_number']
+          );
+        }
+
+        // Get death details
+        final causeOfDeath = getValue(
+            deathDetails['cause_of_death'] ??
+                deathDetails['probable_cause_of_death'] ??
+                'Not specified'
+        );
+
+        final reason = getValue(
+            deathDetails['reason'] ??
+                deathDetails['reason_of_death'] ??
+                'Not specified'
+        );
+
+        final place = getValue(
+            deathDetails['place'] ??
+                deathDetails['death_place'] ??
+                'Not specified'
+        );
+
+        final dateOfDeath = formatDate(
+            deathDetails['date_of_death'] ??
+                deathDetails['death_date']
+        );
 
         return {
-          'hhId': formData['household_id']?.toString() ?? formData['household_ref_key']?.toString() ?? beneficiaryData['household_id']?.toString() ?? 'N/A',
-          'RegitrationDate': getRegistrationDate(),
+          'hhId': getValue(householdData['household_id'] ??
+              beneficiary['household_ref_key']),
+          'RegitrationDate': formatDate(registrationDate),
           'RegitrationType': getRegistrationType(),
-          'BeneficiaryID': getBeneficiaryId(),
-          'RchID': getRchId(),
-          'Name': getName(),
-          'Age|Gender': '${formatAge(getAge())} | ${getGender()}',
-          'Mobileno.': formData['mobile_number']?.toString() ?? formData['contact_number']?.toString() ?? beneficiaryData['mobile_number']?.toString() ?? 'N/A',
-          'FatherName': registrationFollowup['father_name']?.toString() ?? beneficiaryData['father_name']?.toString() ?? child['father_name']?.toString() ?? 'N/A',
-          'MotherName': registrationFollowup['mother_name']?.toString() ?? beneficiaryData['mother_name']?.toString() ?? child['mother_name']?.toString() ?? 'N/A',
-          'causeOFDeath': caseClosure['probable_cause_of_death'] ?? 'Not specified',
-          'reason': caseClosure['reason_of_death'] ?? 'Not specified',
-          'place': caseClosure['death_place'] ?? 'Not specified',
-          'DateofDeath': _formatDate(caseClosure['date_of_death']) ?? 'N/A',
+          'BeneficiaryID': getValue(beneficiary['unique_key']),
+          'RchID': getValue(beneficiaryInfo['rch_id']),
+          'Name': getValue(beneficiaryInfo['name'] ??
+              beneficiaryInfo['headName'] ??
+              beneficiaryInfo['child_name']),
+          'Age|Gender': '${getAge()} | ${getValue(beneficiaryInfo['gender'])}',
+          'Mobileno.': getMobileNumber(),
+          'FatherName': getFatherName(),
+          'MotherName': getValue(
+              beneficiaryInfo['mother_name'] ??
+                  beneficiaryInfo['motherName']
+          ),
+          'causeOFDeath': causeOfDeath,
+          'reason': reason,
+          'place': place,
+          'DateofDeath': dateOfDeath,
           'age': getAge(),
-          'gender': getGender(),
+          'gender': getValue(beneficiaryInfo['gender']),
         };
       }).toList();
-
-      print('Loaded ${transformed.length} deceased records');
-      for (var record in transformed) {
-        print('Deceased Record:');
-        print('  Name: ${record['Name']}');
-        print('  HH ID: ${record['hhId']}');
-        print('  Beneficiary ID: ${record['BeneficiaryID']}');
-        print('  Date of Death: ${record['DateofDeath']}');
-      }
-
-      print('\n📋 Raw data from DAO:');
-      for (var child in deceasedChildren) {
-        print('Raw Record:');
-        print('  household_id: ${child['household_id']}');
-        print('  beneficiary_id: ${child['beneficiary_id']}');
-        print('  form_data keys: ${(child['form_data'] as Map?)?.keys.toList()}');
-      }
 
       setState(() {
         _deceasedList = transformed;
@@ -175,7 +199,7 @@ class _DeseasedListState extends State<DeseasedList> {
       setState(() {
         _isLoading = false;
       });
-       
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to load deceased list: $e')),

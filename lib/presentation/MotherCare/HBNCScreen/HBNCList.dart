@@ -65,20 +65,40 @@ class _HBNCListScreenState
       return 0;
     }
   }
-  Future<bool> _isSynced(String beneficiaryRefKey) async {
+// Add this new method to check sync status from both tables
+// Add this new method to check sync status from both tables
+  Future<bool> _isSynced(String beneficiaryId) async {
     try {
       final db = await DatabaseProvider.instance.database;
-      final result = await db.query(
+
+      // Check mother_care_activities table
+      final motherCareResult = await db.query(
         'mother_care_activities',
+        columns: ['is_synced'],
         where: 'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryRefKey, 'hbnc_visit'],
+        whereArgs: [beneficiaryId, 'hbnc_visit'],
         orderBy: 'created_date_time DESC',
         limit: 1,
       );
 
-      if (result.isNotEmpty) {
-        return result.first['is_synced'] == 1;
+      final followupResult = await db.query(
+        'followup_form_data',
+        columns: ['is_synced'],
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryId, '4r7twnycml3ej1vg'],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      // Return true if either record exists and is synced
+      if (motherCareResult.isNotEmpty && motherCareResult.first['is_synced'] == 1) {
+        return true;
       }
+
+      if (followupResult.isNotEmpty && followupResult.first['is_synced'] == 1) {
+        return true;
+      }
+
       return false;
     } catch (e) {
       print('Error checking sync status: $e');
@@ -611,6 +631,8 @@ class _HBNCListScreenState
                       },
                     ),
                     const SizedBox(width: 8),
+                    // Replace the existing sync icon with this code
+                    // Replace the existing sync icon with this code
                     // Replace the existing sync icon with this code
                     FutureBuilder<bool>(
                       future: _isSynced(data['fullBeneficiaryId']?.toString() ?? ''),

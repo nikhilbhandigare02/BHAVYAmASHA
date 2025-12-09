@@ -3,7 +3,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 import '../../l10n/app_localizations.dart' show AppLocalizations;
-import '../ClusterMeeting/ClusterMeetingScreen.dart';
+import '../ClusterMeeting/ClusterMeeting/ClusterMeetingScreen.dart';
 import '../High-Risk/High_Risk.dart';
 import '../RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 

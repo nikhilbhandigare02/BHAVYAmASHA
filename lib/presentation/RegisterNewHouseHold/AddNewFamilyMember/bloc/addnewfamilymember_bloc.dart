@@ -1102,6 +1102,8 @@ class AddnewfamilymemberBloc
             
             print('Inserting child care activity: ${jsonEncode(childCareActivityData)}');
             await LocalStorageDao.instance.insertChildCareActivity(childCareActivityData);
+
+
           } catch (e) {
             print('Error inserting child care activity: $e');
           }
