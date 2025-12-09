@@ -121,6 +121,8 @@ class EligibleCouleUpdateBloc
           womanName: name,
           currentAge: currentAge,
           mobileNo: mobile,
+          otherReligion: data['otherReligion']?.toString() ?? data['other_religion']?.toString() ?? '',
+          otherCategory: data['otherCategory']?.toString() ?? data['other_category']?.toString() ?? '',
           totalChildrenBorn: totalBorn,
           totalLiveChildren: totalLive,
           totalMaleChildren: totalMale,
@@ -199,6 +201,8 @@ class EligibleCouleUpdateBloc
             address: info['address']?.toString() ?? '',
             religion: info['religion']?.toString() ?? state.religion,
             category: info['category']?.toString() ?? state.category,
+            otherReligion: (info['otherReligion']?.toString() ?? info['other_religion']?.toString() ?? state.otherReligion),
+            otherCategory: (info['otherCategory']?.toString() ?? info['other_category']?.toString() ?? state.otherCategory),
             ageAtMarriage: info['ageAtMarriage']?.toString() ?? state.ageAtMarriage,
             whoseMobile: info['mobileOwner']?.toString() ?? state.whoseMobile,
             totalChildrenBorn: info['totalBorn']?.toString() ?? totalBorn,
@@ -235,6 +239,8 @@ class EligibleCouleUpdateBloc
             headDetails['category']?.toString() ??
             womanDetails['caste']?.toString() ??
             headDetails['caste']?.toString() ?? state.category,
+        otherReligion: (womanDetails['otherReligion']?.toString() ?? womanDetails['other_religion']?.toString() ?? headDetails['otherReligion']?.toString() ?? headDetails['other_religion']?.toString() ?? state.otherReligion),
+        otherCategory: (womanDetails['otherCategory']?.toString() ?? womanDetails['other_category']?.toString() ?? headDetails['otherCategory']?.toString() ?? headDetails['other_category']?.toString() ?? state.otherCategory),
 
         // Children details from database
         totalChildrenBorn: childrenDetails['totalBorn']?.toString() ?? totalBorn,

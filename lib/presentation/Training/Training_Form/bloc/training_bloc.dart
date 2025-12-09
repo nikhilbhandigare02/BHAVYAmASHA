@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/utils/enums.dart';
+import '../../../../data/Database/User_Info.dart';
 import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/Database/tables/training_data_table.dart';
@@ -98,6 +99,24 @@ class TrainingBloc extends Bloc<TrainingEvent, TrainingState> {
           randomHouseholdKey = val?.toString() ?? '';
         }
       } catch (_) {}
+      final currentUser = await UserInfo.getCurrentUser();
+      print('Current User: $currentUser');
+
+      Map<String, dynamic> userDetails = {};
+      if (currentUser != null) {
+        if (currentUser['details'] is String) {
+          try {
+            userDetails = jsonDecode(currentUser['details'] ?? '{}');
+          } catch (e) {
+            print('Error parsing user details: $e');
+            userDetails = {};
+          }
+        } else if (currentUser['details'] is Map) {
+          userDetails = Map<String, dynamic>.from(currentUser['details']);
+        }
+        print('User Details: $userDetails');
+      }
+      final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
       final formData = {
         'form_name': formName,
@@ -125,7 +144,7 @@ class TrainingBloc extends Bloc<TrainingEvent, TrainingState> {
         'device_details': '{}',
         'app_details': '{}',
         'parent_user': '',
-        'current_user_key': '',
+        'current_user_key': ashaUniqueKey,
         'facility_id': 0,
         'form_json': formJson,
         'created_date_time': now,

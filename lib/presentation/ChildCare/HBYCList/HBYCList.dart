@@ -10,6 +10,7 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
 class HBYCList extends StatefulWidget {
   const HBYCList({super.key});
@@ -114,7 +115,6 @@ class _HBYCListState extends State<HBYCList> {
     return false;
   }
 
-  // Load HBYC children from database
   Future<void> _loadHBYCChildren() async {
     if (!mounted) return;
     
@@ -123,11 +123,24 @@ class _HBYCListState extends State<HBYCList> {
     try {
       final db = await DatabaseProvider.instance.database;
       
-      // Query for child beneficiaries: is_adult = 0 and not deleted
+
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      String whereClause;
+      List<Object?> whereArgs;
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        whereClause = 'is_deleted = ? AND is_adult = ? AND current_user_key = ?';
+        whereArgs = [0, 0, ashaUniqueKey];
+      } else {
+        whereClause = 'is_deleted = ? AND is_adult = ?';
+        whereArgs = [0, 0];
+      }
+
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries_new',
-        where: 'is_deleted = ? AND is_adult = ?',
-        whereArgs: [0, 0],
+        where: whereClause,
+        whereArgs: whereArgs,
       );
 
       final hbycChildren = <Map<String, dynamic>>[];

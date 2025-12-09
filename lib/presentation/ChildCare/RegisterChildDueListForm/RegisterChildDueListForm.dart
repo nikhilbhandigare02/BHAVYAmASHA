@@ -28,6 +28,9 @@ class BeneficiaryData {
   final String? birthWeightGrams;
   final String? birthCertificate;
   final String? village;
+  final String? mobileOwner;
+  final String? otherReligion;
+  final String? otherCategory;
 
   BeneficiaryData({
     this.name,
@@ -45,6 +48,9 @@ class BeneficiaryData {
     this.birthWeightGrams,
     this.birthCertificate,
     this.village,
+    this.mobileOwner,
+    this.otherReligion,
+    this.otherCategory,
   });
 
   factory BeneficiaryData.fromJson(Map<String, dynamic> json) {
@@ -64,6 +70,9 @@ class BeneficiaryData {
       birthWeightGrams: json['birthWeightGrams']?.toString(),
       birthCertificate: json['birthCertificate']?.toString(),
       village: json['village']?.toString(),
+      mobileOwner: json['mobileOwner']?.toString(),
+      otherReligion: json['otherReligion']?.toString(),
+      otherCategory: json['otherCategory']?.toString(),
 
     );
   }
@@ -84,6 +93,9 @@ class BeneficiaryData {
     'birthWeightGrams': birthWeightGrams,
     'birthCertificate': birthCertificate,
     'village': village,
+    'mobileOwner': mobileOwner,
+    'otherReligion': otherReligion,
+    'otherCategory': otherCategory,
   };
 
   @override
@@ -181,6 +193,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
             birthWeightGrams: (info['birthWeight']?.toString()),
             birthCertificate: info['birthCertificate']?.toString(),
             village: (info['village']?.toString() ?? headDetails['village']?.toString()),
+            mobileOwner: (info['mobileOwner']?.toString() ?? headDetails['mobileOwner']?.toString()),
+            otherReligion: (info['other_religion']?.toString() ?? headDetails['other_religion']?.toString() ?? info['otherReligion']?.toString() ?? headDetails['otherReligion']?.toString()),
+            otherCategory: (info['other_category']?.toString() ?? headDetails['other_category']?.toString() ?? info['otherCategory']?.toString() ?? headDetails['otherCategory']?.toString()),
 
           );
 
@@ -249,6 +264,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
               socialClass: headDetails['category']?.toString(),
               uniqueKey: row['unique_key']?.toString(),
               village: (beneficiaryInfo['village']?.toString() ?? headDetails['village']?.toString()),
+              mobileOwner: headDetails['mobileOwner']?.toString(),
+              otherReligion: (headDetails['other_religion']?.toString() ?? headDetails['otherReligion']?.toString()),
+              otherCategory: (headDetails['other_category']?.toString() ?? headDetails['otherCategory']?.toString()),
             );
             break;
           }
@@ -277,6 +295,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                   socialClass: member['category']?.toString(),
                   uniqueKey: member['unique_key']?.toString(),
                   village: (beneficiaryInfo['village']?.toString() ?? headDetails['village']?.toString()),
+                  mobileOwner: member['mobileOwner']?.toString(),
+                  otherReligion: (member['other_religion']?.toString() ?? member['otherReligion']?.toString()),
+                  otherCategory: (member['other_category']?.toString() ?? member['otherCategory']?.toString()),
                 );
                 break;
               }
@@ -286,6 +307,58 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
           if (beneficiaryData != null) break;
         } catch (e) {
           debugPrint('Error processing beneficiary data: $e');
+        }
+      }
+
+      if (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true))) {
+        String? villageName;
+        final hhRows = await db.query(
+          'households',
+          where: 'unique_key = ? OR id = ?',
+          whereArgs: [hhId, hhId],
+          limit: 1,
+        );
+        if (hhRows.isNotEmpty) {
+          final headId = hhRows.first['head_id']?.toString();
+          if (headId != null && headId.isNotEmpty) {
+            final headRows = await db.query(
+              'beneficiaries_new',
+              where: 'unique_key = ? AND is_deleted = 0',
+              whereArgs: [headId],
+              limit: 1,
+            );
+            if (headRows.isNotEmpty) {
+              final infoStr2 = headRows.first['beneficiary_info']?.toString() ?? '{}';
+              Map<String, dynamic> info2 = {};
+              try {
+                info2 = Map<String, dynamic>.from(jsonDecode(infoStr2));
+              } catch (_) {}
+              final head2 = (info2['head_details'] is Map)
+                  ? Map<String, dynamic>.from(info2['head_details'])
+                  : <String, dynamic>{};
+              villageName = (info2['village']?.toString() ?? head2['village']?.toString());
+            }
+          }
+        }
+        if (villageName != null && villageName.trim().isNotEmpty) {
+          beneficiaryData = BeneficiaryData(
+            name: beneficiaryData?.name,
+            gender: beneficiaryData?.gender,
+            mobile: beneficiaryData?.mobile,
+            rchId: beneficiaryData?.rchId,
+            fatherName: beneficiaryData?.fatherName,
+            motherName: beneficiaryData?.motherName,
+            dateOfBirth: beneficiaryData?.dateOfBirth,
+            religion: beneficiaryData?.religion,
+            socialClass: beneficiaryData?.socialClass,
+            uniqueKey: beneficiaryData?.uniqueKey,
+            createdDate: beneficiaryData?.createdDate,
+            weightGrams: beneficiaryData?.weightGrams,
+            birthWeightGrams: beneficiaryData?.birthWeightGrams,
+            birthCertificate: beneficiaryData?.birthCertificate,
+            village: villageName,
+            mobileOwner: beneficiaryData?.mobileOwner,
+          );
         }
       }
 
@@ -345,13 +418,40 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       }
       if (data.mobile != null) {
         bloc.add(MobileNumberChanged(data.mobile!));
-        bloc.add(WhoseMobileNumberChanged('Self'));
+      }
+      final String? ownerLabel = () {
+        final raw = data.mobileOwner?.toLowerCase() ?? '';
+        if (raw.isEmpty) return null;
+        final headLabel = l10n?.headOfFamily ?? 'Head of the family';
+        final motherLabel = l10n?.mother ?? 'Mother';
+        final fatherLabel = l10n?.father ?? 'Father';
+        final otherLabel = l10n?.other ?? 'Other';
+        if (raw.contains('head')) return headLabel;
+        if (raw == 'self') return headLabel;
+        if (raw == 'mother') return motherLabel;
+        if (raw == 'father') return fatherLabel;
+        return otherLabel;
+      }();
+      if (ownerLabel != null && ownerLabel.isNotEmpty) {
+        bloc.add(WhoseMobileNumberChanged(ownerLabel));
       }
       if (data.fatherName != null) bloc.add(FatherNameChanged(data.fatherName!));
       if (data.motherName != null) bloc.add(MotherNameChanged(data.motherName!));
       if (data.rchId != null) bloc.add(RchIdChildChanged(data.rchId!));
       if (data.religion != null) bloc.add(ReligionChanged(data.religion!));
+      if (data.religion != null && data.religion == 'Other') {
+        final val = data.otherReligion?.trim();
+        if (val != null && val.isNotEmpty) {
+          bloc.add(CustomReligionChanged(val));
+        }
+      }
       if (data.socialClass != null) bloc.add(CasteChanged(data.socialClass!));
+      if (data.socialClass != null && data.socialClass == 'Other') {
+        final val = data.otherCategory?.trim();
+        if (val != null && val.isNotEmpty) {
+          bloc.add(CustomCasteChanged(val));
+        }
+      }
       if (data.dateOfBirth != null) {
         try {
           final dob = DateTime.tryParse(data.dateOfBirth!);
@@ -683,7 +783,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             CustomTextField(
-                              labelText: l10n?.weightGramLabel ?? 'Weight (g)',
+                              labelText:'Weight (500-12500)gms', 
                               hintText: 'Enter weight',
                               initialValue: state.weightGrams,
                               keyboardType: TextInputType.number,
@@ -709,7 +809,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             CustomTextField(
-                              labelText: 'Birth weight (g)',
+                              labelText: 'Birth weight (1200-4000)gms',
                               hintText: 'Enter birth weight',
                               initialValue: state.birthWeightGrams,
                               keyboardType: TextInputType.number,
@@ -764,6 +864,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     },
                                     hintText: l10n?.choose ?? 'choose',
                                   ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                   if (state.religion == 'Other')
                                     Padding(
                                       padding: const EdgeInsets.only(top: 8.0),
@@ -816,6 +917,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     },
                                     hintText: l10n?.choose ?? 'choose',
                                   ),
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                   if (state.caste == 'Other')
                                     Padding(
                                       padding: const EdgeInsets.only(top: 8.0),

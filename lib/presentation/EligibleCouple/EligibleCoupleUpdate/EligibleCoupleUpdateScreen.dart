@@ -73,13 +73,30 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
 
                     Future.delayed(const Duration(milliseconds: 1500), () {
                       if (context.mounted) {
-                        Navigator.of(context).pop(true); // Pass true to indicate success
+                        Navigator.of(context).pop(true);
                       }
                     });
                   }
                 },
                 builder: (context, state) {
                   final bloc = context.read<EligibleCouleUpdateBloc>();
+                  String? _childrenValidationMessage({String? totalBornOverride, String? liveOverride, String? maleOverride, String? femaleOverride}) {
+                    final totalBornStr = totalBornOverride ?? state.totalChildrenBorn;
+                    final liveStr = liveOverride ?? state.totalLiveChildren;
+                    final maleStr = maleOverride ?? state.totalMaleChildren;
+                    final femaleStr = femaleOverride ?? state.totalFemaleChildren;
+                    final totalBorn = int.tryParse(totalBornStr) ?? 0;
+                    final live = int.tryParse(liveStr) ?? 0;
+                    final male = int.tryParse(maleStr) ?? 0;
+                    final female = int.tryParse(femaleStr) ?? 0;
+                    if (live > totalBorn) {
+                      return 'Live children must be less than or equal to total children born';
+                    }
+                    if (male + female != live) {
+                      return 'Sum of male and female children must equal live children';
+                    }
+                    return null;
+                  }
 
                   Widget _buildCountBoxField(String value,
                       Function(String) onChanged) {
@@ -301,6 +318,16 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
                                 height: 0,),
+                              if (state.religion == 'Other')
+                                CustomTextField(
+                                  labelText: 'Other Religion',
+                                  hintText: 'Enter your religion',
+                                  initialValue: state.otherReligion,
+                                  readOnly: true,
+                                ),
+                              Divider(color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,),
 
                               // Category Field
                               CustomTextField(
@@ -310,6 +337,16 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 onChanged: (value) => context.read<EligibleCouleUpdateBloc>().add(CategoryChanged(value)),
                                 readOnly: true,
                               ),
+                              Divider(color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,),
+                              if (state.category == 'Other')
+                                CustomTextField(
+                                  labelText: 'Other Category', 
+                                  hintText: 'Enter your category',
+                                  initialValue: state.otherCategory,
+                                  readOnly: true,
+                                ),
 
                               Divider(color: AppColors.divider,
                                 thickness: 0.5,
@@ -332,9 +369,14 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                           'Total number of children born',
                                       style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600))),
                                   _buildCountBoxField(
-                                      state.totalChildrenBorn, (v) =>
-                                      context.read<EligibleCouleUpdateBloc>()
-                                          .add(TotalChildrenBornChanged(v))),
+                                      state.totalChildrenBorn, (v) {
+                                        context.read<EligibleCouleUpdateBloc>()
+                                            .add(TotalChildrenBornChanged(v));
+                                        final msg = _childrenValidationMessage(totalBornOverride: v);
+                                        if (msg != null) {
+                                          showAppSnackBar(context, msg);
+                                        }
+                                      }),
                                 ],
                               ),
                               Divider(color: AppColors.divider,
@@ -352,10 +394,15 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                                 'Total live children',
                                             style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600))),
                                         _buildCountBoxField(
-                                            state.totalLiveChildren, (v) =>
-                                            context.read<
-                                                EligibleCouleUpdateBloc>().add(
-                                                TotalLiveChildrenChanged(v))),
+                                            state.totalLiveChildren, (v) {
+                                              context.read<
+                                                  EligibleCouleUpdateBloc>().add(
+                                                  TotalLiveChildrenChanged(v));
+                                              final msg = _childrenValidationMessage(liveOverride: v);
+                                              if (msg != null) {
+                                                showAppSnackBar(context, msg);
+                                              }
+                                            }),
                                       ],
                                     ),
                               ),
@@ -374,10 +421,15 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                                 'Total male children',
                                             style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600))),
                                         _buildCountBoxField(
-                                            state.totalMaleChildren, (v) =>
-                                            context.read<
-                                                EligibleCouleUpdateBloc>().add(
-                                                TotalMaleChildrenChanged(v))),
+                                            state.totalMaleChildren, (v) {
+                                              context.read<
+                                                  EligibleCouleUpdateBloc>().add(
+                                                  TotalMaleChildrenChanged(v));
+                                              final msg = _childrenValidationMessage(maleOverride: v);
+                                              if (msg != null) {
+                                                showAppSnackBar(context, msg);
+                                              }
+                                            }),
                                       ],
                                     ),
                               ),
@@ -396,10 +448,15 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                                 'Total female children',
                                             style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600))),
                                         _buildCountBoxField(
-                                            state.totalFemaleChildren, (v) =>
-                                            context.read<
-                                                EligibleCouleUpdateBloc>().add(
-                                                TotalFemaleChildrenChanged(v))),
+                                            state.totalFemaleChildren, (v) {
+                                              context.read<
+                                                  EligibleCouleUpdateBloc>().add(
+                                                  TotalFemaleChildrenChanged(v));
+                                              final msg = _childrenValidationMessage(femaleOverride: v);
+                                              if (msg != null) {
+                                                showAppSnackBar(context, msg);
+                                              }
+                                            }),
                                       ],
                                     ),
                               ),
@@ -513,6 +570,12 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 } else if (unit == 'Days') {
                                   if (age == null || age < 1 || age > 31) {
                                     message =t?.daysRangeValidation ?? 'Days: only 1 to 31 allowed';
+                                  }
+                                }
+                                if (message == null) {
+                                  final childrenMsg = _childrenValidationMessage();
+                                  if (childrenMsg != null) {
+                                    message = childrenMsg;
                                   }
                                 }
                                 if (message != null) {

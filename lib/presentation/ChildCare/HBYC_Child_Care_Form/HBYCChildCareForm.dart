@@ -163,7 +163,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ApiDropdown<String>(
-                              labelText: 'HYBC home visit? *',
+                              labelText: 'HBYC home visit? *',
                               items: _hbycVisitMonthOptions,
                               getLabel: (s) => s,
                               value: state.hbycBhraman.isNotEmpty ? state.hbycBhraman : null,
@@ -223,7 +223,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ApiDropdown<String>(
-                              labelText: 'AppLocalizations.of(context)!.hbycBreastfeedingContinuingLabel',
+                              labelText: AppLocalizations.of(context)!.hbycBreastfeedingContinuingLabel,
                               items: _yesNoOptions,
                               getLabel: (s) => s,
                               value: state.breastfeedingContinuing.isNotEmpty ? state.breastfeedingContinuing : null,

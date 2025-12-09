@@ -6,6 +6,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 
+import '../../../../data/Database/User_Info.dart';
+
 part 'hbyc_child_care_event.dart';
 part 'hbyc_child_care_state.dart';
 
@@ -63,7 +65,24 @@ class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
       try {
         final db = await DatabaseProvider.instance.database;
         final now = DateTime.now().toIso8601String();
-        
+        final currentUser = await UserInfo.getCurrentUser();
+        print('Current User: $currentUser');
+
+        Map<String, dynamic> userDetails = {};
+        if (currentUser != null) {
+          if (currentUser['details'] is String) {
+            try {
+              userDetails = jsonDecode(currentUser['details'] ?? '{}');
+            } catch (e) {
+              print('Error parsing user details: $e');
+              userDetails = {};
+            }
+          } else if (currentUser['details'] is Map) {
+            userDetails = Map<String, dynamic>.from(currentUser['details']);
+          }
+          print('User Details: $userDetails');
+        }
+        final ashaUniqueKey = userDetails['unique_key'] ?? {};
         
         final formData = {
           'form_name': 'Home Based Young Child',
@@ -122,6 +141,7 @@ class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
             'household_ref_key': householdRefKey,
             'beneficiary_ref_key': beneficiaryRefKey,
             'form_json': jsonEncode(formData),
+            'current_user_key': ashaUniqueKey,
             'created_date_time': now,
             'modified_date_time': now,
             'is_synced': 0,

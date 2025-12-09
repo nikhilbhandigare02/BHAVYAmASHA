@@ -12,6 +12,7 @@ import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'ChildTrackingDueListForm.dart';
 
 class CHildTrackingDueList extends StatefulWidget {
@@ -64,11 +65,24 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         debugPrint('form_json length: ${(record['form_json'] as String?)?.length ?? 0}');
       }
 
-      // Query followup_form_data for child registration entries OR child tracking due forms
+
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      String whereClause;
+      List<Object?> whereArgs;
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        whereClause = '(form_json LIKE ? OR forms_ref_key = ?) AND current_user_key = ?';
+        whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6', ashaUniqueKey];
+      } else {
+        whereClause = 'form_json LIKE ? OR forms_ref_key = ?';
+        whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6'];
+      }
+
       final results = await db.query(
         FollowupFormDataTable.table,
-        where: 'form_json LIKE ? OR forms_ref_key = ?',
-        whereArgs: ['%child_registration_due%', '30bycxe4gv7fqnt6'],
+        where: whereClause,
+        whereArgs: whereArgs,
         orderBy: 'id DESC',
       );
 
@@ -283,10 +297,16 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
           // Check if case closure exists for this beneficiary
           if (beneficiaryRefKey.isNotEmpty) {
+            final caseClosureWhere = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+                ? 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0 AND current_user_key = ?'
+                : 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
+            final caseClosureArgs = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+                ? [beneficiaryRefKey, '%case_closure%', ashaUniqueKey]
+                : [beneficiaryRefKey, '%case_closure%'];
             final caseClosureRecords = await db.query(
               FollowupFormDataTable.table,
-              where: 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0',
-              whereArgs: [beneficiaryRefKey, '%case_closure%'],
+              where: caseClosureWhere,
+              whereArgs: caseClosureArgs,
             );
             
             if (caseClosureRecords.isNotEmpty) {
