@@ -286,7 +286,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final List<Map<String, dynamic>> items = [];
       final Set<String> processedBeneficiaries = {};
 
-      // First, get all beneficiaries that should be excluded
       final excludedStates = await db.query(
         'mother_care_activities',
         where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",

@@ -55,31 +55,176 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
     try {
       final dao = LocalStorageDao();
       final lastSyncTime = await dao.getLastSyncTime();
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
+      // Get household counts directly from households table
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        // Get total household count for current user
+        final householdTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM households WHERE is_deleted = 0 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _householdTotal = householdTotalResult.first['count'] as int? ?? 0;
 
-      _householdTotal = await _getTotalCount('households');
-      _householdSynced = await _getSyncedCount('households', await _getIdsFromTable('households'));
+        // Get synced household count for current user
+        final householdSyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM households WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _householdSynced = householdSyncedResult.first['count'] as int? ?? 0;
+      } else {
+        // Get total household count for all users
+        final householdTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM households WHERE is_deleted = 0',
+        );
+        _householdTotal = householdTotalResult.first['count'] as int? ?? 0;
 
-      // Update beneficiary counts
-      _beneficiaryTotal = await _getTotalCount('beneficiaries_new');
-      _beneficiarySynced = await _getSyncedCount('beneficiaries_new',
-          await _getIdsFromTable('beneficiaries_new'));
+        // Get synced household count for all users
+        final householdSyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM households WHERE is_deleted = 0 AND is_synced = 1',
+        );
+        _householdSynced = householdSyncedResult.first['count'] as int? ?? 0;
+      }
 
-      // Update eligible couple counts
-      _eligibleCoupleTotal = await _getTotalCount('eligible_couple_activities');
-      _eligibleCoupleSynced = await _getSyncedCount('eligible_couple_activities',
-          await _getIdsFromTable('eligible_couple_activities'));
+      // Get beneficiary counts directly from beneficiaries_new table
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        // Get total beneficiary count for current user
+        final beneficiaryTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM beneficiaries_new WHERE is_deleted = 0 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _beneficiaryTotal = beneficiaryTotalResult.first['count'] as int? ?? 0;
 
-      _motherCareTotal = await _getTotalCount('mother_care_activities');
-      _motherCareSynced = await _getSyncedCount('mother_care_activities',
-          await _getIdsFromTable('mother_care_activities'));
+        // Get synced beneficiary count for current user
+        final beneficiarySyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM beneficiaries_new WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _beneficiarySynced = beneficiarySyncedResult.first['count'] as int? ?? 0;
+      } else {
+        // Get total beneficiary count for all users
+        final beneficiaryTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM beneficiaries_new WHERE is_deleted = 0',
+        );
+        _beneficiaryTotal = beneficiaryTotalResult.first['count'] as int? ?? 0;
 
-      _childCareTotal = await _getTotalCount('child_care_activities');
-      _childCareSynced = await _getSyncedCount('child_care_activities',
-          await _getIdsFromTable('child_care_activities'));
+        // Get synced beneficiary count for all users
+        final beneficiarySyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM beneficiaries_new WHERE is_deleted = 0 AND is_synced = 1',
+        );
+        _beneficiarySynced = beneficiarySyncedResult.first['count'] as int? ?? 0;
+      }
 
-      _followupTotal = await dao.getFollowupTotalCountLocal();
-      _followupSynced = await dao.getFollowupSyncedCountLocal();
+      // Get eligible couple counts directly from the table
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        final eligibleTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM eligible_couple_activities WHERE is_deleted = 0 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _eligibleCoupleTotal = eligibleTotalResult.first['count'] as int? ?? 0;
+
+        // Get synced count
+        final eligibleSyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM eligible_couple_activities WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _eligibleCoupleSynced = eligibleSyncedResult.first['count'] as int? ?? 0;
+      } else {
+        final eligibleTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM eligible_couple_activities WHERE is_deleted = 0',
+        );
+        _eligibleCoupleTotal = eligibleTotalResult.first['count'] as int? ?? 0;
+
+        final eligibleSyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM eligible_couple_activities WHERE is_deleted = 0 AND is_synced = 1',
+        );
+        _eligibleCoupleSynced = eligibleSyncedResult.first['count'] as int? ?? 0;
+      }
+
+      // Get mother care counts directly from the table
+      // Get total count
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        final totalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM mother_care_activities WHERE is_deleted = 0 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _motherCareTotal = totalResult.first['count'] as int? ?? 0;
+
+        // Get synced count
+        final syncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM mother_care_activities WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _motherCareSynced = syncedResult.first['count'] as int? ?? 0;
+      } else {
+        final totalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM mother_care_activities WHERE is_deleted = 0',
+        );
+        _motherCareTotal = totalResult.first['count'] as int? ?? 0;
+
+        final syncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM mother_care_activities WHERE is_deleted = 0 AND is_synced = 1',
+        );
+        _motherCareSynced = syncedResult.first['count'] as int? ?? 0;
+      }
+
+      // Get child care counts directly from the table
+      // Get total count
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        final childTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM child_care_activities WHERE current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _childCareTotal = childTotalResult.first['count'] as int? ?? 0;
+
+        // Get synced count
+        final childSyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM child_care_activities WHERE is_synced = 1 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _childCareSynced = childSyncedResult.first['count'] as int? ?? 0;
+      } else {
+        final childTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM child_care_activities',
+        );
+        _childCareTotal = childTotalResult.first['count'] as int? ?? 0;
+
+        final childSyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM child_care_activities WHERE is_synced = 1',
+        );
+        _childCareSynced = childSyncedResult.first['count'] as int? ?? 0;
+      }
+
+      // Get followup counts directly from followup_form_data table
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        // Get total followup count for current user
+        final followupTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _followupTotal = followupTotalResult.first['count'] as int? ?? 0;
+
+        // Get synced followup count for current user
+        final followupSyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
+          [ashaUniqueKey],
+        );
+        _followupSynced = followupSyncedResult.first['count'] as int? ?? 0;
+      } else {
+        // Get total followup count for all users
+        final followupTotalResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0',
+        );
+        _followupTotal = followupTotalResult.first['count'] as int? ?? 0;
+
+        // Get synced followup count for all users
+        final followupSyncedResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0 AND is_synced = 1',
+        );
+        _followupSynced = followupSyncedResult.first['count'] as int? ?? 0;
+      }
 
       if (!mounted) return;
 
