@@ -72,6 +72,42 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       };
 
       int totalIdentified = 0;
+      final trackingFormKeyForIdentified =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
+      final Set<String> sterilizedBeneficiariesIdentified = <String>{};
+      if (trackingFormKeyForIdentified.isNotEmpty) {
+        final trackingRows = await db.query(
+          FollowupFormDataTable.table,
+          columns: ['beneficiary_ref_key', 'form_json', 'created_date_time', 'id'],
+          where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          whereArgs: [trackingFormKeyForIdentified],
+          orderBy: 'created_date_time DESC, id DESC',
+        );
+        final Map<String, String> latestFpMethod = {};
+        for (final row in trackingRows) {
+          final key = row['beneficiary_ref_key']?.toString() ?? '';
+          if (key.isEmpty) continue;
+          if (latestFpMethod.containsKey(key)) continue;
+          final s = row['form_json']?.toString() ?? '';
+          if (s.isEmpty) continue;
+          try {
+            final decoded = jsonDecode(s);
+            Map<String, dynamic> formData = decoded is Map<String, dynamic>
+                ? Map<String, dynamic>.from(decoded)
+                : <String, dynamic>{};
+            if (decoded is Map && decoded['form_data'] is Map) {
+              formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+            }
+            final fp = formData['fp_method']?.toString().toLowerCase().trim();
+            if (fp != null) latestFpMethod[key] = fp;
+          } catch (_) {}
+        }
+        sterilizedBeneficiariesIdentified.addAll(
+          latestFpMethod.entries
+              .where((e) => e.value == 'male sterilization' || e.value == 'female sterilization')
+              .map((e) => e.key),
+        );
+      }
       for (final household in identifiedHouseholds.values) {
         Map<String, dynamic>? head;
         Map<String, dynamic>? spouse;
@@ -115,6 +151,10 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
 
           if (!allowedRelations.contains(rawRelation)) continue;
           if (!_isIdentifiedEligibleFemale(info, head: head)) continue;
+          final memberUniqueKey = member['unique_key']?.toString() ?? '';
+          if (memberUniqueKey.isNotEmpty && sterilizedBeneficiariesIdentified.contains(memberUniqueKey)) {
+            continue;
+          }
 
           totalIdentified++;
         }
@@ -124,13 +164,16 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       final trackingFormKey =
           FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
       final Set<String> pregnantBeneficiaries = <String>{};
+      final Set<String> sterilizedBeneficiaries = <String>{};
       if (trackingFormKey.isNotEmpty) {
         final trackingRows = await db.query(
           FollowupFormDataTable.table,
-          columns: ['beneficiary_ref_key', 'form_json'],
+          columns: ['beneficiary_ref_key', 'form_json', 'created_date_time', 'id'],
           where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
           whereArgs: [trackingFormKey],
+          orderBy: 'created_date_time DESC, id DESC',
         );
+        final Map<String, String> latestFp = {};
         for (final row in trackingRows) {
           try {
             final formJsonStr = row['form_json']?.toString() ?? '';
@@ -148,8 +191,18 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
                 pregnantBeneficiaries.add(key);
               }
             }
+            final fp = formData['fp_method']?.toString().toLowerCase().trim();
+            final key = row['beneficiary_ref_key']?.toString() ?? '';
+            if (key.isNotEmpty && fp != null && !latestFp.containsKey(key)) {
+              latestFp[key] = fp;
+            }
           } catch (_) {}
         }
+        sterilizedBeneficiaries.addAll(
+          latestFp.entries
+              .where((e) => e.value == 'male sterilization' || e.value == 'female sterilization')
+              .map((e) => e.key),
+        );
       }
 
       final updatedRows = await LocalStorageDao.instance.getAllBeneficiaries();
@@ -170,7 +223,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
           try {
             final memberUniqueKey = member['unique_key']?.toString() ?? '';
             if (memberUniqueKey.isNotEmpty &&
-                pregnantBeneficiaries.contains(memberUniqueKey)) {
+                (pregnantBeneficiaries.contains(memberUniqueKey) || sterilizedBeneficiaries.contains(memberUniqueKey))) {
               continue;
             }
 
@@ -230,6 +283,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
 
             if (!allowedRelations.contains(rawRelation)) continue;
             if (!_isUpdatedEligibleFemale(info, head: head)) continue;
+            if (memberUniqueKey.isNotEmpty && sterilizedBeneficiaries.contains(memberUniqueKey)) continue;
 
             totalUpdatedEligible++;
           } catch (e) {

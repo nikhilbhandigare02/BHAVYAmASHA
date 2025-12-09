@@ -12,6 +12,8 @@ import '../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../HomeScreen/HomeScreen.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../EligibleCoupleUpdate/EligibleCoupleUpdateScreen.dart';
+import '../../../data/Database/database_provider.dart';
+import '../../../data/Database/tables/followup_form_data_table.dart';
 
 class EligibleCoupleIdentifiedScreen extends StatefulWidget {
   const EligibleCoupleIdentifiedScreen({super.key});
@@ -55,6 +57,42 @@ class _EligibleCoupleIdentifiedScreenState
   Future<void> _loadEligibleCouples() async {
     setState(() { _isLoading = true; });
     final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+    final db = await DatabaseProvider.instance.database;
+    final trackingFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
+    final Map<String, String> latestFpMethod = {};
+    if (trackingFormKey.isNotEmpty) {
+      final trackingRows = await db.query(
+        FollowupFormDataTable.table,
+        columns: ['beneficiary_ref_key', 'form_json', 'created_date_time', 'id'],
+        where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [trackingFormKey],
+        orderBy: 'created_date_time DESC, id DESC',
+      );
+      for (final row in trackingRows) {
+        final key = row['beneficiary_ref_key']?.toString() ?? '';
+        if (key.isEmpty) continue;
+        if (latestFpMethod.containsKey(key)) continue;
+        final formJsonStr = row['form_json']?.toString() ?? '';
+        if (formJsonStr.isEmpty) continue;
+        try {
+          final decoded = jsonDecode(formJsonStr);
+          Map<String, dynamic> formData = decoded is Map<String, dynamic>
+              ? Map<String, dynamic>.from(decoded)
+              : <String, dynamic>{};
+          if (decoded is Map && decoded['form_data'] is Map) {
+            formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+          }
+          final fpMethod = formData['fp_method']?.toString().toLowerCase().trim();
+          if (fpMethod != null) {
+            latestFpMethod[key] = fpMethod;
+          }
+        } catch (_) {}
+      }
+    }
+    final Set<String> sterilizedBeneficiaries = latestFpMethod.entries
+        .where((e) => e.value == 'male sterilization' || e.value == 'female sterilization')
+        .map((e) => e.key)
+        .toSet();
     final couples = <Map<String, dynamic>>[];
 
     final households = <String, List<Map<String, dynamic>>>{};
@@ -134,6 +172,11 @@ class _EligibleCoupleIdentifiedScreenState
 
         // Only consider females 15-49 and married
         if (!_isEligibleFemale(info, head: head)) {
+          continue;
+        }
+
+        final memberUniqueKey = member['unique_key']?.toString() ?? '';
+        if (memberUniqueKey.isNotEmpty && sterilizedBeneficiaries.contains(memberUniqueKey)) {
           continue;
         }
 
