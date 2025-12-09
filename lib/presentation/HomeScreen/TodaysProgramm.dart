@@ -1357,8 +1357,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     } catch (_) {}
   }
 
-  /// HBNC helper: get delivery_date for a beneficiary from delivery outcome
-  /// followup form, same source as HBNCList.
+
   Future<String?> _getHbncDeliveryDateForBeneficiary(String beneficiaryId) async {
     try {
       if (beneficiaryId.isEmpty) return null;
