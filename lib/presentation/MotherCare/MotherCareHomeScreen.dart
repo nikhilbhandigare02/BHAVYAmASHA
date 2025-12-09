@@ -68,7 +68,7 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
       // Get all beneficiaries that should be excluded
       final excludedStates = await db.query(
         'mother_care_activities',
-        where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother','anc_due_state')",
+        where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
         columns: ['beneficiary_ref_key'],
         distinct: true
       );
