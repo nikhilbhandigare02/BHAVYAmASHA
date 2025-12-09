@@ -52,6 +52,8 @@ class CustomTextField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final bool autofocus;
   final bool enableTitleCase; // New parameter to enable/disable title case
+  final String? suffixText;
+  final String? unitLetterSuffix;
 
   const CustomTextField({
     super.key,
@@ -73,6 +75,8 @@ class CustomTextField extends StatefulWidget {
     this.textInputAction,
     this.autofocus = false,
     this.enableTitleCase = false, // Default is false for backward compatibility
+    this.suffixText,
+    this.unitLetterSuffix,
   });
 
   @override
@@ -116,10 +120,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
     super.initState();
     _isObscure = widget.obscureText;
 
-    // Apply title case to initial value if enabled
-    final initialText = widget.enableTitleCase && widget.initialValue != null
-        ? _toTitleCase(widget.initialValue!)
-        : widget.initialValue ?? '';
+    String rawInit = widget.initialValue ?? '';
+    String initialText;
+    if (widget.unitLetterSuffix != null && widget.keyboardType == TextInputType.number) {
+      initialText = rawInit.isEmpty ? '' : '$rawInit ${widget.unitLetterSuffix}';
+    } else {
+      initialText = widget.enableTitleCase && widget.initialValue != null
+          ? _toTitleCase(widget.initialValue!)
+          : rawInit;
+    }
 
     _controller = widget.controller ?? TextEditingController(text: initialText);
     _isDirty = widget.initialValue?.isNotEmpty ?? false;
@@ -132,18 +141,24 @@ class _CustomTextFieldState extends State<CustomTextField> {
     if (widget.controller != oldWidget.controller) {
       _controller?.dispose();
 
-      final initialText = widget.enableTitleCase && widget.initialValue != null
-          ? _toTitleCase(widget.initialValue!)
-          : widget.initialValue ?? '';
+      final rawInit = widget.initialValue ?? '';
+      final initialText = (widget.unitLetterSuffix != null && widget.keyboardType == TextInputType.number)
+          ? (rawInit.isEmpty ? '' : '$rawInit ${widget.unitLetterSuffix}')
+          : (widget.enableTitleCase && widget.initialValue != null
+              ? _toTitleCase(widget.initialValue!)
+              : rawInit);
 
       _controller = widget.controller ?? TextEditingController(text: initialText);
     }
 
     if (widget.controller == null) {
       _controller ??= TextEditingController();
-      final newText = widget.enableTitleCase && widget.initialValue != null
-          ? _toTitleCase(widget.initialValue!)
-          : widget.initialValue ?? '';
+      final rawInit2 = widget.initialValue ?? '';
+      final newText = (widget.unitLetterSuffix != null && widget.keyboardType == TextInputType.number)
+          ? (rawInit2.isEmpty ? '' : '$rawInit2 ${widget.unitLetterSuffix}')
+          : (widget.enableTitleCase && widget.initialValue != null
+              ? _toTitleCase(widget.initialValue!)
+              : rawInit2);
 
       final oldInit = oldWidget.initialValue ?? '';
       final currText = _controller!.text;
@@ -191,7 +206,19 @@ class _CustomTextFieldState extends State<CustomTextField> {
             _isDirty = true;
           });
         }
-        widget.onChanged?.call(value);
+        if (widget.unitLetterSuffix != null && widget.keyboardType == TextInputType.number) {
+          final raw = value.replaceAll(RegExp(r'[^0-9]'), '');
+          final display = raw.isEmpty ? '' : '$raw ${widget.unitLetterSuffix}';
+          if (_controller != null && _controller!.text != display) {
+            _controller!.value = TextEditingValue(
+              text: display,
+              selection: TextSelection.collapsed(offset: display.length),
+            );
+          }
+          widget.onChanged?.call(raw);
+        } else {
+          widget.onChanged?.call(value);
+        }
       },
       onTap: () {
         if (!_isDirty) {
@@ -242,6 +269,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         floatingLabelBehavior: FloatingLabelBehavior.always,
         hintText: widget.hintText,
         hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
+        suffixText: widget.suffixText,
 
         prefixIcon: widget.prefixIcon != null
             ? Padding(

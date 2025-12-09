@@ -92,8 +92,8 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
     'Eclampsia/ Serve Hypertension',
     'Unsafe Abortion',
     'Surgical Complication',
-    'Other reason apart from maternal complication'
-    'Other Specify' 
+    'Other reason apart from maternal complication',
+    'Other Specify'
 
   ];
 
@@ -190,8 +190,8 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
                 }
               },
             ),
+            const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
 
-            // Other Cause TextField
             if (widget.showOtherCauseField) ...[
               CustomTextField(
                 labelText: 'Specify cause of death',
@@ -217,9 +217,23 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
               items: _deathReasons,
               value: widget.reasonOfDeath,
               getLabel: (value) => value,
-              onChanged: widget.onReasonOfDeathChanged,
+              onChanged: (value) {
+                widget.onReasonOfDeathChanged(value);
+                if (value != 'Other Specify') {
+                  widget.otherReasonController.clear();
+                }
+              },
               convertToTitleCase: false,  
             ),
+            const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
+            // Other Reason of Death TextField
+            if (widget.reasonOfDeath == 'Other Specify') ...[
+              CustomTextField(
+                labelText: 'Other reason of Death',
+                controller: widget.otherReasonController,
+                onChanged: (value) {},
+              ),
+            ],
             const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
           ],
         ],

@@ -10,7 +10,6 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
-import '../../../data/SecureStorage/SecureStorage.dart';
 import 'bloc/register_child_form_bloc.dart';
 
 class BeneficiaryData {
@@ -159,15 +158,12 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       final name = widget.arguments?['name']?.toString();
 
       final beneficiaryRefKey = widget.arguments?['beneficiary_ref_key']?.toString();
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-          final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
       if (beneficiaryRefKey != null && beneficiaryRefKey.isNotEmpty) {
         final db = await DatabaseProvider.instance.database;
         final rows = await db.query(
           'beneficiaries_new',
-          where: 'unique_key = ? AND is_deleted = 0 AND AND current_user_key = ?',
-          whereArgs: [beneficiaryRefKey, ashaUniqueKey],
+          where: 'unique_key = ? AND is_deleted = 0',
+          whereArgs: [beneficiaryRefKey],
           limit: 1,
         );
         if (rows.isNotEmpty) {
@@ -311,6 +307,49 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
           if (beneficiaryData != null) break;
         } catch (e) {
           debugPrint('Error processing beneficiary data: $e');
+        }
+      }
+
+      if (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true))) {
+        if (hhId != null && hhId.isNotEmpty) {
+          String? villageNameFromBeneficiaries;
+          final rowsByHh = await db.query(
+            'beneficiaries_new',
+            columns: ['beneficiary_info'],
+            where: 'household_ref_key = ? AND is_deleted = 0',
+            whereArgs: [hhId],
+          );
+          for (final r in rowsByHh) {
+            final infoStr = r['beneficiary_info']?.toString() ?? '{}';
+            Map<String, dynamic> info = {};
+            try { info = Map<String, dynamic>.from(jsonDecode(infoStr)); } catch (_) {}
+            final v1 = info['village_name']?.toString();
+            final v2 = info['village']?.toString();
+            final v = ((v1 ?? '').trim().isNotEmpty) ? v1 : v2;
+            if ((v ?? '').trim().isNotEmpty) { villageNameFromBeneficiaries = v; break; }
+          }
+          if (villageNameFromBeneficiaries != null && villageNameFromBeneficiaries.trim().isNotEmpty) {
+            beneficiaryData = BeneficiaryData(
+              name: beneficiaryData?.name,
+              gender: beneficiaryData?.gender,
+              mobile: beneficiaryData?.mobile,
+              rchId: beneficiaryData?.rchId,
+              fatherName: beneficiaryData?.fatherName,
+              motherName: beneficiaryData?.motherName,
+              dateOfBirth: beneficiaryData?.dateOfBirth,
+              religion: beneficiaryData?.religion,
+              socialClass: beneficiaryData?.socialClass,
+              uniqueKey: beneficiaryData?.uniqueKey,
+              createdDate: beneficiaryData?.createdDate,
+              weightGrams: beneficiaryData?.weightGrams,
+              birthWeightGrams: beneficiaryData?.birthWeightGrams,
+              birthCertificate: beneficiaryData?.birthCertificate,
+              village: villageNameFromBeneficiaries,
+              mobileOwner: beneficiaryData?.mobileOwner,
+              otherReligion: beneficiaryData?.otherReligion,
+              otherCategory: beneficiaryData?.otherCategory,
+            );
+          }
         }
       }
 
@@ -552,20 +591,20 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     padding: const EdgeInsets.only(top: 20),
                                     child: state.isSubmitting
                                         ? const Center(
-                                            child: SizedBox(
-                                              width: 24,
-                                              height: 24,
-                                              child: CircularProgressIndicator(strokeWidth: 3),
-                                            ),
-                                          )
+                                      child: SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(strokeWidth: 3),
+                                      ),
+                                    )
                                         : RoundButton(
-                                            title: 'VERIFY',
-                                            borderRadius: 8,
-                                            fontSize: 12,
-                                            onPress: () {
-                                              // Add verification logic here
-                                            },
-                                          ),
+                                      title: 'VERIFY',
+                                      borderRadius: 8,
+                                      fontSize: 12,
+                                      onPress: () {
+                                        // Add verification logic here
+                                      },
+                                    ),
                                   ),
                                 ),
                               ],
@@ -602,7 +641,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 if (date == null) {
                                   return _captureError('Please enter Date of Registration');
 
-                                  }
+                                }
                                 return null;
                               },
                             ),
@@ -787,7 +826,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             CustomTextField(
-                              labelText:'Weight (500-12500)gms', 
+                              labelText:'Weight (500-12500)gms',
                               hintText: 'Enter weight',
                               initialValue: state.weightGrams,
                               keyboardType: TextInputType.number,

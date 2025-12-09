@@ -1778,7 +1778,7 @@ abstract class AppLocalizations {
   /// No description provided for @cbacPleaseFill.
   ///
   /// In en, this message translates to:
-  /// **'Please fill'**
+  /// **'Please Select'**
   String get cbacPleaseFill;
 
   /// No description provided for @cbacQuestions.
