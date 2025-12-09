@@ -3362,7 +3362,7 @@ abstract class AppLocalizations {
   /// No description provided for @lmpDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'LMP Date'**
+  /// **'Date of last menstrual period (LMP) *'**
   String get lmpDateLabel;
 
   /// No description provided for @loginButton.
@@ -6670,6 +6670,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Video Tutorial List'**
   String get videoTutorialList;
+
+  /// No description provided for @lmpDateLabelText.
+  ///
+  /// In en, this message translates to:
+  /// **'LMP Date'**
+  String get lmpDateLabelText;
 
   /// No description provided for @previousPage.
   ///
@@ -10552,6 +10558,1788 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Is there availability of \'Mother Child Protection (MCP) card? *'**
   String get mcpCardAvailableLabel;
+
+  /// No description provided for @formUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Form updated successfully'**
+  String get formUpdatedSuccessfully;
+
+  /// No description provided for @doNotWantToDisclose.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not want to disclose'**
+  String get doNotWantToDisclose;
+
+  /// No description provided for @id.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get id;
+
+  /// No description provided for @visitInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit Information'**
+  String get visitInformation;
+
+  /// No description provided for @visitId.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit ID'**
+  String get visitId;
+
+  /// No description provided for @formData.
+  ///
+  /// In en, this message translates to:
+  /// **'Form Data'**
+  String get formData;
+
+  /// No description provided for @rawData.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw Data'**
+  String get rawData;
+
+  /// No description provided for @formSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Form has been saved successfully'**
+  String get formSavedSuccessfully;
+
+  /// No description provided for @pregnantAddedToAnc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant beneficiary has been added to antenatal care (ANC) list.'**
+  String get pregnantAddedToAnc;
+
+  /// No description provided for @okay.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get okay;
+
+  /// No description provided for @formSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Form saved successfully'**
+  String get formSavedSuccess;
+
+  /// No description provided for @eligibleCoupleTrackingDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible Couple Tracking Due'**
+  String get eligibleCoupleTrackingDue;
+
+  /// No description provided for @methodOfContraception.
+  ///
+  /// In en, this message translates to:
+  /// **'Method of contraception'**
+  String get methodOfContraception;
+
+  /// No description provided for @condom.
+  ///
+  /// In en, this message translates to:
+  /// **'Condom'**
+  String get condom;
+
+  /// No description provided for @malaN.
+  ///
+  /// In en, this message translates to:
+  /// **'Mala -N (Daily contraceptive pill)'**
+  String get malaN;
+
+  /// No description provided for @atraInjection.
+  ///
+  /// In en, this message translates to:
+  /// **'Atra Injection'**
+  String get atraInjection;
+
+  /// No description provided for @copperT.
+  ///
+  /// In en, this message translates to:
+  /// **'Copper -T (IUCD)'**
+  String get copperT;
+
+  /// No description provided for @chhaya.
+  ///
+  /// In en, this message translates to:
+  /// **'Chhaya (Weekly contraceptive pill)'**
+  String get chhaya;
+
+  /// No description provided for @ecp.
+  ///
+  /// In en, this message translates to:
+  /// **'ECP (Emergency contraceptive pill)'**
+  String get ecp;
+
+  /// No description provided for @maleSterilization.
+  ///
+  /// In en, this message translates to:
+  /// **'Male Sterilization'**
+  String get maleSterilization;
+
+  /// No description provided for @femaleSterilization.
+  ///
+  /// In en, this message translates to:
+  /// **'Female Sterilization'**
+  String get femaleSterilization;
+
+  /// No description provided for @anyOtherSpecifyy.
+  ///
+  /// In en, this message translates to:
+  /// **'Any Other Specify'**
+  String get anyOtherSpecifyy;
+
+  /// No description provided for @dateOfAntraInjection.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Antra Injection'**
+  String get dateOfAntraInjection;
+
+  /// No description provided for @dateOfRemoval.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of removal'**
+  String get dateOfRemoval;
+
+  /// No description provided for @enterReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reason'**
+  String get enterReason;
+
+  /// No description provided for @reasonForAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for absent'**
+  String get reasonForAbsent;
+
+  /// No description provided for @isBeneficiaryAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Is Beneficiary Absent'**
+  String get isBeneficiaryAbsent;
+
+  /// No description provided for @quantityOfMalaN.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity of Mala -N (Daily contraceptive pill)'**
+  String get quantityOfMalaN;
+
+  /// No description provided for @quantityOfECP.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity of ECP (Emergency contraceptive pill)'**
+  String get quantityOfECP;
+
+  /// No description provided for @quantityOfChhaya.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity of Chhaya (Weekly contraceptive pill)'**
+  String get quantityOfChhaya;
+
+  /// No description provided for @quantityOfCondoms.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity of Condoms'**
+  String get quantityOfCondoms;
+
+  /// No description provided for @enterReasonForRemoval.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reason for removal'**
+  String get enterReasonForRemoval;
+
+  /// No description provided for @reasonForRemoval.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for Removal'**
+  String get reasonForRemoval;
+
+  /// No description provided for @anc.
+  ///
+  /// In en, this message translates to:
+  /// **'ANC'**
+  String get anc;
+
+  /// No description provided for @pmsma.
+  ///
+  /// In en, this message translates to:
+  /// **'PMSMA'**
+  String get pmsma;
+
+  /// No description provided for @vhsndAnganwadi.
+  ///
+  /// In en, this message translates to:
+  /// **'VHSND/Anganwadi'**
+  String get vhsndAnganwadi;
+
+  /// No description provided for @hscHwc.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Sub-center/Health & Wealth Centre (HSC/HWC)'**
+  String get hscHwc;
+
+  /// No description provided for @phcLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Health Centre (PHC)'**
+  String get phcLabel;
+
+  /// No description provided for @chcLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Community Health Centre (CHC)'**
+  String get chcLabel;
+
+  /// No description provided for @rh.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral Hospital (RH)'**
+  String get rh;
+
+  /// No description provided for @dh.
+  ///
+  /// In en, this message translates to:
+  /// **'District Hospital (DH)'**
+  String get dh;
+
+  /// No description provided for @mch.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical College Hospital (MCH)'**
+  String get mch;
+
+  /// No description provided for @pmsmaSite.
+  ///
+  /// In en, this message translates to:
+  /// **'PMSMA Site'**
+  String get pmsmaSite;
+
+  /// No description provided for @hepetitisB.
+  ///
+  /// In en, this message translates to:
+  /// **'Hepetitis - B'**
+  String get hepetitisB;
+
+  /// No description provided for @tuberculosisLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuberculosis (TB)'**
+  String get tuberculosisLabel;
+
+  /// No description provided for @asthma.
+  ///
+  /// In en, this message translates to:
+  /// **'Asthma'**
+  String get asthma;
+
+  /// No description provided for @highBP.
+  ///
+  /// In en, this message translates to:
+  /// **'High BP'**
+  String get highBP;
+
+  /// No description provided for @stirti.
+  ///
+  /// In en, this message translates to:
+  /// **'STI/RTI'**
+  String get stirti;
+
+  /// No description provided for @heartDisease.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart Disease'**
+  String get heartDisease;
+
+  /// No description provided for @liver_disease.
+  ///
+  /// In en, this message translates to:
+  /// **'Liver Disease'**
+  String get liver_disease;
+
+  /// No description provided for @kideny_disease.
+  ///
+  /// In en, this message translates to:
+  /// **'Kideny Disease'**
+  String get kideny_disease;
+
+  /// No description provided for @epilespy.
+  ///
+  /// In en, this message translates to:
+  /// **'Epilepsy'**
+  String get epilespy;
+
+  /// No description provided for @specifyOtherDisease.
+  ///
+  /// In en, this message translates to:
+  /// **'Please specify other disease'**
+  String get specifyOtherDisease;
+
+  /// No description provided for @selectRisks.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Risks'**
+  String get selectRisks;
+
+  /// No description provided for @riskSevereAnemia.
+  ///
+  /// In en, this message translates to:
+  /// **'Severe Anemia'**
+  String get riskSevereAnemia;
+
+  /// No description provided for @riskPIH.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia'**
+  String get riskPIH;
+
+  /// No description provided for @riskInfections.
+  ///
+  /// In en, this message translates to:
+  /// **'Syphilis, HIV Positive, Hepatitis B, Hepatitis C'**
+  String get riskInfections;
+
+  /// No description provided for @riskGestationalDiabetes.
+  ///
+  /// In en, this message translates to:
+  /// **'Gestational Diabetes'**
+  String get riskGestationalDiabetes;
+
+  /// No description provided for @riskHypothyroidism.
+  ///
+  /// In en, this message translates to:
+  /// **'Hypothyroidism'**
+  String get riskHypothyroidism;
+
+  /// No description provided for @riskTeenagePregnancy.
+  ///
+  /// In en, this message translates to:
+  /// **'Teenage Pregnancy (<20 year)/ Pregnancy after 35 Year'**
+  String get riskTeenagePregnancy;
+
+  /// No description provided for @riskTwins.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant With Twins Or More'**
+  String get riskTwins;
+
+  /// No description provided for @riskMalPresentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Mal Presentation of baby (Breech/Transverse/Oblique)'**
+  String get riskMalPresentation;
+
+  /// No description provided for @riskPreviousCesarean.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Cesarean Delivery'**
+  String get riskPreviousCesarean;
+
+  /// No description provided for @riskPreviousHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous History of Neo-Natal Death, Still Birth, Premature Birth, Repeated Abortion, PIH, PPH, APH, Obstructed Labour'**
+  String get riskPreviousHistory;
+
+  /// No description provided for @riskRhNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'RH Negative'**
+  String get riskRhNegative;
+
+  /// No description provided for @didPregnantWomanGiveBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Did the pregnant woman give birth to a baby?'**
+  String get didPregnantWomanGiveBirth;
+
+  /// No description provided for @dateOfAbortion.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Abortion'**
+  String get dateOfAbortion;
+
+  /// No description provided for @abortionComplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Any complication leading to abortion?'**
+  String get abortionComplication;
+
+  /// No description provided for @deliveryOutcomeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery outcome *'**
+  String get deliveryOutcomeLabel;
+
+  /// No description provided for @liveBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Live birth'**
+  String get liveBirth;
+
+  /// No description provided for @stillBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Still birth'**
+  String get stillBirth;
+
+  /// No description provided for @newbornDeath.
+  ///
+  /// In en, this message translates to:
+  /// **'Newborn death'**
+  String get newbornDeath;
+
+  /// No description provided for @numberOfChildrenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Children *'**
+  String get numberOfChildrenLabel;
+
+  /// No description provided for @oneChild.
+  ///
+  /// In en, this message translates to:
+  /// **'One Child'**
+  String get oneChild;
+
+  /// No description provided for @twins.
+  ///
+  /// In en, this message translates to:
+  /// **'Twins'**
+  String get twins;
+
+  /// No description provided for @triplets.
+  ///
+  /// In en, this message translates to:
+  /// **'Triplets'**
+  String get triplets;
+
+  /// No description provided for @babysName.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby\'s Name'**
+  String get babysName;
+
+  /// No description provided for @enterBabyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Baby\'s Name'**
+  String get enterBabyName;
+
+  /// No description provided for @babyWeightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby\'s Weight (1200–4000 gms)'**
+  String get babyWeightLabel;
+
+  /// No description provided for @enterBabyWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Baby\'s Weight'**
+  String get enterBabyWeight;
+
+  /// No description provided for @firstBabyName.
+  ///
+  /// In en, this message translates to:
+  /// **'First Baby Name *'**
+  String get firstBabyName;
+
+  /// No description provided for @enterFirstBabyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter First Baby Name'**
+  String get enterFirstBabyName;
+
+  /// No description provided for @firstBabyGender.
+  ///
+  /// In en, this message translates to:
+  /// **'First Baby Gender *'**
+  String get firstBabyGender;
+
+  /// No description provided for @firstBabyWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'First Baby Weight (1200–4000 gms) *'**
+  String get firstBabyWeight;
+
+  /// No description provided for @enterFirstBabyWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter First Baby Weight'**
+  String get enterFirstBabyWeight;
+
+  /// No description provided for @secondBabyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Second Baby Name *'**
+  String get secondBabyName;
+
+  /// No description provided for @enterSecondBabyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Second Baby Name'**
+  String get enterSecondBabyName;
+
+  /// No description provided for @secondBabyGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Second Baby Gender *'**
+  String get secondBabyGender;
+
+  /// No description provided for @secondBabyWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Second Baby Weight (1200–4000 gms) *'**
+  String get secondBabyWeight;
+
+  /// No description provided for @enterSecondBabyWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Second Baby Weight'**
+  String get enterSecondBabyWeight;
+
+  /// No description provided for @thirdBabyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Third Baby Name *'**
+  String get thirdBabyName;
+
+  /// No description provided for @enterThirdBabyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Third Baby Name'**
+  String get enterThirdBabyName;
+
+  /// No description provided for @thirdBabyGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Third Baby Gender *'**
+  String get thirdBabyGender;
+
+  /// No description provided for @thirdBabyWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Third Baby Weight (1200–4000 gms) *'**
+  String get thirdBabyWeight;
+
+  /// No description provided for @enterThirdBabyWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Third Baby Weight'**
+  String get enterThirdBabyWeight;
+
+  /// No description provided for @reasonForAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for Absence'**
+  String get reasonForAbsence;
+
+  /// No description provided for @enterReasonForAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the reason for absence'**
+  String get enterReasonForAbsence;
+
+  /// No description provided for @pleaseFillFieldsCorrectly.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all required fields correctly'**
+  String get pleaseFillFieldsCorrectly;
+
+  /// No description provided for @noPregnantWomenFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No pregnant women found'**
+  String get noPregnantWomenFound;
+
+  /// No description provided for @registerNewANCCases.
+  ///
+  /// In en, this message translates to:
+  /// **'Register new ANC cases in the family registration'**
+  String get registerNewANCCases;
+
+  /// No description provided for @fourthANCLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fourth ANC'**
+  String get fourthANCLabel;
+
+  /// No description provided for @pmama.
+  ///
+  /// In en, this message translates to:
+  /// **'PMAMA'**
+  String get pmama;
+
+  /// No description provided for @srNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Sr No.'**
+  String get srNo;
+
+  /// No description provided for @pregnancyWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnancy Week'**
+  String get pregnancyWeek;
+
+  /// No description provided for @high_Risk.
+  ///
+  /// In en, this message translates to:
+  /// **'High Risk'**
+  String get high_Risk;
+
+  /// No description provided for @noPregnancyOutcomesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No pregnancy outcomes found'**
+  String get noPregnancyOutcomesFound;
+
+  /// No description provided for @nextHBNCDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next HBNC Date'**
+  String get nextHBNCDate;
+
+  /// No description provided for @previousHBNCDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous HBNC Date'**
+  String get previousHBNCDate;
+
+  /// No description provided for @beneficiaryAddedToHbnc.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary has been added to HBNC list'**
+  String get beneficiaryAddedToHbnc;
+
+  /// No description provided for @institutional.
+  ///
+  /// In en, this message translates to:
+  /// **'Institutional'**
+  String get institutional;
+
+  /// No description provided for @nonInstitutional.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-Institutional'**
+  String get nonInstitutional;
+
+  /// No description provided for @enterPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter place'**
+  String get enterPlace;
+
+  /// No description provided for @enterOtherPlaceOfDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter other place of delivery'**
+  String get enterOtherPlaceOfDelivery;
+
+  /// No description provided for @publicPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get publicPlace;
+
+  /// No description provided for @privatePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get privatePlace;
+
+  /// No description provided for @institutionPlaceOfDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Institution place of delivery'**
+  String get institutionPlaceOfDelivery;
+
+  /// No description provided for @nursingHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Nursing Home'**
+  String get nursingHome;
+
+  /// No description provided for @hospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital'**
+  String get hospital;
+
+  /// No description provided for @homeBasedDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Based Delivery'**
+  String get homeBasedDelivery;
+
+  /// No description provided for @inTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'In Transit'**
+  String get inTransit;
+
+  /// No description provided for @nonInstitutionalPlaceOfDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-institutional place of delivery'**
+  String get nonInstitutionalPlaceOfDelivery;
+
+  /// No description provided for @enterOtherNonInstitutionalDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name of other non-institutional delivery'**
+  String get enterOtherNonInstitutionalDelivery;
+
+  /// No description provided for @enterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name'**
+  String get enterName;
+
+  /// No description provided for @transitPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Transit place'**
+  String get transitPlace;
+
+  /// No description provided for @ambulance.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambulance'**
+  String get ambulance;
+
+  /// No description provided for @enterOtherTransitPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter name of other transit place'**
+  String get enterOtherTransitPlace;
+
+  /// No description provided for @anm.
+  ///
+  /// In en, this message translates to:
+  /// **'ANM'**
+  String get anm;
+
+  /// No description provided for @lhv.
+  ///
+  /// In en, this message translates to:
+  /// **'LHV'**
+  String get lhv;
+
+  /// No description provided for @doctor.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor'**
+  String get doctor;
+
+  /// No description provided for @staffNurse.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff Nurse'**
+  String get staffNurse;
+
+  /// No description provided for @tba.
+  ///
+  /// In en, this message translates to:
+  /// **'TBA (Non-Skilled birth attendant)'**
+  String get tba;
+
+  /// No description provided for @whoConductedDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Who conducted the delivery?'**
+  String get whoConductedDelivery;
+
+  /// No description provided for @whoElseConductedDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Who else did the delivery?'**
+  String get whoElseConductedDelivery;
+
+  /// No description provided for @convulsion.
+  ///
+  /// In en, this message translates to:
+  /// **'Convulsion'**
+  String get convulsion;
+
+  /// No description provided for @aph.
+  ///
+  /// In en, this message translates to:
+  /// **'Ante Partumhaemorrhage (Aph)'**
+  String get aph;
+
+  /// No description provided for @pih.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnancy Induced Hypertension (PIH)'**
+  String get pih;
+
+  /// No description provided for @repeatedAbortion.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeated Abortion'**
+  String get repeatedAbortion;
+
+  /// No description provided for @motherDeath.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother Death'**
+  String get motherDeath;
+
+  /// No description provided for @congenitalAnomaly.
+  ///
+  /// In en, this message translates to:
+  /// **'Congenital Anomaly'**
+  String get congenitalAnomaly;
+
+  /// No description provided for @bloodTransfusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood Transfusion'**
+  String get bloodTransfusion;
+
+  /// No description provided for @obstructedLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Obstructed Labour'**
+  String get obstructedLabour;
+
+  /// No description provided for @pph.
+  ///
+  /// In en, this message translates to:
+  /// **'PPH'**
+  String get pph;
+
+  /// No description provided for @anyOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Any other'**
+  String get anyOther;
+
+  /// No description provided for @complication.
+  ///
+  /// In en, this message translates to:
+  /// **'Complication *'**
+  String get complication;
+
+  /// No description provided for @dateOfDischarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of discharge'**
+  String get dateOfDischarge;
+
+  /// No description provided for @enterComplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter complication'**
+  String get enterComplication;
+
+  /// No description provided for @enterOtherComplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter other complication during delivery'**
+  String get enterOtherComplication;
+
+  /// No description provided for @discharge_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Discharge time (hh:mm)'**
+  String get discharge_time;
+
+  /// No description provided for @adaptFamilyPlanningMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to adapt family planning method?'**
+  String get adaptFamilyPlanningMethod;
+
+  /// No description provided for @formSavedSuccessfullyMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Form saved successfully'**
+  String get formSavedSuccessfullyMsg;
+
+  /// No description provided for @firstBreastfeedTiming.
+  ///
+  /// In en, this message translates to:
+  /// **'First Breastfeeding Timing'**
+  String get firstBreastfeedTiming;
+
+  /// No description provided for @within30Minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Within 30 minutes of birth'**
+  String get within30Minutes;
+
+  /// No description provided for @within1Hour.
+  ///
+  /// In en, this message translates to:
+  /// **'Within 1 hour of birth'**
+  String get within1Hour;
+
+  /// No description provided for @within6Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Within 6 hours of birth'**
+  String get within6Hours;
+
+  /// No description provided for @within24Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Within 24 hours of birth'**
+  String get within24Hours;
+
+  /// No description provided for @notBreastfed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not breastfed'**
+  String get notBreastfed;
+
+  /// No description provided for @howWasBreastfed.
+  ///
+  /// In en, this message translates to:
+  /// **'How was the baby breastfed?'**
+  String get howWasBreastfed;
+
+  /// No description provided for @normal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get normal;
+
+  /// No description provided for @forcefully.
+  ///
+  /// In en, this message translates to:
+  /// **'Forcefully'**
+  String get forcefully;
+
+  /// No description provided for @withWeakness.
+  ///
+  /// In en, this message translates to:
+  /// **'With weakness'**
+  String get withWeakness;
+
+  /// No description provided for @couldNotBreastfeedButSpoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not breast feed but had to be fed with spoon'**
+  String get couldNotBreastfeedButSpoon;
+
+  /// No description provided for @couldNeitherBreastfeedNorSpoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Could neither breast feed nor take given by spoon'**
+  String get couldNeitherBreastfeedNorSpoon;
+
+  /// No description provided for @firstFeedGivenAfterBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'First feed given after birth'**
+  String get firstFeedGivenAfterBirth;
+
+  /// No description provided for @firstBreastfeeding.
+  ///
+  /// In en, this message translates to:
+  /// **'First Breastfeeding'**
+  String get firstBreastfeeding;
+
+  /// No description provided for @water.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get water;
+
+  /// No description provided for @honey.
+  ///
+  /// In en, this message translates to:
+  /// **'Honey'**
+  String get honey;
+
+  /// No description provided for @mishriWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishri Water / Sugar Syrup'**
+  String get mishriWater;
+
+  /// No description provided for @goatMilk.
+  ///
+  /// In en, this message translates to:
+  /// **'Goat Milk'**
+  String get goatMilk;
+
+  /// No description provided for @cowMilk.
+  ///
+  /// In en, this message translates to:
+  /// **'Cow Milk'**
+  String get cowMilk;
+
+  /// No description provided for @enter_other_feeding_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter other option'**
+  String get enter_other_feeding_option;
+
+  /// No description provided for @counsellingAdviceNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Counselling/Advice needed?'**
+  String get counsellingAdviceNeeded;
+
+  /// No description provided for @is_navel_tied_with_thread.
+  ///
+  /// In en, this message translates to:
+  /// **'Is navel tied with a clean thread by ASHA or ANM?'**
+  String get is_navel_tied_with_thread;
+
+  /// No description provided for @babyWipedWithCleanCloth.
+  ///
+  /// In en, this message translates to:
+  /// **'Has the baby been wiped with a clean dry cloth?'**
+  String get babyWipedWithCleanCloth;
+
+  /// No description provided for @is_child_kept_warm.
+  ///
+  /// In en, this message translates to:
+  /// **'Has the baby kept warm?'**
+  String get is_child_kept_warm;
+
+  /// No description provided for @babyGivenBath.
+  ///
+  /// In en, this message translates to:
+  /// **'Has the baby been given a bath?'**
+  String get babyGivenBath;
+
+  /// No description provided for @babyWrappedAndPlacedNearMother.
+  ///
+  /// In en, this message translates to:
+  /// **'Whether the baby was wrapped in a cloth and placed near the mother?'**
+  String get babyWrappedAndPlacedNearMother;
+
+  /// No description provided for @selectEyeProblemTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select type of eye problem'**
+  String get selectEyeProblemTypeLabel;
+
+  /// No description provided for @swelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Swelling'**
+  String get swelling;
+
+  /// No description provided for @oozingPus.
+  ///
+  /// In en, this message translates to:
+  /// **'Oozing pus'**
+  String get oozingPus;
+
+  /// No description provided for @counsellingBreastfeeding.
+  ///
+  /// In en, this message translates to:
+  /// **'Counselling/Advice needed for breastfeeding?'**
+  String get counsellingBreastfeeding;
+
+  /// No description provided for @referredByASHA.
+  ///
+  /// In en, this message translates to:
+  /// **'Referred by ASHA to'**
+  String get referredByASHA;
+
+  /// No description provided for @aphc.
+  ///
+  /// In en, this message translates to:
+  /// **'APHC'**
+  String get aphc;
+
+  /// No description provided for @rhLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'RH'**
+  String get rhLabel;
+
+  /// No description provided for @sdh.
+  ///
+  /// In en, this message translates to:
+  /// **'SDH'**
+  String get sdh;
+
+  /// No description provided for @dhLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'DH'**
+  String get dhLabel;
+
+  /// No description provided for @babyWeightRecordedInMPC.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the weight of the newborn baby recorded in the Mother Protection Card?'**
+  String get babyWeightRecordedInMPC;
+
+  /// No description provided for @referToHospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Refer to hospital?'**
+  String get referToHospital;
+
+  /// No description provided for @referToLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refer to'**
+  String get referToLabel;
+
+  /// No description provided for @mchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'MCH'**
+  String get mchLabel;
+
+  /// No description provided for @date_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of death *'**
+  String get date_of_death;
+
+  /// No description provided for @place_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Place of death *'**
+  String get place_of_death;
+
+  /// No description provided for @migrated_out.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrated Out'**
+  String get migrated_out;
+
+  /// No description provided for @on_the_way.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get on_the_way;
+
+  /// No description provided for @facility.
+  ///
+  /// In en, this message translates to:
+  /// **'Facility'**
+  String get facility;
+
+  /// No description provided for @reason_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason of death *'**
+  String get reason_of_death;
+
+  /// No description provided for @ph.
+  ///
+  /// In en, this message translates to:
+  /// **'PH'**
+  String get ph;
+
+  /// No description provided for @severe_anaemia.
+  ///
+  /// In en, this message translates to:
+  /// **'Severe Anaemia'**
+  String get severe_anaemia;
+
+  /// No description provided for @spesis.
+  ///
+  /// In en, this message translates to:
+  /// **'Sepsis'**
+  String get spesis;
+
+  /// No description provided for @obstructed_labour.
+  ///
+  /// In en, this message translates to:
+  /// **'Obstructed Labour'**
+  String get obstructed_labour;
+
+  /// No description provided for @malpresentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Malpresentation'**
+  String get malpresentation;
+
+  /// No description provided for @eclampsia_severe_hypertension.
+  ///
+  /// In en, this message translates to:
+  /// **'Eclampsia / Severe Hypertension'**
+  String get eclampsia_severe_hypertension;
+
+  /// No description provided for @unsafe_abortion.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsafe Abortion'**
+  String get unsafe_abortion;
+
+  /// No description provided for @surgical_complication.
+  ///
+  /// In en, this message translates to:
+  /// **'Surgical Complication'**
+  String get surgical_complication;
+
+  /// No description provided for @other_reason_not_maternal_complication.
+  ///
+  /// In en, this message translates to:
+  /// **'Other reason apart from maternal complication'**
+  String get other_reason_not_maternal_complication;
+
+  /// No description provided for @other_specify.
+  ///
+  /// In en, this message translates to:
+  /// **'Other (Specify)'**
+  String get other_specify;
+
+  /// No description provided for @other_reason_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Other reason of death *'**
+  String get other_reason_of_death;
+
+  /// No description provided for @specify_other_reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Specify other reason'**
+  String get specify_other_reason;
+
+  /// No description provided for @unconscious_fits.
+  ///
+  /// In en, this message translates to:
+  /// **'Unconscious / fits *'**
+  String get unconscious_fits;
+
+  /// No description provided for @excessive_bleeding.
+  ///
+  /// In en, this message translates to:
+  /// **'Excessive bleeding *'**
+  String get excessive_bleeding;
+
+  /// No description provided for @has_mcp_card_filled.
+  ///
+  /// In en, this message translates to:
+  /// **'Has the MCP card filled? *'**
+  String get has_mcp_card_filled;
+
+  /// No description provided for @please_enter_problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter problem *'**
+  String get please_enter_problem;
+
+  /// No description provided for @enter_breastfeeding_problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter breastfeeding problem'**
+  String get enter_breastfeeding_problem;
+
+  /// No description provided for @write_take_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Please write down the take action'**
+  String get write_take_action;
+
+  /// No description provided for @breastfeeding_problem_help.
+  ///
+  /// In en, this message translates to:
+  /// **'If there is a problem in breastfeeding, help the mother to overcome it *'**
+  String get breastfeeding_problem_help;
+
+  /// No description provided for @temp_upto_102.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature up to 102°F (38.9°C)'**
+  String get temp_upto_102;
+
+  /// No description provided for @temp_more_than_102.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature more than 102°F (38.9°C)'**
+  String get temp_more_than_102;
+
+  /// No description provided for @paracetamolGivenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paracetamol tablet given (Temperature up to 102°F / 38.9°C) *'**
+  String get paracetamolGivenLabel;
+
+  /// No description provided for @refer_to_hospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Refer to Hospital *'**
+  String get refer_to_hospital;
+
+  /// No description provided for @please_add_family_head_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add family head details'**
+  String get please_add_family_head_details;
+
+  /// No description provided for @totalBeneficiaryAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Total beneficiary added'**
+  String get totalBeneficiaryAdded;
+
+  /// No description provided for @enterTypeOfFuelForCooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter type of fuel for cooking'**
+  String get enterTypeOfFuelForCooking;
+
+  /// No description provided for @enterPrimarySourceOfWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter primary source of water'**
+  String get enterPrimarySourceOfWater;
+
+  /// No description provided for @other_availability_of_electricity.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter availability of electricity'**
+  String get other_availability_of_electricity;
+
+  /// No description provided for @typeOfToiletLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of toilet'**
+  String get typeOfToiletLabel;
+
+  /// No description provided for @flushToiletWithRunningWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Flush toilet with running water'**
+  String get flushToiletWithRunningWater;
+
+  /// No description provided for @flushToiletWithoutWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Flush toilet without water'**
+  String get flushToiletWithoutWater;
+
+  /// No description provided for @pitToiletWithRunningWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Pit toilet with running water'**
+  String get pitToiletWithRunningWater;
+
+  /// No description provided for @pitToiletWithoutWaterSupply.
+  ///
+  /// In en, this message translates to:
+  /// **'Pit toilet without water supply'**
+  String get pitToiletWithoutWaterSupply;
+
+  /// No description provided for @enterTypeOfToiletLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Type of toilet'**
+  String get enterTypeOfToiletLabel;
+
+  /// No description provided for @whereDoYouGoForToiletLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Where do you go for toilet?'**
+  String get whereDoYouGoForToiletLabel;
+
+  /// No description provided for @communityToilet.
+  ///
+  /// In en, this message translates to:
+  /// **'Community toilet'**
+  String get communityToilet;
+
+  /// No description provided for @friendRelativeToilet.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend/Relative toilet'**
+  String get friendRelativeToilet;
+
+  /// No description provided for @openSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Open space'**
+  String get openSpace;
+
+  /// No description provided for @other_type_of_residential_area.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter type of residential area'**
+  String get other_type_of_residential_area;
+
+  /// No description provided for @enterTypeOfOwnershipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter type of ownership'**
+  String get enterTypeOfOwnershipLabel;
+
+  /// No description provided for @other_type_of_house.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter type of house'**
+  String get other_type_of_house;
+
+  /// No description provided for @failedToSaveFamilyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save family member. Please try again.'**
+  String get failedToSaveFamilyMember;
+
+  /// No description provided for @setMaritaDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Marital Status = Married to fill Spouse details.'**
+  String get setMaritaDetails;
+
+  /// No description provided for @setChildDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Have Children = Yes to fill Children details.'**
+  String get setChildDetails;
+
+  /// No description provided for @childrenDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Children Details'**
+  String get childrenDetails;
+
+  /// No description provided for @spouseDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Details'**
+  String get spouseDetails;
+
+  /// No description provided for @member_status_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Status *'**
+  String get member_status_label;
+
+  /// No description provided for @death.
+  ///
+  /// In en, this message translates to:
+  /// **'Death'**
+  String get death;
+
+  /// No description provided for @please_select_date_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select date of death'**
+  String get please_select_date_of_death;
+
+  /// No description provided for @enter_place_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter place of death'**
+  String get enter_place_of_death;
+
+  /// No description provided for @please_enter_place_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter place of death'**
+  String get please_enter_place_of_death;
+
+  /// No description provided for @please_select_member_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select member status'**
+  String get please_select_member_status;
+
+  /// No description provided for @reason_of_death_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason of Death *'**
+  String get reason_of_death_label;
+
+  /// No description provided for @natural_causes.
+  ///
+  /// In en, this message translates to:
+  /// **'Natural Causes'**
+  String get natural_causes;
+
+  /// No description provided for @illness.
+  ///
+  /// In en, this message translates to:
+  /// **'Illness'**
+  String get illness;
+
+  /// No description provided for @accident.
+  ///
+  /// In en, this message translates to:
+  /// **'Accident'**
+  String get accident;
+
+  /// No description provided for @please_select_reason_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select reason of death'**
+  String get please_select_reason_of_death;
+
+  /// No description provided for @please_specify_reason_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Please specify reason of death'**
+  String get please_specify_reason_of_death;
+
+  /// No description provided for @enter_reason_of_death.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reason of death'**
+  String get enter_reason_of_death;
+
+  /// No description provided for @specify_reason_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Specify Reason *'**
+  String get specify_reason_required;
+
+  /// No description provided for @enter_12_digit_rch_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 12 digit RCH ID'**
+  String get enter_12_digit_rch_id;
+
+  /// No description provided for @must_be_12_digits.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be 12 digits'**
+  String get must_be_12_digits;
+
+  /// No description provided for @rch_id_must_be_12_digits.
+  ///
+  /// In en, this message translates to:
+  /// **'RCH ID must be exactly 12 digits'**
+  String get rch_id_must_be_12_digits;
+
+  /// No description provided for @verifying_rch_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying RCH ID...'**
+  String get verifying_rch_id;
+
+  /// No description provided for @invalid_rch_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid RCH ID'**
+  String get invalid_rch_id;
+
+  /// No description provided for @rch_id_must_be_12digits.
+  ///
+  /// In en, this message translates to:
+  /// **'RCH ID must be exactly 12 digits'**
+  String get rch_id_must_be_12digits;
+
+  /// No description provided for @please_enter_rch_id_first.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter RCH ID first'**
+  String get please_enter_rch_id_first;
+
+  /// No description provided for @no_data_found_rch_id.
+  ///
+  /// In en, this message translates to:
+  /// **'No data found for this RCH ID'**
+  String get no_data_found_rch_id;
+
+  /// No description provided for @api_returned_null_response.
+  ///
+  /// In en, this message translates to:
+  /// **'API returned null response'**
+  String get api_returned_null_response;
+
+  /// No description provided for @failed_to_fetch_rch_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch RCH data'**
+  String get failed_to_fetch_rch_data;
+
+  /// No description provided for @failedTo_fetch_rch_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch RCH data'**
+  String get failedTo_fetch_rch_data;
+
+  /// No description provided for @rch_data_loaded_successfully.
+  ///
+  /// In en, this message translates to:
+  /// **'RCH data loaded successfully!'**
+  String get rch_data_loaded_successfully;
+
+  /// No description provided for @enter_relation_with_family_head.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter relation with family head'**
+  String get enter_relation_with_family_head;
+
+  /// No description provided for @relation_with_mobile_holder_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Relation with mobile no. holder is required'**
+  String get relation_with_mobile_holder_required;
+
+  /// No description provided for @enter_relation_with_mobile_holder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter relation with mobile no. holder'**
+  String get enter_relation_with_mobile_holder;
+
+  /// No description provided for @error_loading_head_mobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading head of family mobile number'**
+  String get error_loading_head_mobile;
+
+  /// No description provided for @no_mobile_found_for_head.
+  ///
+  /// In en, this message translates to:
+  /// **'No mobile number found for the head of family'**
+  String get no_mobile_found_for_head;
+
+  /// No description provided for @child_age_validation.
+  ///
+  /// In en, this message translates to:
+  /// **'For Child: Age should be between 1 day to 15 years.'**
+  String get child_age_validation;
+
+  /// No description provided for @dob_cannot_be_future.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth cannot be in the future'**
+  String get dob_cannot_be_future;
+
+  /// No description provided for @dob_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth is required'**
+  String get dob_required;
+
+  /// No description provided for @enter_other_occupation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter occupation'**
+  String get enter_other_occupation;
+
+  /// No description provided for @enter_valid_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid weight'**
+  String get enter_valid_weight;
+
+  /// No description provided for @weight_range_validation.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight must be between 1.2 and 90 Kg'**
+  String get weight_range_validation;
+
+  /// No description provided for @weight_at_birth.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth Weight (1200-4000)gms'**
+  String get weight_at_birth;
+
+  /// No description provided for @birth_weight_range_validation.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth weight must be between 1200 and 4000 gms'**
+  String get birth_weight_range_validation;
+
+  /// No description provided for @enter_valid_birth_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid birth weight'**
+  String get enter_valid_birth_weight;
+
+  /// No description provided for @is_school_going_child.
+  ///
+  /// In en, this message translates to:
+  /// **'Is he/she a school-going child?'**
+  String get is_school_going_child;
+
+  /// No description provided for @is_birth_certificate_issued.
+  ///
+  /// In en, this message translates to:
+  /// **'Is birth certificate issued?'**
+  String get is_birth_certificate_issued;
+
+  /// No description provided for @enter_religion.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Religion'**
+  String get enter_religion;
+
+  /// No description provided for @enter_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Category'**
+  String get enter_category;
+
+  /// No description provided for @invalid_length.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid length'**
+  String get invalid_length;
+
+  /// No description provided for @bank_account_length_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank account number must be between 11 to 18 digits'**
+  String get bank_account_length_error;
+
+  /// No description provided for @ifsc_invalid_format.
+  ///
+  /// In en, this message translates to:
+  /// **'IFSC code must have first 4 uppercase letters, followed by 0 and 6 digits'**
+  String get ifsc_invalid_format;
+
+  /// No description provided for @ifsc_invalid_length.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid 11-character IFSC code'**
+  String get ifsc_invalid_length;
+
+  /// No description provided for @please_select_family_planning_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select family planning status'**
+  String get please_select_family_planning_status;
+
+  /// No description provided for @antraInjection.
+  ///
+  /// In en, this message translates to:
+  /// **'Antra injection'**
+  String get antraInjection;
+
+  /// No description provided for @dateOfAntra.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Antra'**
+  String get dateOfAntra;
+
+  /// No description provided for @removalDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Removal Date'**
+  String get removalDate;
+
+  /// No description provided for @pleaseCorrectErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Please correct the highlighted errors before continuing.'**
+  String get pleaseCorrectErrors;
+
+  /// No description provided for @fillSpouseDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all required fields in the spouse details before continuing.'**
+  String get fillSpouseDetails;
+
+  /// No description provided for @updating.
+  ///
+  /// In en, this message translates to:
+  /// **'UPDATING...'**
+  String get updating;
+
+  /// No description provided for @errorPreparingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Error preparing data. Please try again.'**
+  String get errorPreparingData;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

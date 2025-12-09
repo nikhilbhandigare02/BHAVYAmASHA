@@ -42,6 +42,8 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return BlocProvider(
       create: (_) => TrackEligibleCoupleBloc(
         beneficiaryId: beneficiaryId,
@@ -54,10 +56,10 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
             if (state.isPregnant == true) {
               showConfirmationDialog(
                 context: context,
-                title: 'Form has been saved successfully',
+                title:l10n?.formSavedSuccessfully ?? 'Form has been saved successfully',
                 message:
-                'Pregnant beneficiary has been added to antenatal care (ANC) list.',
-                yesText: 'Okay',
+               l10n?.pregnantAddedToAnc ?? 'Pregnant beneficiary has been added to antenatal care (ANC) list.',
+                yesText:l10n?.okay ??  'Okay',
                 onYes: () => Navigator.pop(context),
                 titleBackgroundColor: AppColors.background,
                 titleTextColor: AppColors.primary,
@@ -66,7 +68,7 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
                 dialogBackgroundColor: Colors.white,
               );
             } else {
-              showAppSnackBar(context, 'Form saved successfully');
+              showAppSnackBar(context,l10n?.formSavedSuccess ??  'Form saved successfully');
               Navigator.of(context).pop(true);
             }
           }
@@ -91,7 +93,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppHeader(
-        screenTitle: 'Eligible Couple Tracking Due',
+        screenTitle: t?.eligibleCoupleTrackingDue ?? 'Eligible Couple Tracking Due',
         showBack: true,
       ),
       body: SingleChildScrollView(
@@ -173,7 +175,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       CustomDatePicker(
-                        labelText: '${t?.lmpDateLabel ?? 'एलएमपी की तिथि'} *',
+                        labelText: '${t?.lmpDateLabelText ?? 'एलएमपी की तिथि'} *',
                         hintText: t?.dateHint,
                         initialDate: lmp,
                         onDateChanged: (date) {
@@ -242,6 +244,51 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     // Dependent questions for family planning
                     if (state.fpAdopting == true) ...[
                       ApiDropdown<String>(
+                        labelText: t?.methodOfContraception ?? 'Method of contraception',
+                        items: const [
+                          'Condom',
+                          'Mala -N (Daily contraceptive pill)',
+                          'Atra Injection',
+                          'Copper -T (IUCD)',
+                          'Chhaya (Weekly contraceptive pill)',
+                          'ECP (Emergency contraceptive pill)',
+                          'Male Sterilization',
+                          'Female Sterilization',
+                          'Any Other Specify'
+                        ],
+                        getLabel: (value) {
+                          switch (value) {
+                            case 'Condom':
+                              return t!.condom;
+                            case 'Mala -N (Daily contraceptive pill)':
+                              return t!.malaN;
+                            case 'Atra Injection':
+                              return t!.atraInjection;
+                            case 'Copper -T (IUCD)':
+                              return t!.copperT;
+                            case 'Chhaya (Weekly contraceptive pill)':
+                              return t!.chhaya;
+                            case 'ECP (Emergency contraceptive pill)':
+                              return t!.ecp;
+                            case 'Male Sterilization':
+                              return t!.maleSterilization;
+                            case 'Female Sterilization':
+                              return t!.femaleSterilization;
+                            case 'Any Other Specify':
+                              return t!.anyOtherSpecifyy;
+                            default:
+                              return value;
+                          }
+                        },
+                        value: state.fpMethod,
+                        onChanged: (value) {
+                          if (value != null) {
+                            context.read<TrackEligibleCoupleBloc>().add(FpMethodChanged(value));
+                          }
+                        },
+                      ),
+
+                      /*ApiDropdown<String>(
                         labelText: 'Method of contraception' ?? 'गर्भनिरोधक का तरीका',
                         items: const [
                           'Condom',
@@ -263,13 +310,13 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                                 .add(FpMethodChanged(value));
                           }
                         },
-                      ),
+                      ),*/
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
 
                     if (state.fpMethod == 'Atra Injection' && state.fpAdopting == true) ...[
                       CustomDatePicker(
-                        labelText: 'Date of Antra Injection',
+                        labelText: t?.dateOfAntraInjection ?? 'Date of Antra Injection',
                         hintText: 'dd-mm-yyyy',
                         initialDate: state.antraInjectionDateChanged,
                         firstDate: DateTime(1900),
@@ -288,7 +335,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
 
                     if (state.fpMethod == 'Copper -T (IUCD)' && state.fpAdopting == true) ...[
                       CustomDatePicker(
-                        labelText: 'Date of removal',
+                        labelText:t?.dateOfRemoval ?? 'Date of removal',
                         initialDate: state.removalDate ?? DateTime.now(),
                         firstDate: DateTime(1900),
                         lastDate: DateTime(2100),
@@ -302,8 +349,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                       CustomTextField(
-                        labelText: 'Reason for Removal',
-                        hintText: 'Enter reason for removal',
+                        labelText: t?.reasonForRemoval ?? 'Reason for Removal',
+                        hintText:t?.enterReasonForRemoval ??  'Enter reason for removal',
                         initialValue: state.removalReasonChanged,
                         onChanged: (value) {
                           context
@@ -316,8 +363,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
 
                     if (state.fpMethod == 'Condom' && state.fpAdopting == true) ...[
                       CustomTextField(
-                        labelText: 'Quantity of Condoms',
-                        hintText: 'Quantity of condoms',
+                        labelText:t?.quantityOfCondoms ?? 'Quantity of Condoms',
+                        hintText: t?.quantityOfCondoms ?? 'Quantity of condoms',
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
                           context
@@ -329,8 +376,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     ],
                     if (state.fpMethod == 'Chhaya (Weekly contraceptive pill)' && state.fpAdopting == true) ...[
                       CustomTextField(
-                        labelText: 'Quantity of Chhaya (Weekly contraceptive pill)',
-                        hintText: 'Quantity of Chhaya (Weekly contraceptive pill)',
+                        labelText:t?.quantityOfChhaya ??  'Quantity of Chhaya (Weekly contraceptive pill)',
+                        hintText:t?.quantityOfChhaya ?? 'Quantity of Chhaya (Weekly contraceptive pill)',
                         keyboardType: TextInputType.number,
                         initialValue: state.chhaya,
                         onChanged: (value) {
@@ -343,8 +390,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     ],
                     if (state.fpMethod == 'ECP (Emergency contraceptive pill)' && state.fpAdopting == true) ...[
                       CustomTextField(
-                        labelText: 'Quantity of ECP (Emergency contraceptive pill)',
-                        hintText: 'Quantity of ECP (Emergency contraceptive pill)',
+                        labelText: t?.quantityOfECP ?? 'Quantity of ECP (Emergency contraceptive pill)',
+                        hintText: t?.quantityOfECP ?? 'Quantity of ECP (Emergency contraceptive pill)',
                         keyboardType: TextInputType.number,
                         initialValue: state.ecp,
                         onChanged: (value) {
@@ -357,8 +404,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     ],
                     if (state.fpMethod == 'Mala -N (Daily contraceptive pill)' && state.fpAdopting == true) ...[
                       CustomTextField(
-                        labelText: 'Quantity of Mala -N (Daily contraceptive pill)',
-                        hintText: 'Quantity of Mala -N (Daily contraceptive pill)',
+                        labelText: t?.quantityOfMalaN ?? 'Quantity of Mala -N (Daily contraceptive pill)',
+                        hintText: t?.quantityOfMalaN ??'Quantity of Mala -N (Daily contraceptive pill)',
                         keyboardType: TextInputType.number,
                         initialValue: state.mala,
                         onChanged: (value) {
@@ -383,7 +430,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                   children: [
                     const SizedBox(height: 8),
                     ApiDropdown<bool>(
-                      labelText: 'Is Beneficiary Absent',
+                      labelText: t?.isBeneficiaryAbsent ?? 'Is Beneficiary Absent',
                       items: [true, false],
                       getLabel: (value) =>
                       value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
@@ -401,8 +448,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     if (state.beneficiaryAbsentCHanged == true) ...[
                       const SizedBox(height: 8),
                       CustomTextField(
-                        labelText: 'Reason for absent',
-                        hintText: 'Enter reason',
+                        labelText: t?.reasonForAbsent ?? 'Reason for absent',
+                        hintText: t?.enterReason ?? 'Enter reason',
                         onChanged: (val) {
                           context
                               .read<TrackEligibleCoupleBloc>()

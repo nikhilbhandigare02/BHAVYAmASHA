@@ -50,7 +50,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onGridTap(0);
-      // Start loading data after the first frame
       _loadData();
     });
   }
@@ -93,6 +92,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     if (input == null || input.isEmpty) return '-';
     return input.length <= 11 ? input : input.substring(input.length - 11);
   }
+  var _isLoading = true;
+
 
   int _calculateAge(String? dob) {
     if (dob == null || dob.isEmpty) return 0;
@@ -282,12 +283,20 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final ancFormKey =
           FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
 
-      // Get regular ANC items
-      final regularRows = await LocalStorageDao.instance.getANCList();
       final List<Map<String, dynamic>> items = [];
 
-      // Process regular ANC items
-      for (final row in regularRows) {
+      // Get ANC items that have mother_care_state = 'anc_due' by joining with mother_care_activities table
+      final rows = await db.rawQuery('''
+        SELECT bn.*, mca.mother_care_state 
+        FROM beneficiaries_new bn
+        INNER JOIN mother_care_activities mca ON bn.unique_key = mca.beneficiary_ref_key
+        WHERE bn.is_deleted = 0 
+          AND mca.mother_care_state = 'anc_due'
+        ORDER BY bn.created_date_time DESC
+      ''');
+
+      // Process the filtered rows
+      for (final row in rows) {
         try {
           final uniqueKeyFull = row['unique_key']?.toString() ?? '';
 
@@ -538,7 +547,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       // Get ANC due items
       final List<Map<String, dynamic>> ancDueItems = [];
-      
+
       try {
         // Query to get anc_due records with beneficiary details
         final ancDueRecords = await db.rawQuery('''
@@ -562,18 +571,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             final beneficiaryInfo = record['beneficiary_info'] is String
                 ? (jsonDecode(record['beneficiary_info'] as String) as Map<String, dynamic>?) ?? {}
                 : (record['beneficiary_info'] as Map<String, dynamic>?) ?? {};
-                
-            final name = beneficiaryInfo['memberName']?.toString() ?? 
-                        beneficiaryInfo['name']?.toString() ?? 
+
+            final name = beneficiaryInfo['memberName']?.toString() ??
+                        beneficiaryInfo['name']?.toString() ??
                         'Unknown';
-                        
+
             final dob = beneficiaryInfo['dob']?.toString() ?? '';
             final mobile = beneficiaryInfo['mobileNo']?.toString() ?? '-';
             final spouseName = beneficiaryInfo['spouseName']?.toString() ?? '-';
             final gender = (beneficiaryInfo['gender']?.toString() ?? 'female').toLowerCase() == 'female' ? 'Female' : 'Male';
-            
+
             // Skip if already in regular items
-            if (items.any((item) => 
+            if (items.any((item) =>
                 (item['name'] ?? '').toString().toLowerCase() == name.toString().toLowerCase() &&
                 (item['mobile'] ?? '').toString() == mobile.toString())) {
               debugPrint('Skipping duplicate ANC due record for $name ($mobile)');
@@ -582,7 +591,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
             final age = _calculateAge(dob);
             final ageText = age > 0 ? '$age' : '-';
-            
+
             final ancDueItem = {
               'id': record['beneficiary_id'] ?? record['id'],
               'unique_key': record['unique_key'],
@@ -591,8 +600,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               'gender': gender,
               'mobile': mobile,
               'spouse_name': spouseName,
-              'last Visit date': record['created_date_time'] != null 
-                  ? _formatDateForDisplay(record['created_date_time'].toString()) 
+              'last Visit date': record['created_date_time'] != null
+                  ? _formatDateForDisplay(record['created_date_time'].toString())
                   : '-',
               'Current ANC last due date': record['created_date_time'] != null
                   ? _formatDateForDisplay(record['created_date_time'].toString())
@@ -613,22 +622,21 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               'badge': 'ANC',
               'dob': dob, // Add dob for duplicate checking
             };
-            
+
             debugPrint('Adding ANC due item: ${ancDueItem['name']} (${ancDueItem['mobile']})');
             ancDueItems.add(ancDueItem);
           } catch (e) {
             debugPrint('Error processing ANC due record: $e');
           }
         }
-        
+
         debugPrint('Found ${ancDueItems.length} ANC due items to add');
       } catch (e) {
         debugPrint('Error fetching ANC due records: $e');
       }
 
-      // Combine regular and ANC due items
       final combinedItems = [...items, ...ancDueItems];
-      
+
       if (mounted) {
         setState(() {
           _ancItems = combinedItems;
@@ -656,36 +664,76 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   Future<void> _loadHbncItems() async {
     try {
       final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      final rows = await LocalStorageDao.instance.getHbncListTodaysProgram();
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _hbncItems = [];
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
+      // Get delivery outcome data
+      final deliveryOutcomeKey = '4r7twnycml3ej1vg';
+      final deliveryOutcomes = await db.query(
+        'followup_form_data',
+        where: 'forms_ref_key = ? AND current_user_key = ? AND is_deleted = 0',
+        whereArgs: [deliveryOutcomeKey, ashaUniqueKey],
+        // where: 'forms_ref_key = ? AND  is_deleted = 0',
+        // whereArgs: [deliveryOutcomeKey],
+      );
 
       final List<Map<String, dynamic>> items = [];
-      final Set<String> seenHbncBeneficiaries = <String>{};
+      final Set<String> processedBeneficiaries = <String>{};
 
-      for (final row in rows) {
+      for (final outcome in deliveryOutcomes) {
         try {
-          final isDeath = row['is_death'] == 1;
-          final isMigrated = row['is_migrated'] == 1;
-          if (isDeath || isMigrated) continue;
+          final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
 
-          final infoRaw = row['beneficiary_info'];
-          if (infoRaw == null) continue;
+          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
+            continue;
+          }
 
-          final Map<String, dynamic> info = infoRaw is Map<String, dynamic>
-              ? infoRaw
-              : Map<String, dynamic>.from(infoRaw as Map);
+          // Skip if this beneficiary has already been processed
+          if (processedBeneficiaries.contains(beneficiaryRefKey)) {
+            continue;
+          }
+          processedBeneficiaries.add(beneficiaryRefKey);
 
-          // Do not limit to current pregnancies here. HBNC list should be
-          // driven by delivery outcome records (same source as HBNCList).
+          // Get beneficiary details
+          final beneficiaryResults = await db.query(
+            'beneficiaries_new',
+            where: 'unique_key = ?',
+            whereArgs: [beneficiaryRefKey],
+          );
 
-          final name = (info['memberName'] ?? info['headName'] ?? info['name'])
-              ?.toString()
-              .trim();
-          if (name == null || name.isEmpty) continue;
+          if (beneficiaryResults.isEmpty) {
+            continue;
+          }
 
+          final beneficiary = beneficiaryResults.first;
+          final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info'] as String? ?? '{}');
+
+          // Skip if beneficiary is marked as death or migrated
+          if (beneficiary['is_death'] == 1 || beneficiary['is_migrated'] == 1) {
+            continue;
+          }
+
+          final name = (beneficiaryInfo['memberName'] ??
+              beneficiaryInfo['headName'] ??
+              beneficiaryInfo['name'])?.toString().trim() ?? '';
+
+          if (name.isEmpty) continue;
+
+          // Calculate age
           String ageText = '-';
-          final dobRaw =
-              info['dob']?.toString() ?? info['dateOfBirth']?.toString();
+          final dobRaw = beneficiaryInfo['dob']?.toString() ??
+              beneficiaryInfo['dateOfBirth']?.toString();
+
           if (dobRaw != null && dobRaw.isNotEmpty) {
             try {
               String dateStr = dobRaw;
@@ -707,91 +755,41 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             } catch (_) {}
           }
 
-          if (ageText == '-') {
-            final years = info['years']?.toString();
-            final approxAge = info['approxAge']?.toString();
-            ageText = (years != null && years.isNotEmpty)
-                ? '${years}Y'
-                : (approxAge != null && approxAge.isNotEmpty)
-                    ? '${approxAge}y'
-                    : '-';
-          }
+          final gender = beneficiaryInfo['gender']?.toString() ?? 'N/A';
+          final mobile = (beneficiaryInfo['mobileNo'] ??
+              beneficiaryInfo['phone'])?.toString() ?? '';
+          final householdRefKey = beneficiary['household_ref_key']?.toString() ?? '';
 
-          final mobile = (info['mobileNo'] ?? info['phone'])?.toString();
+          // Get delivery date from form data
+          final formJson = jsonDecode(outcome['form_json'] as String);
+          final deliveryOutcome = formJson['delivery_outcome_form'] as Map<String, dynamic>? ?? {};
+          final deliveryDate = deliveryOutcome['delivery_date']?.toString();
 
-          String lastVisitDate = '-';
-          DateTime? lastVisitDt;
-
-          String? modifiedRaw = row['modified_date_time']?.toString();
-          String? createdRaw = row['created_date_time']?.toString();
-
-          String? pickDateStr(String? raw) {
-            if (raw == null || raw.isEmpty) return null;
-            String s = raw;
-            if (s.contains('T')) {
-              s = s.split('T')[0];
-            }
-            return s;
-          }
-
-          String? modifiedStr = pickDateStr(modifiedRaw);
-          String? createdStr = pickDateStr(createdRaw);
-
-          if (modifiedStr != null) {
-            lastVisitDt = DateTime.tryParse(modifiedStr);
-            lastVisitDate = modifiedStr;
-          } else if (createdStr != null) {
-            lastVisitDt = DateTime.tryParse(createdStr);
-            lastVisitDate = createdStr;
-          }
-
-          final householdRefKey = row['household_ref_key']?.toString() ?? '';
-
-          final beneficiaryRefKey = row['unique_key']?.toString() ?? '';
-
-          // Avoid duplicate HBNC cards for the same beneficiary.
-          if (beneficiaryRefKey.isEmpty) {
-            continue;
-          }
-          if (seenHbncBeneficiaries.contains(beneficiaryRefKey)) {
-            continue;
-          }
-
-          // Fetch delivery date from delivery outcome form (same as HBNCList)
-          final deliveryDate = await _getHbncDeliveryDateForBeneficiary(
-            beneficiaryRefKey,
-          );
-
-          // If there is no delivery outcome for this beneficiary, skip it.
           if (deliveryDate == null || deliveryDate.isEmpty) {
             continue;
           }
 
-          // Compute next HBNC visit date using same logic as HBNCList
+          // Get next HBNC visit date
           final nextHbncDate = await _getHbncNextVisitDateForDisplay(
             beneficiaryRefKey,
             deliveryDate,
           );
 
-          // If no next HBNC date is due/available, exclude.
+          // Skip if no next HBNC date is due/available
           if (nextHbncDate == null || nextHbncDate.isEmpty) {
             continue;
           }
 
-          // Use the existing helper to decide visibility: show this
-          // beneficiary only if there is **no** HBNC visit whose
-          // created_date_time lies between (nextHbncDate - 7 days)
-          // and nextHbncDate.
+          // Check if we should show this HBNC item based on visit window
           final shouldShow = await _shouldShowHbncItemForDueDate(
             db,
             beneficiaryRefKey,
             nextHbncDate,
           );
+
           if (!shouldShow) {
             continue;
           }
-
-          final gender = info['gender']?.toString() ?? 'N/A';
 
           items.add({
             'id': _last11(beneficiaryRefKey),
@@ -799,17 +797,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'name': name,
             'age': ageText,
             'gender': gender,
-            'last HBNC due date': nextHbncDate ?? 'N/A',
+            'last HBNC due date': nextHbncDate,
             'mobile': mobile,
             'badge': 'HBNC',
-            // Full IDs for navigation if needed
             'fullBeneficiaryId': beneficiaryRefKey,
             'fullHhId': householdRefKey,
           });
 
-          // Mark this beneficiary as already added to avoid duplicates.
-          seenHbncBeneficiaries.add(beneficiaryRefKey);
-        } catch (_) {
+        } catch (e) {
+          debugPrint('Error processing HBNC item: $e');
           continue;
         }
       }
@@ -817,10 +813,19 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       if (mounted) {
         setState(() {
           _hbncItems = items;
+          _isLoading = false;
         });
         _saveTodayWorkCountsToStorage();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Error in _loadHbncItems: $e');
+      if (mounted) {
+        setState(() {
+          _hbncItems = [];
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   /// Decide whether a beneficiary should appear in HBNC list for a given

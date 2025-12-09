@@ -48,7 +48,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // First, let's see ALL records in the table (newest first)
       final allRecords = await db.query(
         FollowupFormDataTable.table,
         orderBy: 'id DESC',
@@ -72,8 +71,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       String whereClause;
       List<Object?> whereArgs;
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause = '(form_json LIKE ? OR forms_ref_key = ?) AND current_user_key = ?';
-        whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6', ashaUniqueKey];
+        // whereClause = '(form_json LIKE ? OR forms_ref_key = ?) AND current_user_key = ?';
+        // whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6', ashaUniqueKey];
+
+        whereClause = '(form_json LIKE ? OR forms_ref_key = ?) ';
+        whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6'];
       } else {
         whereClause = 'form_json LIKE ? OR forms_ref_key = ?';
         whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6'];
@@ -96,6 +98,27 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           final formJson = row['form_json'] as String?;
           if (formJson == null || formJson.isEmpty) {
             debugPrint('Skipping row with empty form_json');
+            continue;
+          }
+
+
+          final beneficiaryRefKey = row['beneficiary_ref_key']?.toString() ?? '';
+          if (beneficiaryRefKey.isEmpty) {
+            debugPrint('Skipping row with empty beneficiary_ref_key');
+            continue;
+          }
+
+          // Check if beneficiary is marked as deceased in beneficiaries_new table and belongs to current user
+          final beneficiary = await db.query(
+            'beneficiaries_new',
+            where: 'unique_key = ? AND (is_death IS NULL OR is_death = 0) AND current_user_key = ?',
+            whereArgs: [beneficiaryRefKey, ashaUniqueKey],
+            limit: 1,
+          );
+
+          // Skip if beneficiary not found or is marked as deceased (is_death = 1)
+          if (beneficiary.isEmpty) {
+            debugPrint('Skipping deceased or non-existent beneficiary: $beneficiaryRefKey');
             continue;
           }
 
@@ -138,20 +161,15 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             debugPrint('Skipping form with type: $formType and ref key: $formsRefKey');
             continue;
           }
-
-          // Access form fields directly from formData
-          final beneficiaryRefKey = row['beneficiary_ref_key']?.toString() ?? '';
           
-          // Log the complete form data structure for debugging
+
           debugPrint('Raw form data structure:');
           formData.forEach((key, value) {
             debugPrint('  $key: $value (${value.runtimeType})');
           });
 
-          // Try to get form data from different possible structures
           Map<String, dynamic> formDataMap = {};
           
-          // Case 1: form_data is a JSON string that needs to be parsed
           if (formData['form_data'] is String) {
             try {
               debugPrint('Parsing form_data as JSON string');
@@ -241,7 +259,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           // Handle different possible gender fields
           final gender = (formDataMap['sex'] ?? formDataMap['gender'] ?? '').toString();
 
-          // Log detailed information for debugging
           debugPrint('Processing child record:');
           debugPrint('  - Form Type: $formTypeInData');
           debugPrint('  - Form Data Source: ${formDataMap.isNotEmpty ? 'formDataMap' : 'formData'}');
@@ -295,7 +312,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             seenBeneficiaries.add(beneficiaryRefKey);
           }
 
-          // Check if case closure exists for this beneficiary
           if (beneficiaryRefKey.isNotEmpty) {
             final caseClosureWhere = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
                 ? 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0 AND current_user_key = ?'

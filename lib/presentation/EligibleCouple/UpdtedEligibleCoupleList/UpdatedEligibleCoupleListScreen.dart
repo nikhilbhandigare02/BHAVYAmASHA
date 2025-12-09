@@ -58,36 +58,9 @@ class _UpdatedEligibleCoupleListScreenState
     }
   }
 
-  Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final rows = await db.query(
-        'eligible_couple_activities',
-        columns: ['is_synced', 'server_id', 'created_date_time'],
-        where: 'beneficiary_ref_key = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryRefKey],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-
-      if (rows.isNotEmpty) {
-        return {
-          'is_synced': rows.first['is_synced'] == 1,
-          'server_id': rows.first['server_id']
-        };
-      }
-
-      return {'is_synced': false, 'server_id': null};
-    } catch (e) {
-      print('Error fetching sync status: $e');
-      return {'is_synced': false, 'server_id': null};
-    }
-  }
-
   Future<void> _loadCouples() async {
     setState(() { _isLoading = true; });
     print('🔍 Starting to load couples...');
-    final List<Map<String, dynamic>> couples = [];
 
 
     final db = await DatabaseProvider.instance.database;
@@ -124,6 +97,7 @@ class _UpdatedEligibleCoupleListScreenState
 
     final rows = await LocalStorageDao.instance.getAllBeneficiaries();
     print('📊 Total beneficiaries: ${rows.length}');
+    final couples = <Map<String, dynamic>>[];
 
     // Group by household
     final households = <String, List<Map<String, dynamic>>>{};
@@ -256,21 +230,17 @@ class _UpdatedEligibleCoupleListScreenState
               member['is_family_planning'] == 1 ||
               member['is_family_planning']?.toString().toLowerCase() == 'yes';
 
-          try {
-            final coupleData = await _formatData(
-              Map<String, dynamic>.from(member),
-              info,
-              counterpart,
-              isHead: isHeadRelation,
-              isFamilyPlanning: isFp,
-            );
+          final coupleData = _formatData(
+            Map<String, dynamic>.from(member),
+            info,
+            counterpart,
+            isHead: isHeadRelation,
+            isFamilyPlanning: isFp,
+          );
 
-            print('  📝 Added couple data: ${coupleData['Name']} (Protected: ${coupleData['is_family_planning']})');
-            couples.add(coupleData);
-            eligibleCount++;
-          } catch (e) {
-            print('❌ Error formatting couple data: $e');
-          }
+          print('  📝 Added couple data: ${coupleData['Name']} (Protected: ${coupleData['is_family_planning']})');
+          couples.add(coupleData);
+          eligibleCount++;
         } catch (e) {
           print('❌ Error processing EC member: $e');
           if (e is Error) {
@@ -311,10 +281,10 @@ class _UpdatedEligibleCoupleListScreenState
     return isFemale && isMarried && age >= 15 && age <= 49 && !isPregnant;
   }
 
-  Future<Map<String, dynamic>> _formatData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> counterpart, {
+  Map<String, dynamic> _formatData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> counterpart, {
     required bool isHead,
     bool isFamilyPlanning = false,
-  }) async {
+  }) {
     final hhId = (row['household_ref_key']?.toString() ?? '');
     final beneficiary_ref = (row['unique_key']?.toString() ?? '');
     final uniqueKey = (row['unique_key']?.toString() ?? '');
@@ -361,9 +331,6 @@ class _UpdatedEligibleCoupleListScreenState
 
     String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
 
-    // Get sync status
-    final syncStatus = await _getSyncStatus(uniqueKey);
-    
     return {
       'hhId': last11(hhId),
       'beneficiary_ref': beneficiary_ref,
@@ -377,8 +344,6 @@ class _UpdatedEligibleCoupleListScreenState
       'spouseName': spouseName,
       'status': isFamilyPlanning ? 'Protected' : 'Unprotected',
       'is_family_planning': isFamilyPlanning,
-      'is_synced': syncStatus['is_synced'],
-      'server_id': syncStatus['server_id'],
     };
   }
 
@@ -460,8 +425,6 @@ class _UpdatedEligibleCoupleListScreenState
             (data['spouseName']?.toString().toLowerCase().contains(q) ?? false))
         .toList();
   }
-
-  
 
   @override
   void dispose() {
@@ -668,7 +631,7 @@ class _UpdatedEligibleCoupleListScreenState
                     'assets/images/sync.png',
                     width: 24,
                     height: 24,
-                    color: data['is_synced'] == true ? null : Colors.grey[500],
+                    color: (data['is_synced'] == 1) ? null : Colors.grey,
                   ),
                 ],
               ),

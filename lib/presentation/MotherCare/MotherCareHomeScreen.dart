@@ -64,33 +64,40 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
   Future<void> _loadAncVisitCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
+      
+      // Get all beneficiaries that should be excluded
+      final excludedStates = await db.query(
+        'mother_care_activities',
+        where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother','anc_due_state')",
+        columns: ['beneficiary_ref_key'],
+        distinct: true
+      );
+      
+      final Set<String> excludedBeneficiaryIds = excludedStates
+          .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
+          .where((id) => id.isNotEmpty)
+          .toSet();
 
-      // Step 1: Get all anc_due beneficiary IDs
+      print('ℹ️ Found ${excludedBeneficiaryIds.length} beneficiaries with excluded states');
+
+      // Get all anc_due records that are not in excluded states
       final ancDueRecords = await db.rawQuery('''
-      SELECT DISTINCT mca.beneficiary_ref_key
-      FROM mother_care_activities mca
-      INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-      WHERE mca.mother_care_state = 'anc_due' AND bn.is_deleted = 0
-    ''');
+        SELECT DISTINCT mca.beneficiary_ref_key
+        FROM mother_care_activities mca
+        INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
+        WHERE mca.mother_care_state = 'anc_due' 
+          AND bn.is_deleted = 0
+          AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})
+      ''', excludedBeneficiaryIds.toList());
 
       final Set<String> ancDueBeneficiaryIds = ancDueRecords
           .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
           .where((id) => id.isNotEmpty)
           .toSet();
 
-      // Step 2: Get all beneficiaries with delivery outcomes (CRITICAL - matches exact query from _loadPregnantWomen)
-      final deliveryOutcomes = await db.query(
-          'followup_form_data',
-          where: "forms_ref_key = 'bt7gs9rl1a5d26mz' AND form_json LIKE '%\"gives_birth_to_baby\":\"Yes\"%'",
-          columns: ['beneficiary_ref_key']
-      );
+      print('ℹ️ Found ${ancDueBeneficiaryIds.length} anc_due records after filtering');
 
-      final Set<String?> deliveredBeneficiaryIds = deliveryOutcomes
-          .map((e) => e['beneficiary_ref_key']?.toString())
-          .where((id) => id != null && id.isNotEmpty)
-          .toSet();
-
-      // Step 3: Process all beneficiaries
+      // Get all beneficiaries
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final Set<String> uniqueBeneficiaries = {};
 
@@ -116,12 +123,12 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
           // Check if this beneficiary is in anc_due records
           final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
 
-          // CRITICAL: Skip if has delivery outcome
-          if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
+          // Skip if this beneficiary is in excluded states
+          if (excludedBeneficiaryIds.contains(beneficiaryId)) {
             continue;
           }
 
-          // Include if (pregnant OR anc_due) AND female AND no delivery outcome
+          // Include if (pregnant OR anc_due) AND female
           if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
             if (beneficiaryId.isNotEmpty) {
               uniqueBeneficiaries.add(beneficiaryId);
@@ -133,9 +140,9 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
         }
       }
 
-
+      // Add any anc_due records that weren't in the regular beneficiaries list
       for (final id in ancDueBeneficiaryIds) {
-        if (id.isNotEmpty && !deliveredBeneficiaryIds.contains(id)) {
+        if (id.isNotEmpty && !excludedBeneficiaryIds.contains(id)) {
           uniqueBeneficiaries.add(id);
         }
       }
@@ -150,7 +157,7 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
         });
       }
 
-      print('✅ ANC Visit Count: $count (Total unique pregnant women without delivery outcome)');
+      print('✅ ANC Visit Count: $count (Total unique pregnant women after filtering)');
 
     } catch (e, stackTrace) {
       print('❌ Error loading ANC visit count: $e');
@@ -190,69 +197,54 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // CRITICAL: Same ANC ref key used in DeliveryOutcomeScreen
-      const ancRefKey = 'bt7gs9rl1a5d26mz';
-
-      // ✅ ADD THIS: Get current user data (matching first function)
+      // Get current user data
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       print('🔍 Loading Delivery Outcome count...');
       print('🔍 Using current_user_key: $ashaUniqueKey');
 
-      // Step 1: Get all ANC forms with gives_birth_to_baby = "Yes"
-      // ✅ UPDATED: Added current_user_key condition and parameterized query
-      final ancForms = await db.rawQuery('''
+      // Query to get beneficiaries with mother_care_state = 'delivery_outcome'
+      // and exclude those with 'pnc_mother' state
+      final deliveryOutcomeRecords = await db.rawQuery('''
       SELECT 
-        f.beneficiary_ref_key,
-        f.form_json,
-        f.household_ref_key,
-        f.forms_ref_key,
-        f.created_date_time,
-        f.id as form_id
-      FROM ${FollowupFormDataTable.table} f
+        mca.beneficiary_ref_key,
+        mca.household_ref_key,
+        mca.created_date_time,
+        bn.*
+      FROM mother_care_activities mca
+      INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
       WHERE 
-        f.forms_ref_key = ?
-        AND f.form_json LIKE ?
-        AND f.is_deleted = 0
-        AND f.current_user_key = ?
-      ORDER BY f.created_date_time DESC
-    ''', [ancRefKey, '%"gives_birth_to_baby":"Yes"%', ashaUniqueKey ?? '']);
+        mca.mother_care_state = 'delivery_outcome'
+        AND bn.is_deleted = 0
+        AND mca.beneficiary_ref_key NOT IN (
+          SELECT DISTINCT beneficiary_ref_key 
+          FROM mother_care_activities 
+          WHERE mother_care_state = 'pnc_mother'
+        )
+        AND mca.current_user_key = ?
+      ORDER BY mca.created_date_time DESC
+    ''', [ashaUniqueKey ?? '']);
 
-      print('📊 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
+      print('📊 Found ${deliveryOutcomeRecords.length} delivery outcome records after filtering');
 
-      if (ancForms.isEmpty) {
-        print('ℹ️ No ANC forms found with gives_birth_to_baby: Yes');
-        if (mounted) {
-          setState(() {
-            _deliveryOutcomeCount = 0;
-          });
-        }
-        return;
-      }
-
-      // Step 2: Get the delivery outcome form key
-      final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[
-      FollowupFormDataTable.deliveryOutcome];
-
+      // Get the delivery outcome form key
+      final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome];
       print('🔑 Delivery Outcome Key: $deliveryOutcomeKey');
 
-      // Step 3: Track unique beneficiaries that need delivery outcome
+      // Track unique beneficiaries that need delivery outcome
       final Set<String> beneficiariesNeedingOutcome = {};
       final Set<String> beneficiariesProcessed = {};
 
-      for (final form in ancForms) {
+      for (final record in deliveryOutcomeRecords) {
         try {
-          // Get beneficiary reference key
-          final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
-
+          final beneficiaryRefKey = record['beneficiary_ref_key']?.toString();
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            print('⚠️ Skipping form - missing beneficiary_ref_key');
+            print('⚠️ Skipping record - missing beneficiary_ref_key');
             continue;
           }
 
           // Skip if we've already processed this beneficiary
-          // (handles duplicates from multiple ANC forms)
           if (beneficiariesProcessed.contains(beneficiaryRefKey)) {
             print('⏩ Already processed beneficiary: $beneficiaryRefKey');
             continue;
@@ -260,7 +252,7 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
 
           beneficiariesProcessed.add(beneficiaryRefKey);
 
-          // ✅ UPDATED: Added current_user_key condition to match first function
+          // Check if delivery outcome form already exists
           final existingOutcome = await db.query(
             FollowupFormDataTable.table,
             where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 AND current_user_key = ?',
@@ -273,52 +265,25 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
             continue; // Skip - already has outcome
           }
 
-          // CRITICAL: Check if beneficiary exists in beneficiaries_new table
-          // This matches the logic in _loadPregnancyOutcomeeCouples where
-          // it tries to fetch beneficiary data
-          Map<String, dynamic>? beneficiaryRow;
-          try {
-            beneficiaryRow = await LocalStorageDao.instance
-                .getBeneficiaryByUniqueKey(beneficiaryRefKey);
-
-            // If not found in new table, try legacy table
-            if (beneficiaryRow == null) {
-              final results = await db.query(
-                'beneficiaries_new',
-                where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-                whereArgs: [beneficiaryRefKey],
-                limit: 1,
-              );
-
-              if (results.isNotEmpty) {
-                beneficiaryRow = Map<String, dynamic>.from(results.first);
-              }
-            }
-          } catch (e) {
-            print('⚠️ Error fetching beneficiary $beneficiaryRefKey: $e');
-          }
-
-          // Even if beneficiary not found, still count it
-          // (matches screen behavior where it processes the form anyway)
+          // Add to count if no outcome exists
           beneficiariesNeedingOutcome.add(beneficiaryRefKey);
-          print('📝 Added to count: $beneficiaryRefKey (Total: ${beneficiariesNeedingOutcome.length})');
+          print('➕ Added to count - Needs delivery outcome: $beneficiaryRefKey');
 
-        } catch (e) {
-          print('❌ Error processing form: $e');
-          continue;
+        } catch (e, stackTrace) {
+          print('⚠️ Error processing delivery outcome record: $e');
+          print('Stack trace: $stackTrace');
         }
       }
 
       final count = beneficiariesNeedingOutcome.length;
-      print('✅ Final Delivery Outcome Count: $count');
-      print('   - Total ANC forms with birth: ${ancForms.length}');
-      print('   - Unique beneficiaries needing outcome: $count');
+      print('✅ Delivery Outcome Count: $count (Total unique beneficiaries needing outcome)');
 
       if (mounted) {
         setState(() {
           _deliveryOutcomeCount = count;
         });
       }
+
     } catch (e, stackTrace) {
       print('❌ Error loading delivery outcome count: $e');
       print('Stack trace: $stackTrace');
@@ -329,7 +294,6 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
       }
     }
   }
-
   Future<void> _loadHBCNCount() async {
     try {
       print('🔍 Loading HBNC count...');

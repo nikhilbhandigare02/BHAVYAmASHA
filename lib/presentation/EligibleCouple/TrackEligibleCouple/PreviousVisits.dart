@@ -5,6 +5,8 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class PreviousVisitsScreen extends StatefulWidget {
   final String beneficiaryId;
 
@@ -184,10 +186,12 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppHeader(
-        screenTitle: 'Previous Visits',
+        screenTitle:l10n?.previousVisits ?? 'Previous Visits',
         showBack: true,
       ),
       body: _isLoading
@@ -204,8 +208,8 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                   ),
                 )
               : _visits.isEmpty
-                  ? const Center(
-                      child: Text('No previous visits found'),
+                  ?  Center(
+                      child: Text(l10n?.noPreviousVisits ??'No previous visits found'),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(16),
@@ -230,7 +234,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                             : 'Not Synced';
 
                         return Card(
-                          margin: const EdgeInsets.only(bottom: 16),
+                          margin:  EdgeInsets.only(bottom: 16),
                           elevation: 2,
                           child: ExpansionTile(
                             title: Text(
@@ -240,7 +244,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                                 fontSize: 16,
                               ),
                             ),
-                            subtitle: Text('ID: $visitId • $syncStatus'),
+                            subtitle: Text('${l10n?.id ?? "ID"}: $visitId • $syncStatus'),
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(16),
@@ -251,7 +255,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                                       Padding(
                                         padding: const EdgeInsets.only(bottom: 16),
                                         child: Text(
-                                          'Error: ${visit['error']}',
+                                          '${l10n?.error ?? "Error"}: ${visit['error']}',
                                           style: const TextStyle(
                                             color: Colors.red,
                                             fontWeight: FontWeight.bold,
@@ -260,15 +264,15 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                                       ),
 
                                     // Basic Info Section
-                                    _buildSectionHeader('Visit Information'),
-                                    _buildInfoRow('Visit ID:', visitId),
-                                    _buildInfoRow('Type:', visitType),
-                                    _buildInfoRow('Date:', visitDate),
-                                    _buildInfoRow('Status:', syncStatus),
+                                    _buildSectionHeader(l10n?.visitInformation ?? 'Visit Information'),
+                                    _buildInfoRow('${l10n?.visitId ?? "Visit ID"}:', visitId),
+                                    _buildInfoRow('${l10n?.thType ??"Type"}:', visitType),
+                                    _buildInfoRow('${l10n?.dateLabel ?? "Date"}:', visitDate),
+                                    _buildInfoRow('${l10n?.visitStatusLabel ?? "Status"}:', syncStatus),
 
                                     // Form Data Section
                                     if (formValues.isNotEmpty) ...[
-                                      _buildSectionHeader('Form Data'),
+                                      _buildSectionHeader(l10n?.formData ??'Form Data'),
                                       ...formValues.entries.map((entry) {
                                         // Skip null or empty values
                                         if (entry.value == null ||
@@ -297,7 +301,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
 
                                     // Raw Data Section (for debugging)
                                     if (formData.isNotEmpty) ...[
-                                      _buildSectionHeader('Raw Data'),
+                                      _buildSectionHeader(l10n?.rawData ?? 'Raw Data'),
                                       Container(
                                         width: double.infinity,
                                         padding: const EdgeInsets.all(12),

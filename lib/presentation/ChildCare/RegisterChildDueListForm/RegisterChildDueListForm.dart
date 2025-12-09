@@ -10,6 +10,7 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 import 'bloc/register_child_form_bloc.dart';
 
 class BeneficiaryData {
@@ -158,12 +159,15 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       final name = widget.arguments?['name']?.toString();
 
       final beneficiaryRefKey = widget.arguments?['beneficiary_ref_key']?.toString();
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+          final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       if (beneficiaryRefKey != null && beneficiaryRefKey.isNotEmpty) {
         final db = await DatabaseProvider.instance.database;
         final rows = await db.query(
           'beneficiaries_new',
-          where: 'unique_key = ? AND is_deleted = 0',
-          whereArgs: [beneficiaryRefKey],
+          where: 'unique_key = ? AND is_deleted = 0 AND AND current_user_key = ?',
+          whereArgs: [beneficiaryRefKey, ashaUniqueKey],
           limit: 1,
         );
         if (rows.isNotEmpty) {

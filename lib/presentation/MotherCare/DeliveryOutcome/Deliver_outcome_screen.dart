@@ -64,90 +64,46 @@ class _DeliveryOutcomeScreenState
 
     try {
       final db = await DatabaseProvider.instance.database;
-
-      const ancRefKey = 'bt7gs9rl1a5d26mz';
+      
+      // Get current user's unique key
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-      print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      final ancForms = await db.rawQuery('''
-        SELECT 
-          f.beneficiary_ref_key,
-          f.form_json,
-          f.household_ref_key,
-          f.forms_ref_key,
-          f.created_date_time,
-          f.id as form_id
-        FROM ${FollowupFormDataTable.table} f
-        WHERE 
-          f.forms_ref_key = ?
-          AND f.form_json LIKE ?
-          AND f.is_deleted = 0
-          AND f.current_user_key = ?
-        ORDER BY f.created_date_time DESC
-      ''', [ancRefKey, '%"gives_birth_to_baby":"Yes"%', ashaUniqueKey ?? '']);
+      print('🔍 Loading delivery outcome records...');
 
-      print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
-      // After line 61 in Deliver_outcome_screen.dart, add this code:
+      // Build the base query
+      String query = '''
+  SELECT 
+    mca.beneficiary_ref_key,
+    mca.household_ref_key,
+    mca.created_date_time,
+    bn.*
+  FROM mother_care_activities mca
+  INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
+  WHERE 
+    mca.mother_care_state = 'delivery_outcome'
+    AND bn.is_deleted = 0
+    AND mca.beneficiary_ref_key NOT IN (
+      SELECT DISTINCT beneficiary_ref_key 
+      FROM mother_care_activities 
+      WHERE mother_care_state = 'pnc_mother'
+    )
+  ''';
+  
+  // Add current_user_key condition if available
+  if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+    query += " AND mca.current_user_key = '$ashaUniqueKey' ";
+  }
+  
+  // Add ORDER BY clause
+  query += "\n  ORDER BY mca.created_date_time DESC";
 
-      print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
+  final List<Map<String, dynamic>> deliveryOutcomeRecords = 
+      (await db.rawQuery(query)).map((e) => Map<String, dynamic>.from(e)).toList();
+      print('🔍 Found ${deliveryOutcomeRecords.length} delivery outcome records');
 
-// For each form, fetch and print the beneficiary details
-      for (var form in ancForms) {
-        final beneficiaryRefKey = form['beneficiary_ref_key'] as String?;
-        if (beneficiaryRefKey == null) {
-          print('⚠️ Form missing beneficiary_ref_key: $form');
-          continue;
-        }
-
-        print('\n📋 Processing ANC Form for beneficiary: $beneficiaryRefKey');
-
-        try {
-          // Fetch the beneficiary record
-          final db = await DatabaseProvider.instance.database;
-          final beneficiary = await db.query(
-            'beneficiaries_new',
-            where: 'unique_key = ?',
-            whereArgs: [beneficiaryRefKey],
-          );
-
-          if (beneficiary.isNotEmpty) {
-            final beneficiaryData = beneficiary.first;
-            print('👤 Beneficiary Record:');
-            print('   - Unique Key: ${beneficiaryData['unique_key']}');
-            print('   - Household Ref Key: ${beneficiaryData['household_ref_key']}');
-
-            final beneficiaryInfo = beneficiaryData['beneficiary_info'];
-            if (beneficiaryInfo != null) {
-              try {
-
-                final infoJson = beneficiaryInfo is String ? beneficiaryInfo : jsonEncode(beneficiaryInfo);
-                final info = jsonDecode(infoJson) as Map<String, dynamic>;
-
-                print('   - Beneficiary Info:');
-                info.forEach((key, value) {
-                  print('     - $key: $value');
-                });
-              } catch (e) {
-                print('   - Error parsing beneficiary_info: $e');
-                print('   - Raw beneficiary_info type: ${beneficiaryInfo.runtimeType}');
-                print('   - Raw beneficiary_info value: $beneficiaryInfo');
-              }
-            } else {
-              print('   - No beneficiary_info available');
-            }
-          } else {
-            print('❌ No beneficiary found for ref key: $beneficiaryRefKey');
-          }
-        } catch (e) {
-          print('❌ Error fetching beneficiary: $e');
-        }
-      }
-
-
-
-      if (ancForms.isEmpty) {
-        print('ℹ️ No ANC forms found with gives_birth_to_baby: Yes');
+      if (deliveryOutcomeRecords.isEmpty) {
+        print('ℹ️ No delivery outcome records found');
         setState(() {
           _isLoading = false;
           _allData = [];
@@ -156,40 +112,24 @@ class _DeliveryOutcomeScreenState
         return;
       }
 
-      // Process each form
+      // Process each record
       final List<Map<String, dynamic>> processedData = [];
 
-
-
-      for (final form in ancForms) {
+      for (final record in deliveryOutcomeRecords) {
         try {
-          // Get beneficiary details
-          final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
+          final beneficiaryRefKey = record['beneficiary_ref_key']?.toString();
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            print('⚠️ Form missing beneficiary_ref_key: $form');
+            print('⚠️ Record missing beneficiary_ref_key: $record');
             continue;
           }
 
-          final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome];
-          final existingOutcome = await db.query(
-            FollowupFormDataTable.table,
-            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 AND current_user_key = ?',
-            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey, ashaUniqueKey],
-            limit: 1,
-          );
-          if (existingOutcome.isNotEmpty) {
-            continue;
-          }
-
+          // Get beneficiary details
           Map<String, dynamic>? beneficiaryRow;
           try {
-
             beneficiaryRow = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryRefKey);
 
-
             if (beneficiaryRow == null) {
-              print('ℹ️ Beneficiary not found in beneficiaries_new, trying beneficiaries table');
-              final db = await DatabaseProvider.instance.database;
+              // Fallback to direct database query if not found in local storage
               final results = await db.query(
                 'beneficiaries_new',
                 where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
@@ -198,6 +138,7 @@ class _DeliveryOutcomeScreenState
               );
 
               if (results.isNotEmpty) {
+                // Convert the result to Map<String, dynamic>
                 final legacy = Map<String, dynamic>.from(results.first);
                 Map<String, dynamic> info = {};
                 try {
@@ -205,11 +146,13 @@ class _DeliveryOutcomeScreenState
                   if (form is String && form.isNotEmpty) {
                     final decoded = jsonDecode(form);
                     if (decoded is Map) {
+                      // Ensure all nested maps are also Map<String, dynamic>
                       info = Map<String, dynamic>.from(decoded);
                     }
                   }
                 } catch (_) {}
 
+                // Map legacy fields to new format
                 if (!info.containsKey('dob') && info['date_of_birth'] != null) {
                   info['dob'] = info['date_of_birth'];
                 }
@@ -227,40 +170,63 @@ class _DeliveryOutcomeScreenState
             }
 
             if (beneficiaryRow != null) {
-              print('✅ Found beneficiary data: ${beneficiaryRow['beneficiary_info']}');
+              print('✅ Found beneficiary data for $beneficiaryRefKey');
             } else {
-              print('⚠️ Could not find beneficiary with unique_key=$beneficiaryRefKey in any table');
+              print('⚠️ Could not find beneficiary with unique_key=$beneficiaryRefKey');
             }
           } catch (e) {
             print('⚠️ Error fetching beneficiary by unique_key=$beneficiaryRefKey: $e');
+            continue;
           }
 
+          // Format the data for display
           final formattedData = _formatCoupleData(
-            form,
-            {},
-            {},
+            {
+              'beneficiary_ref_key': beneficiaryRefKey,
+              'household_ref_key': record['household_ref_key']?.toString() ?? '',
+              'created_date_time': record['created_date_time']?.toString() ?? '',
+              'form_json': jsonEncode({
+                'form_data': {
+                  'name': beneficiaryRow?['beneficiary_info']?['memberName'] ??
+                      beneficiaryRow?['beneficiary_info']?['headName'] ??
+                      'Unknown',
+                  'husband_name': beneficiaryRow?['beneficiary_info']?['spouseName'] ??
+                      beneficiaryRow?['beneficiary_info']?['headName'] ??
+                      'N/A',
+                  'rch_number': beneficiaryRow?['beneficiary_info']?['RCH_ID'] ??
+                      beneficiaryRow?['beneficiary_info']?['RichID'] ??
+                      'N/A',
+                  'mobile_no': beneficiaryRow?['beneficiary_info']?['mobileNo'] ??
+                      beneficiaryRow?['beneficiary_info']?['mobile_no'] ??
+                      '',
+                  'dob': beneficiaryRow?['beneficiary_info']?['dob'] ??
+                      beneficiaryRow?['beneficiary_info']?['date_of_birth'] ??
+                      '',
+                }
+              })
+            },
+            {}, // female
+            {}, // headOrSpouse
             isHead: true,
             beneficiaryRow: beneficiaryRow,
           );
           processedData.add(formattedData);
 
-        } catch (e) {
-          print('❌ Error processing form: $e');
-          print('Form data: $form');
+        } catch (e, stackTrace) {
+          print('❌ Error processing delivery outcome record: $e');
+          print('Stack trace: $stackTrace');
         }
       }
 
-      print('✅ Processed ${processedData.length} out of ${ancForms.length} forms');
-
-      // Set the data ONCE at the end
       setState(() {
         _allData = processedData;
-        _filtered = processedData;
+        _filtered = List.from(processedData);
         _isLoading = false;
       });
 
-    } catch (e) {
-      print('❌ Error loading pregnancy outcome couples: $e');
+    } catch (e, stackTrace) {
+      print('❌ Error loading delivery outcome records: $e');
+      print('Stack trace: $stackTrace');
       setState(() {
         _isLoading = false;
         _allData = [];

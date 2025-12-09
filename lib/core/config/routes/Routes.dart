@@ -27,6 +27,7 @@ import 'package:medixcel_new/presentation/EligibleCouple/EligibleCoupleHome/Elig
 import '../../../Splash_screen/Splash_screen.dart';
 import '../../../presentation/ABHALink/AbhaLinkScreen.dart' show Abhalinkscreen;
 import '../../../presentation/AllHouseHold/MigrtionSplitScreen/MigrationSplitScreen.dart';
+import '../../../presentation/AllHouseHold/updateMemberDetail/UpdateMemberDetail.dart';
 import '../../../presentation/AshakiDuniya/AshaKiDuniyaScreen.dart';
 import '../../../presentation/CBACForm/CBACForm.dart';
 import '../../../presentation/ChildCare/ChildCareHomeScreen.dart';
@@ -65,7 +66,6 @@ import '../../../presentation/RegisterNewHouseHold/AddNewFamilyMember/bloc/addne
 import '../../../presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 import '../../../presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
 import '../../../presentation/ResetPassword/ResetPassword.dart';
-import '../../../presentation/AllHouseHold/updateMemberDetail/UpdateMemberDetail.dart';
 import '../../../presentation/Routine/RoutineScreen.dart' show Routinescreen;
 import '../../../presentation/SyncStatus/SyncStatusScreen.dart';
 import '../../../presentation/Training/ReceivedTraining/RecievedTraining.dart' show TrainingReceived;

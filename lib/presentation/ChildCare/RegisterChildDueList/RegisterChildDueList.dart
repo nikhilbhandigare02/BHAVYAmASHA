@@ -233,11 +233,24 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // First, get all child care activities with registration_due status
+      // Get current user's unique key
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      // Build where clause based on whether we have a user key
+      String whereClause = 'child_care_state = ?';
+      List<dynamic> whereArgs = ['registration_due'];
+
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        whereClause += ' AND current_user_key = ?';
+        whereArgs.add(ashaUniqueKey);
+      }
+
+      // Get beneficiaries with registration_due status for current user
       final List<Map<String, dynamic>> childActivities = await db.query(
         'child_care_activities',
-        where: 'child_care_state = ?',
-        whereArgs: ['registration_due'],
+        where: whereClause,
+        whereArgs: whereArgs,
         orderBy: 'created_date_time DESC',
       );
 
@@ -374,7 +387,6 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       final normalizedSearchName = childName.trim().toLowerCase();
       debugPrint('\n🔍 Checking registration for: "$childName" in household: "$hhId"');
 
-      // First, check if there's any child registration form for this household
       final results = await db.query(
         'followup_form_data',
         where: 'household_ref_key = ? AND (form_json LIKE ? OR form_json LIKE ?)',

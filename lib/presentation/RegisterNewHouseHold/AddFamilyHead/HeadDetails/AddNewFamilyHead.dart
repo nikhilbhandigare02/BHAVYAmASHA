@@ -82,7 +82,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     // Don't clear _lastFormError here to preserve the first error
     return null;
   }
-  
+
   // Helper to find and scroll to the first error field in head form
   void _scrollToFirstError() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -96,38 +96,92 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       }
     });
   }
-  
+
+  void _handleAbhaProfileResult(Map<String, dynamic> profile, BuildContext context) {
+    debugPrint("Filling ABHA data into form...");
+
+    final bloc = context.read<AddFamilyHeadBloc>();
+
+    // ABHA Address
+    final abha = profile['abhaAddress']?.toString().trim();
+    if (abha != null && abha.isNotEmpty) {
+      bloc.add(AfhABHAChange(abha));
+    }
+
+    // Full Name
+    final nameParts = [
+      profile['firstName'],
+      profile['middleName'],
+      profile['lastName'],
+    ].where((e) => e != null && e.toString().trim().isNotEmpty).join(' ');
+    if (nameParts.isNotEmpty) {
+      bloc.add(AfhUpdateHeadName(nameParts.trim()));
+    }
+
+    // DOB
+    try {
+      final day = profile['dayOfBirth']?.toString();
+      final month = profile['monthOfBirth']?.toString();
+      final year = profile['yearOfBirth']?.toString();
+      if (day != null && month != null && year != null) {
+        final dob = DateTime(int.parse(year), int.parse(month), int.parse(day));
+        bloc.add(AfhToggleUseDob());
+        bloc.add(AfhUpdateDob(dob));
+      }
+    } catch (e) {
+      debugPrint("DOB parse error: $e");
+    }
+
+    // Gender
+    final g = profile['gender']?.toString().toUpperCase();
+    String? gender;
+    if (g == 'M') gender = 'Male';
+    if (g == 'F') gender = 'Female';
+    if (g == 'O' || g == 'T') gender = 'Transgender';
+    if (gender != null) bloc.add(AfhUpdateGender(gender));
+
+    // Mobile
+    final mobile = profile['mobile']?.toString().trim();
+    if (mobile != null && mobile.length == 10) {
+      bloc.add(AfhUpdateMobileNo(mobile));
+      bloc.add(AfhUpdateMobileOwner('Self'));
+    }
+
+    showAppSnackBar(context, "ABHA details filled successfully!");
+  }
+
+
   // Helper method to find the first field with an error in head form
   FormFieldState<dynamic>? _findFirstErrorField() {
     FormFieldState<dynamic>? firstErrorField;
-    
+
     void visitElement(Element element) {
       if (firstErrorField != null) return;
-      
+
       if (element.widget is FormField) {
         final formField = element as StatefulElement;
         final field = formField.state as FormFieldState<dynamic>?;
-        
+
         if (field?.hasError == true) {
           firstErrorField = field;
           return;
         }
       }
-      
+
       element.visitChildren(visitElement);
     }
-    
+
     // First check in the current form
     final form = _formKey.currentState;
     if (form != null && form.context != null) {
       form.context.visitChildElements(visitElement);
     }
-    
+
     // If no error found in main form, check in spouse form if it exists
     if (firstErrorField == null && spousFormKey.currentState?.context != null) {
       spousFormKey.currentState!.context.visitChildElements(visitElement);
     }
-    
+
     return firstErrorField;
   }
 
@@ -137,11 +191,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
   String? _validateYoungestChild(ChildrenState s, AppLocalizations l) {
     // Check if age unit is selected but age is empty
-    if ((s.ageUnit != null && s.ageUnit!.isNotEmpty) && 
+    if ((s.ageUnit != null && s.ageUnit!.isNotEmpty) &&
         (s.youngestAge == null || s.youngestAge!.trim().isEmpty)) {
       return 'Please enter age of youngest child';
     }
-    
+
     // Existing validation for age ranges
     return Validations.validateYoungestChildAge(l, s.youngestAge, s.ageUnit);
   }
@@ -323,7 +377,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           ),
           if (state.useDob)
             _Section(
-              child:
+                child:
                 CustomDatePicker(
                   labelText: '${l.dobLabel} *',
                   hintText: l.dateHint,
@@ -674,8 +728,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     width: 40.w,
                     borderRadius: 8,
                     fontSize: 14.sp,
-                    onPress: () {
-                      Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+                    onPress: () async {
+                      final result = await Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+
+                      debugPrint("BACK FROM ABHA SCREEN");
+                      debugPrint("ABHA RESULT: $result");
+
+                      if (result is Map<String, dynamic>) {
+                        if (!mounted) return;
+                        _handleAbhaProfileResult(result, context); // pass context safely
+                      }
                     },
                   ),
                 ),
@@ -805,10 +867,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     .add(AfhUpdateMobileOwnerOtherRelation(v.trim())),
                 validator: (value) => state.mobileOwner == 'Other'
                     ? _captureError(
-                        (value == null || value.trim().isEmpty)
-                            ? 'Relation with mobile no. holder is required'
-                            : null,
-                      )
+                  (value == null || value.trim().isEmpty)
+                      ? 'Relation with mobile no. holder is required'
+                      : null,
+                )
                     : null,
               ),
             ),
@@ -1249,7 +1311,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             ),
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
           ],
-          ],
+        ],
 
       ),
     );
@@ -1694,19 +1756,19 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                           final bool isSpouseStateEmpty =
                               (current.relation == null || current.relation!.trim().isEmpty) &&
-                              (current.memberName == null || current.memberName!.trim().isEmpty) &&
-                              (current.spouseName == null || current.spouseName!.trim().isEmpty) &&
-                              current.dob == null &&
-                              (current.UpdateYears == null || current.UpdateYears!.trim().isEmpty) &&
-                              (current.UpdateMonths == null || current.UpdateMonths!.trim().isEmpty) &&
-                              (current.UpdateDays == null || current.UpdateDays!.trim().isEmpty);
+                                  (current.memberName == null || current.memberName!.trim().isEmpty) &&
+                                  (current.spouseName == null || current.spouseName!.trim().isEmpty) &&
+                                  current.dob == null &&
+                                  (current.UpdateYears == null || current.UpdateYears!.trim().isEmpty) &&
+                                  (current.UpdateMonths == null || current.UpdateMonths!.trim().isEmpty) &&
+                                  (current.UpdateDays == null || current.UpdateDays!.trim().isEmpty);
 
                           if (isSpouseStateEmpty) {
                             final g = (state.gender == 'Male')
                                 ? 'Female'
                                 : (state.gender == 'Female')
-                                    ? 'Male'
-                                    : null;
+                                ? 'Male'
+                                : null;
                             // Hydrate only minimal shared fields so spouse
                             // record stays independent from head record, and
                             // only when there is no existing DB state.
@@ -1734,7 +1796,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 // Head -> Spouse: keep spouse tab prefilled
                                 BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
                                   listenWhen: (prev, curr) =>
-                                      prev.headName != curr.headName ||
+                                  prev.headName != curr.headName ||
                                       prev.spouseName != curr.spouseName,
                                   listener: (ctx, st) {
                                     if (_syncingNames) return;
@@ -1753,7 +1815,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 // spouse tab, push them back to head form.
                                 BlocListener<SpousBloc, SpousState>(
                                   listenWhen: (p, c) =>
-                                      p.memberName != c.memberName ||
+                                  p.memberName != c.memberName ||
                                       p.spouseName != c.spouseName,
                                   listener: (ctx, sp) {
                                     if (_syncingNames) return;
@@ -1925,16 +1987,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             clearSpousFormError();
                                                             final spouseForm = spousFormKey.currentState;
                                                             final spousState = context.read<SpousBloc>().state;
-                                                            
+
                                                             final isFormValid = spouseForm?.validate() ?? false;
-                                                            
+
                                                             final areAllFieldsValid = validateAllSpousFields(spousState);
-                                                            
+
                                                             if (!isFormValid || !areAllFieldsValid) {
                                                               canProceed = false;
                                                               final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
                                                               showAppSnackBar(context, msg);
-                                                              
+
                                                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                                                 final form = spousFormKey.currentContext?.findRenderObject() as RenderBox?;
                                                                 if (form != null) {
@@ -1955,18 +2017,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             clearSpousFormError();
                                                             final spouseForm = spousFormKey.currentState;
                                                             final spousState = context.read<SpousBloc>().state;
-                                                            
+
                                                             // First validate the form fields
                                                             final isFormValid = spouseForm?.validate() ?? false;
-                                                            
+
                                                             // Then validate all fields including custom validations
                                                             final areAllFieldsValid = validateAllSpousFields(spousState);
-                                                            
+
                                                             if (!isFormValid || !areAllFieldsValid) {
                                                               final msg = spousLastFormError ??
                                                                   'Please correct the highlighted errors before continuing.';
                                                               showAppSnackBar(context, msg);
-                                                              
+
                                                               // Scroll to the first error in the form
                                                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                                                 final form = spousFormKey.currentContext?.findRenderObject() as RenderBox?;
@@ -1978,7 +2040,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                   );
                                                                 }
                                                               });
-                                                              
+
                                                               return;
                                                             }
                                                           }

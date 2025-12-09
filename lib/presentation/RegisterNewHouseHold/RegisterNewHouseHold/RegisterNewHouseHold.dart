@@ -436,7 +436,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                          'Please add family head details',
+                                          l10n?.please_add_family_head_details ??'Please add family head details',
                                           style: const TextStyle(color: Colors.white),
                                         ),
                                         backgroundColor: Colors.redAccent,
@@ -886,7 +886,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             ),
           );
         }),
-        if (headAdded) _buildMembersCards(),
+        if (headAdded) _buildMembersCards(context),
         if (headAdded) SizedBox(height: 2.h),
         if (!_hideAddMemberButton)
           Center(
@@ -917,7 +917,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     );
   }
 
-  Widget _buildMembersCards() {
+  Widget _buildMembersCards(BuildContext context) {
+
     final l10n = AppLocalizations.of(context);
     return Column(
       children: [
@@ -1217,7 +1218,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        m['Name'] ?? 'N/A',
+                        m['Name'] ?? (l10n?.na ??'N/A'),
                         style: TextStyle(color: primary, fontWeight: FontWeight.w600, fontSize: 14.sp),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1305,7 +1306,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
                 const SizedBox(height: 8),
                 Text(
-                  'New house has been added successfully',
+                 l10n?.dataSavedSuccessfully ?? 'New house has been added successfully',
                   textAlign: TextAlign.center,
                   style:  TextStyle(
                     fontSize: 18,
@@ -1314,7 +1315,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Total beneficiary added: $memberCount ',
+                  '${l10n?.totalBeneficiaryAdded ??"Total beneficiary added"}: $memberCount ',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 16,
@@ -1336,7 +1337,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                         );
                       },
                       child: Text(
-                        'OK',
+                        l10n?.ok ??'OK',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,

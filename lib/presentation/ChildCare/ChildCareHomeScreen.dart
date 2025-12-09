@@ -37,7 +37,7 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
       'hbyc': 0,
       'deceased': 0,
     });
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCounts();
       _startCcScheduler();
@@ -48,9 +48,9 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
   Future<void> _loadCounts() async {
     try {
       developer.log('Loading counts...', name: 'ChildCareHomeScreen');
-      
+
       if (!mounted) return;
-      
+
       setState(() {
         _countsFuture = Future.wait([
           _countProvider.getRegisteredChildCount(),
@@ -66,14 +66,14 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
             'hbyc': counts[3],
             'deceased': counts[4],
           };
-          
+
           developer.log('Counts loaded: $result', name: 'ChildCareHomeScreen');
           return result;
         }).catchError((error, stackTrace) {
-          developer.log('Error in loading counts: $error', 
-                       name: 'ChildCareHomeScreen',
-                       error: error,
-                       stackTrace: stackTrace);
+          developer.log('Error in loading counts: $error',
+              name: 'ChildCareHomeScreen',
+              error: error,
+              stackTrace: stackTrace);
           // Return default values in case of error
           return {
             'registered': 0,
@@ -84,13 +84,13 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
           };
         });
       });
-      
+
     } catch (e, stackTrace) {
-      developer.log('Error in _loadCounts: $e', 
-                   name: 'ChildCareHomeScreen',
-                   error: e,
-                   stackTrace: stackTrace);
-      
+      developer.log('Error in _loadCounts: $e',
+          name: 'ChildCareHomeScreen',
+          error: e,
+          stackTrace: stackTrace);
+
       if (mounted) {
         setState(() {
           _countsFuture = Future.value({
@@ -156,7 +156,7 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
         (MediaQuery.of(context).size.width -
             totalHorizontalPadding -
             spacingBetweenCards) /
-        2.9;
+            2.9;
 
     return FutureBuilder<Map<String, int>>(
       future: _countsFuture,
@@ -195,7 +195,7 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                       _buildCard(
                         context: context,
                         title: (l10n?.childRegisteredBeneficiaryListTitle ??
-                                'Registered Child\nBeneficiary List')
+                            'Registered Child\nBeneficiary List')
                             .toString(),
                         countKey: 'registered',
                         image: 'assets/images/toddler.png',
@@ -207,7 +207,7 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                       _buildCard(
                         context: context,
                         title: (l10n?.childRegisteredDueListTitle ??
-                                'Child Registered\nDue List')
+                            'Child Registered\nDue List')
                             .toString(),
                         countKey: 'registrationDue',
                         image: 'assets/images/family.png',
@@ -219,7 +219,7 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                       _buildCard(
                         context: context,
                         title: (l10n?.childTrackingDueListTitle ??
-                                'Child Tracking\nDue List')
+                            'Child Tracking\nDue List')
                             .toString(),
                         countKey: 'trackingDue',
                         image: 'assets/images/notes.png',

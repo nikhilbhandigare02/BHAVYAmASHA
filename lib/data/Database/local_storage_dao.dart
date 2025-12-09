@@ -1409,36 +1409,6 @@ class LocalStorageDao {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getAllBeneficiaries({int? isMigrated}) async {
-    try {
-      final db = await _db;
-      final where = isMigrated != null ? 'is_migrated = ?' : null;
-      final whereArgs = isMigrated != null ? [isMigrated] : null;
-
-      final rows = await db.query(
-          'beneficiaries_new',
-          where: where,
-          whereArgs: whereArgs,
-          orderBy: 'created_date_time DESC'
-      );
-      final result = rows.map((row) {
-        final mapped = Map<String, dynamic>.from(row);
-        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
-        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
-        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
-        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
-        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
-        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
-        return mapped;
-      }).toList();
-      return result;
-    } catch (e, stackTrace) {
-      print('Error getting beneficiaries: $e');
-      print('Stack trace: $stackTrace');
-      rethrow;
-    }
-  }
-
   // Future<List<Map<String, dynamic>>> getAllBeneficiaries({int? isMigrated}) async {
   //   try {
   //     final db = await _db;
@@ -1446,26 +1416,29 @@ class LocalStorageDao {
   //     String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
   //
   //     String? where;
-  //     List<Object?>? whereArgs;
-  //     if (isMigrated != null && ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-  //       where = 'is_migrated = ? AND current_user_key = ?';
-  //       whereArgs = [isMigrated, ashaUniqueKey];
-  //     } else if (isMigrated != null) {
-  //       where = 'is_migrated = ?';
-  //       whereArgs = [isMigrated];
-  //     } else if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-  //       where = 'current_user_key = ?';
-  //       whereArgs = [ashaUniqueKey];
-  //     } else {
-  //       where = null;
-  //       whereArgs = null;
-  //     }
+  //         List<Object?>? whereArgs;
+  //         if (isMigrated != null && ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+  //           where = 'is_migrated = ? AND current_user_key = ?';
+  //           whereArgs = [isMigrated, ashaUniqueKey];
+  //         } else if (isMigrated != null) {
+  //           where = 'is_migrated = ?';
+  //           whereArgs = [isMigrated];
+  //         } else if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+  //           where = 'current_user_key = ?';
+  //           whereArgs = [ashaUniqueKey];
+  //         } else {
+  //           where = null;
+  //           whereArgs = null;
+  //         }
+  //
+  //
+  //
   //
   //     final rows = await db.query(
-  //       'beneficiaries_new',
-  //       where: where,
-  //       whereArgs: whereArgs,
-  //       orderBy: 'created_date_time DESC'
+  //         'beneficiaries_new',
+  //         where: where,
+  //         whereArgs: whereArgs,
+  //         orderBy: 'created_date_time DESC'
   //     );
   //     final result = rows.map((row) {
   //       final mapped = Map<String, dynamic>.from(row);
@@ -1484,6 +1457,52 @@ class LocalStorageDao {
   //     rethrow;
   //   }
   // }
+
+  Future<List<Map<String, dynamic>>> getAllBeneficiaries({int? isMigrated}) async {
+    try {
+      final db = await _db;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      String? where;
+      List<Object?>? whereArgs;
+      if (isMigrated != null && ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where = 'is_migrated = ? AND current_user_key = ?';
+        whereArgs = [isMigrated, ashaUniqueKey];
+      } else if (isMigrated != null) {
+        where = 'is_migrated = ?';
+        whereArgs = [isMigrated];
+      } else if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where = 'current_user_key = ?';
+        whereArgs = [ashaUniqueKey];
+      } else {
+        where = null;
+        whereArgs = null;
+      }
+
+      final rows = await db.query(
+        'beneficiaries_new',
+        where: where,
+        whereArgs: whereArgs,
+        orderBy: 'created_date_time DESC'
+      );
+      final result = rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+        return mapped;
+      }).toList();
+      return result;
+    } catch (e, stackTrace) {
+      print('Error getting beneficiaries: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
 
   Future<List<Map<String, dynamic>>> getUnsyncedBeneficiaries() async {
     try {

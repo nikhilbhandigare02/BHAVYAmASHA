@@ -55,8 +55,8 @@ class HouseHoldDetails extends StatelessWidget {
               const Divider(color: AppColors.divider, thickness: 0.8),
               if (state.residentialArea == 'Other')
                 CustomTextField(
-                  labelText: 'Enter type of residential area',
-                  hintText: 'Enter type of residential area',
+                  labelText: l?.other_type_of_residential_area ??'Enter type of residential area',
+                  hintText:l?.other_type_of_residential_area ?? 'Enter type of residential area',
                   initialValue: state.otherResidentialArea,
                   onChanged: (v) => context
                       .read<HouseholdDetailsAmenitiesBloc>()
@@ -93,8 +93,8 @@ class HouseHoldDetails extends StatelessWidget {
               const Divider(color: AppColors.divider, thickness: 0.8),
               if (state.houseType == 'other')
                 CustomTextField(
-                  labelText: 'Enter type of house',
-                  hintText: 'Enter type of house',
+                  labelText:l?.other_type_of_house ?? 'Enter type of house',
+                  hintText:l?.other_type_of_house ?? 'Enter type of house',
                   initialValue: state.otherHouseType,
                   onChanged: (v) => context
                       .read<HouseholdDetailsAmenitiesBloc>()
@@ -127,8 +127,8 @@ class HouseHoldDetails extends StatelessWidget {
               const Divider(color: AppColors.divider, thickness: 0.8),
               if (state.ownershipType == 'Other')
                 CustomTextField(
-                  labelText: 'Enter type of ownership',
-                  hintText: 'Enter type of ownership',
+                  labelText:l?.enterTypeOfOwnershipLabel ?? 'Enter type of ownership',
+                  hintText:l?.enterTypeOfOwnershipLabel ?? 'Enter type of ownership',
                   initialValue: state.otherOwnershipType,
                   onChanged: (v) => context
                       .read<HouseholdDetailsAmenitiesBloc>()

@@ -8,6 +8,7 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/tables/beneficiaries_table.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 
 class DeseasedList extends StatefulWidget {
   const DeseasedList({super.key});
@@ -37,8 +38,11 @@ class _DeseasedListState extends State<DeseasedList> {
         _isLoading = true;
       });
 
-      // Get database instance
       final db = await DatabaseProvider.instance.database;
+
+      // Get current user's unique key
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       // Query to get deceased beneficiaries with their details
       final List<Map<String, dynamic>> deceasedBeneficiaries = await db.rawQuery('''
@@ -49,9 +53,9 @@ class _DeseasedListState extends State<DeseasedList> {
         h.household_info as hh_info
       FROM ${BeneficiariesTable.table} b
       LEFT JOIN households h ON b.household_ref_key = h.unique_key
-      WHERE b.is_death = 1
+      WHERE b.is_death = 1 ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
       ORDER BY b.created_date_time DESC
-    ''');
+    ''', ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? [ashaUniqueKey] : []);
 
       final transformed = deceasedBeneficiaries.map((beneficiary) {
         // Parse JSON data
@@ -86,14 +90,17 @@ class _DeseasedListState extends State<DeseasedList> {
         final registrationDate = beneficiary['household_created_date'] ??
             beneficiary['created_date_time'];
 
-        // Get age - try to calculate from DOB if available
+
         String getAge() {
           // First try to get age directly
-          if (beneficiaryInfo['age'] != null) {
-            return getValue(beneficiaryInfo['age']);
+          if (beneficiaryInfo['years'] != null) {
+            return getValue(beneficiaryInfo['years']);
+          } else if(beneficiaryInfo['months'] != null) {
+            return getValue(beneficiaryInfo['months']);
+          } else if(beneficiaryInfo['days'] != null) {
+            return getValue(beneficiaryInfo['days']);
           }
 
-          // If no direct age, try to calculate from DOB
           if (beneficiaryInfo['dob'] != null) {
             try {
               final dob = DateTime.parse(beneficiaryInfo['dob']);
@@ -124,6 +131,7 @@ class _DeseasedListState extends State<DeseasedList> {
           return getValue(
               beneficiaryInfo['fatherName'] ??
                   beneficiaryInfo['father_name'] ??
+                  beneficiaryInfo['spouseName'] ??
                   householdData['father_name']
           );
         }
