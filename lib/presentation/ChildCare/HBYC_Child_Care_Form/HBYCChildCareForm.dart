@@ -98,7 +98,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
             );
           }
           if (state.status == HbycFormStatus.success) {
-            showAppSnackBar(context, 'Form saved sucessfully');
+            showAppSnackBar(context, 'Form saved successfully');
             Navigator.pushNamedAndRemoveUntil(
               context,
               Route_Names.HBYCList,

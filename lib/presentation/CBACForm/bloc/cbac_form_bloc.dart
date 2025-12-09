@@ -594,6 +594,8 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
           scoreAge = 2;
           break;
         case 'AGE_50_69':
+        case 'AGE_50_59':
+        case 'AGE_GE60':
           scoreAge = 3;
           break;
         default:
@@ -601,15 +603,37 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       }
     } else {
       // Fallback to label matching for legacy data
-      final itemsAge = [
-        'Less than 30 years',
-        '30-39 years',
-        '40-49 years',
-        '50-69 years',
-      ];
       final age = state.data['partA.age'] as String?;
-      final idx = age == null ? -1 : itemsAge.indexOf(age);
-      scoreAge = switch (idx) { 1 => 1, 2 => 2, 3 => 3, _ => 0 };
+      if (age != null) {
+        // New labels
+        final itemsAgeNew = [
+          '0 to 29 years',
+          '30 to 39 years',
+          '40 to 49 years',
+          '50 to 59 years',
+          'Over 59 years',
+        ];
+        final idxNew = itemsAgeNew.indexOf(age);
+        if (idxNew == 1) {
+          scoreAge = 1;
+        } else if (idxNew == 2) {
+          scoreAge = 2;
+        } else if (idxNew == 3 || idxNew == 4) {
+          scoreAge = 3;
+        } else {
+          // Legacy labels
+          final itemsAgeLegacy = [
+            'Less than 30 years',
+            '30-39 years',
+            '40-49 years',
+            '50-69 years',
+          ];
+          final idxLegacy = itemsAgeLegacy.indexOf(age);
+          scoreAge = switch (idxLegacy) { 1 => 1, 2 => 2, 3 => 3, _ => 0 };
+        }
+      } else {
+        scoreAge = 0;
+      }
     }
 
     int scoreTobacco;
@@ -650,13 +674,26 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
         case 'WAIST_GT90':
           scoreWaist = 2;
           break;
+        case 'WAIST_91_100':
+          scoreWaist = 1;
+          break;
+        case 'WAIST_GT100':
+          scoreWaist = 2;
+          break;
         default:
           scoreWaist = 0;
       }
     } else {
-      final itemsWaist = ['≤ 80 cm','81-90 cm','> 90 cm'];
+      final genderCode = state.data['personal.gender_code']?.toString();
       final v = state.data['partA.waist'] as String?;
-      final idx = v == null ? -1 : itemsWaist.indexOf(v);
+      int idx = -1;
+      if (genderCode == 'M') {
+        final itemsWaistMale = ['90 cm or less','91 to 100 cm','More than 100 cm'];
+        idx = v == null ? -1 : itemsWaistMale.indexOf(v);
+      } else {
+        final itemsWaistFemale = ['≤ 80 cm','81-90 cm','> 90 cm'];
+        idx = v == null ? -1 : itemsWaistFemale.indexOf(v);
+      }
       scoreWaist = switch (idx) { 1 => 1, 2 => 2, _ => 0 };
     }
 

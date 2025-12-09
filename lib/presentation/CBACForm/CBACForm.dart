@@ -353,7 +353,7 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
         // Extract location details
         final hscName = workingLocation['hsc_name']?.toString()?.trim() ?? '';
         final district = workingLocation['district']?.toString()?.trim() ?? '';
-        final block = workingLocation['block']?.toString()?.trim() ?? '';
+        final block = workingLocation['village']?.toString()?.trim() ?? '';
 
         debugPrint('🎯 EXTRACTED VALUES FROM USER DETAILS:');
         debugPrint('   First Name: "$firstName"');
@@ -599,12 +599,67 @@ class _PersonalInfoTab extends StatelessWidget {
         BlocBuilder<CbacFormBloc, CbacFormState>(
           buildWhen: (p, c) => p.data['personal.age'] != c.data['personal.age'],
           builder: (context, state) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final txt = state.data['personal.age']?.toString().trim();
+              final hasPartA = (state.data['partA.age']?.toString().isNotEmpty ?? false) &&
+                               (state.data['partA.age_code']?.toString().isNotEmpty ?? false);
+              final n = int.tryParse(txt ?? '');
+              if (!hasPartA && n != null) {
+                String label;
+                String code;
+                if (n <= 29) {
+                  label = '0 to 29 years';
+                  code = 'AGE_0_29';
+                } else if (n <= 39) {
+                  label = '30 to 39 years';
+                  code = 'AGE_30_39';
+                } else if (n <= 49) {
+                  label = '40 to 49 years';
+                  code = 'AGE_40_49';
+                } else if (n <= 59) {
+                  label = '50 to 59 years';
+                  code = 'AGE_50_59';
+                } else {
+                  label = 'Over 59 years';
+                  code = 'AGE_GE60';
+                }
+                bloc.add(CbacFieldChanged('partA.age', label));
+                bloc.add(CbacFieldChanged('partA.age_code', code));
+              }
+            });
             return CustomTextField(
-              hintText: l10n.ageLabel,
-              labelText: l10n.ageLabel,
+              hintText: l10n.ageLabelSimple,
+              labelText: l10n.ageLabelSimple,
               keyboardType: TextInputType.number,
               initialValue: state.data['personal.age']?.toString() ?? '',
-              onChanged: (v) => bloc.add(CbacFieldChanged('personal.age', v.trim())),
+              unitLetterSuffix: (l10n.yearsSuffix.isNotEmpty ? l10n.yearsSuffix[0] : 'Y'),
+              onChanged: (v) {
+                final val = v.trim();
+                bloc.add(CbacFieldChanged('personal.age', val));
+                final n = int.tryParse(val);
+                if (n != null) {
+                  String label;
+                  String code;
+                  if (n <= 29) {
+                    label = '0 to 29 years';
+                    code = 'AGE_0_29';
+                  } else if (n <= 39) {
+                    label = '30 to 39 years';
+                    code = 'AGE_30_39';
+                  } else if (n <= 49) {
+                    label = '40 to 49 years';
+                    code = 'AGE_40_49';
+                  } else if (n <= 59) {
+                    label = '50 to 59 years';
+                    code = 'AGE_50_59';
+                  } else {
+                    label = 'Over 59 years';
+                    code = 'AGE_GE60';
+                  }
+                  bloc.add(CbacFieldChanged('partA.age', label));
+                  bloc.add(CbacFieldChanged('partA.age_code', code));
+                }
+              },
             );
           },
         ),
@@ -754,6 +809,34 @@ class _PartATab extends StatelessWidget {
         final bloc = BlocProvider.of<CbacFormBloc>(context);
 
         final age = state.data['partA.age'] as String?;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if ((age == null || age.isEmpty)) {
+            final personalAgeTxt = state.data['personal.age']?.toString().trim();
+            final n = int.tryParse(personalAgeTxt ?? '');
+            if (n != null) {
+              String label;
+              String code;
+              if (n <= 29) {
+                label = '0 to 29 years';
+                code = 'AGE_0_29';
+              } else if (n <= 39) {
+                label = '30 to 39 years';
+                code = 'AGE_30_39';
+              } else if (n <= 49) {
+                label = '40 to 49 years';
+                code = 'AGE_40_49';
+              } else if (n <= 59) {
+                label = '50 to 59 years';
+                code = 'AGE_50_59';
+              } else {
+                label = 'Over 59 years';
+                code = 'AGE_GE60';
+              }
+              bloc.add(CbacFieldChanged('partA.age', label));
+              bloc.add(CbacFieldChanged('partA.age_code', code));
+            }
+          }
+        });
         final tobacco = state.data['partA.tobacco'] as String?;
         final alcohol = state.data['partA.alcohol'] as String?;
         final activity = state.data['partA.activity'] as String?;
@@ -764,15 +847,16 @@ class _PartATab extends StatelessWidget {
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+                Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
+
                 Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
               ],
-            );
+        );
         Widget rowScore(int score) => SizedBox(
               // width: 20,
               child: Align(
                 alignment: Alignment.centerRight,
-               child: Text('$score', style: const TextStyle(color: Colors.black54)),
+               child: Text('$score', style:  TextStyle(color: Colors.black87, fontSize: 15.sp)),
               ),
             );
 
@@ -787,14 +871,14 @@ class _PartATab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              //  crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
                     width: 325,
                     child: ApiDropdown<String>(
                       labelText: question,
                       hintText: 'Select Option',
-                      labelFontSize: 13.sp,
+                      labelFontSize: 15.sp,
                       items: items,
                       getLabel: (s) => s,
                       value: value,
@@ -802,7 +886,7 @@ class _PartATab extends StatelessWidget {
                       isExpanded: true,
                     ),
                   ),
-
+                  const Spacer(),
                   rowScore(score),
                 ],
               ),
@@ -813,10 +897,11 @@ class _PartATab extends StatelessWidget {
         }
 
         final itemsAge = <String>[
-          l10n.cbacA_ageLT30,
-          l10n.cbacA_age30to39,
-          l10n.cbacA_age40to49,
-          l10n.cbacA_age50to69,
+          '0 to 29 years',
+          '30 to 39 years',
+          '40 to 49 years',
+          '50 to 59 years',
+          'Over 59 years',
         ];
         final itemsTobacco = <String>[
           l10n.cbacA_tobNever,
@@ -828,17 +913,27 @@ class _PartATab extends StatelessWidget {
           l10n.cbacA_actLT150,
           l10n.cbacA_actGT150,
         ];
-        final itemsWaist = <String>[
-          l10n.cbacA_waistLE80,
-          l10n.cbacA_waist81to90,
-          l10n.cbacA_waistGT90,
-        ];
-        
-        final codeAge = <String>['AGE_LT30','AGE_30_39','AGE_40_49','AGE_50_69'];
+        final genderCode = state.data['personal.gender_code']?.toString();
+        final isFemale = genderCode == 'F' || state.data['personal.gender'] == l10n.genderFemale;
+        final itemsWaist = isFemale
+            ? <String>[
+                l10n.cbacA_waistLE80,
+                l10n.cbacA_waist81to90,
+                l10n.cbacA_waistGT90,
+              ]
+            : <String>[
+                '90 cm or less',
+                '91 to 100 cm',
+                'More than 100 cm',
+              ];
+
+        final codeAge = <String>['AGE_0_29','AGE_30_39','AGE_40_49','AGE_50_59','AGE_GE60'];
         final codeTob = <String>['TOB_NEVER','TOB_SOMETIMES','TOB_DAILY'];
         final codeYesNo = <String>['YES','NO'];
         final codeActivity = <String>['ACT_LT150','ACT_GE150'];
-        final codeWaist = <String>['WAIST_LE80','WAIST_81_90','WAIST_GT90'];
+        final codeWaist = isFemale
+            ? <String>['WAIST_LE80','WAIST_81_90','WAIST_GT90']
+            : <String>['WAIST_LE90','WAIST_91_100','WAIST_GT100'];
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (state.data['partA.age_code'] == null && age != null) {
@@ -880,9 +975,11 @@ class _PartATab extends StatelessWidget {
         });
 
         final idxAge = age == null ? -1 : itemsAge.indexOf(age);
-        final scoreAge = switch (idxAge) { 1 => 1, 2 => 2, 3 => 3, _ => 0 };
+        final scoreAge = switch (idxAge) { 1 => 1, 2 => 2, 3 => 3, 4 => 4, _ => 0,  };
         final idxTob = tobacco == null ? -1 : itemsTobacco.indexOf(tobacco);
-        final scoreTobacco = idxTob <= 0 ? 0 : 1;
+
+        final scoreTobacco = idxTob <= 0 ? 0 : idxTob;
+
         final idxAlcohol = alcohol == null ? -1 : itemsYesNo.indexOf(alcohol);
         final scoreAlcohol = idxAlcohol == 0 ? 1 : 0;
         final idxActivity = activity == null ? -1 : itemsActivity.indexOf(activity);
@@ -901,6 +998,7 @@ class _PartATab extends StatelessWidget {
 
             qRow(
               question: l10n.cbacA_ageQ,
+
               items: itemsAge,
               value: age,
               onChanged: (v) {
@@ -984,7 +1082,13 @@ class _PartATab extends StatelessWidget {
             ),
 
             const SizedBox(height: 8),
-            Text(l10n.cbacTotalScorePartA(total), style: const TextStyle(fontWeight: FontWeight.w600)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(l10n.cbacTotalScorePartA(''), style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text('$total', style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 15)),
+              ],
+            ),
           ],
         );
       },
@@ -1102,9 +1206,11 @@ class _PartBTab extends StatelessWidget {
                 ...qRow(l10n.cbacB_b2_breastLump, 'partB.b2.breastLump'),
                 ...qRow(l10n.cbacB_b2_nippleBleed, 'partB.b2.nippleBleed'),
                 ...qRow(l10n.cbacB_b2_breastShapeDiff, 'partB.b2.breastShapeDiff'),
-                ...qRow(l10n.cbacB_b2_excessBleeding, 'partB.b2.excessBleeding'),
-                ...qRow(l10n.cbacB_b2_depression, 'partB.b2.depression'),
-                ...qRow(l10n.cbacB_b2_uterusProlapse, 'partB.b2.uterusProlapse'),
+                ...qRow(
+                   " ${l10n.cbacB_b2_excessBleeding}***", 'partB.b2.excessBleeding '),
+                ...qRow("${l10n.cbacB_b2_depression}***", 'partB.b2.depression'),
+                ...qRow(
+                    "${l10n.cbacB_b2_uterusProlapse}***", 'partB.b2.uterusProlapse'),
                 ...qRow(l10n.cbacB_b2_postMenopauseBleed, 'partB.b2.postMenopauseBleed'),
                 ...qRow(l10n.cbacB_b2_postIntercourseBleed, 'partB.b2.postIntercourseBleed'),
                 ...qRow(l10n.cbacB_b2_smellyDischarge, 'partB.b2.smellyDischarge'),
@@ -1425,6 +1531,134 @@ class _PartDTab extends StatelessWidget {
 
         final total = scoreFromValue(q1) + scoreFromValue(q2);
 
+        int computePartAScore() {
+          final ageCode = state.data['partA.age_code'] as String?;
+          final tobCode = state.data['partA.tobacco_code'] as String?;
+          final alcoholCode = state.data['partA.alcohol_code'] as String?;
+          final activityCode = state.data['partA.activity_code'] as String?;
+          final waistCode = state.data['partA.waist_code'] as String?;
+          final familyCode = state.data['partA.familyHistory_code'] as String?;
+
+          int scoreAge;
+          if (ageCode != null) {
+            switch (ageCode) {
+              case 'AGE_30_39':
+                scoreAge = 1;
+                break;
+              case 'AGE_40_49':
+                scoreAge = 2;
+                break;
+              case 'AGE_50_69':
+              case 'AGE_50_59':
+              case 'AGE_GE60':
+                scoreAge = 3;
+                break;
+              default:
+                scoreAge = 0;
+            }
+          } else {
+            final a = state.data['partA.age'] as String?;
+            if (a != null) {
+              final itemsAgeNew = [
+                '0 to 29 years',
+                '30 to 39 years',
+                '40 to 49 years',
+                '50 to 59 years',
+                'Over 59 years',
+              ];
+              final idxNew = itemsAgeNew.indexOf(a);
+              if (idxNew == 1) {
+                scoreAge = 1;
+              } else if (idxNew == 2) {
+                scoreAge = 2;
+              } else if (idxNew == 3 || idxNew == 4) {
+                scoreAge = 3;
+              } else {
+                final itemsAgeLegacy = [
+                  'Less than 30 years',
+                  '30-39 years',
+                  '40-49 years',
+                  '50-69 years',
+                ];
+                final idxLegacy = itemsAgeLegacy.indexOf(a);
+                scoreAge = switch (idxLegacy) { 1 => 1, 2 => 2, 3 => 3, _ => 0 };
+              }
+            } else {
+              scoreAge = 0;
+            }
+          }
+
+          final scoreTobacco = tobCode != null
+              ? (tobCode == 'TOB_NEVER' ? 0 : 1)
+              : (() {
+                  final v = state.data['partA.tobacco'] as String?;
+                  final itemsTobacco = ['Never consumed','Sometimes','Daily'];
+                  final idx = v == null ? -1 : itemsTobacco.indexOf(v);
+                  return idx <= 0 ? 0 : 1;
+                })();
+
+          final scoreAlcohol = alcoholCode != null
+              ? (alcoholCode == 'YES' ? 1 : 0)
+              : (() {
+                  final v = state.data['partA.alcohol'] as String?;
+                  final isYes = v != null && v.toLowerCase() == 'yes';
+                  return isYes ? 1 : 0;
+                })();
+
+          final scoreActivity = activityCode != null
+              ? (activityCode == 'ACT_LT150' ? 1 : 0)
+              : (() {
+                  final v = state.data['partA.activity'] as String?;
+                  final itemsActivity = ['Less than 150 minutes per week','150 minutes or more per week'];
+                  final idx = v == null ? -1 : itemsActivity.indexOf(v);
+                  return idx == 0 ? 1 : 0;
+                })();
+
+          int scoreWaist;
+          if (waistCode != null) {
+            switch (waistCode) {
+              case 'WAIST_81_90':
+                scoreWaist = 1;
+                break;
+              case 'WAIST_GT90':
+                scoreWaist = 2;
+                break;
+              case 'WAIST_91_100':
+                scoreWaist = 1;
+                break;
+              case 'WAIST_GT100':
+                scoreWaist = 2;
+                break;
+              default:
+                scoreWaist = 0;
+            }
+          } else {
+            final genderCode = state.data['personal.gender_code']?.toString();
+            final v = state.data['partA.waist'] as String?;
+            int idx = -1;
+            if (genderCode == 'M') {
+              final itemsWaistMale = ['90 cm or less','91 to 100 cm','More than 100 cm'];
+              idx = v == null ? -1 : itemsWaistMale.indexOf(v);
+            } else {
+              final itemsWaistFemale = ['≤ 80 cm','81-90 cm','> 90 cm'];
+              idx = v == null ? -1 : itemsWaistFemale.indexOf(v);
+            }
+            scoreWaist = switch (idx) { 1 => 1, 2 => 2, _ => 0 };
+          }
+
+          final scoreFamily = familyCode != null
+              ? (familyCode == 'YES' ? 2 : 0)
+              : (() {
+                  final v = state.data['partA.familyHistory'] as String?;
+                  final isYes = v != null && v.toLowerCase() == 'yes';
+                  return isYes ? 2 : 0;
+                })();
+
+          return scoreAge + scoreTobacco + scoreAlcohol + scoreActivity + scoreWaist + scoreFamily;
+        }
+
+        final partAScore = computePartAScore();
+
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1437,7 +1671,7 @@ class _PartDTab extends StatelessWidget {
               width: 28,
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Text(v == null ? '-' : '${scoreFromValue(v)}', style:  TextStyle(color: Colors.black54, fontSize: 14.sp)),
+                child: Text(v == null ? '0' : '${scoreFromValue(v)}', style:  TextStyle(color: Colors.black87, fontSize: 15.sp)),
               ),
             );
 
@@ -1445,7 +1679,7 @@ class _PartDTab extends StatelessWidget {
           return Column(
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+               // crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
                     width: 300,
@@ -1498,7 +1732,20 @@ class _PartDTab extends StatelessWidget {
               },
             ),
             const SizedBox(height: 12),
-            Text(l10n.cbacTotalScorePartD(total), style: const TextStyle(fontWeight: FontWeight.w600)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(l10n.cbacTotalScorePartD(''), style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text('$total', style: const TextStyle(fontWeight: FontWeight.w600, fontSize:16)),
+              ],
+            ),
+            if (partAScore >= 4 || (partAScore + total) >= 4) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Suspected NCD case, please visit the nearest HWC or call 104',
+                style:  TextStyle(color: Colors.red, fontWeight: FontWeight.w400,fontSize: 17.sp),
+              ),
+            ],
           ],
         );
       },

@@ -94,13 +94,14 @@ class _UpdatedEligibleCoupleListScreenState
     final trackingFormKey =
         FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
     final Set<String> pregnantBeneficiaries = <String>{};
+    final Set<String> sterilizedBeneficiaries = <String>{};
     if (trackingFormKey.isNotEmpty) {
       final trackingRows = await db.query(
         FollowupFormDataTable.table,
         columns: ['beneficiary_ref_key', 'form_json'],
         where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
         whereArgs: [trackingFormKey],
-      );
+      ); 
       for (final row in trackingRows) {
         try {
           final formJsonStr = row['form_json']?.toString() ?? '';
@@ -116,6 +117,13 @@ class _UpdatedEligibleCoupleListScreenState
             final key = row['beneficiary_ref_key']?.toString() ?? '';
             if (key.isNotEmpty) {
               pregnantBeneficiaries.add(key);
+            }
+          }
+          final fpMethod = formData['fp_method']?.toString().toLowerCase().trim();
+          if (fpMethod == 'male sterilization' || fpMethod == 'female sterilization') {
+            final key = row['beneficiary_ref_key']?.toString() ?? '';
+            if (key.isNotEmpty) {
+              sterilizedBeneficiaries.add(key);
             }
           }
         } catch (_) {}
@@ -213,6 +221,10 @@ class _UpdatedEligibleCoupleListScreenState
           if (memberUniqueKey.isNotEmpty &&
               pregnantBeneficiaries.contains(memberUniqueKey)) {
             // Skip ECs that are already marked pregnant in tracking form
+            continue;
+          }
+          if (memberUniqueKey.isNotEmpty &&
+              sterilizedBeneficiaries.contains(memberUniqueKey)) {
             continue;
           }
 

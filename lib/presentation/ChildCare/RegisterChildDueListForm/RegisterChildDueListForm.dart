@@ -311,6 +311,49 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       }
 
       if (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true))) {
+        if (hhId != null && hhId.isNotEmpty) {
+          String? villageNameFromBeneficiaries;
+          final rowsByHh = await db.query(
+            'beneficiaries_new',
+            columns: ['beneficiary_info'],
+            where: 'household_ref_key = ? AND is_deleted = 0',
+            whereArgs: [hhId],
+          );
+          for (final r in rowsByHh) {
+            final infoStr = r['beneficiary_info']?.toString() ?? '{}';
+            Map<String, dynamic> info = {};
+            try { info = Map<String, dynamic>.from(jsonDecode(infoStr)); } catch (_) {}
+            final v1 = info['village_name']?.toString();
+            final v2 = info['village']?.toString();
+            final v = ((v1 ?? '').trim().isNotEmpty) ? v1 : v2;
+            if ((v ?? '').trim().isNotEmpty) { villageNameFromBeneficiaries = v; break; }
+          }
+          if (villageNameFromBeneficiaries != null && villageNameFromBeneficiaries.trim().isNotEmpty) {
+            beneficiaryData = BeneficiaryData(
+              name: beneficiaryData?.name,
+              gender: beneficiaryData?.gender,
+              mobile: beneficiaryData?.mobile,
+              rchId: beneficiaryData?.rchId,
+              fatherName: beneficiaryData?.fatherName,
+              motherName: beneficiaryData?.motherName,
+              dateOfBirth: beneficiaryData?.dateOfBirth,
+              religion: beneficiaryData?.religion,
+              socialClass: beneficiaryData?.socialClass,
+              uniqueKey: beneficiaryData?.uniqueKey,
+              createdDate: beneficiaryData?.createdDate,
+              weightGrams: beneficiaryData?.weightGrams,
+              birthWeightGrams: beneficiaryData?.birthWeightGrams,
+              birthCertificate: beneficiaryData?.birthCertificate,
+              village: villageNameFromBeneficiaries,
+              mobileOwner: beneficiaryData?.mobileOwner,
+              otherReligion: beneficiaryData?.otherReligion,
+              otherCategory: beneficiaryData?.otherCategory,
+            );
+          }
+        }
+      }
+
+      if (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true))) {
         String? villageName;
         final hhRows = await db.query(
           'households',

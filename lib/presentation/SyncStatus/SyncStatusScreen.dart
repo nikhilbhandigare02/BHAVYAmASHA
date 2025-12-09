@@ -3,6 +3,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
 import '../../data/Database/database_provider.dart';
 import '../../l10n/app_localizations.dart';
@@ -55,8 +56,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
       final dao = LocalStorageDao();
       final lastSyncTime = await dao.getLastSyncTime();
 
-      // Get counts directly from database tables
-      // Update household counts
+
       _householdTotal = await _getTotalCount('households');
       _householdSynced = await _getSyncedCount('households', await _getIdsFromTable('households'));
 
@@ -70,17 +70,14 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
       _eligibleCoupleSynced = await _getSyncedCount('eligible_couple_activities',
           await _getIdsFromTable('eligible_couple_activities'));
 
-      // Update mother care counts
       _motherCareTotal = await _getTotalCount('mother_care_activities');
       _motherCareSynced = await _getSyncedCount('mother_care_activities',
           await _getIdsFromTable('mother_care_activities'));
 
-      // Update child care counts
       _childCareTotal = await _getTotalCount('child_care_activities');
       _childCareSynced = await _getSyncedCount('child_care_activities',
           await _getIdsFromTable('child_care_activities'));
 
-      // Followup counts (kept as is since it's not in dashboard)
       _followupTotal = await dao.getFollowupTotalCountLocal();
       _followupSynced = await dao.getFollowupSyncedCountLocal();
 
@@ -100,15 +97,30 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
     }
   }
 
-  // Helper method to get total count from a table
   Future<int> _getTotalCount(String tableName) async {
     try {
       final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       // For child_care_activities, get all records regardless of is_deleted status
       if (tableName == 'child_care_activities') {
+        if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+          final result = await db.rawQuery(
+            'SELECT COUNT(*) as count FROM $tableName WHERE current_user_key = ?',
+            [ashaUniqueKey],
+          );
+          return result.first['count'] as int? ?? 0;
+        }
         final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName');
         return result.first['count'] as int? ?? 0;
       } else {
+        if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+          final result = await db.rawQuery(
+            'SELECT COUNT(*) as count FROM $tableName WHERE is_deleted = 0 AND current_user_key = ?',
+            [ashaUniqueKey],
+          );
+          return result.first['count'] as int? ?? 0;
+        }
         final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName WHERE is_deleted = 0');
         return result.first['count'] as int? ?? 0;
       }
@@ -124,15 +136,31 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
 
     try {
       final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final placeholders = List.filled(ids.length, '?').join(',');
       // For child_care_activities, don't filter by is_deleted
       if (tableName == 'child_care_activities') {
+        if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+          final result = await db.rawQuery(
+            'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_synced = 1 AND current_user_key = ?',
+            [...ids, ashaUniqueKey],
+          );
+          return result.first['count'] as int? ?? 0;
+        }
         final result = await db.rawQuery(
           'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_synced = 1',
           ids,
         );
         return result.first['count'] as int? ?? 0;
       } else {
+        if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+          final result = await db.rawQuery(
+            'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
+            [...ids, ashaUniqueKey],
+          );
+          return result.first['count'] as int? ?? 0;
+        }
         final result = await db.rawQuery(
           'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_deleted = 0 AND is_synced = 1',
           ids,
@@ -149,7 +177,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
   Future<List<int>> _getIdsFromTable(String tableName) async {
     try {
       final db = await DatabaseProvider.instance.database;
-      // For child_care_activities, get all IDs regardless of is_deleted status
+
       if (tableName == 'child_care_activities') {
         final result = await db.rawQuery('SELECT id FROM $tableName');
         return result.map((e) => e['id'] as int).toList();
