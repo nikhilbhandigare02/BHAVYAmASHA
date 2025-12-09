@@ -28,6 +28,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
   String _errorMessage = '';
   List<Map<String, dynamic>> _childTrackingList = [];
   late List<Map<String, dynamic>> _filtered;
+  final Map<String, bool> _syncCache = {};
 
   @override
   void initState() {
@@ -401,6 +402,30 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       }
     }
   }
+
+  Future<bool> _isChildTrackingSynced(String beneficiaryId) async {
+    if (beneficiaryId.isEmpty) return false;
+    final cacheKey = 'ctd_$beneficiaryId';
+    if (_syncCache.containsKey(cacheKey)) return _syncCache[cacheKey] ?? false;
+
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final formsKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childTrackingDue] ?? '30bycxe4gv7fqnt6';
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        columns: ['is_synced'],
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [beneficiaryId, formsKey],
+        orderBy: 'created_date_time DESC, id DESC',
+        limit: 1,
+      );
+      final synced = rows.isNotEmpty && (rows.first['is_synced'] == 1);
+      _syncCache[cacheKey] = synced;
+      return synced;
+    } catch (_) {
+      return false;
+    }
+  }
   
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return 'N/A';
@@ -688,16 +713,28 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.asset(
-                      'assets/images/sync.png',
-                      width: 24,
-                      height: 24,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => 
-                          const Icon(Icons.sync, size: 24, color: Colors.grey),
-                    ),
+                  FutureBuilder<bool>(
+                    future: _isChildTrackingSynced(data['BeneficiaryID']?.toString() ?? ''),
+                    builder: (context, snapshot) {
+                      final isSynced = snapshot.data == true;
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                            isSynced ? Colors.green : Colors.grey,
+                            BlendMode.srcIn,
+                          ),
+                          child: Image.asset(
+                            'assets/images/sync.png',
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => 
+                                Icon(Icons.sync, size: 24, color: isSynced ? Colors.green : Colors.grey),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

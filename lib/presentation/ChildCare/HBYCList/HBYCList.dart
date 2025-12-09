@@ -10,6 +10,7 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
+import '../../../data/Database/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
 class HBYCList extends StatefulWidget {
@@ -24,6 +25,7 @@ class _HBYCListState extends State<HBYCList> {
   late List<Map<String, dynamic>> _hbycChildren = [];
   late List<Map<String, dynamic>> _filtered = [];
   bool _isLoading = true;
+  final Map<String, bool> _syncCache = {};
 
   @override
   void initState() {
@@ -37,6 +39,29 @@ class _HBYCListState extends State<HBYCList> {
     _searchCtrl.removeListener(_onSearchChanged);
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  Future<bool> _isHbycSynced(String beneficiaryId) async {
+    if (beneficiaryId.isEmpty) return false;
+    final cacheKey = 'hbyc_$beneficiaryId';
+    if (_syncCache.containsKey(cacheKey)) return _syncCache[cacheKey] ?? false;
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final formsKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.hbycForm] ?? '999';
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        columns: ['is_synced'],
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [beneficiaryId, formsKey],
+        orderBy: 'created_date_time DESC, id DESC',
+        limit: 1,
+      );
+      final synced = rows.isNotEmpty && (rows.first['is_synced'] == 1);
+      _syncCache[cacheKey] = synced;
+      return synced;
+    } catch (_) {
+      return false;
+    }
   }
 
   // Calculate age in months from date of birth
@@ -499,14 +524,26 @@ class _HBYCListState extends State<HBYCList> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.asset(
-                          'assets/images/sync.png',
-                          width: 25,
-                          height: 25,
-                          fit: BoxFit.cover,
-                        ),
+                      FutureBuilder<bool>(
+                        future: _isHbycSynced(data['BeneficiaryID']?.toString() ?? ''),
+                        builder: (context, snapshot) {
+                          final isSynced = snapshot.data == true;
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.mode(
+                                isSynced ? Colors.green : Colors.grey,
+                                BlendMode.srcIn,
+                              ),
+                              child: Image.asset(
+                                'assets/images/sync.png',
+                                width: 25,
+                                height: 25,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
