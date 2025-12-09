@@ -13,6 +13,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../data/SecureStorage/SecureStorage.dart';
 import '../HomeScreen/HomeScreen.dart';
+import 'package:medixcel_new/core/config/routes/Routes.dart' as AppRoutes;
 
 class Mothercarehomescreen extends StatefulWidget {
   const Mothercarehomescreen({super.key});
@@ -21,7 +22,7 @@ class Mothercarehomescreen extends StatefulWidget {
   State<Mothercarehomescreen> createState() => _MothercarehomescreenState();
 }
 
-class _MothercarehomescreenState extends State<Mothercarehomescreen> {
+class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteAware {
   int _ancVisitCount = 0;
   int _deliveryOutcomeCount = 0;
   int _hbcnMotherCount = 0;
@@ -30,6 +31,31 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
   @override
   void initState() {
     super.initState();
+    _loadAncVisitCount();
+    _loadDeliveryOutcomeCount();
+    _loadHBCNCount();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      AppRoutes.Routes.routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void dispose() {
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      AppRoutes.Routes.routeObserver.unsubscribe(this);
+    }
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
     _loadAncVisitCount();
     _loadDeliveryOutcomeCount();
     _loadHBCNCount();
@@ -309,15 +335,25 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
       print('🔍 Loading HBNC count...');
 
       final db = await DatabaseProvider.instance.database;
-      const deliveryOutcomeKey = '4r7twnycml3ej1vg';
+
+      // ✅ Use constant from FollowupFormDataTable for consistency
+      final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[
+      FollowupFormDataTable.deliveryOutcome];
+
+      // ✅ ADD THIS: Get current user data (matching the pattern)
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       print('🔑 Using delivery outcome key: $deliveryOutcomeKey');
+      print('👤 Current User Key: $ashaUniqueKey');
 
       // Step 1: Get all delivery outcome records
+      // ✅ UPDATED: Added current_user_key and is_deleted filters
       final dbOutcomes = await db.query(
-        'followup_form_data',
-        where: 'forms_ref_key = ?',
-        whereArgs: [deliveryOutcomeKey],
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND current_user_key = ? AND is_deleted = 0',
+        whereArgs: [deliveryOutcomeKey, ashaUniqueKey ?? ''],
+        orderBy: 'created_date_time DESC',
       );
 
       print('📊 Found ${dbOutcomes.length} delivery outcome records');
@@ -358,9 +394,10 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> {
 
           // CRITICAL: Check if beneficiary exists in beneficiaries_new table
           // (matches screen: "await db.query('beneficiaries_new', where: 'unique_key = ?')")
+          // ✅ UPDATED: Added is_deleted filter for beneficiary check
           final beneficiaryResults = await db.query(
             'beneficiaries_new',
-            where: 'unique_key = ?',
+            where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
             whereArgs: [beneficiaryRefKey],
           );
 

@@ -365,7 +365,7 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
       );
 
       if (beneficiaryRecords.isEmpty) {
-        print('⚠️  Beneficiary not found with ref_key: $beneficiaryRefKey');
+        print('  Beneficiary not found with ref_key: $beneficiaryRefKey');
         return;
       }
 

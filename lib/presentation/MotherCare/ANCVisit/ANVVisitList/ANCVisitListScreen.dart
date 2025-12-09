@@ -333,7 +333,10 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       if (registrationDate.isNotEmpty) {
         try {
           final dateTime = DateTime.parse(registrationDate);
-          formattedDate = '${dateTime.day}-${dateTime.month}-${dateTime.year}';
+          // Format day and month to always show two digits
+          final day = dateTime.day.toString().padLeft(2, '0');
+          final month = dateTime.month.toString().padLeft(2, '0');
+          formattedDate = '$day-$month-${dateTime.year}';
         } catch (e) {
           print('⚠️ Error parsing date: $e');
         }

@@ -43,7 +43,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     _tabController.dispose();
     super.dispose();
   }
-
+// Add this new method to check sync status
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                 }
 
                 if (state.saveSuccess && !state.isSaving) {
-                  showAppSnackBar(context, 'Form save succsefully');
+                  showAppSnackBar(context, 'Form saved successfully.');
                   if (mounted) {
                     Future.delayed(const Duration(milliseconds: 2000), () {
                       if (mounted) {

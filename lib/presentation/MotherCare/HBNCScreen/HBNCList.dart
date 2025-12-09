@@ -65,6 +65,26 @@ class _HBNCListScreenState
       return 0;
     }
   }
+  Future<bool> _isSynced(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final result = await db.query(
+        'mother_care_activities',
+        where: 'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey, 'hbnc_visit'],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (result.isNotEmpty) {
+        return result.first['is_synced'] == 1;
+      }
+      return false;
+    } catch (e) {
+      print('Error checking sync status: $e');
+      return false;
+    }
+  }
 
   Future<int> _getChildTabCount(String beneficiaryId) async {
     try {
@@ -591,20 +611,20 @@ class _HBNCListScreenState
                       },
                     ),
                     const SizedBox(width: 8),
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade400,
-                          shape: BoxShape.circle,
-                        ),
-                        child:  Icon(
-                          Icons.cloud_done,
-                          color: Colors.white,
-                          size: 15.sp,
-                        ),
-                      ),
+                    // Replace the existing sync icon with this code
+                    FutureBuilder<bool>(
+                      future: _isSynced(data['fullBeneficiaryId']?.toString() ?? ''),
+                      builder: (context, snapshot) {
+                        final isSynced = snapshot.data ?? false;
+                        return SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: Image.asset(
+                            'assets/images/sync.png',
+                            color: isSynced ? null : Colors.grey[500],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

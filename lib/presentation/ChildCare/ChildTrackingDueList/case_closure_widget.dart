@@ -89,6 +89,12 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
     'Sepsis',
     'Obstruct Labour',
     'Malpresentation'
+    'Eclampsia/ Serve Hypertension',
+    'Unsafe Abortion',
+    'Surgical Complication',
+    'Other reason apart from maternal complication'
+    'Other Specify' 
+
   ];
 
   @override
@@ -212,12 +218,12 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
               value: widget.reasonOfDeath,
               getLabel: (value) => value,
               onChanged: widget.onReasonOfDeathChanged,
-              convertToTitleCase: false, // Disable title case conversion
+              convertToTitleCase: false,  
             ),
             const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
           ],
         ],
-      ],
+      ], 
     );
   }
 }
