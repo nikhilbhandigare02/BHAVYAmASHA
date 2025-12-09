@@ -10,7 +10,6 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
-import '../../../data/SecureStorage/SecureStorage.dart';
 import 'bloc/register_child_form_bloc.dart';
 
 class BeneficiaryData {
@@ -159,15 +158,12 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       final name = widget.arguments?['name']?.toString();
 
       final beneficiaryRefKey = widget.arguments?['beneficiary_ref_key']?.toString();
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-          final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
       if (beneficiaryRefKey != null && beneficiaryRefKey.isNotEmpty) {
         final db = await DatabaseProvider.instance.database;
         final rows = await db.query(
           'beneficiaries_new',
-          where: 'unique_key = ? AND is_deleted = 0 AND AND current_user_key = ?',
-          whereArgs: [beneficiaryRefKey, ashaUniqueKey],
+          where: 'unique_key = ? AND is_deleted = 0',
+          whereArgs: [beneficiaryRefKey],
           limit: 1,
         );
         if (rows.isNotEmpty) {
@@ -595,20 +591,20 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     padding: const EdgeInsets.only(top: 20),
                                     child: state.isSubmitting
                                         ? const Center(
-                                            child: SizedBox(
-                                              width: 24,
-                                              height: 24,
-                                              child: CircularProgressIndicator(strokeWidth: 3),
-                                            ),
-                                          )
+                                      child: SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(strokeWidth: 3),
+                                      ),
+                                    )
                                         : RoundButton(
-                                            title: 'VERIFY',
-                                            borderRadius: 8,
-                                            fontSize: 12,
-                                            onPress: () {
-                                              // Add verification logic here
-                                            },
-                                          ),
+                                      title: 'VERIFY',
+                                      borderRadius: 8,
+                                      fontSize: 12,
+                                      onPress: () {
+                                        // Add verification logic here
+                                      },
+                                    ),
                                   ),
                                 ),
                               ],
@@ -645,7 +641,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 if (date == null) {
                                   return _captureError('Please enter Date of Registration');
 
-                                  }
+                                }
                                 return null;
                               },
                             ),
@@ -830,7 +826,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             CustomTextField(
-                              labelText:'Weight (500-12500)gms', 
+                              labelText:'Weight (500-12500)gms',
                               hintText: 'Enter weight',
                               initialValue: state.weightGrams,
                               keyboardType: TextInputType.number,
