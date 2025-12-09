@@ -74,20 +74,22 @@ class _DeliveryOutcomeScreenState
       // Build the base query
       String query = '''
   SELECT 
-    mca.beneficiary_ref_key,
-    mca.household_ref_key,
-    mca.created_date_time,
-    bn.*
-  FROM mother_care_activities mca
-  INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-  WHERE 
-    mca.mother_care_state = 'delivery_outcome'
-    AND bn.is_deleted = 0
-    AND mca.beneficiary_ref_key NOT IN (
-      SELECT DISTINCT beneficiary_ref_key 
-      FROM mother_care_activities 
-      WHERE mother_care_state = 'pnc_mother'
-    )
+  mca.beneficiary_ref_key,
+  mca.household_ref_key,
+  mca.created_date_time,
+  bn.*
+FROM mother_care_activities mca
+INNER JOIN beneficiaries_new bn 
+  ON mca.beneficiary_ref_key = bn.unique_key
+WHERE 
+  mca.mother_care_state = 'delivery_outcome'
+  AND bn.is_deleted = 0
+  AND mca.beneficiary_ref_key NOT IN (
+    SELECT beneficiary_ref_key
+    FROM mother_care_activities
+    WHERE mother_care_state <> 'delivery_outcome'
+)
+
   ''';
   
   // Add current_user_key condition if available
