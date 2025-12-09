@@ -135,7 +135,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get religionNotDisclosed => 'बताना नहीं चाहते';
 
   @override
-  String get religionHindu => 'हिन्दू';
+  String get religionHindu => 'हिंन्दू';
 
   @override
   String get religionMuslim => 'मुस्लिम';
@@ -144,7 +144,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get religionChristian => 'ईसाई';
 
   @override
-  String get religionSikh => 'सिख';
+  String get religionSikh => 'सिंख';
 
   @override
   String get religionBuddhism => 'बौद्ध';
@@ -338,7 +338,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get announcementItem3Title => 'बिहार की आशा कार्यकर्ताओं ने बेहतर वेतन और कार्य वातावरण की मांग की';
 
   @override
-  String get anyHighRiskProblemLabel => 'Is there any high risk problem?';
+  String get anyHighRiskProblemLabel => 'क्या कोई उच्च जोखिम वाली समस्या है?';
 
   @override
   String get appTitle => 'मेडिक्सेल';
@@ -989,7 +989,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get detailsLabel => 'विवरण';
 
   @override
-  String get diastolicLabel => 'Diastolic';
+  String get diastolicLabel => 'डायस्टोलिक';
 
   @override
   String get disabilityBedridden => 'किसी बीमारी के कारण बिस्तर पर';
@@ -1082,7 +1082,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get economicStatusLabel => 'आर्थिक स्थिति';
 
   @override
-  String get eddDateLabel => 'प्रसव होने की संभावित तिथि';
+  String get eddDateLabel => 'प्रसव की संभावित तिथि';
 
   @override
   String get edit => 'संपादित करें';
@@ -1420,7 +1420,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get helpInstructions => 'कृपया किसी भी सहायता के लिए नीचे दिए गए हेल्प नंबरों पर कॉल करें।';
 
   @override
-  String get hemoglobinLabel => 'Hemoglobin (HB)';
+  String get hemoglobinLabel => 'हीमोग्लोबिन (एच.बी)';
 
   @override
   String get hhIdLabel => 'परिवार आईडी';
@@ -1923,7 +1923,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pincodeLabel => 'पिनकोड';
 
   @override
-  String get placeOfAncLabel => 'Place of ANC';
+  String get placeOfAncLabel => 'एएनसी का स्थान';
 
   @override
   String get pmsmaLabel => 'पीएमएसएमए';
@@ -1995,7 +1995,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get registrationDateLabel => 'पंजीकरण तिथि';
 
   @override
-  String get registrationThroughTitle => 'इसके माध्यम से पंजीकरण';
+  String get registrationThroughTitle => 'पंजीकरण का माध्यम';
 
   @override
   String get registrationTypeLabel => 'पंजीकरण प्रकार';
@@ -2172,7 +2172,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get searchHBNC => 'खोज HBNC';
 
   @override
-  String get secondAncLabel => 'दूसरा एएनसी';
+  String get secondAncLabel => 'दूसरी एएनसी';
 
   @override
   String get select => 'चुनें';
@@ -2181,7 +2181,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectArea => 'चुनें';
 
   @override
-  String get self => 'स्वयं';
+  String get self => 'स्व';
 
   @override
   String get separated => 'अलग रह रहे';
@@ -2235,7 +2235,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get streetLocalityLabel => 'सड़क/स्थानीयता';
 
   @override
-  String get systolicLabel => 'Systolic';
+  String get systolicLabel => 'सिस्टोलिक';
 
   @override
   String get tabAll => 'सभी';
@@ -2289,7 +2289,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get thType => 'प्रकार';
 
   @override
-  String get thirdAncLabel => 'तीसरा एएनसी';
+  String get thirdAncLabel => 'तीसरी एएनसी';
 
   @override
   String get toDoVisits => 'दौरा करना';
@@ -2319,7 +2319,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tolaLabel => 'टोला';
 
   @override
-  String get totalChildrenBornLabel => 'कुल जन्मे बच्चों की संख्या';
+  String get totalChildrenBornLabel => 'पैदा हुए बच्चों की कुल संख्या';
 
   @override
   String get totalFemaleChildrenLabel => 'कुल महिला बच्चों की संख्या';
@@ -2505,7 +2505,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get weeksOfPregnancyLabel => 'No. of weeks of pregnancy';
 
   @override
-  String get weightKgLabel => 'Weight (Kg)';
+  String get weightKgLabel => 'वजन (कि.ग्रा.)';
 
   @override
   String get welcome => 'हमारे ऐप में आपका स्वागत है';
@@ -2898,7 +2898,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get phc => 'पीएचसी';
 
   @override
-  String get chc => 'CHC';
+  String get chc => 'सी.एच.सी.';
 
   @override
   String get districtHospital => 'District Hospital';
@@ -3307,6 +3307,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get videoTutorialList => 'वीडियो ट्यूटोरियल सूची';
+
+  @override
+  String get lmpDateLabelText => 'एलएमपी की तिथि';
 
   @override
   String get previousPage => 'पिछला पेज';
@@ -5176,7 +5179,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get postDeliveryProblemsLabel => 'क्या प्रसव के बाद मां को निम्नलिखित में से कोई समस्या है? *';
 
   @override
-  String get breastfeedingProblemsLabel => 'क्या मां को स्तनपान कराते समय समस्या है? *';
+  String get breastfeedingProblemsLabel => 'क्या माँ को स्तनपान कराने में समस्या है? *';
 
   @override
   String get milkNotProducingOrLessLabel => 'प्रसव के बाद माँ का दूध नहीं बन रहा है या वह समझती है कि कम दूध बन रहा है। *';
@@ -5252,4 +5255,895 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get mcpCardAvailableLabel => 'क्या \'मात्र शिशु संरक्षण (एमसीपी)\' कार्ड की उपलब्धता है? *';
+
+  @override
+  String get formUpdatedSuccessfully => 'प्रपत्र सफलतापूर्वक अपडेट किया गया';
+
+  @override
+  String get doNotWantToDisclose => 'नही बताना चाहतें हैं';
+
+  @override
+  String get id => 'आईडी';
+
+  @override
+  String get visitInformation => 'भ्रमण जानकारी';
+
+  @override
+  String get visitId => 'विज़िट आईडी';
+
+  @override
+  String get formData => 'फॉर्म डेटा';
+
+  @override
+  String get rawData => 'कच्चा डेटा';
+
+  @override
+  String get formSavedSuccessfully => 'फ़ॉर्म सफलतापूर्वक सहेजा गया है';
+
+  @override
+  String get pregnantAddedToAnc => 'गर्भवती लाभार्थी को प्रसवपूर्व देखभाल (ANC) सूची में जोड़ दिया गया है।';
+
+  @override
+  String get okay => 'ठीक है';
+
+  @override
+  String get formSavedSuccess => 'फॉर्म सफलतापूर्वक सहेजा गया';
+
+  @override
+  String get eligibleCoupleTrackingDue => 'योग्य दम्पत्तियों की ट्रैकिंग';
+
+  @override
+  String get methodOfContraception => 'गर्भनिरोधक का तरीका';
+
+  @override
+  String get condom => 'कंडोम';
+
+  @override
+  String get malaN => 'माला-एन (दैनिक गर्भनिरोधक गोली)';
+
+  @override
+  String get atraInjection => 'अंतरा इंजेक्शन';
+
+  @override
+  String get copperT => 'कॉपर - टी (आईयूडी)';
+
+  @override
+  String get chhaya => 'छाया(साप्ताहिक गर्भनिरोधक गोली)';
+
+  @override
+  String get ecp => 'ई.सी.पी(आपातकालीन गर्भनिरोधक गोली)';
+
+  @override
+  String get maleSterilization => 'पुरुष नसबंदी';
+
+  @override
+  String get femaleSterilization => 'महिला बंध्याकरण';
+
+  @override
+  String get anyOtherSpecifyy => 'कोई अन्य निर्दिष्ट करें';
+
+  @override
+  String get dateOfAntraInjection => 'अंतरा इंजेक्शन की तिथि';
+
+  @override
+  String get dateOfRemoval => 'निकासी की तिथि';
+
+  @override
+  String get enterReason => 'कारण दर्ज करें';
+
+  @override
+  String get reasonForAbsent => 'अनुपस्थिति का कारण';
+
+  @override
+  String get isBeneficiaryAbsent => 'क्या लाभार्थी अनुपस्थित है?';
+
+  @override
+  String get quantityOfMalaN => 'माला-एन (दैनिक गर्भनिरोधक गोली) की मात्रा';
+
+  @override
+  String get quantityOfECP => 'ईसीपी (आपातकालीन गर्भनिरोधक गोली) की मात्रा';
+
+  @override
+  String get quantityOfChhaya => 'छाया (साप्ताहिक गर्भनिरोधक गोली) की मात्रा';
+
+  @override
+  String get quantityOfCondoms => 'कंडोम की संख्या';
+
+  @override
+  String get enterReasonForRemoval => 'निकासी का कारण दर्ज करें';
+
+  @override
+  String get reasonForRemoval => 'निकासी का कारण';
+
+  @override
+  String get anc => 'एएनसी';
+
+  @override
+  String get pmsma => 'पी.एम.एस.एम.ए';
+
+  @override
+  String get vhsndAnganwadi => 'वी.एच.एस.एन.डी/आंगनवाड़ी';
+
+  @override
+  String get hscHwc => 'स्वास्थ्य उप-केंद्र/स्वास्थ्य एवं कल्याण केंद्र (HSC/HWC)';
+
+  @override
+  String get phcLabel => 'प्राथमिक स्वास्थ्य केंद्र (PHC)';
+
+  @override
+  String get chcLabel => 'सामुदायिक स्वास्थ्य केंद्र (CHC)';
+
+  @override
+  String get rh => 'रेफरल अस्पताल (RH)';
+
+  @override
+  String get dh => 'जिला अस्पताल (DH)';
+
+  @override
+  String get mch => 'मेडिकल कॉलेज अस्पताल (MCH)';
+
+  @override
+  String get pmsmaSite => 'पी.एम.एस.एम.ए साइट';
+
+  @override
+  String get hepetitisB => 'हेपेटाइटिस - बी';
+
+  @override
+  String get tuberculosisLabel => 'क्षय रोग (टीबी)';
+
+  @override
+  String get asthma => 'अस्थमा';
+
+  @override
+  String get highBP => 'हाई बी.पी.';
+
+  @override
+  String get stirti => 'एसटीआई/आरटीआई';
+
+  @override
+  String get heartDisease => 'दिल की बीमारी';
+
+  @override
+  String get liver_disease => 'लिवर की बीमारी';
+
+  @override
+  String get kideny_disease => 'गुर्दे की बीमारी';
+
+  @override
+  String get epilespy => 'मिर्गी';
+
+  @override
+  String get specifyOtherDisease => 'कृपया अन्य बीमारी बताएं';
+
+  @override
+  String get selectRisks => 'जोखिम चुनें';
+
+  @override
+  String get riskSevereAnemia => 'गंभीर एनीमिया';
+
+  @override
+  String get riskPIH => 'गर्भावधि उच्च रक्तचाप, प्री-एक्लेमप्सिया, एक्लेमप्सिया';
+
+  @override
+  String get riskInfections => 'सिफलिस, एचआईवी पॉजिटिव, हेपेटाइटिस बी, हेपेटाइटिस सी';
+
+  @override
+  String get riskGestationalDiabetes => 'गर्भकालीन मधुमेह';
+
+  @override
+  String get riskHypothyroidism => 'हाइपोथायरायडिज्म';
+
+  @override
+  String get riskTeenagePregnancy => 'किशोर गर्भावस्था (<20 वर्ष)/35 वर्ष के बाद गर्भावस्था';
+
+  @override
+  String get riskTwins => 'जुड़वाँ या एक से अधिक बच्चे वाली गर्भवती';
+
+  @override
+  String get riskMalPresentation => 'अनैसर्गिक गर्भावस्था प्रस्तुतीकरण(ब्रीच/ट्रांसवर्स/ऑब्लिक)';
+
+  @override
+  String get riskPreviousCesarean => 'पपिछली सी-सेक्शन';
+
+  @override
+  String get riskPreviousHistory => 'जटिल प्रस्तुति इतिहास (मृत बच्चे का जन्म, गर्भपात, जन्मजात विकृति, बधिक प्रसूति, समय से पहले जन्म आदि)';
+
+  @override
+  String get riskRhNegative => 'आर.एच. निगेटिव';
+
+  @override
+  String get didPregnantWomanGiveBirth => 'क्या गर्भवती महिला ने बच्चे को जन्म दिया?';
+
+  @override
+  String get dateOfAbortion => 'गर्भपात की तिथि';
+
+  @override
+  String get abortionComplication => 'क्या गर्भपात के दौरान कोई जटिलता हुई?';
+
+  @override
+  String get deliveryOutcomeLabel => 'प्रसव का परिणाम *';
+
+  @override
+  String get liveBirth => 'जीवित पैदाइश';
+
+  @override
+  String get stillBirth => 'मृत बच्चा';
+
+  @override
+  String get newbornDeath => 'नवजात शिशु की मृत्युु';
+
+  @override
+  String get numberOfChildrenLabel => 'बच्चों की संख्या *';
+
+  @override
+  String get oneChild => 'एक बच्चा';
+
+  @override
+  String get twins => 'जुडवा बच्चे';
+
+  @override
+  String get triplets => 'तीन बच्चे';
+
+  @override
+  String get babysName => 'शिशु का नाम';
+
+  @override
+  String get enterBabyName => 'शिशु का नाम दर्ज करें';
+
+  @override
+  String get babyWeightLabel => 'शिशु का वजन (1200–4000 ग्राम)';
+
+  @override
+  String get enterBabyWeight => 'शिशु का वजन दर्ज करें';
+
+  @override
+  String get firstBabyName => 'पहले बच्चे का नाम *';
+
+  @override
+  String get enterFirstBabyName => 'पहले बच्चे का नाम दर्ज करें';
+
+  @override
+  String get firstBabyGender => 'पहले बच्चे का लिंग *';
+
+  @override
+  String get firstBabyWeight => 'पहले बच्चे का वजन (1200–4000 ग्राम) *';
+
+  @override
+  String get enterFirstBabyWeight => 'पहले बच्चे का वजन दर्ज करें';
+
+  @override
+  String get secondBabyName => 'दूसरे बच्चे का नाम *';
+
+  @override
+  String get enterSecondBabyName => 'दूसरे बच्चे का नाम दर्ज करें';
+
+  @override
+  String get secondBabyGender => 'दूसरे बच्चे का लिंग *';
+
+  @override
+  String get secondBabyWeight => 'दूसरे बच्चे का वजन (1200–4000 ग्राम) *';
+
+  @override
+  String get enterSecondBabyWeight => 'दूसरे बच्चे का वजन दर्ज करें';
+
+  @override
+  String get thirdBabyName => 'तीसरे बच्चे का नाम *';
+
+  @override
+  String get enterThirdBabyName => 'तीसरे बच्चे का नाम दर्ज करें';
+
+  @override
+  String get thirdBabyGender => 'तीसरे बच्चे का लिंग *';
+
+  @override
+  String get thirdBabyWeight => 'तीसरे बच्चे का वजन (1200–4000 ग्राम) *';
+
+  @override
+  String get enterThirdBabyWeight => 'तीसरे बच्चे का वजन दर्ज करें';
+
+  @override
+  String get reasonForAbsence => 'अनुपस्थिति का कारण';
+
+  @override
+  String get enterReasonForAbsence => 'अनुपस्थिति का कारण दर्ज करें';
+
+  @override
+  String get pleaseFillFieldsCorrectly => 'कृपया सभी आवश्यक फ़ील्ड सही तरीके से भरें';
+
+  @override
+  String get noPregnantWomenFound => 'कोई गर्भवती महिला नहीं मिली';
+
+  @override
+  String get registerNewANCCases => 'परिवार पंजीकरण में नए ANC मामलों को दर्ज करें';
+
+  @override
+  String get fourthANCLabel => 'चौथी एएनसी';
+
+  @override
+  String get pmama => 'पीएमएएमए';
+
+  @override
+  String get srNo => 'क्रमांक';
+
+  @override
+  String get pregnancyWeek => 'गर्भावस्था का सप्ताह';
+
+  @override
+  String get high_Risk => 'उच्च जोखिम';
+
+  @override
+  String get noPregnancyOutcomesFound => 'कोई गर्भावस्था का परिणाम नहीं मिला';
+
+  @override
+  String get nextHBNCDate => 'अगली एचबीएनसी तिथि';
+
+  @override
+  String get previousHBNCDate => 'पिछली एचबीएनसी तिथि';
+
+  @override
+  String get beneficiaryAddedToHbnc => 'लाभार्थी को HBNC सूची में जोड़ दिया गया है';
+
+  @override
+  String get institutional => 'संस्थागत';
+
+  @override
+  String get nonInstitutional => 'गैर संस्थागत';
+
+  @override
+  String get enterPlace => 'स्थान दर्ज करें';
+
+  @override
+  String get enterOtherPlaceOfDelivery => 'अन्य प्रसव स्थान दर्ज करें';
+
+  @override
+  String get publicPlace => 'सार्वजनिक';
+
+  @override
+  String get privatePlace => 'प्राइवेट';
+
+  @override
+  String get institutionPlaceOfDelivery => 'प्रसव का संस्थागत स्थान';
+
+  @override
+  String get nursingHome => 'नर्सिंग होम';
+
+  @override
+  String get hospital => 'अस्पताल';
+
+  @override
+  String get homeBasedDelivery => 'घर पर प्रसव';
+
+  @override
+  String get inTransit => 'रास्ते में';
+
+  @override
+  String get nonInstitutionalPlaceOfDelivery => 'प्रसव का गैर संस्थागत स्थान';
+
+  @override
+  String get enterOtherNonInstitutionalDelivery => 'अन्य गैर-संस्थागत प्रसव का नाम दर्ज करें';
+
+  @override
+  String get enterName => 'नाम दर्ज करें';
+
+  @override
+  String get transitPlace => 'परागमन स्थान';
+
+  @override
+  String get ambulance => 'एंबुलेंस';
+
+  @override
+  String get enterOtherTransitPlace => 'कृपया अन्य परिवहन स्थान का नाम दर्ज करें';
+
+  @override
+  String get anm => 'एएनएम';
+
+  @override
+  String get lhv => 'एलएचवी';
+
+  @override
+  String get doctor => 'डॉक्टर';
+
+  @override
+  String get staffNurse => 'स्टाफ नर्स';
+
+  @override
+  String get tba => 'टीबीए (गैर-कुशल जन्म परिचारक)';
+
+  @override
+  String get whoConductedDelivery => 'डिलीवरी किसने कराई?';
+
+  @override
+  String get whoElseConductedDelivery => 'डिलीवरी किसने और कराई?';
+
+  @override
+  String get convulsion => 'पेशी-स्फुरण के साथ बेहोशी और ऐंठन';
+
+  @override
+  String get aph => 'प्रसवपूर्व रक्तस्राव (Aph)';
+
+  @override
+  String get pih => 'गर्भावस्था प्रेरित उच्च रक्तचाप (PIH)';
+
+  @override
+  String get repeatedAbortion => 'बार-बार गर्भपात';
+
+  @override
+  String get motherDeath => 'माँ की मृत्यु';
+
+  @override
+  String get congenitalAnomaly => 'जन्मजात विसंगति';
+
+  @override
+  String get bloodTransfusion => 'रक्त आधान';
+
+  @override
+  String get obstructedLabour => 'बाधित श्रम';
+
+  @override
+  String get pph => 'पीपीएच';
+
+  @override
+  String get anyOther => 'कोई अन्य';
+
+  @override
+  String get complication => 'जटिलताएँ *';
+
+  @override
+  String get dateOfDischarge => 'डिस्चार्ज की तिथि';
+
+  @override
+  String get enterComplication => 'जटिलता दर्ज करें';
+
+  @override
+  String get enterOtherComplication => 'प्रसव के दौरान अन्य जटिलता दर्ज करें';
+
+  @override
+  String get discharge_time => 'डिस्चार्ज का समय (hh:mm)';
+
+  @override
+  String get adaptFamilyPlanningMethod => 'क्या आप परिवार नियोजन पद्धति अपनाना चाहते हैं?';
+
+  @override
+  String get formSavedSuccessfullyMsg => 'फॉर्म सफलतापूर्वक सहेजा गया';
+
+  @override
+  String get firstBreastfeedTiming => 'पहली बार स्तनपान का समय';
+
+  @override
+  String get within30Minutes => 'जन्म के 30 मिनट के भीतर';
+
+  @override
+  String get within1Hour => 'जन्म के एक घंटे के भीतर';
+
+  @override
+  String get within6Hours => 'जन्म के 6 घंटे के भीतर';
+
+  @override
+  String get within24Hours => 'जन्म के 24 घंटे के भीतर';
+
+  @override
+  String get notBreastfed => 'स्तनपान नहीं कराया';
+
+  @override
+  String get howWasBreastfed => 'शिशु को कैसे स्तनपान कराया गया?';
+
+  @override
+  String get normal => 'सामान्य';
+
+  @override
+  String get forcefully => 'जबरदस्ती';
+
+  @override
+  String get withWeakness => 'दुर्बलता';
+
+  @override
+  String get couldNotBreastfeedButSpoon => 'स्तनपान नहीं करा सकती थी लेकिन चम्मच से दूध पिलाना पड़ता था';
+
+  @override
+  String get couldNeitherBreastfeedNorSpoon => 'ना स्तनपान कर पाया और ना ही चम्मच से खा सका';
+
+  @override
+  String get firstFeedGivenAfterBirth => 'जन्म के बाद दिया गया पहला भोजन';
+
+  @override
+  String get firstBreastfeeding => 'पहला स्तनपान';
+
+  @override
+  String get water => 'पानी';
+
+  @override
+  String get honey => 'शहद';
+
+  @override
+  String get mishriWater => 'मिश्री का पानी/शुगर सिरप';
+
+  @override
+  String get goatMilk => 'बकरी का दूध';
+
+  @override
+  String get cowMilk => 'गाय का दूध';
+
+  @override
+  String get enter_other_feeding_option => 'कृपया अन्य विकल्प दर्ज करें';
+
+  @override
+  String get counsellingAdviceNeeded => 'सलाह/परामर्श की आवश्यकता है?';
+
+  @override
+  String get is_navel_tied_with_thread => 'क्या आशा एवं ए.एन.एम. के द्वारा पुनः नाभि को साफ धागे से बांधा गया?';
+
+  @override
+  String get babyWipedWithCleanCloth => 'क्या बच्चे को साफ और सूखे कपड़े से पोछा गया है?';
+
+  @override
+  String get is_child_kept_warm => 'क्या शिशु को गर्म रखा गया था?';
+
+  @override
+  String get babyGivenBath => 'क्या बच्चे को नहलाया गया है?';
+
+  @override
+  String get babyWrappedAndPlacedNearMother => 'क्या बच्चे को कपड़े में लपेट कर माँ के पास रखा गया?';
+
+  @override
+  String get selectEyeProblemTypeLabel => 'आँख की समस्या का प्रकार चुनें';
+
+  @override
+  String get swelling => 'सूजन';
+
+  @override
+  String get oozingPus => 'रिसता हुआ मवाद';
+
+  @override
+  String get counsellingBreastfeeding => 'स्तनपान के लिए परामर्श/सलाह की आवश्यकता है?';
+
+  @override
+  String get referredByASHA => 'ASHA द्वारा रेफर किया गया';
+
+  @override
+  String get aphc => 'ए.पी.एच.सी.';
+
+  @override
+  String get rhLabel => 'आर.एच.';
+
+  @override
+  String get sdh => 'एस.डी.एच.';
+
+  @override
+  String get dhLabel => 'डी.एच.';
+
+  @override
+  String get babyWeightRecordedInMPC => 'क्या नवजात शिशु का वजन मदर प्रोटेक्शन कार्ड में दर्ज है?';
+
+  @override
+  String get referToHospital => 'अस्पताल भेजें?';
+
+  @override
+  String get referToLabel => 'कहाँ रेफर करें';
+
+  @override
+  String get mchLabel => 'एम.सी.एच.';
+
+  @override
+  String get date_of_death => 'मृत्यु कि तिथि *';
+
+  @override
+  String get place_of_death => 'मृत्यु की स्थान *';
+
+  @override
+  String get migrated_out => 'स्थानांतरित (बाहर)';
+
+  @override
+  String get on_the_way => 'रास्ते में';
+
+  @override
+  String get facility => 'सुविधा';
+
+  @override
+  String get reason_of_death => 'मृत्यु का कारण *';
+
+  @override
+  String get ph => 'पीएच';
+
+  @override
+  String get severe_anaemia => 'गंभीर रक्ताल्पता';
+
+  @override
+  String get spesis => 'सेप्सिस';
+
+  @override
+  String get obstructed_labour => 'बाधित श्रम';
+
+  @override
+  String get malpresentation => 'गलत प्रस्तुति';
+
+  @override
+  String get eclampsia_severe_hypertension => 'एक्लम्पसिया/गंभीर उच्च रक्तचाप';
+
+  @override
+  String get unsafe_abortion => 'असुरक्षित गर्भपात';
+
+  @override
+  String get surgical_complication => 'सर्जिकल जटिलता';
+
+  @override
+  String get other_reason_not_maternal_complication => 'मातृ जटिलताओं के अलावा अन्य कारण';
+
+  @override
+  String get other_specify => 'अन्य (निर्दिष्ट करे)';
+
+  @override
+  String get other_reason_of_death => 'मृत्यु का अन्य कारण *';
+
+  @override
+  String get specify_other_reason => 'अन्य कारण लिखें';
+
+  @override
+  String get unconscious_fits => 'बेहोशी / दौरे *';
+
+  @override
+  String get excessive_bleeding => 'अत्यधिक रक्तस्राव *';
+
+  @override
+  String get has_mcp_card_filled => 'क्या एमसीपी कार्ड भर दिया गया है? *';
+
+  @override
+  String get please_enter_problem => 'कृपया समस्या दर्ज करें *';
+
+  @override
+  String get enter_breastfeeding_problem => 'स्तनपान की समस्या दर्ज करें';
+
+  @override
+  String get write_take_action => 'कृपया किए जाने वाले कार्य को लिखें';
+
+  @override
+  String get breastfeeding_problem_help => 'यदि स्तनपान में कोई समस्या है, तो माँ की मदद करें ताकि वह इसे दूर कर सके *';
+
+  @override
+  String get temp_upto_102 => 'तापमान 102°F (38.9°C) तक';
+
+  @override
+  String get temp_more_than_102 => 'तापमान 102°F (38.9°C) से अधिक';
+
+  @override
+  String get paracetamolGivenLabel => 'पैरासिटामोल टैबलेट दी गई (तापमान 102°F / 38.9°C तक) *';
+
+  @override
+  String get refer_to_hospital => 'अस्पताल रेफर किया गया *';
+
+  @override
+  String get please_add_family_head_details => 'कृपया परिवार के मुखिया का विवरण जोड़ें';
+
+  @override
+  String get totalBeneficiaryAdded => 'कुल लाभार्थी जोड़े गए';
+
+  @override
+  String get enterTypeOfFuelForCooking => 'खाना बनाने के लिए ईंधन का प्रकार दर्ज करें';
+
+  @override
+  String get enterPrimarySourceOfWater => 'पानी का प्राथमिक स्रोत दर्ज करें';
+
+  @override
+  String get other_availability_of_electricity => 'बिजली की उपलब्धता दर्ज करें';
+
+  @override
+  String get typeOfToiletLabel => 'शौचालय का प्रकार';
+
+  @override
+  String get flushToiletWithRunningWater => 'बहते पानी के साथ शौचालय फ्लश करें';
+
+  @override
+  String get flushToiletWithoutWater => 'पानी के बिना फ्लश शौचालय';
+
+  @override
+  String get pitToiletWithRunningWater => 'बहते पानी की आपूर्ति के साथ गड्ढा शौचालय';
+
+  @override
+  String get pitToiletWithoutWaterSupply => 'पानी की आपूर्ति के बिना गड्ढे शौचालय';
+
+  @override
+  String get enterTypeOfToiletLabel => 'शौचालय का प्रकार दर्ज करें';
+
+  @override
+  String get whereDoYouGoForToiletLabel => 'आप शौच के लिए कहाँ जाते हैं?';
+
+  @override
+  String get communityToilet => 'सामुदायिक शौचालय';
+
+  @override
+  String get friendRelativeToilet => 'मदोस्त/सम्बन्धी का सौचालय';
+
+  @override
+  String get openSpace => 'खुली जगह';
+
+  @override
+  String get other_type_of_residential_area => 'आवासीय क्षेत्र का प्रकार दर्ज करें';
+
+  @override
+  String get enterTypeOfOwnershipLabel => 'स्वामित्व का प्रकार दर्ज करें';
+
+  @override
+  String get other_type_of_house => 'घर का प्रकार दर्ज करें';
+
+  @override
+  String get failedToSaveFamilyMember => 'परिवार सदस्य को सहेजने में विफल। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get setMaritaDetails => 'Set Marital Status = Married to fill Spouse details.';
+
+  @override
+  String get setChildDetails => 'बच्चों का विवरण भरने के लिए Have Children = Yes का चयन करें।';
+
+  @override
+  String get childrenDetails => 'बच्चों का विवरण';
+
+  @override
+  String get spouseDetails => 'पति का विवरण';
+
+  @override
+  String get member_status_label => 'सदस्य की स्थिति *';
+
+  @override
+  String get death => 'मृत';
+
+  @override
+  String get please_select_date_of_death => 'कृपया मृत्यु की तिथि चुनें';
+
+  @override
+  String get enter_place_of_death => 'मृत्यु का स्थान दर्ज करें';
+
+  @override
+  String get please_enter_place_of_death => 'कृपया मृत्यु का स्थान दर्ज करें';
+
+  @override
+  String get please_select_member_status => 'कृपया सदस्य की स्थिति चुनें';
+
+  @override
+  String get reason_of_death_label => 'मृत्यु का कारण *';
+
+  @override
+  String get natural_causes => 'प्राकृतिक कारण';
+
+  @override
+  String get illness => 'बीमारी';
+
+  @override
+  String get accident => 'दुर्घटना';
+
+  @override
+  String get please_select_reason_of_death => 'कृपया मृत्यु का कारण चुनें';
+
+  @override
+  String get please_specify_reason_of_death => 'कृपया मृत्यु का कारण निर्दिष्ट करें';
+
+  @override
+  String get enter_reason_of_death => 'मृत्यु का कारण दर्ज करें';
+
+  @override
+  String get specify_reason_required => 'कारण निर्दिष्ट करें *';
+
+  @override
+  String get enter_12_digit_rch_id => '12 अंकों का RCH ID दर्ज करें';
+
+  @override
+  String get must_be_12_digits => '12 अंकों का होना चाहिए';
+
+  @override
+  String get rch_id_must_be_12_digits => 'RCH ID बिल्कुल 12 अंकों का होना चाहिए';
+
+  @override
+  String get verifying_rch_id => 'RCH ID सत्यापित कर रहे हैं...';
+
+  @override
+  String get invalid_rch_id => 'अमान्य RCH ID';
+
+  @override
+  String get rch_id_must_be_12digits => 'RCH ID बिल्कुल 12 अंकों का होना चाहिए';
+
+  @override
+  String get please_enter_rch_id_first => 'कृपया पहले RCH ID दर्ज करें';
+
+  @override
+  String get no_data_found_rch_id => 'इस RCH ID के लिए कोई डेटा नहीं मिला';
+
+  @override
+  String get api_returned_null_response => 'API ने शून्य प्रतिक्रिया दी';
+
+  @override
+  String get failed_to_fetch_rch_data => 'RCH डेटा लाने में विफल';
+
+  @override
+  String get failedTo_fetch_rch_data => 'RCH डेटा लाने में विफल';
+
+  @override
+  String get rch_data_loaded_successfully => 'RCH डेटा सफलतापूर्वक लोड हो गया!';
+
+  @override
+  String get enter_relation_with_family_head => 'परिवार प्रमुख के साथ संबंध दर्ज करें';
+
+  @override
+  String get relation_with_mobile_holder_required => 'मोबाइल नंबर धारक के साथ संबंध आवश्यक है';
+
+  @override
+  String get enter_relation_with_mobile_holder => 'मोबाइल नंबर धारक के साथ संबंध दर्ज करें';
+
+  @override
+  String get error_loading_head_mobile => 'परिवार प्रमुख का मोबाइल नंबर लोड करने में त्रुटि';
+
+  @override
+  String get no_mobile_found_for_head => 'परिवार प्रमुख के लिए कोई मोबाइल नंबर नहीं मिला';
+
+  @override
+  String get child_age_validation => 'बच्चे के लिए: आयु 1 दिन से 15 वर्ष के बीच होनी चाहिए।';
+
+  @override
+  String get dob_cannot_be_future => 'जन्म तिथि भविष्य की नहीं हो सकती';
+
+  @override
+  String get dob_required => 'जन्म तिथि आवश्यक है';
+
+  @override
+  String get enter_other_occupation => 'व्यवसाय दर्ज करें';
+
+  @override
+  String get enter_valid_weight => 'कृपया सही वजन दर्ज करें';
+
+  @override
+  String get weight_range_validation => 'वजन 1.2 से 90 किलोग्राम के बीच होना चाहिए';
+
+  @override
+  String get weight_at_birth => 'जन्म के समय वजन (1200-4000)ग्राम';
+
+  @override
+  String get birth_weight_range_validation => 'जन्म का वजन 1200 से 4000 ग्राम के बीच होना चाहिए';
+
+  @override
+  String get enter_valid_birth_weight => 'कृपया सही जन्म वजन दर्ज करें';
+
+  @override
+  String get is_school_going_child => 'क्या वह स्कूल जाने वाला बच्चा है?';
+
+  @override
+  String get is_birth_certificate_issued => 'क्या जन्म प्रमाण पत्र जारी किया गया है?';
+
+  @override
+  String get enter_religion => 'धर्म दर्ज करें';
+
+  @override
+  String get enter_category => 'श्रेणी दर्ज करें';
+
+  @override
+  String get invalid_length => 'अमान्य लंबाई';
+
+  @override
+  String get bank_account_length_error => 'बैंक खाता संख्या 11 से 18 अंकों के बीच होनी चाहिए';
+
+  @override
+  String get ifsc_invalid_format => 'IFSC कोड में पहले 4 बड़े अक्षर होने चाहिए, उसके बाद 0 और 6 अंक होने चाहिए';
+
+  @override
+  String get ifsc_invalid_length => 'कृपया मान्य 11-अक्षरों वाला IFSC कोड दर्ज करें';
+
+  @override
+  String get please_select_family_planning_status => 'कृपया परिवार नियोजन की स्थिति चुनें';
+
+  @override
+  String get antraInjection => 'अंत्रा इंजेक्शन';
+
+  @override
+  String get dateOfAntra => 'अंत्रा की तारीख';
+
+  @override
+  String get removalDate => 'निकालने की तारीख';
+
+  @override
+  String get pleaseCorrectErrors => 'आगे बढ़ने से पहले कृपया हाइलाइट की गई त्रुटियों को ठीक करें।';
+
+  @override
+  String get fillSpouseDetails => 'आगे बढ़ने से पहले कृपया पति/पत्नी के सभी आवश्यक विवरण भरें।';
+
+  @override
+  String get updating => 'अपडेट किया जा रहा है...';
+
+  @override
+  String get errorPreparingData => 'डेटा तैयार करने में त्रुटि हुई। कृपया पुनः प्रयास करें।';
 }

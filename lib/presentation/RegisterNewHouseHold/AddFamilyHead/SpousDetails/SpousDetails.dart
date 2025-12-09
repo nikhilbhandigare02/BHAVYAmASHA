@@ -51,6 +51,8 @@ bool validateAllSpousFields(SpousState state) {
     isValid = false;
   }
 
+
+
   if (state.mobileOwner == 'Other' &&
       (state.mobileOwnerOtherRelation == null ||
           state.mobileOwnerOtherRelation!.trim().isEmpty)) {
@@ -497,13 +499,77 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
             spBloc.add(SpUpdateSpouseName(spouseName));
           }
 
-          
+
         },
         child: _buildForm(l),
       );
     }
 
     return _buildForm(l);
+  }
+  void _handleAbhaProfileResult(Map<String, dynamic> profile, BuildContext context) {
+    debugPrint("ABHA Profile Received in Spouse Tab: $profile");
+
+    final spBloc = context.read<SpousBloc>();
+
+    // 1. ABHA Address (Spouse)
+    final abhaAddress = profile['abhaAddress']?.toString().trim();
+    if (abhaAddress != null && abhaAddress.isNotEmpty) {
+      spBloc.add(SpUpdateAbhaAddress(abhaAddress));
+    }
+
+    // 2. Full Name → Member Name (Spouse's own name)
+    final nameParts = [
+      profile['firstName'],
+      profile['middleName'],
+      profile['lastName'],
+    ].where((e) => e != null && e.toString().trim().isNotEmpty).join(' ');
+    if (nameParts.isNotEmpty) {
+      spBloc.add(SpUpdateMemberName(nameParts.trim()));
+    }
+
+    // 3. DOB → Switch to DOB mode + fill
+    try {
+      final day = profile['dayOfBirth']?.toString();
+      final month = profile['monthOfBirth']?.toString();
+      final year = profile['yearOfBirth']?.toString();
+      if (day != null && month != null && year != null) {
+        final dob = DateTime(int.parse(year), int.parse(month), int.parse(day));
+        spBloc.add(SpToggleUseDob());        // Switch to DOB mode
+        spBloc.add(SpUpdateDob(dob));
+      }
+    } catch (e) {
+      debugPrint("DOB parse error: $e");
+    }
+
+    // 4. Gender
+    final g = profile['gender']?.toString().toUpperCase();
+    String? gender;
+    if (g == 'M') gender = 'Male';
+    if (g == 'F') gender = 'Female';
+    if (g == 'O' || g == 'T') gender = 'Transgender';
+
+    if (gender != null) {
+      spBloc.add(SpUpdateGender(gender));
+      // Also update relation if needed (e.g. if head is male → spouse female)
+      final headGender = context.read<AddFamilyHeadBloc>().state.gender;
+      final expectedRelation = headGender == 'Male' ? 'Wife' : 'Husband';
+      if (gender == 'Female' && headGender == 'Male') {
+        spBloc.add(SpUpdateRelation('Wife'));
+      } else if (gender == 'Male' && headGender == 'Female') {
+        spBloc.add(SpUpdateRelation('Husband'));
+      }
+    }
+
+    // 5. Mobile Number + Owner = Self
+    final mobile = profile['mobile']?.toString().trim();
+    if (mobile != null && mobile.length == 10) {
+      spBloc.add(SpUpdateMobileNo(mobile));
+      spBloc.add(SpUpdateMobileOwner('Self'));
+    }
+
+    // Success message
+    showAppSnackBar(context, "ABHA details filled for Spouse successfully!");
   }
 
   Widget _buildForm(AppLocalizations l) {
@@ -673,7 +739,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
               ),
 
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-  
+
 
               _section(
                 CustomTextField(
@@ -1084,9 +1150,13 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         width: 15.h,
                         borderRadius: 8,
                         fontSize: 14.sp,
-                        onPress: () {
-                          Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+                        onPress: () async {
+                          final result = await Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
 
+                          debugPrint("BACK FROM ABHA SCREEN (Spouse Tab)");
+                          if (result is Map<String, dynamic> && mounted) {
+                            _handleAbhaProfileResult(result, context);
+                          }
                         },
                       ),
                     ),
@@ -1260,12 +1330,12 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           }
                         }
                       } else {
-                      if (v == 'Family Head' || v == 'Husband') {
-                        final headNo = context.read<AddFamilyHeadBloc>().state.mobileNo?.trim();
-                        if (headNo != null && headNo.isNotEmpty) {
-                          spBloc.add(SpUpdateMobileNo(headNo));
-                        }
-                      }}
+                        if (v == 'Family Head' || v == 'Husband') {
+                          final headNo = context.read<AddFamilyHeadBloc>().state.mobileNo?.trim();
+                          if (headNo != null && headNo.isNotEmpty) {
+                            spBloc.add(SpUpdateMobileNo(headNo));
+                          }
+                        }}
                     } else {
                       spBloc.add(const SpUpdateMobileNo(''));
                     }

@@ -3,7 +3,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 import '../../l10n/app_localizations.dart' show AppLocalizations;
-import '../ClusterMeeting/ClusterMeetingScreen.dart';
+import '../ClusterMeeting/ClusterMeeting/ClusterMeetingScreen.dart';
 import '../High-Risk/High_Risk.dart';
 import '../RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 
@@ -354,14 +354,14 @@ class AshaDashboardSection extends StatelessWidget {
     bool hasCluster = appRoleId == 4;
 
     if (!hasCluster && index >= 1) {
-      dynamicIndex = index + 1; // shift to match original mapping
+      dynamicIndex = index + 1;
     }
 
     switch (dynamicIndex) {
       case 0:
         Navigator.pushNamed(context, Route_Names.Annoucement);
         break;
-      case 1: // Cluster meetings (only when visible)
+      case 1:
         if (hasCluster) {
           Navigator.push(
             context,

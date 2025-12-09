@@ -115,84 +115,215 @@ class _HBYCListState extends State<HBYCList> {
     return false;
   }
 
+  // Future<void> _loadHBYCChildren() async {
+  //   if (!mounted) return;
+  //
+  //   setState(() => _isLoading = true);
+  //
+  //   try {
+  //     final db = await DatabaseProvider.instance.database;
+  //
+  //
+  //     final currentUserData = await SecureStorageService.getCurrentUserData();
+  //     final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+  //
+  //     String whereClause;
+  //     List<Object?> whereArgs;
+  //     if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+  //       whereClause = 'is_deleted = ? AND is_adult = ? AND current_user_key = ?';
+  //       whereArgs = [0, 0, ashaUniqueKey];
+  //     } else {
+  //       whereClause = 'is_deleted = ? AND is_adult = ?';
+  //       whereArgs = [0, 0];
+  //     }
+  //
+  //     final List<Map<String, dynamic>> rows = await db.query(
+  //       'beneficiaries_new',
+  //       where: whereClause,
+  //       whereArgs: whereArgs,
+  //     );
+  //
+  //     final hbycChildren = <Map<String, dynamic>>[];
+  //
+  //     for (final row in rows) {
+  //       final rowHhId = row['household_ref_key']?.toString();
+  //       if (rowHhId == null) continue;
+  //
+  //       final info = row['beneficiary_info'] is String
+  //           ? jsonDecode(row['beneficiary_info'] as String)
+  //           : row['beneficiary_info'];
+  //
+  //       if (info is! Map) continue;
+  //
+  //       final memberType = info['memberType']?.toString() ?? '';
+  //       final dob = info['dob']?.toString();
+  //
+  //       // Only process child members with age between 3-15 months and not case closed
+  //       if (memberType == 'Child' && _isAgeInRange(dob)) {
+  //         final beneficiaryId = row['unique_key']?.toString() ?? '';
+  //
+  //         // Skip if case is closed for this beneficiary
+  //         if (beneficiaryId.isNotEmpty && await _isCaseClosed(beneficiaryId)) {
+  //           continue;
+  //         }
+  //
+  //         final name = info['name']?.toString() ??
+  //                     info['memberName']?.toString() ??
+  //                     info['member_name']?.toString() ??
+  //                     info['memberNameLocal']?.toString() ??
+  //                     '';
+  //
+  //         final gender = info['gender']?.toString() ?? '';
+  //         final ageGender = _formatAgeGender(dob, gender);
+  //
+  //         final richId = info['RichIDChanged']?.toString() ??
+  //                       info['richIdChanged']?.toString() ??
+  //                       info['richId']?.toString() ?? '';
+  //
+  //         final card = <String, dynamic>{
+  //           'hhId': rowHhId,
+  //           'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+  //           'RegitrationType': 'HBYC',
+  //           'BeneficiaryID': beneficiaryId,
+  //           'RchID': richId,
+  //           'Name': name,
+  //           'Age|Gender': ageGender,
+  //           '_raw': row,
+  //           '_info': info,
+  //         };
+  //
+  //         hbycChildren.add(card);
+  //       }
+  //     }
+  //
+  //     if (mounted) {
+  //       setState(() {
+  //         _hbycChildren = List<Map<String, dynamic>>.from(hbycChildren);
+  //         _filtered = List<Map<String, dynamic>>.from(hbycChildren);
+  //         _isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error loading HBYC children: $e');
+  //     if (mounted) {
+  //       setState(() => _isLoading = false);
+  //     }
+  //   }
+  // }
+
+
   Future<void> _loadHBYCChildren() async {
     if (!mounted) return;
-    
+
     setState(() => _isLoading = true);
 
     try {
       final db = await DatabaseProvider.instance.database;
-      
 
+      // Get current user's unique key
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      String whereClause;
-      List<Object?> whereArgs;
+      // Build where clause based on whether we have a user key
+      String whereClause = 'is_deleted = ? AND is_adult = ?';
+      List<dynamic> whereArgs = [0, 0];
+      
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause = 'is_deleted = ? AND is_adult = ? AND current_user_key = ?';
-        whereArgs = [0, 0, ashaUniqueKey];
-      } else {
-        whereClause = 'is_deleted = ? AND is_adult = ?';
-        whereArgs = [0, 0];
+        whereClause += ' AND current_user_key = ?';
+        whereArgs.add(ashaUniqueKey);
       }
 
+      // Get child beneficiaries for current user
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries_new',
         where: whereClause,
         whereArgs: whereArgs,
       );
 
+      debugPrint('Found ${rows.length} child beneficiaries in database');
+
       final hbycChildren = <Map<String, dynamic>>[];
 
       for (final row in rows) {
-        final rowHhId = row['household_ref_key']?.toString();
-        if (rowHhId == null) continue;
+        try {
+          final rowHhId = row['household_ref_key']?.toString();
+          if (rowHhId == null || rowHhId.isEmpty) continue;
 
-        final info = row['beneficiary_info'] is String
-            ? jsonDecode(row['beneficiary_info'] as String)
-            : row['beneficiary_info'];
-
-        if (info is! Map) continue;
-
-        final memberType = info['memberType']?.toString() ?? '';
-        final dob = info['dob']?.toString();
-        
-        // Only process child members with age between 3-15 months and not case closed
-        if (memberType == 'Child' && _isAgeInRange(dob)) {
-          final beneficiaryId = row['unique_key']?.toString() ?? '';
-          
-          // Skip if case is closed for this beneficiary
-          if (beneficiaryId.isNotEmpty && await _isCaseClosed(beneficiaryId)) {
+          // Parse beneficiary info
+          Map<String, dynamic> info = {};
+          try {
+            if (row['beneficiary_info'] is String) {
+              info = jsonDecode(row['beneficiary_info'] as String);
+            } else if (row['beneficiary_info'] is Map) {
+              info = Map<String, dynamic>.from(row['beneficiary_info'] as Map);
+            }
+          } catch (e) {
+            debugPrint('Error parsing beneficiary_info: $e');
             continue;
           }
-          
-          final name = info['name']?.toString() ??
-                      info['memberName']?.toString() ??
-                      info['member_name']?.toString() ??
-                      info['memberNameLocal']?.toString() ??
-                      '';
 
-          final gender = info['gender']?.toString() ?? '';
-          final ageGender = _formatAgeGender(dob, gender);
+          // Get child details
+          final dob = info['date_of_birth']?.toString() ??
+              info['dob']?.toString();
 
-          final richId = info['RichIDChanged']?.toString() ??
-                        info['richIdChanged']?.toString() ??
-                        info['richId']?.toString() ?? '';
+          // Only include children between 3-15 months
+          if (!_isAgeInRange(dob)) continue;
 
+          final beneficiaryId = row['unique_key']?.toString() ?? '';
+          if (beneficiaryId.isEmpty) continue;
+
+          // Skip if case is closed for this beneficiary
+          if (await _isCaseClosed(beneficiaryId)) {
+            continue;
+          }
+
+          // Get name from multiple possible fields
+          final name = _getValueFromMap(info, [
+            'name',
+            'child_name',
+            'memberName',
+            'member_name',
+            'memberNameLocal'
+          ]);
+
+          // Get gender
+          final gender = _getValueFromMap(info, [
+            'gender',
+            'sex'
+          ]);
+
+          // Get RCH ID from multiple possible fields
+          final rchId = _getValueFromMap(info, [
+            'rch_id',
+            'rchId',
+            'RichIDChanged',
+            'richIdChanged',
+            'richId'
+          ]);
+
+          // Get registration date
+          final registrationDate = row['created_date_time']?.toString() ??
+              info['registration_date']?.toString() ??
+              info['createdAt']?.toString();
+
+          // Create the card data
           final card = <String, dynamic>{
             'hhId': rowHhId,
-            'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+            'RegitrationDate': _formatDate(registrationDate),
             'RegitrationType': 'HBYC',
             'BeneficiaryID': beneficiaryId,
-            'RchID': richId,
-            'Name': name,
-            'Age|Gender': ageGender,
+            'RchID': rchId,
+            'Name': name.isNotEmpty ? name : 'Unnamed Child',
+            'Age|Gender': _formatAgeGender(dob, gender),
+            'DOB': _formatDate(dob),
+            'Gender': gender,
             '_raw': row,
             '_info': info,
           };
-          
+
           hbycChildren.add(card);
+        } catch (e) {
+          debugPrint('Error processing beneficiary: $e');
         }
       }
 
@@ -202,6 +333,7 @@ class _HBYCListState extends State<HBYCList> {
           _filtered = List<Map<String, dynamic>>.from(hbycChildren);
           _isLoading = false;
         });
+        debugPrint('Loaded ${hbycChildren.length} HBYC children');
       }
     } catch (e) {
       debugPrint('Error loading HBYC children: $e');
@@ -209,6 +341,17 @@ class _HBYCListState extends State<HBYCList> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+// Helper method to get value from map with multiple possible keys
+  String _getValueFromMap(Map<String, dynamic> map, List<String> keys) {
+    for (final key in keys) {
+      final value = map[key];
+      if (value != null && value.toString().trim().isNotEmpty) {
+        return value.toString().trim();
+      }
+    }
+    return '';
   }
 
   // Handle search functionality

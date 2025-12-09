@@ -40,6 +40,167 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     super.dispose();
   }
 
+  // Future<void> _loadChildBeneficiaries() async {
+  //   if (!mounted) return;
+  //
+  //   setState(() => _isLoading = true);
+  //
+  //   try {
+  //     final db = await DatabaseProvider.instance.database;
+  //
+  //     // Get current user key from secure storage
+  //     final currentUserData = await SecureStorageService.getCurrentUserData();
+  //     String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+  //
+  //     print('🔍 Fetching deceased beneficiaries...');
+  //
+  //     // Build where clause for deceased children query
+  //     String deceasedWhere = 'form_json LIKE ?';
+  //     List<Object?> deceasedWhereArgs = ['%"reason_of_death":%'];
+  //
+  //     if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+  //       deceasedWhere += ' AND current_user_key = ?';
+  //       deceasedWhereArgs.add(ashaUniqueKey);
+  //     }
+  //
+  //     final deceasedChildren = await db.query(
+  //       'followup_form_data',
+  //       columns: ['DISTINCT beneficiary_ref_key', 'form_json'],
+  //       where: deceasedWhere,
+  //       whereArgs: deceasedWhereArgs,
+  //     );
+  //
+  //     print('✅ Found ${deceasedChildren.length} potential deceased records');
+  //
+  //     final deceasedIds = <String>{};
+  //     for (var child in deceasedChildren) {
+  //       try {
+  //         final jsonData = jsonDecode(child['form_json'] as String);
+  //         final formData = jsonData['form_data'] as Map<String, dynamic>?;
+  //         final caseClosure = formData?['case_closure'] as Map<String, dynamic>?;
+  //
+  //         if (caseClosure?['is_case_closure'] == true &&
+  //             caseClosure?['reason_of_death']?.toString().toLowerCase() == 'death') {
+  //           final beneficiaryId = child['beneficiary_ref_key']?.toString();
+  //           if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
+  //             print('Found deceased beneficiary: $beneficiaryId');
+  //             deceasedIds.add(beneficiaryId);
+  //           }
+  //         }
+  //       } catch (e) {
+  //         print('⚠️ Error processing deceased record: $e');
+  //       }
+  //     }
+  //
+  //     print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
+  //
+  //     // Build where clause for beneficiaries query
+  //     String where = 'is_deleted = ? AND is_adult = ?';
+  //     List<Object?> whereArgs = [0, 0]; // 0 for false, 1 for true
+  //
+  //     if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+  //       where += ' AND current_user_key = ?';
+  //       whereArgs.add(ashaUniqueKey);
+  //     }
+  //
+  //     final List<Map<String, dynamic>> rows = await db.query(
+  //       'beneficiaries_new',
+  //       columns: ['*', 'is_death'],
+  //       where: where,
+  //       whereArgs: whereArgs,
+  //     );
+  //
+  //     print('📊 Found ${rows.length} total beneficiaries');
+  //     final childBeneficiaries = <Map<String, dynamic>>[];
+  //
+  //     for (final row in rows) {
+  //       try {
+  //         final rowHhId = row['household_ref_key']?.toString();
+  //         if (rowHhId == null) continue;
+  //
+  //         // Parse beneficiary info
+  //         final info = row['beneficiary_info'] is String
+  //             ? jsonDecode(row['beneficiary_info'] as String)
+  //             : row['beneficiary_info'];
+  //
+  //         if (info is! Map) continue;
+  //
+  //         // Check if this is a direct child record (new format)
+  //         final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+  //         final relation = info['relation']?.toString().toLowerCase() ?? '';
+  //
+  //         if (memberType == 'child' || relation == 'child' ||
+  //             relation == 'son' || relation == 'daughter') {
+  //
+  //           final name = info['name']?.toString() ??
+  //               info['memberName']?.toString() ??
+  //               info['member_name']?.toString() ??
+  //               '';
+  //
+  //           if (name.isEmpty) continue; // Skip if no name
+  //
+  //           final fatherName = info['fatherName']?.toString() ??
+  //               info['father_name']?.toString() ?? '';
+  //
+  //           final motherName = info['motherName']?.toString() ??
+  //               info['mother_name']?.toString() ?? '';
+  //
+  //           final mobileNo = info['mobileNo']?.toString() ??
+  //               info['mobile']?.toString() ??
+  //               info['mobile_number']?.toString() ?? '';
+  //
+  //           final richId = info['RichIDChanged']?.toString() ??
+  //               info['richIdChanged']?.toString() ??
+  //               info['richId']?.toString() ?? '';
+  //
+  //           final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
+  //           final gender = info['gender'] ?? info['sex'];
+  //
+  //           final beneficiaryId = row['unique_key']?.toString() ?? '';
+  //           final isDeceased = deceasedIds.contains(beneficiaryId);
+  //
+  //           if (isDeceased) {
+  //             print('ℹ️ Marking as deceased - ID: $beneficiaryId, Name: $name');
+  //           }
+  //
+  //           final card = <String, dynamic>{
+  //             'hhId': rowHhId,
+  //             'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+  //             'RegitrationType': 'Child',
+  //             'BeneficiaryID': beneficiaryId,
+  //             'RchID': richId,
+  //             'Name': name,
+  //             'Age|Gender': _formatAgeGender(dob, gender),
+  //             'Mobileno.': mobileNo,
+  //             'FatherName': fatherName,
+  //             'MotherName': motherName,
+  //             'is_deceased': isDeceased,
+  //             'is_death': row['is_death'] ?? 0,
+  //             '_raw': row,
+  //           };
+  //
+  //           childBeneficiaries.add(card);
+  //         }
+  //       } catch (e) {
+  //         print('⚠️ Error processing beneficiary record: $e');
+  //       }
+  //     }
+  //
+  //     if (mounted) {
+  //       setState(() {
+  //         _childBeneficiaries = List<Map<String, dynamic>>.from(childBeneficiaries);
+  //         _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
+  //         _isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error loading child beneficiaries: $e');
+  //     if (mounted) {
+  //       setState(() => _isLoading = false);
+  //     }
+  //   }
+  // }
+
   Future<void> _loadChildBeneficiaries() async {
     if (!mounted) return;
 
@@ -48,27 +209,12 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // Get current user key from secure storage
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
       print('🔍 Fetching deceased beneficiaries...');
-
-      // Build where clause for deceased children query
-      String deceasedWhere = 'form_json LIKE ?';
-      List<Object?> deceasedWhereArgs = ['%"reason_of_death":%'];
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        deceasedWhere += ' AND current_user_key = ?';
-        deceasedWhereArgs.add(ashaUniqueKey);
-      }
-
-      final deceasedChildren = await db.query(
-        'followup_form_data',
-        columns: ['DISTINCT beneficiary_ref_key', 'form_json'],
-        where: deceasedWhere,
-        whereArgs: deceasedWhereArgs,
-      );
+      final deceasedChildren = await db.rawQuery('''
+        SELECT DISTINCT beneficiary_ref_key, form_json 
+        FROM followup_form_data 
+        WHERE form_json LIKE '%"reason_of_death":%' 
+      ''');
 
       print('✅ Found ${deceasedChildren.length} potential deceased records');
 
@@ -94,20 +240,11 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
 
       print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
 
-      // Build where clause for beneficiaries query
-      String where = 'is_deleted = ? AND is_adult = ?';
-      List<Object?> whereArgs = [0, 0]; // 0 for false, 1 for true
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        where += ' AND current_user_key = ?';
-        whereArgs.add(ashaUniqueKey);
-      }
-
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries_new',
         columns: ['*', 'is_death'],
-        where: where,
-        whereArgs: whereArgs,
+        where: 'is_deleted = ? AND is_adult = ?',
+        whereArgs: [0, 0], // 0 for false, 1 for true
       );
 
       print('📊 Found ${rows.length} total beneficiaries');
@@ -191,6 +328,16 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
           _childBeneficiaries = List<Map<String, dynamic>>.from(childBeneficiaries);
           _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
           _isLoading = false;
+          
+          // Debug log the number of records loaded
+          debugPrint('✅ Loaded ${_childBeneficiaries.length} child beneficiaries');
+          debugPrint('✅ Filtered list contains ${_filtered.length} records');
+          
+          // Log first few records for verification
+          final count = _childBeneficiaries.length > 5 ? 5 : _childBeneficiaries.length;
+          for (int i = 0; i < count; i++) {
+            debugPrint('Record $i: ${_childBeneficiaries[i]['Name']} (ID: ${_childBeneficiaries[i]['BeneficiaryID']})');
+          }
         });
       }
     } catch (e) {
@@ -287,16 +434,26 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
       if (q.isEmpty) {
+        // Reset to show all records when search is cleared
         _filtered = List<Map<String, dynamic>>.from(_childBeneficiaries);
+        debugPrint('🔍 Search cleared. Showing all ${_filtered.length} records');
       } else {
         _filtered = _childBeneficiaries.where((e) {
-          return (e['hhId']?.toString().toLowerCase() ?? '').contains(q) ||
+          final match = (e['hhId']?.toString().toLowerCase() ?? '').contains(q) ||
               (e['Name']?.toString().toLowerCase() ?? '').contains(q) ||
               (e['Mobileno.']?.toString().toLowerCase() ?? '').contains(q) ||
               (e['FatherName']?.toString().toLowerCase() ?? '').contains(q) ||
               (e['MotherName']?.toString().toLowerCase() ?? '').contains(q) ||
               (e['BeneficiaryID']?.toString().toLowerCase() ?? '').contains(q);
+          
+          if (match) {
+            debugPrint('🔍 Found match: ${e['Name']} (ID: ${e['BeneficiaryID']})');
+          }
+          
+          return match;
         }).toList();
+        
+        debugPrint('🔍 Found ${_filtered.length} matching records for "$q"');
       }
     });
   }

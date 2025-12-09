@@ -13,6 +13,7 @@ import '../../../core/config/routes/Route_Name.dart' show Route_Names;
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/utils/Validations.dart' show Validations;
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
+import '../../../core/widgets/SnackBar/app_snackbar.dart';
 import 'bloc/update_member_detail_bloc.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
@@ -49,7 +50,60 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
 
   Widget _section(Widget child) =>
       Padding(padding: const EdgeInsets.only(bottom: 4), child: child);
+  void _handleAbhaProfileResult(Map<String, dynamic> profile, BuildContext context) {
+    debugPrint("ABHA Profile Received in Update Member Details: $profile");
 
+    final bloc = context.read<UpdateMemberDetailBloc>();
+
+    // 1. ABHA Address
+    final abhaAddress = profile['abhaAddress']?.toString().trim();
+    if (abhaAddress != null && abhaAddress.isNotEmpty) {
+      bloc.add(UpdateMemberDetailAbhaAddressChanged(abhaAddress));
+    }
+
+    // 2. Full Name
+    final nameParts = [
+      profile['firstName'],
+      profile['middleName'],
+      profile['lastName'],
+    ].where((e) => e != null && e.toString().trim().isNotEmpty).join(' ');
+    if (nameParts.isNotEmpty) {
+      bloc.add(UpdateMemberDetailNameChanged(nameParts.trim()));
+    }
+
+    // 3. DOB → Switch to DOB mode + fill
+    try {
+      final day = profile['dayOfBirth']?.toString();
+      final month = profile['monthOfBirth']?.toString();
+      final year = profile['yearOfBirth']?.toString();
+      if (day != null && month != null && year != null) {
+        final dob = DateTime(int.parse(year), int.parse(month), int.parse(day));
+        bloc.add(const UpdateMemberDetailToggleUseDob());
+        bloc.add(UpdateMemberDetailDobChanged(dob));
+      }
+    } catch (e) {
+      debugPrint("DOB parse error: $e");
+    }
+
+    // 4. Gender
+    final g = profile['gender']?.toString().toUpperCase();
+    String? gender;
+    if (g == 'M') gender = 'Male';
+    if (g == 'F') gender = 'Female';
+    if (g == 'O' || g == 'T') gender = 'Transgender';
+    if (gender != null) {
+      bloc.add(UpdateMemberDetailGenderChanged(gender));
+    }
+
+    // 5. Mobile Number + Owner = Self
+    final mobile = profile['mobile']?.toString().trim();
+    if (mobile != null && mobile.length == 10) {
+      bloc.add(UpdateMemberDetailMobileNumberChanged(mobile));
+      bloc.add(UpdateMemberDetailMobileOwnerChanged('Self'));
+    }
+
+    showAppSnackBar(context, "ABHA details updated successfully!");
+  }
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
@@ -975,11 +1029,18 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                             width: 140,
                                             borderRadius: 8,
                                             fontSize: 12,
-                                            onPress: () {
-                                              Navigator.pushNamed(
+                                            onPress: () async {
+                                              final result = await Navigator.pushNamed(
                                                 context,
                                                 Route_Names.Abhalinkscreen,
                                               );
+
+                                              debugPrint("BACK FROM ABHA (Update Member)");
+                                              debugPrint("RESULT: $result");
+
+                                              if (result is Map<String, dynamic> && mounted) {
+                                                _handleAbhaProfileResult(result, context);
+                                              }
                                             },
                                           ),
                                         ),

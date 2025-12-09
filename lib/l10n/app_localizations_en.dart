@@ -1653,7 +1653,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listRoutineImmunization => 'Routine Immunization (RI)';
 
   @override
-  String get lmpDateLabel => 'LMP Date';
+  String get lmpDateLabel => 'Date of last menstrual period (LMP) *';
 
   @override
   String get loginButton => 'Login';
@@ -3307,6 +3307,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoTutorialList => 'Video Tutorial List';
+
+  @override
+  String get lmpDateLabelText => 'LMP Date';
 
   @override
   String get previousPage => 'Previous Page';
@@ -5252,4 +5255,895 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mcpCardAvailableLabel => 'Is there availability of \'Mother Child Protection (MCP) card? *';
+
+  @override
+  String get formUpdatedSuccessfully => 'Form updated successfully';
+
+  @override
+  String get doNotWantToDisclose => 'Do not want to disclose';
+
+  @override
+  String get id => 'ID';
+
+  @override
+  String get visitInformation => 'Visit Information';
+
+  @override
+  String get visitId => 'Visit ID';
+
+  @override
+  String get formData => 'Form Data';
+
+  @override
+  String get rawData => 'Raw Data';
+
+  @override
+  String get formSavedSuccessfully => 'Form has been saved successfully';
+
+  @override
+  String get pregnantAddedToAnc => 'Pregnant beneficiary has been added to antenatal care (ANC) list.';
+
+  @override
+  String get okay => 'Okay';
+
+  @override
+  String get formSavedSuccess => 'Form saved successfully';
+
+  @override
+  String get eligibleCoupleTrackingDue => 'Eligible Couple Tracking Due';
+
+  @override
+  String get methodOfContraception => 'Method of contraception';
+
+  @override
+  String get condom => 'Condom';
+
+  @override
+  String get malaN => 'Mala -N (Daily contraceptive pill)';
+
+  @override
+  String get atraInjection => 'Atra Injection';
+
+  @override
+  String get copperT => 'Copper -T (IUCD)';
+
+  @override
+  String get chhaya => 'Chhaya (Weekly contraceptive pill)';
+
+  @override
+  String get ecp => 'ECP (Emergency contraceptive pill)';
+
+  @override
+  String get maleSterilization => 'Male Sterilization';
+
+  @override
+  String get femaleSterilization => 'Female Sterilization';
+
+  @override
+  String get anyOtherSpecifyy => 'Any Other Specify';
+
+  @override
+  String get dateOfAntraInjection => 'Date of Antra Injection';
+
+  @override
+  String get dateOfRemoval => 'Date of removal';
+
+  @override
+  String get enterReason => 'Enter reason';
+
+  @override
+  String get reasonForAbsent => 'Reason for absent';
+
+  @override
+  String get isBeneficiaryAbsent => 'Is Beneficiary Absent';
+
+  @override
+  String get quantityOfMalaN => 'Quantity of Mala -N (Daily contraceptive pill)';
+
+  @override
+  String get quantityOfECP => 'Quantity of ECP (Emergency contraceptive pill)';
+
+  @override
+  String get quantityOfChhaya => 'Quantity of Chhaya (Weekly contraceptive pill)';
+
+  @override
+  String get quantityOfCondoms => 'Quantity of Condoms';
+
+  @override
+  String get enterReasonForRemoval => 'Enter reason for removal';
+
+  @override
+  String get reasonForRemoval => 'Reason for Removal';
+
+  @override
+  String get anc => 'ANC';
+
+  @override
+  String get pmsma => 'PMSMA';
+
+  @override
+  String get vhsndAnganwadi => 'VHSND/Anganwadi';
+
+  @override
+  String get hscHwc => 'Health Sub-center/Health & Wealth Centre (HSC/HWC)';
+
+  @override
+  String get phcLabel => 'Primary Health Centre (PHC)';
+
+  @override
+  String get chcLabel => 'Community Health Centre (CHC)';
+
+  @override
+  String get rh => 'Referral Hospital (RH)';
+
+  @override
+  String get dh => 'District Hospital (DH)';
+
+  @override
+  String get mch => 'Medical College Hospital (MCH)';
+
+  @override
+  String get pmsmaSite => 'PMSMA Site';
+
+  @override
+  String get hepetitisB => 'Hepetitis - B';
+
+  @override
+  String get tuberculosisLabel => 'Tuberculosis (TB)';
+
+  @override
+  String get asthma => 'Asthma';
+
+  @override
+  String get highBP => 'High BP';
+
+  @override
+  String get stirti => 'STI/RTI';
+
+  @override
+  String get heartDisease => 'Heart Disease';
+
+  @override
+  String get liver_disease => 'Liver Disease';
+
+  @override
+  String get kideny_disease => 'Kideny Disease';
+
+  @override
+  String get epilespy => 'Epilepsy';
+
+  @override
+  String get specifyOtherDisease => 'Please specify other disease';
+
+  @override
+  String get selectRisks => 'Select Risks';
+
+  @override
+  String get riskSevereAnemia => 'Severe Anemia';
+
+  @override
+  String get riskPIH => 'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia';
+
+  @override
+  String get riskInfections => 'Syphilis, HIV Positive, Hepatitis B, Hepatitis C';
+
+  @override
+  String get riskGestationalDiabetes => 'Gestational Diabetes';
+
+  @override
+  String get riskHypothyroidism => 'Hypothyroidism';
+
+  @override
+  String get riskTeenagePregnancy => 'Teenage Pregnancy (<20 year)/ Pregnancy after 35 Year';
+
+  @override
+  String get riskTwins => 'Pregnant With Twins Or More';
+
+  @override
+  String get riskMalPresentation => 'Mal Presentation of baby (Breech/Transverse/Oblique)';
+
+  @override
+  String get riskPreviousCesarean => 'Previous Cesarean Delivery';
+
+  @override
+  String get riskPreviousHistory => 'Previous History of Neo-Natal Death, Still Birth, Premature Birth, Repeated Abortion, PIH, PPH, APH, Obstructed Labour';
+
+  @override
+  String get riskRhNegative => 'RH Negative';
+
+  @override
+  String get didPregnantWomanGiveBirth => 'Did the pregnant woman give birth to a baby?';
+
+  @override
+  String get dateOfAbortion => 'Date of Abortion';
+
+  @override
+  String get abortionComplication => 'Any complication leading to abortion?';
+
+  @override
+  String get deliveryOutcomeLabel => 'Delivery outcome *';
+
+  @override
+  String get liveBirth => 'Live birth';
+
+  @override
+  String get stillBirth => 'Still birth';
+
+  @override
+  String get newbornDeath => 'Newborn death';
+
+  @override
+  String get numberOfChildrenLabel => 'Number of Children *';
+
+  @override
+  String get oneChild => 'One Child';
+
+  @override
+  String get twins => 'Twins';
+
+  @override
+  String get triplets => 'Triplets';
+
+  @override
+  String get babysName => 'Baby\'s Name';
+
+  @override
+  String get enterBabyName => 'Enter Baby\'s Name';
+
+  @override
+  String get babyWeightLabel => 'Baby\'s Weight (1200–4000 gms)';
+
+  @override
+  String get enterBabyWeight => 'Enter Baby\'s Weight';
+
+  @override
+  String get firstBabyName => 'First Baby Name *';
+
+  @override
+  String get enterFirstBabyName => 'Enter First Baby Name';
+
+  @override
+  String get firstBabyGender => 'First Baby Gender *';
+
+  @override
+  String get firstBabyWeight => 'First Baby Weight (1200–4000 gms) *';
+
+  @override
+  String get enterFirstBabyWeight => 'Enter First Baby Weight';
+
+  @override
+  String get secondBabyName => 'Second Baby Name *';
+
+  @override
+  String get enterSecondBabyName => 'Enter Second Baby Name';
+
+  @override
+  String get secondBabyGender => 'Second Baby Gender *';
+
+  @override
+  String get secondBabyWeight => 'Second Baby Weight (1200–4000 gms) *';
+
+  @override
+  String get enterSecondBabyWeight => 'Enter Second Baby Weight';
+
+  @override
+  String get thirdBabyName => 'Third Baby Name *';
+
+  @override
+  String get enterThirdBabyName => 'Enter Third Baby Name';
+
+  @override
+  String get thirdBabyGender => 'Third Baby Gender *';
+
+  @override
+  String get thirdBabyWeight => 'Third Baby Weight (1200–4000 gms) *';
+
+  @override
+  String get enterThirdBabyWeight => 'Enter Third Baby Weight';
+
+  @override
+  String get reasonForAbsence => 'Reason for Absence';
+
+  @override
+  String get enterReasonForAbsence => 'Enter the reason for absence';
+
+  @override
+  String get pleaseFillFieldsCorrectly => 'Please fill all required fields correctly';
+
+  @override
+  String get noPregnantWomenFound => 'No pregnant women found';
+
+  @override
+  String get registerNewANCCases => 'Register new ANC cases in the family registration';
+
+  @override
+  String get fourthANCLabel => 'Fourth ANC';
+
+  @override
+  String get pmama => 'PMAMA';
+
+  @override
+  String get srNo => 'Sr No.';
+
+  @override
+  String get pregnancyWeek => 'Pregnancy Week';
+
+  @override
+  String get high_Risk => 'High Risk';
+
+  @override
+  String get noPregnancyOutcomesFound => 'No pregnancy outcomes found';
+
+  @override
+  String get nextHBNCDate => 'Next HBNC Date';
+
+  @override
+  String get previousHBNCDate => 'Previous HBNC Date';
+
+  @override
+  String get beneficiaryAddedToHbnc => 'Beneficiary has been added to HBNC list';
+
+  @override
+  String get institutional => 'Institutional';
+
+  @override
+  String get nonInstitutional => 'Non-Institutional';
+
+  @override
+  String get enterPlace => 'Enter place';
+
+  @override
+  String get enterOtherPlaceOfDelivery => 'Enter other place of delivery';
+
+  @override
+  String get publicPlace => 'Public';
+
+  @override
+  String get privatePlace => 'Private';
+
+  @override
+  String get institutionPlaceOfDelivery => 'Institution place of delivery';
+
+  @override
+  String get nursingHome => 'Nursing Home';
+
+  @override
+  String get hospital => 'Hospital';
+
+  @override
+  String get homeBasedDelivery => 'Home Based Delivery';
+
+  @override
+  String get inTransit => 'In Transit';
+
+  @override
+  String get nonInstitutionalPlaceOfDelivery => 'Non-institutional place of delivery';
+
+  @override
+  String get enterOtherNonInstitutionalDelivery => 'Enter name of other non-institutional delivery';
+
+  @override
+  String get enterName => 'Enter name';
+
+  @override
+  String get transitPlace => 'Transit place';
+
+  @override
+  String get ambulance => 'Ambulance';
+
+  @override
+  String get enterOtherTransitPlace => 'Please enter name of other transit place';
+
+  @override
+  String get anm => 'ANM';
+
+  @override
+  String get lhv => 'LHV';
+
+  @override
+  String get doctor => 'Doctor';
+
+  @override
+  String get staffNurse => 'Staff Nurse';
+
+  @override
+  String get tba => 'TBA (Non-Skilled birth attendant)';
+
+  @override
+  String get whoConductedDelivery => 'Who conducted the delivery?';
+
+  @override
+  String get whoElseConductedDelivery => 'Who else did the delivery?';
+
+  @override
+  String get convulsion => 'Convulsion';
+
+  @override
+  String get aph => 'Ante Partumhaemorrhage (Aph)';
+
+  @override
+  String get pih => 'Pregnancy Induced Hypertension (PIH)';
+
+  @override
+  String get repeatedAbortion => 'Repeated Abortion';
+
+  @override
+  String get motherDeath => 'Mother Death';
+
+  @override
+  String get congenitalAnomaly => 'Congenital Anomaly';
+
+  @override
+  String get bloodTransfusion => 'Blood Transfusion';
+
+  @override
+  String get obstructedLabour => 'Obstructed Labour';
+
+  @override
+  String get pph => 'PPH';
+
+  @override
+  String get anyOther => 'Any other';
+
+  @override
+  String get complication => 'Complication *';
+
+  @override
+  String get dateOfDischarge => 'Date of discharge';
+
+  @override
+  String get enterComplication => 'Enter complication';
+
+  @override
+  String get enterOtherComplication => 'Enter other complication during delivery';
+
+  @override
+  String get discharge_time => 'Discharge time (hh:mm)';
+
+  @override
+  String get adaptFamilyPlanningMethod => 'Do you want to adapt family planning method?';
+
+  @override
+  String get formSavedSuccessfullyMsg => 'Form saved successfully';
+
+  @override
+  String get firstBreastfeedTiming => 'First Breastfeeding Timing';
+
+  @override
+  String get within30Minutes => 'Within 30 minutes of birth';
+
+  @override
+  String get within1Hour => 'Within 1 hour of birth';
+
+  @override
+  String get within6Hours => 'Within 6 hours of birth';
+
+  @override
+  String get within24Hours => 'Within 24 hours of birth';
+
+  @override
+  String get notBreastfed => 'Not breastfed';
+
+  @override
+  String get howWasBreastfed => 'How was the baby breastfed?';
+
+  @override
+  String get normal => 'Normal';
+
+  @override
+  String get forcefully => 'Forcefully';
+
+  @override
+  String get withWeakness => 'With weakness';
+
+  @override
+  String get couldNotBreastfeedButSpoon => 'Could not breast feed but had to be fed with spoon';
+
+  @override
+  String get couldNeitherBreastfeedNorSpoon => 'Could neither breast feed nor take given by spoon';
+
+  @override
+  String get firstFeedGivenAfterBirth => 'First feed given after birth';
+
+  @override
+  String get firstBreastfeeding => 'First Breastfeeding';
+
+  @override
+  String get water => 'Water';
+
+  @override
+  String get honey => 'Honey';
+
+  @override
+  String get mishriWater => 'Mishri Water / Sugar Syrup';
+
+  @override
+  String get goatMilk => 'Goat Milk';
+
+  @override
+  String get cowMilk => 'Cow Milk';
+
+  @override
+  String get enter_other_feeding_option => 'Please enter other option';
+
+  @override
+  String get counsellingAdviceNeeded => 'Counselling/Advice needed?';
+
+  @override
+  String get is_navel_tied_with_thread => 'Is navel tied with a clean thread by ASHA or ANM?';
+
+  @override
+  String get babyWipedWithCleanCloth => 'Has the baby been wiped with a clean dry cloth?';
+
+  @override
+  String get is_child_kept_warm => 'Has the baby kept warm?';
+
+  @override
+  String get babyGivenBath => 'Has the baby been given a bath?';
+
+  @override
+  String get babyWrappedAndPlacedNearMother => 'Whether the baby was wrapped in a cloth and placed near the mother?';
+
+  @override
+  String get selectEyeProblemTypeLabel => 'Select type of eye problem';
+
+  @override
+  String get swelling => 'Swelling';
+
+  @override
+  String get oozingPus => 'Oozing pus';
+
+  @override
+  String get counsellingBreastfeeding => 'Counselling/Advice needed for breastfeeding?';
+
+  @override
+  String get referredByASHA => 'Referred by ASHA to';
+
+  @override
+  String get aphc => 'APHC';
+
+  @override
+  String get rhLabel => 'RH';
+
+  @override
+  String get sdh => 'SDH';
+
+  @override
+  String get dhLabel => 'DH';
+
+  @override
+  String get babyWeightRecordedInMPC => 'Is the weight of the newborn baby recorded in the Mother Protection Card?';
+
+  @override
+  String get referToHospital => 'Refer to hospital?';
+
+  @override
+  String get referToLabel => 'Refer to';
+
+  @override
+  String get mchLabel => 'MCH';
+
+  @override
+  String get date_of_death => 'Date of death *';
+
+  @override
+  String get place_of_death => 'Place of death *';
+
+  @override
+  String get migrated_out => 'Migrated Out';
+
+  @override
+  String get on_the_way => 'On the way';
+
+  @override
+  String get facility => 'Facility';
+
+  @override
+  String get reason_of_death => 'Reason of death *';
+
+  @override
+  String get ph => 'PH';
+
+  @override
+  String get severe_anaemia => 'Severe Anaemia';
+
+  @override
+  String get spesis => 'Sepsis';
+
+  @override
+  String get obstructed_labour => 'Obstructed Labour';
+
+  @override
+  String get malpresentation => 'Malpresentation';
+
+  @override
+  String get eclampsia_severe_hypertension => 'Eclampsia / Severe Hypertension';
+
+  @override
+  String get unsafe_abortion => 'Unsafe Abortion';
+
+  @override
+  String get surgical_complication => 'Surgical Complication';
+
+  @override
+  String get other_reason_not_maternal_complication => 'Other reason apart from maternal complication';
+
+  @override
+  String get other_specify => 'Other (Specify)';
+
+  @override
+  String get other_reason_of_death => 'Other reason of death *';
+
+  @override
+  String get specify_other_reason => 'Specify other reason';
+
+  @override
+  String get unconscious_fits => 'Unconscious / fits *';
+
+  @override
+  String get excessive_bleeding => 'Excessive bleeding *';
+
+  @override
+  String get has_mcp_card_filled => 'Has the MCP card filled? *';
+
+  @override
+  String get please_enter_problem => 'Please enter problem *';
+
+  @override
+  String get enter_breastfeeding_problem => 'Enter breastfeeding problem';
+
+  @override
+  String get write_take_action => 'Please write down the take action';
+
+  @override
+  String get breastfeeding_problem_help => 'If there is a problem in breastfeeding, help the mother to overcome it *';
+
+  @override
+  String get temp_upto_102 => 'Temperature up to 102°F (38.9°C)';
+
+  @override
+  String get temp_more_than_102 => 'Temperature more than 102°F (38.9°C)';
+
+  @override
+  String get paracetamolGivenLabel => 'Paracetamol tablet given (Temperature up to 102°F / 38.9°C) *';
+
+  @override
+  String get refer_to_hospital => 'Refer to Hospital *';
+
+  @override
+  String get please_add_family_head_details => 'Please add family head details';
+
+  @override
+  String get totalBeneficiaryAdded => 'Total beneficiary added';
+
+  @override
+  String get enterTypeOfFuelForCooking => 'Enter type of fuel for cooking';
+
+  @override
+  String get enterPrimarySourceOfWater => 'Enter primary source of water';
+
+  @override
+  String get other_availability_of_electricity => 'Enter availability of electricity';
+
+  @override
+  String get typeOfToiletLabel => 'Type of toilet';
+
+  @override
+  String get flushToiletWithRunningWater => 'Flush toilet with running water';
+
+  @override
+  String get flushToiletWithoutWater => 'Flush toilet without water';
+
+  @override
+  String get pitToiletWithRunningWater => 'Pit toilet with running water';
+
+  @override
+  String get pitToiletWithoutWaterSupply => 'Pit toilet without water supply';
+
+  @override
+  String get enterTypeOfToiletLabel => 'Enter Type of toilet';
+
+  @override
+  String get whereDoYouGoForToiletLabel => 'Where do you go for toilet?';
+
+  @override
+  String get communityToilet => 'Community toilet';
+
+  @override
+  String get friendRelativeToilet => 'Friend/Relative toilet';
+
+  @override
+  String get openSpace => 'Open space';
+
+  @override
+  String get other_type_of_residential_area => 'Enter type of residential area';
+
+  @override
+  String get enterTypeOfOwnershipLabel => 'Enter type of ownership';
+
+  @override
+  String get other_type_of_house => 'Enter type of house';
+
+  @override
+  String get failedToSaveFamilyMember => 'Failed to save family member. Please try again.';
+
+  @override
+  String get setMaritaDetails => 'Set Marital Status = Married to fill Spouse details.';
+
+  @override
+  String get setChildDetails => 'Select Have Children = Yes to fill Children details.';
+
+  @override
+  String get childrenDetails => 'Children Details';
+
+  @override
+  String get spouseDetails => 'Spouse Details';
+
+  @override
+  String get member_status_label => 'Member Status *';
+
+  @override
+  String get death => 'Death';
+
+  @override
+  String get please_select_date_of_death => 'Please select date of death';
+
+  @override
+  String get enter_place_of_death => 'Enter place of death';
+
+  @override
+  String get please_enter_place_of_death => 'Please enter place of death';
+
+  @override
+  String get please_select_member_status => 'Please select member status';
+
+  @override
+  String get reason_of_death_label => 'Reason of Death *';
+
+  @override
+  String get natural_causes => 'Natural Causes';
+
+  @override
+  String get illness => 'Illness';
+
+  @override
+  String get accident => 'Accident';
+
+  @override
+  String get please_select_reason_of_death => 'Please select reason of death';
+
+  @override
+  String get please_specify_reason_of_death => 'Please specify reason of death';
+
+  @override
+  String get enter_reason_of_death => 'Enter reason of death';
+
+  @override
+  String get specify_reason_required => 'Specify Reason *';
+
+  @override
+  String get enter_12_digit_rch_id => 'Enter 12 digit RCH ID';
+
+  @override
+  String get must_be_12_digits => 'Must be 12 digits';
+
+  @override
+  String get rch_id_must_be_12_digits => 'RCH ID must be exactly 12 digits';
+
+  @override
+  String get verifying_rch_id => 'Verifying RCH ID...';
+
+  @override
+  String get invalid_rch_id => 'Invalid RCH ID';
+
+  @override
+  String get rch_id_must_be_12digits => 'RCH ID must be exactly 12 digits';
+
+  @override
+  String get please_enter_rch_id_first => 'Please enter RCH ID first';
+
+  @override
+  String get no_data_found_rch_id => 'No data found for this RCH ID';
+
+  @override
+  String get api_returned_null_response => 'API returned null response';
+
+  @override
+  String get failed_to_fetch_rch_data => 'Failed to fetch RCH data';
+
+  @override
+  String get failedTo_fetch_rch_data => 'Failed to fetch RCH data';
+
+  @override
+  String get rch_data_loaded_successfully => 'RCH data loaded successfully!';
+
+  @override
+  String get enter_relation_with_family_head => 'Enter relation with family head';
+
+  @override
+  String get relation_with_mobile_holder_required => 'Relation with mobile no. holder is required';
+
+  @override
+  String get enter_relation_with_mobile_holder => 'Enter relation with mobile no. holder';
+
+  @override
+  String get error_loading_head_mobile => 'Error loading head of family mobile number';
+
+  @override
+  String get no_mobile_found_for_head => 'No mobile number found for the head of family';
+
+  @override
+  String get child_age_validation => 'For Child: Age should be between 1 day to 15 years.';
+
+  @override
+  String get dob_cannot_be_future => 'Date of birth cannot be in the future';
+
+  @override
+  String get dob_required => 'Date of birth is required';
+
+  @override
+  String get enter_other_occupation => 'Enter occupation';
+
+  @override
+  String get enter_valid_weight => 'Please enter a valid weight';
+
+  @override
+  String get weight_range_validation => 'Weight must be between 1.2 and 90 Kg';
+
+  @override
+  String get weight_at_birth => 'Birth Weight (1200-4000)gms';
+
+  @override
+  String get birth_weight_range_validation => 'Birth weight must be between 1200 and 4000 gms';
+
+  @override
+  String get enter_valid_birth_weight => 'Please enter a valid birth weight';
+
+  @override
+  String get is_school_going_child => 'Is he/she a school-going child?';
+
+  @override
+  String get is_birth_certificate_issued => 'Is birth certificate issued?';
+
+  @override
+  String get enter_religion => 'Enter Religion';
+
+  @override
+  String get enter_category => 'Enter Category';
+
+  @override
+  String get invalid_length => 'Invalid length';
+
+  @override
+  String get bank_account_length_error => 'Bank account number must be between 11 to 18 digits';
+
+  @override
+  String get ifsc_invalid_format => 'IFSC code must have first 4 uppercase letters, followed by 0 and 6 digits';
+
+  @override
+  String get ifsc_invalid_length => 'Please enter a valid 11-character IFSC code';
+
+  @override
+  String get please_select_family_planning_status => 'Please select family planning status';
+
+  @override
+  String get antraInjection => 'Antra injection';
+
+  @override
+  String get dateOfAntra => 'Date of Antra';
+
+  @override
+  String get removalDate => 'Removal Date';
+
+  @override
+  String get pleaseCorrectErrors => 'Please correct the highlighted errors before continuing.';
+
+  @override
+  String get fillSpouseDetails => 'Please fill all required fields in the spouse details before continuing.';
+
+  @override
+  String get updating => 'UPDATING...';
+
+  @override
+  String get errorPreparingData => 'Error preparing data. Please try again.';
 }
