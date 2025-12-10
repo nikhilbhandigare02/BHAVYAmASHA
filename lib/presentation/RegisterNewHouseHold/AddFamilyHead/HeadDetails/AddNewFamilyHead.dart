@@ -231,6 +231,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
   List<String> _getMobileOwnerList(String gender) {
     const common = [
+      'Self',
+      'Husband',
+      'Wife',
       'Father',
       'Mother',
       'Son',
@@ -257,7 +260,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         'Neighbour',
         'Relative',
         'Other',
-        ...common,
+
       ];
     }
 
@@ -274,24 +277,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         'Neighbour',
         'Relative',
         'Other',
-        ...common,
+
       ];
     }
 
     if (gender == 'transgender') {
       return [
-        'Self',
-        'Husband',
-        'Wife',
-        'Father',
-        'Mother',
-        'Son',
-        'Daughter',
-        'Father In Law',
-        'Mother In Law',
-        'Neighbour',
-        'Relative',
-        'Other',
+
         ...common,
       ];
     }
@@ -310,7 +302,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       'Neighbour',
       'Relative',
       'Other',
-      ...common,
     ];
   }
 
@@ -795,7 +786,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       borderRadius: 1.h,
                       fontSize: 14.sp,
                       onPress: () async {
-                        // Remove previous snackbar
+                        // Remove previous
                         ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
                         final rchId = state?.AfhRichIdChange?.trim() ?? "";
@@ -815,7 +806,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         print("RCH ID: $rchId");
                         print("requestFor: 1");
 
-                        // 👉 CALL YOUR FUNCTION FROM SAME SCREEN
                         final response = await fetchRCHDataForScreen(
                           int.parse(rchId),
                           requestFor: 1, // FEMALE

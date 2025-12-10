@@ -11,6 +11,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/utils/anc_utils.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../data/Database/tables/mother_care_activities_table.dart';
 import '../../data/SecureStorage/SecureStorage.dart';
 import '../HomeScreen/HomeScreen.dart';
 import 'package:medixcel_new/core/config/routes/Routes.dart' as AppRoutes;
@@ -196,96 +197,88 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
   Future<void> _loadDeliveryOutcomeCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
-
-      // Get current user data
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      const ancRefKey = 'bt7gs9rl1a5d26mz';
 
       print('🔍 Loading Delivery Outcome count...');
-      print('🔍 Using current_user_key: $ashaUniqueKey');
 
-      // Query to get beneficiaries with mother_care_state = 'delivery_outcome'
-      // and exclude those with 'pnc_mother' state
-      final deliveryOutcomeRecords = await db.rawQuery('''
-      SELECT 
-        mca.beneficiary_ref_key,
-        mca.household_ref_key,
-        mca.created_date_time,
-        bn.*
-      FROM mother_care_activities mca
-      INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
+      // Same query as in DeliveryOutcomeScreen
+      final ancForms = await db.rawQuery('''
+      SELECT DISTINCT
+        f.beneficiary_ref_key,
+        f.form_json,
+        f.household_ref_key,
+        f.forms_ref_key,
+        f.created_date_time,
+        f.id as form_id
+      FROM ${FollowupFormDataTable.table} f
+      LEFT JOIN ${MotherCareActivitiesTable.table} mca 
+        ON f.beneficiary_ref_key = mca.beneficiary_ref_key
       WHERE 
-        mca.mother_care_state = 'delivery_outcome'
-        AND bn.is_deleted = 0
-        AND mca.beneficiary_ref_key NOT IN (
-          SELECT DISTINCT beneficiary_ref_key 
-          FROM mother_care_activities 
-          WHERE mother_care_state = 'pnc_mother'
-        )
-        AND mca.current_user_key = ?
-      ORDER BY mca.created_date_time DESC
-    ''', [ashaUniqueKey ?? '']);
+        f.forms_ref_key = '$ancRefKey'
+        AND f.is_deleted = 0
+        AND (f.form_json LIKE '%"gives_birth_to_baby":"Yes"%' 
+             OR mca.mother_care_state = 'delivery_outcome')
+      ORDER BY f.created_date_time DESC
+    ''');
 
-      print('📊 Found ${deliveryOutcomeRecords.length} delivery outcome records after filtering');
+      print('📊 Found ${ancForms.length} eligible forms for delivery outcome');
 
-      // Get the delivery outcome form key
-      final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome];
-      print('🔑 Delivery Outcome Key: $deliveryOutcomeKey');
+      if (ancForms.isEmpty) {
+        print('ℹ️ No eligible forms found for delivery outcome');
+        if (mounted) {
+          setState(() {
+            _deliveryOutcomeCount = 0;
+          });
+        }
+        return;
+      }
 
       // Track unique beneficiaries that need delivery outcome
       final Set<String> beneficiariesNeedingOutcome = {};
-      final Set<String> beneficiariesProcessed = {};
+      final Set<String> processedBeneficiaries = {};
 
-      for (final record in deliveryOutcomeRecords) {
+      for (final form in ancForms) {
         try {
-          final beneficiaryRefKey = record['beneficiary_ref_key']?.toString();
+          final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            print('⚠️ Skipping record - missing beneficiary_ref_key');
+            print('⚠️ Form missing beneficiary_ref_key: $form');
             continue;
           }
 
           // Skip if we've already processed this beneficiary
-          if (beneficiariesProcessed.contains(beneficiaryRefKey)) {
-            print('⏩ Already processed beneficiary: $beneficiaryRefKey');
+          if (processedBeneficiaries.contains(beneficiaryRefKey)) {
             continue;
           }
+          processedBeneficiaries.add(beneficiaryRefKey);
 
-          beneficiariesProcessed.add(beneficiaryRefKey);
-
-          // Check if delivery outcome form already exists
+          // Check if delivery outcome already exists
+          final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[
+          FollowupFormDataTable.deliveryOutcome];
           final existingOutcome = await db.query(
             FollowupFormDataTable.table,
-            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 AND current_user_key = ?',
-            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey, ashaUniqueKey],
+            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0',
+            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey],
             limit: 1,
           );
 
-          if (existingOutcome.isNotEmpty) {
-            print('✅ Delivery outcome already exists for: $beneficiaryRefKey');
-            continue; // Skip - already has outcome
+          if (existingOutcome.isEmpty) {
+            beneficiariesNeedingOutcome.add(beneficiaryRefKey);
           }
-
-          // Add to count if no outcome exists
-          beneficiariesNeedingOutcome.add(beneficiaryRefKey);
-          print('➕ Added to count - Needs delivery outcome: $beneficiaryRefKey');
-
-        } catch (e, stackTrace) {
-          print('⚠️ Error processing delivery outcome record: $e');
-          print('Stack trace: $stackTrace');
+        } catch (e) {
+          print('⚠️ Error processing form: $e');
         }
       }
 
-      final count = beneficiariesNeedingOutcome.length;
-      print('✅ Delivery Outcome Count: $count (Total unique beneficiaries needing outcome)');
+      print('✅ Found ${beneficiariesNeedingOutcome.length} beneficiaries needing delivery outcome');
 
       if (mounted) {
         setState(() {
-          _deliveryOutcomeCount = count;
+          _deliveryOutcomeCount = beneficiariesNeedingOutcome.length;
         });
       }
 
     } catch (e, stackTrace) {
-      print('❌ Error loading delivery outcome count: $e');
+      print('❌ Error in _loadDeliveryOutcomeCount: $e');
       print('Stack trace: $stackTrace');
       if (mounted) {
         setState(() {
@@ -293,8 +286,7 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
         });
       }
     }
-  }
-  Future<void> _loadHBCNCount() async {
+  }  Future<void> _loadHBCNCount() async {
     try {
       print('🔍 Loading HBNC count...');
 
