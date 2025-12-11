@@ -8,6 +8,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 
 class HBNCListBeneficiaries extends StatefulWidget {
   const HBNCListBeneficiaries({super.key});
@@ -50,22 +51,8 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
         FollowupFormDataTable.table,
         where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
         whereArgs: [beneficiaryId, hbncVisitKey],
-        orderBy: 'created_date_time DESC',
+        columns: ['id'],
       );
-
-      if (results.isEmpty) return 0;
-
-      try {
-        final formJson = jsonDecode(results.first['form_json'] as String? ?? '{}');
-        final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-        
-        if (formData.containsKey('visitDetails')) {
-          final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
-          return visitDetails['visitNumber'] as int? ?? results.length;
-        }
-      } catch (e) {
-        print('Error parsing form data: $e');
-      }
 
       return results.length;
     } catch (e) {
@@ -79,12 +66,16 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
       final db = await DatabaseProvider.instance.database;
       final deliveryOutcomeKey = '4r7twnycml3ej1vg';
 
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       final results = await db.query(
         'followup_form_data',
-        where: 'forms_ref_key = ?',
-        whereArgs: [deliveryOutcomeKey],
+        where: 'forms_ref_key = ? AND current_user_key = ?',
+        whereArgs: [deliveryOutcomeKey, ashaUniqueKey],
       );
 
+      print('Fetched ${results.length} delivery outcome records');
       return results;
     } catch (e) {
       print('Error fetching delivery outcome data: $e');
@@ -121,6 +112,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
   Future<void> _loadPregnancyOutcomeeCouples() async {
     setState(() => _isLoading = true);
     _filtered = [];
+    final Set<String> processedBeneficiaries = <String>{};
 
     try {
       final dbOutcomes = await _getDeliveryOutcomeData();
@@ -139,6 +131,11 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
           final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
 
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) continue;
+
+          if (processedBeneficiaries.contains(beneficiaryRefKey)) {
+            continue;
+          }
+          processedBeneficiaries.add(beneficiaryRefKey);
 
           final db = await DatabaseProvider.instance.database;
           final beneficiaryResults = await db.query(
@@ -166,10 +163,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
           final gender = beneficiaryInfo['gender']?.toString() ?? 'N/A';
           final hhId = beneficiary['household_ref_key']?.toString() ?? 'N/A';
           
-          final visitCount = await _getVisitCount(beneficiaryRefKey);
-
           final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
-          
           formattedData.add({
             'hhId': displayHhId,
             'name': name,

@@ -1295,7 +1295,7 @@ class RegisterNewHouseholdBloc
                 //
 
 
-                if (memberType.toLowerCase() == 'child' && beneficiaryState == 'registration_due') {
+                if (memberType.toLowerCase() == 'child') {
                   try {
                     final childCareActivityData = {
                       'server_id': null,

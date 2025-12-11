@@ -190,15 +190,7 @@ class Spousdetails extends StatefulWidget {
 
 List<String> _getMobileOwnerList(String gender) {
   const common = [
-    'Father',
-    'Mother',
-    'Son',
-    'Daughter',
-    'Father In Law',
-    'Mother In Law',
-    'Neighbour',
-    'Relative',
-    'Other',
+
   ];
 
   gender = gender.toLowerCase();
@@ -206,7 +198,6 @@ List<String> _getMobileOwnerList(String gender) {
   if (gender == 'female') {
     return [
       'Self',
-      'Family Head',
       'Husband',
       'Father',
       'Mother',
@@ -217,14 +208,13 @@ List<String> _getMobileOwnerList(String gender) {
       'Neighbour',
       'Relative',
       'Other',
-      ...common,
+
     ];
   }
 
   if (gender == 'male') {
     return [
       'Self',
-      'Family Head',
       'Wife',
       'Father',
       'Mother',
@@ -235,14 +225,13 @@ List<String> _getMobileOwnerList(String gender) {
       'Neighbour',
       'Relative',
       'Other',
-      ...common,
+
     ];
   }
 
   if (gender == 'transgender') {
     return [
       'Self',
-      'Family Head',
       'Husband',
       'Wife',
       'Father',
@@ -254,14 +243,13 @@ List<String> _getMobileOwnerList(String gender) {
       'Neighbour',
       'Relative',
       'Other',
-      ...common,
+
     ];
   }
 
   // Fallback if gender is unknown
   return [
     'Self',
-    'Family Head',
     'Husband',
     'Wife',
     'Father',
@@ -1274,7 +1262,6 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                     if (v == 'Husband' || v == 'Wife') {
                       try {
-                        // Try to get the mobile number from AddNewFamilyMemberBloc in add member flow
                         if (widget.isAddMember) {
                           final memberBloc = context.read<AddnewfamilymemberBloc>();
                           final memberState = memberBloc.state;

@@ -41,6 +41,7 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
   final int initialStep;
   final bool isAddMember;
   final String? headMobileNumber;
+  final String? headSpouseMobile;
 
   const AddNewFamilyMemberScreen({
     super.key,
@@ -56,6 +57,7 @@ class AddNewFamilyMemberScreen extends StatefulWidget {
     this.initialStep = 0,
     this.isAddMember = false,
     this.headMobileNumber,
+    this.headSpouseMobile,
   });
 
   @override
@@ -437,19 +439,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   }
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => widget.maintainState;
+
+  // Check if we should prefill mobile number based on relation
+  void _checkAndPrefillMobileNumber(String? relation) {
+    if (relation == 'Mother' && widget.headSpouseMobile != null && widget.headSpouseMobile!.isNotEmpty) {
+      // Prefill the mobile number and set owner to 'Self' for mother
+      context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(widget.headSpouseMobile!));
+      context.read<AddnewfamilymemberBloc>().add(const AnmUpdateMobileOwner('Self'));
+    }
+  }
 
   List<String> _getMobileOwnerList(String gender) {
     const common = [
-      'Father',
-      'Mother',
-      'Son',
-      'Daughter',
-      'Father In Law',
-      'Mother In Law',
-      'Neighbour',
-      'Relative',
-      'Other',
+
     ];
 
     gender = gender.toLowerCase();
@@ -457,7 +460,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     if (gender == 'female') {
       return [
         'Self',
-        'Family Head',
         'Husband',
         'Father',
         'Mother',
@@ -468,14 +470,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         'Neighbour',
         'Relative',
         'Other',
-        ...common,
+
       ];
     }
 
     if (gender == 'male') {
       return [
         'Self',
-        'Family Head',
         'Wife',
         'Father',
         'Mother',
@@ -486,14 +487,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         'Neighbour',
         'Relative',
         'Other',
-        ...common,
+
       ];
     }
 
     if (gender == 'transgender') {
       return [
         'Self',
-        'Family Head',
         'Husband',
         'Wife',
         'Father',
@@ -505,14 +505,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         'Neighbour',
         'Relative',
         'Other',
-        ...common,
+
       ];
     }
 
     // Fallback if gender is unknown
     return [
       'Self',
-      'Family Head',
       'Husband',
       'Wife',
       'Father',
@@ -1921,9 +1920,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                     value: state.relation,
                                     onChanged: (v) {
+                                      final relation = v ?? '';
                                       context
                                           .read<AddnewfamilymemberBloc>()
-                                          .add(AnmUpdateRelation(v ?? ''));
+                                          .add(AnmUpdateRelation(relation));
+                                          
                                       if (v == 'Father' || v == 'Mother') {
                                         final fatherName =
                                             _firstFatherItem() ?? '';

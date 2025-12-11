@@ -245,30 +245,33 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
               ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-              _section(
-                ApiDropdown<String>(
-                  labelText: l.genderOfYoungest,
-                  items: const ['Male', 'Female'],
-                  getLabel: (s) {
-                    switch (s) {
-                      case 'Male':
-                        return l.genderMale;
-                      case 'Female':
-                        return l.genderFemale;
-                      default:
-                        return s;
-                    }
-                  },
-                  value: state.youngestGender,
-                  onChanged: (v) {
-                    context.read<ChildrenBloc>().add(ChUpdateYoungestGender(v));
-                    // Trigger validation when gender changes
-                    setState(() {
-                      _youngestAgeError = _validateYoungestAge(state.youngestAge ?? '');
-                    });
-                  },
+
+                _section(
+                  ApiDropdown<String>(
+                    labelText: l.genderOfYoungest,
+                    items: const ['Male', 'Female','Transgender'],
+                    getLabel: (s) {
+                      switch (s) {
+                        case 'Male':
+                          return l.genderMale;
+                        case 'Female':
+                          return l.genderFemale;
+                        case 'Transgender':
+                          return l.transgender;
+                        default:
+                          return s;
+                      }
+                    },
+                    value: state.youngestGender,
+                    onChanged: (v) {
+                      context.read<ChildrenBloc>().add(ChUpdateYoungestGender(v));
+                      // Trigger validation when gender changes
+                      setState(() {
+                        _youngestAgeError = _validateYoungestAge(state.youngestAge ?? '');
+                      });
+                    },
+                  ),
                 ),
-              ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             ],
           );

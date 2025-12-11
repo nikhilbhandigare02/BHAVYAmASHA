@@ -1071,7 +1071,7 @@ class AddnewfamilymemberBloc
           }
         }
         
-        if (state.memberType?.toLowerCase() == 'child' && beneficiaryState == 'registration_due') {
+        if (state.memberType?.toLowerCase() == 'child') {
           try {
             final childCareActivityData = {
               'server_id': null,

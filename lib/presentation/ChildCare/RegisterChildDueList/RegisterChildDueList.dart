@@ -237,7 +237,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      // Build where clause based on whether we have a user key
+
       String whereClause = 'child_care_state = ?';
       List<dynamic> whereArgs = ['registration_due'];
 
@@ -660,8 +660,8 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           final args = <String, dynamic>{
             'hhId': hhId,
             'name': name,
-            'gender': gender,
-            'mobile': mobile,
+            'gender': gender, 
+            'mobile': mobile, 
 
             'fatherName': fatherName,
             'beneficiaryId': beneficiaryId,
@@ -671,12 +671,50 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           // Schedule the navigation for after the current build
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             if (!mounted) return;
+            String? villageName;
+            try {
+              final db = await DatabaseProvider.instance.database;
+              final rows = await db.query(
+                'beneficiaries_new',
+                columns: ['beneficiary_info'],
+                where: 'household_ref_key = ? AND is_deleted = 0',
+                whereArgs: [hhId],
+                orderBy: 'id ASC',
+                limit: 1,
+              );
+              if (rows.isNotEmpty) {
+                final infoStr = rows.first['beneficiary_info']?.toString() ?? '{}';
+                try {
+                  final info = jsonDecode(infoStr);
+                  if (info is Map) {
+                    villageName = info['village']?.toString();
+                  }
+                } catch (_) {}
+              }
+            } catch (e) {
+              debugPrint('Error fetching village by hhId $hhId: $e');
+            }
+
+            final argsWithVillage = Map<String, dynamic>.from(args);
+            if (villageName != null) {
+              argsWithVillage['village'] = villageName;
+            }
+
+            debugPrint('Navigating with args:');
+            debugPrint('hhId: ${argsWithVillage['hhId']}');
+            debugPrint('name: ${argsWithVillage['name']}');
+            debugPrint('gender: ${argsWithVillage['gender']}');
+            debugPrint('mobile: ${argsWithVillage['mobile']}');
+            debugPrint('fatherName: ${argsWithVillage['fatherName']}');
+            debugPrint('beneficiaryId: ${argsWithVillage['beneficiaryId']}');
+            debugPrint('beneficiary_ref_key: ${argsWithVillage['beneficiary_ref_key']}');
+            debugPrint('village: ${argsWithVillage['village']}');
             
             final result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => RegisterChildDueListFormScreen(
-                  arguments: args,
+                  arguments: argsWithVillage,
                 ),
               ),
             );

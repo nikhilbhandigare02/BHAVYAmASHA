@@ -13,6 +13,7 @@ import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/Tabs/MotherDe
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/Tabs/ChildDetails.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'package:medixcel_new/core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
 
 class HbncVisitScreen extends StatefulWidget {
   final Map<String, dynamic>? beneficiaryData;
@@ -43,7 +44,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     _tabController.dispose();
     super.dispose();
   }
-// Add this new method to check sync status
+
 
   @override
   Widget build(BuildContext context) {
@@ -75,15 +76,33 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                 if (state.saveSuccess && !state.isSaving) {
                   showAppSnackBar(context, 'Form saved successfully.');
                   if (mounted) {
-                    Future.delayed(const Duration(milliseconds: 2000), () {
-                      if (mounted) {
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          Route_Names.HBNCScreen,
-                          (route) => false,
-                        );
-                      }
-                    });
+                    final dynamic dayRaw = state.visitDetails['visitNumber'];
+                    final int visitDay = dayRaw is int ? dayRaw : int.tryParse(dayRaw?.toString() ?? '') ?? 0;
+                    if (visitDay == 42) {
+                      CustomDialog.show(
+                        context,
+                        title: 'Form has been saved successfully',
+                        message: 'The post natal care of beneficiary has been completed',
+                        onOkPressed: () {
+                          Navigator.of(context, rootNavigator: true).pop();
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            Route_Names.HBNCScreen,
+                            (route) => false,
+                          );
+                        },
+                      );
+                    } else {
+                      Future.delayed(const Duration(milliseconds: 2000), () {
+                        if (mounted) {
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            Route_Names.HBNCScreen,
+                            (route) => false,
+                          );
+                        }
+                      });
+                    }
                   }
                 }
 

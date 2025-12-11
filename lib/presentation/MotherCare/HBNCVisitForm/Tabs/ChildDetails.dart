@@ -127,17 +127,22 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ),
                   const Divider(height: 0,),
-              
+
                   ApiDropdown<String>(
                     labelText: t.babyGenderLabel,
                     hintText: t.babyGenderLabel,
-                    items: const ['Male', 'Female', 'Other'],
-                    getLabel: (e) => e == 'Male' ? t.male : (e == 'Female' ? t.female : t.other),
+                    items: const ['Male', 'Female'],   // 👈 ONLY these two now
+                    getLabel: (e) => e == 'Male' ? t.male : t.female,
                     value: s(c['gender']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'gender', value: val, childIndex: widget.childIndex),
+                      NewbornDetailsChanged(
+                        field: 'gender',
+                        value: val,
+                        childIndex: widget.childIndex,
+                      ),
                     ),
                   ),
+
                   const Divider(height: 0,),
               
                   CustomTextField(

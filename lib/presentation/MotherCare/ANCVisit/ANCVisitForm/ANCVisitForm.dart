@@ -17,6 +17,7 @@ import '../../../../data/Database/tables/followup_form_data_table.dart';
 import 'bloc/anvvisitform_bloc.dart';
 import 'package:medixcel_new/core/widgets/MultiSelect/MultiSelect.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
 
 class Ancvisitform extends StatefulWidget {
   final Map<String, dynamic>? beneficiaryData;
@@ -30,6 +31,19 @@ class Ancvisitform extends StatefulWidget {
 class _AncvisitformState extends State<Ancvisitform> {
   late final AnvvisitformBloc _bloc;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  int _childrenCount(String value) {
+    switch (value) {
+      case 'One Child':
+        return 1;
+      case 'Twins':
+        return 2;
+      case 'Triplets':
+        return 3;
+      default:
+        return 0;
+    }
+  }
 
   @override
   @override
@@ -743,8 +757,24 @@ class _AncvisitformState extends State<Ancvisitform> {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
               }
               if (state.isSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n?.saveSuccess ?? 'Saved successfully')));
-                Navigator.pop(context, true);
+                if (state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) {
+                  final count = _childrenCount(state.numberOfChildren);
+                  CustomDialog.show(
+                    context,
+                    title: 'Form has been saved successfully.',
+                    message: 'Delivery outcome : $count',
+                    onOkPressed: () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      Navigator.pop(context, true);
+                    },
+                  );
+                  
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n?.saveSuccess ?? 'Form Submitted successfully')),
+                  );
+                  Navigator.pop(context, true);
+                }
               }
             },
             builder: (context, state) {

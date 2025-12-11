@@ -8,6 +8,7 @@ import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
 import 'package:medixcel_new/data/Database/tables/beneficiaries_table.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:convert';
+import '../../data/SecureStorage/SecureStorage.dart';
 import '../../l10n/app_localizations.dart';
 
 import '../../core/config/routes/Route_Name.dart';
@@ -182,16 +183,41 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
       final db = await DatabaseProvider.instance.database;
       final deliveryKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome] ?? '';
       if (deliveryKey.isEmpty) return 0;
-      final result = await db.rawQuery(
-        'SELECT COUNT(DISTINCT beneficiary_ref_key) as c FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND is_deleted = 0',
-        [deliveryKey],
-      );
+
+      // --- 1. Get Current User Key ---
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      // --- 2. Build Query with JOIN matching HBNCList screen selection ---
+      String sql = '''
+      SELECT COUNT(DISTINCT f.beneficiary_ref_key) as c 
+      FROM ${FollowupFormDataTable.table} f
+      INNER JOIN beneficiaries_new b ON f.beneficiary_ref_key = b.unique_key
+      WHERE f.forms_ref_key = ? 
+      AND f.is_deleted = 0 
+      AND b.is_deleted = 0
+    ''';
+
+      List<Object?> args = [
+        deliveryKey,
+      ];
+
+      // --- 3. Add User Condition ---
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        sql += ' AND f.current_user_key = ?';
+        args.add(ashaUniqueKey);
+      }
+
+      final result = await db.rawQuery(sql, args);
+
       final row = result.isNotEmpty ? result.first : null;
       final v = row?['c'];
+
       if (v is int) return v;
       if (v is num) return v.toInt();
       return 0;
-    } catch (_) {
+    } catch (e) {
+      print('Error counting HBNC: $e');
       return 0;
     }
   }

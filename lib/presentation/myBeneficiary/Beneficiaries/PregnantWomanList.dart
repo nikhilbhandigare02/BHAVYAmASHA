@@ -9,6 +9,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'dart:convert';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 
 class PregnantWomenList extends StatefulWidget {
   const PregnantWomenList({super.key});
@@ -39,18 +40,39 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
 
   Future<void> _loadPregnantWomen() async {
     setState(() { _isLoading = true; });
-    
+
     try {
       final db = await DatabaseProvider.instance.database;
-      final allBeneficiaries = await db.query('beneficiaries_new');
+
+      // --- 1. Get Current User Key from Secure Storage ---
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      // --- 2. Prepare Query Conditions ---
+      String? where;
+      List<Object?>? whereArgs;
+
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where = 'current_user_key = ?';
+        whereArgs = [ashaUniqueKey];
+      }
+
+      // --- 3. Query with Filter ---
+      final allBeneficiaries = await db.query(
+          'beneficiaries_new',
+          where: where,        // Applied the condition
+          whereArgs: whereArgs // Passed the key
+      );
+
       final pregnantList = <Map<String, dynamic>>[];
-      
+
+      // --- Existing Processing Logic ---
       for (final row in allBeneficiaries) {
         try {
-          final info = row['beneficiary_info'] is String 
-              ? jsonDecode(row['beneficiary_info'] as String) 
+          final info = row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
               : (row['beneficiary_info'] as Map?) ?? {};
-              
+
           if (_isPregnant(Map<String, dynamic>.from(info))) {
             pregnantList.add(_formatCardData(row, info));
           }
@@ -58,7 +80,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
           print('Error processing beneficiary: $e');
         }
       }
-      
+
       setState(() {
         _filtered = pregnantList;
         _isLoading = false;

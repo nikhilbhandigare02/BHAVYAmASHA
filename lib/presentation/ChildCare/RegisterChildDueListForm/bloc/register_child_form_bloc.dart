@@ -191,7 +191,6 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
       final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
 
-      // Try different possible keys for facility ID
       final facilityId = userDetails['asha_associated_with_facility_id'] ??
           userDetails['facility_id'] ??
           userDetails['facilityId'] ??
@@ -237,6 +236,7 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
         
         final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
 
+
         if (formId > 0) {
           print('✅ Form saved successfully with ID: $formId');
           print('📋 Form Data: $formJson');
@@ -272,6 +272,39 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
             print('⚠️ Error reading saved data: $e');
           }
 
+          try {
+            final childCareActivityData = {
+              'server_id': null,
+              'household_ref_key': householdRefKey,
+              'beneficiary_ref_key': beneficiaryRefKey,
+              'mother_key': null,
+              'father_key': null,
+              'child_care_state': 'tracking_due',
+              'device_details': jsonEncode({
+                'id': deviceInfo.deviceId,
+                'platform': deviceInfo.platform,
+                'version': deviceInfo.osVersion,
+              }),
+              'app_details': jsonEncode({
+                'app_version': deviceInfo.appVersion.split('+').first,
+                'app_name': deviceInfo.appName,
+                'build_number': deviceInfo.buildNumber,
+                'package_name': deviceInfo.packageName,
+              }),
+              'parent_user': jsonEncode({}),
+              'current_user_key': ashaUniqueKey,
+              'facility_id': facilityId,
+              'created_date_time': now,
+              'modified_date_time': now,
+              'is_synced': 0,
+              'is_deleted': 0,
+            };
+
+            print('Inserting child care activity: ${jsonEncode(childCareActivityData)}');
+            await LocalStorageDao.instance.insertChildCareActivity(childCareActivityData);
+          } catch (e) {
+            print('Error inserting child care activity: $e');
+          }
           emit(state.copyWith(isSubmitting: false, isSuccess: true));
         } else {
           throw Exception('Failed to save form data');

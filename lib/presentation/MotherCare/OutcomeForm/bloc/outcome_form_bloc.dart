@@ -1,11 +1,12 @@
 import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../../../../core/utils/device_info_utils.dart';
+import '../../../../core/utils/id_generator_utils.dart';
+import '../../../../core/utils/geolocation_utils.dart';
 import '../../../../data/Database/User_Info.dart';
 import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
@@ -392,6 +393,160 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                     print('Inserting mother care activity for delivery outcome: ${jsonEncode(motherCareActivityData)}');
                     await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
                     print('✅ Successfully inserted mother care activity for delivery outcome');
+
+                    try {
+                      final count = int.tryParse(state.outcomeCount) ?? 0;
+                      if (count > 0) {
+                        final ancForms = await LocalStorageDao.instance.getFollowupFormsByHouseholdAndBeneficiary(
+                          formType: FollowupFormDataTable.ancDueRegistration,
+                          householdId: householdRefKey,
+                          beneficiaryId: beneficiaryId,
+                        );
+
+                        Map<String, dynamic> formSource = {};
+                        if (ancForms.isNotEmpty) {
+                          final latest = Map<String, dynamic>.from(ancForms.first);
+                          final raw = latest['form_json']?.toString() ?? '';
+                          try {
+                            final parsed = jsonDecode(raw);
+                            if (parsed is Map) {
+                              final root = Map<String, dynamic>.from(parsed);
+                              if (root['form_data'] is Map) {
+                                formSource = Map<String, dynamic>.from(root['form_data']);
+                              } else {
+                                formSource = root;
+                              }
+                            }
+                          } catch (_) {}
+                        }
+
+                        final deviceInfo = await DeviceInfo.getDeviceInfo();
+                        final geoLocation = await GeoLocation.getCurrentLocation();
+                        final locationData = Map<String, String>.from(geoLocation.toJson());
+                        locationData['source'] = 'gps';
+                        if (!geoLocation.hasCoordinates) {
+                          locationData['status'] = 'unavailable';
+                          locationData['reason'] = 'Could not determine location';
+                        }
+                        final geoLocationJson = jsonEncode(locationData);
+
+                        for (int i = 1; i <= count; i++) {
+                          final childName = (formSource['baby${i}_name'] ?? '').toString();
+                          final childGender = (formSource['baby${i}_gender'] ?? '').toString();
+                          final childWeight = formSource['baby${i}_weight'];
+                          final fatherName = (formSource['husband_name'] ?? '').toString();
+                          final motherName = (formSource['woman_name'] ?? '').toString();
+
+                          final memberId = await IdGenerator.generateUniqueId(deviceInfo);
+                          final tsChild = DateTime.now().toIso8601String();
+
+                          final memberPayload = {
+                            'server_id': null,
+                            'household_ref_key': householdRefKey,
+                            'unique_key': memberId,
+                            'beneficiary_state': 'active',
+                            'pregnancy_count': 0,
+                            'beneficiary_info': jsonEncode({
+                              'memberType': 'Child',
+                              'relation': 'Child',
+                              'otherRelation': '',
+                              'name': childName.isNotEmpty ? childName : 'Child $i',
+                              'fatherName': fatherName,
+                              'motherName': motherName,
+                              'useDob': true,
+                              'dob': state.deliveryDate?.toIso8601String(),
+                              'approxAge': null,
+                              'updateDay': null,
+                              'updateMonth': null,
+                              'updateYear': null,
+                              'children': null,
+                              'birthOrder': i,
+                              'gender': childGender,
+                              'bankAcc': null,
+                              'ifsc': null,
+                              'occupation': null,
+                              'education': null,
+                              'religion': null,
+                              'category': null,
+                              'weight': null,
+                              'childSchool': null,
+                              'birthCertificate': null,
+                              'birthWeight': childWeight,
+                              'abhaAddress': null,
+                              'abhaNumber': null,
+                              'mobileOwner': null,
+                              'mobileOwnerRelation': null,
+                              'mobileNo': null,
+                              'voterId': null,
+                              'rationId': null,
+                              'phId': null,
+                              'beneficiaryType': 'Child',
+                              'maritalStatus': null,
+                              'ageAtMarriage': null,
+                              'spouseName': null,
+                              'hasChildren': null,
+                              'isPregnant': null,
+                              'lmp': null,
+                              'isFamilyPlanning': null,
+                              'familyPlanningMethod': null,
+                              'other_occupation': null,
+                              'other_religion': null,
+                              'other_category': null,
+                              'mobile_owner_relation': null,
+                              'years': null,
+                              'months': null,
+                              'days': null,
+                              'fpMethod': null,
+                              'removalDate': null,
+                              'removalReason': null,
+                              'condomQuantity': null,
+                              'malaQuantity': null,
+                              'chhayaQuantity': null,
+                              'ecpQuantity': null,
+                              'antraDate': null,
+                              'memberStatus': 'active',
+                              'relation_to_head': 'Child',
+                              'isFamilyhead': false,
+                              'isFamilyheadWife': false,
+                            }),
+                            'geo_location': geoLocationJson,
+                            'spouse_key': null,
+                            'mother_key': motherKey.isNotEmpty ? motherKey : null,
+                            'father_key': fatherKey.isNotEmpty ? fatherKey : null,
+                            'is_family_planning': 0,
+                            'is_adult': 0,
+                            'is_guest': 0,
+                            'is_death': 0,
+                            'death_details': jsonEncode({}),
+                            'is_migrated': 0,
+                            'is_separated': 0,
+                            'device_details': jsonEncode({
+                              'id': deviceInfo.deviceId,
+                              'platform': deviceInfo.platform,
+                              'version': deviceInfo.osVersion,
+                            }),
+                            'app_details': jsonEncode({
+                              'app_version': deviceInfo.appVersion.split('+').first,
+                              'app_name': deviceInfo.appName,
+                              'build_number': deviceInfo.buildNumber,
+                              'package_name': deviceInfo.packageName,
+                            }),
+                            'parent_user': jsonEncode({}),
+                            'current_user_key': ashaUniqueKey,
+                            'facility_id': facilityId,
+                            'created_date_time': tsChild,
+                            'modified_date_time': tsChild,
+                            'is_synced': 0,
+                            'is_deleted': 0,
+                          };
+
+                          print('Saving child beneficiary from delivery outcome: ${jsonEncode(memberPayload)}');
+                          await LocalStorageDao.instance.insertBeneficiary(memberPayload);
+                        }
+                      }
+                    } catch (e) {
+                      print('❌ Error auto-creating child beneficiaries: $e');
+                    }
                   } catch (e) {
                     print('❌ Error inserting mother care activity: $e');
                   }

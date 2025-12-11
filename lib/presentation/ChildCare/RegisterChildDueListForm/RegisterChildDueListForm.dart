@@ -154,6 +154,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
     debugPrint('Loading member details...');
 
     try {
+      final passedVillage = widget.arguments?['village']?.toString();
+      debugPrint('Received navigation arguments: ${widget.arguments}');
+      debugPrint('Passed village: ${passedVillage ?? ''}');
       final hhId = widget.arguments?['hhId']?.toString();
       final name = widget.arguments?['name']?.toString();
 
@@ -192,7 +195,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
             weightGrams: (info['weight']?.toString()),
             birthWeightGrams: (info['birthWeight']?.toString()),
             birthCertificate: info['birthCertificate']?.toString(),
-            village: (info['village']?.toString() ?? headDetails['village']?.toString()),
+            village: ((passedVillage?.trim().isNotEmpty ?? false) ? passedVillage : (info['village']?.toString() ?? headDetails['village']?.toString())),
             mobileOwner: (info['mobileOwner']?.toString() ?? headDetails['mobileOwner']?.toString()),
             otherReligion: (info['other_religion']?.toString() ?? headDetails['other_religion']?.toString() ?? info['otherReligion']?.toString() ?? headDetails['otherReligion']?.toString()),
             otherCategory: (info['other_category']?.toString() ?? headDetails['other_category']?.toString() ?? info['otherCategory']?.toString() ?? headDetails['otherCategory']?.toString()),
@@ -263,7 +266,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
               religion: headDetails['religion']?.toString(),
               socialClass: headDetails['category']?.toString(),
               uniqueKey: row['unique_key']?.toString(),
-              village: (beneficiaryInfo['village']?.toString() ?? headDetails['village']?.toString()),
+              village: ((passedVillage?.trim().isNotEmpty ?? false) ? passedVillage : (beneficiaryInfo['village']?.toString() ?? headDetails['village']?.toString())),
               mobileOwner: headDetails['mobileOwner']?.toString(),
               otherReligion: (headDetails['other_religion']?.toString() ?? headDetails['otherReligion']?.toString()),
               otherCategory: (headDetails['other_category']?.toString() ?? headDetails['otherCategory']?.toString()),
@@ -310,7 +313,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
         }
       }
 
-      if (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true))) {
+      if ((passedVillage?.trim().isEmpty ?? true) && (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true)))) {
         if (hhId != null && hhId.isNotEmpty) {
           String? villageNameFromBeneficiaries;
           final rowsByHh = await db.query(
@@ -353,7 +356,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
         }
       }
 
-      if (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true))) {
+      if ((passedVillage?.trim().isEmpty ?? true) && (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true)))) {
         String? villageName;
         final hhRows = await db.query(
           'households',
@@ -528,6 +531,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       if (args['mobile'] != null) bloc.add(MobileNumberChanged(args['mobile'].toString()));
       if (args['fatherName'] != null) bloc.add(FatherNameChanged(args['fatherName'].toString()));
       if (args['rchId'] != null) bloc.add(RchIdChildChanged(args['rchId'].toString()));
+      if (args['village'] != null && args['village'].toString().trim().isNotEmpty) {
+        bloc.add(AddressChanged(args['village'].toString().trim()));
+      }
     }
 
     return BlocProvider.value(

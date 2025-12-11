@@ -10,6 +10,7 @@ import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 
 class EligibleCoupleList extends StatefulWidget {
   const EligibleCoupleList({super.key});
@@ -30,81 +31,105 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
   }
 
   Future<void> _loadEligibleCouples() async {
-    final db = await DatabaseProvider.instance.database;
+    try {
+      final db = await DatabaseProvider.instance.database;
 
-    final households = <String, List<Map<String, dynamic>>>{};
+      // --- 1. Get Current User Key ---
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-    final allBeneficiaries = await db.query('beneficiaries_new');
-    
-    for (final row in allBeneficiaries) {
-      try {
-        final hhId = row['household_ref_key']?.toString() ?? '';
-        if (hhId.isEmpty) continue;
-        
-        final info = row['beneficiary_info'] is String 
-            ? jsonDecode(row['beneficiary_info'] as String) 
-            : (row['beneficiary_info'] as Map?) ?? {};
-            
-        if (info is! Map) continue;
-        
-        // Add to household group
-        if (!households.containsKey(hhId)) {
-          households[hhId] = [];
-        }
-        
-        households[hhId]!.add({
-          ...row,
-          'info': info,
-        });
-      } catch (e) {
-        print('Error processing beneficiary: $e');
+      // --- 2. Build Query Condition ---
+      String? where;
+      List<Object?>? whereArgs;
+
+      // Only apply filter if the key exists and is not empty
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where = 'current_user_key = ?';
+        whereArgs = [ashaUniqueKey];
       }
-    }
-    
-    final couples = <Map<String, dynamic>>[];
-    
-    // Process each household
-    for (final hhId in households.keys) {
-      final members = households[hhId]!;
-      
-      // Check each member in the household
-      for (final member in members) {
+
+      final households = <String, List<Map<String, dynamic>>>{};
+
+      // --- 3. Query with Filter ---
+      final allBeneficiaries = await db.query(
+          'beneficiaries_new',
+          where: where,        // Applied the condition
+          whereArgs: whereArgs // Passed the key
+      );
+
+      // --- Existing Processing Logic ---
+      for (final row in allBeneficiaries) {
         try {
-          final info = member['info'] as Map;
-          
-          // Check gender
-          final gender = info['gender']?.toString().toLowerCase() ?? '';
-          if (gender != 'female' && gender != 'f') continue;
-          
-          // Check marital status
-          final maritalStatus = info['maritalStatus']?.toString().toLowerCase() ?? '';
-          if (maritalStatus != 'married') continue;
-          
-          // Check age
-          final dob = info['dob'];
-          final age = _calculateAge(dob);
-          if (age < 15 || age > 49) continue;
-          
-          // If we get here, we have an eligible woman
-          couples.add({
-            'hhId': hhId,
-            'name': info['memberName']?.toString() ?? info['headName']?.toString() ?? 'Unknown',
-            'age': age,
-            'age_gender': _formatAgeGender(dob, gender),
-            'mobile': info['mobileNo']?.toString() ?? '',
-            'status': 'Eligible Couple',
-            '_raw': member,
+          final hhId = row['household_ref_key']?.toString() ?? '';
+          if (hhId.isEmpty) continue;
+
+          final info = row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : (row['beneficiary_info'] as Map?) ?? {};
+
+          if (info is! Map) continue;
+
+          // Add to household group
+          if (!households.containsKey(hhId)) {
+            households[hhId] = [];
+          }
+
+          households[hhId]!.add({
+            ...row,
+            'info': info,
           });
-          
         } catch (e) {
-          print('Error processing household member: $e');
+          print('Error processing beneficiary: $e');
         }
       }
-    }
 
-    setState(() {
-      _filtered = couples;
-    });
+      final couples = <Map<String, dynamic>>[];
+
+      // Process each household
+      for (final hhId in households.keys) {
+        final members = households[hhId]!;
+
+        // Check each member in the household
+        for (final member in members) {
+          try {
+            final info = member['info'] as Map;
+
+            // Check gender
+            final gender = info['gender']?.toString().toLowerCase() ?? '';
+            if (gender != 'female' && gender != 'f') continue;
+
+            // Check marital status
+            final maritalStatus = info['maritalStatus']?.toString().toLowerCase() ?? '';
+            if (maritalStatus != 'married') continue;
+
+            // Check age
+            final dob = info['dob'];
+            final age = _calculateAge(dob);
+            if (age < 15 || age > 49) continue;
+
+            // If we get here, we have an eligible woman
+            couples.add({
+              'hhId': hhId,
+              'name': info['memberName']?.toString() ?? info['headName']?.toString() ?? 'Unknown',
+              'age': age,
+              'age_gender': _formatAgeGender(dob, gender),
+              'mobile': info['mobileNo']?.toString() ?? '',
+              'status': 'Eligible Couple',
+              '_raw': member,
+            });
+
+          } catch (e) {
+            print('Error processing household member: $e');
+          }
+        }
+      }
+
+      setState(() {
+        _filtered = couples;
+      });
+    } catch (e) {
+      print('Error loading eligible couples: $e');
+    }
   }
 
   int _calculateAge(dynamic dobRaw) {

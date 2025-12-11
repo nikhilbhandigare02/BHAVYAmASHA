@@ -10,6 +10,7 @@ import 'package:sizer/sizer.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 
 class Pregnancyoutcome extends StatefulWidget {
   const Pregnancyoutcome({super.key});
@@ -46,38 +47,66 @@ class _PregnancyoutcomeState extends State<Pregnancyoutcome> {
     try {
       final db = await DatabaseProvider.instance.database;
       const ancRefKey = 'bt7gs9rl1a5d26mz';
-      
+
+      // --- 1. Get Current User Key from Secure Storage ---
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
 
-      // First, let's check all forms with this ref_key to see what fields they have
+      // --- 2. Update Debug Query (Optional but good for consistency) ---
       print('🔍 Checking all forms with ref_key: $ancRefKey');
+
+      String debugWhere = 'forms_ref_key = ? AND is_deleted = 0';
+      List<Object?> debugArgs = [ancRefKey];
+
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        debugWhere += ' AND current_user_key = ?';
+        debugArgs.add(ashaUniqueKey);
+      }
+
       final allForms = await db.query(
         FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND is_deleted = 0',
-        whereArgs: [ancRefKey],
+        where: debugWhere,
+        whereArgs: debugArgs,
       );
-      
+
       print('🔍 Found ${allForms.length} forms with ref_key $ancRefKey');
       if (allForms.isNotEmpty) {
         print('🔍 First form data: ${allForms.first}');
       }
 
-      // Now query for forms where gives_birth_to_baby is Yes
-      final ancForms = await db.rawQuery('''
-        SELECT 
-          f.beneficiary_ref_key,
-          f.form_json,
-          f.household_ref_key,
-          f.forms_ref_key,
-          f.created_date_time,
-          f.id as form_id
-        FROM ${FollowupFormDataTable.table} f
-        WHERE 
-          f.forms_ref_key = ?
-          AND f.form_json LIKE ?
-          AND f.is_deleted = 0
-        ORDER BY f.created_date_time DESC
-      ''', [ancRefKey, '%"gives_birth_to_baby":"Yes"%']);
+      // --- 3. Build Main Query Dynamically ---
+      // Start with the base query
+      String sql = '''
+      SELECT 
+        f.beneficiary_ref_key,
+        f.form_json,
+        f.household_ref_key,
+        f.forms_ref_key,
+        f.created_date_time,
+        f.id as form_id
+      FROM ${FollowupFormDataTable.table} f
+      WHERE 
+        f.forms_ref_key = ?
+        AND f.form_json LIKE ?
+        AND f.is_deleted = 0
+    ''';
+
+      // Base arguments
+      List<dynamic> args = [ancRefKey, '%"gives_birth_to_baby":"Yes"%'];
+
+      // Append user condition if key exists
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        sql += ' AND f.current_user_key = ?';
+        args.add(ashaUniqueKey);
+      }
+
+      // Add ordering at the end
+      sql += ' ORDER BY f.created_date_time DESC';
+
+      // Execute the raw query
+      final ancForms = await db.rawQuery(sql, args);
 
       print('🔍 Found ${ancForms.length} pregnancy cases');
       if (ancForms.isNotEmpty) {
@@ -86,6 +115,7 @@ class _PregnancyoutcomeState extends State<Pregnancyoutcome> {
 
       final List<Map<String, dynamic>> processedData = [];
 
+      // --- Process Results (Existing Logic) ---
       for (final form in ancForms) {
         try {
           final formJson = jsonDecode(form['form_json'] as String);

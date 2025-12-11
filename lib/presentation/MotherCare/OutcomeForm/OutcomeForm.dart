@@ -17,7 +17,7 @@ import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../core/widgets/SnackBar/app_snackbar.dart';
-import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
+import '../../../core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
 
 class OutcomeFormPage extends StatelessWidget {
   final Map<String, dynamic> beneficiaryData;
@@ -66,14 +66,16 @@ class _OutcomeFormView extends StatelessWidget {
 
             if (state.submitted) {
               showAppSnackBar(context, l10n.dataSavedSuccessMessage);
-              Future.microtask(() async {
-                await showConfirmationDialog(
-                  context: context,
+              Future.microtask(() {
+                CustomDialog.show(
+                  context,
                   title: 'Form has been saved successfully',
                   message: 'Beneficiary has been added to HBNC list',
-                  yesText: 'OK',
+                  onOkPressed: () {
+                    Navigator.of(context, rootNavigator: true).pop();
+                    Navigator.pop(context);
+                  },
                 );
-                Navigator.pop(context);
               });
             }
           },
@@ -87,7 +89,7 @@ class _OutcomeFormView extends StatelessWidget {
                   future: () async {
                     try {
                       final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString();
-                      print('🔍 Checking submission count for BeneficiaryID: $beneficiaryId');
+                      print('🔍 Checking submFion count for BeneficiaryID: $beneficiaryId');
 
                       if (beneficiaryId == null || beneficiaryId.isEmpty) {
                         print('⚠️ No valid BeneficiaryID found in beneficiaryData: $beneficiaryData');

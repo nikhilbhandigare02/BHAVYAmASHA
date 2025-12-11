@@ -11,6 +11,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/utils/anc_utils.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../data/Database/tables/mother_care_activities_table.dart';
 import '../../data/SecureStorage/SecureStorage.dart';
 import '../HomeScreen/HomeScreen.dart';
 import 'package:medixcel_new/core/config/routes/Routes.dart' as AppRoutes;
@@ -196,96 +197,88 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
   Future<void> _loadDeliveryOutcomeCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
-
-      // Get current user data
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      const ancRefKey = 'bt7gs9rl1a5d26mz';
 
       print('🔍 Loading Delivery Outcome count...');
-      print('🔍 Using current_user_key: $ashaUniqueKey');
 
-      // Query to get beneficiaries with mother_care_state = 'delivery_outcome'
-      // and exclude those with 'pnc_mother' state
-      final deliveryOutcomeRecords = await db.rawQuery('''
-      SELECT 
-        mca.beneficiary_ref_key,
-        mca.household_ref_key,
-        mca.created_date_time,
-        bn.*
-      FROM mother_care_activities mca
-      INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
+      // Same query as in DeliveryOutcomeScreen
+      final ancForms = await db.rawQuery('''
+      SELECT DISTINCT
+        f.beneficiary_ref_key,
+        f.form_json,
+        f.household_ref_key,
+        f.forms_ref_key,
+        f.created_date_time,
+        f.id as form_id
+      FROM ${FollowupFormDataTable.table} f
+      LEFT JOIN ${MotherCareActivitiesTable.table} mca 
+        ON f.beneficiary_ref_key = mca.beneficiary_ref_key
       WHERE 
-        mca.mother_care_state = 'delivery_outcome'
-        AND bn.is_deleted = 0
-        AND mca.beneficiary_ref_key NOT IN (
-          SELECT DISTINCT beneficiary_ref_key 
-          FROM mother_care_activities 
-          WHERE mother_care_state = 'pnc_mother'
-        )
-        AND mca.current_user_key = ?
-      ORDER BY mca.created_date_time DESC
-    ''', [ashaUniqueKey ?? '']);
+        f.forms_ref_key = '$ancRefKey'
+        AND f.is_deleted = 0
+        AND (f.form_json LIKE '%"gives_birth_to_baby":"Yes"%' 
+             OR mca.mother_care_state = 'delivery_outcome')
+      ORDER BY f.created_date_time DESC
+    ''');
 
-      print('📊 Found ${deliveryOutcomeRecords.length} delivery outcome records after filtering');
+      print('📊 Found ${ancForms.length} eligible forms for delivery outcome');
 
-      // Get the delivery outcome form key
-      final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome];
-      print('🔑 Delivery Outcome Key: $deliveryOutcomeKey');
+      if (ancForms.isEmpty) {
+        print('ℹ️ No eligible forms found for delivery outcome');
+        if (mounted) {
+          setState(() {
+            _deliveryOutcomeCount = 0;
+          });
+        }
+        return;
+      }
 
       // Track unique beneficiaries that need delivery outcome
       final Set<String> beneficiariesNeedingOutcome = {};
-      final Set<String> beneficiariesProcessed = {};
+      final Set<String> processedBeneficiaries = {};
 
-      for (final record in deliveryOutcomeRecords) {
+      for (final form in ancForms) {
         try {
-          final beneficiaryRefKey = record['beneficiary_ref_key']?.toString();
+          final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            print('⚠️ Skipping record - missing beneficiary_ref_key');
+            print('⚠️ Form missing beneficiary_ref_key: $form');
             continue;
           }
 
           // Skip if we've already processed this beneficiary
-          if (beneficiariesProcessed.contains(beneficiaryRefKey)) {
-            print('⏩ Already processed beneficiary: $beneficiaryRefKey');
+          if (processedBeneficiaries.contains(beneficiaryRefKey)) {
             continue;
           }
+          processedBeneficiaries.add(beneficiaryRefKey);
 
-          beneficiariesProcessed.add(beneficiaryRefKey);
-
-          // Check if delivery outcome form already exists
+          // Check if delivery outcome already exists
+          final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[
+          FollowupFormDataTable.deliveryOutcome];
           final existingOutcome = await db.query(
             FollowupFormDataTable.table,
-            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 AND current_user_key = ?',
-            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey, ashaUniqueKey],
+            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0',
+            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey],
             limit: 1,
           );
 
-          if (existingOutcome.isNotEmpty) {
-            print('✅ Delivery outcome already exists for: $beneficiaryRefKey');
-            continue; // Skip - already has outcome
+          if (existingOutcome.isEmpty) {
+            beneficiariesNeedingOutcome.add(beneficiaryRefKey);
           }
-
-          // Add to count if no outcome exists
-          beneficiariesNeedingOutcome.add(beneficiaryRefKey);
-          print('➕ Added to count - Needs delivery outcome: $beneficiaryRefKey');
-
-        } catch (e, stackTrace) {
-          print('⚠️ Error processing delivery outcome record: $e');
-          print('Stack trace: $stackTrace');
+        } catch (e) {
+          print('⚠️ Error processing form: $e');
         }
       }
 
-      final count = beneficiariesNeedingOutcome.length;
-      print('✅ Delivery Outcome Count: $count (Total unique beneficiaries needing outcome)');
+      print('✅ Found ${beneficiariesNeedingOutcome.length} beneficiaries needing delivery outcome');
 
       if (mounted) {
         setState(() {
-          _deliveryOutcomeCount = count;
+          _deliveryOutcomeCount = beneficiariesNeedingOutcome.length;
         });
       }
 
     } catch (e, stackTrace) {
-      print('❌ Error loading delivery outcome count: $e');
+      print('❌ Error in _loadDeliveryOutcomeCount: $e');
       print('Stack trace: $stackTrace');
       if (mounted) {
         setState(() {
@@ -294,108 +287,66 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
       }
     }
   }
+
   Future<void> _loadHBCNCount() async {
     try {
       print('🔍 Loading HBNC count...');
-
       final db = await DatabaseProvider.instance.database;
-
-      // ✅ Use constant from FollowupFormDataTable for consistency
-      final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[
-      FollowupFormDataTable.deliveryOutcome];
-
-      // ✅ ADD THIS: Get current user data (matching the pattern)
+      final deliveryOutcomeKey = '4r7twnycml3ej1vg'; // Same key as in HBNCList
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      print('🔑 Using delivery outcome key: $deliveryOutcomeKey');
-      print('👤 Current User Key: $ashaUniqueKey');
-
-      // Step 1: Get all delivery outcome records
-      // ✅ UPDATED: Added current_user_key and is_deleted filters
+      // Get delivery outcome records
       final dbOutcomes = await db.query(
-        FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND current_user_key = ? AND is_deleted = 0',
-        whereArgs: [deliveryOutcomeKey, ashaUniqueKey ?? ''],
-        orderBy: 'created_date_time DESC',
+        'followup_form_data',
+        where: 'forms_ref_key = ? AND current_user_key = ?',
+        whereArgs: [deliveryOutcomeKey, ashaUniqueKey],
       );
 
       print('📊 Found ${dbOutcomes.length} delivery outcome records');
-
       if (dbOutcomes.isEmpty) {
         print('ℹ️ No delivery outcomes found');
         if (mounted) {
-          setState(() {
-            _hbcnMotherCount = 0;
-          });
+          setState(() => _hbcnMotherCount = 0);
         }
         return;
       }
 
-      // Step 2: Track unique beneficiaries (matches screen's deduplication logic)
       final Set<String> processedBeneficiaries = <String>{};
 
-      // Step 3: Process each outcome (exactly matching screen logic)
       for (final outcome in dbOutcomes) {
         try {
+          final formJson = jsonDecode(outcome['form_json'] as String);
+          final formData = formJson['form_data'] ?? {};
           final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
 
-          print('\n📋 Processing outcome ID: ${outcome['id']}');
-          print('   Beneficiary Ref Key: $beneficiaryRefKey');
-
-          // CRITICAL: Skip if beneficiary_ref_key is null or empty
-          // (matches screen: "if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty)")
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            print('   ⚠️ Missing beneficiary_ref_key - SKIPPING');
+            print('⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}');
             continue;
           }
 
-          // CRITICAL: Skip duplicates (matches screen's processedBeneficiaries logic)
           if (processedBeneficiaries.contains(beneficiaryRefKey)) {
-            print('   ℹ️ Already processed - SKIPPING duplicate');
+            print('ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey');
             continue;
           }
 
-          // CRITICAL: Check if beneficiary exists in beneficiaries_new table
-          // (matches screen: "await db.query('beneficiaries_new', where: 'unique_key = ?')")
-          // ✅ UPDATED: Added is_deleted filter for beneficiary check
           final beneficiaryResults = await db.query(
             'beneficiaries_new',
-            where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+            where: 'unique_key = ?',
             whereArgs: [beneficiaryRefKey],
           );
 
-          // CRITICAL: Skip if no beneficiary found
-          // (matches screen: "if (beneficiaryResults.isEmpty) { continue; }")
           if (beneficiaryResults.isEmpty) {
-            print('   ⚠️ No beneficiary found - SKIPPING');
+            print('⚠️ No beneficiary found for key: $beneficiaryRefKey');
             continue;
           }
 
-          print('   ✅ Found beneficiary: ${beneficiaryResults.first['id']}');
-
-          // CRITICAL: Parse beneficiary_info to ensure it's valid
-          // (matches screen's parsing logic)
-          final beneficiaryInfoRaw = beneficiaryResults.first['beneficiary_info'] as String? ?? '{}';
-
-          try {
-            final beneficiaryInfo = jsonDecode(beneficiaryInfoRaw) as Map<String, dynamic>;
-            print('   ✅ Valid beneficiary_info parsed');
-
-            // Successfully parsed - add to processed set
-            processedBeneficiaries.add(beneficiaryRefKey);
-            print('   ✅ Added to count (Total: ${processedBeneficiaries.length})');
-
-          } catch (e) {
-            // CRITICAL: Skip if beneficiary_info can't be parsed
-            // (matches screen: "catch (e) { print('Error parsing beneficiary info: $e'); continue; }")
-            print('   ❌ Error parsing beneficiary_info - SKIPPING: $e');
-            continue;
-          }
+          // If we got this far, add to processed set
+          processedBeneficiaries.add(beneficiaryRefKey);
+          print('✅ Added beneficiary $beneficiaryRefKey to count (Total: ${processedBeneficiaries.length})');
 
         } catch (e) {
-          print('   ❌ Error processing outcome: $e');
-          continue;
+          print('❌ Error processing outcome ${outcome['id']}: $e');
         }
       }
 
@@ -410,12 +361,10 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
         });
       }
     } catch (e, stackTrace) {
-      print('❌ Error loading HBNC count: $e');
+      print('❌ Error in _loadHBCNCount: $e');
       print('Stack trace: $stackTrace');
       if (mounted) {
-        setState(() {
-          _hbcnMotherCount = 0;
-        });
+        setState(() => _hbcnMotherCount = 0);
       }
     }
   }
