@@ -1480,6 +1480,9 @@ class LocalStorageDao {
         whereArgs = null;
       }
 
+      where = '$where AND is_deleted = 0';
+     // whereArgs?.add(ashaUniqueKey);
+
       final rows = await db.query(
         'beneficiaries_new',
         where: where,

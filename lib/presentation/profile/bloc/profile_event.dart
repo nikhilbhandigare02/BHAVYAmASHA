@@ -9,6 +9,14 @@ class RoleIdChanged extends ProfileEvent {
   final int value;
   const RoleIdChanged(this.value);
 }
+class AshaListCountChanged extends ProfileEvent {
+  final int count;
+  AshaListCountChanged(this.count);
+
+  @override
+  List<Object?> get props => [count];
+}
+
 
 class AreaOfWorkingChanged extends ProfileEvent {
   final String value;

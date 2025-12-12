@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../../presentation/HomeScreen/HomeScreen.dart';
 import '../../utils/app_version.dart';
@@ -93,7 +94,25 @@ class _CustomDrawerState extends State<CustomDrawer> {
       }
     }
   }
+  Future<void> openInChrome(String url) async {
+    final Uri uri = Uri.parse(url);
 
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(
+        uri,
+        mode: LaunchMode.inAppWebView,
+        webViewConfiguration: const WebViewConfiguration(
+          enableJavaScript: true,
+          enableDomStorage: true,
+        ),
+      );
+    } else {
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+    }
+  }
   String _getFullName() {
     if (userData == null) return '-';
     try {
@@ -167,7 +186,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     final theme = Theme.of(context);
     final width = MediaQuery.of(context).size.width;
     final bool isTablet = width >= 600;
-
+    print("DRAWER → Current appRoleId: $_appRoleId");
 // Set responsive drawer width
     final double drawerWidth = isTablet ? width * 0.55 : width * 0.75;
     return SizedBox(
@@ -217,6 +236,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       _buildMenuItem(context, 'assets/images/sam_mgmt.png', l10n.drawerProfile, onTap: () {
                         Navigator.pushNamed(context, Route_Names.profileScreen);
                       }),
+
+                      if (_appRoleId == 4)
+                        _buildMenuItem(
+                          context,
+                          'assets/images/id-card.png',
+                          "Report",
+                          onTap: () {
+                            openInChrome(
+                              "https://ashadashboarduat.medixcel.in/#/auth/login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkYwMDAwMDAwMSIsImRpc3RyaWN0X2lkIjoiMSIsInVuaXF1ZV9rZXkiOiJNNVhTQ0VNMVk4RiIsImhzY19pZCI6InVuZGVmaW5lZCIsImlhdCI6MTc2NTQzMjc1MywiZXhwIjoxNzY1NTE5MTUzfQ.Rea0VNzimIFjJU6hUYDp227ae9P1tY-7ObGdikxi8uM",
+                            );
+                          },
+                        ),
                       _buildMenuItem(context, 'assets/images/notes.png', l10n.drawerMisReport, onTap: () {
                         Navigator.pushNamed(context, Route_Names.MISScreen);
                       }),
@@ -323,7 +354,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                 ),
                                 _UserInfoRow(
                                   label: l10n.userRoleLabel,
-                                  value: userData!['role_name']?.toString() ?? 'ASHA Worker',
+                                  value: _appRoleId == 4 ? 'ASHA Facilitator' : 'ASHA Worker',
                                 ),
                                 if (_appRoleId != 4) ...[
                                   _UserInfoRow(
@@ -359,7 +390,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 Container(
                   margin: EdgeInsets.only(top: 0), // Remove any top margin
                   width: double.infinity,
-                  height: 4.5.h,  
+                  height: 4.5.h,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -389,7 +420,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                             Navigator.pushNamedAndRemoveUntil(
                               context,
                               Route_Names.loginScreen,
-                              (Route<dynamic> route) => false,
+                                  (Route<dynamic> route) => false,
                             );
                           }
                         },

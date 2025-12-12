@@ -46,6 +46,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
       }
     });
   }
+
   final TextEditingController _addressController = TextEditingController();
   bool _loading = false;
   String? _error;
@@ -77,9 +78,9 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
       if (result["status_code"] != null && result["status_code"] != 200) {
         String msg = result["message"] ?? "Failed to fetch modes";
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
 
         setState(() {
           _loading = false;
@@ -88,12 +89,25 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
         return; // STOP HERE
       }
-      if (result["authMethods"] == null) {
-        String msg = result["message"] ?? "Authentication modes not found";
+      if (result["status_code"] != null && result["status_code"] != 200) {
+        String msg = "";
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        // First priority: direct message
+        if (result["message"] != null) {
+          msg = result["message"];
+        }
+        // Second: nested error in index 0
+        else if (result[0] != null && result[0]["message"] != null) {
+          msg = result[0]["message"];
+        }
+        // Fallback
+        else {
+          msg = "Failed to fetch modes";
+        }
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
 
         setState(() {
           _loading = false;
@@ -102,20 +116,18 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
         return;
       }
-
       setState(() {
         _apiData = result;
         _loading = false;
       });
-
     } catch (e) {
       setState(() {
         _loading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -135,9 +147,9 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
       if (result["status_code"] != null && result["status_code"] != 200) {
         String msg = result["message"] ?? "OTP request failed";
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
 
         setState(() {
           _loading = false;
@@ -150,9 +162,9 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
       _txnId = result["txnId"];
       if (_txnId == null) {
         String msg = result["message"] ?? "txnId missing";
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
         setState(() => _loading = false);
         return;
       }
@@ -165,21 +177,21 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result["message"] ?? "OTP sent successfully")),
       );
-
     } catch (e) {
       setState(() => _loading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
+
   VerifyOtpResponse? verifyOtpResponse;
   AbhaProfileResponce? abhaProfileResponce;
 
   String? _abhaToken;
 
-// --------------------- VERIFY OTP ---------------------
+  // --------------------- VERIFY OTP ---------------------
   Future<void> getOtp(String otp, String authMode) async {
     if (_txnId == null) {
       print("❌ txnId is null! Call requestOtp() first.");
@@ -202,9 +214,9 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
       // Show backend message
       if (result["message"] != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result["message"])),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(result["message"])));
       }
 
       final auth = result["authResult"]?.toString().toLowerCase();
@@ -238,20 +250,19 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
       // Unexpected response
       setState(() => _loading = false);
-
     } catch (e) {
       setState(() {
         _loading = false;
         _error = e.toString();
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
-// --------------------- GET PROFILE ---------------------
+  // --------------------- GET PROFILE ---------------------
   Future<void> getAbhaProfile({required String? token}) async {
     if (token == null) {
       print("❌ Token missing → cannot fetch profile");
@@ -272,18 +283,18 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
       setState(() => _loading = false);
       Navigator.of(context).pop(result);
-
     } catch (e) {
       setState(() {
         _loading = false;
         _error = e.toString();
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
+
   String formatTime(int seconds) {
     final m = (seconds ~/ 60).toString().padLeft(2, '0');
     final s = (seconds % 60).toString().padLeft(2, '0');
@@ -326,8 +337,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
                     height: 44,
                     width: 140,
                     child: RoundButton(
-                      title: AppLocalizations.of(context)!
-                          .proceedButton,
+                      title: AppLocalizations.of(context)!.proceedButton,
                       borderRadius: 8,
                       isLoading: _loading,
                       color: Colors.green,
@@ -346,6 +356,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
   }
 
   Widget _buildOtpInput() {
+    final localText = AppLocalizations.of(context)!;
     bool isOtpEntered = _otpController.text.trim().length == 6;
 
     // 🔥 Disable buttons during timer
@@ -386,32 +397,10 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
           ),
 
         const SizedBox(height: 10),
-
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // ⭐ VERIFY OTP BUTTON ⭐
-            GestureDetector(
-              onTap: (!disableButtons && isOtpEntered)
-                  ? () {
-                getOtp(
-                  _otpController.text.trim(),
-                  _selectedAuthMethod ?? "MOBILE_OTP",
-                );
-              }
-                  : null,
-              child: Text(
-                "Verify OTP",
-                style: TextStyle(
-                  color: (!disableButtons && isOtpEntered)
-                      ? Colors.black
-                      : Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            // ⭐ RESEND OTP BUTTON ⭐
             GestureDetector(
               onTap: disableButtons
                   ? null
@@ -425,11 +414,74 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
                 startOtpTimer();
               },
-              child: Text(
-                "Resend OTP",
-                style: TextStyle(
-                  color: disableButtons ? Colors.grey : Colors.black,
-                  fontWeight: FontWeight.bold,
+              child: Container(
+                width: 100,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: disableButtons
+                      ? Colors.yellow.withOpacity(0.4)
+                      : Colors.yellow, // filled color
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.refresh,
+                      size: 16,
+                      color: Colors.white, // icon white
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      localText.resendOtp,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Spacer(),
+            GestureDetector(
+              onTap: (!disableButtons && isOtpEntered)
+                  ? () {
+                getOtp(
+                  _otpController.text.trim(),
+                  _selectedAuthMethod ?? "MOBILE_OTP",
+                );
+              }
+                  : null,
+              child: Container(
+                width: 100,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: (!disableButtons && isOtpEntered)
+                      ? AppColors.greenHighlight
+                      : Colors.green.shade200, // filled color
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.check_box_outlined,
+                      size: 16,
+                      color: Colors.white, // icon white
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      localText.verifyOtp,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -438,7 +490,6 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
       ],
     );
   }
-
 
   Widget _buildAuthMethodButtons() {
     final List<String> authMethods =
@@ -449,7 +500,9 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
       children: [
         ApiDropdown<String>(
           labelText: "Authentication Mode",
-          items: (_apiData?['authMethods'] as List<dynamic>?)?.cast<String>() ?? [],
+          items:
+          (_apiData?['authMethods'] as List<dynamic>?)?.cast<String>() ??
+              [],
           getLabel: (s) {
             switch (s) {
               case 'MOBILE_OTP':
@@ -474,7 +527,6 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
       ],
     );
   }
-
 }
 
 class _AbhaInput extends StatelessWidget {
@@ -502,6 +554,7 @@ class _AbhaInput extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              style: const TextStyle(fontSize: 12),
               decoration: InputDecoration(
                 labelText: AppLocalizations.of(context)!.abhaAddressLabel,
                 border: InputBorder.none,

@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/utils/device_info_utils.dart';
 import '../../../core/utils/id_generator_utils.dart';
@@ -15,6 +14,7 @@ import '../../../core/widgets/Dropdown/Dropdown.dart';
 import '../../../core/widgets/SnackBar/app_snackbar.dart';
 import '../../../core/widgets/TextField/TextField.dart';
 import '../../../data/Database/local_storage_dao.dart';
+
 import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../../l10n/app_localizations.dart';
 import 'ClusterMeetingScreen.dart';
@@ -49,11 +49,33 @@ class ClusterMeetingScreenForm extends StatefulWidget {
 }
 
 class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
+  List<dynamic> _ashaList = [];
+  List<bool> _presentList = [];
+  int get presentCount => _presentList.where((e) => e == true).length;
+  int get absentCount => _presentList.where((e) => e == false).length;
+  int _ashaPresentCount = 0;
+  int _ashaAbsentCount = 0;
+  List<TableRow> _buildAshaRows() {
+    return List.generate(_ashaList.length, (index) {
+      final item = _ashaList[index];
+      final name = item['asha_name']?.toString() ?? '—';
+
+      return TableRow(
+        children: [
+          _tableCell((index + 1).toString()),
+          _tableCell(name),
+          _checkBoxCell(index),
+        ],
+      );
+    });
+  }
   Widget _tableHeaderCell(String text) {
-    return Padding(
-      padding: const EdgeInsets.all(3.0),
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 2), // very small space
       child: Text(
         text,
+        textAlign: TextAlign.center,
         style: TextStyle(
           fontWeight: FontWeight.w700,
           fontSize: 12,
@@ -61,12 +83,14 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       ),
     );
   }
-
   Widget _tableCell(String text) {
-    return Padding(
-      padding: const EdgeInsets.all(3.0),
+    return Container(
+      width: double.infinity,          // makes full cell width available
+      alignment: Alignment.center,     // centers text horizontally & vertically
+      padding: EdgeInsets.symmetric(vertical: 7, horizontal: 2),
       child: Text(
         text,
+        textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
@@ -75,6 +99,29 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     );
   }
 
+
+  Widget _checkBoxCell(int index) {
+    final bool value = index < _presentList.length ? _presentList[index] : false;
+
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.zero, // remove inner spacing
+      child: Checkbox(
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // small checkbox
+        visualDensity: VisualDensity.compact,                    // reduce padding around checkbox
+        value: value,
+        onChanged: (val) {
+          setState(() {
+            if (index < _presentList.length) {
+              _presentList[index] = val ?? false;
+            }
+          });
+        },
+      ),
+    );
+  }
+
+  int _ashaCount = 0;
   int clusterMeetingsCount = 0;
   Set<String> _selectedTopics = {};
   List<DiscussionTopic> discussionTopics = [
@@ -433,9 +480,20 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         }
       }
 
+      /// 🔥 PRINT YOUR COMPLETE USER DATA HERE
+      developer.log('USER DATA: ${jsonEncode(data)}', name: 'Drawer');
+
       if (mounted) {
         setState(() {
           userData = data;
+
+          final ashaList = data?['asha_list'] as List<dynamic>? ?? [];
+          _ashaList = ashaList;
+          _ashaCount = ashaList.length;
+
+          // THIS IS CRITICAL — Rebuild present list with correct size
+          _presentList = List<bool>.filled(_ashaList.length, false);
+          developer.log("TOTAL ASHA COUNT → $_ashaCount", name: "ClusterMeeting");
           isLoading = false;
         });
       }
@@ -540,7 +598,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                                     ),
                                     value: isChecked,
                                     controlAffinity:
-                                        ListTileControlAffinity.leading,
+                                    ListTileControlAffinity.leading,
                                     onChanged: (checked) {
                                       setStateDialog(() {
                                         if (checked == true) {
@@ -630,7 +688,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         final dayName = formJson["day_of_week"];
         if (dayName != null) {
           selectedDay = days.firstWhere(
-            (d) => d.name.toLowerCase() == dayName.toString().toLowerCase(),
+                (d) => d.name.toLowerCase() == dayName.toString().toLowerCase(),
             orElse: () => days[0],
           );
         }
@@ -643,10 +701,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
 
         // Count
         clusterMeetingsCount =
-            int.tryParse(
-              formJson["cluster_meetings_this_month"]?.toString() ?? "0",
-            ) ??
-            0;
+            int.tryParse(formJson["cluster_meetings_this_month"]?.toString() ?? "0") ?? 0;
 
         // Month-Year
         final monthYearStr = formJson["month_year"];
@@ -675,6 +730,17 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
           _otherTopicController.text = otherTopic;
           _showOtherTopicField = _selectedTopics.contains('Other');
         }
+
+        final savedPresentList = formJson['asha_present_list'] as List<dynamic>? ?? [];
+
+        List<bool> restored = List<bool>.filled(_ashaList.length, false);
+
+        for (int i = 0; i < savedPresentList.length && i < _ashaList.length; i++) {
+          restored[i] = savedPresentList[i] == true;
+        }
+        _presentList = restored;
+        _ashaPresentCount = _presentList.where((e) => e).length;
+        _ashaAbsentCount  = _presentList.where((e) => !e).length;
       });
     } catch (e) {
       print("Error loading meeting: $e");
@@ -747,7 +813,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       backgroundColor: AppColors.surface,
       appBar: AppHeader(
         screenTitle:
-            l10n?.ashaFacilitatorClusterMeeting ??
+        l10n?.ashaFacilitatorClusterMeeting ??
             "ASHA Facilitator Cluster Meeting",
         showBack: true,
       ),
@@ -950,7 +1016,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      "0",
+                      _ashaList.length.toString(),
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -958,6 +1024,38 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     ),
                   ),
                 ],
+              ),
+              Divider(color: AppColors.divider, thickness: 0.5),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Table(
+                  columnWidths: const {
+                    0: FixedColumnWidth(60),
+                    1: FlexColumnWidth(),
+                    2: FixedColumnWidth(90),
+                  },
+                  border: TableBorder(
+                    horizontalInside: BorderSide(color: Colors.grey),
+                    verticalInside: BorderSide(color: Colors.grey),
+                  ),
+                  children: [
+                    /// Header Row
+                    TableRow(
+                      children: [
+                        _tableHeaderCell("Sr.No."),
+                        _tableHeaderCell("Name"),
+                        _tableHeaderCell("Present?"),
+                      ],
+                    ),
+
+                    /// Dynamically Generated ASHA Rows
+                    ..._buildAshaRows(),
+                  ],
+                ),
               ),
               Divider(color: AppColors.divider, thickness: 0.5),
               Row(
@@ -982,7 +1080,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      "0",
+                      presentCount.toString(),
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -991,43 +1089,6 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                   ),
                 ],
               ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Table(
-                  columnWidths: const {
-                    0: FixedColumnWidth(60),  // Sr.No.
-                    1: FlexColumnWidth(),     // Name
-                    2: FixedColumnWidth(90),  // Present?
-                  },
-                  border: TableBorder(
-                    horizontalInside: BorderSide(color: Colors.grey),
-                    verticalInside: BorderSide(color: Colors.grey),
-                  ),
-                  children: [
-                    /// Header Row
-                    TableRow(
-                      children: [
-                        _tableHeaderCell("Sr.No."),
-                        _tableHeaderCell("Name"),
-                        _tableHeaderCell("Present?"),
-                      ],
-                    ),
-                    // TableRow(
-                    //   children: [
-                    //     _tableCell("1"),
-                    //     _tableCell("Sitaa"),
-                    //     _tableCell("Yes"),   // or Checkbox if needed
-                    //   ],
-                    // ),
-                  ],
-                ),
-              ),
-
               Divider(color: AppColors.divider, thickness: 0.5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1051,7 +1112,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      "0",
+                      absentCount.toString(),
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -1179,7 +1240,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     children: [
                       CustomTextField(
                         labelText:
-                            l10n?.discussionTopicProgram ??
+                        l10n?.discussionTopicProgram ??
                             "Discussion Topic/Program",
                         hintText: _selectedTopics.isEmpty
                             ? l10n?.selectTopics ?? "Select Topics"
@@ -1202,10 +1263,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                   child: CustomTextField(
                     controller: _otherTopicController,
                     labelText:
-                        l10n?.discussionSubTopicProgram ??
+                    l10n?.discussionSubTopicProgram ??
                         "Discussion Sub Topic/Program",
                     hintText:
-                        l10n?.discussionSubTopicProgram ??
+                    l10n?.discussionSubTopicProgram ??
                         "Discussion Sub Topic/Program",
                     onChanged: (value) {
                       setState(() {});
@@ -1219,10 +1280,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
               CustomTextField(
                 controller: _decisionTakenController,
                 labelText:
-                    l10n?.decisionTakenDuringMeeting ??
+                l10n?.decisionTakenDuringMeeting ??
                     "Decision Taken During the Meeting",
                 hintText:
-                    l10n?.decisionTakenDuringMeeting ??
+                l10n?.decisionTakenDuringMeeting ??
                     "Decision Taken During the Meeting",
               ),
             ],
@@ -1258,8 +1319,9 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 'to_time': _toTime?.format(context),
                 'no_of_hours': _calculateHours(),
                 'total_asha_under_facilitator': "0",
-                'asha_present': "0",
-                'asha_absent': "0",
+                'asha_present': presentCount.toString(),
+                'asha_absent': absentCount.toString(),
+                'asha_present_list': _presentList,
                 'cluster_meetings_this_month': clusterMeetingsCount,
                 'month_year': _selectedMonthYear != null
                     ? "${_selectedMonthYear!.month.toString().padLeft(2, '0')}-${_selectedMonthYear!.year}"

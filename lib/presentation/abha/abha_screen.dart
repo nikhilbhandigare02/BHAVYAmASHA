@@ -60,6 +60,7 @@ import 'package:open_file/open_file.dart';
 
 import '../../core/config/Constant/constant.dart';
 import '../../core/utils/utils.dart';
+import '../../core/widgets/TextField/TextField.dart';
 import '../../data/models/abha/create/Exisiting/profile_existing.dart';
 import '../../data/models/abha/create/mobile/abha_suggestion_model.dart';
 import '../../data/models/abha/create/mobile/mobile_create_address_response.dart';
@@ -104,7 +105,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
     return PopScope(
         canPop: true, // whether the route can be popped
         onPopInvoked: (didPop) {
-       /*   if (!didPop) {
+          /*   if (!didPop) {
             Utils.willPopCallback(context);
             // system already popped
           }*/
@@ -361,7 +362,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
   }
 
 
-   @override
+  @override
   Widget createVerifyAbha(BuildContext context) {
     //final localText = AppLocalizations.of(context)!;
     return
@@ -377,7 +378,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
             ),
             drawer: CustomDrawer(),
             body: Stack(children: [
-            /*Container(
+              /*Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
               image: AssetImage('assets/img/background_abdm.png'),
@@ -390,29 +391,29 @@ class _ABHAScreenState extends State<ABHAScreen> {
           ),
         ),*/
 
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: SingleChildScrollView(
-                child: Column(children: [
+              Padding(
+                padding: EdgeInsets.all(10),
+                child: SingleChildScrollView(
+                  child: Column(children: [
 
-                  SizedBox(height: 15,),
-                  Padding(
-                    padding: EdgeInsets.all(0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        createAbhaAddress(context),
-                      ],
+                    SizedBox(height: 15,),
+                    Padding(
+                      padding: EdgeInsets.all(0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          createAbhaAddress(context),
+                        ],
+                      ),
                     ),
-                  ),
-                ],),
+                  ],),
+                ),
               ),
-            ),
-          ],),
+            ],),
 
 
 
-        )
+          )
       );
 
   }
@@ -539,7 +540,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
           ),
         ),
         SizedBox(height: 5,),
-
         Row(
           children: [
             // Mobile number text field
@@ -558,13 +558,13 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   ],
                   decoration: InputDecoration(
                     hintText: "Enter mobile no to search ABHA",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(5),
-                        bottomLeft: Radius.circular(5),
-                      ),
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
+                    // border: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.only(
+                    //     topLeft: Radius.circular(5),
+                    //     bottomLeft: Radius.circular(5),
+                    //   ),
+                    //   borderSide: BorderSide(color: Colors.grey),
+                    // ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(5),
@@ -608,7 +608,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
             ),
 
             // Search icon
-           // if(checkavailableAbha)
+            // if(checkavailableAbha)
             InkWell(
               onTap: (){
                 if (mobileController.text.isEmpty) {
@@ -639,7 +639,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 child: Icon(Icons.search, size: 18, color: AppColors.background,),
               ),
             ),
-           /* if(!checkavailableAbha)
+            /* if(!checkavailableAbha)
             InkWell(
               onTap: (){
                 setState(() {
@@ -834,15 +834,15 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
         Container(
           child: Column(children: [
-             // if(availableAbha)
-              SizedBox(height: 20,),
-              if(availableAbhaNumbers!=null&&availableAbhaNumbers.length!=0&&enableAbhaClick)
+            // if(availableAbha)
+            SizedBox(height: 20,),
+            if(availableAbhaNumbers!=null&&availableAbhaNumbers.length!=0&&enableAbhaClick)
               Text("Select to Proceed",  style: TextStyle(
                 fontSize: 12,
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
               ),),
-              Container(
+            Container(
                 padding: EdgeInsets.symmetric(vertical: 10),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -850,70 +850,70 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   ), // set your max height here
                   child: Scrollbar(
 
-    thumbVisibility: true,   // always show scrollbar
-    thickness: 6,
-    radius: Radius.circular(10),
+                    thumbVisibility: true,   // always show scrollbar
+                    thickness: 6,
+                    radius: Radius.circular(10),
 
                     child: ListView(
                       shrinkWrap: true,
                       children: List.generate(
                         availableAbhaNumbers.length,
                             (index) => Padding(
-                              padding: EdgeInsets.only(bottom: 10),
-                              child: InkWell(
-                                onTap: (){
-                                  if(enableAbhaClick){
-                                    setState(() {
-                                      availableAbhaNumbersSelectedIndex = index;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.all(15),
-                                  //width: 240.w,
-                                  //height: 50.h,
-                                  //padding: EdgeInsets.all(6.w),
-                                  decoration: BoxDecoration(
-                                    color:  (availableAbhaNumbersSelectedIndex == index)?AppColors.bgColorScreen:Colors.white,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    border: Border.all(color: (availableAbhaNumbersSelectedIndex == index)?AppColors.blueApp:Colors.grey, width: (availableAbhaNumbersSelectedIndex == index)?1.5.w:1.w),
-                                  ),
-                                  child: Column(children: [
-                                    Row(children: [
-                                      Expanded(flex:1,
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            localText.abhaNumber,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 11.sp,
-                                              //fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),),
-                                      Text(
-                                        ':  ',
+                          padding: EdgeInsets.only(bottom: 10),
+                          child: InkWell(
+                            onTap: (){
+                              if(enableAbhaClick){
+                                setState(() {
+                                  availableAbhaNumbersSelectedIndex = index;
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(15),
+                              //width: 240.w,
+                              //height: 50.h,
+                              //padding: EdgeInsets.all(6.w),
+                              decoration: BoxDecoration(
+                                color:  (availableAbhaNumbersSelectedIndex == index)?AppColors.bgColorScreen:Colors.white,
+                                borderRadius: BorderRadius.circular(10.0),
+                                border: Border.all(color: (availableAbhaNumbersSelectedIndex == index)?AppColors.blueApp:Colors.grey, width: (availableAbhaNumbersSelectedIndex == index)?1.5.w:1.w),
+                              ),
+                              child: Column(children: [
+                                Row(children: [
+                                  Expanded(flex:1,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        localText.abhaNumber,
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontSize: 11.sp,
                                           //fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      Expanded(flex:2,
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            availableAbhaNumbers[index].abhaNumber??'',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 11.sp,
-                                              //fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),)
-                                    ],),
-                                    /*Row(children: [
+                                    ),),
+                                  Text(
+                                    ':  ',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 11.sp,
+                                      //fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Expanded(flex:2,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        availableAbhaNumbers[index].abhaNumber??'',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 11.sp,
+                                          //fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),)
+                                ],),
+                                /*Row(children: [
                                     Expanded(flex:1,
                                       child: Align(
                                         alignment: Alignment.centerLeft,
@@ -988,45 +988,45 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                                       )
                                   ],),*/
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          flex: 1,
-                                          child: Text(
-                                            localText.name,
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: Text(
+                                        localText.name,
+                                        style: TextStyle(fontSize: 11.sp),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+
+                                    Text(':  '),
+
+                                    Expanded(
+                                      flex: 2,
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              availableAbhaNumbers[index].name ?? '',
+                                              style: TextStyle(fontSize: 11.sp),
+                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: true,
+                                            ),
+                                          ),
+                                          Text(
+                                            availableAbhaNumbers[index].gender != null
+                                                ? ' (${availableAbhaNumbers[index].gender})'
+                                                : '',
                                             style: TextStyle(fontSize: 11.sp),
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                        ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
 
-                                        Text(':  '),
-
-                                        Expanded(
-                                          flex: 2,
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  availableAbhaNumbers[index].name ?? '',
-                                                  style: TextStyle(fontSize: 11.sp),
-                                                  overflow: TextOverflow.ellipsis,
-                                                  softWrap: true,
-                                                ),
-                                              ),
-                                              Text(
-                                                availableAbhaNumbers[index].gender != null
-                                                    ? ' (${availableAbhaNumbers[index].gender})'
-                                                    : '',
-                                                style: TextStyle(fontSize: 11.sp),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    )
-
-                                    /* Row(children: [
+                                /* Row(children: [
                                     Expanded(flex:1,
                                       child: Align(
                                         alignment: Alignment.centerLeft,
@@ -1061,10 +1061,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                         ),
                                       ),)
                                   ],),*/
-                                  ],),
-                                ),
-                              ),
+                              ],),
                             ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -1073,7 +1073,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
 
 
-                /*ListView.builder(
+              /*ListView.builder(
                   // primary: false,
                     shrinkWrap: true,
                     itemCount: availableAbhaNumbers.length ?? 0,
@@ -1168,9 +1168,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-          
+
                                       Text(':  '),
-          
+
                                       Expanded(
                                         flex: 2,
                                         child: Text(
@@ -1207,7 +1207,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                       ),
                                     ),
                                   ],)*//**//*
-          
+
                                   )
                               ],),*//*
                               Row(
@@ -1220,9 +1220,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-          
+
                                   Text(':  '),
-          
+
                                   Expanded(
                                     flex: 2,
                                     child: Row(
@@ -1247,7 +1247,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                   ),
                                 ],
                               )
-          
+
                               *//* Row(children: [
                                 Expanded(flex:1,
                                   child: Align(
@@ -1288,14 +1288,14 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         ),
                       );
                     }),*/
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if(availableAbha)
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if(availableAbha)
                     Align(
                       alignment: Alignment.center,
                       child: InkWell(
@@ -1307,78 +1307,92 @@ class _ABHAScreenState extends State<ABHAScreen> {
                           else {
                             Utils.showToastMessage('Select ABHA number');
                           }
-          
+
                         },
                         child: Container(
-                          width: 130.w,
+                          width: 150.w,
                           height: 30.h,
-                          //padding: EdgeInsets.all(6.w),
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: Colors.amberAccent,
                             borderRadius: BorderRadius.circular(5.0),
                             border: Border.all(
-                                color: AppColors.primary, width: 1.w),
+                                color: Colors.amberAccent, width: 1.w),
                           ),
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              localText.proceedwithkyc,
-                              style: TextStyle(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.arrow_forward_ios_rounded,                  // Prefix icon for "Create New"
                                 color: Colors.white,
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.bold,
+                                size: 16.sp,
                               ),
-                            ),
+                              SizedBox(width: 6.w),           // Small space between icon and text
+                              Text(
+                                localText.proceedwithkyc,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                    if(availableAbha)
-                    SizedBox(width: 10,),
-                    //if(availableAbha)
-                    if(availableAbha)
+                  if(availableAbha)
+                    Spacer(),
+                  // SizedBox(width: 10,),
+                  //if(availableAbha)
+                  if(availableAbha)
                     Align(
                       alignment: Alignment.center,
                       child: InkWell(
                         onTap: () {
                           setState(() {
                             dropdownvalue = defaultDropdownValue;
-                            linkExistAbha =false;
-                            availableAbha =false;
-                            createViaAbha =true;
-                            termCondFlag =true;
+                            linkExistAbha = false;
+                            availableAbha = false;
+                            createViaAbha = true;
+                            termCondFlag = true;
                             createnewFlag = false;
                             enableAbhaClick = false;
                           });
-          
                         },
                         child: Container(
                           width: 130.w,
                           height: 30.h,
-                          //padding: EdgeInsets.all(6.w),
                           decoration: BoxDecoration(
-                            color: AppColors.orangeApp,
+                            color: AppColors.greenHighlight,
                             borderRadius: BorderRadius.circular(5.0),
                             border: Border.all(
-                                color: AppColors.orangeApp, width: 1.w),
+                                color: AppColors.greenHighlight, width: 1.w),
                           ),
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              localText.createNew,
-                              style: TextStyle(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add,                    // Prefix icon for "Create New"
                                 color: Colors.white,
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.bold,
+                                size: 16.sp,
                               ),
-                            ),
+                              SizedBox(width: 6.w),           // Small space between icon and text
+                              Text(
+                                localText.createNew,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    )
-                  ],),
-              ),
-            ],),
+                    ),
+                ],),
+            ),
+          ],),
         ),
 
         if(createViaAbha)
@@ -1397,46 +1411,38 @@ class _ABHAScreenState extends State<ABHAScreen> {
             SizedBox(height: 10,),
             Align(
               alignment: Alignment.centerLeft,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  border: Border.all(
-                      color: AppColors.blueApp,
-                      style: BorderStyle.solid,
-                      width: 0.50),
+              child: DropdownButtonFormField<String>(
+                value: dropdownvalue,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.zero,
+                  border: UnderlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.blueApp, width: 1),
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.blueApp, width: 1),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.blueApp, width: 2),
+                  ),
                 ),
-                child: DropdownButton(
-                  isExpanded: true,
-                  isDense: true,
-                  // Initial Value
-                  value: dropdownvalue,
-                  underline: SizedBox(),
-                  // Down Arrow Icon
-                  icon: const Icon(Icons.keyboard_arrow_down),
-
-                  // Array list of items
-                  items: items.map((String items) {
-                    return DropdownMenuItem(
-                      value: items,
-                      child: Text(
-                        items,
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11.sp),
-                      ),
-                    );
-                  }).toList(),
-                  // After selecting the desired option,it will
-                  // change button value to selected value
-                  onChanged: (String? newValue) {
-
-                    setState(() {
-                      dropdownvalue = newValue!;
-                    });
-                  },
+                icon: Icon(Icons.keyboard_arrow_down, color: AppColors.blueApp),
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11.sp,
                 ),
+                items: items.map((String item) {
+                  return DropdownMenuItem(
+                    value: item,
+                    child: Text(item),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    dropdownvalue = newValue!;
+                  });
+                },
               ),
             ),
             SizedBox(height: 25,)
@@ -1464,19 +1470,27 @@ class _ABHAScreenState extends State<ABHAScreen> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: localText.aadhaarNumber,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    borderSide: BorderSide(color: Colors.grey)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    borderSide: BorderSide(color: Colors.grey)),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
+
+                // Completely remove the box — use underline only
+                border: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey),
                 ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.green, width: 2), // Green when focused
+                ),
+                errorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                ),
+                focusedErrorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red, width: 2),
+                ),
+
                 contentPadding: EdgeInsets.symmetric(
-                  //vertical: 14.sp,
                   horizontal: 16.sp,
+                  vertical: 12, // keeps good height & alignment
                 ),
               ),
               validator: (value) {
@@ -1541,7 +1555,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                       },
                     ),
                     // const SizedBox(width: 10),
-                     Text(
+                    Text(
                       localText.agreeAll,
                       style: TextStyle(
                           fontSize: 11.0, fontWeight: FontWeight.bold),
@@ -1762,23 +1776,32 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   child: Container(
                     width: 100.w,
                     height: 30.h,
-                    //padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
                       color: AppColors.orangeApp,
                       borderRadius: BorderRadius.circular(5.0),
                       border: Border.all(
-                          color: AppColors.orangeApp, width: 1.w),
-                    ),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        localText.sendOtp,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        color: AppColors.orangeApp,
+                        width: 1.w,
                       ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.send_rounded,           // Perfect prefix icon for "Send OTP"
+                          color: Colors.white,
+                          size: 15.sp,
+                        ),
+                        SizedBox(width: 6.w),           // Small space between icon and text
+                        Text(
+                          localText.sendOtp,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -1798,181 +1821,57 @@ class _ABHAScreenState extends State<ABHAScreen> {
               ),
             ),
             SizedBox(height: 5,),
-            TextFormField(
-              //readOnly: verifyAbhaFlag==true?true:false,
+            CustomTextField(
               controller: otpController,
-              style: TextStyle(
-                fontSize: 11,
-              ),
+              hintText: "Please enter OTP",
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: getOtpLabel(localText.enterOtp),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    borderSide: BorderSide(color: Colors.grey)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    borderSide: BorderSide(color: Colors.grey)),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  //vertical: 14.sp,
-                  horizontal: 16.sp,
-                ),
-              ),
+              maxLength: 6,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter OTP';
+                  return "OTP is required";
                 }
                 return null;
               },
             ),
+            Divider(color: AppColors.divider, thickness: 1, height: 0),
+
             Padding(
               padding: EdgeInsets.only(top: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: InkWell(
-                      onTap: () {
-
-                        if(dropdownvalue == 'Aadhaar'){
-                          if(otpController.text.isNotEmpty)
-                          {
-                            _aadhaarOTPABHA(verifyOTP);
-                          }
-                          else {
-                            Utils.showToastMessage('Please enter OTP');
-                          }
-
-                        }
-                        else if(dropdownvalue == 'Mobile'){
-                          if(otpController.text.isNotEmpty)
-                          {
-                            _aadhaarOTPABHA(verifyOTP);
-                          }
-                          else {
-                            Utils.showToastMessage('Please enter OTP');
-                          }
-
-                        }
-                        else {
-                          if(otpController.text.isNotEmpty){
-                            _verifyOTPLinkExisting(otpController.text);
-                          }
-                          else {
-                            Utils.showToastMessage('Please enter OTP');
-                          }
-                        }
-
-                      },
-                      child: Container(
-                        width: 100.w,
-                        height: 30.h,
-                        //padding: EdgeInsets.all(6.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.orangeApp,
-                          borderRadius: BorderRadius.circular(5.0),
-                          border: Border.all(
-                              color: AppColors.orangeApp, width: 1.w),
-                        ),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            localText.verifyOtp,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10,),
-                  /*Align(
-                    alignment: Alignment.center,
-                    child: InkWell(
-                      onTap: isResendEnabled ?() {
-
-                        if(dropdownvalue == 'Aadhaar'){
-                          if(aadhaarController.text.isNotEmpty)
-                          {
-                            _aadhaarOTPABHA(sendOTP);
-                          }
-                          else {
-                            Utils.showToastMessage('Please enter aadhaar number');
-                          }
-
-                        }
-                        else {
+                  InkWell(
+                    onTap: isResendEnabled
+                        ? () {
+                      if (dropdownvalue == 'Aadhaar') {
+                        if (aadhaarController.text.isNotEmpty) {
                           _aadhaarOTPABHA(sendOTP);
-                        }
-
-                      }:null,
-                      child: Container(
-                        width: 100.w,
-                        height: 30.h,
-                        //padding: EdgeInsets.all(6.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.orangeApp,
-                          borderRadius: BorderRadius.circular(5.0),
-                          border: Border.all(
-                              color: AppColors.orangeApp, width: 1.w),
-                        ),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            localText.resendOtp,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )*/
-
-                  Align(
-                    alignment: Alignment.center,
-                    child: InkWell(
-                      onTap: isResendEnabled
-                          ? () {
-                        if (dropdownvalue == 'Aadhaar') {
-                          if (aadhaarController.text.isNotEmpty) {
-                            _aadhaarOTPABHA(sendOTP);
-                          } else {
-                            Utils.showToastMessage('Please enter Aadhaar number');
-                          }
                         } else {
-                          _aadhaarOTPABHA(sendOTP);
+                          Utils.showToastMessage('Please enter Aadhaar number');
                         }
+                      } else {
+                        _aadhaarOTPABHA(sendOTP);
                       }
-                          : null, // disable tap when timer is active
-                      borderRadius: BorderRadius.circular(5.0),
-                      child: Container(
-                        width: 100.w,
-                        height: 30.h,
-                        decoration: BoxDecoration(
-                          color: isResendEnabled
-                              ? AppColors.orangeApp
-                              : AppColors.orangeApp.withOpacity(0.4), // faded look
-                          borderRadius: BorderRadius.circular(5.0),
-                          border: Border.all(
-                            color: AppColors.orangeApp,
-                            width: 1.w,
-                          ),
-                        ),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
+                    }
+                        : null,
+                    borderRadius: BorderRadius.circular(5.0),
+                    child: Container(
+                      width: 100.w,
+                      height: 30.h,
+                      decoration: BoxDecoration(
+                        color: isResendEnabled
+                            ? Colors.yellow
+                            : Colors.yellow.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(color: Colors.yellow, width: 1.w),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.refresh, color: Colors.white, size: 16.sp), // Prefix icon
+                          SizedBox(width: 6.w),
+                          Text(
                             localText.resendOtp,
                             style: TextStyle(
                               color: Colors.white,
@@ -1981,13 +1880,60 @@ class _ABHAScreenState extends State<ABHAScreen> {
                               letterSpacing: 0.3,
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
-
-
-                ],),
+                  Spacer(),
+                  InkWell(
+                    onTap: () {
+                      if (dropdownvalue == 'Aadhaar') {
+                        if (otpController.text.isNotEmpty) {
+                          _aadhaarOTPABHA(verifyOTP);
+                        } else {
+                          Utils.showToastMessage('Please enter OTP');
+                        }
+                      } else if (dropdownvalue == 'Mobile') {
+                        if (otpController.text.isNotEmpty) {
+                          _aadhaarOTPABHA(verifyOTP);
+                        } else {
+                          Utils.showToastMessage('Please enter OTP');
+                        }
+                      } else {
+                        if (otpController.text.isNotEmpty) {
+                          _verifyOTPLinkExisting(otpController.text);
+                        } else {
+                          Utils.showToastMessage('Please enter OTP');
+                        }
+                      }
+                    },
+                    child: Container(
+                      width: 100.w,
+                      height: 30.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.greenHighlight,
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(color: AppColors.greenHighlight, width: 1.w),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.check_box_outlined, color: Colors.white, size: 16.sp), // Prefix icon
+                          SizedBox(width: 6.w),
+                          Text(
+                            localText.verifyOtp,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 10),
             AnimatedOpacity(
@@ -2166,94 +2112,99 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                 if(listABHAID.length > 0)
                   ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: 200, // your max height
-                      ), // set your max height here
+                    constraints: BoxConstraints(
+                      maxHeight: 200, // your max height
+                    ), // set your max height here
 
-                  child: Scrollbar(
-    //controller: _scrollController,
-    thumbVisibility: true,   // always show scrollbar
-    thickness: 6,
-    radius: Radius.circular(10),
+                    child: Scrollbar(
+                      //controller: _scrollController,
+                      thumbVisibility: true,   // always show scrollbar
+                      thickness: 6,
+                      radius: Radius.circular(10),
 
-                    child: ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: listABHAID.length ?? 0,
-                        itemBuilder: (BuildContext context, int index) {
-                          return RadioListTile(
-                            dense: true,
-                            title: Text(listABHAID[index].abhaId ?? '',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13)),
-                            // Display the title for option 1
-                            // subtitle: Text('Subtitle for Option 1'), // Display a subtitle for option 1
-                            value: listABHAID[index].abhaId ?? '',
-                            // Assign a value of 1 to this option
-                            groupValue: _selectedAbhaIDValue,
-                            // Use _selectedValue to track the selected option
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedAbhaIDValue = value!; // Update _selectedValue when option 1 is selected
-                              });
-                            },
-                          );
-                        }),
+                      child: ListView.builder(
+                          primary: false,
+                          shrinkWrap: true,
+                          itemCount: listABHAID.length ?? 0,
+                          itemBuilder: (BuildContext context, int index) {
+                            return RadioListTile(
+                              dense: true,
+                              title: Text(listABHAID[index].abhaId ?? '',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13)),
+                              // Display the title for option 1
+                              // subtitle: Text('Subtitle for Option 1'), // Display a subtitle for option 1
+                              value: listABHAID[index].abhaId ?? '',
+                              // Assign a value of 1 to this option
+                              groupValue: _selectedAbhaIDValue,
+                              // Use _selectedValue to track the selected option
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedAbhaIDValue = value!; // Update _selectedValue when option 1 is selected
+                                });
+                              },
+                            );
+                          }),
+                    ),
                   ),
-                ),
                 if(listABHAID.length > 0)
-                SizedBox(
-                  height: 10,
-                ),
+                  SizedBox(
+                    height: 10,
+                  ),
                 Container(
                   child: Row(
                     children: [
                       if(listABHAID.length > 0)
-                      Align(
-                        alignment: Alignment.center,
-                        child: InkWell(
-                          onTap: () {
-                            if (dropdownvalue == 'Aadhaar') {
-                              _healthCardLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
-                             // _profileLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
-                            }
-                            else {
-                              if(_selectedAbhaIDValue!=null){
-                                _continueExisitingABHAMobileUser(_selectedAbhaIDValue);
+                        Align(
+                          alignment: Alignment.center,
+                          child: InkWell(
+                            onTap: () {
+                              if (dropdownvalue == 'Aadhaar') {
+                                _healthCardLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
+                                // _profileLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
+                              }
+                              else {
+                                if(_selectedAbhaIDValue!=null){
+                                  _continueExisitingABHAMobileUser(_selectedAbhaIDValue);
+                                }
+
                               }
 
-                            }
-
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.only(left: 10.0, right: 10),
-                            //width: 100.w,
-                            height: 30.h,
-                            //padding: EdgeInsets.all(6.w),
-                            decoration: BoxDecoration(
-                              color: AppColors.orangeApp,
-                              borderRadius: BorderRadius.circular(5.0),
-                              border: Border.all(
-                                  color: AppColors.orangeApp, width: 1.w),
-                            ),
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                localText.useExisting,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            },
+                            child:Container(
+                              padding: const EdgeInsets.only(left: 10.0, right: 10),
+                              height: 30.h,
+                              decoration: BoxDecoration(
+                                color: Colors.yellow,
+                                borderRadius: BorderRadius.circular(5.0),
+                                border: Border.all(color: Colors.yellow, width: 1.w),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.person,     // prefix icon
+                                    size: 14.sp,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    localText.useExisting,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ),
-                      ),
                       if(listABHAID.length > 0)
-                      SizedBox(width: 10,),
+                        SizedBox(width: 10,),
                       Align(
                         alignment: Alignment.center,
                         child: InkWell(
@@ -2276,27 +2227,32 @@ class _ABHAScreenState extends State<ABHAScreen> {
                             }
 
                           },
-                          child: Container(
+                          child:Container(
                             padding: const EdgeInsets.only(left: 10.0, right: 10),
-                            // width: 100.w,
                             height: 30.h,
-                            //padding: EdgeInsets.all(6.w),
                             decoration: BoxDecoration(
-                              color: AppColors.orangeApp,
+                              color: Colors.yellow,
                               borderRadius: BorderRadius.circular(5.0),
-                              border: Border.all(
-                                  color: AppColors.orangeApp, width: 1.w),
+                              border: Border.all(color: Colors.yellow, width: 1.w),
                             ),
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                localText.createNew,
-                                style: TextStyle(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_circle,      // prefix icon
+                                  size: 14.sp,
                                   color: Colors.white,
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
+                                SizedBox(width: 6),
+                                Text(
+                                  localText.createNew,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -2434,7 +2390,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                               alignment: Alignment.centerLeft,
                               child: InkWell(
                                 onTap: () {
-                                 /* if (dropdownvalue == 'Aadhaar') {
+                                  /* if (dropdownvalue == 'Aadhaar') {
                                     if(txtABHAIDMobileController.text.isNotEmpty){
                                       _aadhaarCreateABHA();
                                     }
@@ -2449,15 +2405,15 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                                     }
                                     else {*/
-                                      if(txtABHAIDMobileController.text.isNotEmpty){
-                                        _mobileCreateABHA();
-                                      }
-                                      else {
-                                        Utils.showToastMessage('Please enter ABHA ID');
-                                      }
+                                  if(txtABHAIDMobileController.text.isNotEmpty){
+                                    _mobileCreateABHA();
+                                  }
+                                  else {
+                                    Utils.showToastMessage('Please enter ABHA ID');
+                                  }
 
-                                   // }
-                                 // }
+                                  // }
+                                  // }
 
                                 },
                                 child: Container(
@@ -2852,59 +2808,26 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
 
           //For aadhar
-       //   if(!createMobileAadhharView)
+          //   if(!createMobileAadhharView)
 
-            Padding(
-              padding: EdgeInsets.only(top:10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      width: 100.w,
-                      height: 50.h,
-                      child: TextFormField(
-                        onTap: () {
-                          //suggestion(setState);
-                          //createAbhaMobileSuggestion();
-                        },
-                        controller: txtABHAIDMobileController,
-                        style: TextStyle(fontSize: 11),
-                        // keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: localText.abhaId,
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: BorderSide(color: Colors.blue)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue)),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            vertical: 14.sp,
-                            horizontal: 16.sp,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter ABHA ID';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 80.w,
+          Padding(
+            padding: EdgeInsets.only(top:10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    width: 100.w,
                     height: 50.h,
                     child: TextFormField(
-                      readOnly: true,
-                      // controller: usernameController,
+                      onTap: () {
+                        //suggestion(setState);
+                        //createAbhaMobileSuggestion();
+                      },
+                      controller: txtABHAIDMobileController,
                       style: TextStyle(fontSize: 11),
-                      keyboardType: TextInputType.number,
-                      initialValue: abhaIdEnd,
+                      // keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        hintText: abhaIdEnd,
+                        hintText: localText.abhaId,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
                             borderSide: BorderSide(color: Colors.blue)),
@@ -2920,13 +2843,46 @@ class _ABHAScreenState extends State<ABHAScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter OTP';
+                          return 'Please enter ABHA ID';
                         }
                         return null;
                       },
                     ),
                   ),
-                  /*ElevatedButton(
+                ),
+                Container(
+                  width: 80.w,
+                  height: 50.h,
+                  child: TextFormField(
+                    readOnly: true,
+                    // controller: usernameController,
+                    style: TextStyle(fontSize: 11),
+                    keyboardType: TextInputType.number,
+                    initialValue: abhaIdEnd,
+                    decoration: InputDecoration(
+                      hintText: abhaIdEnd,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide(color: Colors.blue)),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 14.sp,
+                        horizontal: 16.sp,
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter OTP';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                /*ElevatedButton(
                     onPressed: () {
                       */ /*if (dropdownvalue == 'Aadhaar') {
                         createAbhaAadhaarSuggestion(setState);
@@ -2935,9 +2891,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
                      // }
                     },
                     child: Text('suggestion'))*/
-                ],
-              ),
+              ],
             ),
+          ),
           if (listMobileAbhaSuggestion != null &&
               listMobileAbhaSuggestion.length != 0)
             Align(
@@ -3016,8 +2972,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
         if (response != null&& response.statusCode==200) {
           searchAvailabilityResponse = SearchAbhaResponse.fromJson(response.data);
 
-            _isLoading=false;
-            Navigator.pop(context);
+          _isLoading=false;
+          Navigator.pop(context);
           availableAbhaNumbers = searchAvailabilityResponse?.abha??[];
 
           if(availableAbhaNumbers.length>0){
@@ -3027,12 +2983,12 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
           setState(() {
             availableAbhaNumbers;
-              //available_abha_numbers
-              availableAbha=true;
-              checkavailableAbha=false;
+            //available_abha_numbers
+            availableAbha=true;
+            checkavailableAbha=false;
             enableAbhaClick;
-            });
-           // Utils.showToastMessage('${searchAvailabilityResponse?.sMessage}');
+          });
+          // Utils.showToastMessage('${searchAvailabilityResponse?.sMessage}');
 
         }
         else {
@@ -3084,7 +3040,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
         if (_isLoading) {
           Navigator.pop(context);
         }
-       /* setState(() {
+        /* setState(() {
           createnewFlag = true;
         });*/
       }
@@ -3105,9 +3061,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
       num? loginId = 1;
 
       if(availableAbhaNumbersSelectedIndex != -1 && availableAbhaNumbers!=null)
-        {
-          loginId = availableAbhaNumbers[availableAbhaNumbersSelectedIndex]!.index;
-        }
+      {
+        loginId = availableAbhaNumbers[availableAbhaNumbersSelectedIndex]!.index;
+      }
 
 
       Map<String, dynamic> data = {
@@ -3190,7 +3146,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
             });
             methodNameLog = Constant.log_type_existing;
             _healthCardLinkExisting(verifyOtpExisting?.token??'');
-           // _profileLinkExisting(setStateDialog, verifyOtpExisting?.token??'');
+            // _profileLinkExisting(setStateDialog, verifyOtpExisting?.token??'');
           }
 
           Utils.showToastMessage('${verifyOtpExisting?.message}');
@@ -3859,7 +3815,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   createMobileAadhharView = false;
                   _isLoading=false;
                   Navigator.pop(context);
-                 /* setState(() {
+                  /* setState(() {
                     linkExistAbha = false;
                     showLinkAbhaIdList = true;
                   //  listABHAID.add(ABHAID(verifyOtpAadhaar?.aBHAProfile?.phrAddress?.first??'', true));
@@ -3898,7 +3854,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     setState(() {
                       linkExistAbha = false;
                       showLinkAbhaIdList = true;
-                        listABHAID.add(ABHAID(verifyOtpAadhaar?.aBHAProfile?.phrAddress?.first??'', true));
+                      listABHAID.add(ABHAID(verifyOtpAadhaar?.aBHAProfile?.phrAddress?.first??'', true));
                     });
 
                     if(listABHAID.length==0){
@@ -3951,7 +3907,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   }
                 });
                 //_mobileabhasuggestions();
-               // _profileMobile(verifyOtpMobile?.tokens?.token??'');
+                // _profileMobile(verifyOtpMobile?.tokens?.token??'');
               }
               sMessage = verifyOtpMobile?.message;
             }
@@ -4035,8 +3991,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
               ),
               onPressed: () => Navigator.of(context).pop(false),
               child:  Text('No',style: TextStyle(
-        color: Colors.black,
-        fontSize: 12.sp)),
+                  color: Colors.black,
+                  fontSize: 12.sp)),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
@@ -4074,7 +4030,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
       };
       dataRequestSync = jsonEncode(jsonData);
 
-    AbhaController controller = AbhaController();
+      AbhaController controller = AbhaController();
       try {
         final response = await controller.aadhaarCreateABHA(AbhaController.aadhaarMobileUpdate, jsonData, clinicToken);
 
@@ -4088,16 +4044,16 @@ class _ABHAScreenState extends State<ABHAScreen> {
             setState(() {
               otpController.text="";
               updateMobile=true;
-                linkExistAbha = true;
+              linkExistAbha = true;
               sendOtpAbha = false;
-                termCondFlag = false;
+              termCondFlag = false;
             });
 
 
 
           }
           // sMessage = abhaSuggestionMobile?.statusCode;
-           Utils.showToastMessage(sMessage);
+          Utils.showToastMessage(sMessage);
         }  else {
 
           Error400 error400 = Error400.fromJson(response?.data);
@@ -4144,7 +4100,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
       };
       dataRequestSync = jsonEncode(data);
 
-       var  methodName = AbhaController.continueExisitingABHAMobile;
+      var  methodName = AbhaController.continueExisitingABHAMobile;
 
       AbhaController controller = AbhaController();
       try {
@@ -4273,7 +4229,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
             // _viewImage(healthCardResposne.sData?.content??'', verifyOtpExisting?.sData?.token??'');
           }
 
-         // Utils.showToastMessage('${healthCardResposne.sMessage}');
+          // Utils.showToastMessage('${healthCardResposne.sMessage}');
         } else {
           Utils.showToastMessage('Something went wrong!');
           print(response);
@@ -4326,17 +4282,17 @@ class _ABHAScreenState extends State<ABHAScreen> {
             // _viewImage(healthCardResposne.sData?.content??'', verifyOtpExisting?.sData?.token??'');
           }
 
-        else {
+          else {
 
-          Error400 error400 = Error400.fromJson(response?.data);
-          Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+            Error400 error400 = Error400.fromJson(response?.data);
+            Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
 
-          setState(() {
-            refresh();
-            refreshLinkABha();
-          });
-          print(response);
-        }
+            setState(() {
+              refresh();
+              refreshLinkABha();
+            });
+            print(response);
+          }
 
           // Utils.showToastMessage('${healthCardResposne.sMessage}');
         } else {
@@ -4461,8 +4417,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
               callAbhaSuggestion = false;
             });
           }
-         // sMessage = abhaSuggestionMobile?.statusCode;
-         // Utils.showToastMessage(sMessage);
+          // sMessage = abhaSuggestionMobile?.statusCode;
+          // Utils.showToastMessage(sMessage);
         }  else {
 
           Error400 error400 = Error400.fromJson(response?.data);
@@ -4597,7 +4553,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
 
 
-    var methodName = AbhaController.aadhaarCreate;
+      var methodName = AbhaController.aadhaarCreate;
 
 
       AbhaController controller = AbhaController();
@@ -4614,8 +4570,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
             methodNameLog = Constant.log_type_create_new_via_aadhaar_final;
             _healthCardLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
           }
-         // sMessage = createAadhaarResponse?.;
-         // Utils.showToastMessage(sMessage);
+          // sMessage = createAadhaarResponse?.;
+          // Utils.showToastMessage(sMessage);
         } else {
           Utils.showToastMessage('Something went wrong!');
           print(response);
@@ -4725,9 +4681,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
               Navigator.pop(context);
 
               if(abhaSuggestionModel?.sData?.abhaAddressList!=null)
-                {
-                  listMobileAbhaSuggestion = abhaSuggestionModel!.sData!.abhaAddressList!;
-                }
+              {
+                listMobileAbhaSuggestion = abhaSuggestionModel!.sData!.abhaAddressList!;
+              }
 
               setStateDialog(() {
                 createMobileAadhharView = false;

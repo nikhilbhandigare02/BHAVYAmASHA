@@ -140,35 +140,38 @@ class _ClusterMeetingScreenState extends State<ClusterMeetingScreen> {
 
 
 
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SizedBox(
-          height: 34,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => ClusterMeetingScreenForm()),
-              ).then((_) {
-                setState(() => isLoading = true); // show loader immediately
+      bottomNavigationBar: SafeArea(
+        bottom: true,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            height: 34,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ClusterMeetingScreenForm()),
+                ).then((_) {
+                  setState(() => isLoading = true); // show loader immediately
 
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _loadMeetings(); // reload list
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _loadMeetings(); // reload list
+                  });
                 });
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
-            ),
-            child:  Text(
-             l10n?.addNewClusterMeeting ??  "ADD NEW CLUSTER MEETING",
-              style: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+              child:  Text(
+               l10n?.addNewClusterMeeting ??  "ADD NEW CLUSTER MEETING",
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

@@ -41,7 +41,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     super.dispose();
   }
 
-
+/*
   Future<bool> _isSynced(String beneficiaryId) async {
     try {
       if (beneficiaryId.isEmpty) return false;
@@ -63,6 +63,32 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     } catch (e) {
       print('Error checking sync status: $e');
       return false;
+    }
+  }*/
+
+  Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        'child_care_activities',
+        columns: ['is_synced', 'server_id', 'created_date_time'],
+        where: 'beneficiary_ref_key = ? AND child_care_state = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey, 'registration_due'],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (rows.isNotEmpty) {
+        return {
+          'is_synced': rows.first['is_synced'] == 1,
+          'server_id': rows.first['server_id']
+        };
+      }
+
+      return {'is_synced': false, 'server_id': null};
+    } catch (e) {
+      print('Error fetching sync status: $e');
+      return {'is_synced': false, 'server_id': null};
     }
   }
 
@@ -238,13 +264,18 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
 
-      String whereClause = 'child_care_state = ?';
+      String whereClause = 'child_care_state = ? ';
+      //whereClause += 'AND is_deleted = 0';
+
       List<dynamic> whereArgs = ['registration_due'];
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
       }
+
+      whereClause += ' AND is_deleted = ?';
+      whereArgs.add(0);
 
       // Get beneficiaries with registration_due status for current user
       final List<Map<String, dynamic>> childActivities = await db.query(
@@ -382,6 +413,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       }
     }
   }
+
   Future<bool> _isChildRegistered(Database db, String hhId, String childName) async {
     try {
       final normalizedSearchName = childName.trim().toLowerCase();
@@ -779,7 +811,19 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  FutureBuilder<bool>(
+
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: _getSyncStatus(data['BeneficiaryID']?.toString() ?? ''),
+                    builder: (context, snapshot) {
+                      final isSynced = snapshot.data?['is_synced'] == true;
+                      return Image.asset(
+                        'assets/images/sync.png',
+                        width: 25,
+                        color: isSynced ? null : Colors.grey[500],
+                      );
+                    },
+                  )
+                  /*FutureBuilder<bool>(
                     future: _isSynced(data['BeneficiaryID']?.toString() ?? ''),
                     builder: (context, snapshot) {
                       final isSynced = snapshot.data ?? false;
@@ -794,7 +838,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                         ),
                       );
                     },
-                  ),
+                  ),*/
                 ],
               ),
             ),

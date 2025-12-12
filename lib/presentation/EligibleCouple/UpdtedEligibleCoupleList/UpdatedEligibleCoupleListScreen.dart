@@ -359,6 +359,32 @@ class _UpdatedEligibleCoupleListScreenState
     };
   }
 
+  Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        'eligible_couple_activities',
+        columns: ['is_synced', 'server_id', 'created_date_time'],
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0 ',
+        whereArgs: [beneficiaryRefKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (rows.isNotEmpty) {
+        return {
+          'is_synced': rows.first['is_synced'] == 1,
+          'server_id': rows.first['server_id']
+        };
+      }
+
+      return {'is_synced': false, 'server_id': null};
+    } catch (e) {
+      print('Error fetching sync status: $e');
+      return {'is_synced': false, 'server_id': null};
+    }
+  }
+
   int _calculateAge(dynamic dobRaw) {
     if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
     try {
@@ -639,12 +665,23 @@ class _UpdatedEligibleCoupleListScreenState
                   ),
 
                   const SizedBox(width: 8),
-                  Image.asset(
-                    'assets/images/sync.png',
-                    width: 24,
-                    height: 24,
-                    color: (data['is_synced'] == 1) ? null : Colors.grey,
-                  ),
+                  // Image.asset(
+                  //   'assets/images/sync.png',
+                  //   width: 24,
+                  //   height: 24,
+                  //   color: (data['is_synced'] == 1) ? null : Colors.grey,
+                  // ),
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: _getSyncStatus(data['beneficiary_ref']!.toString()),
+                    builder: (context, snapshot) {
+                      final isSynced = snapshot.data?['is_synced'] == true;
+                      return Image.asset(
+                        'assets/images/sync.png',
+                        width: 25,
+                        color: isSynced ? null : Colors.grey[500],
+                      );
+                    },
+                  )
                 ],
               ),
             ),

@@ -43,6 +43,7 @@ class ProfileState extends Equatable {
   final String dcmName;
   final String dcmMobile;
   final int? appRoleId;
+  final int? ashaListCount;
   final bool submitting;
   final bool success;
   final String? error;
@@ -90,6 +91,7 @@ class ProfileState extends Equatable {
     this.dcmMobile = '',
     this.appRoleId,
 
+    this.ashaListCount,
     this.submitting = false,
     this.success = false,
     this.error,
@@ -149,7 +151,7 @@ class ProfileState extends Equatable {
     String? dcmMobile,
     bool? submitting,
     int? appRoleId,
-
+    int? ashaListCount,
     bool? success,
     String? error,
   }) {
@@ -195,7 +197,7 @@ class ProfileState extends Equatable {
       dcmName: dcmName ?? this.dcmName,
       dcmMobile: dcmMobile ?? this.dcmMobile,
       appRoleId: appRoleId ?? this.appRoleId,
-
+      ashaListCount: ashaListCount ?? this.ashaListCount,
       submitting: submitting ?? this.submitting,
       success: success ?? this.success,
       error: error,
@@ -216,7 +218,7 @@ class ProfileState extends Equatable {
     ifsc,
     stateName,
     appRoleId,
-
+    ashaListCount,
     division,
     district,
     block,

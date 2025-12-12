@@ -133,9 +133,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // Safely parse details
       try {
-        details = userData['details'] is String
-            ? jsonDecode(userData['details'] as String)
-            : userData['details'] as Map<String, dynamic>? ?? {};
+        dynamic d = userData['details'];
+
+        if (d is String) {
+          details = Map<String, dynamic>.from(jsonDecode(d));
+        } else if (d is Map) {
+          details = Map<String, dynamic>.from(d);
+        } else {
+          details = <String, dynamic>{};
+        }
+
+
       } catch (e) {
         print('Error parsing user details: $e');
         return;
@@ -143,17 +151,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       Map<String, dynamic> actualUserData = details;
 
-      final appRoleId = actualUserData['app_role_id'] ?? '';
+      final appRoleId = details['app_role_id'] ?? '';
       print("APP ROLE ID: $appRoleId");
 
-      final roleId = int.tryParse(appRoleId.toString());
-      if (roleId != null) {
-        _profileBloc.add(RoleIdChanged(roleId));
-        setState(() {
-          _appRoleId = roleId;
-        });
+      if (appRoleId.toString().isNotEmpty) {
+        final parsed = int.tryParse(appRoleId.toString());
+        if (parsed != null) {
+          context.read<ProfileBloc>().add(RoleIdChanged(parsed));
+        }
       }
 
+
+      final ashaList = actualUserData['asha_list'] is List
+          ? List<Map<String, dynamic>>.from(actualUserData['asha_list'])
+          : <Map<String, dynamic>>[];
+
+      final ashaCount = ashaList.length;
+      print("ASHA COUNT → $ashaCount");
+
+// Send count into BLoC
+      _profileBloc.add(AshaListCountChanged(ashaCount));
 
       final name = actualUserData['name'] is Map ? Map<String, dynamic>.from(actualUserData['name']) : <String, dynamic>{};
       final workingLocation = actualUserData['working_location'] is Map
@@ -361,11 +378,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
         child: Scaffold(
           backgroundColor: AppColors.surface,
-
           appBar: AppHeader(
-            screenTitle: _appRoleId == 4
+            screenTitle: context.select<ProfileBloc, bool>(
+                  (bloc) => bloc.state.appRoleId == 4,
+            )
                 ? "Facilitator Profile"
-                :  l10n.ashaProfile,
+                : l10n.ashaProfile,
             showBack: true,
             onBackTap: () {
               Navigator.of(context).pushNamedAndRemoveUntil(
@@ -378,9 +396,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: BlocConsumer<ProfileBloc, ProfileState>(
               listener: (context, state) {
                 if (state.success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Form Submitted Successfully")),
-                  );
+                  SnackBar(content: Text("Form Submitted Successfully"));
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     Route_Names.homeScreen,
@@ -1056,7 +1072,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    l10n.noOfASHAUnderTheFacilitator ?? "No. of ASHA under the facilitator",
+                                    "No. of ASHA under the facilitator",
                                     style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600
@@ -1074,7 +1090,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    "0",
+                                    state.ashaListCount?.toString() ?? "0",
                                     style:  TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,

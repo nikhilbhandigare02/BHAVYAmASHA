@@ -194,6 +194,7 @@ class _DeseasedListState extends State<DeseasedList> {
           'DateofDeath': dateOfDeath,
           'age': getAge(),
           'gender': getValue(beneficiaryInfo['gender']),
+          'is_synced': beneficiary['is_synced'],
         };
       }).toList();
 
@@ -368,6 +369,13 @@ class _DeseasedListState extends State<DeseasedList> {
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
+                    ),
+                    Image.asset(
+                      'assets/images/sync.png',
+                      width: 25,
+                      color: (data['is_synced'] ?? 0) == 1
+                          ? Colors.green
+                          : Colors.grey[500],
                     ),
                   
                   ],

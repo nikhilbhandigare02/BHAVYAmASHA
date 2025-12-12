@@ -371,6 +371,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             'MotherName': motherName,
             'Address': address,
             'Weight': weightGrams,
+            'is_synced': row['is_synced'],
             'formData': formData, // Store the complete form data
           };
 
@@ -463,6 +464,31 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     }
     
     return '$age Y | $displayGender';
+  }
+  Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        'mother_care_activities',
+        columns: ['is_synced', 'server_id', 'created_date_time'],
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0 ',
+        whereArgs: [beneficiaryRefKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (rows.isNotEmpty) {
+        return {
+          'is_synced': rows.first['is_synced'] == 1,
+          'server_id': rows.first['server_id']
+        };
+      }
+
+      return {'is_synced': false, 'server_id': null};
+    } catch (e) {
+      print('Error fetching sync status: $e');
+      return {'is_synced': false, 'server_id': null};
+    }
   }
 
   @override
@@ -688,17 +714,26 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.asset(
-                      'assets/images/sync.png',
-                      width: 24,
-                      height: 24,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => 
-                          const Icon(Icons.sync, size: 24, color: Colors.grey),
-                    ),
+
+                  Image.asset(
+                    'assets/images/sync.png',
+                    width: 25,
+                    color: (data['is_synced'] ?? 0) == 1
+                        ? Colors.green
+                        : Colors.grey[500],
                   ),
+
+                  /*FutureBuilder<Map<String, dynamic>>(
+                    future: _getSyncStatus(data['is_synced']?.toString() ??''),
+                    builder: (context, snapshot) {
+                      final isSynced = snapshot.data?['is_synced'] == true;
+                      return Image.asset(
+                        'assets/images/sync.png',
+                        width: 25,
+                        color: isSynced ? null : Colors.grey[500],
+                      );
+                    },
+                  )*/
                 ],
               ),
             ),
