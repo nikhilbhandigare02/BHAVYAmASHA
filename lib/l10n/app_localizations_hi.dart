@@ -51,7 +51,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get abhaOtpGeneratedSuccess => 'ओटीपी सफलतापूर्वक जनरेट हुआ';
 
   @override
-  String get aboutUsP1Title => 'आशा (मान्यता प्राप्त सामाजिक स्वास्थ्य कार्यकर्ता) ऐप एक ऐसा अनुप्रयोग है जो आशा फ्रंट-लाइन कार्यकर्ताओं को उनकी रोज़मर्रा की जनसंख्या टीकाकरण, योग्य दंपति ट्रैकिंग, मां और शिशु देखभाल, और स्वास्थ्य समिति द्वारा चलाई जाने वाले विभिन्न कार्यक्रमों से संबंधित कार्य करने में मदद करता है।';
+  String get aboutUsP1Title => 'आशा (मान्यता प्राप्त सामाजिक स्वास्थ्य कार्यकर्ता)';
 
   @override
   String get aboutUsP1Part2 => 'ऐप, आशा फ्रंट-लाइन कार्यकर्ताओं को जनसंख्या टीकाकरण, पात्र जोड़ों की ट्रैकिंग, मातृ एवं शिशु देखभाल और स्वास्थ्य समाज द्वारा संचालित विभिन्न कार्यक्रमों से संबंधित उनके दैनिक कार्यों में मदद करने के लिए एक एप्लिकेशन है।';
@@ -81,15 +81,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transgender => 'ट्रांसजेंडर';
 
   @override
-  String get genderMale => 'पुरुष';
-
-  @override
-  String get genderFemale => 'महिला';
-
-  @override
-  String get occupationUnemployed => 'बेरोजगार';
-
-  @override
   String get occupationHousewife => 'गृहिणी';
 
   @override
@@ -108,16 +99,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get occupationRetired => 'सेवानिवृत्त';
 
   @override
-  String get occupationOther => 'अन्य';
+  String get occupationOther => 'Other';
 
   @override
   String get educationNoSchooling => 'स्कूल नहीं गए';
-
-  @override
-  String get educationPrimary => 'प्राथमिक';
-
-  @override
-  String get educationSecondary => 'माध्यमिक';
 
   @override
   String get educationHighSchool => 'हाई स्कूल';
@@ -135,18 +120,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get religionNotDisclosed => 'बताना नहीं चाहते';
 
   @override
-  String get religionHindu => 'हिंन्दू';
-
-  @override
-  String get religionMuslim => 'मुस्लिम';
-
-  @override
-  String get religionChristian => 'ईसाई';
-
-  @override
-  String get religionSikh => 'सिंख';
-
-  @override
   String get religionBuddhism => 'बौद्ध';
 
   @override
@@ -156,7 +129,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get religionParsi => 'पारसी';
 
   @override
-  String get religionOther => 'अन्य';
+  String get religionOther => 'Other';
 
   @override
   String get categoryNotDisclosed => 'बताना नहीं चाहते';
@@ -184,9 +157,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get categoryDontKnow => 'पता नहीं';
-
-  @override
-  String get migrationStayingInHouse => 'घर में रहने वाले';
 
   @override
   String get migrationSeasonalMigrant => 'मौसमी प्रवासी';
@@ -234,9 +204,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ageApproximate => 'आयु/अनुमानित आयु';
 
   @override
-  String get ageAtMarriageHint => 'विवाह के समय आयु दर्ज करें';
-
-  @override
   String get ageAtMarriageInYearsLabel => 'विवाह के समय आयु (वर्ष में)';
 
   @override
@@ -254,7 +221,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ageLabel => 'उम्र: ';
 
   @override
-  String get ageLabelSimple => 'आयु';
+  String get ageLabelSimple => 'Age';
 
   @override
   String get altMobileHint => 'वैकल्पिक मोबाइल नंबर';
@@ -401,7 +368,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bankDetailsTitle => 'बैंक विवरण';
 
   @override
-  String get bcmMobileHint => 'मोबाइल नंबर';
+  String get bcmMobileHint => 'Mobile no.';
 
   @override
   String get bcmMobileLabel => 'ब्लॉक कम्युनिटी मोबिलाइज़र का मोबाइल नंबर';
@@ -661,7 +628,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacC_fuelGas => 'गैस';
 
   @override
-  String get cbacC_fuelOther => 'अन्य';
+  String get cbacC_fuelOther => 'Other';
 
   @override
   String get cbacC_fuelQ => 'खाना पकाने के लिए किस प्रकार का ईंधन उपयोग होता है?';
@@ -953,16 +920,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateHint => 'dd-mm-yyyy';
 
   @override
-  String get dateLabel => 'तारीख';
-
-  @override
   String get dateOfInspectionLabel => 'Date of inspection *';
 
   @override
   String get daughter => 'पुत्री';
 
   @override
-  String get dcmMobileHint => 'मोबाइल नंबर';
+  String get dcmMobileHint => 'Mobile no.';
 
   @override
   String get dcmMobileLabel => 'जिला कम्युनिटी मोबिलाइज़र का मोबाइल नंबर';
@@ -1097,6 +1061,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get educationPostgraduate => 'स्नातकोत्तर';
 
   @override
+  String get educationPrimary => 'प्राथमिक';
+
+  @override
+  String get educationSecondary => 'माध्यमिक';
+
+  @override
   String get elderlyAbove65 => 'वृद्ध (>65 वर्ष)';
 
   @override
@@ -1111,16 +1081,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dataSavedSuccessfully => 'डेटा सफलतापूर्वक सहेजा गया!';
 
   @override
-  String get closeButton => 'बंद करा';
-
-  @override
-  String get ok => 'ठीक है';
+  String get closeButton => 'CLOSE';
 
   @override
   String get elecKeroseneLamp => 'मिट्टी के तेल का दीया';
 
   @override
-  String get elecOther => 'अन्य';
+  String get elecOther => 'Other';
 
   @override
   String get elecSolar => 'सौर ऊर्जा';
@@ -1186,9 +1153,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get familyHeadDetailsTitle => 'परिवार प्रमुख का विवरण';
 
   @override
-  String get familySurvey => 'Family Survey';
-
-  @override
   String get father => 'पिता';
 
   @override
@@ -1220,9 +1184,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get finalizeTotalAmountLabel => 'कुल राशि :';
-
-  @override
-  String get financialYearLabel => 'वित्तीय वर्ष';
 
   @override
   String get finishButton => 'समाप्त';
@@ -1264,13 +1225,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get fuelLpg => 'एलपीजी';
 
   @override
-  String get fuelOther => 'अन्य';
+  String get fuelOther => 'Other';
 
   @override
-  String get genderLabel => 'लिंग: ';
+  String get genderFemale => 'Female';
 
   @override
-  String get genderOther => 'अन्य';
+  String get genderMale => 'Male';
+
+  @override
+  String get genderOther => 'Other';
 
   @override
   String get generateOtp => 'GENERATE OTP';
@@ -1409,9 +1373,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get healthWorkerLabel => 'स्वास्थ्य कार्यकर्ता';
-
-  @override
-  String get hello => 'नमस्ते';
 
   @override
   String get help => 'सहायता नियम';
@@ -1656,13 +1617,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get lmpDateLabel => 'एलएमपी की तिथि';
 
   @override
-  String get loginButton => 'लॉगिन';
-
-  @override
   String get loginFailed => 'लॉगिन विफल। कृपया पुनः प्रयास करें।';
-
-  @override
-  String get loginSuccess => 'लॉगिन सफल!';
 
   @override
   String get loginToContinue => 'जारी रखने के लिए लॉगिन करें';
@@ -1701,10 +1656,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get misStatPregnantWomen => 'कुल गर्भवती महिलाओं की संख्या :';
 
   @override
-  String get mobileHint => 'मोबाइल नंबर';
+  String get mobileHint => 'Mobile no.';
 
   @override
-  String get mobileLabel => 'मोबाइल नंबर';
+  String get mobileLabel => 'Mobile no.';
 
   @override
   String get mobileLabelSimple => 'मोबाइल नं.';
@@ -1797,16 +1752,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get nameLabel => 'नाम';
 
   @override
-  String get nameLabelSimple => 'नाम';
+  String get nameLabelSimple => 'Name';
 
   @override
   String get nameOfFamilyHeadHint => 'परिवार प्रमुख का नाम';
 
   @override
   String get nameOfFamilyHeadLabel => 'परिवार प्रमुख का नाम';
-
-  @override
-  String get nameOfMemberHint => 'सदस्य का नाम दर्ज करें';
 
   @override
   String get nameOfMemberLabel => 'सदस्य का नाम';
@@ -1839,12 +1791,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get newPasswordTooShort => 'नया पासवर्ड कम से कम 6 अक्षरों का होना चाहिए';
 
   @override
-  String get nextButton => 'अगला';
-
-  @override
-  String get no => 'नहीं';
-
-  @override
   String get noHbncVisits => 'कोई एचबीएनसी विज़िट नहीं मिली';
 
   @override
@@ -1869,13 +1815,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get occupationStudent => 'विद्यार्थी';
 
   @override
+  String get occupationUnemployed => 'बेरोजगार';
+
+  @override
   String get or => 'या';
 
   @override
   String get orderOfPregnancyLabel => 'Order of Pregnancy(Gravida)';
-
-  @override
-  String get other => 'अन्य';
 
   @override
   String get otpGeneratedSuccess => 'OTP generated successfully';
@@ -1894,9 +1840,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get passwordEmpty => 'पासवर्ड खाली नहीं हो सकता';
-
-  @override
-  String get passwordHint => 'पासवर्ड दर्ज करें';
 
   @override
   String get passwordLabel => 'पासवर्ड';
@@ -1939,15 +1882,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get preExistingDiseaseLabel => 'Pre - Existing disease';
-
-  @override
-  String get pregnantWomen => 'गर्भवती महिलाएं';
-
-  @override
-  String get previousButton => 'पिछला';
-
-  @override
-  String get previousVisits => 'पिछले दौरे';
 
   @override
   String get previousVisitsButton => 'PREVIOUS VISITS';
@@ -2013,7 +1947,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relationMother => 'माता';
 
   @override
-  String get relationOther => 'अन्य';
+  String get relationOther => 'Other';
 
   @override
   String get relationSister => 'बहन';
@@ -2061,7 +1995,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relative => 'रिश्तेदार';
 
   @override
+  String get religionChristian => 'ईसाई';
+
+  @override
+  String get religionHindu => 'हिंन्दू';
+
+  @override
   String get religionLabel => 'धर्म';
+
+  @override
+  String get religionMuslim => 'मुस्लिम';
+
+  @override
+  String get religionSikh => 'सिंख';
 
   @override
   String get remarksLabel => 'टिप्पणी';
@@ -2127,7 +2073,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get routineSampoornTikakaran => 'सम्पूर्ण टीकाकरण की संख्या';
 
   @override
-  String get saveButton => 'सहेजें';
+  String get saveButton => 'संरक्षित करें';
 
   @override
   String get saveSuccess => 'Saved successfully';
@@ -2178,7 +2124,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get select => 'चुनें';
 
   @override
-  String get selectArea => 'चुनें';
+  String get selectArea => 'क्षेत्र चुनें';
 
   @override
   String get self => 'स्व';
@@ -2205,16 +2151,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get socioEconomicDetailsTitle => 'सामाजिक-आर्थिक विवरण';
 
   @override
-  String get somethingWentWrong => 'कुछ गलत हो गया!';
-
-  @override
   String get son => 'पुत्र';
 
   @override
   String get spouse => 'पति/पत्नी';
-
-  @override
-  String get spouseNameHint => 'पति/पत्नी का नाम दर्ज करें';
 
   @override
   String get spouseNameLabel => 'पति/पत्नी का नाम';
@@ -2244,13 +2184,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tabAshaDashboard => 'आशा डैशबोर्ड';
 
   @override
-  String get tabProtected => 'संरक्षित';
+  String get tabProtected => 'सुरक्षित';
 
   @override
   String get tabTodaysProgram => 'आज का कार्यक्रम';
 
   @override
-  String get tabUnprotected => 'असंरक्षित';
+  String get tabUnprotected => 'असुरक्षित';
 
   @override
   String get td1DateLabel => 'Date of T.D(Tetanus and adult diphtheria) 1';
@@ -2262,7 +2202,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tdBoosterDateLabel => 'Date of T.D(Tetanus and adult diphtheria) booster';
 
   @override
-  String get thAge => 'आयु';
+  String get thAge => 'Age';
 
   @override
   String get thFather => 'पिता';
@@ -2271,7 +2211,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get thGender => 'लिंग';
 
   @override
-  String get thName => 'नाम';
+  String get thName => 'Name';
 
   @override
   String get thNumber => '#';
@@ -2295,7 +2235,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get toDoVisits => 'दौरा करना';
 
   @override
-  String get todayWorkCompleted => 'पूर्ण दौरे';
+  String get todayWorkCompleted => 'Completed visits :';
 
   @override
   String get todayWorkPending => 'लंबित विज़िट :';
@@ -2355,7 +2295,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get trainingReceivedTitle => 'प्राप्त प्रशिक्षण';
 
   @override
-  String get trainingSave => 'सहेजें';
+  String get trainingSave => 'SAVE';
 
   @override
   String get trainingTitle => 'भाव्या एम-आशा प्रशिक्षण';
@@ -2400,9 +2340,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get usernameEmpty => 'उपयोगकर्ता नाम खाली नहीं हो सकता';
 
   @override
-  String get usernameHint => 'उपयोगकर्ता नाम दर्ज करें';
-
-  @override
   String get usernameLabel => 'उपयोगकर्ता नाम';
 
   @override
@@ -2419,9 +2356,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get visitDate => 'भ्रमण दिनांक :';
-
-  @override
-  String get visitDateLabel => 'भ्रमण की तिथि';
 
   @override
   String get visitDetailsANC => 'प्रसवपूर्व देखभाल विज़िट';
@@ -2478,7 +2412,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get waterLake => 'झील';
 
   @override
-  String get waterOther => 'अन्य';
+  String get waterOther => 'Other';
 
   @override
   String get waterPond => 'तालाब';
@@ -2508,9 +2442,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get weightKgLabel => 'वजन (कि.ग्रा.)';
 
   @override
-  String get welcome => 'हमारे ऐप में आपका स्वागत है';
-
-  @override
   String get whoseMobileLabel => 'मोबाइल नंबर किसका?';
 
   @override
@@ -2520,13 +2451,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get wife => 'पत्नी';
 
   @override
-  String get yearsSuffix => 'वर्ष';
+  String get yearsSuffix => 'Years';
 
   @override
-  String get yes => 'हाँ';
+  String get nextButton => 'अगला';
+
+  @override
+  String get previousButton => 'पिछला';
 
   @override
   String get youngestChildAgeLabel => 'सबसे छोटे बच्चे की आयु';
+
+  @override
+  String get familySurvey => 'Family Survey';
 
   @override
   String get suchivani => 'Suchivani';
@@ -2601,16 +2538,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get weightGramLabel => 'वजन (ग्राम)';
 
   @override
-  String get choose => 'चुनें';
+  String get choose => 'choose';
 
   @override
   String get headOfFamily => 'परिवार प्रमुख';
-
-  @override
-  String get male => 'पुरुष';
-
-  @override
-  String get female => 'महिला';
 
   @override
   String get casteGeneral => 'सामान्य';
@@ -2889,13 +2820,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectOption => 'Select';
 
   @override
-  String get home => 'होम';
-
-  @override
   String get subCenter => 'Sub-Center';
-
-  @override
-  String get phc => 'पीएचसी';
 
   @override
   String get chc => 'सी.एच.सी.';
@@ -2916,7 +2841,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cesareanDelivery => 'Cesarean';
 
   @override
-  String get assistedDelivery => 'Assisted (Vacuum/Forceps)';
+  String get assistedDelivery => 'Assisted/Forceps)';
 
   @override
   String get complications => 'Complications during delivery? *';
@@ -3096,6 +3021,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_bloated_or_frequent_vomit_required => 'फूला हुआ पेट/बार-बार उल्टी का चयन अनिवार्य है।';
 
   @override
+  String get previousVisits => 'पिछले दौरे';
+
+  @override
   String get prevVisitSrNo => 'क्र.';
 
   @override
@@ -3106,12 +3034,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get confirmBackLoseDetailsMsg => 'If you go back, details will be lost. Do you want to go back?';
-
-  @override
-  String get confirmYesExit => 'हां, बाहर निकलें';
-
-  @override
-  String get confirmNo => 'नहीं, यहीं रहें';
 
   @override
   String get confirmCloseFormMsg => 'क्या आप वाकई इस फॉर्म को बंद करना चाहते हैं? कोई भी न सहेजे गए परिवर्तन हटा दिए जाएंगे।';
@@ -3165,13 +3087,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get malariaQuestion2 => '2. पॉजिटिव मामलों के पूर्ण उपचार के लिए (प्रति मामला)';
 
   @override
+  String get migrationStayingInHouse => 'घर में रहने वाले';
+
+  @override
   String get aesJeEradicationProgram => 'एईएस/जेई उन्मूलन कार्यक्रम';
 
   @override
   String get ambEradicationProgram => 'एएमबी उन्मूलन कार्यक्रम';
-
-  @override
-  String get niddcpProgram => 'एनआईडीडीसीपी कार्यक्रम';
 
   @override
   String get abPmjayProgram => 'आयुष्मान भारत-पीएमजेएवाई कार्यक्रम';
@@ -3207,13 +3129,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relationWithFamilyHead => 'परिवार के मुखिया से संबंध';
 
   @override
-  String get nameOfMember => 'सदस्य का नाम';
+  String get nameOfMember => 'Name of member';
+
+  @override
+  String get nameOfMemberHint => 'सदस्य का नाम';
 
   @override
   String get ageAtMarriage => 'विवाह के समय आयु';
 
   @override
-  String get spouseName => 'पति/पत्नी का नाम';
+  String get ageAtMarriageHint => 'विवाह के समय आयु दर्ज करें';
+
+  @override
+  String get spouseName => 'Spouse Name';
+
+  @override
+  String get spouseNameHint => 'पति/पत्नी का नाम दर्ज करें';
 
   @override
   String get fatherName => 'पिता का नाम';
@@ -3222,25 +3153,37 @@ class AppLocalizationsHi extends AppLocalizations {
   String get fatherNameHint => 'पिता का नाम दर्ज करें';
 
   @override
+  String get loginSuccess => 'लॉगिन सफल!';
+
+  @override
   String get dismiss => 'बंद करें';
+
+  @override
+  String get loginButton => 'लॉग इन करें';
+
+  @override
+  String get usernameHint => 'उपयोगकर्ता नाम दर्ज करें';
+
+  @override
+  String get passwordHint => 'अपना पासवर्ड दर्ज करें';
 
   @override
   String get years => 'वर्ष';
 
   @override
-  String get yearsHint => 'वर्ष';
+  String get yearsHint => 'Year';
 
   @override
   String get months => 'महीने';
 
   @override
-  String get monthsHint => 'महीने';
+  String get monthsHint => 'Month';
 
   @override
   String get days => 'दिन';
 
   @override
-  String get daysHint => 'दिन';
+  String get daysHint => 'Day';
 
   @override
   String get totalChildrenBorn => 'जन्मे बच्चों की कुल संख्या';
@@ -3300,6 +3243,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get confirmAttentionTitle => 'कार्रवाई की पुष्टि करें';
 
   @override
+  String get confirmYesExit => 'हां, बाहर निकलें';
+
+  @override
+  String get confirmNo => 'नहीं, यहीं रहें';
+
+  @override
   String get memberRemainsToAdd => 'जोड़ने के लिए बचे हुए सदस्यों की संख्या';
 
   @override
@@ -3307,6 +3256,18 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get videoTutorialList => 'वीडियो ट्यूटोरियल सूची';
+
+  @override
+  String get visitDateLabel => 'भ्रमण की तिथि';
+
+  @override
+  String get financialYearLabel => 'वित्तीय वर्ष';
+
+  @override
+  String get yes => 'हाँ';
+
+  @override
+  String get no => 'नहीं';
 
   @override
   String get lmpDateLabelText => 'एलएमपी की तिथि';
@@ -3450,7 +3411,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get kalaAzarDataSaved => 'काला-अजार स्क्रीनिंग डेटा सफलतापूर्वक सहेजा गया!';
 
   @override
-  String get niddcpScreenTitle => 'एनआईडीडीसीपी कार्यक्रम';
+  String get niddcpProgram => 'एनआईडीडीसीपी कार्यक्रम';
+
+  @override
+  String get niddcpScreenTitle => 'NIDDCP Program';
 
   @override
   String get niddcpQuestion1 => 'एनआईडीडीसीपी के तहत आशा को प्रोत्साहन राशि';
@@ -3462,7 +3426,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get trackingDueTitle => 'Tracking Due';
 
   @override
-  String get birthDoses => 'BIRTH DOSES';
+  String get birthDoses => 'जन्म खुराक';
 
   @override
   String get sixWeek => '6 WEEK';
@@ -3552,6 +3516,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deceasedChildDetails => 'मृत बच्चे का विवरण';
 
   @override
+  String get hello => 'नमस्ते';
+
+  @override
+  String get welcome => 'हमारे ऐप में आपका स्वागत है';
+
+  @override
   String get login_button => 'लॉगिन करें';
 
   @override
@@ -3565,6 +3535,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get error => 'त्रुटि';
+
+  @override
+  String get ok => 'ठीक है';
+
+  @override
+  String get home => 'होम';
 
   @override
   String get patients => 'मरीज';
@@ -3711,9 +3687,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enterDob => 'कृपया जन्म तिथि दर्ज करें';
 
   @override
-  String get age => 'उम्र';
-
-  @override
   String get enterAge => 'कृपया आयु दर्ज करें';
 
   @override
@@ -3726,7 +3699,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enterValidMobileNumber => 'कृपया एक मान्य मोबाइल नंबर दर्ज करें';
 
   @override
-  String get gender => 'लिंग';
+  String get male => 'पुरुष';
+
+  @override
+  String get female => 'महिला';
 
   @override
   String get isGuardianPresent => 'क्या अभिभावक उपस्थित है?';
@@ -3741,6 +3717,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get addPatientButton => '+ मरीज़ जोड़ें';
 
   @override
+  String get somethingWentWrong => 'कुछ गलत हो गया!';
+
+  @override
   String get quickDemo => 'त्वरित डेमो';
 
   @override
@@ -3751,9 +3730,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get pleaseSelectSupportType => 'कृपया सहायता प्रकार चुनें *';
-
-  @override
-  String get name => 'नाम';
 
   @override
   String get phone => 'फोन';
@@ -3817,6 +3793,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get sNoLabel => 'क्रम संख्या';
+
+  @override
+  String get dateLabel => 'तिथि';
 
   @override
   String get detailLabel => 'विवरण';
@@ -3898,7 +3877,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get toDate => 'अब तक';
 
   @override
-  String get date => 'तिथि';
+  String get date => 'Date';
 
   @override
   String get all => 'सभी';
@@ -4273,7 +4252,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateOfBirth => 'जन्म तिथि';
 
   @override
-  String get others => 'अन्य';
+  String get others => 'Others';
 
   @override
   String get pleaseEnterGuardianFullName => 'कृपया अभिभावक का पूरा नाम दर्ज करें';
@@ -4286,6 +4265,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get addNew => '+ नया जोड़ें';
+
+  @override
+  String get genderLabel => 'लिंग: ';
 
   @override
   String get abhaIdLabel => 'ABHA आईडी: ';
@@ -4519,7 +4501,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get msg_no_slots_available => 'के स्लॉट उपलब्ध नहीं हैं';
 
   @override
-  String get mob_no => 'मोबाइल नंबर';
+  String get mob_no => 'Mobile No';
 
   @override
   String get mohalla => 'मोहल्ला';
@@ -4612,10 +4594,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get village => 'गाँव';
 
   @override
-  String get mobile => 'मोबाइल';
+  String get mobile => 'Mobile';
+
+  @override
+  String get gender => 'लिंग';
+
+  @override
+  String get age => 'उम्र';
 
   @override
   String get fathersName => 'पिता का नाम';
+
+  @override
+  String get name => 'Name';
 
   @override
   String get beneficiaryId => 'लाभार्थी आईडी';
@@ -4646,6 +4637,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get hsc => 'एचएससी.';
+
+  @override
+  String get phc => 'पीएचसी';
 
   @override
   String get familyHistory => 'पारिवारिक इतिहास';
@@ -4936,7 +4930,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateOfMeeting => 'बैठक की तिथि';
 
   @override
-  String get day => 'दिन';
+  String get day => 'Day';
 
   @override
   String get selectDay => 'दिन चुनें';
@@ -4981,6 +4975,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get immunization => 'टीकाकरण';
 
   @override
+  String get pregnantWomen => 'गर्भवती महिलाएँ';
+
+  @override
   String get deliveries => 'प्रसव';
 
   @override
@@ -5012,6 +5009,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get trainingSupport => 'प्रशिक्षण एवं समर्थन';
+
+  @override
+  String get other => 'अन्य';
 
   @override
   String get districtPatna => 'पटना';
@@ -6146,4 +6146,451 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get errorPreparingData => 'डेटा तैयार करने में त्रुटि हुई। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get please_age_unit => 'कृपया आयु इकाई का चयन करें';
+
+  @override
+  String get pleaseEnterValidAgeForUnit => 'चयनित इकाई के अनुसार कृपया मान्य आयु दर्ज करें';
+
+  @override
+  String get expectedDeliveryDateRequired => 'अपेक्षित प्रसव तिथि आवश्यक है';
+
+  @override
+  String get lastMenstrualPeriodRequired => 'अंतिम मासिक धर्म तिथि आवश्यक है';
+
+  @override
+  String get selectIsWomanPregnant => 'कृपया चुनें कि महिला गर्भवती है या नहीं';
+
+  @override
+  String get validIfscCode => 'कृपया मान्य 11-अक्षरों का IFSC कोड दर्ज करें, जिसमें पहले 4 अक्षर बड़े अक्षरों में हों, 5वां अक्षर 0 होना चाहिए, और शेष अक्षर अंक हों';
+
+  @override
+  String get validMobileNumber => 'मोबाइल नंबर 10 अंकों का होना चाहिए और 6-9 से शुरू होना चाहिए';
+
+  @override
+  String get mobileNumberRequired => 'मोबाइल नंबर आवश्यक है';
+
+  @override
+  String get relationWithMobileHolder => 'मोबाइल नंबर धारक के साथ संबंध';
+
+  @override
+  String get whoseMobileNumberRequired => 'किसका मोबाइल नंबर आवश्यक है';
+
+  @override
+  String get errorLoadingMobileNumber => 'मोबाइल नंबर लोड करने में त्रुटि';
+
+  @override
+  String get rchIdFemaleOnly => 'RCH आईडी केवल महिला सदस्यों के लिए लागू है';
+
+  @override
+  String get invalidOrNotFoundRchId => 'अमान्य या RCH आईडी नहीं मिली';
+
+  @override
+  String get rchIdVerifiedSuccess => 'RCH आईडी सत्यापित और डेटा सफलतापूर्वक लोड किया गया!';
+
+  @override
+  String get please_enter_valid_rch_id => 'कृपया आरएचसी आईडी दर्ज करें';
+
+  @override
+  String get spouseNameRequired => 'जीवनसाथी का नाम आवश्यक है';
+
+  @override
+  String get memberNameRequired => 'सदस्य का नाम आवश्यक है';
+
+  @override
+  String get relationWithFamilyHeadRequired => 'परिवार प्रमुख के साथ संबंध आवश्यक है';
+
+  @override
+  String get brother => 'भाई';
+
+  @override
+  String get sister => 'बहन';
+
+  @override
+  String get nephew => 'भतीजा';
+
+  @override
+  String get niece => 'भतीजी';
+
+  @override
+  String get grandFather => 'दादा';
+
+  @override
+  String get grandMother => 'दादी';
+
+  @override
+  String get grandSon => 'पोता';
+
+  @override
+  String get grandDaughter => 'पोती';
+
+  @override
+  String get sonInLaw => 'दामाद';
+
+  @override
+  String get daughterInLaw => 'बहू';
+
+  @override
+  String get abhaDetailsSpouseSuccess => 'पति/पत्नी के लिए ABHA विवरण सफलतापूर्वक भरा गया!';
+
+  @override
+  String get genderRequired => 'लिंग अनिवार्य है';
+
+  @override
+  String get rchVerifiedSuccess => 'RCH सफलतापूर्वक सत्यापित!';
+
+  @override
+  String get rchVerifiedSuccessfully => 'RCH सफलतापूर्वक सत्यापित!';
+
+  @override
+  String get enterRelationWithMobileHolder => 'मोबाइल नंबर धारक से संबंध दर्ज करें';
+
+  @override
+  String get ifscValidationMessage => 'कृपया एक मान्य 11-अक्षरों का IFSC कोड दर्ज करें। पहले 4 अक्षर बड़े अंग्रेज़ी अक्षर होने चाहिए, 5वां अक्षर 0 होना चाहिए, और बाकी अक्षर अंक होने चाहिए।';
+
+  @override
+  String get enterSerialNumber => 'सीरियल नंबर दर्ज करें';
+
+  @override
+  String get pleaseEnterDob => 'कृपया जन्म तिथि दर्ज करें';
+
+  @override
+  String get pleaseEnterDor => 'कृपया पंजीकरण तिथि दर्ज करें';
+
+  @override
+  String get enterFullNameChild => 'कृपया बच्चे का पूरा नाम दर्ज करें';
+
+  @override
+  String get pleaseEnterChildName => 'कृपया बच्चे का नाम दर्ज करें';
+
+  @override
+  String get pleaseEnterGender => 'कृपया लिंग दर्ज करें';
+
+  @override
+  String get pleaseEnterMothersName => 'कृपया माँ का नाम दर्ज करें';
+
+  @override
+  String get enterMothersName => 'माँ का नाम दर्ज करें';
+
+  @override
+  String get enterAddress => 'पता दर्ज करें';
+
+  @override
+  String get pleaseEnterAddress => 'कृपया पता दर्ज करें';
+
+  @override
+  String get pleaseEnterWhoseMobileNumber => 'कृपया किसका मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get enter10DigitMobileNumber => '10 अंकों का मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get mobileMustBe10DigitsAndStartWith => 'मोबाइल नंबर 10 अंकों का होना चाहिए और 6-9 से शुरू होना चाहिए';
+
+  @override
+  String get pleaseEnterMobileNumber => 'कृपया मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get enterMothersRchId => 'मां का RCH ID दर्ज करें';
+
+  @override
+  String get enterBirthCertificateNumber => 'उपलब्ध हो तो जन्म प्रमाणपत्र संख्या दर्ज करें';
+
+  @override
+  String get child_weight => 'वजन (500-12500)ग्राम';
+
+  @override
+  String get enter_Weight => 'वजन दर्ज करें';
+
+  @override
+  String get weightRangeError => 'वजन 500 से 12500 ग्राम के बीच होना चाहिए';
+
+  @override
+  String get enterValidWeight => 'कृपया मान्य वजन ग्राम में दर्ज करें';
+
+  @override
+  String get enterBirthWeight => 'जन्म के समय का वजन दर्ज करें';
+
+  @override
+  String get birthWeightRange => 'जन्म के समय वजन (1200-4000)ग्राम';
+
+  @override
+  String get enterValidBirthWeight => 'कृपया ग्राम में सही जन्म का वजन दर्ज करें';
+
+  @override
+  String get specifyReligionLabel => 'धर्म निर्दिष्ट करें';
+
+  @override
+  String get enterReligion => 'अपना धर्म दर्ज करें';
+
+  @override
+  String get pleaseSpecifyReligion => 'कृपया अपना धर्म निर्दिष्ट करें';
+
+  @override
+  String get specifyCategory => 'कृपया अपनी श्रेणी निर्दिष्ट करें';
+
+  @override
+  String get enter_Category => 'अपनी श्रेणी दर्ज करें';
+
+  @override
+  String get specifyCategoryShort => 'श्रेणी निर्दिष्ट करें';
+
+  @override
+  String get correctHighlightedFields => 'कृपया हाइलाइट किए गए फ़ील्ड को सही करें।';
+
+  @override
+  String get noChildrenFound => 'पंजीकरण के लिए कोई बच्चा नहीं मिला';
+
+  @override
+  String get childrenRegistrationDue => '\"registration_due\" स्थिति वाले बच्चे यहाँ दिखाई देंगे';
+
+  @override
+  String get noMatchingChild => 'कोई मिलान करने वाला बाल लाभार्थी नहीं मिला।';
+
+  @override
+  String get noChildBeneficiaries => 'कोई बाल लाभार्थी नहीं मिला। शुरुआत करने के लिए नया बच्चा जोड़ें।';
+
+  @override
+  String get deceased => 'मृत';
+
+  @override
+  String get noHbycChildrenFound => 'कोई HBYC बच्चे नहीं मिले';
+
+  @override
+  String get months3 => '3 महीने';
+
+  @override
+  String get months6 => '6 महीने';
+
+  @override
+  String get months9 => '9 महीने';
+
+  @override
+  String get months12 => '12 महीने';
+
+  @override
+  String get months15 => '15 महीने';
+
+  @override
+  String get homeBasedCareForYoungChild => 'युवा बच्चे के लिए होम बेस्ड केयर';
+
+  @override
+  String get hbycHomeVisit => 'HBYC गृह भ्रमण? *';
+
+  @override
+  String get is_referred_to_health_facility => 'क्या नजदिकी स्वस्थ्य संस्थान पर रेफर किया गया?';
+
+  @override
+  String get is_complementary_food_given => 'क्या संपूर्ण आहार दिया गया?';
+
+  @override
+  String get foodAdvice_1 => '1. एक समय में 2–3 चम्मच भोजन, दिन में 2–3 बार';
+
+  @override
+  String get foodAdvice_2 => '2. एक समय में 1/2 कप/कटोरी भोजन, दिन में 2–3 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
+
+  @override
+  String get foodAdvice_3 => '3. एक समय में 1/2 कप/कटोरी भोजन, दिन में 3–4 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
+
+  @override
+  String get foodAdvice_4 => '4. एक समय में 3/4 से 1 कप/कटोरी भोजन, दिन में 3–4 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
+
+  @override
+  String get mentionRecordedWeightForAge => 'MCP कार्ड के अनुसार दर्ज वजन-के-अनुसार (किलोग्राम में) उल्लेख करें';
+
+  @override
+  String get pleaseEnterWeightForAge => 'कृपया वजन-के-अनुसार दर्ज करें';
+
+  @override
+  String get recordingWeightForLengthHeight => 'आंगनवाड़ी कार्यकर्ता द्वारा वजन-के-सापेक्ष लंबाई/ऊंचाई का रिकॉर्डिंग';
+
+  @override
+  String get recorded_height => 'एमसीपी कार्ड में अंकित लम्बाई / उचाई का उल्लेख करें (सेंटीमीटर में)';
+
+  @override
+  String get enterWeightForLengthHeight => 'कृपया वजन-के-सापेक्ष लंबाई/ऊंचाई दर्ज करें';
+
+  @override
+  String get referred_place => 'कहां रेफर किया गया?';
+
+  @override
+  String get is_developmental_delay_checked => 'उम्र के अनुसार बच्चे के शारीरिक एवं मानसिक विकास में कोई विलम्भ/बाधाये पाई गई?';
+
+  @override
+  String get isChildReferred => 'क्या बच्चे को रेफर किया गया है?';
+
+  @override
+  String get immunizationStatusChecked => 'टीकाकरण स्थिति MCP कार्ड के अनुसार जाँची गई?';
+
+  @override
+  String get orsGiven => 'ORS दिया गया?';
+
+  @override
+  String get enterOrsCount => 'कृपया दिए गए ORS की संख्या दर्ज करें';
+
+  @override
+  String get orsCount => 'दिए गए ORS की संख्या';
+
+  @override
+  String get ifaSyrupGiven => 'क्या आयरन फोलिक एसिड सिरप दिया गया?';
+
+  @override
+  String get ifaSyrupCount => 'आयरन फोलिक एसिड सिरप की संख्या दर्ज करें';
+
+  @override
+  String get ifaSyrupCountValidation => 'कृपया आयरन फोलिक एसिड सिरप की संख्या दर्ज करें';
+
+  @override
+  String get counselExclusiveBreastfeeding => 'केवल स्तनपान के लिए परामर्श दिया गया?';
+
+  @override
+  String get is_counsel_for_complementary_feeding => 'पूरक आहार देने के बारे में परामर्श?';
+
+  @override
+  String get is_counsel_for_hand_washing => 'हाथ धोने एवं स्वच्छ व्यवहार के बारे में परामर्श ?';
+
+  @override
+  String get is_counsel_for_parenting => 'लालन-पालन (पालन-पोषण का समर्थन) के बारे में सलाह ?';
+
+  @override
+  String get familyPlanningCounselling => 'परिवार नियोजन पर परामर्श?';
+
+  @override
+  String get previous => 'पिछला';
+
+  @override
+  String get saveForm => 'फ़ॉर्म सहेजें';
+
+  @override
+  String get child_deseased_list => 'मृत बच्चे की सूची';
+
+  @override
+  String get searchByNameIdMobile => 'नाम, आईडी या मोबाइल से खोजें';
+
+  @override
+  String get noMatchingRecordsFound => 'कोई मेल खाते रिकॉर्ड नहीं मिला';
+
+  @override
+  String get noDeceasedChildrenFound => 'कोई मृत बच्चों का रिकॉर्ड नहीं मिला';
+
+  @override
+  String get notSpecified => 'निर्दिष्ट नहीं';
+
+  @override
+  String get temporary => 'अस्थायी';
+
+  @override
+  String get permanent => 'स्थायी';
+
+  @override
+  String get measles => 'खसरा';
+
+  @override
+  String get lowBirthWeight => 'जन्म के समय कम वजन';
+
+  @override
+  String get highFever => 'तेज़ बुखार';
+
+  @override
+  String get diarrhoea => 'दस्त';
+
+  @override
+  String get pneumonia => 'न्यूमोनिया';
+
+  @override
+  String get severeAnaemia => 'गंभीर रक्ताल्पता';
+
+  @override
+  String get sepsis => 'सेप्सिस';
+
+  @override
+  String get obstructLabour => 'बाधित श्रम';
+
+  @override
+  String get eclampsiaHypertension => 'एक्लम्पसिया/गंभीर उच्च रक्तचाप';
+
+  @override
+  String get unsafeAbortion => 'असुरक्षित गर्भपात';
+
+  @override
+  String get surgicalComplication => 'सर्जिकल जटिलता';
+
+  @override
+  String get otherMaternalReason => 'मातृ जटिलताओं के अलावा अन्य कारण';
+
+  @override
+  String get otherSpecify => 'अन्य निर्दिष्ट करे';
+
+  @override
+  String get case_closer => 'केस बंद';
+
+  @override
+  String get reasonOfClosure => 'समापन का कारण';
+
+  @override
+  String get migrationType => 'प्रवासन प्रकार';
+
+  @override
+  String get enterReasonForClosure => 'बंद करने का कारण दर्ज करें';
+
+  @override
+  String get specifyReason => 'कारण दर्ज करें';
+
+  @override
+  String get probableCauseOfDeath => 'संभावित मृत्यु का कारण';
+
+  @override
+  String get specifyCauseOfDeath => 'मृत्यु का कारण दर्ज करें';
+
+  @override
+  String get deathPlace => 'मृत्यु का स्थान';
+
+  @override
+  String get reasonOfDeath => 'मृत्यु का कारण';
+
+  @override
+  String get otherReasonOfDeath => 'अन्य मृत्यु का कारण';
+
+  @override
+  String get no_ChildrenFound => 'कोई बच्चा नहीं मिला';
+
+  @override
+  String get caseClosureRecorded => 'केस बंद करने का रिकॉर्ड किया गया। बच्चे को ट्रैकिंग सूची से हटा दिया गया।';
+
+  @override
+  String get childRegistration => 'शिशु पंजीकरण';
+
+  @override
+  String get content_ComingSoon => 'सामग्री शीघ्र उपलब्ध होगी...';
+
+  @override
+  String get birth_Doses => 'Birth Doses';
+
+  @override
+  String get doses16Year => '16 वर्ष की खुराक';
+
+  @override
+  String get dateOfVisits => 'दौरे की तिथियाँ';
+
+  @override
+  String get six_WeekDoses => '6 सप्ताह की खुराक';
+
+  @override
+  String get ten_WeekDoses => '10 सप्ताह की खुराक';
+
+  @override
+  String get fourteen_WeekDoses => '14 सप्ताह की खुराक';
+
+  @override
+  String get nineMonthDoses => '9 महीने की खुराक';
+
+  @override
+  String get sixteenToTwentyFourMonthDoses => '16-24 महीने की खुराक';
+
+  @override
+  String get fiveToSixYearDoses => '5-6 वर्ष की खुराक';
+
+  @override
+  String get tenYearDoses => '10 वर्ष की खुराक';
 }
