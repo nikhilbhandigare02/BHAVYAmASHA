@@ -1068,7 +1068,7 @@
   "totalLiveChildren": "Total number of live children",
   "totalMaleChildren": "Total number of male children",
   "totalFemaleChildren": "Total number of female children",
-  "malePlusFemaleError": "Male + Female must equal Total number of live children",
+  "malePlusFemaleError": "Some of total male and female must equal total live children",
   "youngestChildAge": "Age of youngest child",
   "ageUnitOfYoungest": "Age unit of youngest child",
   "genderOfYoungest": "Gender of youngest child",

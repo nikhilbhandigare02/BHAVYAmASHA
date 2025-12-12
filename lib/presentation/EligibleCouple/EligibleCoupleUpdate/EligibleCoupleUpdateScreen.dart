@@ -10,6 +10,7 @@ import '../../../core/config/themes/CustomColors.dart';
 import 'bloc/eligible_coule_update_bloc.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
+import '../../../core/utils/Validations.dart';
 
 class EligibleCoupleUpdateScreen extends StatelessWidget {
   const EligibleCoupleUpdateScreen({super.key});
@@ -85,6 +86,27 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
               },
               builder: (context, state) {
                 final bloc = context.read<EligibleCouleUpdateBloc>();
+                final live = int.tryParse(state.totalLiveChildren) ?? 0;
+                final male = int.tryParse(state.totalMaleChildren) ?? 0;
+                final female = int.tryParse(state.totalFemaleChildren) ?? 0;
+                final showMaleFemaleError = live > 0 && (male + female) != live;
+                String? youngestAgeInlineError;
+                final rawYoungestAge = state.youngestChildAge;
+                final unitYoungestAge = state.youngestChildAgeUnit;
+                if (rawYoungestAge.trim().isNotEmpty) {
+                  if (unitYoungestAge.isEmpty) {
+                    youngestAgeInlineError = 'Please select age unit';
+                  } else {
+                    final msg = Validations.validateYoungestChildAge(AppLocalizations.of(context)!, rawYoungestAge, unitYoungestAge);
+                    if (msg != null) {
+                      if (msg.startsWith('Please enter age of Youngest Child')) {
+                        youngestAgeInlineError = null;
+                      } else {
+                        youngestAgeInlineError = 'Please enter valid age for selected unit';
+                      }
+                    }
+                  }
+                }
 
                 Widget _buildCountBoxField(
                   String value,
@@ -461,6 +483,18 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            if (youngestAgeInlineError != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0, left: 4.0),
+                                child: Text(
+                                  youngestAgeInlineError!,
+                                  style: TextStyle(
+                                    color: Colors.red.shade700,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
@@ -492,6 +526,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 ],
                               ),
                             ),
+
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
@@ -554,6 +589,14 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 ],
                               ),
                             ),
+                            if (showMaleFemaleError)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 0, top: 4, bottom: 8),
+                                child: Text(
+                                  (t?.malePlusFemaleError ?? 'Some of total male and female must equal total live children'),
+                                  style: TextStyle(color: Colors.red.shade700, fontSize: 14.sp, fontWeight: FontWeight.w600),
+                                ),
+                              ),
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
@@ -662,6 +705,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                     return t?.transgender ?? 'Transgender';
                                   default:
                                     return s;
+                                    
                                 }
                               },
                               onChanged: (v) => context
@@ -690,13 +734,27 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                         child: SizedBox(
                           width: double.infinity,
                           height: 4.5.h,
-                          child: RoundButton(
-                            title: state.isSubmitting
-                                ? 'UPDATING...'
-                                : (t?.updateButton ?? 'UPDATE'),
-                            onPress: () {
+                            child: RoundButton(
+                              title: state.isSubmitting
+                                  ? 'UPDATING...'
+                                  : (t?.updateButton ?? 'UPDATE'),
+                              onPress: () {
+                              final live = int.tryParse(state.totalLiveChildren) ?? 0;
+                              final male = int.tryParse(state.totalMaleChildren) ?? 0;
+                              final female = int.tryParse(state.totalFemaleChildren) ?? 0;
+                              if (live > 0 && (male + female) != live) {
+                                showAppSnackBar(
+                                  context,
+                                  (t?.malePlusFemaleError ?? 'Some of total male and female must equal total live children'),
+                                );
+                                return;
+                              }
                               final unit = state.youngestChildAgeUnit;
                               final ageStr = state.youngestChildAge;
+                              if (ageStr.trim().isNotEmpty && unit.isEmpty) {
+                                showAppSnackBar(context, 'Please select age unit');
+                                return;
+                              }
                               final age = int.tryParse(ageStr);
                               String? message;
                               if (unit == 'Years') {
@@ -706,16 +764,16 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                       'Year: only 1 to 90 allowed';
                                 }
                               } else if (unit == 'Months') {
-                                if (age == null || age < 1 || age > 12) {
+                                if (age == null || age < 1 || age > 11) {
                                   message =
                                       t?.monthRangeValidation ??
-                                      'Month: only 1 to 12 allowed';
+                                      'Month: only 1 to 11 allowed';
                                 }
                               } else if (unit == 'Days') {
-                                if (age == null || age < 1 || age > 31) {
+                                if (age == null || age < 1 || age > 30) {
                                   message =
                                       t?.daysRangeValidation ??
-                                      'Days: only 1 to 31 allowed';
+                                      'Days: only 1 to 30 allowed';
                                 }
                               }
                               if (message != null) {
@@ -726,8 +784,8 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 const SubmitPressed(),
                               );
                             },
-                            disabled: state.isSubmitting,
-                          ),
+                              disabled: state.isSubmitting,
+                            ),
                         ),
                       ),
                     ),
