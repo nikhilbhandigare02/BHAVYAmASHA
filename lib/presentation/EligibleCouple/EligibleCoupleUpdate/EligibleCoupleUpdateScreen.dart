@@ -360,6 +360,20 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                               ),
                             ),
 
+
+                            if (state.religion == 'Other')
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
+                              CustomTextField(
+                                labelText: 'Enter Religion',
+                                hintText: 'Enter Religion',
+                                initialValue: state.otherReligion,
+                                readOnly: true,
+                              ),
+
                             /* IgnorePointer(
                               child: ApiDropdown<String>(
                                 key: const ValueKey('religionField'),
@@ -399,6 +413,19 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                   .add(CategoryChanged(value)),
                               readOnly: true,
                             ),
+
+                            if (state.category == 'Other')
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
+                              CustomTextField(
+                                labelText: 'Enter Category',
+                                hintText: 'Enter Category',
+                                initialValue: state.otherCategory,
+                                readOnly: true,
+                              ),
 
                             Divider(
                               color: AppColors.divider,

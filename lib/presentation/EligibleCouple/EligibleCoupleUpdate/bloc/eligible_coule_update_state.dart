@@ -10,6 +10,8 @@ class EligibleCouleUpdateState extends Equatable {
   final String mobileNo;
   final String religion;
   final String category;
+  final String otherReligion;
+  final String otherCategory;
   final String totalChildrenBorn;
   final String totalLiveChildren;
   final String totalMaleChildren;
@@ -39,6 +41,8 @@ class EligibleCouleUpdateState extends Equatable {
     this.mobileNo = '',
     this.religion = '',
     this.category = '',
+    this.otherReligion = '',
+    this.otherCategory = '',
     this.totalChildrenBorn = '0',
     this.totalLiveChildren = '0',
     this.totalMaleChildren = '0',
@@ -68,6 +72,8 @@ class EligibleCouleUpdateState extends Equatable {
     String? mobileNo,
     String? religion,
     String? category,
+    String? otherReligion,
+    String? otherCategory,
     String? totalChildrenBorn,
     String? totalLiveChildren,
     String? totalMaleChildren,
@@ -95,6 +101,8 @@ class EligibleCouleUpdateState extends Equatable {
       mobileNo: mobileNo ?? this.mobileNo,
       religion: religion ?? this.religion,
       category: category ?? this.category,
+      otherReligion: otherReligion ?? this.otherReligion,
+      otherCategory: otherCategory ?? this.otherCategory,
       totalChildrenBorn: totalChildrenBorn ?? this.totalChildrenBorn,
       totalLiveChildren: totalLiveChildren ?? this.totalLiveChildren,
       totalMaleChildren: totalMaleChildren ?? this.totalMaleChildren,
@@ -126,6 +134,8 @@ class EligibleCouleUpdateState extends Equatable {
         mobileNo,
         religion,
         category,
+        otherReligion,
+        otherCategory,
         totalChildrenBorn,
         totalLiveChildren,
         totalMaleChildren,

@@ -102,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return parts.join(', ');
   }
-
+  List<Map<String, dynamic>> ashaList = [];
   @override
   void initState() {
     super.initState();
@@ -134,7 +134,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Safely parse details
       try {
         dynamic d = userData['details'];
-
         if (d is String) {
           details = Map<String, dynamic>.from(jsonDecode(d));
         } else if (d is Map) {
@@ -142,13 +141,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         } else {
           details = <String, dynamic>{};
         }
-
-
       } catch (e) {
         print('Error parsing user details: $e');
         return;
       }
-
       Map<String, dynamic> actualUserData = details;
 
       final appRoleId = details['app_role_id'] ?? '';
@@ -161,10 +157,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
 
-
-      final ashaList = actualUserData['asha_list'] is List
+      ashaList = actualUserData['asha_list'] is List
           ? List<Map<String, dynamic>>.from(actualUserData['asha_list'])
           : <Map<String, dynamic>>[];
+
+      setState(() {});
+
 
       final ashaCount = ashaList.length;
       print("ASHA COUNT → $ashaCount");
@@ -361,6 +359,175 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
   }
+  Widget buildAshaTable() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Table Header
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: const [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  "Sr",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  "ASHA Name",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  "Area",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  "Ph No.",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  "Population",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Table Rows
+        ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: ashaList.length,
+          itemBuilder: (context, index) {
+            final item = ashaList[index];
+
+            return Container(
+              padding: EdgeInsets.symmetric(vertical: 1),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade300),
+                ),
+              ),
+              child: Row(
+                children: [
+                  // Sr
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      (index + 1).toString(),
+                      style: TextStyle(fontSize: 9),
+                    ),
+                  ),
+                  // Name
+                  Expanded(
+                    flex: 3,
+                    child: TextField(
+                      readOnly: true,
+                      maxLines: 1,
+                      style: TextStyle(fontSize: 9),
+                      controller: TextEditingController(text: item["asha_name"] ?? ""),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        fillColor: Colors.grey.shade200,
+                        filled: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 2),
+                  // Area
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      readOnly: true,
+                      maxLines: 1,
+                      style: TextStyle(fontSize: 9),
+                      controller: TextEditingController(text: item["area"] ?? ""),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        fillColor: Colors.grey.shade200,
+                        filled: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 2),
+                  // Phone
+                  Expanded(
+                    flex: 3,
+                    child: TextField(
+                      readOnly: true,
+                      maxLines: 1,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(fontSize: 9),
+                      controller: TextEditingController(text: item["ph_no"]?.toString() ?? ""),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        fillColor: Colors.grey.shade200,
+                        filled: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 2),
+                  // Population
+                  Expanded(
+                    flex: 3,
+                    child: TextField(
+                      readOnly: true,
+                      maxLines: 1,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(fontSize: 9),
+                      controller: TextEditingController(text: item["population"] ?? ""),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        fillColor: Colors.grey.shade200,
+                        filled: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1102,6 +1269,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                         },
                       ),
+                      Divider(color: AppColors.divider, thickness: 0.5),
+                      buildAshaTable(),
                       const SizedBox(height: 24),
                       RoundButton(
                         title: l10n.updateButton,
