@@ -44,49 +44,118 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // --- 1. Get Current User Key from Secure Storage ---
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      // --- 2. Prepare Query Conditions ---
-      String? where;
-      List<Object?>? whereArgs;
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        where = 'current_user_key = ?';
-        whereArgs = [ashaUniqueKey];
-      }
-
-      // --- 3. Query with Filter ---
-      final allBeneficiaries = await db.query(
-          'beneficiaries_new',
-          where: where,        // Applied the condition
-          whereArgs: whereArgs // Passed the key
+      final excludedStates = await db.query(
+        'mother_care_activities',
+        where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
+        columns: ['beneficiary_ref_key'],
+        distinct: true,
       );
+      final excludedBeneficiaryIds = excludedStates
+          .map((e) => e['beneficiary_ref_key']?.toString())
+          .where((id) => id != null && id!.isNotEmpty)
+          .cast<String>()
+          .toSet();
 
-      final pregnantList = <Map<String, dynamic>>[];
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final pregnantWomen = <Map<String, dynamic>>[];
+      final processedBeneficiaries = <String>{};
 
-      // --- Existing Processing Logic ---
-      for (final row in allBeneficiaries) {
-        try {
-          final info = row['beneficiary_info'] is String
-              ? jsonDecode(row['beneficiary_info'] as String)
-              : (row['beneficiary_info'] as Map?) ?? {};
-
-          if (_isPregnant(Map<String, dynamic>.from(info))) {
-            pregnantList.add(_formatCardData(row, info));
-          }
-        } catch (e) {
-          print('Error processing beneficiary: $e');
-        }
+      String ancSql = """
+        SELECT mca.*, bn.*, mca.id as mca_id, bn.id as beneficiary_id
+        FROM mother_care_activities mca
+        INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
+        WHERE mca.mother_care_state = 'anc_due' 
+          AND bn.is_deleted = 0
+      """;
+      final ancArgs = <Object?>[];
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        ancSql += ' AND bn.current_user_key = ?';
+        ancArgs.add(ashaUniqueKey);
       }
+      if (excludedBeneficiaryIds.isNotEmpty) {
+        ancSql += ' AND mca.beneficiary_ref_key NOT IN (${List.filled(excludedBeneficiaryIds.length, '?').join(',')})';
+        ancArgs.addAll(excludedBeneficiaryIds);
+      }
+      final ancDueRecords = await db.rawQuery(ancSql, ancArgs);
+      final ancDueBeneficiaryIds = ancDueRecords
+          .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
+          .where((id) => id.isNotEmpty)
+          .toSet();
+
+      for (final row in rows) {
+        try {
+          final rawInfo = row['beneficiary_info'];
+          if (rawInfo == null) {
+            continue;
+          }
+          Map<String, dynamic> info = rawInfo is String
+              ? jsonDecode(rawInfo) as Map<String, dynamic>
+              : Map<String, dynamic>.from(rawInfo as Map);
+
+          final gender = info['gender']?.toString().toLowerCase() ?? '';
+          final beneficiaryId = row['unique_key']?.toString() ?? '';
+          final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
+          if (excludedBeneficiaryIds.contains(beneficiaryId)) {
+            continue;
+          }
+          final isPregnant = _isPregnant(info);
+          if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
+            final item = _formatCardData(row, info);
+            item['status'] = isAncDue ? 'ANC DUE' : 'Pregnant';
+            item['isAncDue'] = isAncDue;
+            item['unique_key'] = beneficiaryId;
+            item['BeneficiaryID'] = beneficiaryId;
+            item['created_date_time'] = row['created_date_time']?.toString() ?? '';
+            pregnantWomen.add(item);
+            processedBeneficiaries.add(beneficiaryId);
+          }
+        } catch (_) {}
+      }
+
+      for (final anc in ancDueRecords) {
+        final beneficiaryId = anc['beneficiary_ref_key']?.toString() ?? '';
+        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) {
+          continue;
+        }
+        final hhId = anc['household_ref_key']?.toString() ?? '';
+        final displayId = beneficiaryId.length > 11 ? beneficiaryId.substring(beneficiaryId.length - 11) : beneficiaryId;
+        final item = {
+          'hhId': hhId,
+          'name': 'ANC Due - $displayId',
+          'age_gender': 'N/A | N/A',
+          'status': 'ANC DUE',
+          'unique_key': beneficiaryId,
+          'BeneficiaryID': beneficiaryId,
+          'created_date_time': anc['created_date_time']?.toString() ?? '',
+        };
+        pregnantWomen.add(item);
+      }
+
+      final byBeneficiary = <String, Map<String, dynamic>>{};
+      for (final item in pregnantWomen) {
+        final benId = item['BeneficiaryID']?.toString() ?? '';
+        final uniqueKey = item['unique_key']?.toString() ?? '';
+        final key = benId.isNotEmpty ? benId : uniqueKey;
+        if (key.isEmpty) continue;
+        byBeneficiary[key] = item;
+      }
+
+      final dedupedList = byBeneficiary.values.toList();
+      dedupedList.sort((a, b) {
+        final dateA = DateTime.tryParse(a['created_date_time']?.toString() ?? '');
+        final dateB = DateTime.tryParse(b['created_date_time']?.toString() ?? '');
+        if (dateA == null || dateB == null) return 0;
+        return dateB.compareTo(dateA);
+      });
 
       setState(() {
-        _filtered = pregnantList;
+        _filtered = dedupedList;
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading pregnant women: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -127,7 +196,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
         'hhId': row['household_ref_key']?.toString() ?? '',
         'name': name,
         'age_gender': '${age > 0 ? '$age Y' : 'N/A'} | $displayGender',
-        'status': 'ANC DUE',
+        'status': 'Pregnant',
       };
     } catch (e) {
       print('Error formatting card data: $e');

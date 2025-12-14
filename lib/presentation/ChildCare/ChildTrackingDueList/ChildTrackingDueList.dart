@@ -53,7 +53,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         orderBy: 'id DESC',
       );
       debugPrint('📋 Total records in followup_form_data table: ${allRecords.length}');
-      
+
       for (var i = 0; i < allRecords.length && i < 5; i++) {
         final record = allRecords[i];
         debugPrint('\n--- Record ${i + 1} (ID: ${record['id']}) ---');
@@ -127,11 +127,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           final formData = jsonDecode(formJson);
           String formType = '';
           final formsRefKey = row['forms_ref_key']?.toString() ?? '';
-          
+
           // Try to get form type from different possible locations
           if (formData['form_type'] != null) {
             formType = formData['form_type'].toString();
-          } 
+          }
           // Check if we have the nested structure with child_registration_due_form
           else if (formData['child_registration_due_form'] is Map) {
             formType = 'child_registration_due';
@@ -139,7 +139,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           // Try to get form type from the first key if it's a map
           else if (formData is Map && formData.isNotEmpty) {
             final firstKey = formData.keys.first;
-            if (firstKey.toString().contains('child_registration') || 
+            if (firstKey.toString().contains('child_registration') ||
                 firstKey.toString().contains('child_tracking')) {
               formType = firstKey.toString();
             }
@@ -150,18 +150,18 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           debugPrint('Form data keys: ${formData.keys.join(', ')}');
 
           // Check if this is a child registration or tracking form
-          final isChildRegistration = formType == FollowupFormDataTable.childRegistrationDue || 
-                                   formType == 'child_registration_due';
-                                    
-          final isChildTracking = formsRefKey == '30bycxe4gv7fqnt6' || 
-                                formType == FollowupFormDataTable.childTrackingDue ||
-                                formType == 'child_tracking_due';
-          
+          final isChildRegistration = formType == FollowupFormDataTable.childRegistrationDue ||
+              formType == 'child_registration_due';
+
+          final isChildTracking = formsRefKey == '30bycxe4gv7fqnt6' ||
+              formType == FollowupFormDataTable.childTrackingDue ||
+              formType == 'child_tracking_due';
+
           if (!isChildRegistration && !isChildTracking) {
             debugPrint('Skipping form with type: $formType and ref key: $formsRefKey');
             continue;
           }
-          
+
 
           debugPrint('Raw form data structure:');
           formData.forEach((key, value) {
@@ -169,7 +169,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           });
 
           Map<String, dynamic> formDataMap = {};
-          
+
           if (formData['form_data'] is String) {
             try {
               debugPrint('Parsing form_data as JSON string');
@@ -190,26 +190,26 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           else if (formData['formData'] is Map) {
             formDataMap = Map<String, dynamic>.from(formData['formData'] as Map);
           }
-          
+
           // Debug print the form data map
           debugPrint('Processed form data map:');
           formDataMap.forEach((key, value) {
             debugPrint('  $key: $value (${value.runtimeType})');
           });
-          
+
           // If we still don't have data, try to get it from the form_json field
           if (row['form_json'] != null) {
             try {
               final formJson = jsonDecode(row['form_json'] as String);
               debugPrint('Raw form_json content: $formJson');
-              
+
               // Handle case where data is under 'child_registration_due_form' key
               if (formJson is Map && formJson.isNotEmpty) {
                 // Try to get data from 'child_registration_due_form' key first
                 if (formJson['child_registration_due_form'] is Map) {
                   formDataMap = Map<String, dynamic>.from(formJson['child_registration_due_form']);
                   debugPrint('Extracted data from child_registration_due_form');
-                } 
+                }
                 // Fallback to the first key if 'child_registration_due_form' doesn't exist
                 else {
                   final firstKey = formJson.keys.first;
@@ -218,7 +218,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                     debugPrint('Extracted data from key: $firstKey');
                   }
                 }
-                
+
                 // Debug print the extracted data
                 debugPrint('Extracted form data:');
                 formDataMap.forEach((key, value) {
@@ -233,29 +233,29 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
           // Extract fields with null safety
           final formTypeInData = formDataMap['form_type']?.toString() ?? formType;
-          
+
           // Extract fields with null safety - using the correct field names from the form data
-          final childName = formDataMap['name_of_child']?.toString()?.trim() ?? 
-                          formDataMap['child_name']?.toString()?.trim() ?? '';
-                          
+          final childName = formDataMap['name_of_child']?.toString()?.trim() ??
+              formDataMap['child_name']?.toString()?.trim() ?? '';
+
           final motherName = formDataMap['mother_name']?.toString()?.trim() ?? '';
           final fatherName = formDataMap['father_name']?.toString()?.trim() ?? '';
-          final rchId = formDataMap['child_rch_id']?.toString()?.trim() ?? 
-                       formDataMap['rch_id_child']?.toString()?.trim() ?? '';
-                       
-          final mobileNumber = formDataMap['mob_no']?.toString()?.trim() ?? 
-                             formDataMap['mobile_number']?.toString()?.trim() ?? '';
-                             
+          final rchId = formDataMap['child_rch_id']?.toString()?.trim() ??
+              formDataMap['rch_id_child']?.toString()?.trim() ?? '';
+
+          final mobileNumber = formDataMap['mob_no']?.toString()?.trim() ??
+              formDataMap['mobile_number']?.toString()?.trim() ?? '';
+
           final address = formDataMap['address']?.toString()?.trim() ?? '';
-          
+
           // Handle different possible weight fields
-          final weightGrams = formDataMap['weight']?.toString()?.trim() ?? 
-                            formDataMap['weight_grams']?.toString()?.trim() ?? '';
-                            
+          final weightGrams = formDataMap['weight']?.toString()?.trim() ??
+              formDataMap['weight_grams']?.toString()?.trim() ?? '';
+
           // Handle different possible date fields
-          final dateOfBirth = formDataMap['dob']?.toString() ?? 
-                            formDataMap['date_of_birth']?.toString() ?? '';
-                            
+          final dateOfBirth = formDataMap['dob']?.toString() ??
+              formDataMap['date_of_birth']?.toString() ?? '';
+
           // Handle different possible gender fields
           final gender = (formDataMap['sex'] ?? formDataMap['gender'] ?? '').toString();
 
@@ -284,13 +284,13 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             formDataMap.forEach((key, value) {
               debugPrint('    $key: $value');
             });
-            
+
             // Try to find any field that might contain the name
             final nameFields = formDataMap.entries
-                .where((entry) => entry.key.toString().toLowerCase().contains('name') || 
-                                 entry.key.toString().toLowerCase().contains('child'))
+                .where((entry) => entry.key.toString().toLowerCase().contains('name') ||
+                entry.key.toString().toLowerCase().contains('child'))
                 .toList();
-                
+
             if (nameFields.isNotEmpty) {
               debugPrint('Potential name fields found:');
               for (var field in nameFields) {
@@ -299,7 +299,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             } else {
               debugPrint('No name-like fields found in the form data');
             }
-            
+
             continue;
           }
 
@@ -324,7 +324,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
               where: caseClosureWhere,
               whereArgs: caseClosureArgs,
             );
-            
+
             if (caseClosureRecords.isNotEmpty) {
               // Check if any of these records have case_closure with is_case_closure = true
               bool hasCaseClosure = false;
@@ -344,7 +344,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                   debugPrint('Error checking case closure: $e');
                 }
               }
-              
+
               if (hasCaseClosure) {
                 debugPrint('⏭️ Skipping child $childName - case closure already recorded');
                 continue;
@@ -353,7 +353,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           }
 
           // Format registration date
-          final registrationDate = row['created_date_time'] != null 
+          final registrationDate = row['created_date_time'] != null
               ? _formatDate(row['created_date_time'].toString())
               : 'N/A';
 
@@ -402,7 +402,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       }
     }
   }
-  
+
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return 'N/A';
     try {
@@ -412,18 +412,18 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       return dateStr;
     }
   }
-  
+
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
     String age = 'N/A';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
-    
+
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
       try {
         String dateStr = dobRaw.toString();
         DateTime? dob;
-        
+
         dob = DateTime.tryParse(dateStr);
-        
+
         if (dob == null) {
           final timestamp = int.tryParse(dateStr);
           if (timestamp != null && timestamp > 0) {
@@ -433,22 +433,22 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             );
           }
         }
-        
+
         if (dob != null) {
           final now = DateTime.now();
           int years = now.year - dob.year;
-          
+
           if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
             years--;
           }
-          
+
           age = years >= 0 ? years.toString() : '0';
         }
       } catch (e) {
         debugPrint('Error parsing date of birth: $e');
       }
     }
-    
+
     String displayGender;
     switch (gender) {
       case 'm':
@@ -462,7 +462,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       default:
         displayGender = 'Other';
     }
-    
+
     return '$age Y | $displayGender';
   }
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
@@ -528,77 +528,77 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage.isNotEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _errorMessage,
-                        style: TextStyle(fontSize: 16.sp, color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadChildTrackingData,
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                )
-              : Column(
-                  children: [
-                    // 🔍 Search Field
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                      child: TextField(
-                        controller: _searchCtrl,
-                        decoration: InputDecoration(
-                          hintText: 'Search by name, ID, or mobile...',
-                          prefixIcon: const Icon(Icons.search),
-                          filled: true,
-                          fillColor: AppColors.background,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: AppColors.outlineVariant),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    Expanded(
-                      child: _filtered.isEmpty
-                          ? Center(
-                              child: Text(
-                                'No children found',
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            )
-                          : RefreshIndicator(
-                              onRefresh: _loadChildTrackingData,
-                              child: ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(5, 0, 5, 12),
-                                itemCount: _filtered.length,
-                                itemBuilder: (context, index) {
-                                  final childData = _filtered[index];
-                                  return _householdCard(context, childData);
-                                },
-                              ),
-                            ),
-                    ),
-                  ],
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _errorMessage,
+              style: TextStyle(fontSize: 16.sp, color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadChildTrackingData,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      )
+          : Column(
+        children: [
+          // 🔍 Search Field
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: 'Search by name, ID, or mobile...',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: AppColors.background,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.outlineVariant),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                ),
+              ),
+            ),
+          ),
+
+          Expanded(
+            child: _filtered.isEmpty
+                ? Center(
+              child: Text(
+                'No children found',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )
+                : RefreshIndicator(
+              onRefresh: _loadChildTrackingData,
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(5, 0, 5, 12),
+                itemCount: _filtered.length,
+                itemBuilder: (context, index) {
+                  final childData = _filtered[index];
+                  return _householdCard(context, childData);
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -610,12 +610,12 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       onTap: () {
         final formData = data['formData'] as Map<String, dynamic>?;
 
-        
+
         if (formData == null) {
           debugPrint('❌ formData is null, cannot navigate');
           return;
         }
-        
+
         final completeFormData = {
           ...formData,
           'household_ref_key': data['hhId']?.toString() ?? '',
@@ -632,14 +632,14 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           'registration_type': data['RegitrationType']?.toString() ?? 'Child Registration',
           'registration_date': data['RegitrationDate']?.toString() ?? '',
         };
-        
+
         debugPrint('Complete form data to pass:');
         debugPrint('  household_ref_key: ${completeFormData['household_ref_key']}');
         debugPrint('  beneficiary_ref_key: ${completeFormData['beneficiary_ref_key']}');
         debugPrint('  child_name: ${completeFormData['child_name']}');
         debugPrint('  age: ${completeFormData['age']}');
         debugPrint('  gender: ${completeFormData['gender']}');
-        
+
         Navigator.pushNamed(
           context,
           Route_Names.ChildTrackingDueListForm,
@@ -650,7 +650,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         )?.then((result) {
           if (result is Map && result['saved'] == true) {
             debugPrint('✅ Form saved, removing card for beneficiary: ${completeFormData['beneficiary_id']}');
-            
+
             setState(() {
               _childTrackingList.removeWhere((child) {
                 final childBeneficiaryId = child['BeneficiaryID']?.toString() ?? '';
@@ -659,7 +659,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
               });
               _filtered = List<Map<String, dynamic>>.from(_childTrackingList);
             });
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Case closure recorded. Child removed from tracking list.'),
@@ -674,7 +674,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-        height: 180,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
@@ -698,7 +697,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                   Icon(Icons.home, color: AppColors.primary, size: 15.sp),
+                  Icon(Icons.home, color: AppColors.primary, size: 15.sp),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -754,10 +753,10 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                       const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType'] ?? 'Child Registration')),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID', 
-                        (data['BeneficiaryID']?.toString().length ?? 0) > 11 
-                          ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11) 
-                          : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
+                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                          (data['BeneficiaryID']?.toString().length ?? 0) > 11
+                              ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
+                              : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -768,7 +767,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                       Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
                       const SizedBox(width: 8),
                       Expanded(child: _rowText(
-                        l10n?.rchIdLabel ?? 'RCH ID', 
+                        l10n?.rchIdLabel ?? 'RCH ID',
                         data['RchID']?.isNotEmpty == true ? data['RchID'] : 'N/A',
                       )),
                     ],
@@ -782,7 +781,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                           data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: _rowText(
                           l10n?.fatherNameLabel ?? 'Father\'s Name',
@@ -804,7 +803,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     final Color primary = Theme.of(context).primaryColor;
     final bool isLight = primary.computeLuminance() > 0.5;
     final textColor = isLight ? Colors.black87 : Colors.white;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

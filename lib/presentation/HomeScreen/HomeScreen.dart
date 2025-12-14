@@ -9,6 +9,7 @@ import 'package:medixcel_new/core/config/routes/Routes.dart' as AppRoutes;
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../core/config/Constant/constant.dart';
 import '../../core/widgets/AppDrawer/Drawer.dart';
 import '../../core/widgets/AppHeader/AppHeader.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
@@ -126,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         }
       } catch (_) {}
     });
-    SyncService.instance.start(interval: const Duration(minutes: 1));
+    SyncService.instance.start(interval: const Duration(minutes: 5));
 
     Future.delayed(const Duration(seconds: 5), () async {
       if (!mounted) return;
@@ -155,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     });
     Future.microtask(() async {
       try {
-        await SyncService.instance.fetchFollowupFormsFromServer();
+        //await SyncService.instance.fetchFollowupFormsFromServer();
 
         if (mounted) {
           _loadHouseholdCount();
@@ -341,6 +342,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   }
 
   Future<void> _loadHouseholdCount() async {
+    householdCount = 0;
     try {
       // Use households table count directly so the dashboard value
       // matches the total number of household records shown in the
@@ -378,11 +380,20 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         }
       }).toList();
 
+      final syncedCount = familyHeads.where((r) {
+        final s = r['is_synced'];
+        return s == 1 || s == '1';
+      }).length;
+
       if (mounted) {
         setState(() {
           householdCount = familyHeads.length;
+          Constant.householdTotal = householdCount;
+          Constant.householdTotalSync = syncedCount;
         });
       }
+      print(householdCount);
+      print('call');
     } catch (e) {
       print('Error loading household count: $e');
     }
@@ -445,6 +456,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       };
 
       int totalIdentified = 0;
+      int totalIdentifiedSync = 0;
       for (final household in households.values) {
         Map<String, dynamic>? head;
         Map<String, dynamic>? spouse;
@@ -489,6 +501,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           if (!allowedRelations.contains(rawRelation)) continue;
           if (!_isIdentifiedEcFemale(info, head: head)) continue;
 
+          if(member['is_synced']==1){
+            totalIdentifiedSync++;
+          }
           totalIdentified++;
         }
       }
@@ -496,6 +511,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       if (mounted) {
         setState(() {
           eligibleCouplesCount = totalIdentified;
+          Constant.eligibleCouplesTotal = totalIdentified;
+          Constant.eligibleCouplesTotalSync = totalIdentifiedSync;
         });
       }
     } catch (e) {
@@ -521,7 +538,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
     final maritalStatusRaw =
         person['maritalStatus']?.toString().toLowerCase() ??
-        head?['maritalStatus']?.toString().toLowerCase() ?? '';
+            head?['maritalStatus']?.toString().toLowerCase() ?? '';
     final isMarried = maritalStatusRaw == 'married';
     if (!isMarried) return false;
 
@@ -653,9 +670,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   Future<void> _loadAncVisitCount() async {
     try {
       final count = await ANCUtils.getMotherCareTotalCount();
+      final countSync = await ANCUtils.getMotherCareTotalSyncCount();
       if (mounted) {
         setState(() {
           ancVisitCount = count;
+          Constant.motherCareTotal = count;
+          Constant.motherCareTotal = countSync;
         });
       }
     } catch (e) {
@@ -960,14 +980,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                         setState(() => selectedGridIndex = index),
                     appRoleId: appRoleId ?? 0,
                     mainGridActions: [
-                      null, 
                       null,
                       null,
                       null,
                       null,
                       null,
                       null,
-                      () async {
+                      null,
+                          () async {
                         final result = await Navigator.pushNamed(
                             context, Route_Names.Mothercarehomescreen);
                         if (!mounted) return;

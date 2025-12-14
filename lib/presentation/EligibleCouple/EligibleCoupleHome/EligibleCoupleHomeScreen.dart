@@ -333,7 +333,10 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
 
     final dob = person['dob'];
     final age = _calculateAge(dob);
-    return age >= 15 && age <= 49;
+    final fpMethodRaw = person['fpMethod']?.toString().toLowerCase().trim() ?? '';
+    final hpMethodRaw = person['hpMethod']?.toString().toLowerCase().trim() ?? '';
+    final isSterilized = fpMethodRaw == 'female sterilization' || fpMethodRaw == 'male sterilization' || hpMethodRaw == 'female sterilization' || hpMethodRaw == 'male sterilization';
+    return age >= 15 && age <= 49 && !isSterilized;
   }
 
   bool _isUpdatedEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
@@ -347,7 +350,10 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     final age = _calculateAge(dob);
     final isPregnantRaw = person['isPregnant']?.toString().toLowerCase() ?? '';
     final isPregnant = isPregnantRaw == 'yes' || isPregnantRaw == 'true' || isPregnantRaw == '1';
-    return isFemale && isMarried && age >= 15 && age <= 49 && !isPregnant;
+    final fpMethodRaw = person['fpMethod']?.toString().toLowerCase().trim() ?? '';
+    final hpMethodRaw = person['hpMethod']?.toString().toLowerCase().trim() ?? '';
+    final isSterilized = fpMethodRaw == 'female sterilization' || fpMethodRaw == 'male sterilization' || hpMethodRaw == 'female sterilization' || hpMethodRaw == 'male sterilization';
+    return isFemale && isMarried && age >= 15 && age <= 49 && !isPregnant && !isSterilized;
   }
 
   int _calculateAge(dynamic dobRaw) {

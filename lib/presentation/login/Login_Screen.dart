@@ -333,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                                             } else {
                                               try {
-                                                await SyncService.instance.runFullSyncOnce();
+                                                //await SyncService.instance.runFullSyncOnce();
                                               } catch (_) {}
                                               if (!mounted) return;
 

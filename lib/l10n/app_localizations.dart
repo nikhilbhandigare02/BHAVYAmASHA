@@ -5114,7 +5114,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthCertificateIssuedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the birth certificate been issued?'**
+  /// **'Is birth certificate issued?'**
   String get birthCertificateIssuedLabel;
 
   /// No description provided for @birthCertificateNumberLabel.
@@ -5264,7 +5264,7 @@ abstract class AppLocalizations {
   /// No description provided for @newbornWeightGramLabel.
   ///
   /// In en, this message translates to:
-  /// **'Baby\'s weight (g) *'**
+  /// **'Baby\'s weight (1200-4000)gms *'**
   String get newbornWeightGramLabel;
 
   /// No description provided for @newbornTemperatureLabel.
@@ -5294,7 +5294,7 @@ abstract class AppLocalizations {
   /// No description provided for @weighingScaleColorLabel.
   ///
   /// In en, this message translates to:
-  /// **'Weighing Scale Color *'**
+  /// **'Scale color of weighing machine*'**
   String get weighingScaleColorLabel;
 
   /// No description provided for @colorGreen.
@@ -5366,7 +5366,7 @@ abstract class AppLocalizations {
   /// No description provided for @mcpCardAvailableLabelMother.
   ///
   /// In en, this message translates to:
-  /// **'Is there availability of \'Mother Child Protection (MCP) *'**
+  /// **'Is there availability of \'Mother Child Protection (MCP) * card'**
   String get mcpCardAvailableLabelMother;
 
   /// No description provided for @postDeliveryProblemNone.
@@ -5414,25 +5414,25 @@ abstract class AppLocalizations {
   /// No description provided for @mealsPerDayLabel.
   ///
   /// In en, this message translates to:
-  /// **'How many times does a mother take a full meal in 24 hours?'**
+  /// **'No. of times does a mother take a full meal in 24 hours?'**
   String get mealsPerDayLabel;
 
   /// No description provided for @padsPerDayLabel.
   ///
   /// In en, this message translates to:
-  /// **'How many pads are changed in a day for bleeding? *'**
+  /// **'How many pads have been changed in a day for bleeding? *'**
   String get padsPerDayLabel;
 
   /// No description provided for @mothersTemperatureLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mother\'s temperature *'**
+  /// **'Temperature of mother *'**
   String get mothersTemperatureLabel;
 
   /// No description provided for @foulDischargeHighFeverLabel.
   ///
   /// In en, this message translates to:
-  /// **'Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) * (Temperatue of mother - Temperature more than 102 degree F(38.9 degree C)) *'**
+  /// **'Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) *'**
   String get foulDischargeHighFeverLabel;
 
   /// No description provided for @abnormalSpeechOrSeizureLabel.
@@ -10454,7 +10454,7 @@ abstract class AppLocalizations {
   /// No description provided for @exclusiveBreastfeedingStartedLabel.
   ///
   /// In en, this message translates to:
-  /// **'At what time was the baby first breastfed? *'**
+  /// **'Has the exclusive breastfeeding initiated?*'**
   String get exclusiveBreastfeedingStartedLabel;
 
   /// No description provided for @firstBreastfeedTimingLabel.
@@ -10514,7 +10514,7 @@ abstract class AppLocalizations {
   /// No description provided for @pusInNavelLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is pus in the navel! ? *'**
+  /// **'Is pus in the navel? *'**
   String get pusInNavelLabel;
 
   /// No description provided for @routineCareDoneLabel.
@@ -13234,6 +13234,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'10 Year Doses'**
   String get tenYearDoses;
+
+  /// No description provided for @report.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get report;
+
+  /// No description provided for @facilitatorProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Facilitator Profile'**
+  String get facilitatorProfile;
+
+  /// No description provided for @formSubmittedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Form Submitted Successfully'**
+  String get formSubmittedSuccessfully;
+
+  /// No description provided for @ashaFacilitatorId.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA Facilitator ID'**
+  String get ashaFacilitatorId;
+
+  /// No description provided for @enterAshaFacilitatorId.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter ASHA Facilitator ID'**
+  String get enterAshaFacilitatorId;
+
+  /// No description provided for @ashaFacilitator_Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of ASHA Facilitator'**
+  String get ashaFacilitator_Name;
+
+  /// No description provided for @enterAshaFacilitatorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Name of ASHA Facilitator'**
+  String get enterAshaFacilitatorName;
+
+  /// No description provided for @age_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get age_label;
+
+  /// No description provided for @populationCoveredAshaFacilitator.
+  ///
+  /// In en, this message translates to:
+  /// **'Population covered under ASHA Facilitator'**
+  String get populationCoveredAshaFacilitator;
+
+  /// No description provided for @enterPopulationCoveredAshaFacilitator.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter population covered under ASHA Facilitator'**
+  String get enterPopulationCoveredAshaFacilitator;
+
+  /// No description provided for @numberOfAshaUnderFacilitator.
+  ///
+  /// In en, this message translates to:
+  /// **'No. of ASHA under the facilitator'**
+  String get numberOfAshaUnderFacilitator;
+
+  /// No description provided for @population.
+  ///
+  /// In en, this message translates to:
+  /// **'Population'**
+  String get population;
+
+  /// No description provided for @phoneNumberShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Ph No.'**
+  String get phoneNumberShort;
+
+  /// No description provided for @area.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get area;
+
+  /// No description provided for @srNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Sr'**
+  String get srNumber;
+
+  /// No description provided for @communityC.
+  ///
+  /// In en, this message translates to:
+  /// **'C - Community'**
+  String get communityC;
+
+  /// No description provided for @institutionalI.
+  ///
+  /// In en, this message translates to:
+  /// **'I - Institutional'**
+  String get institutionalI;
+
+  /// No description provided for @categoryA.
+  ///
+  /// In en, this message translates to:
+  /// **'Category A'**
+  String get categoryA;
+
+  /// No description provided for @categoryB.
+  ///
+  /// In en, this message translates to:
+  /// **'Category B'**
+  String get categoryB;
+
+  /// No description provided for @categoryC.
+  ///
+  /// In en, this message translates to:
+  /// **'Category C'**
+  String get categoryC;
+
+  /// No description provided for @register1.
+  ///
+  /// In en, this message translates to:
+  /// **'Register 1'**
+  String get register1;
+
+  /// No description provided for @register2.
+  ///
+  /// In en, this message translates to:
+  /// **'Register 2'**
+  String get register2;
+
+  /// No description provided for @register3.
+  ///
+  /// In en, this message translates to:
+  /// **'Register 3'**
+  String get register3;
+
+  /// No description provided for @setting_update_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Bhavya m-ASHA application is up to date.'**
+  String get setting_update_msg;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

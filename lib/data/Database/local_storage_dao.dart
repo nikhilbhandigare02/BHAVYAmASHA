@@ -341,7 +341,7 @@ class LocalStorageDao {
         'eligible_couple_activities',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
         where:
-              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+              "server_id IS NOT NULL AND TRIM(server_id) != '')",
 
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
@@ -362,7 +362,7 @@ class LocalStorageDao {
         'child_care_activities',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
         where:
-              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+              "server_id IS NOT NULL AND TRIM(server_id) != '')",
 
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
@@ -383,7 +383,7 @@ class LocalStorageDao {
         'mother_care_activities',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
         where:
-                "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+                "server_id IS NOT NULL AND TRIM(server_id) != '')",
 
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
@@ -1268,10 +1268,20 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {
     try {
       final db = await _db;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      
+      String where = 'is_deleted = ?';
+      List<dynamic> whereArgs = [0];
+      
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where += ' AND current_user_key = ?';
+        whereArgs.add(ashaUniqueKey);
+      }
 
       final rows = await db.query('households',
-          where: 'is_deleted = ?',
-          whereArgs: [0],
+          where: where,
+          whereArgs: whereArgs,
           orderBy: 'created_date_time DESC');
 
       final result = rows.map((row) {
@@ -1806,7 +1816,7 @@ class LocalStorageDao {
         'households',
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
         where:
-        "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-10 minutes')",
+        "server_id IS NOT NULL AND TRIM(server_id) != '' )",
 
         orderBy: "CAST(server_id AS INTEGER) DESC",
         limit: 1,
@@ -2008,7 +2018,7 @@ class LocalStorageDao {
         FollowupFormDataTable.table,
         columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
         where:
-              "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','-5 minutes')",
+              "server_id IS NOT NULL AND TRIM(server_id) != ''  )",
 
         orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
@@ -2311,8 +2321,7 @@ extension LocalStorageDaoReads on LocalStorageDao {
         'beneficiaries_new',
         columns: ['server_id'],
         where:
-            "server_id IS NOT NULL AND TRIM(server_id) != '' AND COALESCE(modified_date_time, created_date_time) <= datetime('now','"
-                "-10 minutes')",
+            "server_id IS NOT NULL AND TRIM(server_id) != '')",
 
         orderBy: "CAST(server_id AS INTEGER) DESC",
         limit: 1,

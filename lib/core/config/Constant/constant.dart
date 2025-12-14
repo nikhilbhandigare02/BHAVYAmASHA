@@ -38,4 +38,12 @@ class Constant {
   static String log_type_via_aadhaar = "via_aadhaar";
 
   static String totalRewardPoints = "";
+  static int householdTotal = 0;
+  static int householdTotalSync = 0;
+  static int eligibleCouplesTotal = 0;
+  static int eligibleCouplesTotalSync = 0;
+  static int motherCareTotal = 0;
+  static int motherCareTotalSync = 0;
+  static int childRegisteredtotal = 0;
+  static int childRegisteredtotalSync = 0;
 }

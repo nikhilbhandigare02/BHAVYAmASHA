@@ -108,7 +108,7 @@ class _IncentiveFormState extends State<IncentiveForm> {
                                 setState(() {
                                   selectedCategoryType = val;
                                 });
-                              }),
+                              },context),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -118,7 +118,7 @@ class _IncentiveFormState extends State<IncentiveForm> {
                                 setState(() {
                                   selectedCategory = val;
                                 });
-                              }),
+                              },context),
                         ),
                       ],
                     ),
@@ -198,7 +198,7 @@ class _IncentiveFormState extends State<IncentiveForm> {
                                 setState(() {
                                   selectedRegisterName = val;
                                 });
-                              }),
+                              },context),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -208,7 +208,8 @@ class _IncentiveFormState extends State<IncentiveForm> {
                                 setState(() {
                                   selectedVolume = val;
                                 });
-                              }),
+                              },
+                          context),
                         ),
                       ],
                     ),
@@ -307,7 +308,71 @@ class _IncentiveFormState extends State<IncentiveForm> {
     );
   }
 
+
   Widget _dropdownField(String label, List<String> items, String? selectedValue,
+      Function(String?) onChanged, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        const SizedBox(height: 4),
+        DropdownButtonFormField<String>(
+          value: selectedValue,
+          items: items
+              .map(
+                (e) => DropdownMenuItem<String>(
+              value: e,
+              child: Text(getLocalizedDropdownLabel(context, e)),
+            ),
+          )
+              .toList(),
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+            contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            filled: true,
+            fillColor: Colors.white,
+            isDense: true,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String getLocalizedDropdownLabel(BuildContext context, String value) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Mapping known values to localization keys
+    switch (value) {
+      case 'C - सामुदायिक':
+        return l10n.communityC;
+      case 'I - संस्थागत':
+        return l10n.institutionalI;
+
+      case 'Category A':
+        return l10n.categoryA;
+      case 'Category B':
+        return l10n.categoryB;
+      case 'Category C':
+        return l10n.categoryC;
+
+      case 'Register 1':
+        return l10n.register1;
+      case 'Register 2':
+        return l10n.register2;
+      case 'Register 3':
+        return l10n.register3;
+
+      default:
+        return value; // if not matched, show original value
+    }
+  }
+
+
+
+/* Widget _dropdownField(String label, List<String> items, String? selectedValue,
       Function(String?) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,5 +400,5 @@ class _IncentiveFormState extends State<IncentiveForm> {
         ),
       ],
     );
-  }
+  }*/
 }

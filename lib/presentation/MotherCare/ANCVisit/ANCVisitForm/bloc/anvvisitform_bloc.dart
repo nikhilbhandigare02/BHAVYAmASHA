@@ -314,9 +314,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         }
 
         try {
-          // After a successful ANC submission, mark this beneficiary as
-          // logically deleted for local lists and flag it as unsynced so
-          // that the updated state is sent to the API.
+
           await LocalStorageDao.instance
               .updateBeneficiaryDeleteAndSyncFlagByUniqueKey(
             uniqueKey: beneficiaryId,

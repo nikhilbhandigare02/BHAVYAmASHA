@@ -230,7 +230,10 @@ class _EligibleCoupleIdentifiedScreenState
     // Check age between 15-49
     final dob = person['dob'];
     final age = _calculateAge(dob);
-    return age >= 15 && age <= 49;
+    final fpMethodRaw = person['fpMethod']?.toString().toLowerCase().trim() ?? '';
+    final hpMethodRaw = person['hpMethod']?.toString().toLowerCase().trim() ?? '';
+    final isSterilized = fpMethodRaw == 'female sterilization' || fpMethodRaw == 'male sterilization' || hpMethodRaw == 'female sterilization' || hpMethodRaw == 'male sterilization';
+    return age >= 15 && age <= 49 && !isSterilized;
   }
 
   Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {

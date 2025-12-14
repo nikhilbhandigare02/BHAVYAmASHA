@@ -363,6 +363,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
           'has_conditions': state.data['personal.hasConditions'],
           'mobile': state.data['personal.mobile'],
           'disability': state.data['personal.disability'],
+          'disability_details': state.data['personal.disabilityDetails'],
           // Part A
           'partA_age': state.data['partA.age'],
           'partA_tobacco': state.data['partA.tobacco'],

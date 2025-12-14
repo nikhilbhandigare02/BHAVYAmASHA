@@ -63,7 +63,7 @@ class _SettingState extends State<Setting> {
                     title: l10n.settingsCheck,
                     color: AppColors.primary,
                     onPress: () {
-                      showAppSnackBar(context, 'Your Bhavya m-ASHA application is up to date.');
+                      showAppSnackBar(context,l10n?.setting_update_msg ?? 'Your Bhavya m-ASHA application is up to date.');
                     },
                   ),
                 ),

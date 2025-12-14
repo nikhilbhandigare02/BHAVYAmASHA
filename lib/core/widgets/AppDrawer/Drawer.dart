@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
+import '../../../data/sync/sync_api_call.dart';
 import '../../../presentation/HomeScreen/HomeScreen.dart';
 import '../../utils/app_version.dart';
 import '../ConfirmationDialogue/ConfirmationDialogue.dart';
@@ -241,7 +242,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                         _buildMenuItem(
                           context,
                           'assets/images/id-card.png',
-                          "Report",
+                          l10n.report,// ?? "Report",
                           onTap: () {
                             openInChrome(
                               "https://ashadashboarduat.medixcel.in/#/auth/login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkYwMDAwMDAwMSIsImRpc3RyaWN0X2lkIjoiMSIsInVuaXF1ZV9rZXkiOiJNNVhTQ0VNMVk4RiIsImhzY19pZCI6InVuZGVmaW5lZCIsImlhdCI6MTc2NTQzMjc1MywiZXhwIjoxNzY1NTE5MTUzfQ.Rea0VNzimIFjJU6hUYDp227ae9P1tY-7ObGdikxi8uM",
@@ -276,9 +277,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           ),
                         );
 
-                        try {
+                        try { 
                           // Start the sync operation
-                          await SyncService.instance.runFullSyncOnce();
+                          // await SyncService.instance.runFullSyncOnce();
+                          await SyncApiCall.allGetApicall();
 
                           // If still mounted and sync completed successfully
                           if (mounted) {

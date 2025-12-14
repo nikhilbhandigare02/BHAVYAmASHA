@@ -7,7 +7,7 @@ class RoundButton extends StatelessWidget {
   final String title;
   final VoidCallback onPress;
   final bool isLoading;
-  final bool disabled; // 👈 add this
+  final bool disabled;
   final Color? color;
   final double height;
   final double width;
@@ -58,7 +58,7 @@ class RoundButton extends StatelessWidget {
         ),
         child: Center(
           child: isLoading
-              ?  SizedBox(
+              ? const SizedBox(
             height: 24,
             width: 24,
             child: CircularProgressIndicator(
@@ -68,18 +68,21 @@ class RoundButton extends StatelessWidget {
           )
               : Row(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null)
                 Icon(icon, color: AppColors.onPrimary, size: iconSize),
               if (icon != null) SizedBox(width: spacing),
-              Text(
-                title,
-                style: TextStyle(
-                  color: AppColors.onPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: fontSize,
-                  letterSpacing: 0.5,
+              Flexible(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: AppColors.onPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontSize,
+                    letterSpacing: 0.5,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ],

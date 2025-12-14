@@ -378,7 +378,7 @@ class BeneficiaryRepository {
         : <String, dynamic>{};
 
     final mapped = <String, dynamic>{
-      'memberType': 'Adult',
+      'memberType': info['memberType'],
       'relation': info['relation'] ?? info['relation_to_head'] ?? '',
       'name': fullName,
 

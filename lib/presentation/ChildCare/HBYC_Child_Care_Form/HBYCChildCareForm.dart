@@ -387,17 +387,15 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               hintText: AppLocalizations.of(context)!.select,
                               onChanged: (v) => context.read<HbycChildCareBloc>().add(WeightLessThan3sdReferredChanged(v ?? '')),
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (state.weightLessThan3sdReferred == 'Yes')
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: CustomTextField(
-                                  controller: _referralDetailsController,
-                                  hintText: 'Referred place ',
-                                  labelText: 'Referred place ',
-                                  maxLines: 3,
-                                ),
+                              CustomTextField(
+                                controller: _referralDetailsController,
+                                hintText: 'Referred place ',
+                                labelText: 'Referred place ',
+                                //maxLines: 3,
                               ),
-                            const SizedBox(height: 8),
+
                           ],
                         );
                       },
@@ -418,17 +416,16 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               hintText: AppLocalizations.of(context)!.select,
                               onChanged: (v) => context.read<HbycChildCareBloc>().add(DevelopmentDelaysObservedChanged(v ?? '')),
                             ),
+                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             if (state.developmentDelaysObserved == 'Yes')
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: CustomTextField(
-                                  controller: _developmentDelaysDetailsController,
-                                  hintText: 'is the child referred?',
-                                  labelText: 'is the child referred?',
-                                  maxLines: 3,
-                                ),
+
+                              CustomTextField(
+                                controller: _developmentDelaysDetailsController,
+                                hintText: 'is the child referred?',
+                                labelText: 'is the child referred?',
+                               // maxLines: 3,
                               ),
-                            const SizedBox(height: 8),
+
                           ],
                         );
                       },
@@ -580,7 +577,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             // Show these fields when syrup IS available (Yes)
-                            if (state.ironFolicSyrupAvailable == 'Yes') ...[
+                            if (state.ironFolicSyrupAvailable == 'No') ...[
                               const SizedBox(height: 8),
 
                               ApiDropdown<String>(

@@ -519,10 +519,10 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
 
 
             CustomTextField(
-              key: ValueKey('phc_${_district}'),
+             // key: ValueKey('phc_${_district}'),
               hintText: l10n.phcNameLabel,
               labelText: l10n.phcNameLabel,
-              initialValue: _district,
+              //initialValue: _district,
               onChanged: (v) => context.read<CbacFormBloc>().add(CbacFieldChanged('general.phc', v.trim())),
             ),
             const Divider(height: 0.5),
@@ -786,16 +786,36 @@ class _PersonalInfoTab extends StatelessWidget {
         BlocBuilder<CbacFormBloc, CbacFormState>(
           buildWhen: (previous, current) => previous.data['personal.disability'] != current.data['personal.disability'],
           builder: (context, state) {
-            return ApiDropdown<String>(
-              hintText: l10n.disabilityQuestionLabel,
-              labelText: l10n.disabilityQuestionLabel,
-              items: [l10n.disabilityVisualImpairment, l10n.disabilityPhysicallyHandicap, l10n.disabilityBedridden, l10n.disabilityNeedHelp],
-              value: state.data['personal.disability'],
-              getLabel: (s) => s,
-              onChanged: (v) => bloc.add(CbacFieldChanged('personal.disability', v)),
+            final selected = state.data['personal.disability']?.toString() ?? '';
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ApiDropdown<String>(
+                  hintText: l10n.disabilityQuestionLabel,
+                  labelText: l10n.disabilityQuestionLabel,
+                  items: [l10n.disabilityVisualImpairment, l10n.disabilityPhysicallyHandicap, l10n.disabilityBedridden, l10n.disabilityNeedHelp],
+                  value: state.data['personal.disability'],
+                  getLabel: (s) => s,
+                  onChanged: (v) => bloc.add(CbacFieldChanged('personal.disability', v)),
+                ),
+                const Divider(height: 0.5),
+                if (selected.isNotEmpty) ...[
+
+                  CustomTextField(
+                    hintText: 'Details (if any selected from above list, give details)',
+                    labelText: 'Details (if any selected from above list, give details)',
+                    initialValue: state.data['personal.disabilityDetails']?.toString() ?? '',
+                    onChanged: (v) => bloc.add(CbacFieldChanged('personal.disabilityDetails', v.trim())),
+                  ),
+
+                  const Divider(height: 0.5),
+                ],
+              ],
             );
           },
+
         ),
+
       ],
     );
   }
@@ -1169,7 +1189,7 @@ class _PartBTab extends StatelessWidget {
         ...qRow(l10n.cbacB_b1_ulcers, 'partB.b1.ulcers'),
         ...qRow(l10n.cbacB_b1_swellingMouth, 'partB.b1.swellingMouth'),
         ...qRow(l10n.cbacB_b1_rashMouth, 'partB.b1.rashMouth'),
-        ...qRow(l10n.cbacB_b1_chewPain, ' partB.b1.chewPain'),
+        ...qRow(l10n.cbacB_b1_chewPain, 'partB.b1.chewPain'),
         ...qRow("${l10n.cbacB_b1_druggs} **", 'partB.b1.druggs'),
         ...qRow("${l10n.cbacB_b1_tuberculosisFamily} **", 'partB.b1.Tuberculosis'),
         ...qRow("${l10n.cbacB_b1_history} **", 'partB.b1.history'),
@@ -1207,7 +1227,7 @@ class _PartBTab extends StatelessWidget {
                 ...qRow(l10n.cbacB_b2_nippleBleed, 'partB.b2.nippleBleed'),
                 ...qRow(l10n.cbacB_b2_breastShapeDiff, 'partB.b2.breastShapeDiff'),
                 ...qRow(
-                   " ${l10n.cbacB_b2_excessBleeding}***", 'partB.b2.excessBleeding '),
+                   " ${l10n.cbacB_b2_excessBleeding}***", 'partB.b2.excessBleeding'),
                 ...qRow("${l10n.cbacB_b2_depression}***", 'partB.b2.depression'),
                 ...qRow(
                     "${l10n.cbacB_b2_uterusProlapse}***", 'partB.b2.uterusProlapse'),

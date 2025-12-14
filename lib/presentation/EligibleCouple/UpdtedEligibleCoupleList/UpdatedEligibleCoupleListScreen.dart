@@ -289,8 +289,11 @@ class _UpdatedEligibleCoupleListScreenState
     // Check if the person is pregnant
     final isPregnantRaw = person['isPregnant']?.toString().toLowerCase() ?? '';
     final isPregnant = isPregnantRaw == 'yes' || isPregnantRaw == 'true' || isPregnantRaw == '1';
+    final fpMethodRaw = person['fpMethod']?.toString().toLowerCase().trim() ?? '';
+    final hpMethodRaw = person['hpMethod']?.toString().toLowerCase().trim() ?? '';
+    final isSterilized = fpMethodRaw == 'female sterilization' || fpMethodRaw == 'male sterilization' || hpMethodRaw == 'female sterilization' || hpMethodRaw == 'male sterilization';
     
-    return isFemale && isMarried && age >= 15 && age <= 49 && !isPregnant;
+    return isFemale && isMarried && age >= 15 && age <= 49 && !isPregnant && !isSterilized;
   }
 
   Map<String, dynamic> _formatData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> counterpart, {

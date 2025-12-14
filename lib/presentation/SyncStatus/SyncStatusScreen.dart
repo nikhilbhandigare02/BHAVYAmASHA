@@ -7,6 +7,7 @@ import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
+import '../../core/config/Constant/constant.dart';
 import '../../data/Database/database_provider.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -810,13 +811,12 @@ sfgfdd
                               crossAxisSpacing: 3.w,
                               childAspectRatio: 1.5,
                               children: [
-                                SyncCard(title:l10n?.household ?? 'Household', total: _householdTotal, synced: _householdSynced),
+                                SyncCard(title:l10n?.household ?? 'Household', total: Constant.householdTotal, synced: Constant.householdTotalSync),
                                 SyncCard(title:l10n?.beneficiary ?? 'Beneficiary', total: _beneficiaryTotal, synced: _beneficiarySynced),
                                 SyncCard(title:l10n?.followUpLabel ?? 'Follow Up', total: _followupTotal, synced: _followupSynced),
-                                SyncCard(title:l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple', total: _eligibleCoupleTotal, synced: _eligibleCoupleSynced),
-                                SyncCard(title:l10n?.gridMotherCare ?? 'Mother Care', total: _motherCareTotal, synced: _motherCareSynced),
-                                SyncCard(title:l10n?.gridChildCare ?? 'Child Care', total: _childCareTotal, synced: _childCareSynced),
-                              ],
+                                SyncCard(title:l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple', total: Constant.eligibleCouplesTotal, synced: Constant.eligibleCouplesTotalSync),
+                                SyncCard(title:l10n?.gridMotherCare ?? 'Mother Care', total: Constant.motherCareTotal, synced: Constant.motherCareTotalSync),
+                                SyncCard(title:l10n?.gridChildCare ?? 'Child Care', total: _childCareTotal, synced: _childCareSynced),],
                             ),
 
                             SizedBox(height: 2.h),

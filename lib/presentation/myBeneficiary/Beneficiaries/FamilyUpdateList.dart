@@ -37,24 +37,76 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
       final households = await LocalStorageDao.instance.getAllHouseholds();
 
       final heads = <Map<String, dynamic>>[];
-      
+
+      // Create a map of household_ref_key to head_id (same as _loadData)
+      final headKeyByHousehold = <String, String>{};
+      for (final hh in households) {
+        try {
+          final hhRefKey = (hh['unique_key'] ?? '').toString();
+          final headId = (hh['head_id'] ?? '').toString();
+          if (hhRefKey.isEmpty || headId.isEmpty) continue;
+          headKeyByHousehold[hhRefKey] = headId;
+        } catch (_) {}
+      }
+
+      // Filter to get only family heads (same logic as _loadData)
+      final familyHeads = rows.where((r) {
+        try {
+          final householdRefKey = (r['household_ref_key'] ?? '').toString();
+          final uniqueKey = (r['unique_key'] ?? '').toString();
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+
+          // Exclude dead or migrated (same as _loadData)
+          final isDeath = r['is_death'] == 1;
+          final isMigrated = r['is_migrated'] == 1;
+          if (isDeath || isMigrated) return false;
+
+          bool isConfiguredHead = false;
+          if (configuredHeadKey != null && configuredHeadKey.isNotEmpty) {
+            isConfiguredHead = configuredHeadKey == uniqueKey;
+          }
+
+          bool isHeadByRelation = false;
+          final rawInfo = r['beneficiary_info'];
+          Map<String, dynamic> info;
+          if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo as Map);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            info = <String, dynamic>{};
+          }
+
+          final relation = (info['relation_to_head'] ?? info['relation'] ?? '')
+              .toString()
+              .toLowerCase();
+          isHeadByRelation = relation == 'head';
+
+          return isConfiguredHead || isHeadByRelation;
+        } catch (_) {
+          return false;
+        }
+      }).toList();
+
       // Create a map of household_ref_key to household data
       final householdMap = {
-        for (var hh in households) 
-          hh['household_ref_key']: hh
+        for (var hh in households) hh['household_ref_key']: hh
       };
 
-      for (final row in rows) {
+      // Process each family head
+      for (final row in familyHeads) {
         try {
           final info = row['beneficiary_info'] is String
               ? jsonDecode(row['beneficiary_info'] as String)
               : row['beneficiary_info'];
-              
+
           if (info is! Map) continue;
-          
+
           final householdRefKey = row['household_ref_key']?.toString() ?? '';
           final householdData = householdMap[householdRefKey] ?? {};
-          
+
           heads.add({
             'hhId': householdRefKey,
             'name': info['headName']?.toString() ?? info['memberName']?.toString() ?? '',
@@ -62,14 +114,14 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
             'mohalla': info['mohalla']?.toString() ?? '',
             'village': info['village']?.toString() ?? '',
             'unique_key': row['unique_key']?.toString() ?? '',
-            '_raw': row,  // Store the raw row data
-            'household': householdData, // Store household data
+            '_raw': row,
+            'household': householdData,
           });
         } catch (e) {
           print('Error parsing beneficiary: $e');
         }
       }
-      
+
       if (mounted) {
         setState(() {
           _filtered = heads;

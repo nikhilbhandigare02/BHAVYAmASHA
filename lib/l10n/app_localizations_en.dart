@@ -2529,7 +2529,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mothersRchIdLabel => 'Mother\'s RCH ID number';
 
   @override
-  String get birthCertificateIssuedLabel => 'Has the birth certificate been issued?';
+  String get birthCertificateIssuedLabel => 'Is birth certificate issued?';
 
   @override
   String get birthCertificateNumberLabel => 'birth certificate number';
@@ -2604,7 +2604,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get babyGenderLabel => 'Baby\'s gender *';
 
   @override
-  String get newbornWeightGramLabel => 'Baby\'s weight (g) *';
+  String get newbornWeightGramLabel => 'Baby\'s weight (1200-4000)gms *';
 
   @override
   String get newbornTemperatureLabel => 'temperature *';
@@ -2619,7 +2619,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get temperatureUnitFahrenheit => 'Fahrenheit';
 
   @override
-  String get weighingScaleColorLabel => 'Weighing Scale Color *';
+  String get weighingScaleColorLabel => 'Scale color of weighing machine*';
 
   @override
   String get colorGreen => 'Green';
@@ -2655,7 +2655,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherStatusLabel => 'Mother\'s status *';
 
   @override
-  String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) *';
+  String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) * card';
 
   @override
   String get postDeliveryProblemNone => 'None';
@@ -2679,16 +2679,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'Convulsions';
 
   @override
-  String get mealsPerDayLabel => 'How many times does a mother take a full meal in 24 hours?';
+  String get mealsPerDayLabel => 'No. of times does a mother take a full meal in 24 hours?';
 
   @override
-  String get padsPerDayLabel => 'How many pads are changed in a day for bleeding? *';
+  String get padsPerDayLabel => 'How many pads have been changed in a day for bleeding? *';
 
   @override
-  String get mothersTemperatureLabel => 'Mother\'s temperature *';
+  String get mothersTemperatureLabel => 'Temperature of mother *';
 
   @override
-  String get foulDischargeHighFeverLabel => 'Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) * (Temperatue of mother - Temperature more than 102 degree F(38.9 degree C)) *';
+  String get foulDischargeHighFeverLabel => 'Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) *';
 
   @override
   String get abnormalSpeechOrSeizureLabel => 'Is the mother speaking abnormally or having fits? *';
@@ -5203,7 +5203,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightColorMatchLabel => 'Weighing matches with colour? *';
 
   @override
-  String get exclusiveBreastfeedingStartedLabel => 'At what time was the baby first breastfed? *';
+  String get exclusiveBreastfeedingStartedLabel => 'Has the exclusive breastfeeding initiated?*';
 
   @override
   String get firstBreastfeedTimingLabel => 'At what time was the baby first breastfed? *';
@@ -5233,7 +5233,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pusBumpsOrBoilLabel => 'More than ten pus- filled pustules or large boil *';
 
   @override
-  String get pusInNavelLabel => 'Is pus in the navel! ? *';
+  String get pusInNavelLabel => 'Is pus in the navel? *';
 
   @override
   String get routineCareDoneLabel => 'Whether the Routine Newborn care tasks was performed? *';
@@ -6593,4 +6593,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tenYearDoses => '10 Year Doses';
+
+  @override
+  String get report => 'Report';
+
+  @override
+  String get facilitatorProfile => 'Facilitator Profile';
+
+  @override
+  String get formSubmittedSuccessfully => 'Form Submitted Successfully';
+
+  @override
+  String get ashaFacilitatorId => 'ASHA Facilitator ID';
+
+  @override
+  String get enterAshaFacilitatorId => 'Enter ASHA Facilitator ID';
+
+  @override
+  String get ashaFacilitator_Name => 'Name of ASHA Facilitator';
+
+  @override
+  String get enterAshaFacilitatorName => 'Enter Name of ASHA Facilitator';
+
+  @override
+  String get age_label => 'Age';
+
+  @override
+  String get populationCoveredAshaFacilitator => 'Population covered under ASHA Facilitator';
+
+  @override
+  String get enterPopulationCoveredAshaFacilitator => 'Enter population covered under ASHA Facilitator';
+
+  @override
+  String get numberOfAshaUnderFacilitator => 'No. of ASHA under the facilitator';
+
+  @override
+  String get population => 'Population';
+
+  @override
+  String get phoneNumberShort => 'Ph No.';
+
+  @override
+  String get area => 'Area';
+
+  @override
+  String get srNumber => 'Sr';
+
+  @override
+  String get communityC => 'C - Community';
+
+  @override
+  String get institutionalI => 'I - Institutional';
+
+  @override
+  String get categoryA => 'Category A';
+
+  @override
+  String get categoryB => 'Category B';
+
+  @override
+  String get categoryC => 'Category C';
+
+  @override
+  String get register1 => 'Register 1';
+
+  @override
+  String get register2 => 'Register 2';
+
+  @override
+  String get register3 => 'Register 3';
+
+  @override
+  String get setting_update_msg => 'Your Bhavya m-ASHA application is up to date.';
 }

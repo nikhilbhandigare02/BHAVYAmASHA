@@ -46,8 +46,48 @@ class _CountBox extends StatelessWidget {
   }
 }
 
-class _EligibleCoupleUpdateView extends StatelessWidget {
+class _EligibleCoupleUpdateView extends StatefulWidget {
   const _EligibleCoupleUpdateView();
+
+  @override
+  State<_EligibleCoupleUpdateView> createState() => _EligibleCoupleUpdateViewState();
+}
+
+class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, FocusNode> _focusNodes = {};
+
+  TextEditingController _controllerFor(String key, String value) {
+    final existing = _controllers[key];
+    if (existing == null) {
+      final c = TextEditingController(text: value);
+      _controllers[key] = c;
+      return c;
+    }
+    if (existing.text != value) {
+      existing.value = existing.value.copyWith(
+        text: value,
+        selection: TextSelection.collapsed(offset: value.length),
+        composing: TextRange.empty,
+      );
+    }
+    return existing;
+  }
+
+  FocusNode _focusFor(String key) {
+    return _focusNodes.putIfAbsent(key, () => FocusNode());
+  }
+
+  @override
+  void dispose() {
+    for (final c in _controllers.values) {
+      c.dispose();
+    }
+    for (final f in _focusNodes.values) {
+      f.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +109,9 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                   ).showSnackBar(SnackBar(content: Text(state.error!)));
                 }
                 if (state.isSuccess) {
-                  SnackBar(
-                    content: Text(
-                      t?.formUpdatedSuccessfully ?? 'Form updated successfully',
-                    ),
+                  showAppSnackBar(
+                    context,
+                    t?.formUpdatedSuccessfully ?? 'Form Updated successfully',
                   );
 
                   Future.delayed(const Duration(milliseconds: 1500), () {
@@ -109,6 +148,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                 }
 
                 Widget _buildCountBoxField(
+                  String fieldKey,
                   String value,
                   Function(String) onChanged,
                 ) {
@@ -117,7 +157,8 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                     height: 40,
                     child: _CountBox(
                       child: TextField(
-                        controller: TextEditingController(text: value),
+                        controller: _controllerFor(fieldKey, value),
+                        focusNode: _focusFor(fieldKey),
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
                         decoration: const InputDecoration(
@@ -458,7 +499,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
 
                             Text(
                               t?.childrenDetailsTitle ?? 'Children Details',
-                              style: Theme.of(context).textTheme.titleMedium,
+                              style: TextStyle(fontWeight:FontWeight.bold),
                             ),
                             const SizedBox(height: 12),
 
@@ -476,6 +517,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                   ),
                                 ),
                                 _buildCountBoxField(
+                                  'totalChildrenBorn',
                                   state.totalChildrenBorn,
                                   (v) => context
                                       .read<EligibleCouleUpdateBloc>()
@@ -483,18 +525,6 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            if (youngestAgeInlineError != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4.0, left: 4.0),
-                                child: Text(
-                                  youngestAgeInlineError!,
-                                  style: TextStyle(
-                                    color: Colors.red.shade700,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
@@ -518,6 +548,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                     ),
                                   ),
                                   _buildCountBoxField(
+                                    'totalLiveChildren',
                                     state.totalLiveChildren,
                                     (v) => context
                                         .read<EligibleCouleUpdateBloc>()
@@ -550,6 +581,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                     ),
                                   ),
                                   _buildCountBoxField(
+                                    'totalMaleChildren',
                                     state.totalMaleChildren,
                                     (v) => context
                                         .read<EligibleCouleUpdateBloc>()
@@ -581,6 +613,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                     ),
                                   ),
                                   _buildCountBoxField(
+                                    'totalFemaleChildren',
                                     state.totalFemaleChildren,
                                     (v) => context
                                         .read<EligibleCouleUpdateBloc>()
@@ -624,6 +657,7 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                   ),
                                 ),
                                 _buildCountBoxField(
+                                  'youngestChildAge',
                                   state.youngestChildAge,
                                   (v) => context
                                       .read<EligibleCouleUpdateBloc>()
@@ -680,6 +714,18 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 ),*/
                               ],
                             ),
+                            if (youngestAgeInlineError != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0, left: 4.0),
+                                child: Text(
+                                  youngestAgeInlineError!,
+                                  style: TextStyle(
+                                    color: Colors.red.shade700,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
@@ -736,9 +782,11 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                           height: 4.5.h,
                             child: RoundButton(
                               title: state.isSubmitting
-                                  ? 'UPDATING...'
+                                  ? ''
                                   : (t?.updateButton ?? 'UPDATE'),
+                              isLoading: state.isSubmitting,
                               onPress: () {
+                                if (state.isSubmitting) return;
                               final live = int.tryParse(state.totalLiveChildren) ?? 0;
                               final male = int.tryParse(state.totalMaleChildren) ?? 0;
                               final female = int.tryParse(state.totalFemaleChildren) ?? 0;
@@ -780,9 +828,11 @@ class _EligibleCoupleUpdateView extends StatelessWidget {
                                 showAppSnackBar(context, message);
                                 return;
                               }
-                              context.read<EligibleCouleUpdateBloc>().add(
-                                const SubmitPressed(),
-                              );
+                              if (!state.isSubmitting) {
+                                context.read<EligibleCouleUpdateBloc>().add(
+                                  const SubmitPressed(),
+                                );
+                              }
                             },
                               disabled: state.isSubmitting,
                             ),

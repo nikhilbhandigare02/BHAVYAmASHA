@@ -248,31 +248,31 @@ class AppLocalizationsHi extends AppLocalizations {
   String get anganwadiCenterNoLabel => 'आंगनवाड़ी केंद्र संख्या';
 
   @override
-  String get anm1MobileHint => 'एएनएम1 का मोबाइल नंबर';
+  String get anm1MobileHint => 'ए.एन.एम. 1 का मोबाइल नंबर';
 
   @override
-  String get anm1MobileLabel => 'एएनएम1 का मोबाइल नंबर';
+  String get anm1MobileLabel => 'ए.एन.एम. 1 का मोबाइल नंबर';
 
   @override
-  String get anm1NameHint => 'एएनएम1 का नाम';
+  String get anm1NameHint => 'ए.एन.एम. 1 का नाम';
 
   @override
-  String get anm1NameLabel => 'एएनएम1 का नाम';
+  String get anm1NameLabel => 'ए.एन.एम. 1 का नाम';
 
   @override
-  String get anm2MobileHint => 'एएनएम2 का मोबाइल नंबर';
+  String get anm2MobileHint => 'ए.एन.एम. 2 का मोबाइल नंबर';
 
   @override
-  String get anm2MobileLabel => 'एएनएम2 का मोबाइल नंबर';
+  String get anm2MobileLabel => 'ए.एन.एम. 2 का मोबाइल नंबर';
 
   @override
-  String get anm2NameHint => 'एएनएम2 का नाम';
+  String get anm2NameHint => 'ए.एन.एम. 2 का नाम';
 
   @override
-  String get anm2NameLabel => 'एएनएम2 का नाम';
+  String get anm2NameLabel => 'ए.एन.एम. 2 का नाम';
 
   @override
-  String get anmNameLabel => 'एएनएम का नाम';
+  String get anmNameLabel => 'ए.एन.एम. का नाम';
 
   @override
   String get announcement => 'घोषणा';
@@ -353,19 +353,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get availableLabel => 'उपलब्ध';
 
   @override
-  String get awwMobileHint => 'एडब्ल्यूडब्ल्यू का मोबाइल नंबर';
+  String get awwMobileHint => 'ए.डब्ल्यू.डब्ल्यू. का मोबाइल नंबर';
 
   @override
-  String get awwMobileLabel => 'एडब्ल्यूडब्ल्यू का मोबाइल नंबर';
+  String get awwMobileLabel => 'ए.डब्ल्यू.डब्ल्यू. का मोबाइल नंबर';
 
   @override
-  String get awwNameHint => 'एडब्ल्यूडब्ल्यू का नाम';
+  String get awwNameHint => 'ए.डब्ल्यू.डब्ल्यू. का नाम';
 
   @override
-  String get awwNameLabel => 'एडब्ल्यूडब्ल्यू का नाम';
+  String get awwNameLabel => 'ए.डब्ल्यू.डब्ल्यू. का नाम';
 
   @override
-  String get bankDetailsTitle => 'बैंक विवरण';
+  String get bankDetailsTitle => 'बैंक का विवरण';
 
   @override
   String get bcmMobileHint => 'Mobile no.';
@@ -419,10 +419,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get birthOrderLabel => 'जन्म क्रम';
 
   @override
-  String get blockHint => 'प्रखंड';
+  String get blockHint => 'ब्लॉक';
 
   @override
-  String get blockLabel => 'प्रखंड';
+  String get blockLabel => 'ब्लॉक';
 
   @override
   String get blockLabelSimple => 'प्रखंड';
@@ -881,16 +881,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get childrenDetailsTitle => 'बच्चों का विवरण';
 
   @override
-  String get choMobileHint => 'सीएचओ का मोबाइल नंबर';
+  String get choMobileHint => 'सी.एच.ओ. का मोबाइल नंबर';
 
   @override
-  String get choMobileLabel => 'सीएचओ का मोबाइल नंबर';
+  String get choMobileLabel => 'सी.एच.ओ. का मोबाइल नंबर';
 
   @override
-  String get choNameHint => 'सीएचओ का नाम';
+  String get choNameHint => 'सी.एच.ओ. का नाम';
 
   @override
-  String get choNameLabel => 'सीएचओ का नाम';
+  String get choNameLabel => 'सी.एच.ओ. का नाम';
 
   @override
   String get completedVisits => 'पूर्ण दौरे';
@@ -995,22 +995,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get districtLabelSimple => 'जिला';
 
   @override
-  String get divisionHint => 'प्रमंडल';
+  String get divisionHint => 'डिवीजन';
 
   @override
-  String get divisionLabel => 'प्रमंडल';
+  String get divisionLabel => 'डिवीजन';
 
   @override
   String get divorced => 'तलाकशुदा';
 
   @override
-  String get dobLabel => 'जन्म तिथि';
+  String get dobLabel => 'जन्म की तिथि';
 
   @override
   String get dobShort => 'जन्म तिथि';
 
   @override
-  String get dojLabel => 'नियुक्ति की तिथि';
+  String get dojLabel => 'नियुक्ति होने की तिथि';
 
   @override
   String get drawerAboutUs => 'हमारे बारे में';
@@ -1165,16 +1165,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get fatherNameLabel => 'पिता का नाम';
 
   @override
-  String get fatherSpouseHint => 'पिता/पति का नाम';
+  String get fatherSpouseHint => 'पिता/जीवनसाथी का नाम';
 
   @override
-  String get fatherSpouseLabel => 'पिता/पति का नाम';
+  String get fatherSpouseLabel => 'पिता/जीवनसाथी का नाम';
 
   @override
   String get finalizeClaimedAmount => 'दावा की गई राशि';
 
   @override
-  String get finalizeSave => 'संग्रहीत करें';
+  String get finalizeSave => 'संरक्षित करें';
 
   @override
   String get finalizeStateAmount => 'राज्य राशि';
@@ -1201,10 +1201,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get fpMethodLabel => 'गर्भनिरोधक का तरीका';
 
   @override
-  String get fruNameHint => 'एफआरयू का नाम';
+  String get fruNameHint => 'एफ.आर.यू. का नाम';
 
   @override
-  String get fruNameLabel => 'एफआरयू का नाम';
+  String get fruNameLabel => 'एफ.आर.यू. का नाम';
 
   @override
   String get fuelCoal => 'कोयला';
@@ -1426,10 +1426,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get householdBeneficiaryTitle => 'परिवार लाभार्थी';
 
   @override
-  String get hscNameHint => 'एचएससी का नाम';
+  String get hscNameHint => 'एच.एस.सी. का नाम';
 
   @override
-  String get hscNameLabel => 'एचएससी का नाम';
+  String get hscNameLabel => 'एच.एस.सी. का नाम';
 
   @override
   String get husbandFatherNameLabel => 'पति / पिता का नाम';
@@ -1441,10 +1441,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get husbandNameLabel => 'पति का नाम';
 
   @override
-  String get hwcNameHint => 'एचडब्ल्यूसी का नाम';
+  String get hwcNameHint => 'एच.डब्ल्यू.सी. का नाम';
 
   @override
-  String get hwcNameLabel => 'एचडब्ल्यूसी का नाम';
+  String get hwcNameLabel => 'एच.डब्ल्यू.सी. का नाम';
 
   @override
   String get idTypeAadhaar => 'आधार';
@@ -1480,10 +1480,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get incentiveHeaderAnganwadi => 'आंगनवाड़ी';
 
   @override
-  String get incentiveDailyTabPlaceholder => 'Daily tasks content here';
+  String get incentiveDailyTabPlaceholder => 'दैनिक कार्यों की सामग्री यहाँ';
 
   @override
-  String get incentiveFormTitle => 'Incentive Form';
+  String get incentiveFormTitle => 'इंसेंटिव फॉर्म';
 
   @override
   String get incentiveFormWorkCodeLabel => 'कार्य कोड :';
@@ -1644,13 +1644,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get misMonthLabel => 'महीना : ';
 
   @override
-  String get misStatAbhaFetched => 'उपयोगकर्ता द्वारा प्राप्त मौजूदा एबीएचए की कुल संख्या :';
+  String get misStatAbhaFetched => 'उपयोगकर्ता द्वारा प्राप्त मौजूदा आभा की कुल संख्या :';
 
   @override
-  String get misStatAbhaGenerated => 'उपयोगकर्ता द्वारा उत्पन्न कुल एबीएचए की संख्या :';
+  String get misStatAbhaGenerated => 'उपयोगकर्ता द्वारा कुल बनायी गयी आभा की संख्या :';
 
   @override
-  String get misStatNewborns => 'नवजात शिशुओं की कुल संख्या :';
+  String get misStatNewborns => 'कुल नवजात शिशुओं की संख्या :';
 
   @override
   String get misStatPregnantWomen => 'कुल गर्भवती महिलाओं की संख्या :';
@@ -1659,7 +1659,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mobileHint => 'Mobile no.';
 
   @override
-  String get mobileLabel => 'Mobile no.';
+  String get mobileLabel => 'मोबाइल नंबर';
 
   @override
   String get mobileLabelSimple => 'मोबाइल नं.';
@@ -1677,7 +1677,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get monthAugust => 'अगस्त';
 
   @override
-  String get monthDecember => 'दिसंबर';
+  String get monthDecember => 'दिसम्बर';
 
   @override
   String get monthFebruary => 'फ़रवरी';
@@ -1713,16 +1713,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get monthlySectionStateContribution => 'राज्य योगदान';
 
   @override
-  String get monthlyTaskPC11 => 'PC1.1 - वर्ष की शुरुआत में सभी घरों की प्रविष्टि बनाएं और प्रत्येक माह उसका अध्ययन करें';
+  String get monthlyTaskPC11 => 'PC1.1 - वर्ष के आरंभ में सभी घरों की ऐसी बनाने एव प्रतीक माह उसके अध्ययन किए जाने हेतू';
 
   @override
-  String get monthlyTaskPC110 => 'PC1.10 - 6 और अधिकतम 35 लाभार्थियों तक';
+  String get monthlyTaskPC110 => 'PC1.10 - 6 एव 6 से अधिक 35 लाभार्थी तक|';
 
   @override
-  String get monthlyTaskPC21 => 'PC2.1 - टीकाकरण: ड्यू लिस्ट से 90% दर्ज बच्चों का पूर्ण टीकाकरण सुनिश्चित करें';
+  String get monthlyTaskPC21 => 'PC2.1 - प्रतिरक्षण-Due List अद्यतन कर 90% लक्षित बच्चों का Full immunization करने पर';
 
   @override
-  String get monthlyTaskPC23 => 'PC2.3 - मातृ स्वास्थ्य: सभी गर्भवती माताओं की लाइन लिस्टिंग और उनमें से 60% की चार एएनसी जाँच पूर्ण करें';
+  String get monthlyTaskPC23 => 'PC2.3 - मातृ स्वास्थ्य: सभी गर्भावस्था माताओं का Line Listing एव 60% गर्भवती माताओं का चार प्रसूतिपूर्ण करने जांच (ANC) पर ';
 
   @override
   String get mother => 'माता';
@@ -1743,10 +1743,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mukhiyaMobileLabel => 'मुखिया का मोबाइल नंबर';
 
   @override
-  String get mukhiyaNameHint => 'ग्राम मुखिया का नाम';
+  String get mukhiyaNameHint => 'गाँव मुखिया का नाम';
 
   @override
-  String get mukhiyaNameLabel => 'ग्राम मुखिया का नाम';
+  String get mukhiyaNameLabel => 'गाँव मुखिया का नाम';
 
   @override
   String get nameLabel => 'नाम';
@@ -1854,10 +1854,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get personalHealthIdLabel => 'व्यक्तिगत स्वास्थ्य आईडी';
 
   @override
-  String get phcChcHint => 'पीएचसी/सीएचसी';
+  String get phcChcHint => 'पी.एच.सी./सी.एच.सी.';
 
   @override
-  String get phcChcLabel => 'पीएचसी/सीएचसी';
+  String get phcChcLabel => 'पी.एच.सी./सी.एच.सी.';
 
   @override
   String get phcNameLabel => 'प्राथमिक स्वास्थ्य केंद्र का नाम';
@@ -1917,10 +1917,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get reenterPasswordEmpty => 'पासवर्ड पुनः दर्ज करना आवश्यक है';
 
   @override
-  String get reenterPasswordHint => 'नया पासवर्ड फिर से दर्ज करें';
+  String get reenterPasswordHint => 'नया पासवर्ड पुनः दर्ज करें';
 
   @override
-  String get reenterPasswordLabel => 'पासवर्ड फिर से दर्ज करें';
+  String get reenterPasswordLabel => 'पुनः दर्ज करें';
 
   @override
   String get reenterPasswordTooShort => 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए';
@@ -2025,10 +2025,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get residentialAreaTypeLabel => 'आवासीय क्षेत्र का प्रकार';
 
   @override
-  String get rhSdhDhHint => 'आरएच/एसडीएच/डीएच/सदर अस्पताल';
+  String get rhSdhDhHint => 'आर.एच/अनुमण्डलीय अस्पताल/जिला अस्पताल/सदर अस्पताल';
 
   @override
-  String get rhSdhDhLabel => 'आरएच/एसडीएच/डीएच/सदर अस्पताल';
+  String get rhSdhDhLabel => 'आर.एच/अनुमण्डलीय अस्पताल/जिला अस्पताल/सदर अस्पताल';
 
   @override
   String get richIdLabel => 'रिच आईडी';
@@ -2136,10 +2136,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsAppLanguage => 'ऐप भाषा';
 
   @override
-  String get settingsCheck => 'चेक';
+  String get settingsCheck => 'जाँचें';
 
   @override
-  String get settingsCheckForUpdates => 'अपडेट के लिए जाँचें';
+  String get settingsCheckForUpdates => 'अपडेट जाँचें';
 
   @override
   String get sharing => 'साझा';
@@ -2160,10 +2160,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get spouseNameLabel => 'पति/पत्नी का नाम';
 
   @override
-  String get stateHint => 'State';
+  String get stateHint => 'राज्य';
 
   @override
-  String get stateLabel => 'State';
+  String get stateLabel => 'राज्य';
 
   @override
   String get statusCompleted => 'पूर्ण';
@@ -2307,7 +2307,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get unmarried => 'अविवाहित';
 
   @override
-  String get updateButton => 'अपडेट';
+  String get updateButton => 'अपडेट करें';
 
   @override
   String get updatedEligibleCoupleListSubtitle => 'Eligible Couples List';
@@ -2337,19 +2337,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get userVillageLabel => 'गांव:';
 
   @override
-  String get usernameEmpty => 'उपयोगकर्ता नाम खाली नहीं हो सकता';
+  String get usernameEmpty => 'उपयोगकर्ता का नाम खाली नहीं हो सकता';
 
   @override
-  String get usernameLabel => 'उपयोगकर्ता नाम';
+  String get usernameLabel => 'उपयोगकर्ता का नाम';
 
   @override
   String get viewDetails => 'विवरण देखें';
 
   @override
-  String get villageHint => 'गांव';
+  String get villageHint => 'गाँव';
 
   @override
-  String get villageLabel => 'गांव';
+  String get villageLabel => 'गाँव';
 
   @override
   String get villageNameLabel => 'गांव का नाम';
@@ -5044,7 +5044,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get syncStatus => 'सिंक स्थिति';
 
   @override
-  String get household => 'परिवार';
+  String get household => 'घरेलू';
 
   @override
   String get beneficiary => 'लाभार्थी';
@@ -5056,7 +5056,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get lastSynced => 'अंतिम सिंक';
 
   @override
-  String get synced => 'सिंक';
+  String get synced => 'सिंक किया गया';
 
   @override
   String get noDataFound => 'कोई डेटा नहीं मिला';
@@ -6593,4 +6593,76 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get tenYearDoses => '10 वर्ष की खुराक';
+
+  @override
+  String get report => 'रिपोर्ट';
+
+  @override
+  String get facilitatorProfile => 'फैसिलिटेटर प्रोफ़ाइल';
+
+  @override
+  String get formSubmittedSuccessfully => 'प्रपत्र सफलतापूर्वक संरक्षित किया गया';
+
+  @override
+  String get ashaFacilitatorId => 'आशा फ़ैसिलिटेटर आई.डी.';
+
+  @override
+  String get enterAshaFacilitatorId => 'आशा फ़ैसिलिटेटर आईडी दर्ज करें';
+
+  @override
+  String get ashaFacilitator_Name => 'आशा फ़ैसिलिटेटर का नाम';
+
+  @override
+  String get enterAshaFacilitatorName => 'आशा फ़ैसिलिटेटर का नाम दर्ज करें';
+
+  @override
+  String get age_label => 'आयु';
+
+  @override
+  String get populationCoveredAshaFacilitator => 'आशा फ़ैसिलिटेटर के क्षेत्र की जनसंख्या';
+
+  @override
+  String get enterPopulationCoveredAshaFacilitator => 'आशा फ़ैसिलिटेटर के क्षेत्र की जनसंख्या दर्ज करें';
+
+  @override
+  String get numberOfAshaUnderFacilitator => 'फ़ैसिलिटेटर के अंतर्गत आशा की संख्या';
+
+  @override
+  String get population => 'जनसंख्या';
+
+  @override
+  String get phoneNumberShort => 'फोन नं.';
+
+  @override
+  String get area => 'क्षेत्र';
+
+  @override
+  String get srNumber => 'क्र.';
+
+  @override
+  String get communityC => 'C - सामुदायिक';
+
+  @override
+  String get institutionalI => 'I - संस्थागत';
+
+  @override
+  String get categoryA => 'श्रेणी A';
+
+  @override
+  String get categoryB => 'श्रेणी B';
+
+  @override
+  String get categoryC => 'श्रेणी C';
+
+  @override
+  String get register1 => 'रजिस्टर 1';
+
+  @override
+  String get register2 => 'रजिस्टर 2';
+
+  @override
+  String get register3 => 'रजिस्टर 3';
+
+  @override
+  String get setting_update_msg => 'आपका भव्य एम-आशा आवेदन अद्यतन है।';
 }
