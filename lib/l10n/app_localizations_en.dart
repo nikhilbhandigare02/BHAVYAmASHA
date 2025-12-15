@@ -1261,6 +1261,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gridChildCare => 'Child Care';
 
   @override
+  String get hintTemp => 'Temperature';
+
+  @override
   String get gridEligibleCouple => 'Number Of Eligible Couple Identified';
 
   @override
@@ -2595,7 +2598,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alive => 'Alive';
 
   @override
-  String get babyConditionLabel => 'Baby\'s condition *';
+  String get babyConditionLabel => 'Child status *';
 
   @override
   String get babyNameLabel => 'Baby\'s name  *';
@@ -2607,7 +2610,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newbornWeightGramLabel => 'Baby\'s weight (1200-4000)gms *';
 
   @override
-  String get newbornTemperatureLabel => 'temperature *';
+  String get newbornTemperatureLabel => 'Temperature *';
 
   @override
   String get infantTemperatureUnitLabel => 'Temperature of the baby (Measure in axial and record) *';
@@ -2619,7 +2622,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get temperatureUnitFahrenheit => 'Fahrenheit';
 
   @override
-  String get weighingScaleColorLabel => 'Scale color of weighing machine*';
+  String get weighingScaleColorLabel => 'Scale color of weighing machine *';
 
   @override
   String get colorGreen => 'Green';
@@ -2634,13 +2637,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold to the touch, or that the child\'s temperature is 37.5°C or higher or less than 35.5°C, and that the chest draws inward when breathing. *';
 
   @override
-  String get bleedingUmbilicalCordLabel => 'Is there bleeding from the umbilical cord? *';
+  String get bleedingUmbilicalCordLabel => 'Is Umbilical cord bleeding *';
 
   @override
-  String get newbornSeizuresLabel => 'Is the child having seizures?*';
+  String get newbornSeizuresLabel => 'Is the child having seizures? *';
 
   @override
-  String get stoppedCryingLabel => 'Has the baby stopped crying? *';
+  String get stoppedCryingLabel => 'Has the child stopped crying? *';
 
   @override
   String get homeVisitDayLabel => 'Home Visit Day *';
@@ -2655,7 +2658,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherStatusLabel => 'Mother\'s status *';
 
   @override
-  String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) * card';
+  String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) card? *';
 
   @override
   String get postDeliveryProblemNone => 'None';
@@ -5203,7 +5206,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightColorMatchLabel => 'Weighing matches with colour? *';
 
   @override
-  String get exclusiveBreastfeedingStartedLabel => 'Has the exclusive breastfeeding initiated?*';
+  String get exclusiveBreastfeedingStartedLabel => 'Has the exclusive breastfeeding initiated? *';
 
   @override
   String get firstBreastfeedTimingLabel => 'At what time was the baby first breastfed? *';
@@ -5212,7 +5215,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get breathingRapidLabel => 'Is the breath of the baby going fast (60 or more per minute) *';
 
   @override
-  String get lethargicLabel => 'Is the baby lethargic?';
+  String get lethargicLabel => 'Is the baby Lethargic? *';
 
   @override
   String get congenitalAbnormalitiesLabel => 'Is the baby having any congenital physical abnormality *';
@@ -5242,7 +5245,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying continuously or passing usrine less than 6 times a day? *';
 
   @override
-  String get cryingSoftlyLabel => 'Is the baby crying weak? *';
+  String get cryingSoftlyLabel => 'Is the child crying weak? *';
 
   @override
   String get newbornReferredByAshaLabel => 'In the above symptoms, weather the child is referred by ASHA? *';
@@ -5251,7 +5254,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get birthRegisteredLabel => 'Is birth registration completed? *';
 
   @override
-  String get birthDoseVaccinationLabel => 'Is the birthdose vaccination given to baby? *';
+  String get birthDoseVaccinationLabel => 'Is the Birthdose vaccination given to baby? *';
 
   @override
   String get mcpCardAvailableLabel => 'Is there availability of \'Mother Child Protection (MCP) card? *';
@@ -5773,16 +5776,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get is_navel_tied_with_thread => 'Is navel tied with a clean thread by ASHA or ANM?';
 
   @override
-  String get babyWipedWithCleanCloth => 'Has the baby been wiped with a clean dry cloth?';
+  String get babyWipedWithCleanCloth => 'Has the baby wiped with clean dry cloth? *';
 
   @override
-  String get is_child_kept_warm => 'Has the baby kept warm?';
+  String get is_child_kept_warm => 'Has the baby kept warm? *';
 
   @override
-  String get babyGivenBath => 'Has the baby been given a bath?';
+  String get babyGivenBath => 'Has the baby given bath? *';
 
   @override
-  String get babyWrappedAndPlacedNearMother => 'Whether the baby was wrapped in a cloth and placed near the mother?';
+  String get babyWrappedAndPlacedNearMother => 'Whether the baby was wrapped in a cloth and placed near the mother? *';
 
   @override
   String get selectEyeProblemTypeLabel => 'Select type of eye problem';
@@ -5899,7 +5902,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get breastfeeding_problem_help => 'If there is a problem in breastfeeding, help the mother to overcome it *';
 
   @override
-  String get temp_upto_102 => 'Temperature up to 102°F (38.9°C)';
+  String get temp_upto_102 => 'Temperature upto 102°F (38.9°C)';
 
   @override
   String get temp_more_than_102 => 'Temperature more than 102°F (38.9°C)';

@@ -109,7 +109,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                 children: [
                   ApiDropdown<String>(
                     labelText: t.babyConditionLabel,
-                    items: const ['alive', 'death'],
+                    items:  ['alive', 'death'],
                     getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                     value: s(c['babyCondition']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -117,7 +117,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ),
                   const Divider(height: 0,),
-              
+
                   CustomTextField(
                     labelText: t.babyNameLabel,
                     hintText: t.babyNameLabel,
@@ -131,7 +131,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ApiDropdown<String>(
                     labelText: t.babyGenderLabel,
                     hintText: t.babyGenderLabel,
-                    items: const ['Male', 'Female'],   // 👈 ONLY these two now
+                    items: const ['Male', 'Female'],
                     getLabel: (e) => e == 'Male' ? t.male : t.female,
                     value: s(c['gender']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -144,7 +144,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ),
 
                   const Divider(height: 0,),
-              
+
                   CustomTextField(
                     labelText: t.newbornWeightGramLabel,
                     hintText: t.newbornWeightGramLabel,
@@ -155,19 +155,19 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ),
                   const Divider(height: 0,),
-              
+
                   CustomTextField(
                     labelText: t.newbornTemperatureLabel,
-                    hintText: t.newbornTemperatureLabel,
+                    hintText: t.hintTemp,
                     keyboardType: TextInputType.number,
                     initialValue: s(c['temperature']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'temperature', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.infantTemperatureUnitLabel,
                     items: const ['Celsius', 'Fahrenheit'],
@@ -177,9 +177,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'tempUnit', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.weightColorMatchLabel,
                     items: const ['Yes', 'No'],
@@ -189,9 +189,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'weightColorMatch', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.weighingScaleColorLabel,
                     items: const ['Green', 'Yellow', 'Red'],
@@ -201,9 +201,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'weighingScaleColor', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.motherReportsTempOrChestIndrawingLabel,
                     labelMaxLines: 4,
@@ -214,9 +214,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'motherReportsTempOrChestIndrawing', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   // Breastfeeding-related fields
                   ApiDropdown<String>(
                     labelText: t.exclusiveBreastfeedingStartedLabel,
@@ -227,8 +227,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'exclusiveBreastfeedingStarted', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   ApiDropdown<String>(
                     labelText: t.firstBreastfeedTimingLabel,
                     items: const [
@@ -245,8 +245,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'firstBreastfeedTiming', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   ApiDropdown<String>(
                     labelText: t.howWasBreastfedLabel,
                     items: const [
@@ -262,8 +262,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'howWasBreastfed', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                   const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   ApiDropdown<String>(
                     labelText: t.firstFeedGivenAfterBirthLabel,
                     items: const ['First Breastfeeding','Water','Honey','Mishri Water / Sugar Syrup', 'Goat Milk','Cow Milk', 'Other' ],
@@ -277,15 +277,15 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: CustomTextField(
-                        labelText: 'Please enter other option',
+                        labelText: t.enter_other_feeding_option,
                         initialValue: c['firstFeedOther'] ?? '',
                         onChanged: (val) => context.read<HbncVisitBloc>().add(
                           NewbornDetailsChanged(field: 'firstFeedOther', value: val, childIndex: widget.childIndex),
                         ),
                       ),
                     ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   ApiDropdown<String>(
                     labelText: t.adequatelyFedSevenToEightTimesLabel,
                     items: const ['Yes', 'No'],
@@ -299,7 +299,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: ApiDropdown<String>(
-                        labelText: 'Counselling/Advise needed?',
+                        labelText: t.counsellingAdviceNeeded,
                         items: const ['Yes', 'No'],
                         getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                         value: yn(c['adequatelyFedCounseling']),
@@ -308,8 +308,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                         ),
                       ),
                     ),
-                     const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   ApiDropdown<String>(
                     labelText: t.babyDrinkingLessMilkLabel,
                     items: const ['Yes', 'No'],
@@ -319,8 +319,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'babyDrinkingLessMilk', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   ApiDropdown<String>(
                     labelText: t.breastfeedingStoppedLabel,
                     items: const ['Yes', 'No'],
@@ -329,8 +329,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'breastfeedingStopped', value: val, childIndex: widget.childIndex),
                     ),),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   ApiDropdown<String>(
                     labelText: t.bloatedStomachOrFrequentVomitingLabel,
                     items: const ['Yes', 'No'],
@@ -340,10 +340,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'bloatedStomachOrFrequentVomiting', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-                  // Additional checks (mostly Yes/No)
-                  ApiDropdown<String>(
+                  const Divider(height: 0,),
+                   ApiDropdown<String>(
                     labelText: t.bleedingUmbilicalCordLabel,
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
@@ -352,12 +350,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'bleedingUmbilicalCord', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-                  // Conditional dropdown for navel tied by ASHA/ANM
+                  const Divider(height: 0,),
+
                   if (c['bleedingUmbilicalCord'] == 'Yes')
                     ApiDropdown<String>(
-                      labelText: 'Is navel tied with a clean thread by ASHA or ANM?',
+                      labelText: t.is_navel_tied_with_thread,
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: yn(c['navelTiedByAshaAnm']),
@@ -367,7 +364,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   if (c['bleedingUmbilicalCord'] == 'Yes')
                     const Divider(height: 0,),
-              
+
                   ApiDropdown<String>(
                     labelText: t.pusInNavelLabel,
                     items: const ['Yes', 'No'],
@@ -377,9 +374,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'pusInNavel', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.routineCareDoneLabel,
                     items: const ['Yes', 'No'],
@@ -389,11 +386,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'routineCareDone', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   // New Question 1: Wiped with clean cloth
                   ApiDropdown<String>(
-                    labelText: 'Has the baby been wiped with a clean dry cloth?',
+                    labelText:t.babyWipedWithCleanCloth,
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['wipedWithCleanCloth']),
@@ -401,11 +398,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'wipedWithCleanCloth', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   // New Question 2: Kept warm
                   ApiDropdown<String>(
-                    labelText: 'Has the baby kept warm?',
+                    labelText: t.is_child_kept_warm,
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['keptWarm']),
@@ -413,11 +410,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'keptWarm', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   // New Question 3: Given bath
                   ApiDropdown<String>(
-                    labelText: 'Has the baby given a bath?',
+                    labelText: t.babyGivenBath,
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['givenBath']),
@@ -425,11 +422,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'givenBath', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   // New Question 4: Wrapped and placed near mother
                   ApiDropdown<String>(
-                    labelText: 'Whether the baby was wrapped in a cloth and placed near the mother ? *',
+                    labelText: t.babyWrappedAndPlacedNearMother,
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['wrappedAndPlacedNearMother']),
@@ -437,8 +434,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'wrappedAndPlacedNearMother', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
                   ApiDropdown<String>(
                     labelText: t.breathingRapidLabel,
                     items: const ['Yes', 'No'],
@@ -448,9 +445,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'breathingRapid', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.lethargicLabel,
                     items: const ['Yes', 'No'],
@@ -460,9 +457,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'lethargic', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.congenitalAbnormalitiesLabel,
                     items: const ['Yes', 'No'],
@@ -472,9 +469,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'congenitalAbnormalities', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.eyesNormalLabel,
                     items: const ['Yes', 'No'],
@@ -484,22 +481,24 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'eyesNormal', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                  const Divider(height: 0,),
                   if (c['eyesNormal'] == 'No')
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: ApiDropdown<String>(
-                        labelText: 'Select type of eye problem',
-                        items: const ['Swelling', 'Oozing pus'],
-                        getLabel: (e) => e,
-                        value: c['eyesProblemType'],
-                        onChanged: (val) => context.read<HbncVisitBloc>().add(
-                          NewbornDetailsChanged(field: 'eyesProblemType', value: val, childIndex: widget.childIndex),
-                        ),
+
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: ApiDropdown<String>(
+                      labelText:t.selectEyeProblemTypeLabel,
+                      items: const ['Swelling', 'Oozing pus'],
+                      getLabel: (e) => e,
+                      value: c['eyesProblemType'],
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'eyesProblemType', value: val, childIndex: widget.childIndex),
                       ),
                     ),
-                                      const Divider(height: 0,),
-              
-              
+                  ),
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.eyesSwollenOrPusLabel,
                     items: const ['Yes', 'No'],
@@ -509,9 +508,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'eyesSwollenOrPus', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.skinFoldRednessLabel,
                     labelMaxLines: 3,
@@ -522,9 +521,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'skinFoldRedness', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.newbornJaundiceLabel,
                     items: const ['Yes', 'No'],
@@ -534,9 +533,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'jaundice', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.pusBumpsOrBoilLabel,
                     items: const ['Yes', 'No'],
@@ -546,9 +545,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'pusBumpsOrBoil', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.newbornSeizuresLabel,
                     items: const ['Yes', 'No'],
@@ -558,9 +557,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'seizures', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.cryingConstantlyOrLessUrineLabel,
                     labelMaxLines: 3,
@@ -575,7 +574,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: ApiDropdown<String>(
-                        labelText: 'Counselling/Advise needed for breastfeeding?',
+                        labelText: t.counsellingBreastfeeding,
                         items: const ['Yes', 'No'],
                         getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                         value: yn(c['cryingCounseling']),
@@ -584,9 +583,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                         ),
                       ),
                     ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.cryingSoftlyLabel,
                     items: const ['Yes', 'No'],
@@ -596,9 +595,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'cryingSoftly', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.stoppedCryingLabel,
                     items: const ['Yes', 'No'],
@@ -608,9 +607,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'stoppedCrying', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.newbornReferredByAshaLabel,
                     items: const ['Yes', 'No'],
@@ -623,8 +622,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   if (c['referredByASHA'] == 'Yes') ...[
                     const SizedBox(height: 8),
                     ApiDropdown<String>(
-                      labelText: 'Referred by ASHA to',
-                      items: const ['HSC', 'APHC', 'PHC', 'CHC', 'RH', 'SDH', 'DH'],
+                      labelText:t.referredByASHA,
+                      items:  [t.hsc,t.aphc,t.phc,t.chc,t.rh,t.sdh,t.dh],
                       getLabel: (e) => e,
                       value: s(c['referredByASHAFacility']),
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -633,8 +632,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ],
                   const Divider(height: 0,),
-              
-              
+
+
                   ApiDropdown<String>(
                     labelText: t.birthRegisteredLabel,
                     items: const ['Yes', 'No'],
@@ -644,9 +643,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'birthRegistered', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.birthCertificateIssuedLabel,
                     items: const ['Yes', 'No'],
@@ -656,9 +655,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'birthCertificateIssued', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.birthDoseVaccinationLabel,
                     items: const ['Yes', 'No'],
@@ -668,9 +667,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'birthDoseVaccination', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
-              
+                  const Divider(height: 0,),
+
+
                   ApiDropdown<String>(
                     labelText: t.mcpCardAvailableLabel,
                     items: const ['Yes', 'No'],
@@ -680,12 +679,12 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'mcpCardAvailable', value: val, childIndex: widget.childIndex),
                     ),
                   ),
-                                      const Divider(height: 0,),
-              
+                  const Divider(height: 0,),
+
 
                   if (c['mcpCardAvailable'] == 'Yes')
                     ApiDropdown<String>(
-                      labelText: 'Is the weight of the new born baby recorded in the Mother Card Protection card?',
+                      labelText: t.babyWeightRecordedInMPC,
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: yn(c['weightRecordedInMcpCard']),
@@ -695,10 +694,10 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   if (c['mcpCardAvailable'] == 'Yes')
                     const Divider(height: 0,),
-              
+
                   // Refer to hospital field
                   ApiDropdown<String>(
-                    labelText: 'Refer to hospital?',
+                    labelText: t.refer_to_hospital,
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['referToHospital']),
@@ -707,10 +706,17 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ),
                   if (c['referToHospital'] == 'Yes') ...[
-                    const SizedBox(height: 8),
+                    const Divider(height: 0,),
                     ApiDropdown<String>(
-                      labelText: 'Refer to',
-                      items: const ['PHC', 'CHC', 'RH', 'SDH', 'DH', 'MCH'],
+                      labelText: t.referToLabel,
+                      items:  [
+                        t.visitTypePhc,
+                        t.chc,
+                        t.rhLabel,
+                        t.sdh,
+                        t.dhLabel,
+                        t.mchLabel,
+                      ],
                       getLabel: (e) => e,
                       value: s(c['referToHospitalFacility']),
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -719,7 +725,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ],
                   const Divider(height: 0,),
-              
+
                 ],
               ),
             ),

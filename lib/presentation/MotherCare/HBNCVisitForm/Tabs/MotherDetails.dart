@@ -15,7 +15,7 @@ class MotherDetailsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<HbncVisitBloc, HbncVisitState>(
       listenWhen: (previous, current) =>
-          previous.motherDetails != current.motherDetails,
+      previous.motherDetails != current.motherDetails,
       listener: (context, state) {
         print('MotherDetails (from state): ${state.motherDetails}');
       },
@@ -45,7 +45,7 @@ class MotherDetailsTab extends StatelessWidget {
                   const Divider(height: 0),
                   if (m['motherStatus'] == 'death') ...[
                     CustomDatePicker(
-                      labelText: 'Date of death *',
+                      labelText:t.date_of_death,
                       initialDate: m['dateOfDeath'] is DateTime ? m['dateOfDeath'] as DateTime : null,
                       onDateChanged: (d) => context.read<HbncVisitBloc>().add(
                         MotherDetailsChanged(field: 'dateOfDeath', value: d),
@@ -53,8 +53,8 @@ class MotherDetailsTab extends StatelessWidget {
                     ),
                     const Divider(),
                     ApiDropdown<String>(
-                      labelText: 'Place of death *',
-                      items: const ['Home', 'Migrated Out', 'On the way', 'Facility', 'Other'],
+                      labelText: t.place_of_death,
+                      items:  [t.home,t.migrated_out,t.on_the_way,t.facility,t.other],
                       getLabel: (e) => e,
                       value: _asString(m['deathPlace']),
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -63,19 +63,19 @@ class MotherDetailsTab extends StatelessWidget {
                     ),
                     const Divider(),
                     ApiDropdown<String>(
-                      labelText: 'Reason of death *',
-                      items: const [
-                        'PH',
-                        'PPH',
-                        'Severe Anaemia',
-                        'Spesis',
-                        'Obstructed Labour',
-                        'Malpresentation',
-                        'Eclampsia/Severe Hypertension',
-                        'Unsafe Abortion',
-                        'Surgical Complication',
-                        'Other reason apart from maternal complication',
-                        'Other (Specify)'
+                      labelText: t.reason_of_death,
+                      items: [
+                        t.ph,
+                        t.pph,
+                        t.severe_anaemia,
+                        t.spesis,
+                        t.obstructedLabour,
+                        t.malpresentation,
+                        t.eclampsia_severe_hypertension,
+                        t.unsafe_abortion,
+                        t.surgical_complication,
+                        t.other_reason_not_maternal_complication,
+                        t.other_specify
                       ],
                       getLabel: (e) => e,
                       value: _asString(m['reasonOfDeath']),
@@ -86,8 +86,8 @@ class MotherDetailsTab extends StatelessWidget {
                     const Divider(),
                     if (m['reasonOfDeath'] == 'Other (Specify)') ...[
                       CustomTextField(
-                        labelText: 'Other reason of death *',
-                        hintText: 'Specify other reason',
+                        labelText: t.other_reason_of_death,
+                        hintText: t.specify_other_reason,
                         initialValue: _asString(m['reasonOfDeathOther']),
                         onChanged: (val) => context.read<HbncVisitBloc>().add(
                           MotherDetailsChanged(field: 'reasonOfDeathOther', value: val),
@@ -114,304 +114,304 @@ class MotherDetailsTab extends StatelessWidget {
 
 
 
-                  if (m['mcpCardAvailable'] == 'Yes') ...[
-                    ApiDropdown<String>(
-                      labelText: 'Has the MCP card filled? *',
-                      items: const ['Yes', 'No'],
-                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                      value: _asString(m['mcpCardFilled']),
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        MotherDetailsChanged(
-                          field: 'mcpCardFilled',
-                          value: val,
+                    if (m['mcpCardAvailable'] == 'Yes') ...[
+                      ApiDropdown<String>(
+                        labelText: t.has_mcp_card_filled,
+                        items: const ['Yes', 'No'],
+                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                        value: _asString(m['mcpCardFilled']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          MotherDetailsChanged(
+                            field: 'mcpCardFilled',
+                            value: val,
+                          ),
                         ),
                       ),
-                    ),
-                    const Divider(),
-                  ],
-
-                  ApiDropdown<String>(
-                    labelText: t.postDeliveryProblemsLabel,
-                    items: const [
-                      'Yes',
-                      'No'
+                      const Divider(),
                     ],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: _asString(m['postDeliveryProblems']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(
-                        field: 'postDeliveryProblems',
-                        value: val,
-                      ),
-                    ),
-                  ),
-                  const Divider(),
 
-
-                  if (
-                      m['postDeliveryProblems'] == 'Yes') ...[
                     ApiDropdown<String>(
-                      labelText: 'Excessive bleeding *',
-                      items: const ['Yes', 'No'],
-                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                      value: _asString(m['excessiveBleeding']),
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        MotherDetailsChanged(
-                          field: 'excessiveBleeding',
-                          value: val,
-                        ),
-                      ),
-                    ),
-                    const Divider(),
-                    ApiDropdown<String>(
-                      labelText: 'Unconsious / fits *',
-                      items: const ['Yes', 'No'],
-                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                      value: _asString(m['unconsciousFits']),
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        MotherDetailsChanged(
-                          field: 'unconsciousFits',
-                          value: val,
-                        ),
-                      ),
-                    ),
-                    const Divider(),
-                  ],
-
-                  // Breastfeeding problems
-                  ApiDropdown<String>(
-                    labelText: t.breastfeedingProblemsLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: _asString(m['breastfeedingProblems']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(
-                        field: 'breastfeedingProblems',
-                        value: val,
-                      ),
-                    ),
-                  ),
-                  const Divider(),
-
-                  if (m['breastfeedingProblems'] == 'Yes') ...[
-                    CustomTextField(
-                      labelText: 'Please enter problem *',
-                      hintText: 'Enter breastfeeding problem',
-                      initialValue:
-                          _asString(m['breastfeedingProblemDescription']) ?? '',
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        MotherDetailsChanged(
-                          field: 'breastfeedingProblemDescription',
-                          value: val,
-                        ),
-                      ),
-                    ),
-                    const Divider(),
-                    CustomTextField(
-                      labelText: 'Is there is a problem in breastfeeding, help the mother to overcome it *',
-                      hintText: 'Please write down the take action',
-                      initialValue: _asString(m['breastfeedingHelpGiven']),
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        MotherDetailsChanged(
-                          field: 'breastfeedingHelpGiven',
-                          value: val,
-                        ),
-                      ),
-
-                    ),
-                    const Divider(height: 0),
-                  ],
-
-                  // Full meals count
-                  ApiDropdown<int>(
-                    labelText: "${t.mealsPerDayLabel} *",
-                    items: const [1, 2, 3, 4, 5, 6, 7, 8, 9],
-                    getLabel: (e) => e.toString(),
-                    value: (m['mealsPerDay'] is int)
-                        ? m['mealsPerDay'] as int
-                        : int.tryParse(_asString(m['mealsPerDay']) ?? ''),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(field: 'mealsPerDay', value: val),
-                    ),
-                  ),
-                  const Divider(),
-
-                  ApiDropdown<String>(
-                    labelText: t.counselingAdviceLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: _asString(m['counselingAdvice']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(
-                        field: 'counselingAdvice',
-                        value: val,
-                      ),
-                    ),
-                  ),
-                  const Divider(),
-
-                  ApiDropdown<int>(
-                    labelText: t.padsPerDayLabel,
-                    items: const [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-                    getLabel: (e) => e.toString(),
-                    value: (m['padsPerDay'] is int)
-                        ? m['padsPerDay'] as int
-                        : int.tryParse(_asString(m['padsPerDay']) ?? ''),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(field: 'padsPerDay', value: val),
-                    ),
-                  ),
-                  const Divider(),
-
-                  ApiDropdown<String>(
-                    labelText: t.mothersTemperatureLabel,
-                    items: const [
-                      'Temperature upto 102 degree F(38.9 degree C)',
-                      'Temperure More that102 degree F (38.9 degree C)'
-                    ],
-                    getLabel: (e) => e,
-                    value: _asString(m['temperature']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(field: 'temperature', value: val),
-                    ),
-                  ),
-                  const Divider(height: 0),
-
-                  // Paracetamol tablet given when temperature up to 102 F
-                  Builder(
-                    builder: (context) {
-                      final tempStr = _asString(m['temperature']) ?? '';
-                      final isUpto102 = tempStr == 'Temperature upto 102 degree F(38.9 degree C)';
-                      if (isUpto102) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText:
-                                  'Paracetamol tablet given (Temperature up to 102°F / 38.9°C) *',
-                              items: const ['Yes', 'No'],
-                              getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                              value: _asString(m['paracetamolGiven']),
-                              onChanged: (val) =>
-                                  context.read<HbncVisitBloc>().add(
-                                    MotherDetailsChanged(
-                                      field: 'paracetamolGiven',
-                                      value: val,
-                                    ),
-                                  ),
-                            ),
-
-                          ],
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-
-                  ApiDropdown<String>(
-                    labelText: t.foulDischargeHighFeverLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: _asString(m['foulDischargeHighFever']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(
-                        field: 'foulDischargeHighFever',
-                        value: val,
-                      ),
-                    ),
-                  ),
-                  const Divider(height: 0),
-
-                  // Abnormal speech or seizures
-                  // ApiDropdown<String>(
-                  //   labelText: t.abnormalSpeechOrSeizureLabel,
-                  //   items: const ['Yes', 'No'],
-                  //   getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                  //   value: _asString(m['abnormalSpeechOrSeizure']),
-                  //   onChanged: (val) => context.read<HbncVisitBloc>().add(
-                  //     MotherDetailsChanged(
-                  //       field: 'abnormalSpeechOrSeizure',
-                  //       value: val,
-                  //     ),
-                  //   ),
-                  // ),
-                  const Divider(height: 0),
-
-                  // New questions (as per request) - Yes/No
-                  ApiDropdown<String>(
-                    labelText: t.milkNotProducingOrLessLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: _asString(m['milkNotProducingOrLess']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(
-                        field: 'milkNotProducingOrLess',
-                        value: val,
-                      ),
-                    ),
-                  ),
-                  const Divider(height: 0),
-
-                  if (m['milkNotProducingOrLess'] == 'Yes') ...[
-                    ApiDropdown<String>(
-                      labelText: 'Counseling/Advise *',
-                      items: const ['Yes', 'No'],
-                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                      value: _asString(m['milkCounselingAdvice']),
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        MotherDetailsChanged(
-                          field: 'milkCounselingAdvice',
-                          value: val,
-                        ),
-                      ),
-                    ),
-                    const Divider(height: 0),
-                  ],
-                  ApiDropdown<String>(
-                    labelText: t.nippleCracksPainOrEngorgedLabel,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: _asString(m['nippleCracksPainOrEngorged']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(
-                        field: 'nippleCracksPainOrEngorged',
-                        value: val,
-                      ),
-                    ),
-                  ),
-                  const Divider(height: 0),
-
-                  // Refer to Hospital & Refer to
-                  ApiDropdown<String>(
-                    labelText: 'Refer to Hospital *',
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: _asString(m['referHospital']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      MotherDetailsChanged(field: 'referHospital', value: val),
-                    ),
-                  ),
-                  const Divider(height: 0),
-
-                  if (m['referHospital'] == 'Yes') ...[
-                    ApiDropdown<String>(
-                      labelText: 'Refer to? *',
+                      labelText: t.postDeliveryProblemsLabel,
                       items: const [
-                        'PHC',
-                        'CHC',
-                        'RH',
-                        'SDH',
-                        'DH',
-                        'MCH',
+                        'Yes',
+                        'No'
                       ],
-                      getLabel: (e) => e,
-                      value: _asString(m['referTo']),
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['postDeliveryProblems']),
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        MotherDetailsChanged(field: 'referTo', value: val),
+                        MotherDetailsChanged(
+                          field: 'postDeliveryProblems',
+                          value: val,
+                        ),
+                      ),
+                    ),
+                    const Divider(),
+
+
+                    if (
+                    m['postDeliveryProblems'] == 'Yes') ...[
+                      ApiDropdown<String>(
+                        labelText: t.excessive_bleeding,
+                        items: const ['Yes', 'No'],
+                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                        value: _asString(m['excessiveBleeding']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          MotherDetailsChanged(
+                            field: 'excessiveBleeding',
+                            value: val,
+                          ),
+                        ),
+                      ),
+                      const Divider(),
+                      ApiDropdown<String>(
+                        labelText: t.unconscious_fits,
+                        items: const ['Yes', 'No'],
+                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                        value: _asString(m['unconsciousFits']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          MotherDetailsChanged(
+                            field: 'unconsciousFits',
+                            value: val,
+                          ),
+                        ),
+                      ),
+                      const Divider(),
+                    ],
+
+                    // Breastfeeding problems
+                    ApiDropdown<String>(
+                      labelText: t.breastfeedingProblemsLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['breastfeedingProblems']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(
+                          field: 'breastfeedingProblems',
+                          value: val,
+                        ),
+                      ),
+                    ),
+                    const Divider(),
+
+                    if (m['breastfeedingProblems'] == 'Yes') ...[
+                      CustomTextField(
+                        labelText:t.please_enter_problem ,
+                        hintText: t.enter_breastfeeding_problem,
+                        initialValue:
+                        _asString(m['breastfeedingProblemDescription']) ?? '',
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          MotherDetailsChanged(
+                            field: 'breastfeedingProblemDescription',
+                            value: val,
+                          ),
+                        ),
+                      ),
+                      const Divider(),
+                      CustomTextField(
+                        labelText: t.breastfeeding_problem_help,
+                        hintText:t.write_take_action,
+                        initialValue: _asString(m['breastfeedingHelpGiven']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          MotherDetailsChanged(
+                            field: 'breastfeedingHelpGiven',
+                            value: val,
+                          ),
+                        ),
+
+                      ),
+                      const Divider(height: 0),
+                    ],
+
+                    // Full meals count
+                    ApiDropdown<int>(
+                      labelText: "${t.mealsPerDayLabel} *",
+                      items: const [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                      getLabel: (e) => e.toString(),
+                      value: (m['mealsPerDay'] is int)
+                          ? m['mealsPerDay'] as int
+                          : int.tryParse(_asString(m['mealsPerDay']) ?? ''),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(field: 'mealsPerDay', value: val),
+                      ),
+                    ),
+                    const Divider(),
+
+                    ApiDropdown<String>(
+                      labelText: t.counselingAdviceLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['counselingAdvice']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(
+                          field: 'counselingAdvice',
+                          value: val,
+                        ),
+                      ),
+                    ),
+                    const Divider(),
+
+                    ApiDropdown<int>(
+                      labelText: t.padsPerDayLabel,
+                      items: const [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                      getLabel: (e) => e.toString(),
+                      value: (m['padsPerDay'] is int)
+                          ? m['padsPerDay'] as int
+                          : int.tryParse(_asString(m['padsPerDay']) ?? ''),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(field: 'padsPerDay', value: val),
+                      ),
+                    ),
+                    const Divider(),
+
+        ApiDropdown<String>(
+        labelText: t.mothersTemperatureLabel,
+        hintText: t.selectOption,
+        items: const [
+        'Temperature upto 102 degree F(38.9 degree C)',
+        'Temperure More that102 degree F (38.9 degree C)'
+        ],
+        getLabel: (e) => e,
+        value: _asString(m['temperature']),
+        onChanged: (val) => context.read<HbncVisitBloc>().add(
+        MotherDetailsChanged(field: 'temperature', value: val),
+        ),
+        ),
+                    const Divider(height: 0),
+
+                    // Paracetamol tablet given when temperature up to 102 F
+                    Builder(
+                      builder: (context) {
+                        final tempStr = _asString(m['temperature']) ?? '';
+                        final isUpto102 = tempStr == 'Temperature upto 102 degree F(38.9 degree C)';
+                        if (isUpto102) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ApiDropdown<String>(
+                                labelText:t.paracetamolGivenLabel,
+                                items: const ['Yes', 'No'],
+                                getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                                value: _asString(m['paracetamolGiven']),
+                                onChanged: (val) =>
+                                    context.read<HbncVisitBloc>().add(
+                                      MotherDetailsChanged(
+                                        field: 'paracetamolGiven',
+                                        value: val,
+                                      ),
+                                    ),
+                              ),
+
+                            ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+
+                    ApiDropdown<String>(
+                      labelText: t.foulDischargeHighFeverLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['foulDischargeHighFever']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(
+                          field: 'foulDischargeHighFever',
+                          value: val,
+                        ),
                       ),
                     ),
                     const Divider(height: 0),
-                  ],
+
+
+                    ApiDropdown<String>(
+                      labelText: t.abnormalSpeechOrSeizureLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['abnormalSpeechOrSeizure']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(
+                          field: 'abnormalSpeechOrSeizure',
+                          value: val,
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 0),
+
+                    // New questions (as per request) - Yes/No
+                    ApiDropdown<String>(
+                      labelText: t.milkNotProducingOrLessLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['milkNotProducingOrLess']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(
+                          field: 'milkNotProducingOrLess',
+                          value: val,
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 0),
+
+                    if (m['milkNotProducingOrLess'] == 'Yes') ...[
+                      ApiDropdown<String>(
+                        labelText: t.counselingAdviceLabel,
+                        items: const ['Yes', 'No'],
+                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                        value: _asString(m['milkCounselingAdvice']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          MotherDetailsChanged(
+                            field: 'milkCounselingAdvice',
+                            value: val,
+                          ),
+                        ),
+                      ),
+                      const Divider(height: 0),
+                    ],
+                    ApiDropdown<String>(
+                      labelText: t.nippleCracksPainOrEngorgedLabel,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['nippleCracksPainOrEngorged']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(
+                          field: 'nippleCracksPainOrEngorged',
+                          value: val,
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 0),
+
+                    // Refer to Hospital & Refer to
+                    ApiDropdown<String>(
+                      labelText: t.refer_to_hospital,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: _asString(m['referHospital']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        MotherDetailsChanged(field: 'referHospital', value: val),
+                      ),
+                    ),
+                    const Divider(height: 0),
+
+                    if (m['referHospital'] == 'Yes') ...[
+                      ApiDropdown<String>(
+                        labelText:t.referToLabel,
+                        items:  [
+                          t.visitTypePhc,
+                          t.chc,
+                          t.rh,
+                          t.sdh,
+                          t.dh,
+                          t.mch,
+                        ],
+                        getLabel: (e) => e,
+                        value: _asString(m['referTo']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          MotherDetailsChanged(field: 'referTo', value: val),
+                        ),
+                      ),
+                      const Divider(height: 0),
+                    ],
 
                   ],
                 ],

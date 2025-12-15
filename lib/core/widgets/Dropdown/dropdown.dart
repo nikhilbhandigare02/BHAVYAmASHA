@@ -22,6 +22,7 @@ class ApiDropdown<T> extends StatelessWidget {
   final double? labelFontSize;
   final String? emptyOptionText;
 
+
   String _toTitleCase(String text) {
     return text;
     /*if (text.isEmpty) return text;
@@ -80,8 +81,10 @@ class ApiDropdown<T> extends StatelessWidget {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final TextStyle inputStyle = TextStyle(
       fontSize: 15.sp,
       fontWeight: FontWeight.w500,
@@ -135,8 +138,9 @@ class ApiDropdown<T> extends StatelessWidget {
                             Text(
                               value != null
                                   ? getLabel(value!)
-                                  : (hintText ?? 'Select option'),
-                              style: inputStyle.copyWith(
+                                   : (hintText ?? l10n.selectOptionLabel),
+
+              style: inputStyle.copyWith(
                                 color: value != null
                                     ? AppColors.onSurface
                                     : AppColors.onSurfaceVariant,

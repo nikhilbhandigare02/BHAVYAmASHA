@@ -1261,6 +1261,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gridChildCare => 'शिशु देखभाल';
 
   @override
+  String get hintTemp => 'तापमान';
+
+  @override
   String get gridEligibleCouple => 'योग्य दम्पत्ति';
 
   @override
@@ -5899,10 +5902,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get breastfeeding_problem_help => 'यदि स्तनपान में कोई समस्या है, तो माँ की मदद करें ताकि वह इसे दूर कर सके *';
 
   @override
-  String get temp_upto_102 => 'तापमान 102°F (38.9°C) तक';
+  String get temp_upto_102 => '102°F (38.9°C) तक तापमान';
 
   @override
-  String get temp_more_than_102 => 'तापमान 102°F (38.9°C) से अधिक';
+  String get temp_more_than_102 => '102°F (38.9°C) से अधिक तापमान';
 
   @override
   String get paracetamolGivenLabel => 'पैरासिटामोल टैबलेट दी गई (तापमान 102°F / 38.9°C तक) *';
