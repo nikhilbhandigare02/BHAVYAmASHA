@@ -20,6 +20,7 @@ class ApiDropdown<T> extends StatelessWidget {
   final Function(List<T>)? onMultiChanged;
 
   final double? labelFontSize;
+  final String? emptyOptionText;
 
   String _toTitleCase(String text) {
     return text;
@@ -47,6 +48,7 @@ class ApiDropdown<T> extends StatelessWidget {
     this.onMultiChanged,
     this.labelFontSize,
     this.convertToTitleCase = true,
+    this.emptyOptionText,
   });
 
   Widget? get _labelWidget {
@@ -217,20 +219,37 @@ class ApiDropdown<T> extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: items.map((item) {
-                  return RadioListTile<T>(
-                    title: Text(
-                      convertToTitleCase ? _toTitleCase(getLabel(item)) : getLabel(item),
-                      style: TextStyle(fontSize: labelFontSize ?? 15.sp),
-                    ),
-                    value: item,
-                    groupValue: tempValue,
-                    onChanged: (val) => setState(() => tempValue = val),
-                    contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
-                    dense: true,
-                    visualDensity: const VisualDensity(vertical: -4),
-                  );
-                }).toList(),
+                children: items.isEmpty
+                    ? [
+                        ListTile(
+                          leading: const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                          title: Text(
+                            emptyOptionText ?? (  'No options found'),
+                            style: TextStyle(
+                              fontSize: labelFontSize ?? 15.sp,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          enabled: false,
+                          contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -4),
+                        )
+                      ]
+                    : items.map((item) {
+                        return RadioListTile<T>(
+                          title: Text(
+                            convertToTitleCase ? _toTitleCase(getLabel(item)) : getLabel(item),
+                            style: TextStyle(fontSize: labelFontSize ?? 15.sp),
+                          ),
+                          value: item,
+                          groupValue: tempValue,
+                          onChanged: (val) => setState(() => tempValue = val),
+                          contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -4),
+                        );
+                      }).toList(),
               ),
             ),
           ),

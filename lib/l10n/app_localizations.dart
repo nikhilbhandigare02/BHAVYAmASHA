@@ -470,7 +470,7 @@ abstract class AppLocalizations {
   /// No description provided for @advanceFilter.
   ///
   /// In en, this message translates to:
-  /// **'Advance Filter'**
+  /// **'Advance Filters'**
   String get advanceFilter;
 
   /// No description provided for @affiliatedToStateInsuranceLabel.
@@ -638,7 +638,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectOptions.
   ///
   /// In en, this message translates to:
-  /// **'Select Options'**
+  /// **'Select'**
   String get selectOptions;
 
   /// No description provided for @antenatal.

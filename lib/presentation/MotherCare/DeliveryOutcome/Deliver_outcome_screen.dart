@@ -82,16 +82,16 @@ class _DeliveryOutcomeScreenState
           f.forms_ref_key = '$ancRefKey'
           AND f.is_deleted = 0
           AND (f.form_json LIKE '%"gives_birth_to_baby":"Yes"%' 
-               OR mca.mother_care_state = 'delivery_outcome')
+               AND mca.mother_care_state = 'delivery_outcome') 
         ORDER BY f.created_date_time DESC
       ''');
 
       print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
-      // After line 61 in Deliver_outcome_screen.dart, add this code:
+
 
       print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
 
-// For each form, fetch and print the beneficiary details
+       // For each form, fetch and print the beneficiary details
       for (var form in ancForms) {
         final beneficiaryRefKey = form['beneficiary_ref_key'] as String?;
         if (beneficiaryRefKey == null) {

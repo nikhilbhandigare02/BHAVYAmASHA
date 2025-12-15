@@ -195,7 +195,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addressLabel => 'Address';
 
   @override
-  String get advanceFilter => 'Advance Filter';
+  String get advanceFilter => 'Advance Filters';
 
   @override
   String get affiliatedToStateInsuranceLabel => 'Affiliated to state Health Insurance Scheme';
@@ -281,7 +281,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get announcements => 'Announcement';
 
   @override
-  String get selectOptions => 'Select Options';
+  String get selectOptions => 'Select';
 
   @override
   String get antenatal => 'Next Antenatal Date:';

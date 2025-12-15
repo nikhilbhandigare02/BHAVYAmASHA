@@ -836,7 +836,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                           data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 130),
                       Expanded(
                         child: _rowText(
                           l10n?.fatherNameLabel ?? 'Father\'s Name',
