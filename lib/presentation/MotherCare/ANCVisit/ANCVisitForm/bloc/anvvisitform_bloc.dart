@@ -313,17 +313,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           }
         }
 
-        try {
 
-          await LocalStorageDao.instance
-              .updateBeneficiaryDeleteAndSyncFlagByUniqueKey(
-            uniqueKey: beneficiaryId,
-            isDeleted: 1,
-          );
-          print('✅ Beneficiary $beneficiaryId marked is_deleted=1 and is_synced=0');
-        } catch (e) {
-          print('❌ Error updating beneficiary delete/sync flags: $e');
-        }
 
         try {
           final visitData = {

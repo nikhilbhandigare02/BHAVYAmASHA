@@ -1786,28 +1786,28 @@ class LocalStorageDao {
       rethrow;
     }
   }
-  Future<int> updateBeneficiaryDeleteAndSyncFlagByUniqueKey({
-    required String uniqueKey,
-    required int isDeleted,
-  }) async {
-    try {
-      final db = await _db;
-      final changes = await db.update(
-        'beneficiaries_new',
-        {
-          'is_deleted': isDeleted,
-          'is_synced': 0,
-          'modified_date_time': DateTime.now().toIso8601String(),
-        },
-        where: 'unique_key = ?',
-        whereArgs: [uniqueKey],
-      );
-      return changes;
-    } catch (e) {
-      print('Error updating beneficiary delete/sync flags by unique_key: $e');
-      rethrow;
-    }
-  }
+  // Future<int> updateBeneficiaryDeleteAndSyncFlagByUniqueKey({
+  //   required String uniqueKey,
+  //   required int isDeleted,
+  // }) async {
+  //   try {
+  //     final db = await _db;
+  //     final changes = await db.update(
+  //       'beneficiaries_new',
+  //       {
+  //         'is_deleted': isDeleted,
+  //         'is_synced': 0,
+  //         'modified_date_time': DateTime.now().toIso8601String(),
+  //       },
+  //       where: 'unique_key = ?',
+  //       whereArgs: [uniqueKey],
+  //     );
+  //     return changes;
+  //   } catch (e) {
+  //     print('Error updating beneficiary delete/sync flags by unique_key: $e');
+  //     rethrow;
+  //   }
+  // }
 
   Future<String> getLatestHouseholdServerId() async {
     try {
