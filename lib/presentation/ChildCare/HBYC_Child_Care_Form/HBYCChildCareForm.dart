@@ -86,7 +86,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
     return Scaffold(
       appBar: AppHeader(
         screenTitle:
-        l10n?.homeBasedCareForYoungChild ??
+            l10n?.homeBasedCareForYoungChild ??
             'Home Based Care For Young Child',
         showBack: true,
       ),
@@ -109,7 +109,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
             Navigator.pushNamedAndRemoveUntil(
               context,
               Route_Names.HBYCList,
-                  (Route<dynamic> route) => false,
+              (Route<dynamic> route) => false,
             );
           }
         },
@@ -132,7 +132,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.beneficiaryAbsentLabel ??
+                                      l10n?.beneficiaryAbsentLabel ??
                                       'Is Beneficiary Absent?',
                                   items: _yesNoOptions,
                                   getLabel: (s) {
@@ -168,10 +168,10 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                       'beneficiaryAbsentReason',
                                     ),
                                     hintText:
-                                    l10n?.enterReasonForAbsence ??
+                                        l10n?.reasonForAbsence ??
                                         'Enter reason for absence',
                                     labelText:
-                                    l10n?.reasonForAbsence ??
+                                        l10n?.reasonForAbsence ??
                                         'Reason for Absent',
                                     onChanged: (value) =>
                                         context.read<HbycChildCareBloc>().add(
@@ -206,7 +206,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.hbycHomeVisit ??
+                                      l10n?.hbycHomeVisit ??
                                       'HBYC home visit? *',
                                   items: _hbycVisitMonthOptions,
                                   getLabel: (s) {
@@ -236,8 +236,8 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                       .add(HbycBhramanChanged(v ?? '')),
                                   validator: (v) => (v == null || v.isEmpty)
                                       ? AppLocalizations.of(
-                                    context,
-                                  )!.requiredField
+                                          context,
+                                        )!.requiredField
                                       : null,
                                 ),
                               ],
@@ -288,12 +288,10 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                 ),
                                 if (state.isChildSick == 'Yes')
                                   Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       ApiDropdown<String>(
-                                        labelText:
-                                        l10n?.is_referred_to_health_facility ??
+                                        labelText: l10n?.is_referred_to_health_facility ??
                                             'Child referred to health facility?',
                                         items: _yesNoOptions,
                                         getLabel: (s) {
@@ -306,18 +304,14 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                               return s;
                                           }
                                         },
-                                        value:
-                                        _yesNoOptions.contains(
-                                          _sicknessDetailsController.text,
-                                        )
-                                            ? _sicknessDetailsController.text
+                                        value: state.childReferredToHealthFacility.isNotEmpty
+                                            ? state.childReferredToHealthFacility
                                             : null,
-                                        hintText: AppLocalizations.of(
-                                          context,
-                                        )!.select,
+                                        hintText: AppLocalizations.of(context)!.select,
                                         onChanged: (v) {
-                                          _sicknessDetailsController.text =
-                                              v ?? '';
+                                          context.read<HbycChildCareBloc>().add(
+                                            ChildReferredToHealthFacilityChanged(v ?? ''),
+                                          );
                                         },
                                       ),
                                     ],
@@ -353,7 +347,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     }
                                   },
                                   value:
-                                  state.breastfeedingContinuing.isNotEmpty
+                                      state.breastfeedingContinuing.isNotEmpty
                                       ? state.breastfeedingContinuing
                                       : null,
                                   hintText: AppLocalizations.of(
@@ -382,7 +376,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.is_complementary_food_given ??
+                                      l10n?.is_complementary_food_given ??
                                       'Complementary food given?',
                                   items: _yesNoOptions,
                                   getLabel: (s) {
@@ -415,7 +409,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                   const SizedBox(height: 12),
                                   ApiDropdown<String>(
                                     labelText:
-                                    l10n?.foodAdvice_1 ??
+                                        l10n?.foodAdvice_1 ??
                                         '1. 2-3 tablespoons of food at a time, 2-3 times each day',
                                     items: _yesNoOptions,
                                     getLabel: (s) {
@@ -447,7 +441,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
 
                                   ApiDropdown<String>(
                                     labelText:
-                                    l10n?.foodAdvice_2 ??
+                                        l10n?.foodAdvice_2 ??
                                         '2. 1/2 cup/katori serving at a time, 2-3 times each day with 1-2 snacks between meals',
                                     items: _yesNoOptions,
                                     getLabel: (s) {
@@ -479,7 +473,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
 
                                   ApiDropdown<String>(
                                     labelText:
-                                    l10n?.foodAdvice_3 ??
+                                        l10n?.foodAdvice_3 ??
                                         '3. 1/2 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
                                     items: _yesNoOptions,
                                     getLabel: (s) {
@@ -511,7 +505,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
 
                                   ApiDropdown<String>(
                                     labelText:
-                                    l10n?.foodAdvice_4 ??
+                                        l10n?.foodAdvice_4 ??
                                         '4. 3/4 to 1 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
                                     items: _yesNoOptions,
                                     getLabel: (s) {
@@ -585,10 +579,9 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                   CustomTextField(
                                     key: const ValueKey('weightForAge'),
                                     hintText:
-                                    l10n?.mentionRecordedWeightForAge ??
-                                        'Mention the recorded weight-for-age as per MCP card (in kg)',
+                                        'Please enter weight (in kg)',
                                     labelText:
-                                    l10n?.mentionRecordedWeightForAge ??
+                                        l10n?.mentionRecordedWeightForAge ??
                                         'Mention the recorded weight-for-age as per MCP card (in kg)',
                                     keyboardType: TextInputType.number,
                                     onChanged: (value) => context
@@ -621,7 +614,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.recordingWeightForLengthHeight ??
+                                      l10n?.recordingWeightForLengthHeight ??
                                       'Recording of weight-for-length/height by Anganwadi Worker',
                                   items: _yesNoOptions,
                                   getLabel: (s) {
@@ -654,11 +647,9 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                   const SizedBox(height: 8),
                                   CustomTextField(
                                     key: const ValueKey('weightForLength'),
-                                    hintText:
-                                    l10n?.recorded_height ??
-                                        'Mention the recorded weight-for-length/height as per MCP card (in cm)',
+                                    hintText: 'Please enter height (in cm)',
                                     labelText:
-                                    l10n?.recorded_height ??
+                                        l10n?.recorded_height ??
                                         'Mention the recorded weight-for-length/height as per MCP card (in cm)',
                                     keyboardType: TextInputType.number,
                                     onChanged: (value) => context
@@ -668,7 +659,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                       if (state.lengthHeightRecorded == 'Yes' &&
                                           (value == null || value.isEmpty)) {
                                         return l10n
-                                            ?.enterWeightForLengthHeight ??
+                                                ?.enterWeightForLengthHeight ??
                                             'Please enter weight-for-length/height';
                                       }
                                       return null;
@@ -685,16 +676,15 @@ class _HbycFormViewState extends State<_HbycFormView> {
                           height: 0,
                         ),
 
-                        // Weight Less Than 3SD Section with conditional input
                         BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                           builder: (context, state) {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                /// <3SD Referred?
                                 ApiDropdown<String>(
-                                  labelText: AppLocalizations.of(
-                                    context,
-                                  )!.hbycWeightLessThan3sdLabel,
+                                  labelText: AppLocalizations.of(context)!
+                                      .hbycWeightLessThan3sdLabel,
                                   items: _yesNoOptions,
                                   getLabel: (s) {
                                     switch (s) {
@@ -706,46 +696,128 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                         return s;
                                     }
                                   },
-                                  value:
-                                  state.weightLessThan3sdReferred.isNotEmpty
+                                  value: state.weightLessThan3sdReferred.isNotEmpty
                                       ? state.weightLessThan3sdReferred
                                       : null,
-                                  hintText: AppLocalizations.of(
-                                    context,
-                                  )!.select,
-                                  onChanged: (v) =>
-                                      context.read<HbycChildCareBloc>().add(
-                                        WeightLessThan3sdReferredChanged(
-                                          v ?? '',
-                                        ),
-                                      ),
+                                  hintText: AppLocalizations.of(context)!.select,
+                                  onChanged: (v) => context
+                                      .read<HbycChildCareBloc>()
+                                      .add(WeightLessThan3sdReferredChanged(v ?? '')),
                                 ),
-                                if (state.weightLessThan3sdReferred == 'Yes')
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: CustomTextField(
-                                      controller: _referralDetailsController,
-                                      hintText:
-                                      l10n?.referred_place ??
-                                          'Referred place ',
-                                      labelText:
-                                      l10n?.referred_place ??
-                                          'Referred place ',
-                                      maxLines: 3,
-                                    ),
+
+                                /// Referred Place (Dropdown)
+                                if (state.weightLessThan3sdReferred == 'Yes') ...[
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
                                   ),
-                                const SizedBox(height: 8),
+                                  ApiDropdown<String>(
+                                    labelText: l10n?.referred_place ?? 'Referred Place',
+                                    items: const ['VHSND', 'PHC','NRC'],
+                                    getLabel: (s) => s,
+                                    value: state.referralDetailsChild.isNotEmpty
+                                        ? state.referralDetailsChild
+                                        : null,
+                                    hintText: l10n!.selectOption,
+                                    onChanged: (v) => context
+                                        .read<HbycChildCareBloc>()
+                                        .add(ReferralDetailsChildChanged(v ?? '')),
+                                  ),
+                                ],
                               ],
                             );
                           },
                         ),
+
                         Divider(
                           color: AppColors.divider,
                           thickness: 0.5,
                           height: 0,
                         ),
 
-                        // Development Delays Observed Section with conditional input
+                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ApiDropdown<String>(
+                              labelText: l10n?.is_developmental_delay_checked ??
+                                  'Developmental delay checked?',
+                              items: _yesNoOptions,
+                              getLabel: (s) {
+                                switch (s) {
+                                  case 'Yes':
+                                    return l10n?.yes ?? 'Yes';
+                                  case 'No':
+                                    return l10n?.no ?? 'No';
+                                  default:
+                                    return s;
+                                }
+                              },
+                              value: state.developmentDelaysObserved.isNotEmpty
+                                  ? state.developmentDelaysObserved
+                                  : null,
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context
+                                  .read<HbycChildCareBloc>()
+                                  .add(DevelopmentDelaysObservedChanged(v ?? '')),
+                            ),
+
+                            /// Divider after first dropdown
+                            if (state.developmentDelaysObserved == 'Yes')
+                              const Divider(thickness: 0.5),
+
+                            // Show "Is the child referred?" only if Developmental delay = Yes
+                            if (state.developmentDelaysObserved == 'Yes') ...[
+                              ApiDropdown<String>(
+                                labelText:
+                                l10n?.isChildReferred ?? 'Is the child referred?',
+                                items: _yesNoOptions,
+                                getLabel: (s) =>
+                                s == 'Yes' ? l10n?.yes ?? 'Yes' : l10n?.no ?? 'No',
+                                value: state.childReferred.isNotEmpty
+                                    ? state.childReferred
+                                    : null,
+                                hintText: l10n!.selectOption,
+                                onChanged: (v) => context
+                                    .read<HbycChildCareBloc>()
+                                    .add(ChildReferredChanged(v ?? '')),
+                              ),
+                            ],
+
+                            /// Divider after "Is Child Referred?"
+                            if (state.developmentDelaysObserved == 'Yes' &&
+                                state.childReferred == 'Yes')
+                              const Divider(thickness: 0.5),
+
+                            // Show "Referred Place" only if both previous are Yes
+                            if (state.developmentDelaysObserved == 'Yes' &&
+                                state.childReferred == 'Yes') ...[
+                              ApiDropdown<String>(
+                                labelText:
+                                l10n?.referred_place ?? 'Referred Place',
+                                items: const ['ANM', 'Health Facility'],
+                                getLabel: (s) => s,
+                                value: state.referralDetails.isNotEmpty
+                                    ? state.referralDetails
+                                    : null,
+                                hintText: l10n!.selectOption,
+                                onChanged: (v) => context
+                                    .read<HbycChildCareBloc>()
+                                    .add(ReferralDetailsChanged(v ?? '')),
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
                         BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                           builder: (context, state) {
                             return Column(
@@ -753,67 +825,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.is_developmental_delay_checked ??
-                                      'Developmental delay checked?',
-                                  items: _yesNoOptions,
-                                  getLabel: (s) {
-                                    switch (s) {
-                                      case 'Yes':
-                                        return l10n?.yes ?? 'Yes';
-                                      case 'No':
-                                        return l10n?.no ?? 'No';
-                                      default:
-                                        return s;
-                                    }
-                                  },
-                                  value:
-                                  state.developmentDelaysObserved.isNotEmpty
-                                      ? state.developmentDelaysObserved
-                                      : null,
-                                  hintText: AppLocalizations.of(
-                                    context,
-                                  )!.select,
-                                  onChanged: (v) =>
-                                      context.read<HbycChildCareBloc>().add(
-                                        DevelopmentDelaysObservedChanged(
-                                          v ?? '',
-                                        ),
-                                      ),
-                                ),
-                                if (state.developmentDelaysObserved == 'Yes')
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: CustomTextField(
-                                      controller:
-                                      _developmentDelaysDetailsController,
-                                      hintText:
-                                      l10n?.isChildReferred ??
-                                          'is the child referred?',
-                                      labelText:
-                                      l10n?.isChildReferred ??
-                                          'is the child referred?',
-                                      maxLines: 3,
-                                    ),
-                                  ),
-                                const SizedBox(height: 8),
-                              ],
-                            );
-                          },
-                        ),
-                        Divider(
-                          color: AppColors.divider,
-                          thickness: 0.5,
-                          height: 0,
-                        ),
-
-                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                          builder: (context, state) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ApiDropdown<String>(
-                                  labelText:
-                                  l10n?.immunizationStatusChecked ??
+                                      l10n?.immunizationStatusChecked ??
                                       'Immunization status checked as per MCP card?',
                                   items: _yesNoOptions,
                                   getLabel: (s) {
@@ -827,7 +839,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     }
                                   },
                                   value:
-                                  state.fullyVaccinatedAsPerMcp.isNotEmpty
+                                      state.fullyVaccinatedAsPerMcp.isNotEmpty
                                       ? state.fullyVaccinatedAsPerMcp
                                       : null,
                                   hintText: AppLocalizations.of(
@@ -1016,10 +1028,10 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     CustomTextField(
                                       key: const ValueKey('orsCount'),
                                       hintText:
-                                      l10n?.orsCount ??
+                                          l10n?.orsCount ??
                                           'Number of ORS given',
                                       labelText:
-                                      l10n?.orsCount ??
+                                          l10n?.orsCount ??
                                           'Number of ORS given',
                                       keyboardType: TextInputType.number,
                                       onChanged: (value) => context
@@ -1067,7 +1079,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     }
                                   },
                                   value:
-                                  state.ironFolicSyrupAvailable.isNotEmpty
+                                      state.ironFolicSyrupAvailable.isNotEmpty
                                       ? state.ironFolicSyrupAvailable
                                       : null,
                                   hintText: AppLocalizations.of(
@@ -1095,12 +1107,12 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                 ),
 
                                 // Show these fields when syrup IS available (Yes)
-                                if (state.ironFolicSyrupAvailable == 'Yes') ...[
+                                if (state.ironFolicSyrupAvailable == 'No') ...[
                                   const SizedBox(height: 8),
 
                                   ApiDropdown<String>(
                                     labelText:
-                                    l10n?.ifaSyrupGiven ??
+                                        l10n?.ifaSyrupGiven ??
                                         'Iron Folic Acid syrup Given?',
                                     items: _yesNoOptions,
                                     getLabel: (s) {
@@ -1142,10 +1154,10 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     CustomTextField(
                                       key: const ValueKey('ifaSyrupCount'),
                                       hintText:
-                                      l10n?.ifaSyrupCount ??
+                                          l10n?.ifaSyrupCount ??
                                           'Number of Iron Folic Acid syrup given',
                                       labelText:
-                                      l10n?.ifaSyrupCount ??
+                                          l10n?.ifaSyrupCount ??
                                           'Number of Iron Folic Acid syrup given',
                                       keyboardType: TextInputType.number,
                                       onChanged: (value) => context
@@ -1155,7 +1167,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                         if (state.ifaSyrupGiven == 'Yes' &&
                                             (value == null || value.isEmpty)) {
                                           return l10n
-                                              ?.ifaSyrupCountValidation ??
+                                                  ?.ifaSyrupCountValidation ??
                                               'Please enter number of Iron Folic Acid syrup given';
                                         }
                                         return null;
@@ -1180,7 +1192,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.counselExclusiveBreastfeeding ??
+                                      l10n?.counselExclusiveBreastfeeding ??
                                       'Counsel for exclusive breastfeeding?',
                                   items: _yesNoOptions,
                                   getLabel: (s) {
@@ -1194,7 +1206,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     }
                                   },
                                   value:
-                                  state.counselingExclusiveBf6m.isNotEmpty
+                                      state.counselingExclusiveBf6m.isNotEmpty
                                       ? state.counselingExclusiveBf6m
                                       : null,
                                   hintText: AppLocalizations.of(
@@ -1222,7 +1234,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.is_counsel_for_complementary_feeding ??
+                                      l10n?.is_counsel_for_complementary_feeding ??
                                       'Counsel for complementary feeding?',
                                   items: _yesNoOptions,
                                   getLabel: (s) {
@@ -1236,7 +1248,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     }
                                   },
                                   value:
-                                  state.adviceComplementaryFoods.isNotEmpty
+                                      state.adviceComplementaryFoods.isNotEmpty
                                       ? state.adviceComplementaryFoods
                                       : null,
                                   hintText: AppLocalizations.of(
@@ -1266,7 +1278,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.is_counsel_for_hand_washing ??
+                                      l10n?.is_counsel_for_hand_washing ??
                                       'Counsel for hand washing?',
                                   items: _yesNoOptions,
                                   getLabel: (s) {
@@ -1280,7 +1292,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     }
                                   },
                                   value:
-                                  state.adviceHandWashingHygiene.isNotEmpty
+                                      state.adviceHandWashingHygiene.isNotEmpty
                                       ? state.adviceHandWashingHygiene
                                       : null,
                                   hintText: AppLocalizations.of(
@@ -1310,7 +1322,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.is_counsel_for_parenting ??
+                                      l10n?.is_counsel_for_parenting ??
                                       'Counsel for parenting?',
                                   items: _yesNoOptions,
                                   getLabel: (s) {
@@ -1351,7 +1363,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                               children: [
                                 ApiDropdown<String>(
                                   labelText:
-                                  l10n?.familyPlanningCounselling ??
+                                      l10n?.familyPlanningCounselling ??
                                       'family planning Counselling?',
                                   items: _yesNoOptions,
                                   getLabel: (s) {
@@ -1365,7 +1377,7 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     }
                                   },
                                   value:
-                                  state.counselingFamilyPlanning.isNotEmpty
+                                      state.counselingFamilyPlanning.isNotEmpty
                                       ? state.counselingFamilyPlanning
                                       : null,
                                   hintText: AppLocalizations.of(
@@ -1409,9 +1421,9 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                     }
                                   },
                                   value:
-                                  state
-                                      .advicePreparingAdministeringOrs
-                                      .isNotEmpty
+                                      state
+                                          .advicePreparingAdministeringOrs
+                                          .isNotEmpty
                                       ? state.advicePreparingAdministeringOrs
                                       : null,
                                   hintText: AppLocalizations.of(
@@ -1434,25 +1446,31 @@ class _HbycFormViewState extends State<_HbycFormView> {
                           height: 0,
                         ),
 
-                        ApiDropdown<String>(
-                          labelText: AppLocalizations.of(
-                            context,
-                          )!.hbycAdviceAdministeringIfaSyrupLabel,
-                          items: _yesNoOptions,
-                          getLabel: (s) {
-                            switch (s) {
-                              case 'Yes':
-                                return l10n?.yes ?? 'Yes';
-                              case 'No':
-                                return l10n?.no ?? 'No';
-                              default:
-                                return s;
-                            }
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!
+                                  .hbycAdviceAdministeringIfaSyrupLabel,
+                              items: _yesNoOptions,
+                              getLabel: (s) {
+                                switch (s) {
+                                  case 'Yes':
+                                    return l10n?.yes ?? 'Yes';
+                                  case 'No':
+                                    return l10n?.no ?? 'No';
+                                  default:
+                                    return s;
+                                }
+                              },
+                              value: state.adviceAdministeringIfaSyrup.isNotEmpty
+                                  ? state.adviceAdministeringIfaSyrup
+                                  : null, // ⭐ THIS FIXES IT
+                              hintText: AppLocalizations.of(context)!.select,
+                              onChanged: (v) => context
+                                  .read<HbycChildCareBloc>()
+                                  .add(AdviceAdministeringIfaSyrupChanged(v ?? '')),
+                            );
                           },
-                          hintText: AppLocalizations.of(context)!.select,
-                          onChanged: (v) => context
-                              .read<HbycChildCareBloc>()
-                              .add(AdviceAdministeringIfaSyrupChanged(v ?? '')),
                         ),
                         Divider(
                           color: AppColors.divider,
@@ -1543,19 +1561,19 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                       beneficiaryRefKey: widget.beneficiaryId,
                                       householdRefKey: widget.hhid,
                                       sicknessDetails:
-                                      state.isChildSick == 'Yes'
+                                          state.isChildSick == 'Yes'
                                           ? _sicknessDetailsController.text
                                           : null,
                                       referralDetails:
-                                      state.weightLessThan3sdReferred ==
-                                          'Yes'
+                                          state.weightLessThan3sdReferred ==
+                                              'Yes'
                                           ? _referralDetailsController.text
                                           : null,
                                       developmentDelaysDetails:
-                                      state.developmentDelaysObserved ==
-                                          'Yes'
+                                          state.developmentDelaysObserved ==
+                                              'Yes'
                                           ? _developmentDelaysDetailsController
-                                          .text
+                                                .text
                                           : null,
                                     ),
                                   );

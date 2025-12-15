@@ -5815,7 +5815,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dhLabel => 'DH';
 
   @override
-  String get babyWeightRecordedInMPC => 'Is the weight of the newborn baby recorded in the Mother Protection Card?';
+  String get babyWeightRecordedInMPC => 'Is the weight of the newborn baby recorded in the Mother Protection Card? *';
 
   @override
   String get referToHospital => 'Refer to hospital?';
@@ -6388,16 +6388,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get is_complementary_food_given => 'Complementary food given?';
 
   @override
-  String get foodAdvice_1 => '1. 2–3 tablespoons of food at a time, 2–3 times each day';
+  String get foodAdvice_1 => '2–3 tablespoons of food at a time, 2–3 times each day';
 
   @override
-  String get foodAdvice_2 => '2. 1/2 cup/katori serving at a time, 2–3 times each day with 1–2 snacks between meals';
+  String get foodAdvice_2 => '1/2 cup/katori serving at a time, 2–3 times each day with 1–2 snacks between meals';
 
   @override
-  String get foodAdvice_3 => '3. 1/2 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals';
+  String get foodAdvice_3 => '1/2 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals';
 
   @override
-  String get foodAdvice_4 => '4. 3/4 to 1 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals';
+  String get foodAdvice_4 => '3/4 to 1 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals';
 
   @override
   String get mentionRecordedWeightForAge => 'Mention the recorded weight-for-age as per MCP card (in kg)';

@@ -74,8 +74,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     });
     on<EddDateChanged>((e, emit) => emit(state.copyWith(eddDate: e.value)));
     on<WeeksOfPregnancyChanged>((e, emit) => emit(state.copyWith(weeksOfPregnancy: e.value)));
-    on<GravidaDecremented>((e, emit) => emit(state.copyWith(gravida: (state.gravida > 0 ? state.gravida - 1 : 0))));
-    on<GravidaIncremented>((e, emit) => emit(state.copyWith(gravida: state.gravida + 1)));
+    on<GravidaDecremented>((e, emit) => emit(state.copyWith(gravida: state.gravida > 1 ? state.gravida - 1 : 1)));
+    on<GravidaIncremented>((e, emit) => emit(state.copyWith(gravida: state.gravida < 15 ? state.gravida + 1 : 15)));
     on<IsBreastFeedingChanged>((e, emit) => emit(state.copyWith(isBreastFeeding: e.value)));
     on<Td1DateChanged>((e, emit) => emit(state.copyWith(td1Date: e.value)));
     on<Td2DateChanged>((e, emit) => emit(state.copyWith(td2Date: e.value)));

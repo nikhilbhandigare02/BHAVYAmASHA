@@ -866,12 +866,14 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.houseNumberLabel ?? 'House number',
                               hintText: l10n?.houseNumberLabel ?? 'House number',
                               initialValue: state.houseNumber,
+                              readOnly: true,
                               onChanged: (v) => bloc.add(HouseNumberChanged(v)),
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             CustomTextField(
                               labelText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
                               hintText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
+                              readOnly: true,
                               key: ValueKey('woman_name_${state.womanName}'),
                               initialValue: state.womanName,
                               onChanged: (v) => bloc.add(WomanNameChanged(v)),
@@ -879,6 +881,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             CustomTextField(
                               labelText: l10n?.husbandNameLabel ?? "Husband's name",
+                              readOnly: true,
                               hintText: l10n?.husbandNameLabel ?? "Husband's name",
                               key: ValueKey('husband_name_${state.husbandName}'),
                               initialValue: state.husbandName,
@@ -887,6 +890,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             CustomTextField(
                               labelText: l10n?.rchNumberLabel ?? 'RCH number',
+                              readOnly: true,
                               hintText: l10n?.rchNumberLabel ?? 'RCH number',
                               initialValue: state.rchNumber,
                               onChanged: (v) => bloc.add(RchNumberChanged(v)),
@@ -936,6 +940,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
+                              readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                             ),
@@ -966,7 +971,11 @@ class _AncvisitformState extends State<Ancvisitform> {
                                       child: Text('${state.gravida > 0 ? state.gravida : 1}'),
                                     ),
                                     const SizedBox(width: 6),
-                                    _qtyButton(icon: Icons.add, onTap: () => bloc.add(const GravidaIncremented()), enabled: true),
+                                    _qtyButton(
+                                      icon: Icons.add,
+                                      onTap: state.gravida < 15 ? () => bloc.add(const GravidaIncremented()) : null,
+                                      enabled: state.gravida < 15,
+                                    ),
                                   ],
                                 ),
                               ],
@@ -1002,7 +1011,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
                               hintText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
                               initialDate: state.tdBoosterDate,
-                              readOnly: true,
+                              readOnly: state.gravida < 2,
                               onDateChanged: (d) => bloc.add(TdBoosterDateChanged(d)),
                             ),
 
@@ -1155,6 +1164,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   'Pregnant With Twins Or More',
                                   'Mal Presentation of baby(Breech/Transverse/Oblique)',
                                   'Previous Cesarean Delivery',
+                                  'Placenta Previa',
                                   'Previous History of Neo-Natal Death, Still Birth, Premature Birth, Repeated Abortion,PIH,PPH,APH,Obstructed Labour',
                                   'RH Negative'
                                 ].map((risk) => MultiSelectItem<String>(
@@ -1162,15 +1172,15 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   value: risk,
                                 )).toList(),
                                 selectedValues: state.selectedRisks,
-                                labelText: 'Select Risks',
-                                hintText: 'Select Risks',
+                                labelText: 'Select risks',
+                                hintText: 'Select risks',
                                 onSelectionChanged: (values) {
                                   bloc.add(SelectedRisksChanged(List<String>.from(values)));
                                 },
                               ),
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               if (!(int.tryParse(state.weeksOfPregnancy) != null && int.parse(state.weeksOfPregnancy) > 30)) ...[
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 8),
                                 ApiDropdown<String>(
                                   labelText: 'Any complication leading to abortion?',
                                   items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
@@ -1437,22 +1447,20 @@ class _AncvisitformState extends State<Ancvisitform> {
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             if (state.beneficiaryAbsent == (l10n?.yes ?? 'Yes'))
-                              Column(
-                                children: [
-                                  const SizedBox(height: 8),
+
                                   CustomTextField(
                                     labelText: 'Reason for Absence',
                                     hintText: 'Enter the reason for absence',
                                     initialValue: state.absenceReason,
                                     onChanged: (v) => bloc.add(AbsenceReasonChanged(v)),
                                     validator: null, // Made non-mandatory as requested
-                                    maxLines: 3,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                                ],
 
-                              ),
+                                  ),
+
+                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
+
+
                           ],
                         ),
                       ),

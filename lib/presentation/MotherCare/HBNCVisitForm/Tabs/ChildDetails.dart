@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
@@ -10,6 +11,8 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'dart:convert';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
+
+import '../../../../core/config/themes/CustomColors.dart';
 
 class ChildDetailsTab extends StatefulWidget {
   final String beneficiaryId;
@@ -388,7 +391,6 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ),
                   const Divider(height: 0,),
 
-                  // New Question 1: Wiped with clean cloth
                   ApiDropdown<String>(
                     labelText:t.babyWipedWithCleanCloth,
                     items: const ['Yes', 'No'],
@@ -400,7 +402,6 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ),
                   const Divider(height: 0,),
 
-                  // New Question 2: Kept warm
                   ApiDropdown<String>(
                     labelText: t.is_child_kept_warm,
                     items: const ['Yes', 'No'],
@@ -623,7 +624,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     const SizedBox(height: 8),
                     ApiDropdown<String>(
                       labelText:t.referredByASHA,
-                      items:  [t.hsc,t.aphc,t.phc,t.chc,t.rh,t.sdh,t.dh],
+                      items:  [t.hsc,t.aphc,t.phc,t.chc,t.rhLabel,t.sdh,t.dhLabel],
                       getLabel: (e) => e,
                       value: s(c['referredByASHAFacility']),
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -669,7 +670,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ),
                   const Divider(height: 0,),
 
-
+                  if (c['birthDoseVaccination'] == 'Yes') ...[ 
+                    VaccineTable(),
+                    Divider(height: 0,),
+                    SizedBox(height: 5,)
+                  ],
                   ApiDropdown<String>(
                     labelText: t.mcpCardAvailableLabel,
                     items: const ['Yes', 'No'],
@@ -732,7 +737,152 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
           ],
         );
       },
+
+    );
+
+  }
+}
+
+class VaccineTable extends StatefulWidget {
+  const VaccineTable({super.key});
+
+  @override
+  State<VaccineTable> createState() => _VaccineTableState();
+}
+
+class _VaccineTableState extends State<VaccineTable> {
+  final vaccines = ['BCG', 'OPV-0', 'Hepatitis-B', 'Vit-K'];
+  final Map<String, bool> _checked = {};
+
+  @override
+  void initState() {
+    super.initState();
+    for (var v in vaccines) {
+      _checked[v] = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Table(
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      columnWidths: const {
+        0: FlexColumnWidth(2),
+        1: FlexColumnWidth(2),
+        2: FlexColumnWidth(2),
+        3: FlexColumnWidth(1.5),
+      },
+      children: [
+        /// Header
+        const TableRow(
+          children: [
+            _HeaderCell('Type of Vaccine'),
+            _HeaderCell('Date'),
+            _HeaderCell('Age'),
+            _HeaderCell('Dose Given'),
+          ],
+        ),
+
+        /// Rows
+        ...vaccines.map(
+              (vaccine) => TableRow(
+            children: [
+              _TextCell(vaccine),
+
+              const _TextCell(
+                'dd-mm-yyyy',
+                color: Colors.grey,
+              ),
+
+              /// Age
+              Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  height: 28, // 👈 reduced
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(4),
+                    ],
+                    style: const TextStyle(fontSize: 12),
+                    decoration: const InputDecoration(
+                      hintText: 'Days',
+                      hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+              ),
+
+              /// Checkbox
+              Center(
+                child: Checkbox(
+                  value: _checked[vaccine],
+                  activeColor: AppColors.primary,
+                  visualDensity: VisualDensity.compact, // 👈 reduces space
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      _checked[vaccine] = val ?? false;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
+
+/// ---------- Cells ----------
+
+class _HeaderCell extends StatelessWidget {
+  final String text;
+  const _HeaderCell(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(4), // 👈 reduced
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        ),
+      ),
+    );
+  }
+}
+
+class _TextCell extends StatelessWidget {
+  final String text;
+  final Color? color;
+
+  const _TextCell(this.text, {this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(4), // 👈 reduced
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: color),
+        ),
+      ),
+    );
+  }
+}
+
 

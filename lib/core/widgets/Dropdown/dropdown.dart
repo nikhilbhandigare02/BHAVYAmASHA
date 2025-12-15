@@ -207,9 +207,9 @@ class ApiDropdown<T> extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  (labelText ?? 'Select Option').replaceAll(' *', ''),
+                  (labelText ?? 'Select Option').replaceAll('', ''),
                   style: TextStyle(
-                    fontSize: labelFontSize ?? 15.sp, // ✅ applied here too
+                    fontSize: labelFontSize ?? 15.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.onSurfaceVariant,
                   ),

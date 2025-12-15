@@ -22,7 +22,37 @@ class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
     on<WeighedByAwwChanged>((event, emit) => emit(state.copyWith(weighedByAww: event.value)));
     on<LengthHeightRecordedChanged>((event, emit) => emit(state.copyWith(lengthHeightRecorded: event.value)));
     on<WeightLessThan3sdReferredChanged>((event, emit) => emit(state.copyWith(weightLessThan3sdReferred: event.value)));
-    on<DevelopmentDelaysObservedChanged>((event, emit) => emit(state.copyWith(developmentDelaysObserved: event.value)));
+    on<DevelopmentDelaysObservedChanged>((event, emit) {
+      emit(
+        state.copyWith(
+          developmentDelaysObserved: event.value,
+          childReferred: '',
+          referralDetails: '',
+        ),
+      );
+    });
+    on<ChildReferredChanged>((event, emit) {
+      emit(
+        state.copyWith(
+          childReferred: event.value,
+
+          // Reset referral place if No
+          referralDetails: event.value == 'Yes' ? state.referralDetails : '',
+        ),
+      );
+    });
+
+    on<ReferralDetailsChanged>((event, emit) {
+      emit(state.copyWith(referralDetails: event.value));
+    });
+    on<ReferralDetailsChildChanged>(
+          (event, emit) =>
+          emit(state.copyWith(referralDetailsChild: event.value)),
+    );
+    on<ChildReferredToHealthFacilityChanged>((event, emit) {
+      emit(state.copyWith(childReferredToHealthFacility: event.value));
+    });
+
     on<FullyVaccinatedAsPerMcpChanged>((event, emit) => emit(state.copyWith(fullyVaccinatedAsPerMcp: event.value)));
     on<MeaslesVaccineGivenChanged>((event, emit) => emit(state.copyWith(measlesVaccineGiven: event.value)));
     on<VitaminADosageGivenChanged>((event, emit) => emit(state.copyWith(vitaminADosageGiven: event.value)));
@@ -101,6 +131,10 @@ class HbycChildCareBloc extends Bloc<HbycChildCareEvent, HbycChildCareState> {
             if (state.ironFolicSyrupAvailable == 'No') 'ifa_syrup_given': state.ifaSyrupGiven,
             if (state.ironFolicSyrupAvailable == 'No' && state.ifaSyrupGiven == 'Yes') 'ifa_syrup_count': state.ifaSyrupCount,
             'breastfeeding_continuing': state.breastfeedingContinuing,
+            'is_referred_to_health_facility':state.childReferredToHealthFacility,
+            'referred_place':state.referralDetails,
+            'is_Child_Referred':state.childReferred,
+            'referred_place_child':state.referralDetailsChild,
             'complete_diet_provided': state.completeDietProvided,
             'food_frequency_1': state.foodFrequency1,
             'food_frequency_2': state.foodFrequency2,

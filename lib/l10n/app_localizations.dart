@@ -11678,7 +11678,7 @@ abstract class AppLocalizations {
   /// No description provided for @babyWeightRecordedInMPC.
   ///
   /// In en, this message translates to:
-  /// **'Is the weight of the newborn baby recorded in the Mother Protection Card?'**
+  /// **'Is the weight of the newborn baby recorded in the Mother Protection Card? *'**
   String get babyWeightRecordedInMPC;
 
   /// No description provided for @referToHospital.
@@ -12824,25 +12824,25 @@ abstract class AppLocalizations {
   /// No description provided for @foodAdvice_1.
   ///
   /// In en, this message translates to:
-  /// **'1. 2–3 tablespoons of food at a time, 2–3 times each day'**
+  /// **'2–3 tablespoons of food at a time, 2–3 times each day'**
   String get foodAdvice_1;
 
   /// No description provided for @foodAdvice_2.
   ///
   /// In en, this message translates to:
-  /// **'2. 1/2 cup/katori serving at a time, 2–3 times each day with 1–2 snacks between meals'**
+  /// **'1/2 cup/katori serving at a time, 2–3 times each day with 1–2 snacks between meals'**
   String get foodAdvice_2;
 
   /// No description provided for @foodAdvice_3.
   ///
   /// In en, this message translates to:
-  /// **'3. 1/2 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals'**
+  /// **'1/2 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals'**
   String get foodAdvice_3;
 
   /// No description provided for @foodAdvice_4.
   ///
   /// In en, this message translates to:
-  /// **'4. 3/4 to 1 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals'**
+  /// **'3/4 to 1 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals'**
   String get foodAdvice_4;
 
   /// No description provided for @mentionRecordedWeightForAge.
