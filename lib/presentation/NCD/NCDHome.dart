@@ -196,13 +196,15 @@ class _FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
-
+    final double cardHeight = MediaQuery.of(context).orientation == Orientation.portrait
+        ? 15.h
+        : 22.h;
     return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(10),
       child: SizedBox(
         width: width,
-        height: 14.h,
+        height: cardHeight,
         child: Card(
           elevation: 2,
           color: Colors.white,
