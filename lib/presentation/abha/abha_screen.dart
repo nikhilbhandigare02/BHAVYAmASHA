@@ -4992,14 +4992,4 @@ class ABHAID {
 
   ABHAID(this.abhaId, this.selectedAbha);
 }
-/*
 
-showBeautifulDialog(
-context,
-title: "Linked",
-message: "This is a non-KYC ABHA address. Please link your ABHA address to your ABHA number to enable the download.",
-onOk: () {
-// optional: navigate or refresh
-print("User tapped OK");
-},
-);*/
