@@ -148,15 +148,12 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
-    // 🔹 3 cards per row (with spacing)
-    final double totalHorizontalPadding = 12 * 2; // outer padding
-    final double spacingBetweenCards = 12 * 2; // 2 gaps of 12px between 3 cards
-    final double cardWidth =
-        (MediaQuery.of(context).size.width -
-            totalHorizontalPadding -
-            spacingBetweenCards) /
-            2.9;
+    final double totalHorizontalPadding = 12 * 2; // left + right padding = 24
+    final double spacingBetweenCards = 4 * 2;     // two gaps of 4px between 3 cards = 8
+    final double cardWidth = (MediaQuery.of(context).size.width -
+        totalHorizontalPadding -
+        spacingBetweenCards) /
+        3;  // exactly 3 cards per row
 
     return FutureBuilder<Map<String, int>>(
       future: _countsFuture,
@@ -287,13 +284,15 @@ class _FeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
     final scaleFactor = MediaQuery.of(context).textScaleFactor;
-
+    final double cardHeight = MediaQuery.of(context).orientation == Orientation.portrait
+        ? 15.h
+        : 25.h;
     return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(12),
       child: SizedBox(
         width: width,
-        height: 15.h, // ✅ Fixed responsive height
+        height: cardHeight,
         child: Card(
           color: AppColors.background,
           elevation: 2,

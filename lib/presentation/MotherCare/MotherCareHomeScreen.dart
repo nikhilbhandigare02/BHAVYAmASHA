@@ -465,7 +465,9 @@ class _FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
-    final double cardHeight = 15.h;
+    final double cardHeight = MediaQuery.of(context).orientation == Orientation.portrait
+        ? 15.h
+        : 25.h;
     final scaleFactor = MediaQuery.of(context).textScaleFactor;
     return InkWell(
       onTap: onClick,
