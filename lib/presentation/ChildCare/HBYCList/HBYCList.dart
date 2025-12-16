@@ -316,12 +316,10 @@ class _HBYCListState extends State<HBYCList> {
           final beneficiaryId = row['unique_key']?.toString() ?? '';
           if (beneficiaryId.isEmpty) continue;
 
-          // Skip if case is closed for this beneficiary
           if (await _isCaseClosed(beneficiaryId)) {
             continue;
           }
 
-          // Get name from multiple possible fields
           final name = _getValueFromMap(info, [
             'name',
             'child_name',
@@ -336,7 +334,6 @@ class _HBYCListState extends State<HBYCList> {
             'sex'
           ]);
 
-          // Get RCH ID from multiple possible fields
           final rchId = _getValueFromMap(info, [
             'rch_id',
             'rchId',
@@ -387,7 +384,6 @@ class _HBYCListState extends State<HBYCList> {
     }
   }
 
-// Helper method to get value from map with multiple possible keys
   String _getValueFromMap(Map<String, dynamic> map, List<String> keys) {
     for (final key in keys) {
       final value = map[key];

@@ -80,7 +80,14 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<Td1DateChanged>((e, emit) => emit(state.copyWith(td1Date: e.value)));
     on<Td2DateChanged>((e, emit) => emit(state.copyWith(td2Date: e.value)));
     on<TdBoosterDateChanged>((e, emit) => emit(state.copyWith(tdBoosterDate: e.value)));
-    on<FolicAcidTabletsChanged>((e, emit) => emit(state.copyWith(folicAcidTablets: e.value)));
+    on<FolicAcidTabletsChanged>((event, emit) {
+      emit(state.copyWith(folicAcidTablets: event.value));
+    });
+
+    on<CalciumVitaminD3TabletsChanged>((event, emit) {
+      emit(state.copyWith(calciumVitaminD3Tablets: event.value));
+    });
+
     on<PreExistingDiseasesChanged>((e, emit) => emit(state.copyWith(selectedDiseases: e.selectedDiseases)));
     on<OtherDiseaseChanged>((e, emit) => emit(state.copyWith(otherDisease: e.value)));
     on<WeightChanged>((e, emit) => emit(state.copyWith(weight: e.value)));
