@@ -19,6 +19,7 @@ class AnvvisitformState extends Equatable {
   final DateTime? td2Date;
   final DateTime? tdBoosterDate;
   final String folicAcidTablets;
+  final String calciumVitaminD3Tablets;
   final List<String> selectedDiseases;
   final String otherDisease;
   final String weight;
@@ -70,6 +71,7 @@ class AnvvisitformState extends Equatable {
     this.td2Date,
     this.tdBoosterDate,
     this.folicAcidTablets = '',
+    this.calciumVitaminD3Tablets = '',
     this.selectedDiseases = const [],
     this.otherDisease = '',
     this.weight = '',
@@ -121,6 +123,7 @@ class AnvvisitformState extends Equatable {
     DateTime? td2Date,
     DateTime? tdBoosterDate,
     String? folicAcidTablets,
+    String? calciumVitaminD3Tablets,
     List<String>? selectedDiseases,
     String? otherDisease,
     String? weight,
@@ -172,6 +175,7 @@ class AnvvisitformState extends Equatable {
       td2Date: td2Date ?? this.td2Date,
       tdBoosterDate: tdBoosterDate ?? this.tdBoosterDate,
       folicAcidTablets: folicAcidTablets ?? this.folicAcidTablets,
+      calciumVitaminD3Tablets: calciumVitaminD3Tablets ?? this.calciumVitaminD3Tablets,
       selectedDiseases: selectedDiseases ?? this.selectedDiseases,
       otherDisease: otherDisease ?? this.otherDisease,
       weight: weight ?? this.weight,
@@ -224,6 +228,7 @@ class AnvvisitformState extends Equatable {
         td2Date,
         tdBoosterDate,
         folicAcidTablets,
+        calciumVitaminD3Tablets,
         selectedDiseases,
         otherDisease,
         weight,

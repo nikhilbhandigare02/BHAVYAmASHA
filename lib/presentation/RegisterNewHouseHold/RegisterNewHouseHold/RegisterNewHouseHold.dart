@@ -274,8 +274,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   child: TabBar(
                     controller: _tabController,
                     isScrollable: true,
-                    tabAlignment: TabAlignment.start, // 👈 ensures tabs start flush left
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 16), // spacing between tabs
+                    tabAlignment: TabAlignment.start,
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 16),
                     indicatorColor: AppColors.onPrimary,
                     labelColor: AppColors.onPrimary,
                     unselectedLabelColor: AppColors.onPrimary,

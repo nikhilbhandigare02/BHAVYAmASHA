@@ -15,6 +15,7 @@ import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/Database/tables/followup_form_data_table.dart';
 import 'bloc/anvvisitform_bloc.dart';
+
 import 'package:medixcel_new/core/widgets/MultiSelect/MultiSelect.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
@@ -1024,6 +1025,18 @@ class _AncvisitformState extends State<Ancvisitform> {
                               onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
                               validator: validateTabletCount,
                             ),
+
+                            if (int.tryParse(state.weeksOfPregnancy) != null && int.parse(state.weeksOfPregnancy) > 30) ...[
+                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              CustomTextField(
+                                labelText: 'Number of Calcium and Vitamin D3 tablets given',
+                                hintText: 'Enter number of Calcium and Vitamin D3 tablets',
+                                initialValue: state.calciumVitaminD3Tablets,
+                                keyboardType: TextInputType.number,
+                                onChanged: (v) => bloc.add(CalciumVitaminD3TabletsChanged(v)),
+                                validator: validateTabletCount,
+                              ),
+                            ],
 
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                             MultiSelect<String>(

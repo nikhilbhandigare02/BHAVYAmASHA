@@ -347,6 +347,32 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
 
               await SecureStorageService.saveDeliveryOutcome(outcomeData);
 
+              try {
+                final fpVal = state.fpMethod?.toString() ?? '';
+                final low = fpVal.toLowerCase().trim();
+                if (low == 'male sterilization' || low == 'female sterilization') {
+                  final bKey = beneficiaryId.length >= 11
+                      ? beneficiaryId.substring(beneficiaryId.length - 11)
+                      : beneficiaryId;
+                  if (bKey.isNotEmpty) {
+                    final beneficiary = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(bKey);
+                    if (beneficiary != null) {
+                      final info = Map<String, dynamic>.from(
+                          (beneficiary['beneficiary_info'] is Map)
+                              ? beneficiary['beneficiary_info'] as Map
+                              : <String, dynamic>{});
+                      info['fpMethod'] = fpVal;
+                      await LocalStorageDao.instance.updateBeneficiary({
+                        'id': beneficiary['id'],
+                        'beneficiary_info': info,
+                      });
+                    }
+                  }
+                }
+              } catch (e) {
+                print('Error updating fpMethod in beneficiary_info: $e');
+              }
+
               // Update submission status
               emit(state.copyWith(
                 submitting: false,

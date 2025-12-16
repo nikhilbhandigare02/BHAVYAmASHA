@@ -2274,6 +2274,23 @@
   "register1": "Register 1",
   "register2": "Register 2",
   "register3": "Register 3",
-  "setting_update_msg": "Your Bhavya m-ASHA application is up to date."
-
+  "setting_update_msg": "Your Bhavya m-ASHA application is up to date.",
+  "aasha": "ASHA",
+  "help_title": "Help",
+  "ashaModule1": "ASHA module 1",
+  "ashaModule2": "ASHA module 2",
+  "ashaModule3": "ASHA module 3",
+  "ashaModule4": "ASHA module 4",
+  "ashaModule567": "ASHA module 5,6 & 7",
+  "ncdLabel": "NCD",
+  "hbnc": "HBNC",
+  "hbyc": "HBYC",
+  "ashaFacilitatorTraining": "ASHA Facilitator training",
+  "inductionTraining": "Induction Training",
+  "maa": "MAA (Mothers Absolute Affection)",
+  "idcf": "IDCF (Integrated Diarrhoea Control Fortnight)",
+  "otherTraining": "Other Training",
+  "receiving": "Receiving",
+  "providing": "Providing",
+  "newHouseholdRegister": "New Household Registration"
 }
