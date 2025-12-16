@@ -229,13 +229,39 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
       };
 
       try {
-        print('\n📝 Data being inserted to DB:');
-        print('form_json field: ${formDataForDb['form_json']}');
-        print('form_json is null: ${formDataForDb['form_json'] == null}');
-        print('form_json length: ${(formDataForDb['form_json'] as String?)?.length}');
+        print('\n📝 Checking for existing record...');
         
-        final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
+        // First, check if a record with the same beneficiary_ref_key and forms_ref_key exists
+        final db = await DatabaseProvider.instance.database;
+        final existingRecords = await db.query(
+          'followup_form_data',
+          where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+          whereArgs: [beneficiaryRefKey, formsRefKey],
+          limit: 1,
+        );
 
+        int formId;
+
+        if (existingRecords.isNotEmpty) {
+          // Update existing record
+          final existingId = existingRecords.first['id'] as int;
+          formDataForDb['modified_date_time'] = now;
+          formDataForDb.remove('created_date_time'); // Keep the original created date
+
+          print('🔄 Updating existing record ID: $existingId');
+          await db.update(
+            'followup_form_data',
+            formDataForDb,
+            where: 'id = ?',
+            whereArgs: [existingId],
+          );
+          formId = existingId;
+          print('✅ Successfully updated existing record');
+        } else {
+          // Insert new record
+          print('➕ No existing record found, inserting new one');
+          formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
+        }
 
         if (formId > 0) {
           print('✅ Form saved successfully with ID: $formId');
@@ -272,13 +298,21 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
             print('⚠️ Error reading saved data: $e');
           }
 
+          // Check if child care activity exists for this beneficiary
           try {
-            final childCareActivityData = {
-              'server_id': null,
+            final childCareActivities = await db.query(
+              'child_care_activities',
+              where: 'beneficiary_ref_key = ?',
+              whereArgs: [beneficiaryRefKey],
+              limit: 1,
+            );
+
+            final childCareData = {
+              'server_id': '',
               'household_ref_key': householdRefKey,
               'beneficiary_ref_key': beneficiaryRefKey,
-              'mother_key': null,
-              'father_key': null,
+              'mother_key': motherKey,
+              'father_key': fatherKey,
               'child_care_state': 'tracking_due',
               'device_details': jsonEncode({
                 'id': deviceInfo.deviceId,
@@ -291,7 +325,7 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
                 'build_number': deviceInfo.buildNumber,
                 'package_name': deviceInfo.packageName,
               }),
-              'parent_user': jsonEncode({}),
+              'parent_user': '',
               'current_user_key': ashaUniqueKey,
               'facility_id': facilityId,
               'created_date_time': now,
@@ -300,11 +334,25 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
               'is_deleted': 0,
             };
 
-            print('Inserting child care activity: ${jsonEncode(childCareActivityData)}');
-            await LocalStorageDao.instance.insertChildCareActivity(childCareActivityData);
+            if (childCareActivities.isNotEmpty) {
+              // Update existing child care activity
+              await db.update(
+                'child_care_activities',
+                childCareData,
+                where: 'beneficiary_ref_key = ?',
+                whereArgs: [beneficiaryRefKey],
+              );
+              print('🔄 Updated existing child care activity for beneficiary: $beneficiaryRefKey');
+            } else {
+              // Insert new child care activity
+              await db.insert('child_care_activities', childCareData);
+              print('➕ Created new child care activity for beneficiary: $beneficiaryRefKey');
+            }
           } catch (e) {
-            print('Error inserting child care activity: $e');
+            print('⚠️ Error updating/inserting child care activity: $e');
+            // Don't fail the whole operation if child care activity update fails
           }
+
           emit(state.copyWith(isSubmitting: false, isSuccess: true));
         } else {
           throw Exception('Failed to save form data');

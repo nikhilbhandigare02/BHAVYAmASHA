@@ -1416,8 +1416,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.5),
-                    buildAshaTable(context),
+                    Column(
+                      children: [
+                        if (state.appRoleId == 4) ...[
+                          Divider(color: AppColors.divider, thickness: 0.5),
+                          buildAshaTable(context),
+                        ],
+                      ],
+                    ),
                     const SizedBox(height: 24),
                     RoundButton(
                       title: l10n.updateButton,

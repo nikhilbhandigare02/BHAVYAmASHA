@@ -380,7 +380,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bcmNameLabel => 'ब्लॉक कम्युनिटी मोबिलाइज़र का नाम';
 
   @override
-  String get beneficiaryAbsentLabel => 'Is Beneficiary Absent?';
+  String get beneficiaryAbsentLabel => 'क्या लाभार्थी अनुपस्थित है?';
 
   @override
   String get beneficiaryIdLabel => 'लाभार्थी आईडी';
@@ -1259,6 +1259,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get gridChildCare => 'शिशु देखभाल';
+
+  @override
+  String get hintTemp => 'तापमान';
 
   @override
   String get gridEligibleCouple => 'योग्य दम्पत्ति';
@@ -5155,7 +5158,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get correctHighlightedErrors => 'जारी रखने से पहले कृपया हाइलाइट किए गए त्रुटियों को सुधारें।';
 
   @override
-  String get selectOptionLabel => 'विकल्प चुनें';
+  String get selectOptionLabel => 'चुनें';
 
   @override
   String get screeningDate => 'स्क्रीनिंग तिथि';
@@ -5899,10 +5902,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get breastfeeding_problem_help => 'यदि स्तनपान में कोई समस्या है, तो माँ की मदद करें ताकि वह इसे दूर कर सके *';
 
   @override
-  String get temp_upto_102 => 'तापमान 102°F (38.9°C) तक';
+  String get temp_upto_102 => '102°F (38.9°C) तक तापमान';
 
   @override
-  String get temp_more_than_102 => 'तापमान 102°F (38.9°C) से अधिक';
+  String get temp_more_than_102 => '102°F (38.9°C) से अधिक तापमान';
 
   @override
   String get paracetamolGivenLabel => 'पैरासिटामोल टैबलेट दी गई (तापमान 102°F / 38.9°C तक) *';
@@ -6376,7 +6379,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get homeBasedCareForYoungChild => 'युवा बच्चे के लिए होम बेस्ड केयर';
 
   @override
-  String get hbycHomeVisit => 'HBYC गृह भ्रमण? *';
+  String get hbycHomeVisit => 'एचबीवाईसी गृह भ्रमण? *';
 
   @override
   String get is_referred_to_health_facility => 'क्या नजदिकी स्वस्थ्य संस्थान पर रेफर किया गया?';
@@ -6385,16 +6388,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get is_complementary_food_given => 'क्या संपूर्ण आहार दिया गया?';
 
   @override
-  String get foodAdvice_1 => '1. एक समय में 2–3 चम्मच भोजन, दिन में 2–3 बार';
+  String get foodAdvice_1 => 'एक समय में 2–3 चम्मच भोजन, दिन में 2–3 बार';
 
   @override
-  String get foodAdvice_2 => '2. एक समय में 1/2 कप/कटोरी भोजन, दिन में 2–3 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
+  String get foodAdvice_2 => 'एक समय में 1/2 कप/कटोरी भोजन, दिन में 2–3 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
 
   @override
-  String get foodAdvice_3 => '3. एक समय में 1/2 कप/कटोरी भोजन, दिन में 3–4 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
+  String get foodAdvice_3 => 'एक समय में 1/2 कप/कटोरी भोजन, दिन में 3–4 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
 
   @override
-  String get foodAdvice_4 => '4. एक समय में 3/4 से 1 कप/कटोरी भोजन, दिन में 3–4 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
+  String get foodAdvice_4 => 'एक समय में 3/4 से 1 कप/कटोरी भोजन, दिन में 3–4 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
 
   @override
   String get mentionRecordedWeightForAge => 'MCP कार्ड के अनुसार दर्ज वजन-के-अनुसार (किलोग्राम में) उल्लेख करें';

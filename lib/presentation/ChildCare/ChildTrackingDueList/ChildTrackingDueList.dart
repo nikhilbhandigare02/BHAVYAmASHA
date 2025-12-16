@@ -47,46 +47,66 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
     try {
       final db = await DatabaseProvider.instance.database;
-
-      final allRecords = await db.query(
-        FollowupFormDataTable.table,
-        orderBy: 'id DESC',
-      );
-      debugPrint('📋 Total records in followup_form_data table: ${allRecords.length}');
-
-      for (var i = 0; i < allRecords.length && i < 5; i++) {
-        final record = allRecords[i];
-        debugPrint('\n--- Record ${i + 1} (ID: ${record['id']}) ---');
-        debugPrint('household_ref_key: ${record['household_ref_key']}');
-        debugPrint('beneficiary_ref_key: ${record['beneficiary_ref_key']}');
-        debugPrint('created_date_time: ${record['created_date_time']}');
-        debugPrint('form_json: ${record['form_json']}');
-        debugPrint('form_json length: ${(record['form_json'] as String?)?.length ?? 0}');
-      }
-
-
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      String whereClause;
-      List<Object?> whereArgs;
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        // whereClause = '(form_json LIKE ? OR forms_ref_key = ?) AND current_user_key = ?';
-        // whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6', ashaUniqueKey];
+      // First, get all beneficiary_ref_keys from child_care_activities where child_care_state = 'tracking_due'
+      final childCareActivities = await db.query(
+        'child_care_activities',
+        where: 'child_care_state = ? AND is_deleted = 0',
+        whereArgs: ['tracking_due'],
+        columns: ['beneficiary_ref_key'],
+      );
 
-        whereClause = '(form_json LIKE ? OR forms_ref_key = ?) ';
-        whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6'];
-      } else {
-        whereClause = 'form_json LIKE ? OR forms_ref_key = ?';
-        whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6'];
+      if (childCareActivities.isEmpty) {
+        debugPrint('No child care activities found with state: tracking_due');
+        setState(() {
+          _childTrackingList = [];
+          _filtered = [];
+          _isLoading = false;
+        });
+        return;
       }
 
-      final results = await db.query(
-        FollowupFormDataTable.table,
-        where: whereClause,
-        whereArgs: whereArgs,
-        orderBy: 'id DESC',
-      );
+      final beneficiaryRefKeys = childCareActivities
+          .map((e) => e['beneficiary_ref_key'] as String?)
+          .where((key) => key != null && key.isNotEmpty)
+          .toSet()
+          .toList();
+
+      debugPrint('Found ${beneficiaryRefKeys.length} beneficiaries with tracking_due state');
+
+      List<Map<String, dynamic>> results = [];
+      
+      if (beneficiaryRefKeys.isNotEmpty) {
+        try {
+          // Build the WHERE clause for the followup_form_data query
+          String whereClause = 'beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')}) ';
+          List<Object?> whereArgs = [...beneficiaryRefKeys];
+          
+          // Add form type conditions and ensure we get the latest record for each beneficiary
+          whereClause += 'AND (form_json LIKE ? OR forms_ref_key = ?) ';
+          whereArgs.addAll(['%child_registration_due%', '30bycxe4gv7fqnt6']);
+          
+          // Make sure we're getting the most recent record for each beneficiary
+          whereClause += 'AND id IN (SELECT MAX(id) FROM ${FollowupFormDataTable.table} WHERE beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')}) GROUP BY beneficiary_ref_key)';
+          whereArgs.addAll(beneficiaryRefKeys);
+
+          debugPrint('Executing query with whereClause: $whereClause');
+          debugPrint('Query args: $whereArgs');
+
+          results = await db.query(
+            FollowupFormDataTable.table,
+            where: whereClause,
+            whereArgs: whereArgs,
+            orderBy: 'id DESC',
+          );
+        } catch (e) {
+          debugPrint('Error querying followup_form_data: $e');
+          // Fallback to empty results if there's an error
+          results = [];
+        }
+      }
 
       debugPrint('\n🔍 Found ${results.length} child registration/tracking records after filtering');
 
@@ -371,10 +391,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             'MotherName': motherName,
             'Address': address,
             'Weight': weightGrams,
-            'is_synced': row['is_synced'],
+            'is_synced': row['is_synced'] ?? 0, // Ensure we have a default value of 0 if null
             'formData': formData, // Store the complete form data
           };
-
+          
+          debugPrint('Sync status for ${childData['Name']}: ${childData['is_synced']} (type: ${childData['is_synced'].runtimeType})');
           childTrackingList.add(childData);
           debugPrint('✅ Successfully added child: $childName');
         } catch (e) {
@@ -468,25 +489,53 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
     try {
       final db = await DatabaseProvider.instance.database;
-      final rows = await db.query(
-        'mother_care_activities',
+      
+      // First try to get the latest record from followup_form_data
+      final formRows = await db.query(
+        FollowupFormDataTable.table,
         columns: ['is_synced', 'server_id', 'created_date_time'],
-        where: 'beneficiary_ref_key = ? AND is_deleted = 0 ',
+        where: 'beneficiary_ref_key = ? AND (forms_ref_key = ? OR form_json LIKE ?) AND is_deleted = 0',
+        whereArgs: [
+          beneficiaryRefKey, 
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childTrackingDue],
+          '%${FollowupFormDataTable.childTrackingDue}%'
+        ],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (formRows.isNotEmpty) {
+        final isSynced = formRows.first['is_synced'] == 1;
+        debugPrint('Sync status for $beneficiaryRefKey from followup_form_data: $isSynced');
+        return {
+          'is_synced': isSynced,
+          'server_id': formRows.first['server_id']
+        };
+      }
+
+      // Fallback to check child_care_activities if no form data found
+      final activityRows = await db.query(
+        'child_care_activities',
+        columns: ['is_synced', 'server_id', 'created_date_time'],
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0',
         whereArgs: [beneficiaryRefKey],
         orderBy: 'created_date_time DESC',
         limit: 1,
       );
 
-      if (rows.isNotEmpty) {
+      if (activityRows.isNotEmpty) {
+        final isSynced = activityRows.first['is_synced'] == 1;
+        debugPrint('Sync status for $beneficiaryRefKey from child_care_activities: $isSynced');
         return {
-          'is_synced': rows.first['is_synced'] == 1,
-          'server_id': rows.first['server_id']
+          'is_synced': isSynced,
+          'server_id': activityRows.first['server_id']
         };
       }
 
+      debugPrint('No sync status found for beneficiary: $beneficiaryRefKey');
       return {'is_synced': false, 'server_id': null};
     } catch (e) {
-      print('Error fetching sync status: $e');
+      debugPrint('Error fetching sync status for $beneficiaryRefKey: $e');
       return {'is_synced': false, 'server_id': null};
     }
   }
@@ -714,12 +763,18 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                   ),
                   const SizedBox(width: 8),
 
-                  Image.asset(
-                    'assets/images/sync.png',
-                    width: 25,
-                    color: (data['is_synced'] ?? 0) == 1
-                        ? Colors.green
-                        : Colors.grey[500],
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: _getSyncStatus(data['BeneficiaryID']?.toString() ?? ''),
+                    builder: (context, snapshot) {
+                      final isSynced = snapshot.data?['is_synced'] == true;
+                      return Image.asset(
+                        'assets/images/sync.png',
+                        width: 25,
+                        color: isSynced 
+                            ? Colors.green 
+                            : Colors.grey[500],
+                      );
+                    },
                   ),
 
                   /*FutureBuilder<Map<String, dynamic>>(
@@ -781,7 +836,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                           data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 130),
                       Expanded(
                         child: _rowText(
                           l10n?.fatherNameLabel ?? 'Father\'s Name',

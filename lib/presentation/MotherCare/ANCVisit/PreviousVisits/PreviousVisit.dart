@@ -23,11 +23,15 @@ class _PreviousvisitState extends State<Previousvisit> {
   }
 
   Future<void> _loadVisits() async {
-    final rows = await LocalStorageDao.instance.getAncFormsByBeneficiaryId(widget.beneficiaryId);
+    final rows = await LocalStorageDao.instance
+        .getAncFormsByBeneficiaryId(widget.beneficiaryId);
+
     final list = <Map<String, String>>[];
-    for (final r in rows) {
+
+    for (final r in rows.reversed) { // 👈 reverse here
       final createdRaw = r['created_date_time']?.toString() ?? '';
       String created = '-';
+
       try {
         final dt = DateTime.parse(createdRaw);
         final d = dt.day.toString().padLeft(2, '0');
@@ -37,16 +41,23 @@ class _PreviousvisitState extends State<Previousvisit> {
       } catch (_) {
         created = createdRaw.isEmpty ? '-' : createdRaw;
       }
-      final fd = r['form_data'] is Map<String, dynamic> ? (r['form_data'] as Map<String, dynamic>) : {};
+
+      final fd = r['form_data'] is Map<String, dynamic>
+          ? (r['form_data'] as Map<String, dynamic>)
+          : {};
+
       final week = fd['weeks_of_pregnancy']?.toString() ?? '-';
       final risk = fd['high_risk']?.toString() ?? '-';
+
       list.add({'date': created, 'week': week, 'risk': risk});
     }
+
     setState(() {
       _visits = list;
       _loading = false;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

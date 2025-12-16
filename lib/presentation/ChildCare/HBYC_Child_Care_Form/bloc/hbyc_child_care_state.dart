@@ -13,6 +13,9 @@ class HbycChildCareState extends Equatable {
   final String lengthHeightRecorded;
   final String weightLessThan3sdReferred;
   final String developmentDelaysObserved;
+  final String childReferred;
+  final String referralDetails;
+  final String referralDetailsChild;
   final String fullyVaccinatedAsPerMcp;
   final String measlesVaccineGiven;
   final String vitaminADosageGiven;
@@ -38,6 +41,8 @@ class HbycChildCareState extends Equatable {
   final String orsCount;  // For "Number of ORS given"
   final String ifaSyrupGiven;  // For "Iron Folic Acid syrup Given?"
   final String ifaSyrupCount;// 3/4-1 cup, 3-4 times daily + 1-2 snacks
+  final String childReferredToHealthFacility;
+
 
 
   const HbycChildCareState({
@@ -51,6 +56,9 @@ class HbycChildCareState extends Equatable {
     this.lengthHeightRecorded = '',
     this.weightLessThan3sdReferred = '',
     this.developmentDelaysObserved = '',
+    this.childReferred = '',
+    this.referralDetails = '',
+    this.referralDetailsChild = '',
     this.fullyVaccinatedAsPerMcp = '',
     this.measlesVaccineGiven = '',
     this.vitaminADosageGiven = '',
@@ -76,6 +84,8 @@ class HbycChildCareState extends Equatable {
     this.orsCount = '',
     this.ifaSyrupGiven = '',
     this.ifaSyrupCount = '',
+    this.childReferredToHealthFacility = '',
+
   });
 
   HbycChildCareState copyWith({
@@ -89,6 +99,9 @@ class HbycChildCareState extends Equatable {
     String? lengthHeightRecorded,
     String? weightLessThan3sdReferred,
     String? developmentDelaysObserved,
+    String? childReferred,
+    String? referralDetails,
+    String? referralDetailsChild,
     String? fullyVaccinatedAsPerMcp,
     String? measlesVaccineGiven,
     String? vitaminADosageGiven,
@@ -114,6 +127,8 @@ class HbycChildCareState extends Equatable {
     String? orsCount,
     String? ifaSyrupGiven,
     String? ifaSyrupCount,
+    String? childReferredToHealthFacility,
+
   }) {
     return HbycChildCareState(
       beneficiaryAbsent: beneficiaryAbsent ?? this.beneficiaryAbsent,
@@ -126,6 +141,9 @@ class HbycChildCareState extends Equatable {
       lengthHeightRecorded: lengthHeightRecorded ?? this.lengthHeightRecorded,
       weightLessThan3sdReferred: weightLessThan3sdReferred ?? this.weightLessThan3sdReferred,
       developmentDelaysObserved: developmentDelaysObserved ?? this.developmentDelaysObserved,
+      childReferred: childReferred ?? this.childReferred,
+      referralDetails: referralDetails ?? this.referralDetails,
+      referralDetailsChild: referralDetailsChild ?? this.referralDetailsChild,
       fullyVaccinatedAsPerMcp: fullyVaccinatedAsPerMcp ?? this.fullyVaccinatedAsPerMcp,
       measlesVaccineGiven: measlesVaccineGiven ?? this.measlesVaccineGiven,
       vitaminADosageGiven: vitaminADosageGiven ?? this.vitaminADosageGiven,
@@ -150,6 +168,8 @@ class HbycChildCareState extends Equatable {
       orsCount: orsCount ?? this.orsCount,
       ifaSyrupGiven: ifaSyrupGiven ?? this.ifaSyrupGiven,
       ifaSyrupCount: ifaSyrupCount ?? this.ifaSyrupCount,
+      childReferredToHealthFacility: childReferredToHealthFacility ?? this.childReferredToHealthFacility,
+
 
     );
   }
@@ -166,7 +186,10 @@ class HbycChildCareState extends Equatable {
         lengthHeightRecorded,
         weightLessThan3sdReferred,
         developmentDelaysObserved,
-        fullyVaccinatedAsPerMcp,
+    childReferred,
+    referralDetails,
+    referralDetailsChild,
+    fullyVaccinatedAsPerMcp,
         measlesVaccineGiven,
         vitaminADosageGiven,
         orsPacketAvailable,
@@ -191,7 +214,9 @@ class HbycChildCareState extends Equatable {
     orsCount,
     ifaSyrupGiven,
     ifaSyrupCount,
-      ];
+    childReferredToHealthFacility,
+
+  ];
 }
 
 class HbycChildCareInitial extends HbycChildCareState {

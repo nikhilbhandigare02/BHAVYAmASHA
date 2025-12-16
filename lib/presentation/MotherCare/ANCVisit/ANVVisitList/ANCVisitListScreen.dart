@@ -11,7 +11,6 @@ import '../../../../core/config/themes/CustomColors.dart';
 
 import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
-import '../../../../data/SecureStorage/SecureStorage.dart';
 import '../ANCVisitForm/ANCVisitForm.dart';
 
 class Ancvisitlistscreen extends StatefulWidget {
@@ -27,83 +26,69 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   List<Map<String, dynamic>> _allData = [];
   bool _isLoading = true;
 
-  // Future<List<Map<String, dynamic>>> _getAncDueRecords() async {
-  //   try {
-  //     final db = await DatabaseProvider.instance.database;
-  //
-  //     // Get current user's unique key
-  //     final currentUserData = await SecureStorageService.getCurrentUserData();
-  //     final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-  //
-  //     // Build the base query
-  //     String query = '''
-  //       SELECT
-  //         mca.*,
-  //         bn.*,
-  //         mca.id as mca_id,
-  //         bn.id as beneficiary_id
-  //       FROM mother_care_activities mca
-  //       INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-  //       WHERE mca.mother_care_state = 'anc_due'
-  //         AND bn.is_deleted = 0
-  //         AND mca.mother_care_state NOT IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother', 'anc_due_state')
-  //     ''';
-  //
-  //     // Add current_user_key condition if available
-  //     if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-  //       query += " AND mca.current_user_key = '$ashaUniqueKey' ";
-  //     }
-  //
-  //     final List<Map<String, dynamic>> ancDueRecords = await db.rawQuery(query);
-  //
-  //     print('ℹ️ Found ${ancDueRecords.length} anc_due records with valid beneficiary references');
-  //
-  //     // Process the records to include beneficiary info
-  //     return ancDueRecords.map((record) {
-  //       // Extract beneficiary info
-  //       final beneficiaryInfo = {
-  //         'id': record['beneficiary_id'],
-  //         'unique_key': record['unique_key'],
-  //         'memberName': record['memberName'],
-  //         'headName': record['headName'],
-  //         'gender': record['gender'],
-  //         'dob': record['dob'],
-  //         'mobileNo': record['mobileNo'],
-  //         'isPregnant': 'yes',  // Since we're in ANC visit list
-  //         'RCH_ID': record['RCH_ID'],
-  //         'spouseName': record['spouseName'],
-  //         'beneficiary_info': jsonEncode({
-  //           'memberName': record['memberName'] ?? record['headName'],
-  //           'headName': record['headName'],
-  //           'gender': record['gender'],
-  //           'dob': record['dob'],
-  //           'mobileNo': record['mobileNo'],
-  //           'isPregnant': 'yes',
-  //           'RCH_ID': record['RCH_ID'],
-  //           'spouseName': record['spouseName'],
-  //         }),
-  //       };
-  //
-  //
-  //       return {
-  //         ...record,
-  //         'beneficiary_info': jsonEncode(beneficiaryInfo),
-  //         'isAncDue': true,
-  //         'Name': record['memberName'] ?? record['headName'] ?? 'Unknown',
-  //         'Husband': record['spouseName'] ?? record['headName'] ?? 'N/A',
-  //         'RCH ID': record['RCH_ID'] ?? 'N/A',
-  //         'Age': _calculateAge(record['dob'] ?? '')?.toString() ?? 'N/A',
-  //         'RegistrationDate': record['created_date_time'] ?? 'N/A',
-  //       };
-  //     }).toList();
-  //   } catch (e) {
-  //     print('⚠️ Error fetching anc_due records: $e');
-  //     if (e is Error) {
-  //       print('Stack trace: ${e.stackTrace}');
-  //     }
-  //     return [];
-  //   }
-  // }
+  Future<List<Map<String, dynamic>>> _getAncDueRecords() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      final List<Map<String, dynamic>> ancDueRecords = await db.rawQuery('''
+        SELECT 
+          mca.*,
+          bn.*,
+          mca.id as mca_id,  
+          bn.id as beneficiary_id
+        FROM mother_care_activities mca
+        INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
+        WHERE mca.mother_care_state IN 'anc_due, anc_due_state' AND bn.is_deleted = 0
+      ''');
+
+      print('ℹ️ Found ${ancDueRecords.length} anc_due records with valid beneficiary references');
+
+      // Process the records to include beneficiary info
+      return ancDueRecords.map((record) {
+        // Extract beneficiary info
+        final beneficiaryInfo = {
+          'id': record['beneficiary_id'],
+          'unique_key': record['unique_key'],
+          'memberName': record['memberName'],
+          'headName': record['headName'],
+          'gender': record['gender'],
+          'dob': record['dob'],
+          'mobileNo': record['mobileNo'],
+          'isPregnant': 'yes',  // Since we're in ANC visit list
+          'RCH_ID': record['RCH_ID'],
+          'spouseName': record['spouseName'],
+          'beneficiary_info': jsonEncode({
+            'memberName': record['memberName'] ?? record['headName'],
+            'headName': record['headName'],
+            'gender': record['gender'],
+            'dob': record['dob'],
+            'mobileNo': record['mobileNo'],
+            'isPregnant': 'yes',
+            'RCH_ID': record['RCH_ID'],
+            'spouseName': record['spouseName'],
+          }),
+        };
+
+
+        return {
+          ...record,
+          'beneficiary_info': jsonEncode(beneficiaryInfo),
+          'isAncDue': true,
+          'Name': record['memberName'] ?? record['headName'] ?? 'Unknown',
+          'Husband': record['spouseName'] ?? record['headName'] ?? 'N/A',
+          'RCH ID': record['RCH_ID'] ?? 'N/A',
+          'Age': _calculateAge(record['dob'] ?? '')?.toString() ?? 'N/A',
+          'RegistrationDate': record['created_date_time'] ?? 'N/A',
+        };
+      }).toList();
+    } catch (e) {
+      print('⚠️ Error fetching anc_due records: $e');
+      if (e is Error) {
+        print('Stack trace: ${e.stackTrace}');
+      }
+      return [];
+    }
+  }
 
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
     try {
@@ -135,43 +120,32 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
+
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final pregnantWomen = <Map<String, dynamic>>[];
+      final Set<String> processedBeneficiaries = {}; // To track already processed beneficiaries
+
+      print('ℹ️ Found ${rows.length} beneficiaries to process');
+
+      // First, get all anc_due records to avoid duplicate DB queries
+      final ancDueRecords = await _getAncDueRecords();
+      final ancDueBeneficiaryIds = ancDueRecords.map((e) => e['beneficiary_ref_key']?.toString() ?? '').toSet();
+
+      // Get all delivery outcomes to exclude those records
       final db = await DatabaseProvider.instance.database;
-      
-      // First, get all beneficiaries that should be excluded
-      final excludedStates = await db.query(
-        'mother_care_activities',
-        where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
-        columns: ['beneficiary_ref_key'],
-        distinct: true
+      final deliveryOutcomes = await db.query(
+          'followup_form_data',
+          where: "forms_ref_key = 'bt7gs9rl1a5d26mz' AND form_json LIKE '%\"gives_birth_to_baby\":\"Yes\"%'",
+          columns: ['beneficiary_ref_key']
       );
-      
-      final excludedBeneficiaryIds = excludedStates
+      final deliveredBeneficiaryIds = deliveryOutcomes
           .map((e) => e['beneficiary_ref_key']?.toString())
           .where((id) => id != null && id.isNotEmpty)
           .toSet();
 
-      print('ℹ️ Found ${excludedBeneficiaryIds.length} beneficiaries with excluded states');
-
-      // Get all beneficiaries
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final pregnantWomen = <Map<String, dynamic>>[];
-      final Set<String> processedBeneficiaries = {};
-
-      print('ℹ️ Found ${rows.length} beneficiaries to process');
-
-      final ancDueRecords = await db.rawQuery('''
-        SELECT mca.*, bn.*, mca.id as mca_id, bn.id as beneficiary_id
-        FROM mother_care_activities mca
-        INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-        WHERE mca.mother_care_state = 'anc_due' 
-          AND bn.is_deleted = 0
-          AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})
-      ''', excludedBeneficiaryIds.toList());
-
-      final ancDueBeneficiaryIds = ancDueRecords.map((e) => e['beneficiary_ref_key']?.toString() ?? '').toSet();
-      print('ℹ️ Found ${ancDueBeneficiaryIds.length} anc_due records after filtering');
+      print('ℹ️ Found ${deliveredBeneficiaryIds.length} beneficiaries with delivery outcomes');
 
       for (final row in rows) {
         try {
@@ -197,13 +171,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           final name = info['memberName'] ?? info['headName'] ?? 'Unknown';
           final gender = info['gender']?.toString().toLowerCase() ?? '';
           final beneficiaryId = row['unique_key']?.toString() ?? '';
-          
+
           // Check if this beneficiary is in anc_due records
           final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
-          
-          // Skip if this beneficiary is in excluded states
-          if (excludedBeneficiaryIds.contains(beneficiaryId)) {
-            print('  ⏩ Skipping - Beneficiary has excluded state');
+
+          // Skip if this beneficiary already has a delivery outcome
+          if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
+            print('  ⏩ Skipping - Already has delivery outcome');
             continue;
           }
 
@@ -246,7 +220,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             'RegistrationDate': ancDueRecord['created_date_time']?.toString() ?? '',
             '_rawRow': ancDueRecord,
           };
-          
+
           print('  ✅ Added anc_due only record: ${personData['Name']}');
           pregnantWomen.add(personData);
         } catch (e, stackTrace) {
@@ -262,7 +236,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         final uniqueKey = item['unique_key']?.toString() ?? '';
         final key = benId.isNotEmpty ? benId : uniqueKey;
         if (key.isEmpty) continue;
-         byBeneficiary[key] = item;
+        byBeneficiary[key] = item;
       }
 
       // Convert to list and sort by registration date (newest first)
@@ -270,7 +244,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       dedupedList.sort((a, b) {
         final dateA = DateTime.tryParse(a['_rawRow']?['created_date_time']?.toString() ?? '');
         final dateB = DateTime.tryParse(b['_rawRow']?['created_date_time']?.toString() ?? '');
-        
+
         if (dateA == null || dateB == null) return 0;
         return dateB.compareTo(dateA); // Descending order (newest first)
       });
@@ -313,13 +287,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
     ranges['2nd_anc_start'] = _dateAfterWeeks(lmp, 14);
     ranges['2nd_anc_end'] = _dateAfterWeeks(lmp, 24);
-     ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
+    ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
     ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
 
-     ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
+    ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
     ranges['4th_anc_end'] = _calculateEdd(lmp);
 
-     ranges['pmsma_start'] = _dateAfterWeeks(lmp, 40);
+    ranges['pmsma_start'] = _dateAfterWeeks(lmp, 40);
     ranges['pmsma_end'] = _dateAfterWeeks(lmp, 44);
 
     return ranges;
@@ -671,35 +645,41 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (isHighRisk) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.redAccent.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'HRP',
-                                style: TextStyle(
-                                  color: Colors.red[600],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12.sp,
-                                ),
-                              ),
-                            ),
-                          ],
-
-
                           Text(
-                            '${isAncDue ? '' : ''}${l10n?.visitsLabel ?? 'Visits :'} $count',
+                            '${isAncDue ? 'DUE - ' : ''}${l10n?.visitsLabel ?? 'Visits :'} $count',
                             style: TextStyle(
                               color: primary,
                               fontWeight: FontWeight.w500,
                               fontSize: 14.sp,
                             ),
                           ),
-
+                          if (isHighRisk) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.red[50],
+                                border: Border.all(color: Colors.red[700]!),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                'HRP',
+                                style: TextStyle(
+                                  color: Colors.red[700],
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12.sp,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       );
                     },
@@ -790,8 +770,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     builder: (context, snapshot) {
                       final visitCount = snapshot.data?['count'] ?? 0;
                       final isHighRisk = snapshot.data?['isHighRisk'] == true;
+                      
+                      // Get high risk reasons if available
+                      final highRiskReasons = snapshot.data?['highRiskReasons'] is List 
+                          ? List<String>.from(snapshot.data?['highRiskReasons'] ?? []) 
+                          : <String>[];
 
-                       DateTime? lmpDate;
+                      DateTime? lmpDate;
                       try {
                         final rawRow = data['_rawRow'] as Map<String, dynamic>?;
                         dynamic rawInfo = rawRow?['beneficiary_info'];
@@ -807,7 +792,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
                         final lmpRaw = info['lmp']?.toString();
                         if (lmpRaw != null && lmpRaw.isNotEmpty) {
-                           String dateStr = lmpRaw;
+                          String dateStr = lmpRaw;
                           if (dateStr.contains('T')) {
                             dateStr = dateStr.split('T')[0];
                           }
@@ -817,7 +802,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         print('⚠️ Error deriving LMP date: $e');
                       }
 
-                       if (lmpDate == null) {
+                      if (lmpDate == null) {
                         try {
                           final parts = registrationDate.split('/');
                           if (parts.length == 3) {

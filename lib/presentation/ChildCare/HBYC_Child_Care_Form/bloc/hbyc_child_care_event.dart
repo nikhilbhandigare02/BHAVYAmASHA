@@ -112,6 +112,36 @@ class DevelopmentDelaysObservedChanged extends HbycChildCareEvent {
   @override
   List<Object?> get props => [value];
 }
+class ChildReferredChanged extends HbycChildCareEvent {
+  final String value;
+  const ChildReferredChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class ReferralDetailsChanged extends HbycChildCareEvent {
+  final String value;
+  const ReferralDetailsChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+class ReferralDetailsChildChanged extends HbycChildCareEvent {
+  final String value;
+  const ReferralDetailsChildChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+class ChildReferredToHealthFacilityChanged extends HbycChildCareEvent {
+  final String value;
+  const ChildReferredToHealthFacilityChanged(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
 
 class FullyVaccinatedAsPerMcpChanged extends HbycChildCareEvent {
   final String value;

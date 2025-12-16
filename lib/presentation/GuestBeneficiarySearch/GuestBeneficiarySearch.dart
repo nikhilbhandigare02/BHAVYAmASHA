@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
@@ -8,6 +9,7 @@ import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/repositories/GuestBeneficiaryRepository.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import '../../core/utils/Validations.dart' show Validations;
 import '../../core/utils/enums.dart';
 import '../../core/widgets/SnackBar/app_snackbar.dart';
 import '../myBeneficiary/Beneficiaries/GuestBeneficiaries.dart';
@@ -113,6 +115,11 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
       child: Builder(builder: (context) {
         // Add listener for state changes
         return BlocListener<GuestBeneficiarySearchBloc, GuestBeneficiarySearchState>(
+            listenWhen: (previous, current) {
+              final statusChanged = previous.status != current.status;
+              final errorChanged = previous.errorMessage != current.errorMessage;
+              return statusChanged || errorChanged;
+            },
             listener: (context, state) {
               // Handle error state
               if (state.status == GbsStatus.failure && state.errorMessage != null) {
@@ -170,7 +177,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                               children: [
                                 CustomTextField(
                                   labelText: l10n.beneficiaryNumberLabel,
-                                  hintText:  l10n.beneficiaryNumberLabel,
+                                  hintText:  '',
                                   keyboardType: TextInputType.number,
                                   onChanged: (v) => context.read<GuestBeneficiarySearchBloc>().add(GbsUpdateBeneficiaryNo(v)),
                                 ),
@@ -191,7 +198,8 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                                   items: districts,
                                   value: state.district,
                                   getLabel: (s) => s,
-                                  hintText: l10n.districtLabelSimple,
+                                  hintText:l10n.selectOptions,
+                                  emptyOptionText: 'No District Found',
                                   onChanged: (v) => context
                                       .read<GuestBeneficiarySearchBloc>()
                                       .add(GbsUpdateDistrict(v)),
@@ -203,7 +211,8 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                                   items: blocks,
                                   value: state.block,
                                   getLabel: (s) => s,
-                                  hintText: l10n.blockLabelSimple,
+                                  hintText:  l10n.selectOptions,
+                                  emptyOptionText: 'No Block Found',
                                   onChanged: (v) => context.read<GuestBeneficiarySearchBloc>().add(GbsUpdateBlock(v)),
                                 ),
                                 Divider(color: AppColors.divider, thickness: 0.6),
@@ -213,7 +222,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          // TODO: Localize if needed
+
                                           l10n.advanceFilter,
                                           style: TextStyle(
                                             color: AppColors.onSurface,
@@ -256,7 +265,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                                   Container(
                                     child: ApiDropdown<String>(
                                       labelText: l10n.genderLabel,
-                                      hintText: l10n.genderLabel,
+                                      hintText: l10n.selectOptions,
                                       items: genders,
                                       value: state.gender,
                                       getLabel: (s) => s,
@@ -269,6 +278,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                                     labelText: l10n.ageLabelSimple,
                                     hintText: l10n.ageLabelSimple,
                                     keyboardType: TextInputType.number,
+                                    maxLength: 3,
                                     onChanged: (v) => context.read<GuestBeneficiarySearchBloc>().add(GbsUpdateAge(v)),
                                   ),
                                   Divider(color: AppColors.divider, thickness: 0.6),
@@ -276,12 +286,19 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                                   CustomTextField(
                                     labelText: l10n.mobileLabelSimple,
                                     hintText: l10n.enter10DigitNumber ?? 'Enter 10 digit number',
-                                    keyboardType: TextInputType.phone,
+                                    keyboardType: TextInputType.number,
                                     maxLength: 10,
+                                    initialValue: state.mobileNo,
+                                    onChanged: (v) => context.read<GuestBeneficiarySearchBloc>().add(GbsUpdateMobile(v.trim())),
+                                   // autovalidateMode: AutovalidateMode.disabled,
+                                    validator: (value) {
+                                      final text = value?.trim() ?? '';
+                                      if (text.isEmpty) return null;
+                                      return Validations.validateMobileNo(l10n, value);
+                                    },
                                     inputFormatters: [
-                                      // FilteringTextInputFormatter.digitsOnly,
+                                      FilteringTextInputFormatter.digitsOnly,
                                     ],
-                                    onChanged: (v) => context.read<GuestBeneficiarySearchBloc>().add(GbsUpdateMobile(v)),
                                   ),
                                   Divider(color: AppColors.divider, thickness: 0.6),
                                 ],

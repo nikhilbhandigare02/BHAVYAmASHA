@@ -54,6 +54,7 @@ class CustomTextField extends StatefulWidget {
   final bool enableTitleCase; // New parameter to enable/disable title case
   final String? suffixText;
   final String? unitLetterSuffix;
+  final AutovalidateMode? autovalidateMode;
 
   const CustomTextField({
     super.key,
@@ -77,6 +78,7 @@ class CustomTextField extends StatefulWidget {
     this.enableTitleCase = false, // Default is false for backward compatibility
     this.suffixText,
     this.unitLetterSuffix,
+    this.autovalidateMode,
   });
 
   @override
@@ -196,7 +198,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
     return TextFormField(
       controller: _controller,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode: widget.autovalidateMode ?? AutovalidateMode.onUserInteraction,
       initialValue: null,
       textAlignVertical: TextAlignVertical.center,
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),

@@ -19,7 +19,7 @@ import '../../data/Database/database_provider.dart';
 import '../../data/Database/tables/followup_form_data_table.dart' as ffd;
 import '../../data/SecureStorage/SecureStorage.dart';
 
-import '../ChildCare/child_care_count_provider.dart';
+
 
 import '../../data/models/AbhaCreated/AbhaCreated.dart';
 import '../../data/models/ExistingAbhaCreated/ExistingAbhaCreated.dart';
@@ -30,6 +30,7 @@ import '../../data/repositories/TimeStamp/time_stamp.dart';
 import '../../data/repositories/AddBeneficiary/BeneficiaryRepository.dart';
 import '../../data/sync/sync_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../ChildCare/child_care_count_provider.dart';
 import '../GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import 'TodaysProgramm.dart';
 import 'AshaDashboardSection.dart';
@@ -455,8 +456,54 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         'other',
       };
 
+      // === ADDED: Check for sterilized beneficiaries ===
+      final db = await DatabaseProvider.instance.database;
+      final trackingFormKeyForIdentified =
+          ffd.FollowupFormDataTable.formUniqueKeys[ffd.FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
+      final Set<String> sterilizedBeneficiariesIdentified = <String>{};
+
+      if (trackingFormKeyForIdentified.isNotEmpty) {
+        final trackingRows = await db.query(
+          ffd.FollowupFormDataTable.table,
+          columns: ['beneficiary_ref_key', 'form_json', 'created_date_time', 'id'],
+          where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          whereArgs: [trackingFormKeyForIdentified],
+          orderBy: 'created_date_time DESC, id DESC',
+        );
+
+        final Map<String, String> latestFpMethod = {};
+        for (final row in trackingRows) {
+          final key = row['beneficiary_ref_key']?.toString() ?? '';
+          if (key.isEmpty) continue;
+          if (latestFpMethod.containsKey(key)) continue;
+
+          final s = row['form_json']?.toString() ?? '';
+          if (s.isEmpty) continue;
+
+          try {
+            final decoded = jsonDecode(s);
+            Map<String, dynamic> formData = decoded is Map<String, dynamic>
+                ? Map<String, dynamic>.from(decoded)
+                : <String, dynamic>{};
+            if (decoded is Map && decoded['form_data'] is Map) {
+              formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+            }
+            final fp = formData['fp_method']?.toString().toLowerCase().trim();
+            if (fp != null) latestFpMethod[key] = fp;
+          } catch (_) {}
+        }
+
+        sterilizedBeneficiariesIdentified.addAll(
+          latestFpMethod.entries
+              .where((e) => e.value == 'male sterilization' || e.value == 'female sterilization')
+              .map((e) => e.key),
+        );
+      }
+      // === END ADDED ===
+
       int totalIdentified = 0;
       int totalIdentifiedSync = 0;
+
       for (final household in households.values) {
         Map<String, dynamic>? head;
         Map<String, dynamic>? spouse;
@@ -501,7 +548,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           if (!allowedRelations.contains(rawRelation)) continue;
           if (!_isIdentifiedEcFemale(info, head: head)) continue;
 
-          if(member['is_synced']==1){
+          // === ADDED: Skip sterilized beneficiaries ===
+          final memberUniqueKey = member['unique_key']?.toString() ?? '';
+          if (memberUniqueKey.isNotEmpty && sterilizedBeneficiariesIdentified.contains(memberUniqueKey)) {
+            continue;
+          }
+          // === END ADDED ===
+
+          if (member['is_synced'] == 1) {
             totalIdentifiedSync++;
           }
           totalIdentified++;

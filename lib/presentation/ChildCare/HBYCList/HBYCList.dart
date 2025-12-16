@@ -43,23 +43,42 @@ class _HBYCListState extends State<HBYCList> {
 
   Future<bool> _isHbycSynced(String beneficiaryId) async {
     if (beneficiaryId.isEmpty) return false;
+    
+    // Check cache first
     final cacheKey = 'hbyc_$beneficiaryId';
-    if (_syncCache.containsKey(cacheKey)) return _syncCache[cacheKey] ?? false;
+    if (_syncCache.containsKey(cacheKey)) {
+      return _syncCache[cacheKey] ?? false;
+    }
+    
     try {
       final db = await DatabaseProvider.instance.database;
-      final formsKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.hbycForm] ?? '999';
+      
+      debugPrint('Checking sync status for beneficiary: $beneficiaryId in beneficiaries_new table');
+      
+      // Query the beneficiary record
       final rows = await db.query(
-        FollowupFormDataTable.table,
+        'beneficiaries_new',
         columns: ['is_synced'],
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-        whereArgs: [beneficiaryId, formsKey],
-        orderBy: 'created_date_time DESC, id DESC',
+        where: 'unique_key = ?',
+        whereArgs: [beneficiaryId],
         limit: 1,
       );
-      final synced = rows.isNotEmpty && (rows.first['is_synced'] == 1);
-      _syncCache[cacheKey] = synced;
-      return synced;
-    } catch (_) {
+      
+      bool isSynced = false;
+      
+      if (rows.isNotEmpty) {
+        // Check both integer 1 and string '1' for compatibility
+        isSynced = rows.first['is_synced'] == 1 || rows.first['is_synced'] == '1';
+        debugPrint('Sync status for $beneficiaryId from beneficiaries_new: ${isSynced ? 'Synced' : 'Not Synced'} (value: ${rows.first['is_synced']})');
+      } else {
+        debugPrint('No record found in beneficiaries_new for beneficiary: $beneficiaryId');
+      }
+      
+      // Update cache
+      _syncCache[cacheKey] = isSynced;
+      return isSynced;
+    } catch (e) {
+      debugPrint('Error checking sync status for $beneficiaryId: $e');
       return false;
     }
   }
@@ -528,20 +547,10 @@ class _HBYCListState extends State<HBYCList> {
                         future: _isHbycSynced(data['BeneficiaryID']?.toString() ?? ''),
                         builder: (context, snapshot) {
                           final isSynced = snapshot.data == true;
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: ColorFiltered(
-                              colorFilter: ColorFilter.mode(
-                                isSynced ? Colors.green : Colors.grey,
-                                BlendMode.srcIn,
-                              ),
-                              child: Image.asset(
-                                'assets/images/sync.png',
-                                width: 25,
-                                height: 25,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                          return Image.asset(
+                            'assets/images/sync.png',
+                            width: 25,
+                            color: isSynced ? Colors.green : Colors.grey[500],
                           );
                         },
                       ),

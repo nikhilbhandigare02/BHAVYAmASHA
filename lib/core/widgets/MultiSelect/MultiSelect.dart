@@ -195,34 +195,40 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
         ],
         InkWell(
           onTap: _showMultiSelect,
-          child: InputDecorator(
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: widget.hintText,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 12.0,
-                vertical: 8.0,
-              ),
-              suffixIcon: Icon(
-                Icons.arrow_drop_down,
-                color: Colors.grey,
-              ),
-              filled: widget.isDisabled,
-              fillColor: widget.isDisabled
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: 1.0,
+              vertical: 2.0,
+            ),
+            decoration: BoxDecoration(
+              color: widget.isDisabled
                   ? Theme.of(context).disabledColor.withOpacity(0.04)
                   : null,
             ),
-            child: Text(
-              _selectedItems.isEmpty
-                  ? widget.hintText
-                  : _selectedItems
-                  .map((item) => widget.items
-                  .firstWhere((element) => element.value == item)
-                  .label)
-                  .join(', '),
-              style: TextStyle(
-                color: _selectedItems.isEmpty ? Theme.of(context).hintColor : null,
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _selectedItems.isEmpty
+                        ? widget.hintText
+                        : _selectedItems
+                        .map((item) => widget.items
+                        .firstWhere((element) => element.value == item)
+                        .label)
+                        .join(', '),
+                    style: TextStyle(
+                      color: _selectedItems.isEmpty
+                          ? Theme.of(context).hintColor
+                          : Theme.of(context).textTheme.bodyMedium?.color,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: Colors.grey,
+                ),
+              ],
             ),
           ),
         ),

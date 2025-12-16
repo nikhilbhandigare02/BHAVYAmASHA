@@ -69,57 +69,29 @@ class _DeliveryOutcomeScreenState
       print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
 
       final ancForms = await db.rawQuery('''
-        WITH LatestForms AS (
-          SELECT 
-            f.beneficiary_ref_key,
-            f.form_json,
-            f.household_ref_key,
-            f.forms_ref_key,
-            f.created_date_time,
-            f.id as form_id,
-            ROW_NUMBER() OVER (
-              PARTITION BY f.beneficiary_ref_key 
-              ORDER BY f.created_date_time DESC, f.id DESC
-            ) as rn
-          FROM ${FollowupFormDataTable.table} f
-          WHERE 
-            f.forms_ref_key = '$ancRefKey'
-            AND f.is_deleted = 0
-            AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
-        )
-        SELECT * FROM LatestForms WHERE rn = 1
-        
-        UNION
-        
-        -- Also include any records with mother_care_state = 'delivery_outcome' that might not be in the forms
-        SELECT 
-          mca.beneficiary_ref_key,
-          '{}' as form_json,
-          mca.household_ref_key,
-          '' as forms_ref_key,
-          mca.created_date_time,
-          mca.id as form_id,
-          1 as rn
-        FROM ${MotherCareActivitiesTable.table} mca
+        SELECT DISTINCT
+          f.beneficiary_ref_key,
+          f.form_json,
+          f.household_ref_key,
+          f.forms_ref_key,
+          f.created_date_time,
+          f.id as form_id
+        FROM ${FollowupFormDataTable.table} f
+        LEFT JOIN ${MotherCareActivitiesTable.table} mca ON f.beneficiary_ref_key = mca.beneficiary_ref_key
         WHERE 
-          mca.mother_care_state = 'delivery_outcome'
-          AND mca.is_deleted = 0
-          AND mca.beneficiary_ref_key NOT IN (
-            SELECT beneficiary_ref_key 
-            FROM ${FollowupFormDataTable.table} 
-            WHERE forms_ref_key = '$ancRefKey' 
-            AND is_deleted = 0
-            AND form_json LIKE '%"gives_birth_to_baby":"Yes"%'
-          )
-        ORDER BY created_date_time DESC
+          f.forms_ref_key = '$ancRefKey'
+          AND f.is_deleted = 0
+          AND (f.form_json LIKE '%"gives_birth_to_baby":"Yes"%' 
+               AND mca.mother_care_state = 'delivery_outcome') 
+        ORDER BY f.created_date_time DESC
       ''');
 
       print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
-      // After line 61 in Deliver_outcome_screen.dart, add this code:
+
 
       print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
 
-// For each form, fetch and print the beneficiary details
+       // For each form, fetch and print the beneficiary details
       for (var form in ancForms) {
         final beneficiaryRefKey = form['beneficiary_ref_key'] as String?;
         if (beneficiaryRefKey == null) {
@@ -354,37 +326,37 @@ class _DeliveryOutcomeScreenState
         try {
           final info = beneficiaryRow['beneficiary_info'] is Map
               ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
-              : (beneficiaryRow['beneficiary_info'] is String
-              ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
-              : <String, dynamic>{});
-
+              : (beneficiaryRow['beneficiary_info'] is String 
+                  ? jsonDecode(beneficiaryRow['beneficiary_info'] as String) 
+                  : <String, dynamic>{});
+          
           womanName = (info['headName'] ?? info['name'] ?? info['woman_name'] ?? 'Unknown').toString();
         } catch (e) {
           print('⚠️ Error parsing beneficiary_info: $e');
         }
       }
-
+      
       // Fallback to form data if name not found in beneficiary info
       if (womanName == 'Unknown') {
         womanName = (formData['woman_name'] ?? formData['name'] ?? formData['memberName'] ?? formData['headName'] ?? 'Unknown').toString();
       }
-
+      
       // Try to get husband name from beneficiary info first
       String husbandName = 'N/A';
       if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
         try {
           final info = beneficiaryRow['beneficiary_info'] is Map
               ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
-              : (beneficiaryRow['beneficiary_info'] is String
-              ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
-              : <String, dynamic>{});
-
+              : (beneficiaryRow['beneficiary_info'] is String 
+                  ? jsonDecode(beneficiaryRow['beneficiary_info'] as String) 
+                  : <String, dynamic>{});
+          
           husbandName = (info['spouseName'] ?? info['spouse_name'] ?? info['husbandName'] ?? info['husband_name'] ?? 'N/A').toString();
         } catch (e) {
           print('⚠️ Error parsing beneficiary_info for spouse name: $e');
         }
       }
-
+      
       // Fallback to form data if not found in beneficiary info
       if (husbandName == 'N/A') {
         husbandName = (formData['husband_name'] ?? formData['spouse_name'] ?? formData['spouseName'] ?? formData['husbandName'] ?? 'N/A').toString();
@@ -905,10 +877,10 @@ class _DeliveryOutcomeScreenState
 
   Widget _rowText(String title, String value) {
 
-    final displayValue = (title == 'Beneficiary ID' && value.length > 11)
+    final displayValue = (title == 'Beneficiary ID' && value.length > 11) 
         ? '${value.substring(value.length - 11)}'
         : value;
-
+        
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

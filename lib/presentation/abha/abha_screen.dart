@@ -60,6 +60,7 @@ import 'package:open_file/open_file.dart';
 
 import '../../core/config/Constant/constant.dart';
 import '../../core/utils/utils.dart';
+import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../core/widgets/TextField/TextField.dart';
 import '../../data/models/abha/create/Exisiting/profile_existing.dart';
 import '../../data/models/abha/create/mobile/abha_suggestion_model.dart';
@@ -114,8 +115,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
         },child: Container(child: Container(child: createVerifyAbha(context),)));
   }
 
-  //var abhaIdEnd = '@sbx';
-  var abhaIdEnd = '@abdm';
+  var abhaIdEnd = '@sbx';
+  //var abhaIdEnd = '@abdm';
 
   var _base64HealthcardID = '';
   Uint8List? _healthCardImageBytes;
@@ -377,39 +378,42 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
             ),
             drawer: CustomDrawer(),
-            body: Stack(children: [
-              /*Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/img/background_abdm.png'),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Color.fromRGBO(255, 255, 255, 0.5), // white overlay with 10% opacity
-                BlendMode.lighten, // blend mode
-              ),
-            ),
-          ),
-        ),*/
-
-              Padding(
-                padding: EdgeInsets.all(10),
-                child: SingleChildScrollView(
-                  child: Column(children: [
-
-                    SizedBox(height: 15,),
-                    Padding(
-                      padding: EdgeInsets.all(0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          createAbhaAddress(context),
-                        ],
-                      ),
-                    ),
-                  ],),
+            body: SafeArea(
+              bottom: true,
+              child: Stack(children: [
+                /*Container(
+                        decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/img/background_abdm.png'),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Color.fromRGBO(255, 255, 255, 0.5), // white overlay with 10% opacity
+                  BlendMode.lighten, // blend mode
                 ),
               ),
-            ],),
+                        ),
+                      ),*/
+
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: SingleChildScrollView(
+                    child: Column(children: [
+
+                      SizedBox(height: 15,),
+                      Padding(
+                        padding: EdgeInsets.all(0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            createAbhaAddress(context),
+                          ],
+                        ),
+                      ),
+                    ],),
+                  ),
+                ),
+              ],),
+            ),
 
 
 
@@ -1777,12 +1781,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     width: 100.w,
                     height: 30.h,
                     decoration: BoxDecoration(
-                      color: AppColors.orangeApp,
+                      color: Colors.amberAccent,
                       borderRadius: BorderRadius.circular(5.0),
                       border: Border.all(
-                        color: AppColors.orangeApp,
-                        width: 1.w,
-                      ),
+                          color: Colors.amberAccent, width: 1.w),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -2166,8 +2168,11 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                 // _profileLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
                               }
                               else {
-                                if(_selectedAbhaIDValue!=null){
+                                if(_selectedAbhaIDValue!=null&&_selectedAbhaIDValue!=""){
                                   _continueExisitingABHAMobileUser(_selectedAbhaIDValue);
+                                }
+                                else {
+                                  Utils.showToastMessage("Select Abha Id");
                                 }
 
                               }
@@ -2343,6 +2348,40 @@ class _ABHAScreenState extends State<ABHAScreen> {
     );
   }
 
+  Future<bool> _confirmExit(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Exit'),
+        content: const Text('Are you sure you want to close this screen?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    ) ??
+        false;
+  }
+
+  Future<bool> _showConfirmDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+
+    final result = await showConfirmationDialog(
+      context: context,
+      message:l10n?.doYouWantToContinue ?? 'Do you want to close this screen?',
+      yesText:l10n?.yes ?? 'Yes',
+      noText:l10n?.no ?? 'No',
+    );
+    return result ?? false;
+  }
+
   void crateNewABHADialog() {
     showGeneralDialog(
       context: context,
@@ -2355,86 +2394,111 @@ class _ABHAScreenState extends State<ABHAScreen> {
         return StatefulBuilder(// You need this, notice the parameters below:
             builder: (BuildContext context, StateSetter setDialogState) {
               final localText = AppLocalizations.of(context)!;
-              return Scaffold(
-                backgroundColor: Colors.white,
-                body: Container(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 30,),
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            children: [
-                              Text(localText.createAbha,
-                                  style:
-                                  TextStyle(color: Colors.black, fontSize: 18)),
-                              Spacer(),
-                              InkWell(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Icon(Icons.close))
-                            ],
+              return PopScope(
+                canPop: false, // prevent default back close
+                onPopInvoked: (didPop) async {
+                  if (didPop) return;
+
+                  final confirm = await _showConfirmDialog(context);
+                  if (confirm) {
+                    refresh();
+                    Navigator.pop(context);
+                  }
+
+                 /* final shouldExit = await _confirmExit(context);
+                  if (shouldExit) {
+                    refresh();
+                    Navigator.pop(context);
+                  }*/
+                },
+                child: Scaffold(
+                  backgroundColor: Colors.white,
+                  body: Container(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 30,),
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                Text(localText.createAbha,
+                                    style:
+                                    TextStyle(color: Colors.black, fontSize: 18)),
+                                Spacer(),
+                                InkWell(
+                                    onTap: () async {
+                                      final confirm = await _showConfirmDialog(context);
+                                      if (confirm) {
+                                        setState(() {
+                                          refresh();
+                                        });
+
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: Icon(Icons.close))
+                              ],
+                            ),
                           ),
-                        ),
-                        _buildTableOne(setDialogState),
-                        Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: SizedBox(
-                            width: 150.w,
-                            height: 40.h,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: InkWell(
-                                onTap: () {
-                                  /* if (dropdownvalue == 'Aadhaar') {
-                                    if(txtABHAIDMobileController.text.isNotEmpty){
-                                      _aadhaarCreateABHA();
+                          _buildTableOne(setDialogState),
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: SizedBox(
+                              width: 150.w,
+                              height: 40.h,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: InkWell(
+                                  onTap: () {
+                                    /* if (dropdownvalue == 'Aadhaar') {
+                                      if(txtABHAIDMobileController.text.isNotEmpty){
+                                        _aadhaarCreateABHA();
+                                      }
+                                      else {
+                                        Utils.showToastMessage('Please enter ABHA ID');
+                                      }
                                     }
                                     else {
+
+                                      if(createMobileAadhharView){
+                                        _submitDetailsMobile(setDialogState);
+
+                                      }
+                                      else {*/
+                                   // if(txtABHAIDMobileController.text.isNotEmpty){
+                                      _mobileCreateABHA();
+                                   /* }
+                                    else {
                                       Utils.showToastMessage('Please enter ABHA ID');
-                                    }
-                                  }
-                                  else {
+                                    }*/
 
-                                    if(createMobileAadhharView){
-                                      _submitDetailsMobile(setDialogState);
+                                    // }
+                                    // }
 
-                                    }
-                                    else {*/
-                                  if(txtABHAIDMobileController.text.isNotEmpty){
-                                    _mobileCreateABHA();
-                                  }
-                                  else {
-                                    Utils.showToastMessage('Please enter ABHA ID');
-                                  }
-
-                                  // }
-                                  // }
-
-                                },
-                                child: Container(
-                                  width: 150.w,
-                                  height: 30.h,
-                                  //padding: EdgeInsets.all(6.w),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.orangeApp,
-                                    borderRadius: BorderRadius.circular(5.0),
-                                    border: Border.all(
-                                        color: AppColors.orangeApp, width: 1.w),
-                                  ),
-                                  child: Align(
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      (createMobileAadhharView)?
-                                      localText.submit:localText.createAbhaAddress,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.bold,
+                                  },
+                                  child: Container(
+                                    width: 150.w,
+                                    height: 30.h,
+                                    //padding: EdgeInsets.all(6.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amberAccent,
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      border: Border.all(
+                                          color: Colors.amberAccent, width: 1.w),
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        (createMobileAadhharView)?
+                                        localText.submit:localText.createAbhaAddress,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 11.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -2442,8 +2506,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -2452,6 +2516,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
       },
     );
   }
+
+
 
   TextEditingController firstNameController = TextEditingController();
   TextEditingController firstMiddleController = TextEditingController();
@@ -2755,6 +2821,29 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         FilteringTextInputFormatter.digitsOnly,
                         LengthLimitingTextInputFormatter(10),
                       ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter mobile number';
+                        }
+
+                        // Must be exactly 10 digits
+                        if (value.length != 10) {
+                          return 'Mobile number must be 10 digits';
+                        }
+
+                        // Must start with 6, 7, 8 or 9
+                        if (!RegExp(r'^[6-9]').hasMatch(value)) {
+                          return 'Enter valid Indian mobile number';
+                        }
+
+                        // Reject if all digits are the same (1111111111, 9999999999)
+                        if (RegExp(r'^(\d)\1{9}$').hasMatch(value)) {
+                          return 'Invalid mobile number';
+                        }
+
+                        return null;
+                      },
+
                     ),
                   ],
                 ),
@@ -3360,11 +3449,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
           ),
 
           Center(
-            child: SizedBox(
-              width: 150.w,
-              height: 40.h,
-              child: TextButton.icon(
-                onPressed: () async {
+            child: Align(
+              alignment: Alignment.center,
+              child: InkWell(
+                onTap: () async {
                   try {
                     await Utils.requestMediaPermissions();
                     String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
@@ -3379,25 +3467,36 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     Utils.showToastMessage("Error opening file: $e");
                   }
                 },
-
-                icon: const Icon(Icons.download, color: Colors.white, size: 20),
-                label: Text(
-                  localText.download,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                child: Container(
+                  width: 130.w,
+                  height: 30.h,
+                  decoration: BoxDecoration(
+                    color: AppColors.greenHighlight,
+                    borderRadius: BorderRadius.circular(5.0),
+                    border: Border.all(
+                        color: AppColors.greenHighlight, width: 1.w),
                   ),
-                ),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  backgroundColor: AppColors.green,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.download,                    // Prefix icon for "Create New"
+                        color: Colors.white,
+                        size: 16.sp,
+                      ),
+                      SizedBox(width: 6.w),           // Small space between icon and text
+                      Text(
+                        localText.download,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-
             ),
           ),
           /*Row(
@@ -4745,7 +4844,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
     else if(patientPinCodeController.text.isEmpty){
       Utils.showToastMessage('Enter Pincode');
     }
-
+    else if(txtABHAIDMobileController.text.isEmpty){
+      Utils.showToastMessage('Please enter ABHA ID');
+    }
     else {
       if (await Utils.isConnected()) {
         bool _isLoading = true;

@@ -542,6 +542,39 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
 
                           print('Saving child beneficiary from delivery outcome: ${jsonEncode(memberPayload)}');
                           await LocalStorageDao.instance.insertBeneficiary(memberPayload);
+                          try {
+                            final childCareActivityData = {
+                              'server_id': null,
+                              'household_ref_key': householdRefKey,
+                              'beneficiary_ref_key': memberId,
+                              'mother_key': motherKey.isNotEmpty ? motherKey : null,
+                              'father_key': fatherKey.isNotEmpty ? fatherKey : null,
+                              'child_care_state': 'registration_due',
+                              'device_details': jsonEncode({
+                                'id': deviceInfo.deviceId,
+                                'platform': deviceInfo.platform,
+                                'version': deviceInfo.osVersion,
+                              }),
+                              'app_details': jsonEncode({
+                                'app_version': deviceInfo.appVersion.split('+').first,
+                                'app_name': deviceInfo.appName,
+                                'build_number': deviceInfo.buildNumber,
+                                'package_name': deviceInfo.packageName,
+                              }),
+                              'parent_user': jsonEncode({}),
+                              'current_user_key': ashaUniqueKey,
+                              'facility_id': facilityId,
+                              'created_date_time': tsChild,
+                              'modified_date_time': tsChild,
+                              'is_synced': 0,
+                              'is_deleted': 0,
+                            };
+                            print('Inserting child care activity for delivery outcome: ${jsonEncode(childCareActivityData)}');
+                            await LocalStorageDao.instance.insertChildCareActivity(childCareActivityData);
+                            print('✅ Successfully inserted child care activity for delivery outcome');
+                          } catch (e) {
+                            print('❌ Error inserting child care activity for delivery outcome: $e');
+                          }
                         }
                       }
                     } catch (e) {

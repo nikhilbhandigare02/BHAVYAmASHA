@@ -470,7 +470,7 @@ abstract class AppLocalizations {
   /// No description provided for @advanceFilter.
   ///
   /// In en, this message translates to:
-  /// **'Advance Filter'**
+  /// **'Advance Filters'**
   String get advanceFilter;
 
   /// No description provided for @affiliatedToStateInsuranceLabel.
@@ -638,7 +638,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectOptions.
   ///
   /// In en, this message translates to:
-  /// **'Select Options'**
+  /// **'Select'**
   String get selectOptions;
 
   /// No description provided for @antenatal.
@@ -2578,6 +2578,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Child Care'**
   String get gridChildCare;
+
+  /// No description provided for @hintTemp.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get hintTemp;
 
   /// No description provided for @gridEligibleCouple.
   ///
@@ -5246,7 +5252,7 @@ abstract class AppLocalizations {
   /// No description provided for @babyConditionLabel.
   ///
   /// In en, this message translates to:
-  /// **'Baby\'s condition *'**
+  /// **'Child status *'**
   String get babyConditionLabel;
 
   /// No description provided for @babyNameLabel.
@@ -5270,7 +5276,7 @@ abstract class AppLocalizations {
   /// No description provided for @newbornTemperatureLabel.
   ///
   /// In en, this message translates to:
-  /// **'temperature *'**
+  /// **'Temperature *'**
   String get newbornTemperatureLabel;
 
   /// No description provided for @infantTemperatureUnitLabel.
@@ -5294,7 +5300,7 @@ abstract class AppLocalizations {
   /// No description provided for @weighingScaleColorLabel.
   ///
   /// In en, this message translates to:
-  /// **'Scale color of weighing machine*'**
+  /// **'Scale color of weighing machine *'**
   String get weighingScaleColorLabel;
 
   /// No description provided for @colorGreen.
@@ -5324,19 +5330,19 @@ abstract class AppLocalizations {
   /// No description provided for @bleedingUmbilicalCordLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is there bleeding from the umbilical cord? *'**
+  /// **'Is Umbilical cord bleeding *'**
   String get bleedingUmbilicalCordLabel;
 
   /// No description provided for @newbornSeizuresLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the child having seizures?*'**
+  /// **'Is the child having seizures? *'**
   String get newbornSeizuresLabel;
 
   /// No description provided for @stoppedCryingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby stopped crying? *'**
+  /// **'Has the child stopped crying? *'**
   String get stoppedCryingLabel;
 
   /// No description provided for @homeVisitDayLabel.
@@ -5366,7 +5372,7 @@ abstract class AppLocalizations {
   /// No description provided for @mcpCardAvailableLabelMother.
   ///
   /// In en, this message translates to:
-  /// **'Is there availability of \'Mother Child Protection (MCP) * card'**
+  /// **'Is there availability of \'Mother Child Protection (MCP) card? *'**
   String get mcpCardAvailableLabelMother;
 
   /// No description provided for @postDeliveryProblemNone.
@@ -10454,7 +10460,7 @@ abstract class AppLocalizations {
   /// No description provided for @exclusiveBreastfeedingStartedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the exclusive breastfeeding initiated?*'**
+  /// **'Has the exclusive breastfeeding initiated? *'**
   String get exclusiveBreastfeedingStartedLabel;
 
   /// No description provided for @firstBreastfeedTimingLabel.
@@ -10472,7 +10478,7 @@ abstract class AppLocalizations {
   /// No description provided for @lethargicLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the baby lethargic?'**
+  /// **'Is the baby Lethargic? *'**
   String get lethargicLabel;
 
   /// No description provided for @congenitalAbnormalitiesLabel.
@@ -10532,7 +10538,7 @@ abstract class AppLocalizations {
   /// No description provided for @cryingSoftlyLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the baby crying weak? *'**
+  /// **'Is the child crying weak? *'**
   String get cryingSoftlyLabel;
 
   /// No description provided for @newbornReferredByAshaLabel.
@@ -10550,7 +10556,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthDoseVaccinationLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the birthdose vaccination given to baby? *'**
+  /// **'Is the Birthdose vaccination given to baby? *'**
   String get birthDoseVaccinationLabel;
 
   /// No description provided for @mcpCardAvailableLabel.
@@ -11594,25 +11600,25 @@ abstract class AppLocalizations {
   /// No description provided for @babyWipedWithCleanCloth.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby been wiped with a clean dry cloth?'**
+  /// **'Has the baby wiped with clean dry cloth? *'**
   String get babyWipedWithCleanCloth;
 
   /// No description provided for @is_child_kept_warm.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby kept warm?'**
+  /// **'Has the baby kept warm? *'**
   String get is_child_kept_warm;
 
   /// No description provided for @babyGivenBath.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby been given a bath?'**
+  /// **'Has the baby given bath? *'**
   String get babyGivenBath;
 
   /// No description provided for @babyWrappedAndPlacedNearMother.
   ///
   /// In en, this message translates to:
-  /// **'Whether the baby was wrapped in a cloth and placed near the mother?'**
+  /// **'Whether the baby was wrapped in a cloth and placed near the mother? *'**
   String get babyWrappedAndPlacedNearMother;
 
   /// No description provided for @selectEyeProblemTypeLabel.
@@ -11672,7 +11678,7 @@ abstract class AppLocalizations {
   /// No description provided for @babyWeightRecordedInMPC.
   ///
   /// In en, this message translates to:
-  /// **'Is the weight of the newborn baby recorded in the Mother Protection Card?'**
+  /// **'Is the weight of the newborn baby recorded in the Mother Protection Card? *'**
   String get babyWeightRecordedInMPC;
 
   /// No description provided for @referToHospital.
@@ -11846,7 +11852,7 @@ abstract class AppLocalizations {
   /// No description provided for @temp_upto_102.
   ///
   /// In en, this message translates to:
-  /// **'Temperature up to 102°F (38.9°C)'**
+  /// **'Temperature upto 102°F (38.9°C)'**
   String get temp_upto_102;
 
   /// No description provided for @temp_more_than_102.
@@ -12818,25 +12824,25 @@ abstract class AppLocalizations {
   /// No description provided for @foodAdvice_1.
   ///
   /// In en, this message translates to:
-  /// **'1. 2–3 tablespoons of food at a time, 2–3 times each day'**
+  /// **'2–3 tablespoons of food at a time, 2–3 times each day'**
   String get foodAdvice_1;
 
   /// No description provided for @foodAdvice_2.
   ///
   /// In en, this message translates to:
-  /// **'2. 1/2 cup/katori serving at a time, 2–3 times each day with 1–2 snacks between meals'**
+  /// **'1/2 cup/katori serving at a time, 2–3 times each day with 1–2 snacks between meals'**
   String get foodAdvice_2;
 
   /// No description provided for @foodAdvice_3.
   ///
   /// In en, this message translates to:
-  /// **'3. 1/2 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals'**
+  /// **'1/2 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals'**
   String get foodAdvice_3;
 
   /// No description provided for @foodAdvice_4.
   ///
   /// In en, this message translates to:
-  /// **'4. 3/4 to 1 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals'**
+  /// **'3/4 to 1 cup/katori serving at a time, 3–4 times each day with 1–2 snacks between meals'**
   String get foodAdvice_4;
 
   /// No description provided for @mentionRecordedWeightForAge.

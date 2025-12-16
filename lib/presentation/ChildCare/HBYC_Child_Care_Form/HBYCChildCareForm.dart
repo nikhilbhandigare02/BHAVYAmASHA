@@ -55,10 +55,7 @@ class _HbycFormView extends StatefulWidget {
 class _HbycFormViewState extends State<_HbycFormView> {
   final _formKey = GlobalKey<FormState>();
 
-  final _yesNoOptions = const [
-    'Yes',
-    'No',
-  ];
+  final _yesNoOptions = const ['Yes', 'No'];
 
   final _hbycVisitMonthOptions = const [
     '3 months',
@@ -87,18 +84,28 @@ class _HbycFormViewState extends State<_HbycFormView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppHeader(screenTitle: 'Home Based Care For Young Child', showBack: true,),
+      appBar: AppHeader(
+        screenTitle:
+            l10n?.homeBasedCareForYoungChild ??
+            'Home Based Care For Young Child',
+        showBack: true,
+      ),
       body: BlocListener<HbycChildCareBloc, HbycChildCareState>(
         listener: (context, state) {
           if (state.status == HbycFormStatus.failure && state.error != null) {
             final key = state.error!;
-            final localized = key == 'hbycBhramanRequired' ? l10n.hbycBhramanRequired : key;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(localized)),
-            );
+            final localized = key == 'hbycBhramanRequired'
+                ? l10n.hbycBhramanRequired
+                : key;
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(localized)));
           }
           if (state.status == HbycFormStatus.success) {
-            showAppSnackBar(context, 'Form saved successfully');
+            showAppSnackBar(
+              context,
+              l10n?.formSavedSuccess ?? 'Form saved successfully',
+            );
             Navigator.pushNamedAndRemoveUntil(
               context,
               Route_Names.HBYCList,
@@ -110,521 +117,624 @@ class _HbycFormViewState extends State<_HbycFormView> {
           child: Stack(
             children: [
               SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-
-                    const SizedBox(height: 8),
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'Is Beneficiary Absent?',
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.beneficiaryAbsent.isNotEmpty ? state.beneficiaryAbsent : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(BeneficiaryAbsentChanged(v ?? '')),
-                             // validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            if (state.beneficiaryAbsent == 'Yes') ...[
-                              const SizedBox(height: 8),
-                              CustomTextField(
-                                key: const ValueKey('beneficiaryAbsentReason'),
-                                hintText: 'Enter reason for absence',
-                                labelText: 'Reason for Absent',
-                                onChanged: (value) => context.read<HbycChildCareBloc>().add(BeneficiaryAbsentReasonChanged(value)),
-                                // validator: (value) {
-                                //   if (state.beneficiaryAbsent == 'Yes' && (value == null || value.isEmpty)) {
-                                //     return 'Please enter reason for absence';
-                                //   }
-                                //   return null;
-                                // },
-                              ),
-                            ],
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    const SizedBox(height: 1),
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        final label = AppLocalizations.of(context)!.hbycBhramanLabel;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'HBYC home visit? *',
-                              items: _hbycVisitMonthOptions,
-                              getLabel: (s) => s,
-                              value: state.hbycBhraman.isNotEmpty ? state.hbycBhraman : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(HbycBhramanChanged(v ?? '')),
-                              validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    // Is Child Sick Section with conditional input
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: AppLocalizations.of(context)!.hbycIsChildSickLabel,
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.isChildSick.isNotEmpty ? state.isChildSick : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(IsChildSickChanged(v ?? '')),
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            if (state.isChildSick == 'Yes')
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ApiDropdown<String>(
-                                    labelText: 'Child referred to health facility?',
-                                    items: _yesNoOptions,
-                                    getLabel: (s) => s,
-                                    value: _yesNoOptions.contains(_sicknessDetailsController.text)
-                                      ? _sicknessDetailsController.text
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 8),
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.beneficiaryAbsentLabel ??
+                                      'Is Beneficiary Absent?',
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.beneficiaryAbsent.isNotEmpty
+                                      ? state.beneficiaryAbsent
                                       : null,
-                                    hintText: AppLocalizations.of(context)!.select,
-                                    onChanged: (v) {
-                                      _sicknessDetailsController.text = v ?? '';
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) => context
+                                      .read<HbycChildCareBloc>()
+                                      .add(BeneficiaryAbsentChanged(v ?? '')),
+                                  // validator: (v) => (v == null || v.isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
+                                ),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
+                                if (state.beneficiaryAbsent == 'Yes') ...[
+                                  const SizedBox(height: 8),
+                                  CustomTextField(
+                                    key: const ValueKey(
+                                      'beneficiaryAbsentReason',
+                                    ),
+                                    hintText:
+                                        l10n?.reasonForAbsence ??
+                                        'Enter reason for absence',
+                                    labelText:
+                                        l10n?.reasonForAbsence ??
+                                        'Reason for Absent',
+                                    onChanged: (value) =>
+                                        context.read<HbycChildCareBloc>().add(
+                                          BeneficiaryAbsentReasonChanged(value),
+                                        ),
+                                    // validator: (value) {
+                                    //   if (state.beneficiaryAbsent == 'Yes' && (value == null || value.isEmpty)) {
+                                    //     return 'Please enter reason for absence';
+                                    //   }
+                                    //   return null;
+                                    // },
+                                  ),
+                                ],
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        const SizedBox(height: 1),
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            final label = AppLocalizations.of(
+                              context,
+                            )!.hbycBhramanLabel;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.hbycHomeVisit ??
+                                      'HBYC home visit? *',
+                                  items: _hbycVisitMonthOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case '3 months':
+                                        return l10n?.months3 ?? '3 months';
+                                      case '6 months':
+                                        return l10n?.months6 ?? '6 months';
+                                      case '9 months':
+                                        return l10n?.months9 ?? '9 months';
+                                      case '12 months':
+                                        return l10n?.months12 ?? '12 months';
+                                      case '15 months':
+                                        return l10n?.months15 ?? '15 months';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.hbycBhraman.isNotEmpty
+                                      ? state.hbycBhraman
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) => context
+                                      .read<HbycChildCareBloc>()
+                                      .add(HbycBhramanChanged(v ?? '')),
+                                  validator: (v) => (v == null || v.isEmpty)
+                                      ? AppLocalizations.of(
+                                          context,
+                                        )!.requiredField
+                                      : null,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        // Is Child Sick Section with conditional input
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  )!.hbycIsChildSickLabel,
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.isChildSick.isNotEmpty
+                                      ? state.isChildSick
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) => context
+                                      .read<HbycChildCareBloc>()
+                                      .add(IsChildSickChanged(v ?? '')),
+                                ),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
+                                if (state.isChildSick == 'Yes')
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      ApiDropdown<String>(
+                                        labelText: l10n?.is_referred_to_health_facility ??
+                                            'Child referred to health facility?',
+                                        items: _yesNoOptions,
+                                        getLabel: (s) {
+                                          switch (s) {
+                                            case 'Yes':
+                                              return l10n?.yes ?? 'Yes';
+                                            case 'No':
+                                              return l10n?.no ?? 'No';
+                                            default:
+                                              return s;
+                                          }
+                                        },
+                                        value: state.childReferredToHealthFacility.isNotEmpty
+                                            ? state.childReferredToHealthFacility
+                                            : null,
+                                        hintText: AppLocalizations.of(context)!.select,
+                                        onChanged: (v) {
+                                          context.read<HbycChildCareBloc>().add(
+                                            ChildReferredToHealthFacilityChanged(v ?? ''),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  )!.hbycBreastfeedingContinuingLabel,
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value:
+                                      state.breastfeedingContinuing.isNotEmpty
+                                      ? state.breastfeedingContinuing
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        BreastfeedingContinuingChanged(v ?? ''),
+                                      ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        // Replace the existing "Complementary Food is given" section with:
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.is_complementary_food_given ??
+                                      'Complementary food given?',
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.completeDietProvided.isNotEmpty
+                                      ? state.completeDietProvided
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        CompleteDietProvidedChanged(v ?? ''),
+                                      ),
+                                ),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
+                                if (state.completeDietProvided == 'Yes') ...[
+                                  const SizedBox(height: 12),
+                                  ApiDropdown<String>(
+                                    labelText:
+                                        l10n?.foodAdvice_1 ??
+                                        '1. 2-3 tablespoons of food at a time, 2-3 times each day',
+                                    items: _yesNoOptions,
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Yes':
+                                          return l10n?.yes ?? 'Yes';
+                                        case 'No':
+                                          return l10n?.no ?? 'No';
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.foodFrequency1.isNotEmpty
+                                        ? state.foodFrequency1
+                                        : null,
+                                    hintText: AppLocalizations.of(
+                                      context,
+                                    )!.select,
+                                    onChanged: (v) => context
+                                        .read<HbycChildCareBloc>()
+                                        .add(FoodFrequency1Changed(v ?? '')),
+                                  ),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  ApiDropdown<String>(
+                                    labelText:
+                                        l10n?.foodAdvice_2 ??
+                                        '2. 1/2 cup/katori serving at a time, 2-3 times each day with 1-2 snacks between meals',
+                                    items: _yesNoOptions,
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Yes':
+                                          return l10n?.yes ?? 'Yes';
+                                        case 'No':
+                                          return l10n?.no ?? 'No';
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.foodFrequency2.isNotEmpty
+                                        ? state.foodFrequency2
+                                        : null,
+                                    hintText: AppLocalizations.of(
+                                      context,
+                                    )!.select,
+                                    onChanged: (v) => context
+                                        .read<HbycChildCareBloc>()
+                                        .add(FoodFrequency2Changed(v ?? '')),
+                                  ),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  ApiDropdown<String>(
+                                    labelText:
+                                        l10n?.foodAdvice_3 ??
+                                        '3. 1/2 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
+                                    items: _yesNoOptions,
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Yes':
+                                          return l10n?.yes ?? 'Yes';
+                                        case 'No':
+                                          return l10n?.no ?? 'No';
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.foodFrequency3.isNotEmpty
+                                        ? state.foodFrequency3
+                                        : null,
+                                    hintText: AppLocalizations.of(
+                                      context,
+                                    )!.select,
+                                    onChanged: (v) => context
+                                        .read<HbycChildCareBloc>()
+                                        .add(FoodFrequency3Changed(v ?? '')),
+                                  ),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  ApiDropdown<String>(
+                                    labelText:
+                                        l10n?.foodAdvice_4 ??
+                                        '4. 3/4 to 1 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
+                                    items: _yesNoOptions,
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Yes':
+                                          return l10n?.yes ?? 'Yes';
+                                        case 'No':
+                                          return l10n?.no ?? 'No';
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.foodFrequency4.isNotEmpty
+                                        ? state.foodFrequency4
+                                        : null,
+                                    hintText: AppLocalizations.of(
+                                      context,
+                                    )!.select,
+                                    onChanged: (v) => context
+                                        .read<HbycChildCareBloc>()
+                                        .add(FoodFrequency4Changed(v ?? '')),
+                                  ),
+                                ],
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  )!.hbycWeighedByAwwLabel,
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.weighedByAww.isNotEmpty
+                                      ? state.weighedByAww
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) => context
+                                      .read<HbycChildCareBloc>()
+                                      .add(WeighedByAwwChanged(v ?? '')),
+                                ),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
+                                if (state.weighedByAww == 'Yes') ...[
+                                  const SizedBox(height: 8),
+                                  CustomTextField(
+                                    key: const ValueKey('weightForAge'),
+                                    hintText:
+                                        'Please enter weight (in kg)',
+                                    labelText:
+                                        l10n?.mentionRecordedWeightForAge ??
+                                        'Mention the recorded weight-for-age as per MCP card (in kg)',
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (value) => context
+                                        .read<HbycChildCareBloc>()
+                                        .add(WeightForAgeChanged(value)),
+                                    validator: (value) {
+                                      if (state.weighedByAww == 'Yes' &&
+                                          (value == null || value.isEmpty)) {
+                                        return l10n?.pleaseEnterWeightForAge ??
+                                            'Please enter weight-for-age';
+                                      }
+                                      return null;
                                     },
                                   ),
                                 ],
-                              ),
-
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: AppLocalizations.of(context)!.hbycBreastfeedingContinuingLabel,
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.breastfeedingContinuing.isNotEmpty ? state.breastfeedingContinuing : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(BreastfeedingContinuingChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    // Replace the existing "Complementary Food is given" section with:
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'Complementary food given?',
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.completeDietProvided.isNotEmpty ? state.completeDietProvided : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(CompleteDietProvidedChanged(v ?? '')),
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            if (state.completeDietProvided == 'Yes') ...[
-                              const SizedBox(height: 12),
-                              ApiDropdown<String>(
-                                labelText: '1. 2-3 tablespoons of food at a time, 2-3 times each day',
-                                items: _yesNoOptions,
-                                getLabel: (s) => s,
-                                value: state.foodFrequency1.isNotEmpty ? state.foodFrequency1 : null,
-                                hintText: AppLocalizations.of(context)!.select,
-                                onChanged: (v) => context.read<HbycChildCareBloc>().add(FoodFrequency1Changed(v ?? '')),
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              const SizedBox(height: 12),
-
-                              ApiDropdown<String>(
-                                labelText: '2. 1/2 cup/katori serving at a time, 2-3 times each day with 1-2 snacks between meals',
-                                items: _yesNoOptions,
-                                getLabel: (s) => s,
-                                value: state.foodFrequency2.isNotEmpty ? state.foodFrequency2 : null,
-                                hintText: AppLocalizations.of(context)!.select,
-                                onChanged: (v) => context.read<HbycChildCareBloc>().add(FoodFrequency2Changed(v ?? '')),
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              const SizedBox(height: 12),
-
-                              ApiDropdown<String>(
-                                labelText: '3. 1/2 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
-                                items: _yesNoOptions,
-                                getLabel: (s) => s,
-                                value: state.foodFrequency3.isNotEmpty ? state.foodFrequency3 : null,
-                                hintText: AppLocalizations.of(context)!.select,
-                                onChanged: (v) => context.read<HbycChildCareBloc>().add(FoodFrequency3Changed(v ?? '')),
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              const SizedBox(height: 12),
-
-                              ApiDropdown<String>(
-                                labelText: '4. 3/4 to 1 cup/katori serving at a time, 3-4 times each day with 1-2 snacks between meals',
-                                items: _yesNoOptions,
-                                getLabel: (s) => s,
-                                value: state.foodFrequency4.isNotEmpty ? state.foodFrequency4 : null,
-                                hintText: AppLocalizations.of(context)!.select,
-                                onChanged: (v) => context.read<HbycChildCareBloc>().add(FoodFrequency4Changed(v ?? '')),
-                              ),
-                            ],
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: AppLocalizations.of(context)!.hbycWeighedByAwwLabel,
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.weighedByAww.isNotEmpty ? state.weighedByAww : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(WeighedByAwwChanged(v ?? '')),
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            if (state.weighedByAww == 'Yes') ...[
-                              const SizedBox(height: 8),
-                              CustomTextField(
-                                key: const ValueKey('weightForAge'),
-                                hintText: 'Mention the recorded weight-for-age as per MCP card (in kg)',
-                                labelText: 'Mention the recorded weight-for-age as per MCP card (in kg)',
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) => context.read<HbycChildCareBloc>().add(WeightForAgeChanged(value)),
-                                validator: (value) {
-                                  if (state.weighedByAww == 'Yes' && (value == null || value.isEmpty)) {
-                                    return 'Please enter weight-for-age';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'Recording of weight-for-length/height by Anganwadi Worker',
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.lengthHeightRecorded.isNotEmpty ? state.lengthHeightRecorded : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(LengthHeightRecordedChanged(v ?? '')),
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            if (state.lengthHeightRecorded == 'Yes') ...[
-                              const SizedBox(height: 8),
-                              CustomTextField(
-                                key: const ValueKey('weightForLength'),
-                                hintText: 'Mention the recorded weight-for-length/height as per MCP card (in cm)',
-                                labelText: 'Mention the recorded weight-for-length/height as per MCP card (in cm)',
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) => context.read<HbycChildCareBloc>().add(WeightForLengthChanged(value)),
-                                validator: (value) {
-                                  if (state.lengthHeightRecorded == 'Yes' && (value == null || value.isEmpty)) {
-                                    return 'Please enter weight-for-length/height';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    // Weight Less Than 3SD Section with conditional input
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: AppLocalizations.of(context)!.hbycWeightLessThan3sdLabel,
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.weightLessThan3sdReferred.isNotEmpty ? state.weightLessThan3sdReferred : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(WeightLessThan3sdReferredChanged(v ?? '')),
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            if (state.weightLessThan3sdReferred == 'Yes')
-                              CustomTextField(
-                                controller: _referralDetailsController,
-                                hintText: 'Referred place ',
-                                labelText: 'Referred place ',
-                                //maxLines: 3,
-                              ),
-
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    // Development Delays Observed Section with conditional input
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'Developmental delay checked?',
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.developmentDelaysObserved.isNotEmpty ? state.developmentDelaysObserved : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(DevelopmentDelaysObservedChanged(v ?? '')),
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            if (state.developmentDelaysObserved == 'Yes')
-
-                              CustomTextField(
-                                controller: _developmentDelaysDetailsController,
-                                hintText: 'is the child referred?',
-                                labelText: 'is the child referred?',
-                               // maxLines: 3,
-                              ),
-
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'Immunization status checked as per MCP card?',
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.fullyVaccinatedAsPerMcp.isNotEmpty ? state.fullyVaccinatedAsPerMcp : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(FullyVaccinatedAsPerMcpChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: AppLocalizations.of(context)!.hbycMeaslesVaccineGivenLabel,
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.measlesVaccineGiven.isNotEmpty ? state.measlesVaccineGiven : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(MeaslesVaccineGivenChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: AppLocalizations.of(context)!.hbycVitaminADosageGivenLabel,
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.vitaminADosageGiven.isNotEmpty ? state.vitaminADosageGiven : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(VitaminADosageGivenChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: AppLocalizations.of(context)!.hbycOrsPacketAvailableLabel,
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.orsPacketAvailable.isNotEmpty ? state.orsPacketAvailable : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) {
-                                context.read<HbycChildCareBloc>().add(OrsPacketAvailableChanged(v ?? ''));
-                                // Reset the dependent fields when changing the parent field
-                                if (v != 'No') {
-                                  context.read<HbycChildCareBloc>().add(OrsGivenChanged(''));
-                                  context.read<HbycChildCareBloc>().add(OrsCountChanged(''));
-                                }
-                              },
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            if (state.orsPacketAvailable == 'No') ...[
-                              const SizedBox(height: 8),
-                              ApiDropdown<String>(
-                                labelText: 'ORS given?',
-                                items: _yesNoOptions,
-                                getLabel: (s) => s,
-                                value: state.orsGiven.isNotEmpty ? state.orsGiven : null,
-                                hintText: AppLocalizations.of(context)!.select,
-                                onChanged: (v) {
-                                  context.read<HbycChildCareBloc>().add(OrsGivenChanged(v ?? ''));
-                                  if (v != 'Yes') {
-                                    context.read<HbycChildCareBloc>().add(OrsCountChanged(''));
-                                  }
-                                },
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              if (state.orsGiven == 'Yes') ...[
-                                const SizedBox(height: 8),
-                                CustomTextField(
-                                  key: const ValueKey('orsCount'),
-                                  hintText: 'Number of ORS given',
-                                  labelText: 'Number of ORS given',
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (value) => context.read<HbycChildCareBloc>().add(OrsCountChanged(value)),
-                                  validator: (value) {
-                                    if (state.orsGiven == 'Yes' && (value == null || value.isEmpty)) {
-                                      return 'Please enter number of ORS given';
-                                    }
-                                    return null;
-                                  },
-                                ),
                               ],
-                            ],
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
 
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                            ApiDropdown<String>(
-                              labelText: AppLocalizations.of(context)!.hbycIronFolicSyrupAvailableLabel,
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.ironFolicSyrupAvailable.isNotEmpty
-                                  ? state.ironFolicSyrupAvailable
-                                  : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) {
-                                context.read<HbycChildCareBloc>().add(
-                                    IronFolicSyrupAvailableChanged(v ?? '')
-                                );
-
-                                if (v != 'Yes') {
-                                  context.read<HbycChildCareBloc>().add(IfaSyrupGivenChanged(''));
-                                  context.read<HbycChildCareBloc>().add(IfaSyrupCountChanged(''));
-                                }
-                              },
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                            // Show these fields when syrup IS available (Yes)
-                            if (state.ironFolicSyrupAvailable == 'No') ...[
-                              const SizedBox(height: 8),
-
-                              ApiDropdown<String>(
-                                labelText: 'Iron Folic Acid syrup Given?',
-                                items: _yesNoOptions,
-                                getLabel: (s) => s,
-                                value: state.ifaSyrupGiven.isNotEmpty
-                                    ? state.ifaSyrupGiven
-                                    : null,
-                                hintText: AppLocalizations.of(context)!.select,
-                                onChanged: (v) {
-                                  context.read<HbycChildCareBloc>().add(
-                                      IfaSyrupGivenChanged(v ?? '')
-                                  );
-                                  // Reset the count if "No" is selected
-                                  if (v != 'Yes') {
-                                    context.read<HbycChildCareBloc>().add(IfaSyrupCountChanged(''));
-                                  }
-                                },
-                              ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                              if (state.ifaSyrupGiven == 'Yes') ...[
-                                const SizedBox(height: 8),
-                                CustomTextField(
-                                  key: const ValueKey('ifaSyrupCount'),
-                                  hintText: 'Number of Iron Folic Acid syrup given',
-                                  labelText: 'Number of Iron Folic Acid syrup given',
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (value) => context.read<HbycChildCareBloc>().add(
-                                      IfaSyrupCountChanged(value)
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.recordingWeightForLengthHeight ??
+                                      'Recording of weight-for-length/height by Anganwadi Worker',
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.lengthHeightRecorded.isNotEmpty
+                                      ? state.lengthHeightRecorded
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        LengthHeightRecordedChanged(v ?? ''),
+                                      ),
+                                ),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
+                                if (state.lengthHeightRecorded == 'Yes') ...[
+                                  const SizedBox(height: 8),
+                                  CustomTextField(
+                                    key: const ValueKey('weightForLength'),
+                                    hintText: 'Please enter height (in cm)',
+                                    labelText:
+                                        l10n?.recorded_height ??
+                                        'Mention the recorded weight-for-length/height as per MCP card (in cm)',
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (value) => context
+                                        .read<HbycChildCareBloc>()
+                                        .add(WeightForLengthChanged(value)),
+                                    validator: (value) {
+                                      if (state.lengthHeightRecorded == 'Yes' &&
+                                          (value == null || value.isEmpty)) {
+                                        return l10n
+                                                ?.enterWeightForLengthHeight ??
+                                            'Please enter weight-for-length/height';
+                                      }
+                                      return null;
+                                    },
                                   ),
-                                  validator: (value) {
-                                    if (state.ifaSyrupGiven == 'Yes' &&
-                                        (value == null || value.isEmpty)) {
-                                      return 'Please enter number of Iron Folic Acid syrup given';
-                                    }
-                                    return null;
-                                  },
-                                ),
+                                ],
                               ],
-                            ],
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                /// <3SD Referred?
+                                ApiDropdown<String>(
+                                  labelText: AppLocalizations.of(context)!
+                                      .hbycWeightLessThan3sdLabel,
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.weightLessThan3sdReferred.isNotEmpty
+                                      ? state.weightLessThan3sdReferred
+                                      : null,
+                                  hintText: AppLocalizations.of(context)!.select,
+                                  onChanged: (v) => context
+                                      .read<HbycChildCareBloc>()
+                                      .add(WeightLessThan3sdReferredChanged(v ?? '')),
+                                ),
+
+                                /// Referred Place (Dropdown)
+                                if (state.weightLessThan3sdReferred == 'Yes') ...[
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
+                                  ApiDropdown<String>(
+                                    labelText: l10n?.referred_place ?? 'Referred Place',
+                                    items: const ['VHSND', 'PHC','NRC'],
+                                    getLabel: (s) => s,
+                                    value: state.referralDetailsChild.isNotEmpty
+                                        ? state.referralDetailsChild
+                                        : null,
+                                    hintText: l10n!.selectOption,
+                                    onChanged: (v) => context
+                                        .read<HbycChildCareBloc>()
+                                        .add(ReferralDetailsChildChanged(v ?? '')),
+                                  ),
+                                ],
+                              ],
+                            );
+                          },
+                        ),
+
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
 
                     BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                       builder: (context, state) {
@@ -632,144 +742,769 @@ class _HbycFormViewState extends State<_HbycFormView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ApiDropdown<String>(
-                              labelText: 'Counsel for exclusive breastfeeding?',
+                              labelText: l10n?.is_developmental_delay_checked ??
+                                  'Developmental delay checked?',
                               items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.counselingExclusiveBf6m.isNotEmpty
-                                  ? state.counselingExclusiveBf6m
+                              getLabel: (s) {
+                                switch (s) {
+                                  case 'Yes':
+                                    return l10n?.yes ?? 'Yes';
+                                  case 'No':
+                                    return l10n?.no ?? 'No';
+                                  default:
+                                    return s;
+                                }
+                              },
+                              value: state.developmentDelaysObserved.isNotEmpty
+                                  ? state.developmentDelaysObserved
                                   : null,
                               hintText: AppLocalizations.of(context)!.select,
                               onChanged: (v) => context
                                   .read<HbycChildCareBloc>()
-                                  .add(CounselingExclusiveBf6mChanged(v ?? '')),
+                                  .add(DevelopmentDelaysObservedChanged(v ?? '')),
                             ),
+
+                            /// Divider after first dropdown
+                            if (state.developmentDelaysObserved == 'Yes')
+                              const Divider(thickness: 0.5),
+
+                            // Show "Is the child referred?" only if Developmental delay = Yes
+                            if (state.developmentDelaysObserved == 'Yes') ...[
+                              ApiDropdown<String>(
+                                labelText:
+                                l10n?.isChildReferred ?? 'Is the child referred?',
+                                items: _yesNoOptions,
+                                getLabel: (s) =>
+                                s == 'Yes' ? l10n?.yes ?? 'Yes' : l10n?.no ?? 'No',
+                                value: state.childReferred.isNotEmpty
+                                    ? state.childReferred
+                                    : null,
+                                hintText: l10n!.selectOption,
+                                onChanged: (v) => context
+                                    .read<HbycChildCareBloc>()
+                                    .add(ChildReferredChanged(v ?? '')),
+                              ),
+                            ],
+
+                            /// Divider after "Is Child Referred?"
+                            if (state.developmentDelaysObserved == 'Yes' &&
+                                state.childReferred == 'Yes')
+                              const Divider(thickness: 0.5),
+
+                            // Show "Referred Place" only if both previous are Yes
+                            if (state.developmentDelaysObserved == 'Yes' &&
+                                state.childReferred == 'Yes') ...[
+                              ApiDropdown<String>(
+                                labelText:
+                                l10n?.referred_place ?? 'Referred Place',
+                                items: const ['ANM', 'Health Facility'],
+                                getLabel: (s) => s,
+                                value: state.referralDetails.isNotEmpty
+                                    ? state.referralDetails
+                                    : null,
+                                hintText: l10n!.selectOption,
+                                onChanged: (v) => context
+                                    .read<HbycChildCareBloc>()
+                                    .add(ReferralDetailsChanged(v ?? '')),
+                              ),
+                            ],
                           ],
                         );
                       },
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
 
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'Counsel for complementary feeding?',
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.immunizationStatusChecked ??
+                                      'Immunization status checked as per MCP card?',
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value:
+                                      state.fullyVaccinatedAsPerMcp.isNotEmpty
+                                      ? state.fullyVaccinatedAsPerMcp
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        FullyVaccinatedAsPerMcpChanged(v ?? ''),
+                                      ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  )!.hbycMeaslesVaccineGivenLabel,
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.measlesVaccineGiven.isNotEmpty
+                                      ? state.measlesVaccineGiven
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) => context
+                                      .read<HbycChildCareBloc>()
+                                      .add(MeaslesVaccineGivenChanged(v ?? '')),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  )!.hbycVitaminADosageGivenLabel,
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.vitaminADosageGiven.isNotEmpty
+                                      ? state.vitaminADosageGiven
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) => context
+                                      .read<HbycChildCareBloc>()
+                                      .add(VitaminADosageGivenChanged(v ?? '')),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  )!.hbycOrsPacketAvailableLabel,
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.orsPacketAvailable.isNotEmpty
+                                      ? state.orsPacketAvailable
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) {
+                                    context.read<HbycChildCareBloc>().add(
+                                      OrsPacketAvailableChanged(v ?? ''),
+                                    );
+                                    // Reset the dependent fields when changing the parent field
+                                    if (v != 'No') {
+                                      context.read<HbycChildCareBloc>().add(
+                                        OrsGivenChanged(''),
+                                      );
+                                      context.read<HbycChildCareBloc>().add(
+                                        OrsCountChanged(''),
+                                      );
+                                    }
+                                  },
+                                ),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
+                                if (state.orsPacketAvailable == 'No') ...[
+                                  const SizedBox(height: 8),
+                                  ApiDropdown<String>(
+                                    labelText: l10n?.orsGiven ?? 'ORS given?',
+                                    items: _yesNoOptions,
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Yes':
+                                          return l10n?.yes ?? 'Yes';
+                                        case 'No':
+                                          return l10n?.no ?? 'No';
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.orsGiven.isNotEmpty
+                                        ? state.orsGiven
+                                        : null,
+                                    hintText: AppLocalizations.of(
+                                      context,
+                                    )!.select,
+                                    onChanged: (v) {
+                                      context.read<HbycChildCareBloc>().add(
+                                        OrsGivenChanged(v ?? ''),
+                                      );
+                                      if (v != 'Yes') {
+                                        context.read<HbycChildCareBloc>().add(
+                                          OrsCountChanged(''),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
+                                  if (state.orsGiven == 'Yes') ...[
+                                    const SizedBox(height: 8),
+                                    CustomTextField(
+                                      key: const ValueKey('orsCount'),
+                                      hintText:
+                                          l10n?.orsCount ??
+                                          'Number of ORS given',
+                                      labelText:
+                                          l10n?.orsCount ??
+                                          'Number of ORS given',
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (value) => context
+                                          .read<HbycChildCareBloc>()
+                                          .add(OrsCountChanged(value)),
+                                      validator: (value) {
+                                        if (state.orsGiven == 'Yes' &&
+                                            (value == null || value.isEmpty)) {
+                                          return l10n?.enterOrsCount ??
+                                              'Please enter number of ORS given';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ],
+                                ],
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  )!.hbycIronFolicSyrupAvailableLabel,
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value:
+                                      state.ironFolicSyrupAvailable.isNotEmpty
+                                      ? state.ironFolicSyrupAvailable
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) {
+                                    context.read<HbycChildCareBloc>().add(
+                                      IronFolicSyrupAvailableChanged(v ?? ''),
+                                    );
+
+                                    if (v != 'Yes') {
+                                      context.read<HbycChildCareBloc>().add(
+                                        IfaSyrupGivenChanged(''),
+                                      );
+                                      context.read<HbycChildCareBloc>().add(
+                                        IfaSyrupCountChanged(''),
+                                      );
+                                    }
+                                  },
+                                ),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
+
+                                // Show these fields when syrup IS available (Yes)
+                                if (state.ironFolicSyrupAvailable == 'No') ...[
+                                  const SizedBox(height: 8),
+
+                                  ApiDropdown<String>(
+                                    labelText:
+                                        l10n?.ifaSyrupGiven ??
+                                        'Iron Folic Acid syrup Given?',
+                                    items: _yesNoOptions,
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Yes':
+                                          return l10n?.yes ?? 'Yes';
+                                        case 'No':
+                                          return l10n?.no ?? 'No';
+                                        default:
+                                          return s;
+                                      }
+                                    },
+                                    value: state.ifaSyrupGiven.isNotEmpty
+                                        ? state.ifaSyrupGiven
+                                        : null,
+                                    hintText: AppLocalizations.of(
+                                      context,
+                                    )!.select,
+                                    onChanged: (v) {
+                                      context.read<HbycChildCareBloc>().add(
+                                        IfaSyrupGivenChanged(v ?? ''),
+                                      );
+                                      // Reset the count if "No" is selected
+                                      if (v != 'Yes') {
+                                        context.read<HbycChildCareBloc>().add(
+                                          IfaSyrupCountChanged(''),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
+
+                                  if (state.ifaSyrupGiven == 'Yes') ...[
+                                    const SizedBox(height: 8),
+                                    CustomTextField(
+                                      key: const ValueKey('ifaSyrupCount'),
+                                      hintText:
+                                          l10n?.ifaSyrupCount ??
+                                          'Number of Iron Folic Acid syrup given',
+                                      labelText:
+                                          l10n?.ifaSyrupCount ??
+                                          'Number of Iron Folic Acid syrup given',
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (value) => context
+                                          .read<HbycChildCareBloc>()
+                                          .add(IfaSyrupCountChanged(value)),
+                                      validator: (value) {
+                                        if (state.ifaSyrupGiven == 'Yes' &&
+                                            (value == null || value.isEmpty)) {
+                                          return l10n
+                                                  ?.ifaSyrupCountValidation ??
+                                              'Please enter number of Iron Folic Acid syrup given';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ],
+                                ],
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.counselExclusiveBreastfeeding ??
+                                      'Counsel for exclusive breastfeeding?',
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value:
+                                      state.counselingExclusiveBf6m.isNotEmpty
+                                      ? state.counselingExclusiveBf6m
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        CounselingExclusiveBf6mChanged(v ?? ''),
+                                      ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.is_counsel_for_complementary_feeding ??
+                                      'Counsel for complementary feeding?',
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value:
+                                      state.adviceComplementaryFoods.isNotEmpty
+                                      ? state.adviceComplementaryFoods
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        AdviceComplementaryFoodsChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.is_counsel_for_hand_washing ??
+                                      'Counsel for hand washing?',
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value:
+                                      state.adviceHandWashingHygiene.isNotEmpty
+                                      ? state.adviceHandWashingHygiene
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        AdviceHandWashingHygieneChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.is_counsel_for_parenting ??
+                                      'Counsel for parenting?',
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value: state.adviceParentingSupport.isNotEmpty
+                                      ? state.adviceParentingSupport
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        AdviceParentingSupportChanged(v ?? ''),
+                                      ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText:
+                                      l10n?.familyPlanningCounselling ??
+                                      'family planning Counselling?',
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value:
+                                      state.counselingFamilyPlanning.isNotEmpty
+                                      ? state.counselingFamilyPlanning
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        CounselingFamilyPlanningChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ApiDropdown<String>(
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  )!.hbycAdvicePreparingAdministeringOrsLabel,
+                                  items: _yesNoOptions,
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'Yes':
+                                        return l10n?.yes ?? 'Yes';
+                                      case 'No':
+                                        return l10n?.no ?? 'No';
+                                      default:
+                                        return s;
+                                    }
+                                  },
+                                  value:
+                                      state
+                                          .advicePreparingAdministeringOrs
+                                          .isNotEmpty
+                                      ? state.advicePreparingAdministeringOrs
+                                      : null,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  )!.select,
+                                  onChanged: (v) =>
+                                      context.read<HbycChildCareBloc>().add(
+                                        AdvicePreparingAdministeringOrsChanged(
+                                          v ?? '',
+                                        ),
+                                      ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+
+                        BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
+                          builder: (context, state) {
+                            return ApiDropdown<String>(
+                              labelText: AppLocalizations.of(context)!
+                                  .hbycAdviceAdministeringIfaSyrupLabel,
                               items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.adviceComplementaryFoods.isNotEmpty ? state.adviceComplementaryFoods : null,
+                              getLabel: (s) {
+                                switch (s) {
+                                  case 'Yes':
+                                    return l10n?.yes ?? 'Yes';
+                                  case 'No':
+                                    return l10n?.no ?? 'No';
+                                  default:
+                                    return s;
+                                }
+                              },
+                              value: state.adviceAdministeringIfaSyrup.isNotEmpty
+                                  ? state.adviceAdministeringIfaSyrup
+                                  : null, // ⭐ THIS FIXES IT
                               hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceComplementaryFoodsChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              onChanged: (v) => context
+                                  .read<HbycChildCareBloc>()
+                                  .add(AdviceAdministeringIfaSyrupChanged(v ?? '')),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
+                        CustomDatePicker(
+                          labelText: AppLocalizations.of(
+                            context,
+                          )!.hbycCompletionDateLabel,
+                          hintText: AppLocalizations.of(context)!.dateHint,
+                          onDateChanged: (dt) {
+                            if (dt == null) return;
+                            final str =
+                                '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+                            context.read<HbycChildCareBloc>().add(
+                              CompletionDateChanged(str),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.divider,
+                          thickness: 0.5,
+                          height: 0,
+                        ),
 
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'Counsel for hand washing?',
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.adviceHandWashingHygiene.isNotEmpty ? state.adviceHandWashingHygiene : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceHandWashingHygieneChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
+                        const SizedBox(
+                          height: 80,
+                        ), // Space for the fixed buttons at the bottom
+                      ],
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'Counsel for parenting?',
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.adviceParentingSupport.isNotEmpty ? state.adviceParentingSupport : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceParentingSupportChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: 'family planning Counselling?',
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.counselingFamilyPlanning.isNotEmpty ? state.counselingFamilyPlanning : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(CounselingFamilyPlanningChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ApiDropdown<String>(
-                              labelText: AppLocalizations.of(context)!.hbycAdvicePreparingAdministeringOrsLabel,
-                              items: _yesNoOptions,
-                              getLabel: (s) => s,
-                              value: state.advicePreparingAdministeringOrs.isNotEmpty ? state.advicePreparingAdministeringOrs : null,
-                              hintText: AppLocalizations.of(context)!.select,
-                              onChanged: (v) => context.read<HbycChildCareBloc>().add(AdvicePreparingAdministeringOrsChanged(v ?? '')),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    ApiDropdown<String>(
-                      labelText: AppLocalizations.of(context)!.hbycAdviceAdministeringIfaSyrupLabel,
-                      items: _yesNoOptions,
-                      getLabel: (s) => s,
-                      hintText: AppLocalizations.of(context)!.select,
-                      onChanged: (v) => context.read<HbycChildCareBloc>().add(AdviceAdministeringIfaSyrupChanged(v ?? '')),
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                    CustomDatePicker(
-                      labelText: AppLocalizations.of(context)!.hbycCompletionDateLabel,
-                      hintText: AppLocalizations.of(context)!.dateHint,
-                      onDateChanged: (dt) {
-                        if (dt == null) return;
-                        final str = '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
-                        context.read<HbycChildCareBloc>().add(CompletionDateChanged(str));
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                    const SizedBox(height: 80), // Space for the fixed buttons at the bottom
-
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
@@ -784,7 +1519,10 @@ class _HbycFormViewState extends State<_HbycFormView> {
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: BlocBuilder<HbycChildCareBloc, HbycChildCareState>(
                     builder: (context, state) {
                       final busy = state.status == HbycFormStatus.submitting;
@@ -792,14 +1530,15 @@ class _HbycFormViewState extends State<_HbycFormView> {
                         children: [
                           Expanded(
                             child: RoundButton(
-                              title: 'Previous',
+                              title: l10n?.previous ?? 'Previous',
                               height: 4.5.h,
                               onPress: () {
                                 Navigator.of(context).pushNamed(
-                                    Route_Names.PreviousVisitsScreenHBYC,
-                                    arguments: {
-                                      'beneficiaryId': widget.beneficiaryId
-                                    });
+                                  Route_Names.PreviousVisitsScreenHBYC,
+                                  arguments: {
+                                    'beneficiaryId': widget.beneficiaryId,
+                                  },
+                                );
                               },
                               color: AppColors.primary,
                             ),
@@ -807,20 +1546,37 @@ class _HbycFormViewState extends State<_HbycFormView> {
                           const SizedBox(width: 30),
                           Expanded(
                             child: RoundButton(
-                              title: 'Save Form', 
+                              title: l10n?.saveForm ?? 'Save Form',
                               height: 4.5.h,
                               isLoading: busy,
                               disabled: busy,
                               onPress: () {
-                                if (_formKey.currentState?.validate() ?? false) {
-                                  final state = context.read<HbycChildCareBloc>().state;
-                                  context.read<HbycChildCareBloc>().add(SubmitForm(
-                                    beneficiaryRefKey: widget.beneficiaryId,
-                                    householdRefKey: widget.hhid,
-                                    sicknessDetails: state.isChildSick == 'Yes' ? _sicknessDetailsController.text : null,
-                                    referralDetails: state.weightLessThan3sdReferred == 'Yes' ? _referralDetailsController.text : null,
-                                    developmentDelaysDetails: state.developmentDelaysObserved == 'Yes' ? _developmentDelaysDetailsController.text : null,
-                                  ));
+                                if (_formKey.currentState?.validate() ??
+                                    false) {
+                                  final state = context
+                                      .read<HbycChildCareBloc>()
+                                      .state;
+                                  context.read<HbycChildCareBloc>().add(
+                                    SubmitForm(
+                                      beneficiaryRefKey: widget.beneficiaryId,
+                                      householdRefKey: widget.hhid,
+                                      sicknessDetails:
+                                          state.isChildSick == 'Yes'
+                                          ? _sicknessDetailsController.text
+                                          : null,
+                                      referralDetails:
+                                          state.weightLessThan3sdReferred ==
+                                              'Yes'
+                                          ? _referralDetailsController.text
+                                          : null,
+                                      developmentDelaysDetails:
+                                          state.developmentDelaysObserved ==
+                                              'Yes'
+                                          ? _developmentDelaysDetailsController
+                                                .text
+                                          : null,
+                                    ),
+                                  );
                                 }
                               },
                             ),
@@ -838,8 +1594,3 @@ class _HbycFormViewState extends State<_HbycFormView> {
     );
   }
 }
-
-
-
-
-
