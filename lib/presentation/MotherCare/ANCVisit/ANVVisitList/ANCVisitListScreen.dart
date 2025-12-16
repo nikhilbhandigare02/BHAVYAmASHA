@@ -645,26 +645,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (isHighRisk) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.redAccent.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'HRP',
-                                style: TextStyle(
-                                  color: Colors.red[600],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12.sp,
-                                ),
-                              ),
-                            ),
-                          ],
-
-
                           Text(
                             '${isAncDue ? 'DUE - ' : ''}${l10n?.visitsLabel ?? 'Visits :'} $count',
                             style: TextStyle(
@@ -673,7 +653,33 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                               fontSize: 14.sp,
                             ),
                           ),
-
+                          if (isHighRisk) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.red[50],
+                                border: Border.all(color: Colors.red[700]!),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                'HRP',
+                                style: TextStyle(
+                                  color: Colors.red[700],
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12.sp,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       );
                     },
@@ -764,6 +770,11 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     builder: (context, snapshot) {
                       final visitCount = snapshot.data?['count'] ?? 0;
                       final isHighRisk = snapshot.data?['isHighRisk'] == true;
+                      
+                      // Get high risk reasons if available
+                      final highRiskReasons = snapshot.data?['highRiskReasons'] is List 
+                          ? List<String>.from(snapshot.data?['highRiskReasons'] ?? []) 
+                          : <String>[];
 
                       DateTime? lmpDate;
                       try {
@@ -1010,3 +1021,5 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     );
   }
 }
+
+////////////////////////////////////////////////////////
