@@ -6668,4 +6668,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setting_update_msg => 'Your Bhavya m-ASHA application is up to date.';
+
+  @override
+  String get aasha => 'ASHA';
+
+  @override
+  String get help_title => 'Help';
+
+  @override
+  String get ashaModule1 => 'ASHA module 1';
+
+  @override
+  String get ashaModule2 => 'ASHA module 2';
+
+  @override
+  String get ashaModule3 => 'ASHA module 3';
+
+  @override
+  String get ashaModule4 => 'ASHA module 4';
+
+  @override
+  String get ashaModule567 => 'ASHA module 5,6 & 7';
+
+  @override
+  String get ncdLabel => 'NCD';
+
+  @override
+  String get hbnc => 'HBNC';
+
+  @override
+  String get hbyc => 'HBYC';
+
+  @override
+  String get ashaFacilitatorTraining => 'ASHA Facilitator training';
+
+  @override
+  String get inductionTraining => 'Induction Training';
+
+  @override
+  String get maa => 'MAA (Mothers Absolute Affection)';
+
+  @override
+  String get idcf => 'IDCF (Integrated Diarrhoea Control Fortnight)';
+
+  @override
+  String get otherTraining => 'Other Training';
+
+  @override
+  String get receiving => 'Receiving';
+
+  @override
+  String get providing => 'Providing';
+
+  @override
+  String get newHouseholdRegister => 'New Household Registration';
+
+  @override
+  String get sr_No => 'Sr.No.';
+
+  @override
+  String get present => 'Present?';
 }

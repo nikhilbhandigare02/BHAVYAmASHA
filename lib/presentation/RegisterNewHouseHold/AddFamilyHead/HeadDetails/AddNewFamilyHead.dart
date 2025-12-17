@@ -354,14 +354,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 Radio<bool>(
                   value: true,
                   groupValue: state.useDob,
-                  onChanged: (_) => context.read<AddFamilyHeadBloc>().add(AfhToggleUseDob()),
+                  onChanged: widget.isEdit ? null : (_) => context.read<AddFamilyHeadBloc>().add(AfhToggleUseDob()),
                 ),
                 Text(l.dobShort, style: TextStyle(fontSize: 14.sp),),
                 SizedBox(width: 2.w),
                 Radio<bool>(
                   value: false,
                   groupValue: state.useDob,
-                  onChanged: (_) => context.read<AddFamilyHeadBloc>().add(AfhToggleUseDob()),
+                  onChanged: widget.isEdit ? null : (_) => context.read<AddFamilyHeadBloc>().add(AfhToggleUseDob()),
                 ),
                 Text(l.ageApproximate, style: TextStyle(fontSize:14.sp),),
               ],
@@ -383,6 +383,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   },
                   validator: (date) =>
                       _captureError(Validations.validateDOB(l, date)),
+                  readOnly: widget.isEdit,
                 )
             )
           else
@@ -424,7 +425,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           maxLength: 3,
                           initialValue: state.years ?? '',
                           keyboardType: TextInputType.number,
-                          onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateYears(v.trim())),
+                          readOnly: widget.isEdit,
+                          onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(UpdateYears(v.trim())),
                           validator: (value) => _captureError(
                             Validations.validateApproxAge(
                               l,
@@ -452,7 +454,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           maxLength: 2,
                           initialValue: state.months ?? '',
                           keyboardType: TextInputType.number,
-                          onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateMonths(v.trim())),
+                          readOnly: widget.isEdit,
+                          onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(UpdateMonths(v.trim())),
                           validator: (value) => _captureError(
                             Validations.validateApproxAge(
                               l,
@@ -480,7 +483,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           initialValue: state.days ?? '',
                           keyboardType: TextInputType.number,
                           maxLength: 2,
-                          onChanged: (v) => context.read<AddFamilyHeadBloc>().add(UpdateDays(v.trim())),
+                          readOnly: widget.isEdit,
+                          onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(UpdateDays(v.trim())),
                           validator: (value) => _captureError(
                             Validations.validateApproxAge(
                               l,
@@ -503,7 +507,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           _Section(
-            child: ApiDropdown<String>(
+            child: IgnorePointer(
+              ignoring: widget.isEdit,
+              child: ApiDropdown<String>(
               labelText: '${l.genderLabel} *',
               items: const ['Male', 'Female', 'Transgender'],
               getLabel: (s) {
@@ -519,15 +525,17 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 }
               },
               value: state.gender,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateGender(v)),
+              onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateGender(v)),
               validator: (v) => _captureError(v == null ? 'Gender is required ' : null),
-
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           _Section(
-            child: ApiDropdown<String>(
+            child: IgnorePointer(
+              ignoring: widget.isEdit,
+              child: ApiDropdown<String>(
               labelText: l.occupationLabel,
               items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
               getLabel: (s) {
@@ -554,6 +562,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               },
               value: state.occupation,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateOccupation(v)),
+            ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -1832,7 +1841,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                   },
                                 ),
                               ],
-                              child: const Spousdetails(syncFromHead: true),
+                              child: Spousdetails(syncFromHead: true, isEdit: widget.isEdit),
                             ),
                           );
                         }

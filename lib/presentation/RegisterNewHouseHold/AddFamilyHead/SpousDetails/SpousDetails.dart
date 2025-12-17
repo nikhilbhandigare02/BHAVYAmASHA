@@ -165,6 +165,7 @@ class Spousdetails extends StatefulWidget {
   final String? occupation;
   final String? category;
   final String? religion;
+  final bool isEdit;
 
   const Spousdetails({
     super.key,
@@ -182,6 +183,7 @@ class Spousdetails extends StatefulWidget {
     this.occupation,
     this.category,
     this.religion,
+    this.isEdit = false,
   });
 
   @override
@@ -572,7 +574,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
             padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
             children: [
               _section(
-                ApiDropdown<String>(
+                IgnorePointer(
+                  ignoring: widget.isEdit,
+                  child: ApiDropdown<String>(
                   key: const ValueKey('relation_with_head'),
                   labelText: '${l.relationWithFamilyHead} *',
                   items: widget.isMemberDetails
@@ -663,8 +667,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       : (state.relation == 'Spouse'
                       ? (state.gender == 'Female' ? 'Husband' : 'Wife')
                       : (state.relation ?? (state.gender == 'Female' ? 'Husband' : 'Wife'))),
-                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateRelation(v)),
+                  onChanged: widget.isEdit ? null : (v) => context.read<SpousBloc>().add(SpUpdateRelation(v)),
                 ),
+              ),
               ),
 
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -712,11 +717,11 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   labelText: '${l.spouseName} *',
                   hintText: l.spouseNameHint,
                   initialValue: state.spouseName,
-                  readOnly: false,
+                  readOnly: widget.isEdit,
                   // validator: (value) => captureSpousError(
                   //   value == null || value.trim().isEmpty ? 'Spouse name is required' : null,
                   // ),
-                  onChanged: (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
+                  onChanged: widget.isEdit ? null : (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Spouse name is required';
@@ -746,14 +751,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   Radio<bool>(
                     value: true,
                     groupValue: state.useDob,
-                    onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
+                    onChanged: widget.isEdit ? null : (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
                   ),
                   Text(l.dobShort, style: TextStyle(fontSize: 14.sp),),
                   SizedBox(width: 4.w),
                   Radio<bool>(
                     value: false,
                     groupValue: state.useDob,
-                    onChanged: (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
+                    onChanged: widget.isEdit ? null : (_) => context.read<SpousBloc>().add(SpToggleUseDob()),
                   ),
                   Text(l.ageApproximate, style: TextStyle(fontSize:14.sp),),
                 ],
@@ -774,6 +779,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       },
                       validator: (date) =>
                           captureSpousError(Validations.validateDOB(l, date)),
+                      readOnly: widget.isEdit,
                     )
                 )
               else
@@ -814,11 +820,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               maxLength: 3,
                               initialValue: state.UpdateYears ?? '',
                               keyboardType: TextInputType.number,
-                              onChanged: (v) {
-                                context.read<SpousBloc>().add(UpdateYearsChanged(v.trim()));
-                                final state = context.read<SpousBloc>().state;
-                                _updateDobFromAge(v.trim(), state.UpdateMonths ?? '', state.UpdateDays ?? '');
-                              },
+                              readOnly: widget.isEdit,
+                              onChanged: widget.isEdit
+                                  ? null
+                                  : (v) {
+                                      context.read<SpousBloc>().add(UpdateYearsChanged(v.trim()));
+                                      final state = context.read<SpousBloc>().state;
+                                      _updateDobFromAge(v.trim(), state.UpdateMonths ?? '', state.UpdateDays ?? '');
+                                    },
                               validator: (value) => captureSpousError(
                                 Validations.validateApproxAge(
                                   l,
@@ -845,11 +854,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               maxLength: 2,
                               initialValue: state.UpdateMonths ?? '',
                               keyboardType: TextInputType.number,
-                              onChanged: (v) {
-                                context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim()));
-                                final state = context.read<SpousBloc>().state;
-                                _updateDobFromAge(state.UpdateYears ?? '', v.trim(), state.UpdateDays ?? '');
-                              },
+                              readOnly: widget.isEdit,
+                              onChanged: widget.isEdit
+                                  ? null
+                                  : (v) {
+                                      context.read<SpousBloc>().add(UpdateMonthsChanged(v.trim()));
+                                      final state = context.read<SpousBloc>().state;
+                                      _updateDobFromAge(state.UpdateYears ?? '', v.trim(), state.UpdateDays ?? '');
+                                    },
                               validator: (value) => captureSpousError(
                                 Validations.validateApproxAge(
                                   l,
@@ -877,11 +889,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               maxLength: 2,
                               initialValue: state.UpdateDays ?? '',
                               keyboardType: TextInputType.number,
-                              onChanged: (v) {
-                                context.read<SpousBloc>().add(UpdateDaysChanged(v.trim()));
-                                final state = context.read<SpousBloc>().state;
-                                _updateDobFromAge(state.UpdateYears ?? '', state.UpdateMonths ?? '', v.trim());
-                              },
+                              readOnly: widget.isEdit,
+                              onChanged: widget.isEdit
+                                  ? null
+                                  : (v) {
+                                      context.read<SpousBloc>().add(UpdateDaysChanged(v.trim()));
+                                      final state = context.read<SpousBloc>().state;
+                                      _updateDobFromAge(state.UpdateYears ?? '', state.UpdateMonths ?? '', v.trim());
+                                    },
                               validator: (value) => captureSpousError(
                                 Validations.validateApproxAge(
                                   l,
@@ -903,7 +918,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
 
               _section(
-                ApiDropdown<String>(
+                IgnorePointer(
+                  ignoring: widget.isEdit,
+                  child: ApiDropdown<String>(
                   labelText: '${l.genderLabel} *',
                   items: const ['Male', 'Female', 'Transgender'],
                   getLabel: (s) {
@@ -923,12 +940,15 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   validator: (value) => Validations.validateGender(l, value),
                 ),
               ),
+              ),
 
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
               _section(
-                ApiDropdown<String>(
+                IgnorePointer(
+                  ignoring: widget.isEdit,
+                  child: ApiDropdown<String>(
                   labelText: l.occupationLabel,
                   items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
                   getLabel: (s) {
@@ -956,6 +976,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   value: state.occupation,
                   onChanged: (v) => context.read<SpousBloc>().add(SpUpdateOccupation(v)),
                 ),
+              ),
               ),
 
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -1153,7 +1174,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
               ),
 
 
-              if (state.gender == 'Female') ...[
+              if (!widget.isEdit && state.gender == 'Female') ...[
                 _section(
                   Row(
                     children: [
@@ -1526,7 +1547,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
 
               _section(
-                ApiDropdown<String>(
+                IgnorePointer(
+                  ignoring: widget.isEdit,
+                  child: ApiDropdown<String>(
                   labelText: l.beneficiaryTypeLabel,
                   items: const ['StayingInHouse', 'SeasonalMigrant'],
                   getLabel: (s) {
@@ -1543,10 +1566,11 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   onChanged: (v) => context.read<SpousBloc>().add(SpUpdateBeneficiaryType(v)),
                 ),
               ),
+              ),
 
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-              if (state.gender == 'Female') ...[
+              if (!widget.isEdit && state.gender == 'Female') ...[
                 _section(
                   ApiDropdown<String>(
                     key: ValueKey('spouse_isPreg_${state.gender}_${state.isPregnant ?? ''}'),

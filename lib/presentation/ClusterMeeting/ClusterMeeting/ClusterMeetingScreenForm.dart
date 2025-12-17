@@ -69,46 +69,47 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       );
     });
   }
+
   Widget _tableHeaderCell(String text) {
     return Container(
       alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 2), // very small space
+      padding: EdgeInsets.symmetric(
+        vertical: 2,
+        horizontal: 2,
+      ), // very small space
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
-        ),
+        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
       ),
     );
   }
+
   Widget _tableCell(String text) {
     return Container(
-      width: double.infinity,          // makes full cell width available
-      alignment: Alignment.center,     // centers text horizontally & vertically
+      width: double.infinity, // makes full cell width available
+      alignment: Alignment.center, // centers text horizontally & vertically
       padding: EdgeInsets.symmetric(vertical: 7, horizontal: 2),
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
       ),
     );
   }
 
-
   Widget _checkBoxCell(int index) {
-    final bool value = index < _presentList.length ? _presentList[index] : false;
+    final bool value = index < _presentList.length
+        ? _presentList[index]
+        : false;
 
     return Container(
       alignment: Alignment.center,
       padding: EdgeInsets.zero, // remove inner spacing
       child: Checkbox(
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // small checkbox
-        visualDensity: VisualDensity.compact,                    // reduce padding around checkbox
+        materialTapTargetSize:
+            MaterialTapTargetSize.shrinkWrap, // small checkbox
+        visualDensity: VisualDensity.compact, // reduce padding around checkbox
         value: value,
         onChanged: (val) {
           setState(() {
@@ -166,12 +167,14 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     int selectedMonth = _selectedMonthYear?.month ?? DateTime.now().month;
     int selectedYear = _selectedMonthYear?.year ?? DateTime.now().year;
     final l10n = AppLocalizations.of(context);
-// Month Column index
+    // Month Column index
     int monthIndex = selectedMonth - 1;
 
-// Year Column index
+    // Year Column index
     int yearIndex = 2025 - selectedYear;
-    final monthController = FixedExtentScrollController(initialItem: monthIndex);
+    final monthController = FixedExtentScrollController(
+      initialItem: monthIndex,
+    );
     final yearController = FixedExtentScrollController(initialItem: yearIndex);
 
     await showDialog(
@@ -287,8 +290,12 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     final l10n = AppLocalizations.of(context);
 
     // Use controllers for exact initial position
-    final hourController = FixedExtentScrollController(initialItem: selectedHour);
-    final minuteController = FixedExtentScrollController(initialItem: selectedMinute);
+    final hourController = FixedExtentScrollController(
+      initialItem: selectedHour,
+    );
+    final minuteController = FixedExtentScrollController(
+      initialItem: selectedMinute,
+    );
 
     await showDialog(
       context: context,
@@ -319,7 +326,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     builder: (context, index) => Center(
                       child: Text(
                         index.toString().padLeft(2, '0'),
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -346,7 +356,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     builder: (context, index) => Center(
                       child: Text(
                         index.toString().padLeft(2, '0'),
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -360,12 +373,18 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               l10n?.cancel ?? "Cancel",
-              style: TextStyle(fontWeight: FontWeight.normal, color: AppColors.primary),
+              style: TextStyle(
+                fontWeight: FontWeight.normal,
+                color: AppColors.primary,
+              ),
             ),
           ),
           TextButton(
             onPressed: () {
-              final time = TimeOfDay(hour: selectedHour, minute: selectedMinute);
+              final time = TimeOfDay(
+                hour: selectedHour,
+                minute: selectedMinute,
+              );
               setState(() {
                 if (isFromTime) {
                   _fromTime = time;
@@ -377,7 +396,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
             },
             child: Text(
               l10n?.ok ?? "Ok",
-              style: TextStyle(fontWeight: FontWeight.normal, color: AppColors.primary),
+              style: TextStyle(
+                fontWeight: FontWeight.normal,
+                color: AppColors.primary,
+              ),
             ),
           ),
         ],
@@ -430,19 +452,22 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       }
     });
   }
+
   void _applyUserDataToForm() {
     if (userData == null) return;
 
     final nameData = userData!['name'] as Map<String, dynamic>?;
-    final workingLocation = userData!['working_location'] as Map<String, dynamic>?;
+    final workingLocation =
+        userData!['working_location'] as Map<String, dynamic>?;
 
     final firstName = nameData?['first_name']?.toString().trim() ?? '';
     final middleName = nameData?['middle_name']?.toString().trim() ?? '';
     final lastName = nameData?['last_name']?.toString().trim() ?? '';
 
-    final fullName = [firstName, lastName]
-        .where((part) => part.isNotEmpty)
-        .join(' ');
+    final fullName = [
+      firstName,
+      lastName,
+    ].where((part) => part.isNotEmpty).join(' ');
 
     final villageName = workingLocation?['village']?.toString().trim() ?? '';
     final blockName = workingLocation?['block']?.toString().trim() ?? '';
@@ -458,6 +483,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     //   _blockNameController.text = blockName;
     // }
   }
+
   Future<void> _loadUserData() async {
     if (mounted) {
       setState(() => isLoading = true);
@@ -466,16 +492,24 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     try {
       developer.log('Loading user data from secure storage...', name: 'Drawer');
 
-      Map<String, dynamic>? data = await SecureStorageService.getCurrentUserData();
+      Map<String, dynamic>? data =
+          await SecureStorageService.getCurrentUserData();
 
       if (data == null || data.isEmpty) {
-        developer.log('No current user data found, trying legacy format...', name: 'Drawer');
+        developer.log(
+          'No current user data found, trying legacy format...',
+          name: 'Drawer',
+        );
         final legacyData = await SecureStorageService.getUserData();
         if (legacyData != null && legacyData.isNotEmpty) {
           try {
             data = jsonDecode(legacyData) as Map<String, dynamic>?;
           } catch (e) {
-            developer.log('Error parsing legacy user data: $e', name: 'Drawer', error: e);
+            developer.log(
+              'Error parsing legacy user data: $e',
+              name: 'Drawer',
+              error: e,
+            );
           }
         }
       }
@@ -493,7 +527,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
 
           // THIS IS CRITICAL — Rebuild present list with correct size
           _presentList = List<bool>.filled(_ashaList.length, false);
-          developer.log("TOTAL ASHA COUNT → $_ashaCount", name: "ClusterMeeting");
+          developer.log(
+            "TOTAL ASHA COUNT → $_ashaCount",
+            name: "ClusterMeeting",
+          );
           isLoading = false;
         });
       }
@@ -557,7 +594,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n?.selectDiscussionTopics ?? "Select Discussion Topics",
+                    l10n?.discussionTopicProgram ?? "Select Discussion Topics",
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.w400,
@@ -598,7 +635,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                                     ),
                                     value: isChecked,
                                     controlAffinity:
-                                    ListTileControlAffinity.leading,
+                                        ListTileControlAffinity.leading,
                                     onChanged: (checked) {
                                       setStateDialog(() {
                                         if (checked == true) {
@@ -688,7 +725,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         final dayName = formJson["day_of_week"];
         if (dayName != null) {
           selectedDay = days.firstWhere(
-                (d) => d.name.toLowerCase() == dayName.toString().toLowerCase(),
+            (d) => d.name.toLowerCase() == dayName.toString().toLowerCase(),
             orElse: () => days[0],
           );
         }
@@ -701,7 +738,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
 
         // Count
         clusterMeetingsCount =
-            int.tryParse(formJson["cluster_meetings_this_month"]?.toString() ?? "0") ?? 0;
+            int.tryParse(
+              formJson["cluster_meetings_this_month"]?.toString() ?? "0",
+            ) ??
+            0;
 
         // Month-Year
         final monthYearStr = formJson["month_year"];
@@ -731,16 +771,21 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
           _showOtherTopicField = _selectedTopics.contains('Other');
         }
 
-        final savedPresentList = formJson['asha_present_list'] as List<dynamic>? ?? [];
+        final savedPresentList =
+            formJson['asha_present_list'] as List<dynamic>? ?? [];
 
         List<bool> restored = List<bool>.filled(_ashaList.length, false);
 
-        for (int i = 0; i < savedPresentList.length && i < _ashaList.length; i++) {
+        for (
+          int i = 0;
+          i < savedPresentList.length && i < _ashaList.length;
+          i++
+        ) {
           restored[i] = savedPresentList[i] == true;
         }
         _presentList = restored;
         _ashaPresentCount = _presentList.where((e) => e).length;
-        _ashaAbsentCount  = _presentList.where((e) => !e).length;
+        _ashaAbsentCount = _presentList.where((e) => !e).length;
       });
     } catch (e) {
       print("Error loading meeting: $e");
@@ -813,7 +858,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       backgroundColor: AppColors.surface,
       appBar: AppHeader(
         screenTitle:
-        l10n?.ashaFacilitatorClusterMeeting ??
+            l10n?.ashaFacilitatorClusterMeeting ??
             "ASHA Facilitator Cluster Meeting",
         showBack: true,
       ),
@@ -1046,9 +1091,9 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     /// Header Row
                     TableRow(
                       children: [
-                        _tableHeaderCell("Sr.No."),
-                        _tableHeaderCell("Name"),
-                        _tableHeaderCell("Present?"),
+                        _tableHeaderCell(l10n?.sr_No ?? "Sr.No."),
+                        _tableHeaderCell(l10n?.nameLabel ?? "Name"),
+                        _tableHeaderCell(l10n?.present ?? "Present?"),
                       ],
                     ),
 
@@ -1138,7 +1183,6 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
 
                   Row(
                     children: [
-                      // Minus Button
                       GestureDetector(
                         onTap: () {
                           setState(() {
@@ -1240,7 +1284,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     children: [
                       CustomTextField(
                         labelText:
-                        l10n?.discussionTopicProgram ??
+                            l10n?.discussionTopicProgram ??
                             "Discussion Topic/Program",
                         hintText: _selectedTopics.isEmpty
                             ? l10n?.selectTopics ?? "Select Topics"
@@ -1263,10 +1307,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                   child: CustomTextField(
                     controller: _otherTopicController,
                     labelText:
-                    l10n?.discussionSubTopicProgram ??
+                        l10n?.discussionSubTopicProgram ??
                         "Discussion Sub Topic/Program",
                     hintText:
-                    l10n?.discussionSubTopicProgram ??
+                        l10n?.discussionSubTopicProgram ??
                         "Discussion Sub Topic/Program",
                     onChanged: (value) {
                       setState(() {});
@@ -1280,10 +1324,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
               CustomTextField(
                 controller: _decisionTakenController,
                 labelText:
-                l10n?.decisionTakenDuringMeeting ??
+                    l10n?.decisionTakenDuringMeeting ??
                     "Decision Taken During the Meeting",
                 hintText:
-                l10n?.decisionTakenDuringMeeting ??
+                    l10n?.decisionTakenDuringMeeting ??
                     "Decision Taken During the Meeting",
               ),
             ],

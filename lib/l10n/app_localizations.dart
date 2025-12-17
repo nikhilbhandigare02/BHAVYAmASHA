@@ -13384,6 +13384,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your Bhavya m-ASHA application is up to date.'**
   String get setting_update_msg;
+
+  /// No description provided for @aasha.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA'**
+  String get aasha;
+
+  /// No description provided for @help_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help_title;
+
+  /// No description provided for @ashaModule1.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 1'**
+  String get ashaModule1;
+
+  /// No description provided for @ashaModule2.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 2'**
+  String get ashaModule2;
+
+  /// No description provided for @ashaModule3.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 3'**
+  String get ashaModule3;
+
+  /// No description provided for @ashaModule4.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 4'**
+  String get ashaModule4;
+
+  /// No description provided for @ashaModule567.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 5,6 & 7'**
+  String get ashaModule567;
+
+  /// No description provided for @ncdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'NCD'**
+  String get ncdLabel;
+
+  /// No description provided for @hbnc.
+  ///
+  /// In en, this message translates to:
+  /// **'HBNC'**
+  String get hbnc;
+
+  /// No description provided for @hbyc.
+  ///
+  /// In en, this message translates to:
+  /// **'HBYC'**
+  String get hbyc;
+
+  /// No description provided for @ashaFacilitatorTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA Facilitator training'**
+  String get ashaFacilitatorTraining;
+
+  /// No description provided for @inductionTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Induction Training'**
+  String get inductionTraining;
+
+  /// No description provided for @maa.
+  ///
+  /// In en, this message translates to:
+  /// **'MAA (Mothers Absolute Affection)'**
+  String get maa;
+
+  /// No description provided for @idcf.
+  ///
+  /// In en, this message translates to:
+  /// **'IDCF (Integrated Diarrhoea Control Fortnight)'**
+  String get idcf;
+
+  /// No description provided for @otherTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Training'**
+  String get otherTraining;
+
+  /// No description provided for @receiving.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving'**
+  String get receiving;
+
+  /// No description provided for @providing.
+  ///
+  /// In en, this message translates to:
+  /// **'Providing'**
+  String get providing;
+
+  /// No description provided for @newHouseholdRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'New Household Registration'**
+  String get newHouseholdRegister;
+
+  /// No description provided for @sr_No.
+  ///
+  /// In en, this message translates to:
+  /// **'Sr.No.'**
+  String get sr_No;
+
+  /// No description provided for @present.
+  ///
+  /// In en, this message translates to:
+  /// **'Present?'**
+  String get present;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

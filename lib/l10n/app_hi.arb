@@ -2111,7 +2111,25 @@
   "receiving": "प्राप्त हो रहा है",
   "providing": "प्रदान हो रहा है",
   "newHouseholdRegister": "नए परिवार का पंजीकरण",
-  "thName": "नाम"
+  "thName": "नाम",
+  "ashaFacilitatorClusterMeetingList": "आशा फ़ैसिलिटेटर क्लस्टर मीटिंग सूची",
+  "addNewClusterMeeting": "नया क्लस्टर मीटिंग जोड़ें",
+  "fromTime": "बजे से(HH:MM)",
+  "toTime": "बजे तक(HH:MM)",
+  "totalAshaUnderFacilitator": "प्रबंधक के अंतर्गत आशा की कुल संख्या",
+  "day": "दिन",
+  "sr_No": "क्र.",
+  "present": "उपस्थित है?",
+  "clusterMeetingsCountThisMonth": "इस माह में आयोजित क्लस्टर बैठकों की संख्या",
+  "decisionTakenDuringMeeting": "बैठक के दौरान लिया गया फैसला",
+  "ashaPresentCount": "इस बैठक में उपस्थित आशा की संख्या",
+  "pregnantWomen": "गर्भवती महिलाएं",
+  "pnc": "पी.एन.सी",
+  "homeVisit": "घर का दौरे",
+  "newBornCare": "नवजात शिशु की देखभाल",
+  "deaths": "मौतें",
+  "otherPublicHealthProgram": "अन्य सार्वजानिक स्वास्थ्य कार्यक्रम",
+  "trainingSupport": "प्रशिक्षण एवं सहायता"
 
 
 }

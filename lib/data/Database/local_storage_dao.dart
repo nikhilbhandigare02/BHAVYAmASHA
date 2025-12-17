@@ -339,13 +339,18 @@ class LocalStorageDao {
       final db = await _db;
       final rows = await db.query(
         'eligible_couple_activities',
-        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where:
-              "server_id IS NOT NULL AND TRIM(server_id) != '')",
-
-        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        columns: [
+          'server_id',
+          'created_date_time',
+          'modified_date_time',
+          'id',
+          'is_deleted',
+        ],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "created_date_time DESC",
         limit: 1,
       );
+
       if (rows.isEmpty) return '';
       final sid = rows.first['server_id'];
       return sid?.toString() ?? '';
@@ -360,13 +365,19 @@ class LocalStorageDao {
       final db = await _db;
       final rows = await db.query(
         'child_care_activities',
-        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where:
-              "server_id IS NOT NULL AND TRIM(server_id) != '')",
+        columns: [
+          'server_id',
+          'created_date_time',
+          'modified_date_time',
+          'id',
+          'is_deleted',
+        ],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "created_date_time DESC",
 
-        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
         limit: 1,
       );
+
       if (rows.isEmpty) return '';
       final sid = rows.first['server_id'];
       return sid?.toString() ?? '';
@@ -381,13 +392,18 @@ class LocalStorageDao {
       final db = await _db;
       final rows = await db.query(
         'mother_care_activities',
-        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where:
-                "server_id IS NOT NULL AND TRIM(server_id) != '')",
-
-        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        columns: [
+          'server_id',
+          'created_date_time',
+          'modified_date_time',
+          'id',
+          'is_deleted',
+        ],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "created_date_time DESC",
         limit: 1,
       );
+
       if (rows.isEmpty) return '';
       final sid = rows.first['server_id'];
       return sid?.toString() ?? '';
@@ -1270,10 +1286,10 @@ class LocalStorageDao {
       final db = await _db;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-      
+
       String where = 'is_deleted = ?';
       List<dynamic> whereArgs = [0];
-      
+
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         where += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
@@ -1317,13 +1333,13 @@ class LocalStorageDao {
 
         final info = (row['beneficiary_info'] as Map?) ?? <String, dynamic>{};
         String relationToHead =
-            (info['relation_to_head']?.toString().toLowerCase().trim() ?? '');
+        (info['relation_to_head']?.toString().toLowerCase().trim() ?? '');
 
         householdMap.putIfAbsent(hhId, () => {
-              'hasHead': false,
-              'hasSpouse': false,
-              'childrenCount': 0,
-            });
+          'hasHead': false,
+          'hasSpouse': false,
+          'childrenCount': 0,
+        });
 
         final bucket = householdMap[hhId]!;
 
@@ -1491,13 +1507,13 @@ class LocalStorageDao {
       }
 
       where = '$where AND is_deleted = 0';
-     // whereArgs?.add(ashaUniqueKey);
+      // whereArgs?.add(ashaUniqueKey);
 
       final rows = await db.query(
-        'beneficiaries_new',
-        where: where,
-        whereArgs: whereArgs,
-        orderBy: 'created_date_time DESC'
+          'beneficiaries_new',
+          where: where,
+          whereArgs: whereArgs,
+          orderBy: 'created_date_time DESC'
       );
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
@@ -1814,13 +1830,18 @@ class LocalStorageDao {
       final db = await _db;
       final rows = await db.query(
         'households',
-        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where:
-        "server_id IS NOT NULL AND TRIM(server_id) != '' )",
-
-        orderBy: "CAST(server_id AS INTEGER) DESC",
+        columns: [
+          'server_id',
+          'created_date_time',
+          'modified_date_time',
+          'id',
+          'is_deleted',
+        ],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "created_date_time DESC",
         limit: 1,
       );
+
       if (rows.isEmpty) return '';
       final sid = rows.first['server_id'];
       return sid?.toString() ?? '';
@@ -2016,13 +2037,18 @@ class LocalStorageDao {
       final db = await _db;
       final rows = await db.query(
         FollowupFormDataTable.table,
-        columns: ['server_id', 'created_date_time', 'modified_date_time', 'id', 'is_deleted'],
-        where:
-              "server_id IS NOT NULL AND TRIM(server_id) != ''  )",
-
-        orderBy: "COALESCE(modified_date_time, created_date_time) DESC, id DESC",
+        columns: [
+          'server_id',
+          'created_date_time',
+          'modified_date_time',
+          'id',
+          'is_deleted',
+        ],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "created_date_time DESC",
         limit: 1,
       );
+
 
       if (rows.isEmpty) return '';
       final sid = rows.first['server_id'];
@@ -2272,19 +2298,19 @@ class LocalStorageDao {
   Future<String?> getHeadOfFamilyMobileNumber(String householdRefKey) async {
     try {
       final db = await _db;
-      
+
       final household = await db.query(
         'households',
         where: 'unique_key = ? AND is_deleted = 0',
         whereArgs: [householdRefKey],
         limit: 1,
       );
-      
+
       if (household.isEmpty) return null;
-      
+
       final headId = household.first['head_id'] as String?;
       if (headId == null || headId.isEmpty) return null;
-      
+
       // Now get the beneficiary_info for the head
       final beneficiaries = await db.query(
         'beneficiaries_new',
@@ -2292,12 +2318,12 @@ class LocalStorageDao {
         whereArgs: [headId],
         limit: 1,
       );
-      
+
       if (beneficiaries.isEmpty) return null;
-      
+
       final beneficiaryInfo = beneficiaries.first['beneficiary_info'] as String?;
       if (beneficiaryInfo == null) return null;
-      
+
       // Parse the JSON to get the mobile number
       try {
         final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
@@ -2320,12 +2346,11 @@ extension LocalStorageDaoReads on LocalStorageDao {
       final rows = await db.query(
         'beneficiaries_new',
         columns: ['server_id'],
-        where:
-            "server_id IS NOT NULL AND TRIM(server_id) != '')",
-
-        orderBy: "CAST(server_id AS INTEGER) DESC",
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "created_date_time DESC",
         limit: 1,
       );
+
       if (rows.isEmpty) return '';
       final sid = rows.first['server_id'];
       return sid?.toString() ?? '';

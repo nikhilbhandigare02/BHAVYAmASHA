@@ -24,7 +24,7 @@ class _NCDHomeState extends State<Ncdprioritylist> {
   bool _isLoading = true;
 
   final List<Map<String, dynamic>> _staticHouseholds = [
-    {
+    /*{
       'hhId': '51016121847',
       'RegitrationDate': '16-10-2025',
       'RegitrationType': 'General',
@@ -53,7 +53,7 @@ class _NCDHomeState extends State<Ncdprioritylist> {
       'FatherName': 'Vinod Verma',
       'HusbandName': 'Ravi Verma',
       'WifeName': '',
-    },
+    },*/
   ];
 
   late List<Map<String, dynamic>> _filtered;
@@ -106,7 +106,7 @@ class _NCDHomeState extends State<Ncdprioritylist> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.ncdListTitle ?? 'NCD List',
+        screenTitle: l10n?.ncdPriorityListTitle ?? 'NCD List',
         showBack: false,
         icon2Image: 'assets/images/home.png',
 
@@ -156,7 +156,7 @@ class _NCDHomeState extends State<Ncdprioritylist> {
                   child: _filtered.isEmpty
                       ? Center(
                           child: Text(
-                            l10n?.noHouseholdsFound ?? 'No households found',
+                            l10n?.noRecordsFound ?? 'No records found',
                             style: TextStyle(
                               fontSize: 16.sp,
                               color: Colors.grey,
@@ -190,7 +190,7 @@ class _NCDHomeState extends State<Ncdprioritylist> {
                         ),
                       ),
                       child: Text(
-                        (l10n?.gridRegisterNewHousehold ??
+                        (l10n?.newHouseholdRegister ??
                                 'NEW HOUSEHOLD REGISTRATION')
                             .toUpperCase(),
                         style: const TextStyle(color: Colors.white),
