@@ -133,10 +133,10 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
     required String image,
     required String routeName,
     required Map<String, int> counts,
-    double? width,
+    // Removed width parameter
   }) {
     return _FeatureCard(
-      width: width ?? 100,
+      // Removed width argument
       title: title,
       count: counts[countKey] ?? 0,
       image: image,
@@ -145,15 +145,11 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final double totalHorizontalPadding = 12 * 2; // left + right padding = 24
-    final double spacingBetweenCards = 4 * 2;     // two gaps of 4px between 3 cards = 8
-    final double cardWidth = (MediaQuery.of(context).size.width -
-        totalHorizontalPadding -
-        spacingBetweenCards) /
-        3;  // exactly 3 cards per row
+    // Removed manual cardWidth calculations
 
     return FutureBuilder<Map<String, int>>(
       future: _countsFuture,
@@ -189,40 +185,43 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildCard(
-                        context: context,
-                        title: (l10n?.childRegisteredBeneficiaryListTitle ??
-                            'Registered Child\nBeneficiary List')
-                            .toString(),
-                        countKey: 'registered',
-                        image: 'assets/images/toddler.png',
-                        routeName: Route_Names.RegisterChildScreen,
-                        counts: counts,
-                        width: cardWidth,
+                      Expanded(
+                        child: _buildCard(
+                          context: context,
+                          title: (l10n?.childRegisteredBeneficiaryListTitle ??
+                              'Registered Child\nBeneficiary List')
+                              .toString(),
+                          countKey: 'registered',
+                          image: 'assets/images/toddler.png',
+                          routeName: Route_Names.RegisterChildScreen,
+                          counts: counts,
+                        ),
                       ),
                       const SizedBox(width: 4),
-                      _buildCard(
-                        context: context,
-                        title: (l10n?.childRegisteredDueListTitle ??
-                            'Child Registered\nDue List')
-                            .toString(),
-                        countKey: 'registrationDue',
-                        image: 'assets/images/family.png',
-                        routeName: Route_Names.RegisterChildDueList,
-                        counts: counts,
-                        width: cardWidth,
+                      Expanded(
+                        child: _buildCard(
+                          context: context,
+                          title: (l10n?.childRegisteredDueListTitle ??
+                              'Child Registered\nDue List')
+                              .toString(),
+                          countKey: 'registrationDue',
+                          image: 'assets/images/family.png',
+                          routeName: Route_Names.RegisterChildDueList,
+                          counts: counts,
+                        ),
                       ),
                       const SizedBox(width: 4),
-                      _buildCard(
-                        context: context,
-                        title: (l10n?.childTrackingDueListTitle ??
-                            'Child Tracking\nDue List')
-                            .toString(),
-                        countKey: 'trackingDue',
-                        image: 'assets/images/notes.png',
-                        routeName: Route_Names.CHildTrackingDueList,
-                        counts: counts,
-                        width: cardWidth,
+                      Expanded(
+                        child: _buildCard(
+                          context: context,
+                          title: (l10n?.childTrackingDueListTitle ??
+                              'Child Tracking\nDue List')
+                              .toString(),
+                          countKey: 'trackingDue',
+                          image: 'assets/images/notes.png',
+                          routeName: Route_Names.CHildTrackingDueList,
+                          counts: counts,
+                        ),
                       ),
                     ],
                   ),
@@ -230,29 +229,31 @@ class _ChildCareHomeScreenState extends State<ChildCareHomeScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildCard(
-                        context: context,
-                        title: (l10n?.hbycListTitle ?? 'HBYC List').toString(),
-                        countKey: 'hbyc',
-                        image: 'assets/images/pnc-mother.png',
-                        routeName: Route_Names.HBYCList,
-                        counts: counts,
-                        width: cardWidth,
+                      Expanded(
+                        child: _buildCard(
+                          context: context,
+                          title: (l10n?.hbycListTitle ?? 'HBYC List').toString(),
+                          countKey: 'hbyc',
+                          image: 'assets/images/pnc-mother.png',
+                          routeName: Route_Names.HBYCList,
+                          counts: counts,
+                        ),
                       ),
                       const SizedBox(width: 4),
-                      _buildCard(
-                        context: context,
-                        title: (l10n?.deceasedChildTitle ?? 'Deceased Child')
-                            .toString(),
-                        countKey: 'deceased',
-                        image: 'assets/images/death2.png',
-                        routeName: Route_Names.DeseasedList,
-                        counts: counts,
-                        width: cardWidth,
+                      Expanded(
+                        child: _buildCard(
+                          context: context,
+                          title: (l10n?.deceasedChildTitle ?? 'Deceased Child')
+                              .toString(),
+                          countKey: 'deceased',
+                          image: 'assets/images/death2.png',
+                          routeName: Route_Names.DeseasedList,
+                          counts: counts,
+                        ),
                       ),
                       const SizedBox(width: 4),
-                      // Empty placeholder for alignment
-                      SizedBox(width: cardWidth),
+                      // Empty placeholder Expanded for alignment
+                      const Expanded(child: SizedBox()),
                     ],
                   ),
                 ],
@@ -270,14 +271,13 @@ class _FeatureCard extends StatelessWidget {
   final int count;
   final String image;
   final VoidCallback onClick;
-  final double width;
+  // Removed width property
 
   const _FeatureCard({
     required this.title,
     required this.count,
     required this.image,
     required this.onClick,
-    required this.width,
   });
 
   @override
@@ -287,11 +287,12 @@ class _FeatureCard extends StatelessWidget {
     final double cardHeight = MediaQuery.of(context).orientation == Orientation.portrait
         ? 15.h
         : 25.h;
+
     return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(12),
+      // Removed width constraint from SizedBox
       child: SizedBox(
-        width: width,
         height: cardHeight,
         child: Card(
           color: AppColors.background,
@@ -303,7 +304,7 @@ class _FeatureCard extends StatelessWidget {
             padding: EdgeInsets.all(1.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start, // ✅ No forced spacing
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,7 +326,7 @@ class _FeatureCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 1.h), // ✅ Reduced space between image & title
+                SizedBox(height: 1.h),
                 Expanded(
                   child: Align(
                     alignment: Alignment.topLeft,
@@ -336,7 +337,7 @@ class _FeatureCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         color: AppColors.outline,
-                        fontSize: 14.sp, // slightly smaller for balance
+                        fontSize: 14.sp,
                       ),
                     ),
                   ),
