@@ -414,6 +414,14 @@ final class UpdateDatePlace extends AddnewfamilymemberEvent{
   List<Object> get props => [value];
 }
 
+final class UpdateOtherDeathPlace extends AddnewfamilymemberEvent{
+  final String value;
+  const UpdateOtherDeathPlace(this.value);
+
+  @override
+  List<Object> get props => [value];
+}
+
 final class UpdateReasonOfDeath extends AddnewfamilymemberEvent{
   final String value;
   const UpdateReasonOfDeath(this.value);

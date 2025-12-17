@@ -388,6 +388,7 @@ class AddnewfamilymemberBloc
           deathReason: allData['death_reason'] as String?,
           otherDeathReason: allData['other_death_reason'] as String?,
           deathPlace: allData['death_place'] as String?,
+          otherDeathPlace: allData['other_death_place'] as String?,
         ));
         // Handle family planning and pregnancy related fields
         final isFamilyPlanning = allData['isFamilyPlanning'] == true || allData['isFamilyPlanning'] == 'true';
@@ -661,6 +662,9 @@ class AddnewfamilymemberBloc
       emit(newState);
       print('Updated deathPlace: ${newState.deathPlace}');
     });
+    on<UpdateOtherDeathPlace>((e, emit) {
+      emit(state.copyWith(otherDeathPlace: e.value));
+    });
 
     on<AnmSubmit>((event,      emit) async {
       emit(
@@ -755,6 +759,7 @@ class AddnewfamilymemberBloc
           'deathReason': state.deathReason,
           'otherDeathReason': state.otherDeathReason,
           'deathPlace': state.deathPlace,
+          'otherDeathPlace': state.otherDeathPlace,
         }
             : {};
 
@@ -1863,7 +1868,7 @@ class AddnewfamilymemberBloc
           }
         } catch (_) {}
 
-        // Merge into existing beneficiary_info similar to family head update
+
         final existingInfoRaw = existing['beneficiary_info'];
         final Map<String, dynamic> existingInfo = existingInfoRaw is Map
             ? Map<String, dynamic>.from(existingInfoRaw)

@@ -1017,13 +1017,22 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
 
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            CustomTextField(
-                              labelText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
-                              hintText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
-                              initialValue: state.folicAcidTablets,
-                              keyboardType: TextInputType.number,
-                              onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
-                              validator: validateTabletCount,
+                            Builder(
+                              builder: (context) {
+                                final weeks = int.tryParse(state.weeksOfPregnancy ?? '0') ?? 0;
+                                final isAfter12Weeks = weeks > 12;
+                                final label = isAfter12Weeks
+                                    ? 'Number of Iron & Folic Acid tablets given'
+                                    : (l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given');
+                                return CustomTextField(
+                                  labelText: label,
+                                  hintText: label,
+                                  initialValue: state.folicAcidTablets,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
+                                  validator: validateTabletCount,
+                                );
+                              }
                             ),
 
                             if (int.tryParse(state.weeksOfPregnancy) != null && int.parse(state.weeksOfPregnancy) >= 14) ...[

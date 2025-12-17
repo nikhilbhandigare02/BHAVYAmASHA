@@ -156,6 +156,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           'SpouseGender': '',
           'Relation': relation,
           'is_synced': row['is_synced'] ?? 0,
+          'is_death': row['is_death'] ?? 0,
         });
       }
     } catch (e) {
@@ -400,7 +401,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         InkWell(
-          onTap: () async {
+          onTap: (data['is_death'] == 1) ? null : () async {
             // Pass complete household data to next screen
             await Navigator.pushNamed(
               context,
@@ -470,8 +471,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         child: Text(
                           (data['hhId']?.toString().length ?? 0) > 11
                               ? data['hhId'].toString().substring(
-                                  data['hhId'].toString().length - 11,
-                                )
+                            data['hhId'].toString().length - 11,
+                          )
                               : (data['hhId'] ?? ''),
                           style: TextStyle(
                             color: primary,
@@ -482,6 +483,30 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
+                      if (data['is_death'] == 1)
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            // border: Border.all(
+                            //   color: Colors.red.withOpacity(0.5),
+                            //   width: 0.5,
+                            // ),
+                          ),
+                          child: Text(
+                            'Deceased',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       Image.asset(
                         'assets/images/sync.png',
                         width: 25,
@@ -555,8 +580,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                             l10n?.rchIdLabel ?? 'RCH ID',
                             isFemale
                                 ? (data['RichID']?.toString().isNotEmpty == true
-                                      ? data['RichID']
-                                      : (l10n?.notAvailable ?? 'Not Available'))
+                                ? data['RichID']
+                                : (l10n?.notAvailable ?? 'Not Available'))
                                 : (l10n?.na ?? 'N/A'),
                           ),
                           _rowText(
@@ -630,12 +655,12 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 onPress: () {
                   final beneficiaryData = {
                     'beneficiaryId':
-                        data['unique_key']?.toString() ??
+                    data['unique_key']?.toString() ??
                         '', // Use complete ID from unique_key
                     'hhid': data['hhId']?.toString() ?? '',
                     'name': data['Name']?.toString() ?? '',
                     'age':
-                        data['Age|Gender']?.toString().split(' ').first ?? '',
+                    data['Age|Gender']?.toString().split(' ').first ?? '',
                     'gender': data['Gender']?.toString().toLowerCase() ?? '',
                     'mobile': data['Mobileno.']?.toString() ?? '',
                     'village': data['village']?.toString() ?? '',
