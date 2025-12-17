@@ -61,7 +61,6 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
     _loadDeliveryOutcomeCount();
     _loadHBCNCount();
   }
-
   Future<Set<String>> _getDeliveredBeneficiaryIds() async {
     final db = await DatabaseProvider.instance.database;
 
@@ -170,28 +169,6 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
   }
 
 
-  int? _calculateAge(dynamic dob) {
-    if (dob == null) return null;
-    try {
-      String dateStr = dob.toString();
-      if (dateStr.contains('T')) {
-        dateStr = dateStr.split('T')[0];
-      }
-      final birthDate = DateTime.tryParse(dateStr);
-      if (birthDate == null) return null;
-
-      final now = DateTime.now();
-      int age = now.year - birthDate.year;
-      if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
-        age--;
-      }
-      return age;
-    } catch (e) {
-      return null;
-    }
-  }
-
-
   Future<void> _loadDeliveryOutcomeCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -260,7 +237,6 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
       }
     }
   }
-
 
   Future<void> _loadHBCNCount() async {
     try {
@@ -346,7 +322,13 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    const double spacingBetweenCards = 4.0; // Minimal spacing
+
+    final double totalHorizontalPadding = 12 * 2;
+    final double spacingBetweenCards = 4 * 2;
+    final double cardWidth = (MediaQuery.of(context).size.width -
+        totalHorizontalPadding -
+        spacingBetweenCards) /
+        3;
 
     return WillPopScope(
       onWillPop: () async {
@@ -355,66 +337,59 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppHeader(
-          screenTitle: l10n?.gridMotherCare ?? 'Mother Care',
-          showBack: false,
-          icon1Image: 'assets/images/home.png',
+          appBar: AppHeader(
+            screenTitle: l10n?.gridMotherCare ?? 'Mother Care',
+            showBack: false,
+            icon1Image: 'assets/images/home.png',
+
           onIcon1Tap: () => Navigator.pop(context, _ancVisitCount + _deliveryOutcomeCount + _hbcnMotherCount),
-        ),
+          ),
         drawer: const CustomDrawer(),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(12),
-            // 🔹 Use LayoutBuilder to get exact available width
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // Calculate width based on available space minus the spacing between items
-                final double cardWidth = (constraints.maxWidth - (spacingBetweenCards * 2)) / 3;
-
-                return Column(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _FeatureCard(
-                          width: cardWidth,
-                          title: (l10n?.motherAncVisitTitle ?? 'ANC Visit').toString(),
-                          count: _isLoading ? 0 : _ancVisitCount,
-                          image: 'assets/images/pregnant-woman.png',
-                          onClick: () {
-                            Navigator.pushNamed(
-                                context, Route_Names.Ancvisitlistscreen);
-                          },
-                        ),
-                        const SizedBox(width: spacingBetweenCards),
-                        _FeatureCard(
-                          width: cardWidth,
-                          title:
-                          (l10n?.deliveryOutcomeTitle ?? 'Delivery\nOutcome')
-                              .toString(),
-                          count: _deliveryOutcomeCount,
-                          image: 'assets/images/mother.png',
-                          onClick: () {
-                            Navigator.pushNamed(
-                                context, Route_Names.DeliveryOutcomeScreen);
-                          },
-                        ),
-                        const SizedBox(width: spacingBetweenCards),
-                        _FeatureCard(
-                          width: cardWidth,
-                          title:
-                          (l10n?.hbncMotherTitle ?? 'HBNC Mother').toString(),
-                          count: _hbcnMotherCount,
-                          image: 'assets/images/pnc-mother.png',
-                          onClick: () {
-                            Navigator.pushNamed(context, Route_Names.HBNCScreen);
-                          },
-                        ),
-                      ],
+                    _FeatureCard(
+                      width: cardWidth,
+                      title: (l10n?.motherAncVisitTitle ?? 'ANC Visit').toString(),
+                      count: _isLoading ? 0 : _ancVisitCount,
+                      image: 'assets/images/pregnant-woman.png',
+                      onClick: () {
+                        Navigator.pushNamed(
+                            context, Route_Names.Ancvisitlistscreen);
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    _FeatureCard(
+                      width: cardWidth,
+                      title:
+                      (l10n?.deliveryOutcomeTitle ?? 'Delivery\nOutcome')
+                          .toString(),
+                      count: _deliveryOutcomeCount,
+                      image: 'assets/images/mother.png',
+                      onClick: () {
+                        Navigator.pushNamed(
+                            context, Route_Names.DeliveryOutcomeScreen);
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    _FeatureCard(
+                      width: cardWidth,
+                      title:
+                      (l10n?.hbncMotherTitle ?? 'HBNC Mother').toString(),
+                      count: _hbcnMotherCount,
+                      image: 'assets/images/pnc-mother.png',
+                      onClick: () {
+                        Navigator.pushNamed(context, Route_Names.HBNCScreen);
+                      },
                     ),
                   ],
-                );
-              },
+                ),
+              ],
             ),
           ),
         ),
