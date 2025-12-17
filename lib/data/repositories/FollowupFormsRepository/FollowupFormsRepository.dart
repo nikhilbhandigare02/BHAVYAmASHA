@@ -328,43 +328,95 @@ class FollowupFormsRepository {
             'antra_injection_date': src['antra_injection_date'],
             'removal_date': src['removal_date'],
           };
-        } else if (formsRefKey == ancKey && formRoot['anc_form'] is Map) {
-          final src = Map<String, dynamic>.from(formRoot['anc_form'] as Map);
+        } else if (formsRefKey == ancKey) {
+          final Map<String, dynamic> src =
+          formRoot['form_type'] == 'anc_due_registration'
+              ? Map<String, dynamic>.from(formRoot['form_data'] ?? {})
+              : Map<String, dynamic>.from(formRoot['anc_form'] ?? {});
+
+          String _normalizeYesNo(dynamic value) {
+            if (value == null) return '';
+
+            if (value is bool) {
+              return value ? 'yes' : 'no';
+            }
+
+            if (value is String) {
+              final v = value.toLowerCase().trim();
+              if (v == 'true' || v == 'yes') return 'yes';
+              if (v == 'false' || v == 'no') return 'no';
+              return v; // keep existing like 'unknown'
+            }
+
+            return '';
+          }
+          dynamic _pick(Map<String, dynamic> src, String k1, [String? k2]) {
+            if (src[k1] != null && src[k1].toString().isNotEmpty) return src[k1];
+            if (k2 != null && src[k2] != null && src[k2].toString().isNotEmpty) {
+              return src[k2];
+            }
+            return null;
+          }
+
           formDataMap = {
-            'anc_visit_no': src['anc_visit_no'],
+            // ---------------- BASIC ----------------
+            'anc_visit_no': _pick(src, 'anc_visit_no', 'anc_visit'),
             'visit_type': src['visit_type'],
-            'beneficiaryId': src['beneficiaryId'],
-            'beneficiary_ref_key': src['beneficiary_ref_key'],
-            'household_ref_key': src['household_ref_key'],
             'place_of_anc': src['place_of_anc'],
             'date_of_inspection': src['date_of_inspection'],
-            'house_number': src['house_number'],
-            'woman_name': src['woman_name'],
+            'house_number': _pick(src, 'house_number', 'house_no'),
+
+            // ---------------- PERSONAL ----------------
+            'woman_name': _pick(src, 'woman_name', 'pw_name'),
             'husband_name': src['husband_name'],
-            'rch_number': src['rch_number'],
+            'rch_number': _pick(src, 'rch_number', 'rch_reg_no_of_pw'),
+
+            // ---------------- PREGNANCY ----------------
             'lmp_date': src['lmp_date'],
             'edd_date': src['edd_date'],
-            'weeks_of_pregnancy': src['weeks_of_pregnancy'],
-            'gravida': src['gravida'],
-            'selected_risks': src['selected_risks'],
-            'has_abortion_complication': src['has_abortion_complication'],
-            'abortion_date': src['abortion_date'],
-            'is_breast_feeding': src['is_breast_feeding'],
-            'td1_date': src['td1_date'],
-            'td2_date': src['td2_date'],
-            'td_booster_date': src['td_booster_date'],
-            'folic_acid_tablets': src['folic_acid_tablets'],
-            'pre_existing_disease': src['pre_existing_disease'],
+            'weeks_of_pregnancy':
+            _pick(src, 'weeks_of_pregnancy', 'week_of_pregnancy'),
+            'gravida': _pick(src, 'gravida', 'order_of_pregnancy'),
+
+            // ---------------- RISK ----------------
+            'selected_risks':
+            _pick(src, 'selected_risks', 'high_risk_details') ?? [],
+            'high_risk': _pick(src, 'high_risk', 'is_high_risk'),
+            'has_abortion_complication':
+            _pick(src, 'has_abortion_complication', 'is_abortion'),
+            'abortion_date': _pick(src, 'abortion_date', 'date_of_abortion'),
+
+            // ---------------- HEALTH ----------------
+            'is_breast_feeding':
+            _pick(src, 'is_breast_feeding', 'is_breastfeeding'),
             'weight': src['weight'],
-            'systolic': src['systolic'],
-            'diastolic': src['diastolic'],
+            'systolic': _pick(src, 'systolic', 'bp_of_pw_systolic'),
+            'diastolic': _pick(src, 'diastolic', 'bp_of_pw_diastolic'),
             'hemoglobin': src['hemoglobin'],
-            'pregnantWoman': src['pregnantWoman'],
-            'high_risk': src['high_risk'],
-            'gives_birth_to_baby': src['gives_birth_to_baby'],
-            'beneficiary_absent': src['beneficiary_absent'],
+
+            // ---------------- IMMUNIZATION ----------------
+            'td1_date': _pick(src, 'td1_date', 'date_of_td1'),
+            'td2_date': _pick(src, 'td2_date', 'date_of_td2'),
+            'td_booster_date': _pick(src, 'td_booster_date', 'date_of_td_booster'),
+
+            // ---------------- MEDICATION ----------------
+            'folic_acid_tablets':
+            _pick(src, 'folic_acid_tablets', 'folic_acid_tab_quantity'),
+            'pre_existing_disease':
+            _pick(src, 'pre_existing_disease', 'pre_exist_desease'),
+
+            // ---------------- DELIVERY (STRING ALWAYS) ----------------
+            'gives_birth_to_baby': _normalizeYesNo(
+              _pick(src, 'gives_birth_to_baby', 'has_pw_given_birth'),
+            ),
+            'delivery_outcome': src['delivery_outcome'],
+
+            // ---------------- STATUS ----------------
+            'beneficiary_absent':
+            _pick(src, 'beneficiary_absent', 'is_beneficiary_absent'),
           };
-        } else if (formsRefKey == hbycKey && formRoot['hbyc_form'] is Map) {
+        }
+        else if (formsRefKey == hbycKey && formRoot['hbyc_form'] is Map) {
           final src = Map<String, dynamic>.from(formRoot['hbyc_form'] as Map);
           formDataMap = {
             'beneficiary_absent': src['beneficiary_absent'],
@@ -470,8 +522,7 @@ class FollowupFormsRepository {
             'score_total': src['score_total'],
           };
         } else if (formsRefKey == childRegKey) {
-          // Child Registration Due (RegisterChildFormBloc) mapping
-          // Determine source map: prefer a single nested map, otherwise root
+
           Map<String, dynamic> src;
           final mapEntries = formRoot.entries
               .where((e) => e.value is Map<String, dynamic>)
