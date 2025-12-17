@@ -127,7 +127,7 @@ class _EligibleCoupleIdentifiedScreenState
         if (relation == 'self') {
           head = info;
           head['_row'] = _toStringMap(member);
-        } else if (relation == 'spouse') {
+        } else if (relation == 'spouse' || relation == 'wife') {
           spouse = info;
           spouse['_row'] = _toStringMap(member);
         }
@@ -170,7 +170,6 @@ class _EligibleCoupleIdentifiedScreenState
           continue;
         }
 
-        // Only consider females 15-49 and married
         if (!_isEligibleFemale(info, head: head)) {
           continue;
         }

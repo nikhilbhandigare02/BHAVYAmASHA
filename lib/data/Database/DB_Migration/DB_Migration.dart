@@ -330,14 +330,25 @@ class DbMigration {
     }
 
 
+
+
   static Future<void> runHouseholdTableMigration(Database db) async {
-    try {
-      final households = await db.query("household_registrations");
+    final households = await db.query("household_registrations");
 
-      for (var house in households) {
-        String? householdKey = house["unique_key"] as String?;
+    for (var house in households) {
+      try {
+        // ---------- Household Key ----------
+        final String? householdKey =
+        (house["unique_key"] as String?)?.trim().isNotEmpty == true
+            ? house["unique_key"] as String
+            : house["_id"] as String?;
 
-        // Fetch all members of this household
+        if (householdKey == null) {
+          print("⚠️ Skipped household (no key): ${house["_id"]}");
+          continue;
+        }
+
+        // ---------- Fetch Members ----------
         final members = await db.query(
           "beneficiaries_new",
           where: "household_ref_key = ?",
@@ -346,61 +357,76 @@ class DbMigration {
 
         if (members.isEmpty) continue;
 
-        // Find all heads
+        // ---------- Detect Head(s) ----------
         List<Map<String, dynamic>> heads = [];
 
         for (var member in members) {
           final infoJson = member["beneficiary_info"] as String?;
           if (infoJson == null) continue;
 
-          final data = jsonDecode(infoJson);
+          final Map<String, dynamic> data = jsonDecode(infoJson);
 
-          if (data["isFamilyhead"] == true) {
+          // isFamilyhead check
+          final bool isFamilyHead =
+              data["isFamilyhead"] == true ||
+                  data["isFamilyhead"] == "true" ||
+                  data["isFamilyhead"] == 1;
+
+          // relation_to_head check
+          final String? relation =
+          data["relation_to_head"]?.toString().toLowerCase().trim();
+
+          final bool isRelationHead =
+              relation == "self" ||
+                  relation == "head" ||
+                  relation == "household_head" ||
+                  relation == "hoh";
+
+          if (isFamilyHead || isRelationHead) {
             heads.add(member);
           }
         }
 
-        // If no head found → take first member as head
-        // if (heads.isEmpty) {
-        //   heads = [members.first];
-        // }
+        // ---------- Fallback ----------
+        if (heads.isEmpty && members.isNotEmpty) {
+          heads = [members.first];
+        }
 
-        // Insert 1 household record per head
+        // ---------- Insert Household ----------
         for (var head in heads) {
-          String headId = head["unique_key"];
+          final String? headId = head["unique_key"] as String?;
+          if (headId == null) {
+            print("⚠️ Head missing unique_key for household $householdKey");
+            continue;
+          }
 
-          // Household unique key must be unique → append head id
-          final newHouseholdKey = "${householdKey}";
-
-          // Check if already exists
           final existing = await db.query(
             "households",
             where: "unique_key = ?",
-            whereArgs: [newHouseholdKey],
+            whereArgs: [householdKey],
           );
 
           if (existing.isNotEmpty) continue;
 
-          await db.insert(
-            "households",
-            {
-              "server_id": house["_id"] as String?,
-              "unique_key": newHouseholdKey,
-              "head_id": headId,
-              "household_info": house["form_json"] as String?,
-              "current_user_key": house["added_by"] as String?,
-              "created_date_time": house["created_date_time"] as String?,
-              "modified_date_time": house["modified_date_time"] as String?,
-              "parent_user": house["parent_added_by"] as String?,
-              "is_synced": house["is_synced"] as int?,
-              "is_deleted": house["is_deleted"] as int?,
-            },
-          );
+          await db.insert("households", {
+            "server_id": house["_id"],
+            "unique_key": householdKey,
+            "head_id": headId,
+            "household_info": house["form_json"],
+            "current_user_key": house["added_by"],
+            "created_date_time": house["created_date_time"],
+            "modified_date_time": house["modified_date_time"],
+            "parent_user": house["parent_added_by"],
+            "is_synced": house["is_synced"],
+            "is_deleted": house["is_deleted"],
+          });
         }
+      } catch (e) {
+        print("❌ Household migration failed (${house["unique_key"]}): $e");
       }
-    } catch (e) {
-      print("❌ Household Migration Error: $e");
     }
+
+    print("✅ Household migration completed");
   }
 
 
