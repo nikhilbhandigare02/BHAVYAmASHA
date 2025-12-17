@@ -169,28 +169,6 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
   }
 
 
-  int? _calculateAge(dynamic dob) {
-    if (dob == null) return null;
-    try {
-      String dateStr = dob.toString();
-      if (dateStr.contains('T')) {
-        dateStr = dateStr.split('T')[0];
-      }
-      final birthDate = DateTime.tryParse(dateStr);
-      if (birthDate == null) return null;
-
-      final now = DateTime.now();
-      int age = now.year - birthDate.year;
-      if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
-        age--;
-      }
-      return age;
-    } catch (e) {
-      return null;
-    }
-  }
-
-
   Future<void> _loadDeliveryOutcomeCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -259,7 +237,6 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
       }
     }
   }
-
 
   Future<void> _loadHBCNCount() async {
     try {
@@ -346,7 +323,6 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    // 🔹 3 cards per row (with even spacing)
     final double totalHorizontalPadding = 12 * 2;
     final double spacingBetweenCards = 4 * 2;
     final double cardWidth = (MediaQuery.of(context).size.width -
