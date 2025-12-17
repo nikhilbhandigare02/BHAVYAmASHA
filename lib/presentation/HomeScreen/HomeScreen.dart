@@ -724,12 +724,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   Future<void> _loadAncVisitCount() async {
     try {
       final count = await ANCUtils.getMotherCareTotalCount();
-      final countSync = await ANCUtils.getMotherCareTotalSyncCount();
+      final countSync = await ANCUtils.getMotherCareSyncedTotalCount();
       if (mounted) {
         setState(() {
           ancVisitCount = count;
           Constant.motherCareTotal = count;
-          Constant.motherCareTotal = countSync;
+          Constant.motherCareSynced = countSync;
         });
       }
     } catch (e) {
@@ -739,11 +739,15 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   Future<void> _loadChildRegisteredCount() async {
     try {
-      final count = await _childCareCountProvider.getRegisteredChildCount();
-
+      //final count = await _childCareCountProvider.getRegisteredChildCount();
+      final result = await _childCareCountProvider.getRegisteredChildCountTotalAndSync();
+      final total = result['total']!;
+      final synced = result['synced']!;
       if (mounted) {
         setState(() {
-          childRegisteredCount = count;
+          childRegisteredCount = total;
+          Constant.childRegisteredtotal = total;
+          Constant.childRegisteredtotalSync = synced;
         });
       }
     } catch (e) {

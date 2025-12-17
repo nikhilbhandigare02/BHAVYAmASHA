@@ -402,7 +402,84 @@ class ChildCareCountProvider {
   // }
 
 
-  Future<int> getRegisteredChildCount() async {
+   Future<Map<String, int>> getRegisteredChildCountTotalAndSync() async {
+    try {
+      developer.log('Getting registered child count...', name: 'ChildCareCountProvider');
+      final db = await DatabaseProvider.instance.database;
+
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      String whereClause = 'is_deleted = ? AND is_adult = ?';
+      List<dynamic> whereArgs = [0, 0];
+
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        whereClause += ' AND current_user_key = ?';
+        whereArgs.add(ashaUniqueKey);
+      }
+
+      final rows = await db.query(
+        'beneficiaries_new',
+        where: whereClause,
+        whereArgs: whereArgs,
+      );
+
+      int childCount = 0;
+      int childCountIsSync = 0;
+
+      for (final row in rows) {
+        try {
+          final info = row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : row['beneficiary_info'];
+
+          if (info is! Map) continue;
+
+          final memberType = (info['memberType']?.toString() ?? '').toLowerCase();
+          final relation = (info['relation']?.toString() ?? '').toLowerCase();
+          final name = info['name']?.toString() ??
+              info['memberName']?.toString() ??
+              info['member_name']?.toString() ??
+              '';
+
+          final isSynced = row['is_synced'] ?? 0;
+
+          if ((memberType == 'child' ||
+              relation == 'child' ||
+              relation == 'son' ||
+              relation == 'daughter') &&
+              name.isNotEmpty) {
+
+            childCount++;
+            if (isSynced == 1) {
+              childCountIsSync++;
+            }
+          }
+        } catch (e) {
+          developer.log('Error processing beneficiary: $e',
+              name: 'ChildCareCountProvider');
+        }
+      }
+
+      return {
+        'total': childCount,
+        'synced': childCountIsSync,
+      };
+
+    } catch (e, stackTrace) {
+      developer.log('Error in getRegisteredChildCount: $e',
+          name: 'ChildCareCountProvider',
+          error: e,
+          stackTrace: stackTrace);
+
+      return {
+        'total': 0,
+        'synced': 0,
+      };
+    }
+  }
+
+   Future<int> getRegisteredChildCount() async {
     try {
       developer.log('Getting registered child count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
@@ -428,6 +505,7 @@ class ChildCareCountProvider {
       );
 
       int childCount = 0;
+      int childCountIsSync = 0;
 
       for (final row in rows) {
         try {
