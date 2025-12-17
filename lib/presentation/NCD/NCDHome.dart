@@ -6,7 +6,8 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
-import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart' as ffd;
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
+    as ffd;
 import 'package:sizer/sizer.dart';
 
 import 'NCDList.dart';
@@ -37,7 +38,11 @@ class _NCDHomeState extends State<NCDHome> {
       final List<Map<String, dynamic>> result = await db.query(
         ffd.FollowupFormDataTable.table,
         where: 'forms_ref_key = ?',
-        whereArgs: [ffd.FollowupFormDataTable.formUniqueKeys[ffd.FollowupFormDataTable.cbac]],
+        whereArgs: [
+          ffd.FollowupFormDataTable.formUniqueKeys[ffd
+              .FollowupFormDataTable
+              .cbac],
+        ],
       );
 
       if (mounted) {
@@ -83,7 +88,8 @@ class _NCDHomeState extends State<NCDHome> {
     // 🔹 3 cards per row
     final double totalHorizontalPadding = 12 * 2;
     final double spacingBetweenCards = 8;
-    final double cardWidth = (screenWidth - totalHorizontalPadding - (2 * spacingBetweenCards)) / 3;
+    final double cardWidth =
+        (screenWidth - totalHorizontalPadding - (2 * spacingBetweenCards)) / 3;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -125,7 +131,9 @@ class _NCDHomeState extends State<NCDHome> {
                     onClick: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const Ncdeligiblelist()),
+                        MaterialPageRoute(
+                          builder: (context) => const Ncdeligiblelist(),
+                        ),
                       );
                     },
                   ),
@@ -138,7 +146,9 @@ class _NCDHomeState extends State<NCDHome> {
                     onClick: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) =>  Ncdprioritylist()),
+                        MaterialPageRoute(
+                          builder: (context) => Ncdprioritylist(),
+                        ),
                       );
                     },
                   ),
@@ -153,13 +163,17 @@ class _NCDHomeState extends State<NCDHome> {
                 children: [
                   _FeatureCard(
                     width: cardWidth,
-                    title: l10n?.ncdNonEligibleListTitle ?? 'NCD Non-Eligible List',
+                    title:
+                        l10n?.ncdNonEligibleListTitle ??
+                        'NCD Non-Eligible List',
                     count: 0,
                     image: 'assets/images/home.png',
                     onClick: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) =>   Ncdnoneligiblelist()),
+                        MaterialPageRoute(
+                          builder: (context) => Ncdnoneligiblelist(),
+                        ),
                       );
                     },
                   ),
@@ -196,7 +210,8 @@ class _FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
-    final double cardHeight = MediaQuery.of(context).orientation == Orientation.portrait
+    final double cardHeight =
+        MediaQuery.of(context).orientation == Orientation.portrait
         ? 15.h
         : 22.h;
     return InkWell(

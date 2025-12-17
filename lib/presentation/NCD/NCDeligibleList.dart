@@ -23,7 +23,7 @@ class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
   bool _isLoading = true;
 
   final List<Map<String, dynamic>> _staticHouseholds = [
-    {
+    /*{
       'hhId': '51016121847',
       'RegitrationDate': '16-10-2025',
       'RegitrationType': 'General',
@@ -52,7 +52,7 @@ class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
       'FatherName': 'Vinod Verma',
       'HusbandName': 'Ravi Verma',
       'WifeName': '',
-    },
+    },*/
   ];
 
   late List<Map<String, dynamic>> _filtered;
@@ -147,7 +147,17 @@ class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
           ),
 
           Expanded(
-            child: ListView.builder(
+            child: _filtered.isEmpty
+                ? Center(
+              child: Text(
+                l10n?.noRecordsFound ??'No records found',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Colors.grey,
+                ),
+              ),
+            )
+                :  ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               itemCount: _filtered.length,
               itemBuilder: (context, index) {

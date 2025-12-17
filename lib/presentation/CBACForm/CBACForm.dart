@@ -689,6 +689,18 @@ class _PersonalInfoTab extends StatelessWidget {
                 final idx = v == null ? -1 : labelGender.indexOf(v);
                 if (idx >= 0) {
                   bloc.add(CbacFieldChanged('personal.gender_code', codeGender[idx]));
+                  final fatherName = (state.data['beneficiary.fatherName']?.toString().trim() ?? '');
+                  final spouseName = (state.data['beneficiary.spouseName']?.toString().trim() ?? '');
+                  if (codeGender[idx] == 'M') {
+                    if (fatherName.isNotEmpty) {
+                      bloc.add(CbacFieldChanged('personal.father', fatherName));
+                    }
+                  } else {
+                    final pick = spouseName.isNotEmpty ? spouseName : fatherName;
+                    if (pick.isNotEmpty) {
+                      bloc.add(CbacFieldChanged('personal.father', pick));
+                    }
+                  }
                 }
               },
             );
@@ -863,20 +875,32 @@ class _PartATab extends StatelessWidget {
         final waist = state.data['partA.waist'] as String?;
         final familyHx = state.data['partA.familyHistory'] as String?;
         final l10n = AppLocalizations.of(context)!;
+        final scoreColWidth = 36.0;
+        final scoreColRightPadding = 16.0;
 
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
 
-                Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
+                Padding(
+                  padding: EdgeInsets.only(right: scoreColRightPadding),
+                  child: SizedBox(
+                    width: scoreColWidth,
+                    child: Center(
+                      child: Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
+                    ),
+                  ),
+                ),
               ],
         );
-        Widget rowScore(int score) => SizedBox(
-              // width: 20,
-              child: Align(
-                alignment: Alignment.centerRight,
-               child: Text('$score', style:  TextStyle(color: Colors.black87, fontSize: 15.sp)),
+        Widget rowScore(int score) => Padding(
+              padding: EdgeInsets.only(right: scoreColRightPadding),
+              child: SizedBox(
+                width: scoreColWidth,
+                child: Center(
+                  child: Text('$score', style:  TextStyle(color: Colors.black87, fontSize: 15.sp)),
+                ),
               ),
             );
 
@@ -1106,7 +1130,15 @@ class _PartATab extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(l10n.cbacTotalScorePartA(''), style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text('$total', style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 15)),
+                Padding(
+                  padding: EdgeInsets.only(right: scoreColRightPadding),
+                  child: SizedBox(
+                    width: scoreColWidth,
+                    child: Center(
+                      child: Text('$total', style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 15)),
+                    ),
+                  ),
+                ),
               ],
             ),
           ],
@@ -1146,17 +1178,15 @@ class _PartBTab extends StatelessWidget {
 
     List<Widget> qRow(String question, String keyPath) => [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 305,
+              Expanded(
                 child: BlocBuilder<CbacFormBloc, CbacFormState>(
                   buildWhen: (previous, current) => previous.data[keyPath] != current.data[keyPath],
                   builder: (context, state) {
                     return ApiDropdown<String>(
                       labelText: question,
                       hintText: 'Select Option',
-                      labelFontSize: 13.sp,
+                      labelFontSize: 15.sp,
                       items: [l10n.yes, l10n.no],
                       getLabel: (s) => s,
                       value: state.data[keyPath],
@@ -1166,11 +1196,9 @@ class _PartBTab extends StatelessWidget {
                   },
                 ),
               ),
-              const Spacer(),
-              const SizedBox(width: 28), // Placeholder for score to maintain alignment
+              const SizedBox(width: 12),
             ],
           ),
-          // const SizedBox(height: 4),
           const Divider(height: 0.5),
         ];
 
@@ -1279,7 +1307,7 @@ class _PartCTabState extends State<_PartCTab> {
                 style:  TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w400,
-                  fontSize: 14.sp,
+                  fontSize: 15.sp,
                 ),
               ),
               const SizedBox(height: 6),
@@ -1365,7 +1393,7 @@ class _PartCTabState extends State<_PartCTab> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -1678,20 +1706,31 @@ class _PartDTab extends StatelessWidget {
         }
 
         final partAScore = computePartAScore();
+        final scoreColWidth = 36.0;
+        final scoreColRightPadding = 19.0;
 
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(l10n.cbacQuestions, style:  TextStyle(fontWeight: FontWeight.w600,fontSize: 15.sp)),
-                Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp)),
+                Padding(
+                  padding: EdgeInsets.only(right: scoreColRightPadding),
+                  child: SizedBox(
+                    width: scoreColWidth,
+                    child: Center(
+                      child: Text(l10n.cbacScore, style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp)),
+                    ),
+                  ),
+                ),
               ],
             );
-
-        Widget scoreBox(String? v) => SizedBox(
-              width: 28,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Text(v == null ? '0' : '${scoreFromValue(v)}', style:  TextStyle(color: Colors.black87, fontSize: 15.sp)),
+        Widget scoreBox(String? v) => Padding(
+              padding: EdgeInsets.only(right: scoreColRightPadding),
+              child: SizedBox(
+                width: scoreColWidth,
+                child: Center(
+                  child: Text(v == null ? '0' : '${scoreFromValue(v)}', style:  TextStyle(color: Colors.black87, fontSize: 15.sp)),
+                ),
               ),
             );
 
@@ -1706,7 +1745,7 @@ class _PartDTab extends StatelessWidget {
                     child: ApiDropdown<String>(
                       labelText: question,
                       hintText: 'Select Option',
-                      labelFontSize: 13.sp,
+                      labelFontSize: 15.sp,
                       items: options,
                       getLabel: (s) => s,
                       value: value,
@@ -1756,7 +1795,15 @@ class _PartDTab extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(l10n.cbacTotalScorePartD(''), style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text('$total', style: const TextStyle(fontWeight: FontWeight.w600, fontSize:16)),
+                Padding(
+                  padding: EdgeInsets.only(right: scoreColRightPadding),
+                  child: SizedBox(
+                    width: scoreColWidth,
+                    child: Center(
+                      child: Text('$total', style: const TextStyle(fontWeight: FontWeight.w600, fontSize:16)),
+                    ),
+                  ),
+                ),
               ],
             ),
             if (partAScore >= 4 || (partAScore + total) >= 4) ...[

@@ -1026,7 +1026,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               validator: validateTabletCount,
                             ),
 
-                            if (int.tryParse(state.weeksOfPregnancy) != null && int.parse(state.weeksOfPregnancy) > 30) ...[
+                            if (int.tryParse(state.weeksOfPregnancy) != null && int.parse(state.weeksOfPregnancy) >= 14) ...[
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                               CustomTextField(
                                 labelText: 'Number of Calcium and Vitamin D3 tablets given',

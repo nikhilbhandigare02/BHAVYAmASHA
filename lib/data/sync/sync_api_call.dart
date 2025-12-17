@@ -10,10 +10,10 @@ import '../repositories/HousholdRepository/household_repository.dart';
 import '../repositories/MotherCareRepository/MotherCareRepository.dart';
 import '../repositories/NotificationRepository/Notification_Repository.dart';
 
- class SyncApiCall {
-   static final _dao = LocalStorageDao.instance;
-   static final _householdRepo = HouseholdRepository();
-   static final _notificationRepo = NotificationRepository();
+class SyncApiCall {
+  static final _dao = LocalStorageDao.instance;
+  static final _householdRepo = HouseholdRepository();
+  static final _notificationRepo = NotificationRepository();
   static final _beneficiaryPullRepo = BeneficiaryRepository();
   static final _ecRepo = EligibleCoupleRepository();
   static final _ccRepo = ChildCareRepository();
@@ -43,15 +43,15 @@ import '../repositories/NotificationRepository/Notification_Repository.dart';
 
     }
   }
-   static Future<void> fetchNotificationsFromServer() async {
-     try {
-       print('Notification Sync: Fetching notifications...');
-       await _notificationRepo.fetchAndSaveNotifications();
-       print('Notification Sync: Completed');
-     } catch (e) {
-       print('Notification Sync: Error -> $e');
-     }
-   }
+  static Future<void> fetchNotificationsFromServer() async {
+    try {
+      print('Notification Sync: Fetching notifications...');
+      await _notificationRepo.fetchAndSaveNotifications();
+      print('Notification Sync: Completed');
+    } catch (e) {
+      print('Notification Sync: Error -> $e');
+    }
+  }
 
   static Future<void> fetchBeneficiariesFromServer() async {
     try {
@@ -140,7 +140,7 @@ import '../repositories/NotificationRepository/Notification_Repository.dart';
       final ids = await _getUserWorkingIds();
       if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
       final lastId = await _dao.getLatestMotherCareActivityServerId();
-      final useLast = lastId.isEmpty ? null : lastId;
+      final useLast = lastId.isEmpty ? '0' : lastId;
       print('MotherCare Pull: Fetching with last_id=${useLast ?? '[default]'} limit=20');
       final result = await _mcRepo.fetchAndStoreMotherCareActivities(
         facilityId: ids['facilityId']!,

@@ -91,7 +91,7 @@ class MotherCareRepository {
 
     final effectiveLastId = (lastId != null && lastId.toString().trim().isNotEmpty)
         ? lastId.toString().trim()
-        : '';
+        : '0';
 
     final body = <String, dynamic>{
       'facility_id': facilityId,

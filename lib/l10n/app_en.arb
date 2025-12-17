@@ -2292,5 +2292,8 @@
   "otherTraining": "Other Training",
   "receiving": "Receiving",
   "providing": "Providing",
-  "newHouseholdRegister": "New Household Registration"
+  "newHouseholdRegister": "New Household Registration",
+  "sr_No": "Sr.No.",
+  "present": "Present?"
+
 }

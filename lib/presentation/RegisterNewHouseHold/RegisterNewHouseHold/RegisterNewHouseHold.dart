@@ -13,6 +13,7 @@ import 'dart:convert';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
 import '../../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
@@ -58,6 +59,19 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   bool _hideAddMemberButton = false;
   late final HouseholdDetailsAmenitiesBloc _hhBloc;
   bool _skipExitConfirm = false;
+  Future<void> _persistAdultsToSecureStorage() async {
+    try {
+      final adults = _members
+          .where((m) => (m['Type'] ?? '').toString() == 'Adult')
+          .map((m) => {
+                'Name': (m['Name'] ?? '').toString(),
+                'Gender': (m['Gender'] ?? '').toString(),
+                'Relation': (m['Relation'] ?? '').toString(),
+              })
+          .toList();
+      await SecureStorageService.saveHouseholdAdultsSummary(adults);
+    } catch (_) {}
+  }
 
   @override
   void initState() {
@@ -88,6 +102,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         _hydrateAmenitiesFromDb(hhKey);
       }
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _persistAdultsToSecureStorage();
+    });
   }
 
   dynamic _convertYesNoDynamic(dynamic value) {
@@ -646,9 +663,10 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               'Total Children': totalChildren,
             });
             // Increment totalMembers for spouse
-            totalMembers++;
-          }
+          totalMembers++;
+        }
         });
+        await _persistAdultsToSecureStorage();
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -669,12 +687,12 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
     try {
       // Use empty values instead of checking database
       final uniqueKey = _headForm?['hh_unique_key']?.toString() ?? '';
-      
+
       Map<String, String> head = {
         'Name': _headForm?['name']?.toString() ?? '',
         'Gender': _headForm?['gender']?.toString() ?? '',
       };
-      
+
       Map<String, String> spouse = {
         'Name': '',
         'Gender': '',
@@ -683,8 +701,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       // Try to find spouse info if available
       try {
         final spouseMember = _members.firstWhere(
-          (m) => (m['Relation'] ?? '').toString().toLowerCase() == 'spouse' || 
-                 (m['Relation'] ?? '').toString().toLowerCase() == 'wife'
+                (m) => (m['Relation'] ?? '').toString().toLowerCase() == 'spouse' ||
+                (m['Relation'] ?? '').toString().toLowerCase() == 'wife'
         );
         spouse = Map<String, String>.from(spouseMember);
       } catch (_) {}
@@ -793,6 +811,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             totalMembers = totalMembers + 1;
           }
         });
+        await _persistAdultsToSecureStorage();
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -862,9 +881,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             final t = (m['Type'] ?? '').toString();
             final r = (m['Relation'] ?? '').toString();
             return t == 'Child' || t == 'Infant' ||
-                   ['Son', 'Daughter', 'Brother', 'Sister', 'Nephew', 'Niece', 
-                    'Grand Son', 'Grand Daughter', 'Son In Law', 'Daughter In Law','Father','Mother','Grand Father','Grand Mother', 'Father In Law', 'Mother In Law','Husband',
-                    'Other'].contains(r);
+                ['Son', 'Daughter', 'Brother', 'Sister', 'Nephew', 'Niece',
+                  'Grand Son', 'Grand Daughter', 'Son In Law', 'Daughter In Law','Father','Mother','Grand Father','Grand Mother', 'Father In Law', 'Mother In Law','Husband',
+                  'Other'].contains(r);
           }).length;
 
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
@@ -1069,6 +1088,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     }
                   }
                 });
+                await _persistAdultsToSecureStorage();
               }
               return;
             }
@@ -1199,6 +1219,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     }
                   }
                 });
+                await _persistAdultsToSecureStorage();
               }
             }
           },
@@ -1306,7 +1327,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
                 const SizedBox(height: 8),
                 Text(
-                 l10n?.dataSavedSuccessfully ?? 'New house has been added successfully',
+                  l10n?.dataSavedSuccessfully ?? 'New house has been added successfully',
                   textAlign: TextAlign.center,
                   style:  TextStyle(
                     fontSize: 18,

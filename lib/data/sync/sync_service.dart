@@ -104,7 +104,7 @@ class SyncService {
       final ids = await _getUserWorkingIds();
       if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
       final lastId = await _dao.getLatestMotherCareActivityServerId();
-      final useLast = lastId.isEmpty ? null : lastId;
+      final useLast = lastId.isEmpty ? '0' : lastId;
       print('MotherCare Pull: Fetching with last_id=${useLast ?? '[default]'} limit=20');
       final result = await _mcRepo.fetchAndStoreMotherCareActivities(
         facilityId: ids['facilityId']!,
@@ -157,19 +157,19 @@ class SyncService {
       }
       print('ChildCare Push: Found ${list.length} unsynced activity(ies)');
       final payload = list.map((r) => {
-            'facility_id': r['facility_id'],
-            'asha_id': ids['ashaId'],
-            'unique_key': r['household_ref_key'],
-            'beneficiaries_registration_ref_key': r['beneficiary_ref_key'],
-            'mother_key': r['mother_key'],
-            'father_key': r['father_key'],
-            'child_care_type': r['child_care_state'],
-            'device_details': r['device_details'] ?? {},
-            'app_details': r['app_details'] ?? {},
-            'parent_user': r['parent_user'] ?? {},
-            'created_date_time': r['created_date_time'],
-            'modified_date_time': r['modified_date_time'],
-          }).toList();
+        'facility_id': r['facility_id'],
+        'asha_id': ids['ashaId'],
+        'unique_key': r['household_ref_key'],
+        'beneficiaries_registration_ref_key': r['beneficiary_ref_key'],
+        'mother_key': r['mother_key'],
+        'father_key': r['father_key'],
+        'child_care_type': r['child_care_state'],
+        'device_details': r['device_details'] ?? {},
+        'app_details': r['app_details'] ?? {},
+        'parent_user': r['parent_user'] ?? {},
+        'created_date_time': r['created_date_time'],
+        'modified_date_time': r['modified_date_time'],
+      }).toList();
       final resp = await _ccRepo.submitChildCareActivities(payload);
       final success = resp is Map && resp['success'] == true;
       if (success) {
@@ -457,8 +457,8 @@ class SyncService {
               serverId: serverIdFromResp,
             );
             print(
-              'Household Sync: SYNCED unique_key=$uniqueKey (rows=$updated) ' 
-              '+ server_id ${serverIdFromResp == null || serverIdFromResp.isEmpty ? 'NOT set' : 'set to '+serverIdFromResp!}'
+                'Household Sync: SYNCED unique_key=$uniqueKey (rows=$updated) '
+                    '+ server_id ${serverIdFromResp == null || serverIdFromResp.isEmpty ? 'NOT set' : 'set to '+serverIdFromResp!}'
             );
           } else {
             print('Household Sync: NOT SYNCED unique_key=$uniqueKey (API not successful), will retry later');
@@ -477,16 +477,16 @@ class SyncService {
   Future<void> syncUnsyncedBeneficiaries () async {
     try {
       final unsynced = await _dao.getUnsyncedBeneficiaries();
-      
+
       final pendingSync = unsynced.where((b) => (b['is_synced'] ?? 0) == 0).toList();
       final count = pendingSync.length;
-      
+
       if (count == 0) {
         print('Beneficiary Sync: No pending sync records found (is_synced = 0)');
         return;
       }
       print('Beneficiary Sync: Found $count unsynced record(s)');
-      
+
       // Process each unsynced beneficiary
       for (final beneficiary in unsynced) {
         try {
@@ -495,14 +495,14 @@ class SyncService {
             print('Beneficiary Sync: Skipping beneficiary with empty unique_key');
             continue;
           }
-          
+
           print('Beneficiary Sync: Starting sync for unique_key=$uniqueKey');
-          
+
           // Let the helper handle device info and timestamp
           await _beneficiaryApiHelper.syncBeneficiaryByUniqueKey(
             uniqueKey: uniqueKey,
           );
-          
+
           print('Beneficiary Sync: Successfully processed unique_key=$uniqueKey');
         } catch (e, stackTrace) {
           print('Beneficiary Sync: Error syncing beneficiary ${beneficiary['unique_key']}');
@@ -510,7 +510,7 @@ class SyncService {
           print('Stack trace: $stackTrace');
         }
       }
-      
+
       print('Beneficiary Sync: Completed processing $count record(s)');
     } catch (e, stackTrace) {
       print('Beneficiary Sync: Critical error during sync process');

@@ -282,6 +282,7 @@ class _HBYCListState extends State<HBYCList> {
         'beneficiaries_new',
         where: whereClause,
         whereArgs: whereArgs,
+        orderBy: 'created_date_time DESC',
       );
 
       debugPrint('Found ${rows.length} child beneficiaries in database');

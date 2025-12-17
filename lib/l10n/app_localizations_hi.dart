@@ -54,16 +54,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get aboutUsP1Title => 'आशा (मान्यता प्राप्त सामाजिक स्वास्थ्य कार्यकर्ता)';
 
   @override
-  String get aboutUsP1Part2 => 'ऐप, आशा फ्रंट-लाइन कार्यकर्ताओं को जनसंख्या टीकाकरण, पात्र जोड़ों की ट्रैकिंग, मातृ एवं शिशु देखभाल और स्वास्थ्य समाज द्वारा संचालित विभिन्न कार्यक्रमों से संबंधित उनके दैनिक कार्यों में मदद करने के लिए एक एप्लिकेशन है।';
+  String get aboutUsP1Part2 => 'ऐप, आशा फ्रंट-लाइन कार्यकर्ताओं को जनसंख्या टीकाकरण, योग्य जोड़ो की ट्रैकिंग, माँ और बच्चे की देखभाल और स्वास्थ्य समाज द्वारा चलाए जा रहे विभिन्न कार्यक्रमों से संबंधित उनके रोजमर्रा के काम करने में मदद करने के लिए एक एप्लीकेशन है ।';
 
   @override
-  String get aboutUsP2 => 'आशा परिवार का टीकाकरण कर सकती है और वहां से लाभार्थी जोड़े जा सकते हैं। परिवार के सदस्यों के जोड़ने के बाद, योग्य दंपति का ट्रैकिंग और परिवार नियोजन किया जा सकता है। यह ऐप दूरस्थ गांवों में ऑफ़लाइन कार्यक्षमता का समर्थन करने का लक्ष्य रखता है जहां स्थिर नेटवर्क एक चुनौती है।';
+  String get aboutUsP2 => 'आशा परिवार का टीकाकरण कर सकती है और वहां से लाभार्थी को जोड़ा जा सकता है | एक बार परिवार के सदस्य जुड़ने के बाद, योग्य जोड़े और परिवार नियोजन की ट्रैकिंग की जा सकती है | इस ऎप का लक्ष्य दूरदरजा के गांवो के लिए ऑफलाइन कार्यक्षमता का समर्थन करना है जहां एक स्थिर नेटवर्क एक चुनौती है ।';
 
   @override
-  String get aboutUsP3 => 'आशा एबीएचए जेनरेशन कर सकती है, यह ऐप एबीडीएम के एम1 प्रोसेस के लिए एबीडीएम अनुपालन करता है, और इससे कई एबीएचए और लाभार्थियों का निर्माण बढ़ सकता है, जो आगे चलकर किसी भी निजी या सरकारी सुविधा में अपने एबीएचए का उपयोग करके उपचार प्राप्त कर सकेंगे, जब आवश्यक हो।';
+  String get aboutUsP3 => 'आशा, एबीएचए निर्माण कर सकती है, इस ऎप में एबीडीएम की एम1 प्रक्रिया के लिए एबीडीएम अनुपालन है, और यह कई एबीएचए को बढ़ावा दे सकता है और स्वास्थ्य उपचार के साथ आगे बढ़ने वाले लाभार्थी जरूरत पड़ने पर किसी भी निजी या सरकारी सुविधाओं में अपने एबीएचए का उपयोग कर सकते हैं ।';
 
   @override
-  String get aboutUsP4 => 'यह ऐप आशा कार्यकर्ताओं को उनकी बकाया सूची, आज के कार्यक्रम, और आने वाली पीएनसी माताओं और शिशुओं के विवरण की सूची बनाए रखने में सक्षम बनाता है।';
+  String get aboutUsP4 => 'ऐप आशा कार्यकर्ताओं को उनकी को उनकी देय सूची, आज के कार्यक्रम और आगामी पीएनसी मां और शिशु विवरण की एक सूची बनाए रखने की सुविधा देता है ।';
 
   @override
   String get accountNumberHint => 'खाता संख्या';
@@ -75,7 +75,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get addButton => 'जोड़ें';
 
   @override
-  String get addFamilyHeadButton => 'परिवार प्रमुख जोड़ें';
+  String get addFamilyHeadButton => 'परिवार के मुखिया को जोड़ें';
 
   @override
   String get transgender => 'ट्रांसजेंडर';
@@ -195,7 +195,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get addressLabel => 'पता';
 
   @override
-  String get advanceFilter => 'उन्नत फ़िल्टर';
+  String get advanceFilter => 'एडवांस/उच्च फ़िल्टर';
 
   @override
   String get affiliatedToStateInsuranceLabel => 'क्या राज्य स्वास्थ्य बीमा योजना से संबद्ध है';
@@ -221,7 +221,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ageLabel => 'उम्र: ';
 
   @override
-  String get ageLabelSimple => 'Age';
+  String get ageLabelSimple => 'आयु';
 
   @override
   String get altMobileHint => 'वैकल्पिक मोबाइल नंबर';
@@ -275,7 +275,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get anmNameLabel => 'ए.एन.एम. का नाम';
 
   @override
-  String get announcement => 'घोषणा';
+  String get announcement => 'घोषणा सूचि';
 
   @override
   String get announcements => 'घोषणा';
@@ -287,22 +287,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get antenatal => 'अगली प्रसव पूर्व तिथि:';
 
   @override
-  String get announcementItem1Body => 'स्थानीय प्राथमिक स्वास्थ्य केंद्र में ब्लॉक क्षेत्र की आशा कार्यकर्ताओं को स्वास्थ्य संबंधी कार्यों के लिए स्मार्ट फोन दिए गए। पीएचसी प्रभारी डॉ. पुरुषोत्तम प्रियदर्शी ने बताया कि ब्लॉक क्षेत्र की कुल 126 आशा कार्यकर्ताओं को हाई-टेक बनाने के लिए स्मार्ट फोन दिए गए हैं। उन्होंने कहा कि अब रजिस्टर में लिखने की आज़ादी मिलेगी। यह मोबाइल विशेष रूप से स्वास्थ्य संबंधी कार्यक्रमों के लिए तैयार किया गया है और इसे किसी अन्य कार्य के लिए उपयोग नहीं किया जा सकता। सभी आशा कार्यकर्ता अपने स्मार्ट फोन से ही मानदेय के लिए क्लेम फॉर्म भेज सकती हैं। इसके आधार पर मानदेय की राशि उनके बैंक खाते में भेजी जाएगी। बीसीएम संजीत कुमार ने बताया कि ब्लॉक क्षेत्र में कुल 120 आशा कार्यकर्ता और 6 फेसिलिटेटर हैं, जिनमें से 122 को स्मार्ट फोन उपलब्ध करा दिए गए हैं।';
+  String get announcementItem1Body => 'स्थानीय प्राथमिक स्वास्थ्य केंद्र में प्रखंड क्षेत्र के आशा कार्यकर्ताओं को स्वास्थ संबंधित कार्य के लिए स्मार्ट फोन दिया गया। पीएचसी प्रभारी डा. पुरुषोत्तम प्रियदर्शी ने बताया कि प्रखंड क्षेत्र के कुल 126 आशा कार्यकर्ताओं को हाइटेक बनाने के लिए स्मार्ट फोन दिया गया है। स्वास्थ्य विभाग की रीढ़ कही जाने वाली आशा कार्यकर्ताओं को हाईटेक बनाने की दिशा में यह बेहतर कदम है। उन्होंने बताया कि आशा को रजिस्टर में लिखने से अब मुक्ति मिलेगी। मोबाइल को खासतौर पर स्वास्थ्य संबंधी कार्यक्रमों के लिए तैयार किया गया है। मोबाइल को दूसरे काम के लिए उपयोग नहीं किया जा सकेगा। सभी आशा कार्यकर्ता अपने स्मार्ट फोन से ही मानदेय के लिए दावा प्रपत्र भेज सकते हैं। इसी के आधार पर उनके बैंक एकाउंट में मानदेय की राशि भेज दी जाएगी। बीसीएम संजीत कुमार ने बताया कि प्रखंड क्षेत्र में कुल 120 आशा कार्यकर्ता एवं 6 फैसिलेटर हैं। जिसमें से 122 को स्मार्ट फोन उपलब्ध करा दिया गया है।';
 
   @override
-  String get announcementItem1Title => 'वितरण: आशा कार्यकर्ताओं को दिए गए स्मार्ट फोन';
+  String get announcementItem1Title => 'वितरण: आशा कार्यकर्ताओं को दिए गया स्मार्ट फोन';
 
   @override
-  String get announcementItem2Body => 'यदि आप बिहार की निवासी हैं और एक महिला हैं, तो हम आपको बता दें कि बिहार में महिलाओं के लिए लगभग 1.12 लाख पदों पर आशा कार्यकर्ता की जबरदस्त भर्ती की गई है। जिसमें बिहार की सभी महिलाएं आवेदन कर सकती हैं। बिहार आशा भर्ती 2023 के आवेदन प्रक्रिया में बड़ा बदलाव किया गया है। पहले आशा बहाली के लिए केवल 8वीं पास होना आवश्यक था, लेकिन अब इसे बदलकर 10वीं पास कर दिया गया है। इसलिए यदि आप बिहार आशा कार्यकर्ता के रूप में नौकरी पाना चाहती हैं, तो आपके पास कम से कम 10वीं पास होना अनिवार्य होगा। आप आशा कार्यकर्ता के पद के लिए आवेदन कर सकती हैं।';
+  String get announcementItem2Body => 'अगर आप बिहार के निवासी हैं और आप एक महिला है तो हम आपको बता दें बिहार में करीब 1.12 लाख पदों पर महिलाओं के लिए Bihar ASHA पद पर जबरदस्त भर्ती निकाली गई है। जिसमें बिहार के सभी महिलाएं आवेदन कर सकते हैं Bihar ASHA Recruitment 2023 के तहत आवेदन प्रक्रिया में बहुत बड़ा बदलाव भी किया गया है। जैसा कि पहले आशा बहाली के लिए सिर्फ आठवीं पास होना जरूरी था पर अब इसे बदल कर 10वीं पास कर दिया गया है माने तो अब अगर आपको Bihar ASHA पल के लिए नौकरी पाना है तो आपको कम से कम 10वीं पास होना अनिवार्य होगा तभी आप Bihar ASHA पद के लिए आवेदन कर सकते हैं।';
 
   @override
-  String get announcementItem2Title => 'बिहार आशा कार्यकर्ता भर्ती 2023: (महिलाओं के लिए शानदार अवसर, इस विभाग में होंगी 1.12 लाख से अधिक पदों पर भर्ती)';
+  String get announcementItem2Title => 'Bihar ASHA Worker Vacancy 2023: महिलाओं के लिए शानदार मौका, यह विभाग करेगा 1.12 लाख पदों से भी ज्यादा भर्ती ';
 
   @override
-  String get announcementItem3Body => 'आशा कार्यकर्ता कोविड-19 से लड़ाई की अग्रिम पंक्ति में रही हैं। नवजात शिशु और उनकी माताओं की देखभाल, नियमित टीकाकरण और सर्वेक्षण जैसी नियमित जिम्मेदारियों के अलावा, देशभर की आशा कार्यकर्ता कोविड-19 से संबंधित अतिरिक्त कार्य बिना किसी अतिरिक्त वेतन के कर रही हैं।';
+  String get announcementItem3Body => 'आशा कार्यकर्ता कोविड-19 के खिलाफ लड़ाई में सबसे आगे रही हैं। नवजात बच्चे और उनकी मां की देखभाल, नियमित टीकाकरण और सर्वेक्षण के नियमित कर्तव्यों के अलावा, देश भर से आशा कार्यकर्ता बिना किसी अतिरिक्त वेतन के COVID-19 के लिए अतिरिक्त कार्य कर रही हैं।';
 
   @override
-  String get announcementItem3Title => 'बिहार की आशा कार्यकर्ताओं ने बेहतर वेतन और कार्य वातावरण की मांग की';
+  String get announcementItem3Title => 'बिहार की आशा वर्कर्स ने की बेहतर वेतन और काम के माहौल की मांग';
 
   @override
   String get anyHighRiskProblemLabel => 'क्या कोई उच्च जोखिम वाली समस्या है?';
@@ -380,7 +380,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bcmNameLabel => 'ब्लॉक कम्युनिटी मोबिलाइज़र का नाम';
 
   @override
-  String get beneficiaryAbsentLabel => 'क्या लाभार्थी अनुपस्थित है?';
+  String get beneficiaryAbsentLabel => 'Is Beneficiary Absent?';
 
   @override
   String get beneficiaryIdLabel => 'लाभार्थी आईडी';
@@ -425,7 +425,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get blockLabel => 'ब्लॉक';
 
   @override
-  String get blockLabelSimple => 'प्रखंड';
+  String get blockLabelSimple => 'खंड';
 
   @override
   String callNumber(Object number) {
@@ -893,7 +893,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get choNameLabel => 'सी.एच.ओ. का नाम';
 
   @override
-  String get completedVisits => 'पूर्ण दौरे';
+  String get completedVisits => 'पूर्ण कार्य';
 
   @override
   String get contactLabel => 'संपर्क';
@@ -1007,7 +1007,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dobLabel => 'जन्म की तिथि';
 
   @override
-  String get dobShort => 'जन्म तिथि';
+  String get dobShort => 'जन्मतिथि';
 
   @override
   String get dojLabel => 'नियुक्ति होने की तिथि';
@@ -1055,7 +1055,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get educationGraduate => 'स्नातक';
 
   @override
-  String get educationLabel => 'शिक्षा';
+  String get educationLabel => 'शिक्षा का स्तर';
 
   @override
   String get educationPostgraduate => 'स्नातकोत्तर';
@@ -1067,7 +1067,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get educationSecondary => 'माध्यमिक';
 
   @override
-  String get elderlyAbove65 => 'वृद्ध (>65 वर्ष)';
+  String get elderlyAbove65 => 'बुजुर्ग (>65 वर्ष)';
 
   @override
   String get elecGenerator => 'जनरेटर';
@@ -1150,7 +1150,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enterValidMobile => 'मान्य मोबाइल दर्ज करें';
 
   @override
-  String get familyHeadDetailsTitle => 'परिवार प्रमुख का विवरण';
+  String get familyHeadDetailsTitle => 'मुखिया का विवरण';
 
   @override
   String get father => 'पिता';
@@ -1252,7 +1252,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gridAllHousehold => 'सभी घर';
 
   @override
-  String get searchHousehold => 'घर खोज';
+  String get searchHousehold => 'घरेलू खोज';
 
   @override
   String get gridAshaKiDuniya => 'आशा की दुनिया';
@@ -1381,7 +1381,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get help => 'सहायता नियम';
 
   @override
-  String get helpInstructions => 'कृपया किसी भी सहायता के लिए नीचे दिए गए हेल्प नंबरों पर कॉल करें।';
+  String get helpInstructions => 'किसी भी तरह की मदद और सहायता के लिए नीचे हेल्प नंबरों पर कॉल करें।';
 
   @override
   String get hemoglobinLabel => 'हीमोग्लोबिन (एच.बी)';
@@ -1399,10 +1399,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get houseKachcha => 'कच्चा घर';
 
   @override
-  String get houseNoHint => 'मकान संख्या';
+  String get houseNoHint => 'घर संख्या';
 
   @override
-  String get houseNoLabel => 'मकान संख्या';
+  String get houseNoLabel => 'घर का नं';
 
   @override
   String get houseNone => 'कोई नहीं';
@@ -1423,10 +1423,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get houseTypeLabel => 'घर का प्रकार';
 
   @override
-  String get householdBeneficiarySearch => 'परिवार लाभार्थी खोज';
+  String get householdBeneficiarySearch => 'घरेलू लाभार्थी खोज';
 
   @override
-  String get householdBeneficiaryTitle => 'परिवार लाभार्थी';
+  String get householdBeneficiaryTitle => 'घरेलू लाभार्थी';
 
   @override
   String get hscNameHint => 'एच.एस.सी. का नाम';
@@ -1665,13 +1665,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mobileLabel => 'मोबाइल नंबर';
 
   @override
-  String get mobileLabelSimple => 'मोबाइल नं.';
+  String get mobileLabelSimple => 'मोबाइल नंबर';
 
   @override
   String get mobileTelephoneLabel => 'मोबाइल/टेलीफोन नंबर';
 
   @override
-  String get mohallaTolaNameLabel => 'मोहल्ला/टोला का नाम';
+  String get mohallaTolaNameLabel => 'टोला/मोहल्ला';
 
   @override
   String get monthApril => 'अप्रैल';
@@ -1758,10 +1758,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get nameLabelSimple => 'Name';
 
   @override
-  String get nameOfFamilyHeadHint => 'परिवार प्रमुख का नाम';
+  String get nameOfFamilyHeadHint => 'परिवार के मुखिया का नाम';
 
   @override
-  String get nameOfFamilyHeadLabel => 'परिवार प्रमुख का नाम';
+  String get nameOfFamilyHeadLabel => 'परिवार के मुखिया का नाम';
 
   @override
   String get nameOfMemberLabel => 'सदस्य का नाम';
@@ -1809,7 +1809,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get occupationEmployed => 'नौकरी';
 
   @override
-  String get occupationLabel => 'पेशा';
+  String get occupationLabel => 'व्यवसाय';
 
   @override
   String get occupationSelfEmployed => 'स्वरोजगार';
@@ -1929,7 +1929,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get reenterPasswordTooShort => 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए';
 
   @override
-  String get registrationDateLabel => 'पंजीकरण तिथि';
+  String get registrationDateLabel => 'पंजीकरण की तिथि';
 
   @override
   String get registrationThroughTitle => 'पंजीकरण का माध्यम';
@@ -2043,10 +2043,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get rnhAddHeadProceed => 'कृपया आगे बढ़ने से पहले परिवार प्रमुख जोड़ें।';
 
   @override
-  String get rnhTabHouseholdAmenities => 'परिवार सुविधाएँ';
+  String get rnhTabHouseholdAmenities => 'घरेलू सुविधाए';
 
   @override
-  String get rnhTabHouseholdDetails => 'परिवार विवरण';
+  String get rnhTabHouseholdDetails => 'घरेलू विवरण';
 
   @override
   String get rnhTabMemberDetails => 'सदस्य विवरण';
@@ -2085,10 +2085,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get savingButton => 'SAVING...';
 
   @override
-  String get search => 'खोजें';
+  String get search => 'खोज';
 
   @override
-  String get searchHint => 'Search by ID/Name/Contact';
+  String get searchHint => 'आईडी/नाम/संपर्क द्वारा खोजें';
 
   @override
   String get searchEligibleCouple => 'योग्य दम्पति की खोज';
@@ -2106,13 +2106,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get searchPlaceholder => 'Search...';
 
   @override
-  String get eligibleCoupleListTitle => 'योग्य दंपति सूची';
+  String get eligibleCoupleListTitle => 'योग्य दम्पत्ति सूची';
 
   @override
   String get eligibleCoupleStatus => 'योग्य दंपति';
 
   @override
-  String get deathRegisterTitle => 'मृत्यु पंजीकरण';
+  String get deathRegisterTitle => 'मृत्यु रजिस्टर';
 
   @override
   String get placeLabel => 'स्थान';
@@ -2214,7 +2214,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get thGender => 'लिंग';
 
   @override
-  String get thName => 'Name';
+  String get thName => 'नाम';
 
   @override
   String get thNumber => '#';
@@ -2235,7 +2235,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get thirdAncLabel => 'तीसरी एएनसी';
 
   @override
-  String get toDoVisits => 'दौरा करना';
+  String get toDoVisits => 'निर्धारित कार्य';
 
   @override
   String get todayWorkCompleted => 'Completed visits :';
@@ -2289,16 +2289,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get trainingNameLabel => 'प्रशिक्षण का नाम';
 
   @override
-  String get trainingPlaceLabel => 'प्रशिक्षण स्थल';
+  String get trainingPlaceLabel => 'प्रशिक्षण का स्थान';
 
   @override
   String get trainingProvidedTitle => 'प्रशिक्षण प्रदान किया गया';
 
   @override
-  String get trainingReceivedTitle => 'प्राप्त प्रशिक्षण';
+  String get trainingReceivedTitle => 'प्रशिक्षण प्राप्त हुआ';
 
   @override
-  String get trainingSave => 'SAVE';
+  String get trainingSave => 'संरक्षित करें';
 
   @override
   String get trainingTitle => 'भाव्या एम-आशा प्रशिक्षण';
@@ -2337,7 +2337,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get userRoleLabel => 'भूमिका:';
 
   @override
-  String get userVillageLabel => 'गांव:';
+  String get userVillageLabel => 'गाँव';
 
   @override
   String get usernameEmpty => 'उपयोगकर्ता का नाम खाली नहीं हो सकता';
@@ -3258,7 +3258,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbac => 'सीबीएसी';
 
   @override
-  String get videoTutorialList => 'वीडियो ट्यूटोरियल सूची';
+  String get videoTutorialList => 'वीडियो शिक्षण की सूची';
 
   @override
   String get visitDateLabel => 'भ्रमण की तिथि';
@@ -3279,13 +3279,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get previousPage => 'पिछला पेज';
 
   @override
-  String get completeTutorial => 'पूरा ट्यूटोरियल';
+  String get completeTutorial => 'संपूर्ण व्याख्या';
 
   @override
   String get ashwinPortalFilm => 'आश्विन पोर्टल फिल्म';
 
   @override
-  String get pneumoniaAwareness => 'निमोनिया जागरूकता (बाल स्वास्थ्य)';
+  String get pneumoniaAwareness => 'निमोनिया के प्रति जागरूकता(शिशु स्वास्थ्य)';
 
   @override
   String get healthMinisterMessage => 'माननीय स्वास्थ्य मंत्री बिहार का संदेश';
@@ -3300,22 +3300,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get myBeneficiariesTitle => 'मेरे लाभार्थी';
 
   @override
-  String get familyUpdate => 'परिवार अद्यतन';
+  String get familyUpdate => 'फैमिली अपडेट';
 
   @override
-  String get eligibleCoupleList => 'पात्र दंपति सूची';
+  String get eligibleCoupleList => 'योग्य दम्पत्ति सूची';
 
   @override
   String get pregnantWomenList => 'गर्भवती महिलाओं की सूची';
 
   @override
-  String get pregnancyOutcome => 'गर्भावस्था परिणाम';
+  String get pregnancyOutcome => 'गर्भावस्था का परिणाम';
 
   @override
   String get hbcnList => 'एचबीसीएन सूची';
 
   @override
-  String get lbwReferred => 'कम वजन वाले शिशु (एलबीडब्ल्यू) रेफर किए गए';
+  String get lbwReferred => 'एलबीडब्ल्यू रेफर';
 
   @override
   String get abortionList => 'गर्भपात सूची';
@@ -3324,7 +3324,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deathRegister => 'मृत्यु रजिस्टर';
 
   @override
-  String get migratedOut => 'बाहर स्थानांतरित';
+  String get migratedOut => 'माइग्रेटेड आउट';
 
   @override
   String get guestBeneficiaryList => 'अतिथि लाभार्थी सूची';
@@ -3507,7 +3507,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get viewLabel => 'देखें';
 
   @override
-  String get editLabel => 'संपादित करें';
+  String get editLabel => 'सुधारें';
 
   @override
   String get deleteLabel => 'हटाएं';
@@ -4270,7 +4270,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get addNew => '+ नया जोड़ें';
 
   @override
-  String get genderLabel => 'लिंग: ';
+  String get genderLabel => 'लिंग';
 
   @override
   String get abhaIdLabel => 'ABHA आईडी: ';
@@ -4558,7 +4558,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get refresh_data => 'डेटा रीफ़्रेश करें';
 
   @override
-  String get guest_beneficiaries => 'अतिथि लाभार्थी';
+  String get guest_beneficiaries => 'अतिथि लाभार्थी सूची';
 
   @override
   String get no_guest_beneficiaries_found => 'कोई अतिथि लाभार्थी नहीं मिले';
@@ -4570,7 +4570,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get progress => 'प्रगति';
 
   @override
-  String get pendingVisits => 'लंबित दौरे';
+  String get pendingVisits => 'लंबित कार्य';
 
   @override
   String get tryAgain => 'पुनः प्रयास करें';
@@ -4855,10 +4855,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get noOfASHAUnderTheFacilitator => 'फैसिलिटेटर के अंतर्गत आशा की संख्या';
 
   @override
-  String get ashaFacilitatorClusterMeetingList => 'आशा फ़ैसिलिटेटर क्लस्टर बैठक सूची';
+  String get ashaFacilitatorClusterMeetingList => 'आशा फ़ैसिलिटेटर क्लस्टर मीटिंग सूची';
 
   @override
-  String get addNewClusterMeeting => 'नई क्लस्टर बैठक जोड़ें';
+  String get addNewClusterMeeting => 'नया क्लस्टर मीटिंग जोड़ें';
 
   @override
   String get facilitatorNotSpecified => 'सुविधादाता निर्दिष्ट नहीं किया गया';
@@ -4873,7 +4873,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get phcName => 'पी.एच.सी का नाम';
 
   @override
-  String get decisionTakenDuringMeeting => 'बैठक के दौरान लिया गया निर्णय';
+  String get decisionTakenDuringMeeting => 'बैठक के दौरान लिया गया फैसला';
 
   @override
   String get discussionSubTopicProgram => 'चर्चा का उप विषय/कार्यक्रम';
@@ -4885,22 +4885,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectTopics => 'विषय चुनें';
 
   @override
-  String get clusterMeetingsCountThisMonth => 'इस महीने आयोजित क्लस्टर बैठकों की संख्या';
+  String get clusterMeetingsCountThisMonth => 'इस माह में आयोजित क्लस्टर बैठकों की संख्या';
 
   @override
   String get noOfASHAAbsentInThisMeeting => 'इस बैठक में अनुपस्थित आशाओं की संख्या';
 
   @override
-  String get ashaPresentCount => 'इस बैठक में उपस्थित आशाओं की संख्या';
+  String get ashaPresentCount => 'इस बैठक में उपस्थित आशा की संख्या';
 
   @override
-  String get totalAshaUnderFacilitator => 'सुविधादाता के अंतर्गत कुल आशाओं की संख्या';
+  String get totalAshaUnderFacilitator => 'प्रबंधक के अंतर्गत आशा की कुल संख्या';
 
   @override
   String get noOfHours => 'घंटों की संख्या';
 
   @override
-  String get toTime => 'तक (HH:MM)';
+  String get toTime => 'बजे तक(HH:MM)';
 
   @override
   String get ashaInchargeName => 'आशा प्रभारी का नाम';
@@ -4933,13 +4933,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateOfMeeting => 'बैठक की तिथि';
 
   @override
-  String get day => 'Day';
+  String get day => 'दिन';
 
   @override
   String get selectDay => 'दिन चुनें';
 
   @override
-  String get fromTime => 'से (HH:MM)';
+  String get fromTime => 'बजे से(HH:MM)';
 
   @override
   String get selectDiscussionTopics => 'चर्चा विषय चुनें';
@@ -4978,25 +4978,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String get immunization => 'टीकाकरण';
 
   @override
-  String get pregnantWomen => 'गर्भवती महिलाएँ';
+  String get pregnantWomen => 'गर्भवती महिलाएं';
 
   @override
   String get deliveries => 'प्रसव';
 
   @override
-  String get pnc => 'पीएनसी (प्रसवोत्तर देखभाल)';
+  String get pnc => 'पी.एन.सी';
 
   @override
   String get maternalChildHealth => 'मातृ एवं शिशु स्वास्थ्य';
 
   @override
-  String get homeVisit => 'गृह भ्रमण';
+  String get homeVisit => 'घर का दौरे';
 
   @override
-  String get newBornCare => 'नवजात शिशु देखभाल';
+  String get newBornCare => 'नवजात शिशु की देखभाल';
 
   @override
-  String get deaths => 'मृत्यु';
+  String get deaths => 'मौतें';
 
   @override
   String get adolescentHealth => 'किशोर स्वास्थ्य';
@@ -5005,13 +5005,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get familyPlanning => 'परिवार नियोजन';
 
   @override
-  String get otherPublicHealthProgram => 'अन्य जन स्वास्थ्य कार्यक्रम';
+  String get otherPublicHealthProgram => 'अन्य सार्वजानिक स्वास्थ्य कार्यक्रम';
 
   @override
   String get administrative => 'प्रशासनिक';
 
   @override
-  String get trainingSupport => 'प्रशिक्षण एवं समर्थन';
+  String get trainingSupport => 'प्रशिक्षण एवं सहायता';
 
   @override
   String get other => 'अन्य';
@@ -5065,7 +5065,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get noDataFound => 'कोई डेटा नहीं मिला';
 
   @override
-  String get newHouseholdRegistration => 'नया परिवार पंजीकरण';
+  String get newHouseholdRegistration => 'नया परिवार का पंजीकरण';
 
   @override
   String get noMatchingBeneficiariesFound => 'कोई मिलते-जुलते लाभार्थी नहीं मिले।';
@@ -5158,7 +5158,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get correctHighlightedErrors => 'जारी रखने से पहले कृपया हाइलाइट किए गए त्रुटियों को सुधारें।';
 
   @override
-  String get selectOptionLabel => 'चुनें';
+  String get selectOptionLabel => 'विकल्प चुनें';
 
   @override
   String get screeningDate => 'स्क्रीनिंग तिथि';
@@ -6668,4 +6668,64 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get setting_update_msg => 'आपका भव्य एम-आशा आवेदन अद्यतन है।';
+
+  @override
+  String get aasha => 'आशा';
+
+  @override
+  String get help_title => 'सहायता';
+
+  @override
+  String get ashaModule1 => 'आशा मॉड्यूल 1';
+
+  @override
+  String get ashaModule2 => 'आशा मॉड्यूल 2';
+
+  @override
+  String get ashaModule3 => 'आशा मॉड्यूल 3';
+
+  @override
+  String get ashaModule4 => 'आशा मॉड्यूल 4';
+
+  @override
+  String get ashaModule567 => 'आशा मॉड्यूल 5, 6 & 7';
+
+  @override
+  String get ncdLabel => 'एन.सी.डी';
+
+  @override
+  String get hbnc => 'एच.बी.एन.सी';
+
+  @override
+  String get hbyc => 'एच.बी.वाई.सी';
+
+  @override
+  String get ashaFacilitatorTraining => 'आशा फैसिलिटेटर प्रशिक्षण';
+
+  @override
+  String get inductionTraining => 'प्रवेश प्रशिक्षण';
+
+  @override
+  String get maa => 'एमएए (माँ का पूर्ण स्नेह)';
+
+  @override
+  String get idcf => 'आईडीसीएफ (एकीकृत दस्त नियंत्रण पखवाड़ा)';
+
+  @override
+  String get otherTraining => 'अन्य प्रशिक्षण';
+
+  @override
+  String get receiving => 'प्राप्त हो रहा है';
+
+  @override
+  String get providing => 'प्रदान हो रहा है';
+
+  @override
+  String get newHouseholdRegister => 'नए परिवार का पंजीकरण';
+
+  @override
+  String get sr_No => 'क्र.';
+
+  @override
+  String get present => 'उपस्थित है?';
 }

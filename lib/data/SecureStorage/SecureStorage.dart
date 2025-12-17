@@ -14,6 +14,7 @@ class SecureStorageService {
   static const String _keyHbncVisits = 'hbnc_visits';
   static const String _keyTodayToDoCount = 'today_todo_visits_count';
   static const String _keyTodayCompletedCount = 'today_completed_visits_count';
+  static const String _keyHouseholdAdults = 'household_adults_summary';
 
 
   static Future<void> saveToken(String token) async {
@@ -529,4 +530,40 @@ class SecureStorageService {
     }
   }
 
+  static Future<void> saveHouseholdAdultsSummary(List<Map<String, String>> adults) async {
+    try {
+      final cleaned = adults
+          .map((m) => {
+                'Name': (m['Name'] ?? '').toString(),
+                'Gender': (m['Gender'] ?? '').toString(),
+                'Relation': (m['Relation'] ?? '').toString(),
+              })
+          .toList();
+      await _storage.write(
+        key: _keyHouseholdAdults,
+        value: jsonEncode(cleaned),
+      );
+    } catch (e) {
+      print('Error saving household adults summary: $e');
+    }
+  }
+
+  static Future<List<Map<String, String>>> getHouseholdAdultsSummary() async {
+    try {
+      final data = await _storage.read(key: _keyHouseholdAdults);
+      if (data == null || data.isEmpty) return [];
+      final List<dynamic> list = jsonDecode(data);
+      return list
+          .whereType<Map>()
+          .map((m) => {
+                'Name': (m['Name'] ?? '').toString(),
+                'Gender': (m['Gender'] ?? '').toString(),
+                'Relation': (m['Relation'] ?? '').toString(),
+              })
+          .toList();
+    } catch (e) {
+      print('Error reading household adults summary: $e');
+      return [];
+    }
+  }
 }

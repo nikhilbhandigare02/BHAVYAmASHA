@@ -163,7 +163,6 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       final data = Map<String, dynamic>.from(state.data);
       final beneficiary = event.beneficiaryData;
       
-      // Map beneficiary data to form fields
       data['personal.name'] = beneficiary['name'];
       final g = beneficiary['gender']?.toString().toLowerCase();
       data['personal.gender'] =
@@ -182,12 +181,24 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       data['personal.mobile'] = beneficiary['mobile'];
       data['personal.address'] = beneficiary['address'];
       data['beneficiary.voterId'] = beneficiary['voterId'];
-      
-      // Prefer spouseName, otherwise fallback to fatherName
-      if ((beneficiary['spouseName']?.toString().trim() ?? '').isNotEmpty) {
-        data['personal.father'] = beneficiary['spouseName'];
-      } else if ((beneficiary['fatherName']?.toString().trim() ?? '').isNotEmpty) {
-        data['personal.father'] = beneficiary['fatherName'];
+      data['beneficiary.fatherName'] = beneficiary['fatherName'];
+      data['beneficiary.spouseName'] = beneficiary['spouseName'];
+
+      final fatherName = (beneficiary['fatherName']?.toString().trim() ?? '');
+      final spouseName = (beneficiary['spouseName']?.toString().trim() ?? '');
+      final genderCode = data['personal.gender_code']?.toString() ?? '';
+      if (genderCode == 'M') {
+        if (fatherName.isNotEmpty) {
+          data['personal.father'] = beneficiary['fatherName'];
+        } else {
+          data['personal.father'] = '';
+        }
+      } else {
+        if (spouseName.isNotEmpty) {
+          data['personal.father'] = beneficiary['spouseName'];
+        } else if (fatherName.isNotEmpty) {
+          data['personal.father'] = beneficiary['fatherName'];
+        }
       }
       
       emit(state.copyWith(data: data));
