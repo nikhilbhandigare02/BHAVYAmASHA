@@ -567,19 +567,15 @@ class ChildCareCountProvider {
         return 0;
       }
 
-      // Build WHERE clause exactly like _loadChildBeneficiaries
-      String whereClause = 'child_care_state = ?';
-      List<dynamic> whereArgs = ['registration_due'];
+      // Build WHERE clause like _loadChildBeneficiaries
+      String whereClause = 'child_care_state = ? AND is_deleted = ?';
+      List<dynamic> whereArgs = ['registration_due', 0];
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
       }
 
-      whereClause += ' AND is_deleted = ?';
-      whereArgs.add(0);
-
-      // Get child care activities (exactly like _loadChildBeneficiaries)
       final List<Map<String, dynamic>> childActivities = await db.query(
         'child_care_activities',
         where: whereClause,
@@ -589,22 +585,15 @@ class ChildCareCountProvider {
       developer.log('Found ${childActivities.length} child care activities with registration_due status',
           name: 'ChildCareCountProvider');
 
-      if (childActivities.isEmpty) {
-        return 0;
-      }
+      if (childActivities.isEmpty) return 0;
 
       int validChildCount = 0;
 
-      // Process each activity exactly like _loadChildBeneficiaries
+      // Process each activity
       for (final activity in childActivities) {
         final beneficiaryRefKey = activity['beneficiary_ref_key']?.toString();
-        final householdRefKey = activity['household_ref_key']?.toString();
+        if (beneficiaryRefKey == null) continue;
 
-        if (beneficiaryRefKey == null || householdRefKey == null) {
-          continue;
-        }
-
-        // Get the beneficiary record
         final List<Map<String, dynamic>> beneficiaryRows = await db.query(
           'beneficiaries_new',
           where: 'unique_key = ?',
@@ -612,51 +601,40 @@ class ChildCareCountProvider {
           limit: 1,
         );
 
-        if (beneficiaryRows.isEmpty) {
-          continue;
-        }
+        if (beneficiaryRows.isEmpty) continue;
 
         final row = beneficiaryRows.first;
 
-        // Parse beneficiary_info
         dynamic info;
         try {
-          if (row['beneficiary_info'] is String) {
-            info = jsonDecode(row['beneficiary_info'] as String);
-          } else {
-            info = row['beneficiary_info'];
-          }
+          info = (row['beneficiary_info'] is String)
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : row['beneficiary_info'];
         } catch (e) {
           developer.log('Error parsing beneficiary_info: $e', name: 'ChildCareCountProvider');
           continue;
         }
 
-        if (info is! Map) {
-          continue;
-        }
+        if (info is! Map) continue;
 
         final memberData = Map<String, dynamic>.from(info);
-        final memberType = memberData['memberType']?.toString() ?? '';
+        final memberType = (memberData['memberType']?.toString() ?? '').trim().toLowerCase();
 
-        // Only count if memberType is "Child"
-        if (memberType.toLowerCase() == 'child') {
-          final name = memberData['memberName']?.toString() ??
-              memberData['name']?.toString() ??
-              memberData['member_name']?.toString() ??
-              memberData['memberNameLocal']?.toString() ??
-              memberData['Name']?.toString() ?? '';
+        if (memberType != 'child') continue;
 
-          if (name.isEmpty) {
-            continue;
-          }
+        final name = memberData['memberName']?.toString() ??
+            memberData['name']?.toString() ??
+            memberData['member_name']?.toString() ??
+            memberData['memberNameLocal']?.toString() ??
+            memberData['Name']?.toString() ??
+            '';
 
-          // Check if already registered
-          final isAlreadyRegistered = await _isChildRegistered(db, householdRefKey, name);
+        if (name.isEmpty) continue;
 
-          if (!isAlreadyRegistered) {
-            validChildCount++;
-          }
-        }
+        // ✅ Use beneficiaryRefKey instead of householdRefKey
+        final isAlreadyRegistered = await _isChildRegistered(db, beneficiaryRefKey, name);
+
+        if (!isAlreadyRegistered) validChildCount++;
       }
 
       developer.log('FINAL REGISTRATION DUE COUNT = $validChildCount', name: 'ChildCareCountProvider');
@@ -671,89 +649,61 @@ class ChildCareCountProvider {
     }
   }
 
-  Future<bool> _isChildRegistered(Database db, String hhId, String childName) async {
+
+  Future<bool> _isChildRegistered(Database db, String beneficiaryRefKey, String childName) async {
     try {
       final normalizedSearchName = childName.trim().toLowerCase();
-      debugPrint('\n🔍 Checking registration for: "$childName" in household: "$hhId"');
+      debugPrint('\n🔍 Checking registration for child: "$childName" with beneficiary_ref_key: "$beneficiaryRefKey"');
 
+      // Query followup_form_data only for this beneficiary_ref_key
       final results = await db.query(
         'followup_form_data',
-        where: 'household_ref_key = ? AND (form_json LIKE ? OR form_json LIKE ?)',
+        where: 'beneficiary_ref_key = ? AND (form_json LIKE ? OR form_json LIKE ?)',
         whereArgs: [
-          hhId,
+          beneficiaryRefKey,
           '%"form_type":"child_registration_due"%',
           '%"child_registration_due_form"%'
         ],
       );
 
-      debugPrint('📊 Found ${results.length} child registration forms for household: $hhId');
+      debugPrint('📊 Found ${results.length} child registration forms for beneficiary: $beneficiaryRefKey');
 
-      // If there are any matching forms for this household, exclude it
       if (results.isNotEmpty) {
-        debugPrint('✅ Household $hhId has existing child registration form - EXCLUDING');
-        return true;
-      }
+        for (final row in results) {
+          try {
+            final formJson = row['form_json'] as String?;
+            if (formJson == null || formJson.isEmpty) continue;
 
-      // If no forms found, check by name in all forms as a fallback
-      final allForms = await db.query(
-        'followup_form_data',
-        where: 'household_ref_key = ?',
-        whereArgs: [hhId],
-      );
+            final formData = jsonDecode(formJson);
+            final formType = (formData['form_type']?.toString() ?? '').toLowerCase();
+            final hasChildRegistrationForm = formData['child_registration_due_form'] is Map;
 
-      debugPrint('📊 Found ${allForms.length} total forms for household: $hhId');
+            if (formType != 'child_registration_due' && !hasChildRegistrationForm) continue;
 
-      for (int i = 0; i < allForms.length; i++) {
-        final row = allForms[i];
-        try {
-          final formJson = row['form_json'] as String?;
-          if (formJson == null || formJson.isEmpty) {
+            Map<String, dynamic> formDataMap;
+            if (hasChildRegistrationForm) {
+              formDataMap = formData['child_registration_due_form'] as Map<String, dynamic>;
+            } else if (formData['form_data'] is Map) {
+              formDataMap = formData['form_data'] as Map<String, dynamic>;
+            } else {
+              continue;
+            }
+
+            final childNameInForm = formDataMap['name_of_child']?.toString() ??
+                formDataMap['child_name']?.toString() ?? '';
+
+            if (childNameInForm.trim().toLowerCase() == normalizedSearchName) {
+              debugPrint('✅ MATCH FOUND! Child already registered');
+              return true;
+            }
+          } catch (e) {
+            debugPrint('❌ Error parsing form data: $e');
             continue;
           }
-
-          final formData = jsonDecode(formJson);
-
-          // Check for both form_type and direct child_registration_due_form structure
-          final formType = (formData['form_type']?.toString() ?? '').toLowerCase();
-          final hasChildRegistrationForm = formData['child_registration_due_form'] is Map;
-
-          // Skip if not a child registration form
-          if (formType != 'child_registration_due' && !hasChildRegistrationForm) {
-            continue;
-          }
-
-          // Get the form data map based on the structure
-          Map<String, dynamic> formDataMap;
-          if (hasChildRegistrationForm) {
-            formDataMap = formData['child_registration_due_form'] as Map<String, dynamic>;
-          } else if (formData['form_data'] is Map) {
-            formDataMap = formData['form_data'] as Map<String, dynamic>;
-          } else {
-            continue;
-          }
-
-          // Try different possible name fields
-          final childNameInForm =
-              formDataMap['name_of_child']?.toString() ??
-                  formDataMap['child_name']?.toString() ?? '';
-
-          if (childNameInForm.isEmpty) {
-            continue;
-          }
-
-          final normalizedStoredName = childNameInForm.trim().toLowerCase();
-
-          if (normalizedStoredName == normalizedSearchName) {
-            debugPrint('✅ MATCH FOUND! Child already registered');
-            return true;
-          }
-        } catch (e) {
-          debugPrint('❌ Error parsing form data: $e');
-          continue;
         }
       }
 
-      debugPrint('✅ No existing registration found');
+      debugPrint('✅ No existing registration found for child: "$childName"');
       return false;
     } catch (e) {
       debugPrint('❌ Error checking registration: $e');
