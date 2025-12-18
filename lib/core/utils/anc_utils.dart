@@ -131,16 +131,20 @@ Mother Care Counts:
     final db = await DatabaseProvider.instance.database;
 
     final rows = await db.rawQuery('''
-    SELECT mca.beneficiary_ref_key
-    FROM mother_care_activities mca
-    INNER JOIN (
-      SELECT beneficiary_ref_key, MAX(id) AS max_id
-      FROM mother_care_activities
-      GROUP BY beneficiary_ref_key
-    ) latest ON mca.id = latest.max_id
-    INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-    WHERE mca.mother_care_state IN ('anc_due', 'anc_due_state')
-      AND bn.is_deleted = 0
+     SELECT mca.*
+FROM mother_care_activities mca
+INNER JOIN (
+    SELECT beneficiary_ref_key,
+           MAX(created_date_time) AS max_date
+    FROM mother_care_activities
+    WHERE mother_care_state = 'anc_due'
+    GROUP BY beneficiary_ref_key
+) latest
+  ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
+ AND mca.created_date_time = latest.max_date
+INNER JOIN beneficiaries_new bn
+  ON mca.beneficiary_ref_key = bn.unique_key
+WHERE bn.is_deleted = 0;
   ''');
 
     return rows
@@ -228,56 +232,64 @@ Mother Care Counts:
     final db = await DatabaseProvider.instance.database;
     const deliveryOutcomeKey = '4r7twnycml3ej1vg';
 
-    final rows = await db.query(
-      'followup_form_data',
-      where: 'forms_ref_key = ? AND is_deleted = 0',
-      whereArgs: [deliveryOutcomeKey],
-    );
+    try {
+      // First, get all beneficiary_ref_keys that have either pnc_mother or hbnc_visit state
+      final validBeneficiaries = await db.rawQuery('''
+      SELECT DISTINCT mca.beneficiary_ref_key,
+             MAX(CASE WHEN mca.is_synced = 1 THEN 1 ELSE 0 END) as has_synced
+      FROM mother_care_activities mca
+      WHERE mca.mother_care_state IN ('pnc_mother', 'hbnc_visit')
+      AND mca.is_deleted = 0
+      GROUP BY mca.beneficiary_ref_key
+    ''');
 
-    final Set<String> processedBeneficiaries = {};
-    int syncedCount = 0;
-
-    for (final row in rows) {
-      try {
-        final beneficiaryRefKey = row['beneficiary_ref_key']?.toString();
-        if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) continue;
-
-        final beneficiaryResults = await db.query(
-          'beneficiaries_new',
-          where: 'unique_key = ? AND is_deleted = 0',
-          whereArgs: [beneficiaryRefKey],
-        );
-
-        if (beneficiaryResults.isNotEmpty) {
-          processedBeneficiaries.add(beneficiaryRefKey);
-
-          final syncRows = await db.rawQuery('''
-          SELECT 1
-          FROM mother_care_activities
-          WHERE beneficiary_ref_key = ?
-            AND is_synced = 1
-          LIMIT 1
-        ''', [beneficiaryRefKey]);
-
-          if (syncRows.isNotEmpty) {
-            syncedCount++;
-          }
-        }
-      } catch (e) {
-        print('Error processing HBNC record: $e');
+      if (validBeneficiaries.isEmpty) {
+        print('ℹ️ No beneficiaries found with pnc_mother or hbnc_visit state');
+        return {'total': 0, 'synced': 0};
       }
+
+      final beneficiaryKeys = validBeneficiaries.map((e) => e['beneficiary_ref_key'] as String).toList();
+      final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
+
+      // Get delivery outcome records only for valid beneficiaries
+      final deliveryOutcomeBeneficiaries = await db.rawQuery('''
+      SELECT DISTINCT beneficiary_ref_key 
+      FROM followup_form_data 
+      WHERE forms_ref_key = ? 
+      AND is_deleted = 0
+      AND beneficiary_ref_key IN ($placeholders)
+    ''', [deliveryOutcomeKey, ...beneficiaryKeys]);
+
+      // Create a set of beneficiaries with delivery outcomes
+      final deliveryOutcomeBeneficiarySet = {
+        for (var e in deliveryOutcomeBeneficiaries)
+          e['beneficiary_ref_key'] as String
+      };
+
+      // Count synced records from the valid beneficiaries that also have delivery outcomes
+      int syncedCount = 0;
+      for (final beneficiary in validBeneficiaries) {
+        final beneficiaryRefKey = beneficiary['beneficiary_ref_key'] as String;
+        final hasSynced = (beneficiary['has_synced'] as int) == 1;
+
+        if (deliveryOutcomeBeneficiarySet.contains(beneficiaryRefKey) && hasSynced) {
+          syncedCount++;
+        }
+      }
+
+      final totalCount = deliveryOutcomeBeneficiarySet.length;
+      print('✅ HBNC total processed count: $totalCount');
+      print('🔄 HBNC synced count: $syncedCount');
+
+      return {
+        'total': totalCount,
+        'synced': syncedCount,
+      };
+    } catch (e) {
+      print('❌ Error in _getHBNCCount: $e');
+      return {'total': 0, 'synced': 0};
     }
-
-    print('✅ HBNC total processed count: ${processedBeneficiaries.length}');
-    print('🔄 HBNC synced count: $syncedCount');
-
-    // ✅ ONLY CHANGE IS HERE
-    return {
-      'total': processedBeneficiaries.length,
-      'synced': syncedCount,
-    };
   }
-
   static Future<int> getMotherCareSyncedTotalCount() async {
     try {
       final ancResult = await _loadAncVisitCount();
