@@ -94,18 +94,20 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen>
     final db = await DatabaseProvider.instance.database;
 
     final rows = await db.rawQuery('''
-    SELECT mca.beneficiary_ref_key
-    FROM mother_care_activities mca
-    INNER JOIN (
-      SELECT beneficiary_ref_key, MAX(id) AS max_id
-      FROM mother_care_activities
-      GROUP BY beneficiary_ref_key
-    ) latest
-      ON mca.id = latest.max_id
-    INNER JOIN beneficiaries_new bn
-      ON mca.beneficiary_ref_key = bn.unique_key
-    WHERE mca.mother_care_state IN ('anc_due', 'anc_due_state')
-      AND bn.is_deleted = 0
+    SELECT mca.*
+FROM mother_care_activities mca
+INNER JOIN (
+    SELECT beneficiary_ref_key,
+           MAX(created_date_time) AS max_date
+    FROM mother_care_activities
+    WHERE mother_care_state = 'anc_due'
+    GROUP BY beneficiary_ref_key
+) latest
+  ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
+ AND mca.created_date_time = latest.max_date
+INNER JOIN beneficiaries_new bn
+  ON mca.beneficiary_ref_key = bn.unique_key
+WHERE bn.is_deleted = 0;
   ''');
 
     return rows
@@ -239,70 +241,42 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen>
     try {
       print('🔍 Loading HBNC count...');
       final db = await DatabaseProvider.instance.database;
-      final deliveryOutcomeKey = '4r7twnycml3ej1vg'; // Same key as in HBNCList
+      final deliveryOutcomeKey = '4r7twnycml3ej1vg';
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      // Get delivery outcome records
-      final dbOutcomes = await db.query(
-        'followup_form_data',
-        where: 'forms_ref_key = ? AND current_user_key = ?',
-        whereArgs: [deliveryOutcomeKey, ashaUniqueKey],
-      );
+      // First, get all beneficiary_ref_keys that have either pnc_mother or hbnc_visit state
+      final validBeneficiaries = await db.rawQuery('''
+      SELECT DISTINCT mca.beneficiary_ref_key 
+      FROM mother_care_activities mca
+      WHERE mca.mother_care_state IN ('pnc_mother', 'hbnc_visit')
+      AND mca.is_deleted = 0
+      AND mca.current_user_key = ?
+    ''', [ashaUniqueKey]);
 
-      print('📊 Found ${dbOutcomes.length} delivery outcome records');
-      if (dbOutcomes.isEmpty) {
-        print('ℹ️ No delivery outcomes found');
+      if (validBeneficiaries.isEmpty) {
+        print('ℹ️ No beneficiaries found with pnc_mother or hbnc_visit state');
         if (mounted) {
           setState(() => _hbcnMotherCount = 0);
         }
         return;
       }
 
-      final Set<String> processedBeneficiaries = <String>{};
+      final beneficiaryKeys = validBeneficiaries.map((e) => e['beneficiary_ref_key'] as String).toList();
+      final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
 
-      for (final outcome in dbOutcomes) {
-        try {
-          final formJson = jsonDecode(outcome['form_json'] as String);
-          final formData = formJson['form_data'] ?? {};
-          final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
+      // Get delivery outcome records only for valid beneficiaries
+      final dbOutcomes = await db.rawQuery('''
+      SELECT DISTINCT beneficiary_ref_key 
+      FROM followup_form_data 
+      WHERE forms_ref_key = ? 
+      AND current_user_key = ?
+      AND beneficiary_ref_key IN ($placeholders)
+    ''', [deliveryOutcomeKey, ashaUniqueKey, ...beneficiaryKeys]);
 
-          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            print(
-                '⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}');
-            continue;
-          }
-
-          if (processedBeneficiaries.contains(beneficiaryRefKey)) {
-            print(
-                'ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey');
-            continue;
-          }
-
-          final beneficiaryResults = await db.query(
-            'beneficiaries_new',
-            where: 'unique_key = ?',
-            whereArgs: [beneficiaryRefKey],
-          );
-
-          if (beneficiaryResults.isEmpty) {
-            print('⚠️ No beneficiary found for key: $beneficiaryRefKey');
-            continue;
-          }
-
-          // If we got this far, add to processed set
-          processedBeneficiaries.add(beneficiaryRefKey);
-          print(
-              '✅ Added beneficiary $beneficiaryRefKey to count (Total: ${processedBeneficiaries.length})');
-        } catch (e) {
-          print('❌ Error processing outcome ${outcome['id']}: $e');
-        }
-      }
-
-      final count = processedBeneficiaries.length;
+      final count = dbOutcomes.length;
       print('\n✅ Final HBNC Count: $count');
-      print('   - Total delivery outcomes: ${dbOutcomes.length}');
-      print('   - Valid unique beneficiaries: $count');
+      print('   - Valid unique beneficiaries with delivery outcomes: $count');
 
       if (mounted) {
         setState(() {
@@ -317,7 +291,6 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen>
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);

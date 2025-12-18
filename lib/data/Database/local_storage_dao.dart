@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:medixcel_new/data/Database/tables/beneficiaries_table.dart';
 import 'package:medixcel_new/data/Database/tables/cluster_meeting_table.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
@@ -1251,36 +1252,92 @@ class LocalStorageDao {
         if (formJson == null || formJson.isEmpty) continue;
 
         final decoded = jsonDecode(formJson);
-        if (decoded is! Map || decoded['form_data'] is! Map) continue;
+        if (decoded is! Map<String, dynamic>) continue;
 
-        final formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+        Map<String, dynamic>? data;
 
-        final hr = formData['high_risk'];
-        final bool isHighRisk =
-            hr == true ||
-                hr == 1 ||
-                (hr is String &&
-                    (hr.toLowerCase() == 'true' || hr.toLowerCase() == 'yes' || hr == '1'));
+        if (decoded.containsKey('form_data') && decoded['form_data'] is Map) {
+          data = Map<String, dynamic>.from(decoded['form_data']);
+        } else if (decoded.containsKey('anc_form') && decoded['anc_form'] is Map) {
+          data = Map<String, dynamic>.from(decoded['anc_form']);
+        }
+
+        if (data == null) continue;
+
+        final dynamic hr = data['high_risk'] ?? data['is_high_risk'];
+        final bool isHighRisk = hr == true ||
+            hr == 1 ||
+            (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
 
         if (!isHighRisk) continue;
+
+        // Fetch beneficiary data
+        final beneficiaryRefKey = form['beneficiary_ref_key'] as String?;
+        if (beneficiaryRefKey == null) continue;
+
+        // Get the beneficiary data
+        final beneficiary = await db.query(
+          BeneficiariesTable.table,
+          where: 'unique_key = ?',
+          whereArgs: [beneficiaryRefKey],
+          limit: 1,
+        );
+
+        if (beneficiary.isEmpty) continue;
+
+        // Parse beneficiary info if it's a string
+        var beneficiaryData = Map<String, dynamic>.from(beneficiary.first);
+        if (beneficiaryData['beneficiary_info'] is String) {
+          try {
+            beneficiaryData['beneficiary_info'] = jsonDecode(beneficiaryData['beneficiary_info']);
+          } catch (e) {
+            debugPrint('Error parsing beneficiary_info: $e');
+          }
+        }
+
+        // Get spouse data if exists
+        Map<String, dynamic>? spouseData;
+        final spouseKey = beneficiaryData['spouse_key'];
+        if (spouseKey != null) {
+          final spouse = await db.query(
+            BeneficiariesTable.table,
+            where: 'unique_key = ?',
+            whereArgs: [spouseKey],
+            limit: 1,
+          );
+
+          if (spouse.isNotEmpty) {
+            spouseData = Map<String, dynamic>.from(spouse.first);
+            if (spouseData!['beneficiary_info'] is String) {
+              try {
+                spouseData!['beneficiary_info'] = jsonDecode(spouseData!['beneficiary_info']);
+              } catch (e) {
+                debugPrint('Error parsing spouse beneficiary_info: $e');
+              }
+            }
+          }
+        }
 
         result.add({
           'id': form['id'],
           'forms_ref_key': form['forms_ref_key'],
-          'household_ref_key': form['household_ref_key'],
-          'beneficiary_ref_key': form['beneficiary_ref_key'],
+          'form_type': form['form_type'],
+          'beneficiary_ref_key': beneficiaryRefKey,
+          'beneficiary_data': beneficiaryData,
+          'spouse_data': spouseData, // Add spouse data if available
           'created_date_time': form['created_date_time'],
           'modified_date_time': form['modified_date_time'],
-          'form_data': formData,
+          'form_data': data,
         });
       } catch (e) {
-        print('Error processing high-risk ANC form ${form['id']}: $e');
+        debugPrint(
+          '❌ Error processing high-risk ANC form ${form['id']}: $e',
+        );
       }
     }
 
     return result;
   }
-
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {
     try {
       final db = await _db;
@@ -1510,11 +1567,13 @@ class LocalStorageDao {
       // whereArgs?.add(ashaUniqueKey);
 
       final rows = await db.query(
-          'beneficiaries_new',
-          where: where,
-          whereArgs: whereArgs,
-          orderBy: 'created_date_time DESC'
+        'beneficiaries_new',
+        columns: ['DISTINCT unique_key', '*'],
+        where: where,
+        whereArgs: whereArgs,
+        orderBy: 'created_date_time DESC',
       );
+
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
         mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);

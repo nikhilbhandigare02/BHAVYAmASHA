@@ -93,6 +93,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       final child1to2Map = <String, int>{};
       final child2to5Map = <String, int>{};
 
+      /// Household -> configured head map
       final headKeyByHousehold = <String, String>{};
       for (final hh in households) {
         try {
@@ -103,34 +104,37 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         } catch (_) {}
       }
 
+      /// --------- AGGREGATE COUNTS ----------
       for (final row in rows) {
         try {
           final info = Map<String, dynamic>.from(
             (row['beneficiary_info'] is String
-                ? Map<String, dynamic>.from(jsonDecode(row['beneficiary_info']))
-                : (row['beneficiary_info'] as Map?) ?? const {}),
+                ? jsonDecode(row['beneficiary_info'])
+                : row['beneficiary_info'] ?? {}),
           );
 
           final householdRefKey = (row['household_ref_key'] ?? '').toString();
 
+          // Pregnant
           final isPregnant =
               info['isPregnant']?.toString().toLowerCase() == 'yes' ||
-              info['isPregnant'] == true;
+                  info['isPregnant'] == true;
+
           if (isPregnant) {
             pregnantCountMap[householdRefKey] =
                 (pregnantCountMap[householdRefKey] ?? 0) + 1;
           }
 
+          // Age groups
           final dob = info['dob']?.toString();
           if (dob != null && dob.isNotEmpty) {
-            try {
-              final birthDate = DateTime.parse(dob);
+            final birthDate = DateTime.tryParse(dob);
+            if (birthDate != null) {
               final now = DateTime.now();
-
               int ageInMonths =
                   (now.year - birthDate.year) * 12 +
-                  now.month -
-                  birthDate.month;
+                      now.month -
+                      birthDate.month;
               if (now.day < birthDate.day) ageInMonths--;
 
               if (ageInMonths >= 0 && ageInMonths < 12) {
@@ -146,235 +150,106 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                 elderlyCountMap[householdRefKey] =
                     (elderlyCountMap[householdRefKey] ?? 0) + 1;
               }
-            } catch (e) {
-              print('Error parsing DOB: $dob, error: $e');
             }
           }
-        } catch (e) {
-          print('Error processing beneficiary: $e');
-        }
+        } catch (_) {}
       }
 
+      /// --------- FAMILY HEAD FILTER ----------
       final familyHeads = rows.where((r) {
         try {
           final householdRefKey = (r['household_ref_key'] ?? '').toString();
           final uniqueKey = (r['unique_key'] ?? '').toString();
           if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
 
-          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+          // Exclude migrated & death
+          if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
-          final isDeath = r['is_death'] == 1;
-          final isMigrated = r['is_migrated'] == 1;
-          if (isDeath || isMigrated) return false;
-
-          bool isConfiguredHead = false;
-          if (configuredHeadKey != null && configuredHeadKey.isNotEmpty) {
-            isConfiguredHead = configuredHeadKey == uniqueKey;
-          }
-
-          bool isHeadByRelation = false;
           final rawInfo = r['beneficiary_info'];
           Map<String, dynamic> info;
           if (rawInfo is Map) {
-            info = Map<String, dynamic>.from(rawInfo as Map);
+            info = Map<String, dynamic>.from(rawInfo);
           } else if (rawInfo is String && rawInfo.isNotEmpty) {
             info = Map<String, dynamic>.from(jsonDecode(rawInfo));
           } else {
-            info = <String, dynamic>{};
+            info = {};
           }
+
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+
+          final bool isConfiguredHead =
+              configuredHeadKey != null && configuredHeadKey == uniqueKey;
 
           final relation = (info['relation_to_head'] ?? info['relation'] ?? '')
               .toString()
               .toLowerCase();
-          isHeadByRelation = relation == 'head';
 
-          return isConfiguredHead || isHeadByRelation;
+          final bool isHeadByRelation =
+              relation == 'head' || relation == 'self';
+
+          // ✅ NEW CONDITION
+          final bool isFamilyHead =
+              info['isFamilyHead'] == true ||
+                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
+
+          return isConfiguredHead || isHeadByRelation || isFamilyHead;
         } catch (_) {
           return false;
         }
       }).toList();
 
+      /// --------- MAP TO UI MODEL ----------
       final mapped = familyHeads.map<Map<String, dynamic>>((r) {
-        final info = r['beneficiary_info'] is String
-            ? Map<String, dynamic>.from(jsonDecode(r['beneficiary_info']))
-            : Map<String, dynamic>.from(
-                (r['beneficiary_info'] as Map?) ?? const {},
-              );
+        final info = Map<String, dynamic>.from(
+          (r['beneficiary_info'] is String
+              ? jsonDecode(r['beneficiary_info'])
+              : r['beneficiary_info'] ?? {}),
+        );
 
-        // Get household ref key and id (display)
         final householdRefKey = (r['household_ref_key'] ?? '').toString();
-        final hhId = householdRefKey.length > 11
-            ? householdRefKey.substring(householdRefKey.length - 11)
-            : householdRefKey;
-
         final membersForHousehold = rows.where((b) {
-          final ref = (b['household_ref_key'] ?? '').toString();
-          final isDeleted = b['is_deleted'] == 1;
-          return ref == householdRefKey && !isDeleted;
+          return (b['household_ref_key'] ?? '') == householdRefKey &&
+              b['is_deleted'] != 1;
         }).toList();
 
-        final totalMembers = membersForHousehold.length;
-
-        final name =
-            (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
-                .toString();
-        final mobile = (info['mobileNo'] ?? '').toString();
-
-        String houseNo = '';
-        if (info['houseNo'] != null) {
-          houseNo = info['houseNo'].toString();
-        } else if (r['beneficiary_info'] is Map &&
-            r['beneficiary_info']?['houseNo'] != null) {
-          houseNo = r['beneficiary_info']['houseNo'].toString();
-        }
-
-        // Get head ID (last 11 digits of unique_key)
         final uniqueKey = (r['unique_key'] ?? '').toString();
         final headId = uniqueKey.length > 11
             ? uniqueKey.substring(uniqueKey.length - 11)
             : uniqueKey;
 
-        final maritalStatus = (info['maritalStatus'] ?? '').toString();
-        final eligibleCouples = maritalStatus == 'Married' ? 1 : 0;
-        final elderly = elderlyCountMap[householdRefKey] ?? 0;
-
-        // Children remaining to be added (mirror RegisterNewHouseHold logic,
-        // but using DB members instead of in-memory _members list).
-        final child0to1 = child0to1Map[householdRefKey] ?? 0;
-        final child1to2 = child1to2Map[householdRefKey] ?? 0;
-        final child2to5 = child2to5Map[householdRefKey] ?? 0;
-
-        // How many children the head declared in the registration form.
-
-        int declaredChildren = 0;
-
-        final dynamic childrenField = info['children'];
-        if (childrenField is List) {
-          declaredChildren = childrenField.length;
-        } else if (childrenField is num) {
-          declaredChildren = childrenField.toInt();
-        } else if (childrenField is String && childrenField.trim().isNotEmpty) {
-          declaredChildren = int.tryParse(childrenField.trim()) ?? 0;
-        }
-
-        if (declaredChildren == 0) {
-          final dynamic totalBornField =
-              info['totalBorn'] ?? info['total_children'];
-          if (totalBornField is num) {
-            declaredChildren = totalBornField.toInt();
-          } else if (totalBornField is String &&
-              totalBornField.trim().isNotEmpty) {
-            declaredChildren = int.tryParse(totalBornField.trim()) ?? 0;
-          }
-        }
-        final int childrenTarget = declaredChildren;
-
-        // Calculate total children from all members (excluding head and spouse)
-        int childrenAdded = 0;
-        int headChildren = 0;
-        int memberChildren = 0;
-
-        for (final member in membersForHousehold) {
-          final memberInfo = member['beneficiary_info'] is String
-              ? jsonDecode(member['beneficiary_info'])
-              : member['beneficiary_info'] ?? {};
-          
-          final relation = (memberInfo['relation_to_head'] ?? memberInfo['relation'] ?? '').toString().toLowerCase();
-          
-          if (relation == 'self' || relation == 'head' || relation == 'spouse') {
-            // Get head's children count
-            if (relation == 'self' || relation == 'head' || relation == 'spouse' || relation == 'wife') {
-              final dynamic childrenField = memberInfo['children'];
-              if (childrenField is num) {
-                headChildren = childrenField.toInt();
-              } else if (childrenField is String && childrenField.trim().isNotEmpty) {
-                headChildren = int.tryParse(childrenField.trim()) ?? 0;
-              } else if (childrenField is List) {
-                headChildren = childrenField.length;
-              }
-            }
-            continue;
-          }
-          
-          // Count this as an added child
-          childrenAdded++;
-          
-          // If this is a member with children, add to memberChildren
-          final dynamic memberChildCount = memberInfo['children'];
-          if (memberChildCount != null) {
-            if (memberChildCount is num) {
-              memberChildren += memberChildCount.toInt();
-            } else if (memberChildCount is String && memberChildCount.trim().isNotEmpty) {
-              memberChildren += int.tryParse(memberChildCount.trim()) ?? 0;
-            } else if (memberChildCount is List) {
-              memberChildren += memberChildCount.length;
-            }
-          }
-        }
-
-        // Calculate total target children (head's children + member's children)
-        final int totalChildrenTarget = headChildren + memberChildren;
-        
-        // Calculate remaining children to add
-        final int remainingChildren = totalChildrenTarget > childrenAdded
-            ? (totalChildrenTarget - childrenAdded)
-            : 0;
-
-        // Show remaining count if there's a target or if we've added children
-        final bool hasChildrenTarget = totalChildrenTarget > 0 || childrenAdded > 0;
-
         return {
-          'name': name,
-          'mobile': mobile,
+          'name':
+          (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
+              .toString(),
+          'mobile': (info['mobileNo'] ?? '').toString(),
           'hhId': headId,
-          'houseNo': houseNo.isNotEmpty ? houseNo : 0,
-          'totalMembers': totalMembers,
-          'remainingChildren': remainingChildren,
-          'eligibleCouples': eligibleCouples,
-          'elderly': elderly,
+          'houseNo': info['houseNo'] ?? 0,
+          'totalMembers': membersForHousehold.length,
+          'elderly': elderlyCountMap[householdRefKey] ?? 0,
           'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
-          'child0to1': child0to1,
-          'child1to2': child1to2,
-          'child2to5': child2to5,
-          'hasChildrenTarget': hasChildrenTarget,
-          'remainingChildren': remainingChildren > 0 ? remainingChildren : 0,
+          'child0to1': child0to1Map[householdRefKey] ?? 0,
+          'child1to2': child1to2Map[householdRefKey] ?? 0,
+          'child2to5': child2to5Map[householdRefKey] ?? 0,
           '_raw': r,
         };
       }).toList();
 
+      /// --------- SORT ----------
       mapped.sort((a, b) {
-        final ra = a['_raw'] as Map<String, dynamic>? ?? const {};
-        final rb = b['_raw'] as Map<String, dynamic>? ?? const {};
+        final ra = a['_raw'] as Map<String, dynamic>;
+        final rb = b['_raw'] as Map<String, dynamic>;
 
-        final createdA = DateTime.tryParse(
-          (ra['created_date_time'] ?? '').toString(),
-        );
-        final createdB = DateTime.tryParse(
-          (rb['created_date_time'] ?? '').toString(),
-        );
+        final ca = DateTime.tryParse(ra['created_date_time']?.toString() ?? '');
+        final cb = DateTime.tryParse(rb['created_date_time']?.toString() ?? '');
 
-        if (createdA != null && createdB != null) {
-          return createdB.compareTo(createdA); // newest first
-        }
-
-        final modifiedA = DateTime.tryParse(
-          (ra['modified_date_time'] ?? '').toString(),
-        );
-        final modifiedB = DateTime.tryParse(
-          (rb['modified_date_time'] ?? '').toString(),
-        );
-
-        if (modifiedA != null && modifiedB != null) {
-          return modifiedB.compareTo(modifiedA);
-        }
-
+        if (ca != null && cb != null) return cb.compareTo(ca);
         return 0;
       });
 
       if (mounted) {
         setState(() {
           _items = mapped;
-          _filtered = List<Map<String, dynamic>>.from(_items);
+          _filtered = List<Map<String, dynamic>>.from(mapped);
           _isLoading = false;
         });
       }
