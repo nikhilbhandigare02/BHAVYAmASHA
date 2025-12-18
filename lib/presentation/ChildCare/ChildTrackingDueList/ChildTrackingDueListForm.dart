@@ -330,9 +330,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         debugPrint('👨 Mother Key: $motherKey');
         debugPrint('👴 Father Key: $fatherKey');
         debugPrint('📱 Form Type: $formType');
-
-        // Check if case closure reason is Death and update beneficiary record
-        final closureReason = _getSelectedClosureReason(currentTabIndex);
+ final closureReason = _getSelectedClosureReason(currentTabIndex);
         if (closureReason == 'Death') {
           debugPrint('🔴 Death case closure detected. Updating beneficiary record...');
           

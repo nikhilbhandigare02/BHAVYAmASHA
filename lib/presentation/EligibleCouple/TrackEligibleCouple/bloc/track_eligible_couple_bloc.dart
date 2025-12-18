@@ -272,7 +272,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info'] ?? '{}');
               
               // Update the pregnancy related fields in beneficiary_info
-              beneficiaryInfo['isPregnant'] = 'YES';   // Using 1 instead of true for consistency
+              beneficiaryInfo['isPregnant'] = 'YES';
               
               // Add LMP and EDD dates if available
               if (state.lmpDate != null) {

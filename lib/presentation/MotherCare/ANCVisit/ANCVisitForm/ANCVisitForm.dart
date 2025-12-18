@@ -32,6 +32,7 @@ class Ancvisitform extends StatefulWidget {
 class _AncvisitformState extends State<Ancvisitform> {
   late final AnvvisitformBloc _bloc;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  DateTime? _prevLmpFromEc;
 
   int _childrenCount(String value) {
     switch (value) {
@@ -213,6 +214,15 @@ class _AncvisitformState extends State<Ancvisitform> {
     final difference = today.difference(lmpDate).inDays;
     // Add 1 to account for the first week of pregnancy
     return (difference / 7).floor() + 1;
+  }
+
+  int _fullYearsBetween(DateTime a, DateTime b) {
+    final start = a.isBefore(b) ? a : b;
+    final end = a.isBefore(b) ? b : a;
+    int years = end.year - start.year;
+    final anniversary = DateTime(end.year, start.month, start.day);
+    if (anniversary.isAfter(end)) years -= 1;
+    return years;
   }
 
   Future<void> _initializeForm() async {
@@ -412,7 +422,6 @@ class _AncvisitformState extends State<Ancvisitform> {
             }
           }
 
-          // Process all forms to find matching beneficiary
           for (var form in existingForms) {
             // Try to extract and display name from form_json
             if (form['form_json'] != null) {
@@ -688,6 +697,88 @@ class _AncvisitformState extends State<Ancvisitform> {
     if (houseNo != null) {
       _bloc.add(HouseNumberChanged(houseNo));
     }
+    await _loadPreviousLmpFromEligibleCouple();
+  }
+
+  Future<void> _loadPreviousLmpFromEligibleCouple() async {
+    try {
+      final benId = widget.beneficiaryData?['BeneficiaryID']?.toString() ??
+          widget.beneficiaryData?['unique_key']?.toString() ??
+          (widget.beneficiaryData?['_rawRow'] is Map
+              ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']?.toString()
+              : null);
+
+      final hhId = widget.beneficiaryData?['hhId']?.toString() ??
+          (widget.beneficiaryData?['_rawRow'] is Map
+              ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']?.toString()
+              : null);
+
+      if (benId == null || benId.isEmpty || hhId == null || hhId.isEmpty) {
+        return;
+      }
+
+      final dao = LocalStorageDao();
+      final forms = await dao.getFollowupFormsByHouseholdAndBeneficiary(
+        formType: FollowupFormDataTable.eligibleCoupleTrackingDue,
+        householdId: hhId,
+        beneficiaryId: benId,
+      );
+
+      if (forms.isEmpty) return;
+
+      final uiLmp = _bloc.state.lmpDate;
+      DateTime? chosen;
+
+      for (final form in forms) {
+        final formJsonStr = form['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) continue;
+        Map<String, dynamic> root;
+        try {
+          root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+        } catch (_) {
+          continue;
+        }
+        final data = root['form_data'];
+        if (data is Map) {
+          final lmpStr = data['lmp_date']?.toString();
+          if (lmpStr != null && lmpStr.isNotEmpty) {
+            DateTime? lmp;
+            try {
+              lmp = DateTime.parse(lmpStr);
+            } catch (_) {}
+            if (lmp != null) {
+              final same = uiLmp != null &&
+                  lmp.year == uiLmp.year && lmp.month == uiLmp.month && lmp.day == uiLmp.day;
+              if (same) {
+                print('Skipping LMP equal to current: $lmp');
+                continue;
+              }
+              if (uiLmp != null) {
+                if (lmp.isBefore(uiLmp)) {
+                  chosen = lmp;
+                  break;
+                }
+              } else {
+                chosen = lmp;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      if (chosen != null) {
+        print('Loading previous LMP date: $chosen');
+        setState(() {
+          _prevLmpFromEc = chosen;
+        });
+        _bloc.add(LmpDateChanged(chosen));
+        final weeks = _calculateWeeksOfPregnancy(chosen);
+        _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
+      }
+    } catch (e) {
+      print('Error loading previous LMP: $e');
+    }
   }
 
   // VALIDATION FUNCTIONS
@@ -941,7 +1032,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                              readOnly: true,
+                             // readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                             ),
@@ -997,6 +1088,15 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
                               hintText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
                               initialDate: state.td1Date,
+                              readOnly: (() {
+                                final prev = _prevLmpFromEc;
+                                final curr = state.lmpDate;
+                                if (prev != null && curr != null) {
+                                  final years = _fullYearsBetween(prev, curr);
+                                  return years < 3; // disable if gap < 3 years
+                                }
+                                return false;
+                              })(),
                               onDateChanged: (d) => bloc.add(Td1DateChanged(d)),
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -1004,7 +1104,15 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
                               hintText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
                               initialDate: state.td2Date,
-                              readOnly: true,
+                              readOnly: (() {
+                                final prev = _prevLmpFromEc;
+                                final curr = state.lmpDate;
+                                if (prev != null && curr != null) {
+                                  final years = _fullYearsBetween(prev, curr);
+                                  return years < 3; // disable if gap < 3 years
+                                }
+                                return true;
+                              })(),
                               onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -1012,7 +1120,15 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
                               hintText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
                               initialDate: state.tdBoosterDate,
-                              readOnly: state.gravida < 2,
+                              readOnly: (() {
+                                final prev = _prevLmpFromEc;
+                                final curr = state.lmpDate;
+                                if (prev != null && curr != null) {
+                                  final years = _fullYearsBetween(prev, curr);
+                                  return years > 3; // disable if gap > 3 years
+                                }
+                                return state.gravida < 2;
+                              })(),
                               onDateChanged: (d) => bloc.add(TdBoosterDateChanged(d)),
                             ),
 

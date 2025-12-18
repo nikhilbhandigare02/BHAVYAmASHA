@@ -877,14 +877,29 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
           final int childrenTarget = headChildren + memberChildren;
 
-          final int childrenAdded = _members.where((m) {
-            final t = (m['Type'] ?? '').toString();
-            final r = (m['Relation'] ?? '').toString();
-            return t == 'Child' || t == 'Infant' ||
-                ['Son', 'Daughter', 'Brother', 'Sister', 'Nephew', 'Niece',
-                  'Grand Son', 'Grand Daughter', 'Son In Law', 'Daughter In Law','Father','Mother','Grand Father','Grand Mother', 'Father In Law', 'Mother In Law','Husband',
-                  'Other'].contains(r);
+          final int childTypeCount = _members.where((m) {
+            final t = (m['Type'] ?? '').toString().toLowerCase();
+            return t == 'child';
           }).length;
+
+          final Set<String> memberNames = _members
+              .map((m) => (m['Name'] ?? '').toString().trim().toLowerCase())
+              .where((n) => n.isNotEmpty)
+              .toSet();
+
+          final int adultFatherMatchesCount = _members.where((m) {
+            final t = (m['Type'] ?? '').toString().toLowerCase();
+            if (t != 'adult') return false;
+            final relation = (m['Relation'] ?? '').toString().trim().toLowerCase();
+            if (relation == 'son' || relation == 'daughter' || relation == 'grand son' || relation == 'grand daughter') {
+              return false;
+            }
+            final fatherName = (m['Father'] ?? '').toString().trim().toLowerCase();
+            if (fatherName.isEmpty) return false;
+            return memberNames.contains(fatherName);
+          }).length;
+
+          final int childrenAdded = childTypeCount + adultFatherMatchesCount;
 
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
           if (childrenTarget <= 0) return const SizedBox.shrink();
@@ -1383,7 +1398,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         title,
         style: TextStyle(
           color: isDisabled
-              ? Colors.white.withOpacity(0.4) // 👈 faded color for disabled tabs
+              ? Colors.white.withOpacity(0.4)
               : Colors.white,
           fontWeight: FontWeight.w600,
         ),

@@ -315,8 +315,40 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             print('Inserting mother care activity for pregnant head: ${jsonEncode(motherCareActivityData)}');
             await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
             print('✅ Successfully inserted mother care activity');
+
+            final db = await _databaseProvider.database;
+            final rows = await db.query(
+              'beneficiaries_new',
+              where: 'unique_key = ? AND is_deleted = 0',
+              whereArgs: [beneficiaryId],
+              limit: 1,
+            );
+
+            if (rows.isNotEmpty) {
+              final row = Map<String, dynamic>.from(rows.first);
+              Map<String, dynamic> info;
+              try {
+                info = jsonDecode(row['beneficiary_info']?.toString() ?? '{}');
+              } catch (_) {
+                info = {};
+              }
+
+              info['isPregnant'] = 0;
+
+              await db.update(
+                'beneficiaries_new',
+                {
+                  'beneficiary_info': jsonEncode(info),
+                  'modified_date_time': ts,
+                  'is_synced': 0,
+                },
+                where: 'unique_key = ?',
+                whereArgs: [beneficiaryId],
+              );
+              print('✅ Updated isPregnant flag to 0 for beneficiary: $beneficiaryId');
+            }
           } catch (e) {
-            print('❌ Error inserting mother care activity: $e');
+            print('❌ Error inserting mother care activity or updating beneficiary: $e');
           }
         }
 
