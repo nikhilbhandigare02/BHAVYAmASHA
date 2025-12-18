@@ -77,20 +77,17 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       debugPrint('Found ${beneficiaryRefKeys.length} beneficiaries with tracking_due state');
 
       List<Map<String, dynamic>> results = [];
-      
+
       if (beneficiaryRefKeys.isNotEmpty) {
         try {
-          // Build the WHERE clause for the followup_form_data query
           String whereClause = 'beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')}) ';
           List<Object?> whereArgs = [...beneficiaryRefKeys];
-          
-          // Add form type conditions and ensure we get the latest record for each beneficiary
-          whereClause += 'AND (form_json LIKE ? OR forms_ref_key = ?) ';
-          whereArgs.addAll(['%child_registration_due%', '30bycxe4gv7fqnt6']);
-          
-          // Make sure we're getting the most recent record for each beneficiary
+
+         /* whereClause += 'AND (form_json LIKE ? OR forms_ref_key = ?) ';
+          whereArgs.addAll(['%child_registration_due_form%', '30bycxe4gv7fqnt6']);
+
           whereClause += 'AND id IN (SELECT MAX(id) FROM ${FollowupFormDataTable.table} WHERE beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')}) GROUP BY beneficiary_ref_key)';
-          whereArgs.addAll(beneficiaryRefKeys);
+          whereArgs.addAll(beneficiaryRefKeys);*/
 
           debugPrint('Executing query with whereClause: $whereClause');
           debugPrint('Query args: $whereArgs');
@@ -103,7 +100,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           );
         } catch (e) {
           debugPrint('Error querying followup_form_data: $e');
-          // Fallback to empty results if there's an error
           results = [];
         }
       }
@@ -128,7 +124,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             continue;
           }
 
-          // Check if beneficiary is marked as deceased in beneficiaries_new table and belongs to current user
           final beneficiary = await db.query(
             'beneficiaries_new',
             where: 'unique_key = ? AND (is_death IS NULL OR is_death = 0) AND current_user_key = ?',
@@ -136,7 +131,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             limit: 1,
           );
 
-          // Skip if beneficiary not found or is marked as deceased (is_death = 1)
           if (beneficiary.isEmpty) {
             debugPrint('Skipping deceased or non-existent beneficiary: $beneficiaryRefKey');
             continue;
@@ -148,11 +142,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           String formType = '';
           final formsRefKey = row['forms_ref_key']?.toString() ?? '';
 
-          // Try to get form type from different possible locations
           if (formData['form_type'] != null) {
             formType = formData['form_type'].toString();
           }
-          // Check if we have the nested structure with child_registration_due_form
           else if (formData['child_registration_due_form'] is Map) {
             formType = 'child_registration_due';
           }
@@ -223,14 +215,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
               final formJson = jsonDecode(row['form_json'] as String);
               debugPrint('Raw form_json content: $formJson');
 
-              // Handle case where data is under 'child_registration_due_form' key
               if (formJson is Map && formJson.isNotEmpty) {
-                // Try to get data from 'child_registration_due_form' key first
                 if (formJson['child_registration_due_form'] is Map) {
                   formDataMap = Map<String, dynamic>.from(formJson['child_registration_due_form']);
                   debugPrint('Extracted data from child_registration_due_form');
                 }
-                // Fallback to the first key if 'child_registration_due_form' doesn't exist
                 else {
                   final firstKey = formJson.keys.first;
                   if (firstKey != null && formJson[firstKey] is Map) {
@@ -279,20 +268,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           // Handle different possible gender fields
           final gender = (formDataMap['sex'] ?? formDataMap['gender'] ?? '').toString();
 
-          debugPrint('Processing child record:');
-          debugPrint('  - Form Type: $formTypeInData');
-          debugPrint('  - Form Data Source: ${formDataMap.isNotEmpty ? 'formDataMap' : 'formData'}');
-          debugPrint('  - Forms Ref Key: $formsRefKey');
-          debugPrint('  - Beneficiary Ref Key: $beneficiaryRefKey');
-          debugPrint('  - Child Name: $childName');
-          debugPrint('  - Mother\'s Name: $motherName');
-          debugPrint('  - Father\'s Name: $fatherName');
-          debugPrint('  - RCH ID: $rchId');
-          debugPrint('  - Mobile: $mobileNumber');
-          debugPrint('  - Address: $address');
-          debugPrint('  - Weight: $weightGrams g');
-          debugPrint('  - DOB: $dateOfBirth');
-          debugPrint('  - Gender: $gender');
 
           // If we still don't have a name, log all form data before skipping
           if (childName.isEmpty) {
@@ -394,7 +369,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             'is_synced': row['is_synced'] ?? 0, // Ensure we have a default value of 0 if null
             'formData': formData, // Store the complete form data
           };
-          
+
           debugPrint('Sync status for ${childData['Name']}: ${childData['is_synced']} (type: ${childData['is_synced'].runtimeType})');
           childTrackingList.add(childData);
           debugPrint('✅ Successfully added child: $childName');
@@ -771,7 +746,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                         'assets/images/sync.png',
                         width: 25,
                         color: isSynced 
-                            ? Colors.green 
+                            ? Colors.green
                             : Colors.grey[500],
                       );
                     },

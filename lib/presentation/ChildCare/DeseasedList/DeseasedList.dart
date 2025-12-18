@@ -40,30 +40,40 @@ class _DeseasedListState extends State<DeseasedList> {
 
       final db = await DatabaseProvider.instance.database;
 
-      // Get current user's unique key
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
 
-      // Query to get deceased beneficiaries with their details
-      final List<Map<String, dynamic>> deceasedBeneficiaries = await db.rawQuery('''
+      final List<Map<String, dynamic>> deceasedBeneficiaries =
+      await db.rawQuery(
+        '''
       SELECT 
         b.*,
-        h.household_info as household_data,
-        h.created_date_time as household_created_date,
-        h.household_info as hh_info
+        h.household_info AS household_data,
+        h.created_date_time AS household_created_date,
+        h.household_info AS hh_info
       FROM ${BeneficiariesTable.table} b
-      LEFT JOIN households h ON b.household_ref_key = h.unique_key
-      WHERE b.is_death = 1 ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
+      LEFT JOIN households h 
+        ON b.household_ref_key = h.unique_key
+      WHERE b.is_death = 1
+        AND b.is_deleted = 0
+        AND b.is_migrated = 0
+        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
       ORDER BY b.created_date_time DESC
-    ''', ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? [ashaUniqueKey] : []);
+      ''',
+        ashaUniqueKey != null && ashaUniqueKey.isNotEmpty
+            ? [ashaUniqueKey]
+            : [],
+      );
 
       final transformed = deceasedBeneficiaries.map((beneficiary) {
-        // Parse JSON data
-        final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info']?.toString() ?? '{}');
-        final householdData = jsonDecode(beneficiary['hh_info']?.toString() ?? '{}');
-        final deathDetails = jsonDecode(beneficiary['death_details']?.toString() ?? '{}');
+        final beneficiaryInfo =
+        jsonDecode(beneficiary['beneficiary_info']?.toString() ?? '{}');
+        final householdData =
+        jsonDecode(beneficiary['hh_info']?.toString() ?? '{}');
+        final deathDetails =
+        jsonDecode(beneficiary['death_details']?.toString() ?? '{}');
 
-        // Helper function to safely get values
         String getValue(dynamic value, [String defaultValue = 'N/A']) {
           if (value == null ||
               (value is String && value.trim().isEmpty) ||
@@ -73,31 +83,24 @@ class _DeseasedListState extends State<DeseasedList> {
           return value.toString();
         }
 
-        // Format date
         String formatDate(dynamic dateValue, [String defaultValue = 'N/A']) {
           if (dateValue == null) return defaultValue;
           try {
-            final dateString = dateValue.toString();
-            if (dateString.isEmpty) return defaultValue;
-            final date = DateTime.parse(dateString);
-            return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
-          } catch (e) {
-            return dateValue.toString();
+            final date = DateTime.parse(dateValue.toString());
+            return '${date.day.toString().padLeft(2, '0')}-'
+                '${date.month.toString().padLeft(2, '0')}-'
+                '${date.year}';
+          } catch (_) {
+            return defaultValue;
           }
         }
 
-        // Get registration date (from household creation date or beneficiary creation date)
-        final registrationDate = beneficiary['household_created_date'] ??
-            beneficiary['created_date_time'];
-
-
         String getAge() {
-          // First try to get age directly
           if (beneficiaryInfo['years'] != null) {
             return getValue(beneficiaryInfo['years']);
-          } else if(beneficiaryInfo['months'] != null) {
+          } else if (beneficiaryInfo['months'] != null) {
             return getValue(beneficiaryInfo['months']);
-          } else if(beneficiaryInfo['days'] != null) {
+          } else if (beneficiaryInfo['days'] != null) {
             return getValue(beneficiaryInfo['days']);
           }
 
@@ -111,87 +114,48 @@ class _DeseasedListState extends State<DeseasedList> {
                 age--;
               }
               return age > 0 ? age.toString() : 'N/A';
-            } catch (e) {
-              return 'N/A';
-            }
+            } catch (_) {}
           }
           return 'N/A';
         }
 
-        // Get registration type (from beneficiary type or default to 'Child')
-        String getRegistrationType() {
-          return getValue(
-              beneficiaryInfo['beneficiaryType'] ??
-                  (beneficiary['is_adult'] == 1 ? 'Adult' : 'Child')
-          );
-        }
-
-        // Get father's name - check multiple possible fields
-        String getFatherName() {
-          return getValue(
-              beneficiaryInfo['fatherName'] ??
-                  beneficiaryInfo['father_name'] ??
-                  beneficiaryInfo['spouseName'] ??
-                  householdData['father_name']
-          );
-        }
-
-        // Get mobile number - check multiple possible fields
-        String getMobileNumber() {
-          return getValue(
-              beneficiaryInfo['mobileNo'] ??
-                  beneficiaryInfo['mobile_number'] ??
-                  beneficiaryInfo['contact_number'] ??
-                  householdData['mobile_number'] ??
-                  householdData['contact_number']
-          );
-        }
-
-        // Get death details
-        final causeOfDeath = getValue(
-            deathDetails['cause_of_death'] ??
-                deathDetails['probable_cause_of_death'] ??
-                'Not specified'
-        );
-
-        final reason = getValue(
-            deathDetails['reason'] ??
-                deathDetails['reason_of_death'] ??
-                'Not specified'
-        );
-
-        final place = getValue(
-            deathDetails['place'] ??
-                deathDetails['death_place'] ??
-                'Not specified'
-        );
-
-        final dateOfDeath = formatDate(
-            deathDetails['date_of_death'] ??
-                deathDetails['death_date']
-        );
+        final registrationDate =
+            beneficiary['household_created_date'] ??
+                beneficiary['created_date_time'];
 
         return {
-          'hhId': getValue(householdData['household_id'] ??
-              beneficiary['household_ref_key']),
+          'hhId': getValue(
+              householdData['household_id'] ??
+                  beneficiary['household_ref_key']),
           'RegitrationDate': formatDate(registrationDate),
-          'RegitrationType': getRegistrationType(),
+          'RegitrationType': getValue(
+              beneficiaryInfo['beneficiaryType'] ??
+                  (beneficiary['is_adult'] == 1 ? 'Adult' : 'Child')),
           'BeneficiaryID': getValue(beneficiary['unique_key']),
           'RchID': getValue(beneficiaryInfo['rch_id']),
-          'Name': getValue(beneficiaryInfo['name'] ??
-              beneficiaryInfo['headName'] ??
-              beneficiaryInfo['child_name']),
-          'Age|Gender': '${getAge()} | ${getValue(beneficiaryInfo['gender'])}',
-          'Mobileno.': getMobileNumber(),
-          'FatherName': getFatherName(),
+          'Name': getValue(
+              beneficiaryInfo['name'] ??
+                  beneficiaryInfo['headName'] ??
+                  beneficiaryInfo['child_name']),
+          'Age|Gender':
+          '${getAge()} | ${getValue(beneficiaryInfo['gender'])}',
+          'Mobileno.': getValue(
+              beneficiaryInfo['mobileNo'] ??
+                  householdData['mobile_number']),
+          'FatherName': getValue(
+              beneficiaryInfo['fatherName'] ??
+                  beneficiaryInfo['father_name']),
           'MotherName': getValue(
-              beneficiaryInfo['mother_name'] ??
-                  beneficiaryInfo['motherName']
-          ),
-          'causeOFDeath': causeOfDeath,
-          'reason': reason,
-          'place': place,
-          'DateofDeath': dateOfDeath,
+              beneficiaryInfo['motherName'] ??
+                  beneficiaryInfo['mother_name']),
+          'causeOFDeath': getValue(
+              deathDetails['cause_of_death']),
+          'reason': getValue(
+              deathDetails['reason_of_death']),
+          'place': getValue(
+              deathDetails['death_place']),
+          'DateofDeath': formatDate(
+              deathDetails['date_of_death']),
           'age': getAge(),
           'gender': getValue(beneficiaryInfo['gender']),
           'is_synced': beneficiary['is_synced'],
@@ -204,16 +168,13 @@ class _DeseasedListState extends State<DeseasedList> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading deceased list: $e');
       setState(() {
         _isLoading = false;
       });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load deceased list: $e')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load deceased list: $e')),
+      );
     }
   }
 
@@ -374,7 +335,7 @@ class _DeseasedListState extends State<DeseasedList> {
                       'assets/images/sync.png',
                       width: 25,
                       color: (data['is_synced'] ?? 0) == 1
-                          ? Colors.green
+                          ? null
                           : Colors.grey[500],
                     ),
                   

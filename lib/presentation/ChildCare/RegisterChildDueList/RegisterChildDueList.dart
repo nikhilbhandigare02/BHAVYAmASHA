@@ -250,7 +250,6 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
   // }
 
 
-
   Future<void> _loadChildBeneficiaries() async {
     if (!mounted) return;
 
@@ -263,21 +262,15 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-
-      String whereClause = 'child_care_state = ? ';
-      //whereClause += 'AND is_deleted = 0';
-
-      List<dynamic> whereArgs = ['registration_due'];
+      String whereClause = 'child_care_state = ? AND is_deleted = ?';
+      List<dynamic> whereArgs = ['registration_due', 0];
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
       }
 
-      whereClause += ' AND is_deleted = ?';
-      whereArgs.add(0);
-
-      // Get beneficiaries with registration_due status for current user
+      // Get child care activities with registration_due
       final List<Map<String, dynamic>> childActivities = await db.query(
         'child_care_activities',
         where: whereClause,
@@ -291,10 +284,9 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
 
       for (final activity in childActivities) {
         final beneficiaryRefKey = activity['beneficiary_ref_key']?.toString();
-        final householdRefKey = activity['household_ref_key']?.toString();
 
-        if (beneficiaryRefKey == null || householdRefKey == null) {
-          debugPrint('⚠️ Skipping child care activity with null beneficiary_ref_key or household_ref_key');
+        if (beneficiaryRefKey == null) {
+          debugPrint('⚠️ Skipping activity with null beneficiary_ref_key');
           continue;
         }
 
@@ -305,11 +297,10 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           'beneficiaries_new',
           where: 'unique_key = ?',
           whereArgs: [beneficiaryRefKey],
-          limit: 1,
         );
 
         if (beneficiaryRows.isEmpty) {
-          debugPrint('⚠️ No beneficiary found for child care activity: $beneficiaryRefKey');
+          debugPrint('⚠️ No beneficiary found for key: $beneficiaryRefKey');
           continue;
         }
 
@@ -318,11 +309,9 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         // Parse beneficiary_info
         dynamic info;
         try {
-          if (row['beneficiary_info'] is String) {
-            info = jsonDecode(row['beneficiary_info'] as String);
-          } else {
-            info = row['beneficiary_info'];
-          }
+          info = (row['beneficiary_info'] is String)
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : row['beneficiary_info'];
         } catch (e) {
           debugPrint('❌ Error parsing beneficiary_info: $e');
           continue;
@@ -334,70 +323,50 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         }
 
         final memberData = Map<String, dynamic>.from(info);
-        final memberType = memberData['memberType']?.toString() ?? '';
+        final memberType = (memberData['memberType']?.toString() ?? '').trim().toLowerCase();
 
-        debugPrint('📝 Member Type: "$memberType"');
-
-        // Only process if memberType is "Child"
-        if (memberType.toLowerCase() == 'child') {
-          debugPrint('✅ Found Child member');
-
-          final name = memberData['memberName']?.toString() ??
-              memberData['name']?.toString() ??
-              memberData['member_name']?.toString() ??
-              memberData['memberNameLocal']?.toString() ??
-              memberData['Name']?.toString() ?? '';
-
-          debugPrint('👶 Child Name: "$name"');
-
-          if (name.isEmpty) {
-            debugPrint('⚠️ Skipping child with empty name');
-            continue;
-          }
-
-          final isAlreadyRegistered = await _isChildRegistered(db, householdRefKey, name);
-
-          if (isAlreadyRegistered) {
-            debugPrint('⏭️ Child already registered: $name in household: $householdRefKey - SKIPPING');
-            continue;
-          }
-
-          debugPrint('✅ Child NOT registered yet: $name - ADDING TO LIST');
-
-          final fatherName = memberData['fatherName']?.toString() ?? '';
-          final motherName = memberData['motherName']?.toString() ?? '';
-          final mobileNo = memberData['mobileNo']?.toString() ?? '';
-          final richId = memberData['RichIDChanged']?.toString() ?? '';
-          final beneficiaryId = row['unique_key']?.toString() ?? '';
-
-          final card = <String, dynamic>{
-            'hhId': householdRefKey,
-            'RegitrationDate': _formatDate(activity['created_date_time']?.toString() ?? row['created_date_time']?.toString()),
-            'RegitrationType': 'Child',
-            'BeneficiaryID': beneficiaryId,
-            'RchID': richId,
-            'Name': name,
-            'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
-            'Mobileno.': mobileNo,
-            'FatherName': fatherName,
-            'MotherName': motherName,
-            '_raw': row,
-            '_memberData': memberData,
-            '_activityData': activity,
-          };
-
-          debugPrint('📋 Created card: ${card['Name']}');
-          childBeneficiaries.add(card);
-        } else {
+        if (memberType != 'child') {
           debugPrint('⏭️ Skipping non-child member type: $memberType');
+          continue;
         }
+
+        final name = memberData['memberName']?.toString().trim() ??
+            memberData['name']?.toString().trim() ??
+            '';
+        if (name.isEmpty) {
+          debugPrint('⚠️ Skipping child with empty name');
+          continue;
+        }
+
+        // ✅ Check registration by beneficiary_ref_key instead of household_ref_key
+        final isAlreadyRegistered = await _isChildRegistered(db, beneficiaryRefKey, name);
+        if (isAlreadyRegistered) {
+          debugPrint('⏭️ Skipping already registered child: $name');
+          continue;
+        }
+
+        // Prepare child card
+        final card = <String, dynamic>{
+          'hhId': activity['household_ref_key']?.toString() ?? '',
+          'RegitrationDate': _formatDate(activity['created_date_time']?.toString() ?? row['created_date_time']?.toString()),
+          'RegitrationType': 'Child',
+          'BeneficiaryID': beneficiaryRefKey,
+          'RchID': memberData['RichIDChanged']?.toString() ?? '',
+          'Name': name,
+          'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
+          'Mobileno.': memberData['mobileNo']?.toString() ?? '',
+          'FatherName': memberData['fatherName']?.toString() ?? '',
+          'MotherName': memberData['motherName']?.toString() ?? '',
+          '_raw': row,
+          '_memberData': memberData,
+          '_activityData': activity,
+        };
+
+        debugPrint('📋 Added child: ${card['Name']}');
+        childBeneficiaries.add(card);
       }
 
-      debugPrint('\n📊 FINAL RESULTS:');
-      debugPrint('Total children found: ${childBeneficiaries.length}');
-      for (final child in childBeneficiaries) {
-        debugPrint('  - ${child['Name']} (HH: ${child['hhId']})');
-      }
+      debugPrint('📊 Total children found: ${childBeneficiaries.length}');
 
       if (mounted) {
         setState(() {
@@ -408,101 +377,75 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       }
     } catch (e) {
       debugPrint('❌ Error loading child beneficiaries: $e');
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Future<bool> _isChildRegistered(Database db, String hhId, String childName) async {
+
+  Future<bool> _isChildRegistered(Database db, String beneficiaryRefKey, String childName) async {
     try {
       final normalizedSearchName = childName.trim().toLowerCase();
-      debugPrint('\n🔍 Checking registration for: "$childName" in household: "$hhId"');
+      debugPrint('\n🔍 Checking registration for child: "$childName" with beneficiary_ref_key: "$beneficiaryRefKey"');
 
+      // Query followup_form_data for this beneficiary_ref_key
       final results = await db.query(
         'followup_form_data',
-        where: 'household_ref_key = ? AND (form_json LIKE ? OR form_json LIKE ?)',
+        where: 'beneficiary_ref_key = ? AND (form_json LIKE ? OR form_json LIKE ?)',
         whereArgs: [
-          hhId,
+          beneficiaryRefKey,
           '%"form_type":"child_registration_due"%',
           '%"child_registration_due_form"%'
         ],
       );
 
-      debugPrint('📊 Found ${results.length} child registration forms for household: $hhId');
+      debugPrint('📊 Found ${results.length} child registration forms for beneficiary: $beneficiaryRefKey');
 
-      // If there are any matching forms for this household, exclude it
       if (results.isNotEmpty) {
-        debugPrint('✅ Household $hhId has existing child registration form - EXCLUDING');
-        return true;
-      }
+        // Check each form for exact child name match
+        for (final row in results) {
+          try {
+            final formJson = row['form_json'] as String?;
+            if (formJson == null || formJson.isEmpty) continue;
 
-      // If no forms found, check by name in all forms as a fallback
-      final allForms = await db.query(
-        'followup_form_data',
-        where: 'household_ref_key = ?',
-        whereArgs: [hhId],
-      );
+            final formData = jsonDecode(formJson);
+            final formType = (formData['form_type']?.toString() ?? '').toLowerCase();
+            final hasChildRegistrationForm = formData['child_registration_due_form'] is Map;
 
-      debugPrint('📊 Found ${allForms.length} total forms for household: $hhId');
+            if (formType != 'child_registration_due' && !hasChildRegistrationForm) continue;
 
-      for (int i = 0; i < allForms.length; i++) {
-        final row = allForms[i];
-        try {
-          final formJson = row['form_json'] as String?;
-          if (formJson == null || formJson.isEmpty) {
+            Map<String, dynamic> formDataMap;
+            if (hasChildRegistrationForm) {
+              formDataMap = formData['child_registration_due_form'] as Map<String, dynamic>;
+            } else if (formData['form_data'] is Map) {
+              formDataMap = formData['form_data'] as Map<String, dynamic>;
+            } else {
+              continue;
+            }
+
+            // Check possible name fields
+            final childNameInForm = formDataMap['name_of_child']?.toString() ??
+                formDataMap['child_name']?.toString() ?? '';
+
+            if (childNameInForm.trim().toLowerCase() == normalizedSearchName) {
+              debugPrint('✅ MATCH FOUND! Child already registered');
+              return true;
+            }
+          } catch (e) {
+            debugPrint('❌ Error parsing form data: $e');
             continue;
           }
-
-          final formData = jsonDecode(formJson);
-
-          // Check for both form_type and direct child_registration_due_form structure
-          final formType = (formData['form_type']?.toString() ?? '').toLowerCase();
-          final hasChildRegistrationForm = formData['child_registration_due_form'] is Map;
-
-          // Skip if not a child registration form
-          if (formType != 'child_registration_due' && !hasChildRegistrationForm) {
-            continue;
-          }
-
-          // Get the form data map based on the structure
-          Map<String, dynamic> formDataMap;
-          if (hasChildRegistrationForm) {
-            formDataMap = formData['child_registration_due_form'] as Map<String, dynamic>;
-          } else if (formData['form_data'] is Map) {
-            formDataMap = formData['form_data'] as Map<String, dynamic>;
-          } else {
-            continue;
-          }
-
-          // Try different possible name fields
-          final childNameInForm =
-              formDataMap['name_of_child']?.toString() ??
-                  formDataMap['child_name']?.toString() ?? '';
-
-          if (childNameInForm.isEmpty) {
-            continue;
-          }
-
-          final normalizedStoredName = childNameInForm.trim().toLowerCase();
-
-          if (normalizedStoredName == normalizedSearchName) {
-            debugPrint('✅ MATCH FOUND! Child already registered');
-            return true;
-          }
-        } catch (e) {
-          debugPrint('❌ Error parsing form data: $e');
-          continue;
         }
       }
 
-      debugPrint('✅ No existing registration found');
+      debugPrint('✅ No existing registration found for child: "$childName"');
       return false;
     } catch (e) {
       debugPrint('❌ Error checking registration: $e');
       return false;
     }
-  }  String _formatDate(String? dateStr) {
+  }
+
+  String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return 'N/A';
     try {
       final date = DateTime.parse(dateStr);
