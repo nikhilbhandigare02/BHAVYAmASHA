@@ -894,7 +894,7 @@
   "padsPerDayLabel": "How many pads have been changed in a day for bleeding? *",
   "mothersTemperatureLabel": "Temperature of mother *",
   "foulDischargeHighFeverLabel": "Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) *",  "abnormalSpeechOrSeizureLabel": "Is the mother speaking abnormally or having fits? *",
-  "counselingAdviceLabel": "Counseling / Advice *",
+  "counselingAdviceLabel": "Counseling / Advise *",
 
   "outcomeFormTitle": "Delivery Outcome",
   "deliveryOutcomeDetails": "Delivery Outcome Details",
@@ -1988,7 +1988,7 @@
   "dhLabel": "DH",
   "babyWeightRecordedInMPC": "Is the weight of the newborn baby recorded in the Mother Protection Card? *",
   "referToHospital": "Refer to hospital?",
-  "referToLabel": "Refer to",
+  "referToLabel": "Refer to *",
   "mchLabel": "MCH",
   "date_of_death": "Date of death ",
   "place_of_death": "Place of death ",

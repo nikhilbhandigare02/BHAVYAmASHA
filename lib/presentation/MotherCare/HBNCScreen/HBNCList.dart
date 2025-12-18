@@ -65,7 +65,8 @@ class _HBNCListScreenState
       return 0;
     }
   }
-
+// Add this new method to check sync status from both tables
+// Add this new method to check sync status from both tables
   Future<bool> _isSynced(String beneficiaryId) async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -140,21 +141,43 @@ class _HBNCListScreenState
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      final results = await db.query(
-        'followup_form_data',
-        where: 'forms_ref_key = ? AND current_user_key = ? AND is_deleted = 0',
-        whereArgs: [deliveryOutcomeKey, ashaUniqueKey],
+      // First, get all beneficiary_ref_keys that have either pnc_mother or hbnc_visit state in mother_care_activities
+      final validBeneficiaries = await db.rawQuery('''
+        SELECT DISTINCT mca.beneficiary_ref_key 
+        FROM mother_care_activities mca
+        WHERE mca.mother_care_state IN ('pnc_mother', 'hbnc_visit')
+        AND mca.is_deleted = 0
+        AND mca.current_user_key = ?
+      ''', [ashaUniqueKey]);
+
+      if (validBeneficiaries.isEmpty) {
+        print('No beneficiaries found with pnc_mother or hbnc_visit state');
+        return [];
+      }
+
+      final beneficiaryKeys = validBeneficiaries.map((e) => e['beneficiary_ref_key']).toList();
+
+      // Then get the delivery outcome data only for those beneficiaries
+      final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
+      final query = '''
+        SELECT * FROM followup_form_data 
+        WHERE forms_ref_key = ? 
+        AND current_user_key = ?
+        AND beneficiary_ref_key IN ($placeholders)
+      ''';
+
+      final results = await db.rawQuery(
+        query,
+        [deliveryOutcomeKey, ashaUniqueKey, ...beneficiaryKeys],
       );
 
-      print('Fetched ${results.length} delivery outcome records');
+      print('Fetched ${results.length} delivery outcome records with valid mother care states');
       return results;
     } catch (e) {
       print('Error fetching delivery outcome data: $e');
       return [];
     }
   }
-
-
 
   Future<void> _loadPregnancyOutcomeeCouples() async {
     setState(() => _isLoading = true);
@@ -193,15 +216,11 @@ class _HBNCListScreenState
           processedBeneficiaries.add(beneficiaryRefKey);
 
           final db = await DatabaseProvider.instance.database;
-          final currentUserData = await SecureStorageService.getCurrentUserData();
-          String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
           final beneficiaryResults = await db.query(
             'beneficiaries_new',
-            where: 'unique_key = ? AND is_deleted = 0 AND current_user_key = ?',
-            whereArgs: [beneficiaryRefKey, ashaUniqueKey],
+            where: 'unique_key = ?',
+            whereArgs: [beneficiaryRefKey],
           );
-
 
           if (beneficiaryResults.isEmpty) {
             print('⚠️ No beneficiary found for key: $beneficiaryRefKey');
@@ -343,10 +362,10 @@ class _HBNCListScreenState
 
             if (visitDetails is Map) {
               final visitDate = visitDetails['visitDate'] ??
-                               visitDetails['visit_date'] ??
-                               visitDetails['dateOfVisit'] ??
-                               visitDetails['date_of_visit'];
-              
+                  visitDetails['visit_date'] ??
+                  visitDetails['dateOfVisit'] ??
+                  visitDetails['date_of_visit'];
+
               print('📅 Extracted visit date from visitDetails: $visitDate');
 
               if (visitDate != null && visitDate.toString().isNotEmpty) {
@@ -358,12 +377,12 @@ class _HBNCListScreenState
           }
 
           // Try to get visit date directly from form data (check multiple possible field names)
-          final visitDate = formData['visit_date'] ?? 
-                           formData['visitDate'] ??
-                           formData['dateOfVisit'] ??
-                           formData['date_of_visit'] ??
-                           formData['visitDate'];
-                            
+          final visitDate = formData['visit_date'] ??
+              formData['visitDate'] ??
+              formData['dateOfVisit'] ??
+              formData['date_of_visit'] ??
+              formData['visitDate'];
+
           if (visitDate != null && visitDate.toString().isNotEmpty) {
             print('📅 Found visit date in form data: $visitDate');
             final formattedDate = _formatDate(visitDate.toString());
@@ -428,7 +447,7 @@ class _HBNCListScreenState
     return null;
   }
 
-   int _calculateAge(dynamic dob) {
+  int _calculateAge(dynamic dob) {
     if (dob == null) return 0;
     try {
       final birthDate = DateTime.tryParse(dob.toString());
@@ -512,9 +531,20 @@ class _HBNCListScreenState
             ),
           ),
 
-          // Household List
           Expanded(
-            child: ListView.builder(
+            child:  _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _filtered.isEmpty
+                ? Center(
+              child: Text(
+                'No data found',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+            )
+                :ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               itemCount: _filtered.length,
               itemBuilder: (context, index) {
@@ -734,7 +764,7 @@ class _HBNCListScreenState
                         Expanded(
                           child: _rowText(
                             'Previous HBNC Date',
-                            (data['visitCount'] as int?) != null && (data['visitCount'] as int) > 0 
+                            (data['visitCount'] as int?) != null && (data['visitCount'] as int) > 0
                                 ? data['previousHBNCDate']?.toString() ?? 'Not Available'
                                 : 'Not Available',
                           ),
@@ -758,7 +788,7 @@ class _HBNCListScreenState
     );
   }
 
- 
+
   Widget _rowText(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

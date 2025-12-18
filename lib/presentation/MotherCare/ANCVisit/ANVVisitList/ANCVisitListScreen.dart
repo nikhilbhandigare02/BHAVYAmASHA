@@ -31,19 +31,22 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     final db = await DatabaseProvider.instance.database;
 
     final rows = await db.rawQuery('''
-    SELECT mca.*
-    FROM mother_care_activities mca
-    INNER JOIN (
-      SELECT beneficiary_ref_key, MAX(created_date_time) AS max_date
-      FROM mother_care_activities
-      GROUP BY beneficiary_ref_key
-    ) latest
-      ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
-     AND mca.created_date_time = latest.max_date
-    INNER JOIN beneficiaries_new bn
-      ON mca.beneficiary_ref_key = bn.unique_key
-    WHERE mca.mother_care_state IN ('anc_due', 'anc_due_state')
-      AND bn.is_deleted = 0
+  SELECT mca.*
+FROM mother_care_activities mca
+INNER JOIN (
+    SELECT beneficiary_ref_key,
+           MAX(created_date_time) AS max_date
+    FROM mother_care_activities
+    WHERE mother_care_state = 'anc_due'
+    GROUP BY beneficiary_ref_key
+) latest
+  ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
+ AND mca.created_date_time = latest.max_date
+INNER JOIN beneficiaries_new bn
+  ON mca.beneficiary_ref_key = bn.unique_key
+WHERE bn.is_deleted = 0;
+
+
   ''');
 
     return rows;
@@ -58,12 +61,10 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       forms_ref_key = ?
       AND (
         LOWER(form_json) LIKE '%gives_birth_to_baby%'
-        OR LOWER(form_json) LIKE '%delivery_outcome%'
       )
       AND (
         LOWER(form_json) LIKE '%yes%'
         OR LOWER(form_json) LIKE '%live_birth%'
-        OR LOWER(form_json) LIKE '%:true%'
       )
     ''',
       whereArgs: ['bt7gs9rl1a5d26mz'],
@@ -722,10 +723,10 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     builder: (context, snapshot) {
                       final visitCount = snapshot.data?['count'] ?? 0;
                       final isHighRisk = snapshot.data?['isHighRisk'] == true;
-                      
+
                       // Get high risk reasons if available
-                      final highRiskReasons = snapshot.data?['highRiskReasons'] is List 
-                          ? List<String>.from(snapshot.data?['highRiskReasons'] ?? []) 
+                      final highRiskReasons = snapshot.data?['highRiskReasons'] is List
+                          ? List<String>.from(snapshot.data?['highRiskReasons'] ?? [])
                           : <String>[];
 
                       DateTime? lmpDate;
