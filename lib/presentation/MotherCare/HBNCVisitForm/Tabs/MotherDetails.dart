@@ -307,7 +307,7 @@ class MotherDetailsTab extends StatelessWidget {
                         return const SizedBox.shrink();
                       },
                     ),
-
+                    const Divider(height: 0),
                     ApiDropdown<String>(
                       labelText: t.foulDischargeHighFeverLabel,
                       items: const ['Yes', 'No'],

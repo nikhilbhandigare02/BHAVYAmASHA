@@ -5450,7 +5450,7 @@ abstract class AppLocalizations {
   /// No description provided for @counselingAdviceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Counseling / Advice *'**
+  /// **'Counseling / Advise *'**
   String get counselingAdviceLabel;
 
   /// No description provided for @outcomeFormTitle.
@@ -11690,7 +11690,7 @@ abstract class AppLocalizations {
   /// No description provided for @referToLabel.
   ///
   /// In en, this message translates to:
-  /// **'Refer to'**
+  /// **'Refer to *'**
   String get referToLabel;
 
   /// No description provided for @mchLabel.

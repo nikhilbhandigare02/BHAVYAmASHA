@@ -135,6 +135,27 @@ Future<bool?> showConfirmationDialog({
         titlePadding: EdgeInsets.zero,
         contentPadding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        title: (title != null && title.isNotEmpty)
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    color: titleBackgroundColor,
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        color: titleTextColor ?? AppColors.onSurface,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 0),
+                ],
+              )
+            : null,
 
         // 🟡 Message Section
         content: Padding(
@@ -151,7 +172,7 @@ Future<bool?> showConfirmationDialog({
 
 
         actionsAlignment:
-        hasTwoButtons ? MainAxisAlignment.end : MainAxisAlignment.end,
+            hasTwoButtons ? MainAxisAlignment.end : MainAxisAlignment.end,
         actions: [
           if (hasTwoButtons)
             TextButton(
@@ -162,7 +183,7 @@ Future<bool?> showConfirmationDialog({
               child: Text(
                 noText!,
                 style: TextStyle(
-                  color: AppColors.onSurface ?? AppColors.error,
+                  color: noButtonColor ?? AppColors.onSurface,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -175,7 +196,7 @@ Future<bool?> showConfirmationDialog({
             child: Text(
               yesText,
               style: TextStyle(
-                color: AppColors.onSurface ?? AppColors.error,
+                color: yesButtonColor ?? AppColors.onSurface,
                 fontWeight: FontWeight.w500,
               ),
             ),
