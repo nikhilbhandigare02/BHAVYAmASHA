@@ -82,13 +82,13 @@ import '../../l10n/app_localizations.dart';
 
 
 
-class ABHAScreen extends StatefulWidget {
-  const ABHAScreen({super.key});
+class ABHAScreenWithBoth extends StatefulWidget {
+  const ABHAScreenWithBoth({super.key});
   @override
-  State<ABHAScreen> createState() => _ABHAScreenState();
+  State<ABHAScreenWithBoth> createState() => _ABHAScreenState();
 }
 
-class _ABHAScreenState extends State<ABHAScreen> {
+class _ABHAScreenState extends State<ABHAScreenWithBoth> {
   TextEditingController abhaIdController = new TextEditingController();
   TextEditingController mobileController = new TextEditingController();
   TextEditingController otpController = new TextEditingController();
@@ -100,7 +100,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
   bool isABDMEnabled = true;
   double? latitude;
   double? longitude;
-  bool isEnableSearch = true;
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -170,7 +169,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
           child: StatefulBuilder(
             builder: (context, setState) {
               return Container(
-                width: 300,
+                width: 300, // Set width for the popup
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -426,11 +425,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
   String dropdownvalue = '';
   // List of items in our dropdown menu
-  /*var items = [
-    'Mobile',
-    'Aadhaar',
-  ];*/
   var items = [
+    'Mobile',
     'Aadhaar',
   ];
   List<ABHAID> listABHAID = [];
@@ -517,8 +513,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
     final localText = AppLocalizations.of(context)!;
     String? selectedOption = box.read('selectedABHASettings');
     print("sselected option $selectedOption");
-    defaultDropdownValue="Aadhaar";
-    /*if (selectedOption == null) {
+
+    if (selectedOption == null) {
       items = ['Mobile', 'Aadhaar'];
       defaultDropdownValue='Mobile';
     } else {
@@ -532,7 +528,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
         items = ['Mobile', 'Aadhaar'];
         defaultDropdownValue='Mobile';
       }
-    }*/
+    }
     return Padding(
       padding: EdgeInsets.all(15),
       child: Column(children: [
@@ -564,10 +560,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     FilteringTextInputFormatter.digitsOnly, // only digits
                     LengthLimitingTextInputFormatter(10),   // max 10 digits
                   ],
-                  enabled: isEnableSearch,
                   decoration: InputDecoration(
-                    fillColor: isEnableSearch ? Colors.white : Colors.grey.shade200,
-
                     hintText: "Enter mobile no to search ABHA",
                     // border: OutlineInputBorder(
                     //   borderRadius: BorderRadius.only(
@@ -622,29 +615,26 @@ class _ABHAScreenState extends State<ABHAScreen> {
             // if(checkavailableAbha)
             InkWell(
               onTap: (){
-                if(isEnableSearch){
-                  if (mobileController.text.isEmpty) {
-                    Utils.showToastMessage('Please enter mobile number');
-                  }
-                  else if (mobileController.text.length!=10){
-                    Utils.showToastMessage('Enter valid 10-digit mobile number');
-                  }
-                  else {
-                    setState(() {
-                      refresh();
-                      refreshLinkABha();
-                    });
-                    _searchAvailability(mobileController.text);
-                  }
+                if (mobileController.text.isEmpty) {
+                  Utils.showToastMessage('Please enter mobile number');
                 }
-
+                else if (mobileController.text.length!=10){
+                  Utils.showToastMessage('Enter valid 10-digit mobile number');
+                }
+                else {
+                  setState(() {
+                    refresh();
+                    refreshLinkABha();
+                  });
+                  _searchAvailability(mobileController.text);
+                }
               },
               child: Container(
                 width: 60.w,
                 height: 35.h,
                 decoration: BoxDecoration(
-                  color: isEnableSearch ? AppColors.primary : Colors.grey.shade300,
-                  border: Border.all(color: isEnableSearch ? AppColors.primary : Colors.grey.shade300,),
+                  color: AppColors.primary,
+                  border: Border.all(color: AppColors.primary),
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(5),
                     bottomRight: Radius.circular(5),
@@ -1365,7 +1355,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         onTap: () {
                           setState(() {
                             dropdownvalue = defaultDropdownValue;
-                            isEnableSearch = false;
                             linkExistAbha = false;
                             availableAbha = false;
                             createViaAbha = true;
@@ -1410,8 +1399,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
           ],),
         ),
 
-        //if(createViaAbha)
-        if(false)
+        if(createViaAbha)
           Column(children: [
             SizedBox(height: 0,),
             Align(
@@ -4534,7 +4522,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
           Error400 error400 = Error400.fromJson(response?.data);
           Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
-         /* setState(() {
+          setState(() {
             checkavailableAbha= false;
             dropdownvalue = defaultDropdownValue;
             linkExistAbha =false;
@@ -4542,7 +4530,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
             createViaAbha =true;
 
             termCondFlag =true;
-          });*/
+          });
           print(response);
         }
       } catch (e) {

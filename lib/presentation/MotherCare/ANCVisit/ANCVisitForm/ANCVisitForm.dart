@@ -102,8 +102,8 @@ class _AncvisitformState extends State<Ancvisitform> {
 
   void _updateFormWithData(Map<String, dynamic> formData) {
     // Basic information
-    _bloc.add(VisitTypeChanged(formData['visit_type'] ?? ''));
-    _bloc.add(PlaceOfAncChanged(formData['place_of_anc'] ?? ''));
+    // _bloc.add(VisitTypeChanged(formData['visit_type'] ?? '')); // Don't auto-fill visit type
+    // _bloc.add(PlaceOfAncChanged(formData['place_of_anc'] ?? '')); // Don't auto-fill place of ANC
     _bloc.add(DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])));
     _bloc.add(HouseNumberChanged(formData['house_number'] ?? ''));
     _bloc.add(WomanNameChanged(formData['woman_name'] ?? ''));
@@ -941,7 +941,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                              //readOnly: true,
+                              readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                             ),
@@ -1017,13 +1017,22 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
 
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                            CustomTextField(
-                              labelText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
-                              hintText: l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given',
-                              initialValue: state.folicAcidTablets,
-                              keyboardType: TextInputType.number,
-                              onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
-                              validator: validateTabletCount,
+                            Builder(
+                              builder: (context) {
+                                final weeks = int.tryParse(state.weeksOfPregnancy ?? '0') ?? 0;
+                                final isAfter12Weeks = weeks > 12;
+                                final label = isAfter12Weeks
+                                    ? 'Number of Iron & Folic Acid tablets given'
+                                    : (l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given');
+                                return CustomTextField(
+                                  labelText: label,
+                                  hintText: label,
+                                  initialValue: state.folicAcidTablets,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
+                                  validator: validateTabletCount,
+                                );
+                              }
                             ),
 
                             if (int.tryParse(state.weeksOfPregnancy) != null && int.parse(state.weeksOfPregnancy) >= 14) ...[

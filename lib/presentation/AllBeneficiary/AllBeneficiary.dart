@@ -37,9 +37,14 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+
+    _loadData().then((_) {
+      print('✅ Total beneficiaries loaded: ${_allBeneficiaries.length}');
+    });
+
     _searchCtrl.addListener(_onSearchChanged);
   }
+
 
   Future<void> _loadData() async {
     setState(() {
@@ -50,29 +55,37 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     final dao = LocalStorageDao();
 
     try {
-
       final rows = await LocalStorageDao.instance.getAllBeneficiaries(
-        isMigrated: 0,
+        isMigrated: 0, // DB-level filter
       );
+
       print('=== AllBeneficiary Screen - Data Loading ===');
       print('Total records from database: ${rows.length}');
+
       for (int i = 0; i < rows.length; i++) {
         print('\n--- Record $i ---');
         print('beneficiary_info: ${rows[i]['beneficiary_info']}');
         print('household_ref_key: ${rows[i]['household_ref_key']}');
         print('unique_key: ${rows[i]['unique_key']}');
         print('created_date_time: ${rows[i]['created_date_time']}');
+        print('is_migrated: ${rows[i]['is_migrated']}');
       }
       print('=== End of Data Loading ===\n');
 
       for (final row in rows) {
+
+        // 🚫 Skip migrated beneficiaries
+        final int isMigrated = row['is_migrated'] ?? 0;
+        if (isMigrated == 1) {
+          continue;
+        }
+
         // Parse beneficiary info safely
         Map<String, dynamic> info;
         try {
           if (row['beneficiary_info'] is String) {
-            info =
-                jsonDecode(row['beneficiary_info'] as String)
-                    as Map<String, dynamic>;
+            info = jsonDecode(row['beneficiary_info'] as String)
+            as Map<String, dynamic>;
           } else if (row['beneficiary_info'] is Map) {
             info = Map<String, dynamic>.from(row['beneficiary_info'] as Map);
           } else {
@@ -84,17 +97,22 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         }
 
         final String hhId = row['household_ref_key']?.toString() ?? '';
-        final String createdDate = row['created_date_time']?.toString() ?? '';
-        final String gender = (info['gender']?.toString().toLowerCase() ?? '');
+        final String createdDate =
+            row['created_date_time']?.toString() ?? '';
+        final String gender =
+            info['gender']?.toString().toLowerCase() ?? '';
         final String richId =
             info['RichIDChanged']?.toString() ??
-            info['richIdChanged']?.toString() ??
-            '';
+                info['richIdChanged']?.toString() ??
+                '';
 
-        // Unified display name: prefer name -> memberName -> headName
+        // Unified display name
         final String displayName =
-            (info['name'] ?? info['memberName'] ?? info['headName'] ?? '')
-                .toString();
+        (info['name'] ??
+            info['memberName'] ??
+            info['headName'] ??
+            '')
+            .toString();
 
         final String uniqueKey = row['unique_key']?.toString() ?? '';
         final String beneficiaryId = uniqueKey.length > 11
@@ -103,14 +121,16 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
         final String relation =
             info['relation_to_head']?.toString() ??
-            info['relation']?.toString() ??
-            'N/A';
+                info['relation']?.toString() ??
+                'N/A';
+
         final String village = info['village']?.toString() ?? '';
         final String mohalla = info['mohalla']?.toString() ?? '';
 
         final bool isChild =
             (info['memberType']?.toString().toLowerCase() == 'child') ||
-            (relation.toLowerCase() == 'child');
+                (relation.toLowerCase() == 'child');
+
         final String registrationType = isChild ? 'Child' : 'General';
 
         beneficiaries.add({
@@ -124,38 +144,48 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           'RichID': richId,
           'Gender': gender,
           'Name': displayName,
-          'Age|Gender': _formatAgeGender(info['dob'], info['gender']),
+          'Age|Gender': _formatAgeGender(
+            info['dob'],
+            info['gender'],
+          ),
           'Mobileno.': info['mobileNo']?.toString() ?? '',
           'FatherName': info['fatherName']?.toString() ?? '',
-          // For now, we don't derive spouse fields here; keep them empty
           'WifeName': '',
           'HusbandName': '',
           'SpouseName': '',
           'SpouseGender': '',
           'Relation': relation,
           'is_synced': row['is_synced'] ?? 0,
+          'is_death': row['is_death'] ?? 0,
         });
       }
     } catch (e) {
-      print('Error loading data: $e');
+      print('❌ Error loading data: $e');
     } finally {
       print('\n=== Data Processing Complete ===');
       print('Total beneficiaries processed: ${beneficiaries.length}');
+
       for (int i = 0; i < beneficiaries.length; i++) {
         print('\nBeneficiary $i:');
         print('  Name: ${beneficiaries[i]['Name']}');
         print('  Type: ${beneficiaries[i]['RegitrationType']}');
         print('  Household: ${beneficiaries[i]['hhId']}');
       }
+
       print('=== End Processing ===\n');
+
+      // 🔃 Sort by registration date (latest first)
       beneficiaries.sort((a, b) {
-        final da = DateTime.tryParse((a['RegitrationDate'] ?? '').toString());
-        final db = DateTime.tryParse((b['RegitrationDate'] ?? '').toString());
+        final da = DateTime.tryParse(
+            (a['RegitrationDate'] ?? '').toString());
+        final db = DateTime.tryParse(
+            (b['RegitrationDate'] ?? '').toString());
         if (da != null && db != null) {
           return db.compareTo(da);
         }
         return 0;
       });
+
       setState(() {
         _allBeneficiaries = beneficiaries;
         _filtered = beneficiaries;
@@ -163,6 +193,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       });
     }
   }
+
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
     String age = 'N/A';
@@ -370,7 +401,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         InkWell(
-          onTap: () async {
+          onTap: (data['is_death'] == 1) ? null : () async {
             // Pass complete household data to next screen
             await Navigator.pushNamed(
               context,
@@ -440,8 +471,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         child: Text(
                           (data['hhId']?.toString().length ?? 0) > 11
                               ? data['hhId'].toString().substring(
-                                  data['hhId'].toString().length - 11,
-                                )
+                            data['hhId'].toString().length - 11,
+                          )
                               : (data['hhId'] ?? ''),
                           style: TextStyle(
                             color: primary,
@@ -452,6 +483,30 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
+                      if (data['is_death'] == 1)
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            // border: Border.all(
+                            //   color: Colors.red.withOpacity(0.5),
+                            //   width: 0.5,
+                            // ),
+                          ),
+                          child: Text(
+                            'Deceased',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       Image.asset(
                         'assets/images/sync.png',
                         width: 25,
@@ -525,8 +580,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                             l10n?.rchIdLabel ?? 'RCH ID',
                             isFemale
                                 ? (data['RichID']?.toString().isNotEmpty == true
-                                      ? data['RichID']
-                                      : (l10n?.notAvailable ?? 'Not Available'))
+                                ? data['RichID']
+                                : (l10n?.notAvailable ?? 'Not Available'))
                                 : (l10n?.na ?? 'N/A'),
                           ),
                           _rowText(
@@ -600,12 +655,12 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 onPress: () {
                   final beneficiaryData = {
                     'beneficiaryId':
-                        data['unique_key']?.toString() ??
+                    data['unique_key']?.toString() ??
                         '', // Use complete ID from unique_key
                     'hhid': data['hhId']?.toString() ?? '',
                     'name': data['Name']?.toString() ?? '',
                     'age':
-                        data['Age|Gender']?.toString().split(' ').first ?? '',
+                    data['Age|Gender']?.toString().split(' ').first ?? '',
                     'gender': data['Gender']?.toString().toLowerCase() ?? '',
                     'mobile': data['Mobileno.']?.toString() ?? '',
                     'village': data['village']?.toString() ?? '',

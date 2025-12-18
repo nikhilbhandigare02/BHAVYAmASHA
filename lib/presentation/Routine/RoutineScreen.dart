@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 
@@ -36,56 +37,17 @@ class _RoutinescreenState extends State<Routinescreen> {
     _loadChild1to2();
     _loadChild2to5();
   }
-
-  Future<void> _loadSampoornTikakaran() async {
-    print('Starting to load Sampoorn Tikakaran data...');
+  Future<List<Map<String, dynamic>>> _filterByCurrentUserKey(List<Map<String, dynamic>> rows) async {
     try {
-      print('Calling getChildTrackingDueFor16Year()...');
-      final rows = await LocalStorageDao.instance.getChildTrackingDueFor16Year();
-      print('Received ${rows.length} rows from database');
-
-      setState(() {
-        _sampoornTikakaran.clear();
-        for (var row in rows) {
-          print('Processing row: ${row['id']}');
-          final formData = row['form_json'];
-
-          // Check if formData is a Map and contains 'form_data'
-          final formDataContent = formData is Map ?
-          (formData['form_data'] ?? formData) :
-          formData;
-
-          if (formDataContent != null) {
-            print('Form data found: ${formDataContent['child_name'] ?? formDataContent['name']}');
-
-            _sampoornTikakaran.add({
-              'name': formDataContent['child_name'] ?? formDataContent['name'] ?? 'N/A',
-              'age': formDataContent['age'] ?? 'N/A',
-              'gender': formDataContent['gender'] ?? 'N/A',
-              'father_name': formDataContent['father_name'] ?? 'N/A',
-              'mother_name': formDataContent['mother_name'] ?? 'N/A',
-              'mobile': formDataContent['mobile_number'] ?? formDataContent['mobile'] ?? 'N/A',
-              'rch_id': formDataContent['rch_id_child'] ?? formDataContent['rch_id'] ?? 'N/A',
-              'registration_date': formDataContent['registration_date'] ?? 'N/A',
-              'household_id': formDataContent['household_id'] ?? 'N/A',
-              'beneficiary_id': formDataContent['beneficiary_id'] ?? 'N/A',
-              'id': formDataContent['id'] ?? row['id']?.toString() ?? 'N/A',
-            });
-          } else {
-            print('Warning: form_data is null for row: $row');
-          }
-        }
-        print('Total items in _sampoornTikakaran: ${_sampoornTikakaran.length}');
-      });
-    } catch (e) {
-      print('Error in _loadSampoornTikakaran: $e');
-      if (e is Error) {
-        print('Stack trace: ${e.stackTrace}');
-      }
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return rows;
+      return rows.where((row) => (row['current_user_key'] ?? '').toString() == ashaUniqueKey).toList();
+    } catch (_) {
+      return rows;
     }
   }
-
-  Future<void> _loadPregnantWomen() async {
+Future<void> _loadPregnantWomen() async {
     setState(() {
       _isLoading = true;
     });
@@ -179,16 +141,69 @@ class _RoutinescreenState extends State<Routinescreen> {
       });
     }
   }
+  
+  Future<void> _loadSampoornTikakaran() async {
+    print('Starting to load Sampoorn Tikakaran data...');
+    try {
+      print('Calling getChildTrackingDueFor16Year()...');
+      final rows = await LocalStorageDao.instance.getChildTrackingDueFor16Year();
+      final scopedRows = await _filterByCurrentUserKey(rows);
+      print('Received ${rows.length} rows from database');
+      print('Scoped to current user: ${scopedRows.length}');
+
+      setState(() {
+        _sampoornTikakaran.clear();
+        for (var row in scopedRows) {
+          print('Processing row: ${row['id']}');
+          final formData = row['form_json'];
+
+          // Check if formData is a Map and contains 'form_data'
+          final formDataContent = formData is Map ?
+          (formData['form_data'] ?? formData) :
+          formData;
+
+          if (formDataContent != null) {
+            print('Form data found: ${formDataContent['child_name'] ?? formDataContent['name']}');
+
+            _sampoornTikakaran.add({
+              'name': formDataContent['child_name'] ?? formDataContent['name'] ?? 'N/A',
+              'age': formDataContent['age'] ?? 'N/A',
+              'gender': formDataContent['gender'] ?? 'N/A',
+              'father_name': formDataContent['father_name'] ?? 'N/A',
+              'mother_name': formDataContent['mother_name'] ?? 'N/A',
+              'mobile': formDataContent['mobile_number'] ?? formDataContent['mobile'] ?? 'N/A',
+              'rch_id': formDataContent['rch_id_child'] ?? formDataContent['rch_id'] ?? 'N/A',
+              'registration_date': formDataContent['registration_date'] ?? 'N/A',
+              'household_id': formDataContent['household_id'] ?? 'N/A',
+              'beneficiary_id': formDataContent['beneficiary_id'] ?? 'N/A',
+              'id': formDataContent['id'] ?? row['id']?.toString() ?? 'N/A',
+            });
+          } else {
+            print('Warning: form_data is null for row: $row');
+          }
+        }
+        print('Total items in _sampoornTikakaran: ${_sampoornTikakaran.length}');
+      });
+    } catch (e) {
+      print('Error in _loadSampoornTikakaran: $e');
+      if (e is Error) {
+        print('Stack trace: ${e.stackTrace}');
+      }
+    }
+  }
+
   Future<void> _loadPoornTikakaran() async {
     print('Starting to load Poorn Tikakaran (9-year) data...');
     try {
       print('Calling getChildTrackingDueFor9Year()...');
       final rows = await LocalStorageDao.instance.getChildTrackingDueFor9Year();
+      final scopedRows = await _filterByCurrentUserKey(rows);
       print('Received ${rows.length} rows from database');
+      print('Scoped to current user: ${scopedRows.length}');
 
       setState(() {
         _poornTikakaran.clear();
-        for (var row in rows) {
+        for (var row in scopedRows) {
           print('Processing row: ${row['id']}');
           final formData = row['form_json'];
 
@@ -235,14 +250,18 @@ class _RoutinescreenState extends State<Routinescreen> {
       final sixWeeks = await LocalStorageDao.instance.getChildTrackingFor6Weeks();
       final tenWeeks = await LocalStorageDao.instance.getChildTrackingFor10Weeks();
       final fourteenWeeks = await LocalStorageDao.instance.getChildTrackingFor14Weeks();
+      final birthDoseScoped = await _filterByCurrentUserKey(birthDose);
+      final sixWeeksScoped = await _filterByCurrentUserKey(sixWeeks);
+      final tenWeeksScoped = await _filterByCurrentUserKey(tenWeeks);
+      final fourteenWeeksScoped = await _filterByCurrentUserKey(fourteenWeeks);
 
       setState(() {
         _child0to1.clear();
         // Combine all age groups into one list
-        _addFormDataToList(_child0to1, birthDose);
-        _addFormDataToList(_child0to1, sixWeeks);
-        _addFormDataToList(_child0to1, tenWeeks);
-        _addFormDataToList(_child0to1, fourteenWeeks);
+        _addFormDataToList(_child0to1, birthDoseScoped);
+        _addFormDataToList(_child0to1, sixWeeksScoped);
+        _addFormDataToList(_child0to1, tenWeeksScoped);
+        _addFormDataToList(_child0to1, fourteenWeeksScoped);
         print('Total items in _child0to1: ${_child0to1.length}');
       });
     } catch (e) {
@@ -257,7 +276,8 @@ class _RoutinescreenState extends State<Routinescreen> {
     print('Loading children 1-2 years data...');
     try {
       final rows = await LocalStorageDao.instance.getChildTrackingFor16To24Months();
-      _updateChildList(_child1to2, rows, '1-2 years');
+      final scopedRows = await _filterByCurrentUserKey(rows);
+      _updateChildList(_child1to2, scopedRows, '1-2 years');
     } catch (e) {
       print('Error in _loadChild1to2: $e');
       if (e is Error) {
@@ -270,7 +290,8 @@ class _RoutinescreenState extends State<Routinescreen> {
     print('Loading children 2-5 years data...');
     try {
       final rows = await LocalStorageDao.instance.getChildTrackingFor5To6Years();
-      _updateChildList(_child2to5, rows, '2-5 years');
+      final scopedRows = await _filterByCurrentUserKey(rows);
+      _updateChildList(_child2to5, scopedRows, '2-5 years');
     } catch (e) {
       print('Error in _loadChild2to5: $e');
       if (e is Error) {

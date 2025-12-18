@@ -26,67 +26,161 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   List<Map<String, dynamic>> _allData = [];
   bool _isLoading = true;
 
+
   Future<List<Map<String, dynamic>>> _getAncDueRecords() async {
+    final db = await DatabaseProvider.instance.database;
+
+    final rows = await db.rawQuery('''
+    SELECT mca.*
+    FROM mother_care_activities mca
+    INNER JOIN (
+      SELECT beneficiary_ref_key, MAX(created_date_time) AS max_date
+      FROM mother_care_activities
+      GROUP BY beneficiary_ref_key
+    ) latest
+      ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
+     AND mca.created_date_time = latest.max_date
+    INNER JOIN beneficiaries_new bn
+      ON mca.beneficiary_ref_key = bn.unique_key
+    WHERE mca.mother_care_state IN ('anc_due', 'anc_due_state')
+      AND bn.is_deleted = 0
+  ''');
+
+    return rows;
+  }
+
+  Future<Set<String>> _getDeliveredBeneficiaryIds() async {
+    final db = await DatabaseProvider.instance.database;
+
+    final rows = await db.query(
+      'followup_form_data',
+      where: '''
+      forms_ref_key = ?
+      AND (
+        LOWER(form_json) LIKE '%gives_birth_to_baby%'
+        OR LOWER(form_json) LIKE '%delivery_outcome%'
+      )
+      AND (
+        LOWER(form_json) LIKE '%yes%'
+        OR LOWER(form_json) LIKE '%live_birth%'
+        OR LOWER(form_json) LIKE '%:true%'
+      )
+    ''',
+      whereArgs: ['bt7gs9rl1a5d26mz'],
+      columns: ['beneficiary_ref_key'],
+      distinct: true,
+    );
+
+    return rows
+        .map((e) => e['beneficiary_ref_key']?.toString())
+        .where((id) => id != null && id!.isNotEmpty)
+        .cast<String>()
+        .toSet();
+  }
+
+  Future<void> _loadPregnantWomen() async {
+    setState(() => _isLoading = true);
+
     try {
-      final db = await DatabaseProvider.instance.database;
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final pregnantWomen = <Map<String, dynamic>>[];
+      final Set<String> processedBeneficiaries = {};
 
-      final List<Map<String, dynamic>> ancDueRecords = await db.rawQuery('''
-        SELECT 
-          mca.*,
-          bn.*,
-          mca.id as mca_id,  
-          bn.id as beneficiary_id
-        FROM mother_care_activities mca
-        INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-        WHERE mca.mother_care_state IN 'anc_due, anc_due_state' AND bn.is_deleted = 0
-      ''');
+      print('ℹ️ Found ${rows.length} beneficiaries');
 
-      print('ℹ️ Found ${ancDueRecords.length} anc_due records with valid beneficiary references');
+      final ancDueRecords = await _getAncDueRecords();
+      final ancDueBeneficiaryIds = ancDueRecords
+          .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
+          .toSet();
 
-      // Process the records to include beneficiary info
-      return ancDueRecords.map((record) {
-        // Extract beneficiary info
-        final beneficiaryInfo = {
-          'id': record['beneficiary_id'],
-          'unique_key': record['unique_key'],
-          'memberName': record['memberName'],
-          'headName': record['headName'],
-          'gender': record['gender'],
-          'dob': record['dob'],
-          'mobileNo': record['mobileNo'],
-          'isPregnant': 'yes',  // Since we're in ANC visit list
-          'RCH_ID': record['RCH_ID'],
-          'spouseName': record['spouseName'],
-          'beneficiary_info': jsonEncode({
-            'memberName': record['memberName'] ?? record['headName'],
-            'headName': record['headName'],
-            'gender': record['gender'],
-            'dob': record['dob'],
-            'mobileNo': record['mobileNo'],
-            'isPregnant': 'yes',
-            'RCH_ID': record['RCH_ID'],
-            'spouseName': record['spouseName'],
-          }),
-        };
+      final deliveredBeneficiaryIds = await _getDeliveredBeneficiaryIds();
+      print('ℹ️ Delivered: ${deliveredBeneficiaryIds.length}');
 
+      for (final row in rows) {
+        try {
+          final rawInfo = row['beneficiary_info'];
+          if (rawInfo == null) continue;
 
-        return {
-          ...record,
-          'beneficiary_info': jsonEncode(beneficiaryInfo),
-          'isAncDue': true,
-          'Name': record['memberName'] ?? record['headName'] ?? 'Unknown',
-          'Husband': record['spouseName'] ?? record['headName'] ?? 'N/A',
-          'RCH ID': record['RCH_ID'] ?? 'N/A',
-          'Age': _calculateAge(record['dob'] ?? '')?.toString() ?? 'N/A',
-          'RegistrationDate': record['created_date_time'] ?? 'N/A',
-        };
-      }).toList();
-    } catch (e) {
-      print('⚠️ Error fetching anc_due records: $e');
-      if (e is Error) {
-        print('Stack trace: ${e.stackTrace}');
+          final Map<String, dynamic> info = rawInfo is String
+              ? jsonDecode(rawInfo)
+              : Map<String, dynamic>.from(rawInfo);
+
+          final beneficiaryId = row['unique_key']?.toString() ?? '';
+          if (beneficiaryId.isEmpty) continue;
+
+          if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
+            continue;
+          }
+
+          final isPregnant =
+              info['isPregnant']?.toString().toLowerCase() == 'yes';
+          final gender = info['gender']?.toString().toLowerCase() ?? '';
+          final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
+
+          if ((isPregnant || isAncDue) &&
+              (gender == 'f' || gender == 'female')) {
+            final personData =
+            _processPerson(row, info, isPregnant: true);
+
+            if (personData != null) {
+              personData['isAncDue'] = isAncDue;
+              pregnantWomen.add(personData);
+              processedBeneficiaries.add(beneficiaryId);
+            }
+          }
+        } catch (_) {}
       }
-      return [];
+
+      // ---------------- ANC-DUE-ONLY RECORDS ----------------
+      for (final ancDue in ancDueRecords) {
+        final beneficiaryId =
+            ancDue['beneficiary_ref_key']?.toString() ?? '';
+
+        if (beneficiaryId.isEmpty ||
+            processedBeneficiaries.contains(beneficiaryId)) {
+          continue;
+        }
+
+        // ❌ EXCLUDE DELIVERED (IMPORTANT)
+        if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
+          continue;
+        }
+
+        pregnantWomen.add({
+          'BeneficiaryID': beneficiaryId,
+          'unique_key': beneficiaryId,
+          'Name': 'ANC Due - ${_getLast11Chars(beneficiaryId)}',
+          'isAncDue': true,
+          'RegistrationDate': ancDue['created_date_time'],
+          '_rawRow': ancDue,
+        });
+      }
+
+      // ---------------- DEDUP + SORT ----------------
+      final Map<String, Map<String, dynamic>> byId = {};
+      for (final item in pregnantWomen) {
+        final id = item['BeneficiaryID'] ?? item['unique_key'];
+        if (id != null) byId[id] = item;
+      }
+
+      final list = byId.values.toList()
+        ..sort((a, b) {
+          final d1 = DateTime.tryParse(
+              a['_rawRow']?['created_date_time'] ?? '');
+          final d2 = DateTime.tryParse(
+              b['_rawRow']?['created_date_time'] ?? '');
+          return (d2 ?? DateTime(0))
+              .compareTo(d1 ?? DateTime(0));
+        });
+
+      setState(() {
+        _allData = list;
+        _filtered = list;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('❌ Error: $e');
+      setState(() => _isLoading = false);
     }
   }
 
@@ -95,7 +189,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       final db = await DatabaseProvider.instance.database;
       final rows = await db.query(
         'mother_care_activities',
-        columns: ['is_synced', 'server_id', 'created_date_time'],
+        columns: ['is_synced',  'created_date_time'],
         where: 'beneficiary_ref_key = ? AND is_deleted = 0 ',
         whereArgs: [beneficiaryRefKey],
         orderBy: 'created_date_time DESC',
@@ -105,163 +199,17 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       if (rows.isNotEmpty) {
         return {
           'is_synced': rows.first['is_synced'] == 1,
-          'server_id': rows.first['server_id']
+          // 'server_id': rows.first['server_id']
         };
       }
 
-      return {'is_synced': false, 'server_id': null};
+      return {'is_synced': false};
     } catch (e) {
       print('Error fetching sync status: $e');
-      return {'is_synced': false, 'server_id': null};
+      return {'is_synced': false,};
     }
   }
 
-  Future<void> _loadPregnantWomen() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final pregnantWomen = <Map<String, dynamic>>[];
-      final Set<String> processedBeneficiaries = {}; // To track already processed beneficiaries
-
-      print('ℹ️ Found ${rows.length} beneficiaries to process');
-
-      // First, get all anc_due records to avoid duplicate DB queries
-      final ancDueRecords = await _getAncDueRecords();
-      final ancDueBeneficiaryIds = ancDueRecords.map((e) => e['beneficiary_ref_key']?.toString() ?? '').toSet();
-
-      // Get all delivery outcomes to exclude those records
-      final db = await DatabaseProvider.instance.database;
-      final deliveryOutcomes = await db.query(
-          'followup_form_data',
-          where: "forms_ref_key = 'bt7gs9rl1a5d26mz' AND form_json LIKE '%\"gives_birth_to_baby\":\"Yes\"%'",
-          columns: ['beneficiary_ref_key']
-      );
-      final deliveredBeneficiaryIds = deliveryOutcomes
-          .map((e) => e['beneficiary_ref_key']?.toString())
-          .where((id) => id != null && id.isNotEmpty)
-          .toSet();
-
-      print('ℹ️ Found ${deliveredBeneficiaryIds.length} beneficiaries with delivery outcomes');
-
-      for (final row in rows) {
-        try {
-          // Parse the beneficiary info
-          final dynamic rawInfo = row['beneficiary_info'];
-          if (rawInfo == null) {
-            print(' Skipping - No beneficiary_info found');
-            continue;
-          }
-
-          Map<String, dynamic> info = {};
-          try {
-            info = rawInfo is String
-                ? jsonDecode(rawInfo) as Map<String, dynamic>
-                : Map<String, dynamic>.from(rawInfo as Map);
-          } catch (e) {
-            print(' Error parsing beneficiary_info: $e');
-            continue;
-          }
-
-          final isPregnant =
-              info['isPregnant']?.toString().toLowerCase() == 'yes';
-          final name = info['memberName'] ?? info['headName'] ?? 'Unknown';
-          final gender = info['gender']?.toString().toLowerCase() ?? '';
-          final beneficiaryId = row['unique_key']?.toString() ?? '';
-
-          // Check if this beneficiary is in anc_due records
-          final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
-
-          // Skip if this beneficiary already has a delivery outcome
-          if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
-            print('  ⏩ Skipping - Already has delivery outcome');
-            continue;
-          }
-
-          if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
-            print('  🤰 Found ${isAncDue ? 'anc_due ' : ''}pregnant woman: $name (${isPregnant ? 'pregnant' : 'anc_due only'})');
-            final personData = _processPerson(row, info, isPregnant: isPregnant || isAncDue);
-            if (personData != null) {
-              // Mark if this is an anc_due record
-              personData['isAncDue'] = isAncDue;
-              print('  ✅ Added ${isAncDue ? "anc_due " : ""}pregnant woman: ${personData['Name']}');
-              pregnantWomen.add(personData);
-              processedBeneficiaries.add(beneficiaryId);
-            }
-          }
-        } catch (e, stackTrace) {
-          print('⚠️ Error processing beneficiary row: $e');
-          print('Stack trace: $stackTrace');
-        }
-      }
-
-      // Add any anc_due records that weren't in the regular beneficiaries list
-      for (final ancDueRecord in ancDueRecords) {
-        final beneficiaryId = ancDueRecord['beneficiary_ref_key']?.toString() ?? '';
-        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) {
-          continue; // Skip if already processed or no beneficiary ID
-        }
-
-        try {
-          // For anc_due records not in regular beneficiaries, create a minimal record
-          final personData = {
-            'id': ancDueRecord['id']?.toString() ?? '',
-            'unique_key': beneficiaryId,
-            'BeneficiaryID': beneficiaryId,
-            'hhId': ancDueRecord['household_ref_key']?.toString() ?? '',
-            'unique_key_display': _getLast11Chars(beneficiaryId),
-            'BeneficiaryID_display': _getLast11Chars(beneficiaryId),
-            'hhId_display': _getLast11Chars(ancDueRecord['household_ref_key']?.toString() ?? ''),
-            'Name': 'ANC Due - ${_getLast11Chars(beneficiaryId)}',
-            'isAncDue': true,
-            'RegistrationDate': ancDueRecord['created_date_time']?.toString() ?? '',
-            '_rawRow': ancDueRecord,
-          };
-
-          print('  ✅ Added anc_due only record: ${personData['Name']}');
-          pregnantWomen.add(personData);
-        } catch (e, stackTrace) {
-          print('⚠️ Error processing anc_due record: $e');
-          print('Stack trace: $stackTrace');
-        }
-      }
-
-
-      final Map<String, Map<String, dynamic>> byBeneficiary = {};
-      for (final item in pregnantWomen) {
-        final benId = item['BeneficiaryID']?.toString() ?? '';
-        final uniqueKey = item['unique_key']?.toString() ?? '';
-        final key = benId.isNotEmpty ? benId : uniqueKey;
-        if (key.isEmpty) continue;
-        byBeneficiary[key] = item;
-      }
-
-      // Convert to list and sort by registration date (newest first)
-      final dedupedList = byBeneficiary.values.toList();
-      dedupedList.sort((a, b) {
-        final dateA = DateTime.tryParse(a['_rawRow']?['created_date_time']?.toString() ?? '');
-        final dateB = DateTime.tryParse(b['_rawRow']?['created_date_time']?.toString() ?? '');
-
-        if (dateA == null || dateB == null) return 0;
-        return dateB.compareTo(dateA); // Descending order (newest first)
-      });
-
-      setState(() {
-        _allData = dedupedList;
-        _filtered = dedupedList;
-        _isLoading = false;
-      });
-    } catch (e, stackTrace) {
-      print('❌ Fatal error in _loadPregnantWomen: $e');
-      print('Stack trace: $stackTrace');
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
 
   String _getLast11Chars(String? input) {
     if (input == null || input.isEmpty) return '';
@@ -416,6 +364,10 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     super.initState();
     _loadPregnantWomen();
     _searchCtrl.addListener(_onSearchChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadPregnantWomen();
+      print('📊 Pregnant women count (initState): ${_allData.length}');
+    });
   }
 
   @override

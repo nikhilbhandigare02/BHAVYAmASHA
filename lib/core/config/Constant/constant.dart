@@ -43,6 +43,7 @@ class Constant {
   static int eligibleCouplesTotal = 0;
   static int eligibleCouplesTotalSync = 0;
   static int motherCareTotal = 0;
+  static int motherCareSynced = 0;
   static int motherCareTotalSync = 0;
   static int childRegisteredtotal = 0;
   static int childRegisteredtotalSync = 0;

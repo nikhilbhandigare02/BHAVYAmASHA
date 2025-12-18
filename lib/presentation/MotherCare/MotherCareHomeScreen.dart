@@ -23,7 +23,8 @@ class Mothercarehomescreen extends StatefulWidget {
   State<Mothercarehomescreen> createState() => _MothercarehomescreenState();
 }
 
-class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteAware {
+class _MothercarehomescreenState extends State<Mothercarehomescreen>
+    with RouteAware {
   int _ancVisitCount = 0;
   int _deliveryOutcomeCount = 0;
   int _hbcnMotherCount = 0;
@@ -62,224 +63,170 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
     _loadHBCNCount();
   }
 
+  Future<Set<String>> _getDeliveredBeneficiaryIds() async {
+    final db = await DatabaseProvider.instance.database;
+
+    final rows = await db.query(
+      'followup_form_data',
+      where: '''
+      forms_ref_key = ?
+      AND (
+        LOWER(form_json) LIKE ?
+        OR LOWER(form_json) LIKE ?
+      )
+    ''',
+      whereArgs: [
+        'bt7gs9rl1a5d26mz',
+        '%"gives_birth_to_baby":"yes"%',
+      ],
+      columns: ['beneficiary_ref_key'],
+      distinct: true,
+    );
+
+    return rows
+        .map((e) => e['beneficiary_ref_key']?.toString())
+        .where((id) => id != null && id!.isNotEmpty)
+        .cast<String>()
+        .toSet();
+  }
+
+  Future<Set<String>> _getAncDueBeneficiaryIds() async {
+    final db = await DatabaseProvider.instance.database;
+
+    final rows = await db.rawQuery('''
+    SELECT mca.beneficiary_ref_key
+    FROM mother_care_activities mca
+    INNER JOIN (
+      SELECT beneficiary_ref_key, MAX(id) AS max_id
+      FROM mother_care_activities
+      GROUP BY beneficiary_ref_key
+    ) latest
+      ON mca.id = latest.max_id
+    INNER JOIN beneficiaries_new bn
+      ON mca.beneficiary_ref_key = bn.unique_key
+    WHERE mca.mother_care_state IN ('anc_due', 'anc_due_state')
+      AND bn.is_deleted = 0
+  ''');
+
+    return rows
+        .map((e) => e['beneficiary_ref_key']?.toString())
+        .where((id) => id != null && id!.isNotEmpty)
+        .cast<String>()
+        .toSet();
+  }
+
   Future<void> _loadAncVisitCount() async {
     try {
-      final db = await DatabaseProvider.instance.database;
-      
-      // Get all beneficiaries that should be excluded
-      final excludedStates = await db.query(
-        'mother_care_activities',
-        where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
-        columns: ['beneficiary_ref_key'],
-        distinct: true
-      );
-      
-      final Set<String> excludedBeneficiaryIds = excludedStates
-          .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
-          .where((id) => id.isNotEmpty)
-          .toSet();
+      setState(() => _isLoading = true);
 
-      print('ℹ️ Found ${excludedBeneficiaryIds.length} beneficiaries with excluded states');
+      final deliveredIds = await _getDeliveredBeneficiaryIds();
+      final ancDueIds = await _getAncDueBeneficiaryIds();
 
-      // Get all anc_due records that are not in excluded states
-      final ancDueRecords = await db.rawQuery('''
-        SELECT DISTINCT mca.beneficiary_ref_key
-        FROM mother_care_activities mca
-        INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-        WHERE mca.mother_care_state = 'anc_due' 
-          AND bn.is_deleted = 0
-          AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})
-      ''', excludedBeneficiaryIds.toList());
-
-      final Set<String> ancDueBeneficiaryIds = ancDueRecords
-          .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
-          .where((id) => id.isNotEmpty)
-          .toSet();
-
-      print('ℹ️ Found ${ancDueBeneficiaryIds.length} anc_due records after filtering');
-
-      // Get all beneficiaries
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final Set<String> uniqueBeneficiaries = {};
+
+      final Set<String> countedIds = {};
 
       for (final row in rows) {
-        try {
-          // Parse beneficiary info
-          final dynamic rawInfo = row['beneficiary_info'];
-          if (rawInfo == null) continue;
+        final rawInfo = row['beneficiary_info'];
+        if (rawInfo == null) continue;
 
-          Map<String, dynamic> info = {};
-          try {
-            info = rawInfo is String
-                ? jsonDecode(rawInfo) as Map<String, dynamic>
-                : Map<String, dynamic>.from(rawInfo as Map);
-          } catch (e) {
-            continue;
-          }
+        final info = rawInfo is String
+            ? jsonDecode(rawInfo)
+            : Map<String, dynamic>.from(rawInfo);
 
-          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes';
-          final gender = info['gender']?.toString().toLowerCase() ?? '';
-          final beneficiaryId = row['unique_key']?.toString() ?? '';
+        final beneficiaryId = row['unique_key']?.toString() ?? '';
+        if (beneficiaryId.isEmpty) continue;
 
-          // Check if this beneficiary is in anc_due records
-          final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
+        // ❌ Exclude delivered
+        if (deliveredIds.contains(beneficiaryId)) continue;
 
-          // Skip if this beneficiary is in excluded states
-          if (excludedBeneficiaryIds.contains(beneficiaryId)) {
-            continue;
-          }
+        final gender = info['gender']?.toString().toLowerCase() ?? '';
+        if (gender != 'f' && gender != 'female') continue;
 
-          // Include if (pregnant OR anc_due) AND female
-          if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
-            if (beneficiaryId.isNotEmpty) {
-              uniqueBeneficiaries.add(beneficiaryId);
-            }
-          }
-        } catch (e) {
-          // Skip problematic records
-          continue;
+        final isPregnant =
+            info['isPregnant']?.toString().toLowerCase() == 'yes';
+        final isAncDue = ancDueIds.contains(beneficiaryId);
+
+        // ✅ Same condition as UI
+        if (isPregnant || isAncDue) {
+          countedIds.add(beneficiaryId);
         }
       }
 
-      // Add any anc_due records that weren't in the regular beneficiaries list
-      for (final id in ancDueBeneficiaryIds) {
-        if (id.isNotEmpty && !excludedBeneficiaryIds.contains(id)) {
-          uniqueBeneficiaries.add(id);
-        }
-      }
+      setState(() {
+        _ancVisitCount = countedIds.length;
+        _isLoading = false;
+      });
 
-      // Final count
-      final count = uniqueBeneficiaries.length;
-
-      if (mounted) {
-        setState(() {
-          _ancVisitCount = count;
-          _isLoading = false;
-        });
-      }
-
-      print('✅ ANC Visit Count: $count (Total unique pregnant women after filtering)');
-
-    } catch (e, stackTrace) {
-      print('❌ Error loading ANC visit count: $e');
-      print('Stack trace: $stackTrace');
-      if (mounted) {
-        setState(() {
-          _ancVisitCount = 0;
-          _isLoading = false;
-        });
-      }
+      print('✅ ANC Visit Count: $_ancVisitCount');
+    } catch (e, s) {
+      print('❌ ANC Count Error: $e');
+      print(s);
+      setState(() {
+        _ancVisitCount = 0;
+        _isLoading = false;
+      });
     }
   }
-
-  int? _calculateAge(dynamic dob) {
-    if (dob == null) return null;
-    try {
-      String dateStr = dob.toString();
-      if (dateStr.contains('T')) {
-        dateStr = dateStr.split('T')[0];
-      }
-      final birthDate = DateTime.tryParse(dateStr);
-      if (birthDate == null) return null;
-
-      final now = DateTime.now();
-      int age = now.year - birthDate.year;
-      if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
-        age--;
-      }
-      return age;
-    } catch (e) {
-      return null;
-    }
-  }
-
 
   Future<void> _loadDeliveryOutcomeCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
       const ancRefKey = 'bt7gs9rl1a5d26mz';
 
-      print('🔍 Loading Delivery Outcome count...');
+      print('🔍 Loading Delivery Outcome count (same logic as list)...');
 
-      // Same query as in DeliveryOutcomeScreen
-      final ancForms = await db.rawQuery('''
-      SELECT DISTINCT
-        f.beneficiary_ref_key,
-        f.form_json,
-        f.household_ref_key,
-        f.forms_ref_key,
-        f.created_date_time,
-        f.id as form_id
-      FROM ${FollowupFormDataTable.table} f
-      LEFT JOIN ${MotherCareActivitiesTable.table} mca 
-        ON f.beneficiary_ref_key = mca.beneficiary_ref_key
-      WHERE 
-        f.forms_ref_key = '$ancRefKey'
-        AND f.is_deleted = 0
-        AND (f.form_json LIKE '%"gives_birth_to_baby":"Yes"%' 
-             AND mca.mother_care_state = 'delivery_outcome') 
-      ORDER BY f.created_date_time DESC
+      final rows = await db.rawQuery('''
+      WITH LatestForms AS (
+        SELECT
+          f.beneficiary_ref_key,
+          ROW_NUMBER() OVER (
+            PARTITION BY f.beneficiary_ref_key
+            ORDER BY f.created_date_time DESC, f.id DESC
+          ) AS rn
+        FROM ${FollowupFormDataTable.table} f
+        WHERE
+          f.forms_ref_key = '$ancRefKey'
+          AND f.is_deleted = 0
+          AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+      )
+
+      SELECT DISTINCT beneficiary_ref_key
+      FROM (
+        -- From ANC forms
+        SELECT beneficiary_ref_key
+        FROM LatestForms
+        WHERE rn = 1
+
+        UNION
+
+        -- From mother care activities
+        SELECT mca.beneficiary_ref_key
+        FROM ${MotherCareActivitiesTable.table} mca
+        WHERE
+          mca.mother_care_state = 'delivery_outcome'
+          AND mca.is_deleted = 0
+      )
+      WHERE beneficiary_ref_key NOT IN (
+        SELECT beneficiary_ref_key
+        FROM ${FollowupFormDataTable.table}
+        WHERE
+          forms_ref_key = '${FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome]}'
+          AND is_deleted = 0
+      )
     ''');
 
-      print('📊 Found ${ancForms.length} eligible forms for delivery outcome');
-
-      if (ancForms.isEmpty) {
-        print('ℹ️ No eligible forms found for delivery outcome');
-        if (mounted) {
-          setState(() {
-            _deliveryOutcomeCount = 0;
-          });
-        }
-        return;
-      }
-
-      // Track unique beneficiaries that need delivery outcome
-      final Set<String> beneficiariesNeedingOutcome = {};
-      final Set<String> processedBeneficiaries = {};
-
-      for (final form in ancForms) {
-        try {
-          final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
-          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            print('⚠️ Form missing beneficiary_ref_key: $form');
-            continue;
-          }
-
-          // Skip if we've already processed this beneficiary
-          if (processedBeneficiaries.contains(beneficiaryRefKey)) {
-            continue;
-          }
-          processedBeneficiaries.add(beneficiaryRefKey);
-
-          // Check if delivery outcome already exists
-          final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[
-          FollowupFormDataTable.deliveryOutcome];
-          final existingOutcome = await db.query(
-            FollowupFormDataTable.table,
-            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0',
-            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey],
-            limit: 1,
-          );
-
-          if (existingOutcome.isEmpty) {
-            beneficiariesNeedingOutcome.add(beneficiaryRefKey);
-          }
-        } catch (e) {
-          print('⚠️ Error processing form: $e');
-        }
-      }
-
-      print('✅ Found ${beneficiariesNeedingOutcome.length} beneficiaries needing delivery outcome');
+      print('✅ Delivery Outcome Count = ${rows.length}');
 
       if (mounted) {
         setState(() {
-          _deliveryOutcomeCount = beneficiariesNeedingOutcome.length;
+          _deliveryOutcomeCount = rows.length;
         });
       }
-
     } catch (e, stackTrace) {
       print('❌ Error in _loadDeliveryOutcomeCount: $e');
       print('Stack trace: $stackTrace');
+
       if (mounted) {
         setState(() {
           _deliveryOutcomeCount = 0;
@@ -321,12 +268,14 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
           final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
 
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            print('⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}');
+            print(
+                '⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}');
             continue;
           }
 
           if (processedBeneficiaries.contains(beneficiaryRefKey)) {
-            print('ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey');
+            print(
+                'ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey');
             continue;
           }
 
@@ -343,8 +292,8 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
 
           // If we got this far, add to processed set
           processedBeneficiaries.add(beneficiaryRefKey);
-          print('✅ Added beneficiary $beneficiaryRefKey to count (Total: ${processedBeneficiaries.length})');
-
+          print(
+              '✅ Added beneficiary $beneficiaryRefKey to count (Total: ${processedBeneficiaries.length})');
         } catch (e) {
           print('❌ Error processing outcome ${outcome['id']}: $e');
         }
@@ -373,74 +322,83 @@ class _MothercarehomescreenState extends State<Mothercarehomescreen> with RouteA
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    // 🔹 3 cards per row (with even spacing)
-    final double totalHorizontalPadding = 12 * 2;
-    final double spacingBetweenCards = 4 * 2;
-    final double cardWidth = (MediaQuery.of(context).size.width -
-        totalHorizontalPadding -
-        spacingBetweenCards) /
-        3;
+    // Constant for the space between cards (2 gaps of 4px = 8px total used in row)
+    const double gapSize = 4.0;
+    const double totalGap = gapSize * 2;
 
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context, _ancVisitCount + _deliveryOutcomeCount + _hbcnMotherCount);
+        Navigator.pop(context,
+            _ancVisitCount + _deliveryOutcomeCount + _hbcnMotherCount);
         return false;
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-          appBar: AppHeader(
-            screenTitle: l10n?.gridMotherCare ?? 'Mother Care',
-            showBack: false,
-            icon1Image: 'assets/images/home.png',
-
-          onIcon1Tap: () => Navigator.pop(context, _ancVisitCount + _deliveryOutcomeCount + _hbcnMotherCount),
-          ),
+        appBar: AppHeader(
+          screenTitle: l10n?.gridMotherCare ?? 'Mother Care',
+          showBack: false,
+          icon1Image: 'assets/images/home.png',
+          onIcon1Tap: () => Navigator.pop(context,
+              _ancVisitCount + _deliveryOutcomeCount + _hbcnMotherCount),
+        ),
         drawer: const CustomDrawer(),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-            child: Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.all(12),
+            // 1. LayoutBuilder to get the safe available width
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // 2. Calculate card width dynamically
+                // (Available Width - Total Gaps) / 3 cards
+                final double cardWidth =
+                    (constraints.maxWidth - totalGap) / 3;
+
+                return Column(
                   children: [
-                    _FeatureCard(
-                      width: cardWidth,
-                      title: (l10n?.motherAncVisitTitle ?? 'ANC Visit').toString(),
-                      count: _isLoading ? 0 : _ancVisitCount,
-                      image: 'assets/images/pregnant-woman.png',
-                      onClick: () {
-                        Navigator.pushNamed(
-                            context, Route_Names.Ancvisitlistscreen);
-                      },
-                    ),
-                    const SizedBox(width: 4),
-                    _FeatureCard(
-                      width: cardWidth,
-                      title:
-                      (l10n?.deliveryOutcomeTitle ?? 'Delivery\nOutcome')
-                          .toString(),
-                      count: _deliveryOutcomeCount,
-                      image: 'assets/images/mother.png',
-                      onClick: () {
-                        Navigator.pushNamed(
-                            context, Route_Names.DeliveryOutcomeScreen);
-                      },
-                    ),
-                    const SizedBox(width: 4),
-                    _FeatureCard(
-                      width: cardWidth,
-                      title:
-                      (l10n?.hbncMotherTitle ?? 'HBNC Mother').toString(),
-                      count: _hbcnMotherCount,
-                      image: 'assets/images/pnc-mother.png',
-                      onClick: () {
-                        Navigator.pushNamed(context, Route_Names.HBNCScreen);
-                      },
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _FeatureCard(
+                          width: cardWidth,
+                          title: (l10n?.motherAncVisitTitle ?? 'ANC Visit')
+                              .toString(),
+                          count: _isLoading ? 0 : _ancVisitCount,
+                          image: 'assets/images/pregnant-woman.png',
+                          onClick: () {
+                            Navigator.pushNamed(
+                                context, Route_Names.Ancvisitlistscreen);
+                          },
+                        ),
+                        const SizedBox(width: gapSize),
+                        _FeatureCard(
+                          width: cardWidth,
+                          title: (l10n?.deliveryOutcomeTitle ??
+                              'Delivery\nOutcome')
+                              .toString(),
+                          count: _deliveryOutcomeCount,
+                          image: 'assets/images/mother.png',
+                          onClick: () {
+                            Navigator.pushNamed(
+                                context, Route_Names.DeliveryOutcomeScreen);
+                          },
+                        ),
+                        const SizedBox(width: gapSize),
+                        _FeatureCard(
+                          width: cardWidth,
+                          title: (l10n?.hbncMotherTitle ?? 'HBNC Mother')
+                              .toString(),
+                          count: _hbcnMotherCount,
+                          image: 'assets/images/pnc-mother.png',
+                          onClick: () {
+                            Navigator.pushNamed(
+                                context, Route_Names.HBNCScreen);
+                          },
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),
@@ -465,7 +423,8 @@ class _FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
-    final double cardHeight = MediaQuery.of(context).orientation == Orientation.portrait
+    final double cardHeight =
+    MediaQuery.of(context).orientation == Orientation.portrait
         ? 15.h
         : 25.h;
     final scaleFactor = MediaQuery.of(context).textScaleFactor;
@@ -507,7 +466,9 @@ class _FeatureCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 1.5.h,),
+                SizedBox(
+                  height: 1.5.h,
+                ),
                 Text(
                   title,
                   textAlign: TextAlign.left,

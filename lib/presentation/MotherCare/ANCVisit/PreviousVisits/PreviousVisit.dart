@@ -29,25 +29,32 @@ class _PreviousvisitState extends State<Previousvisit> {
     final list = <Map<String, String>>[];
 
     for (final r in rows.reversed) { // 👈 reverse here
-      final createdRaw = r['created_date_time']?.toString() ?? '';
+      final fd = r['form_data'] is Map<String, dynamic>
+          ? (r['form_data'] as Map<String, dynamic>)
+          : {};
+
+      String dateRaw = fd['date_of_inspection']?.toString() ?? '';
+      if (dateRaw.isEmpty) {
+        dateRaw = r['created_date_time']?.toString() ?? '';
+      }
+
       String created = '-';
 
       try {
-        final dt = DateTime.parse(createdRaw);
+        final dt = DateTime.parse(dateRaw);
         final d = dt.day.toString().padLeft(2, '0');
         final m = dt.month.toString().padLeft(2, '0');
         final y = dt.year.toString();
         created = '$d-$m-$y';
       } catch (_) {
-        created = createdRaw.isEmpty ? '-' : createdRaw;
+        created = dateRaw.isEmpty ? '-' : dateRaw;
       }
 
-      final fd = r['form_data'] is Map<String, dynamic>
-          ? (r['form_data'] as Map<String, dynamic>)
-          : {};
+      String week = fd['weeks_of_pregnancy']?.toString() ?? '';
+      if (week.trim().isEmpty) week = '-';
 
-      final week = fd['weeks_of_pregnancy']?.toString() ?? '-';
-      final risk = fd['high_risk']?.toString() ?? '-';
+      String risk = fd['high_risk']?.toString() ?? '';
+      if (risk.trim().isEmpty) risk = '-';
 
       list.add({'date': created, 'week': week, 'risk': risk});
     }
@@ -83,11 +90,51 @@ class _PreviousvisitState extends State<Previousvisit> {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Row(
-                    children:  [
-                      Expanded(child: Text('Sr No.', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp))),
-                      Expanded(child: Text('Visit Date', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp))),
-                      Expanded(child: Text('Pregnancy Week', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp))),
-                      Expanded(child: Text('High Risk', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp))),
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          'Sr No.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Visit Date',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Pregnancy Week',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'High Risk',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -112,10 +159,38 @@ class _PreviousvisitState extends State<Previousvisit> {
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                             child: Row(
                               children: [
-                                Expanded(child: Text('${index + 1}', style: TextStyle(fontSize: 14.sp))),
-                                Expanded(child: Text(row['date'] ?? '-', style: TextStyle(fontSize: 14.sp))),
-                                Expanded(child: Text(row['week'] ?? '-', style: TextStyle(fontSize: 14.sp))),
-                                Expanded(child: Text(row['risk'] ?? '-', style: TextStyle(fontSize: 14.sp))),
+                                Expanded(
+                                  flex: 1,
+                                  child: Text(
+                                    '${index + 1}',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 14.sp),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    row['date'] ?? '-',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 14.sp),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    row['week'] ?? '-',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 14.sp),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    row['risk'] ?? '-',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 14.sp),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

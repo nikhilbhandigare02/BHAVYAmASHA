@@ -7,7 +7,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
-    as ffd;
+as ffd;
 import 'package:sizer/sizer.dart';
 
 import 'NCDList.dart';
@@ -64,7 +64,6 @@ class _NCDHomeState extends State<NCDHome> {
         whereArgs: ['vl7o6r9b6v3fbesk'],
       );
 
-      // Log the raw query results
       debugPrint('CBAC Forms Data (${result.length} records):');
       for (var form in result) {
         debugPrint('Form ID: ${form['id']}');
@@ -83,13 +82,9 @@ class _NCDHomeState extends State<NCDHome> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
 
-    // 🔹 3 cards per row
-    final double totalHorizontalPadding = 12 * 2;
-    final double spacingBetweenCards = 8;
-    final double cardWidth =
-        (screenWidth - totalHorizontalPadding - (2 * spacingBetweenCards)) / 3;
+    // Define spacing constant
+    const double spacingBetweenCards = 8;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -97,94 +92,102 @@ class _NCDHomeState extends State<NCDHome> {
         screenTitle: l10n?.ncdTitle ?? 'NCD',
         showBack: false,
         icon1Image: 'assets/images/home.png',
-
         onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.homeScreen),
       ),
       drawer: const CustomDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-          child: Column(
-            children: [
-              // 🔹 First Row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          // 1. LayoutBuilder provides the parent's box constraints
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+
+              // 2. Calculate width dynamically based on available space (constraints.maxWidth)
+              // We subtract the total gap space (2 gaps of 8px) and divide by 3 items
+              final double cardWidth = (constraints.maxWidth - (2 * spacingBetweenCards)) / 3;
+
+              return Column(
                 children: [
-                  _FeatureCard(
-                    width: cardWidth,
-                    title: l10n?.ncdListTitle ?? 'NCD List',
-                    count: _cbacFormsCount,
-                    image: 'assets/images/home.png',
-                    onClick: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Ncdlist()),
-                      );
-                    },
+                  // 🔹 First Row
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _FeatureCard(
+                        width: cardWidth,
+                        title: l10n?.ncdListTitle ?? 'NCD List',
+                        count: _cbacFormsCount,
+                        image: 'assets/images/home.png',
+                        onClick: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Ncdlist()),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: spacingBetweenCards),
+                      _FeatureCard(
+                        width: cardWidth,
+                        title: l10n?.ncdEligibleListTitle ?? 'NCD Eligible List',
+                        count: 0,
+                        image: 'assets/images/home.png',
+                        onClick: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Ncdeligiblelist(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: spacingBetweenCards),
+                      _FeatureCard(
+                        width: cardWidth,
+                        title: l10n?.ncdPriorityListTitle ?? 'NCD Priority List',
+                        count: 0,
+                        image: 'assets/images/home.png',
+                        onClick: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Ncdprioritylist(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  _FeatureCard(
-                    width: cardWidth,
-                    title: l10n?.ncdEligibleListTitle ?? 'NCD Eligible List',
-                    count: 0,
-                    image: 'assets/images/home.png',
-                    onClick: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Ncdeligiblelist(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  _FeatureCard(
-                    width: cardWidth,
-                    title: l10n?.ncdPriorityListTitle ?? 'NCD Priority List',
-                    count: 0,
-                    image: 'assets/images/home.png',
-                    onClick: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Ncdprioritylist(),
-                        ),
-                      );
-                    },
+
+                  const SizedBox(height: 10),
+
+                  // 🔹 Second Row
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _FeatureCard(
+                        width: cardWidth,
+                        title: l10n?.ncdNonEligibleListTitle ??
+                            'NCD Non-Eligible List',
+                        count: 0,
+                        image: 'assets/images/home.png',
+                        onClick: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Ncdnoneligiblelist(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: spacingBetweenCards),
+                      // Placeholders to keep alignment consistent
+                      SizedBox(width: cardWidth, height: 14.h),
+                      const SizedBox(width: spacingBetweenCards),
+                      SizedBox(width: cardWidth, height: 14.h),
+                    ],
                   ),
                 ],
-              ),
-
-              const SizedBox(height: 10),
-
-              // 🔹 Second Row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _FeatureCard(
-                    width: cardWidth,
-                    title:
-                        l10n?.ncdNonEligibleListTitle ??
-                        'NCD Non-Eligible List',
-                    count: 0,
-                    image: 'assets/images/home.png',
-                    onClick: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Ncdnoneligiblelist(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  // Empty placeholders for alignment
-                  SizedBox(width: cardWidth, height: 14.h),
-                  const SizedBox(width: 8),
-                  SizedBox(width: cardWidth, height: 14.h),
-                ],
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
@@ -211,9 +214,10 @@ class _FeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = AppColors.primary;
     final double cardHeight =
-        MediaQuery.of(context).orientation == Orientation.portrait
+    MediaQuery.of(context).orientation == Orientation.portrait
         ? 15.h
         : 22.h;
+
     return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(10),
