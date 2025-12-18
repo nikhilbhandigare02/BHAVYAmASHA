@@ -102,8 +102,8 @@ class _AncvisitformState extends State<Ancvisitform> {
 
   void _updateFormWithData(Map<String, dynamic> formData) {
     // Basic information
-    _bloc.add(VisitTypeChanged(formData['visit_type'] ?? ''));
-    _bloc.add(PlaceOfAncChanged(formData['place_of_anc'] ?? ''));
+    // _bloc.add(VisitTypeChanged(formData['visit_type'] ?? '')); // Don't auto-fill visit type
+    // _bloc.add(PlaceOfAncChanged(formData['place_of_anc'] ?? '')); // Don't auto-fill place of ANC
     _bloc.add(DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])));
     _bloc.add(HouseNumberChanged(formData['house_number'] ?? ''));
     _bloc.add(WomanNameChanged(formData['woman_name'] ?? ''));
@@ -941,7 +941,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                              //readOnly: true,
+                              readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                             ),

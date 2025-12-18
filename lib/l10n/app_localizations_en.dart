@@ -2652,10 +2652,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get highRisk => 'High-Risk Pregnancy List';
 
   @override
-  String get dateOfHomeVisitLabel => 'Date of home visit *';
+  String get dateOfHomeVisitLabel => 'Home visit date *';
 
   @override
-  String get motherStatusLabel => 'Mother\'s status *';
+  String get motherStatusLabel => 'Mother status *';
 
   @override
   String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) card? *';
@@ -5827,10 +5827,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mchLabel => 'MCH';
 
   @override
-  String get date_of_death => 'Date of death *';
+  String get date_of_death => 'Date of death ';
 
   @override
-  String get place_of_death => 'Place of death *';
+  String get place_of_death => 'Place of death ';
 
   @override
   String get migrated_out => 'Migrated Out';
@@ -5842,7 +5842,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facility => 'Facility';
 
   @override
-  String get reason_of_death => 'Reason of death *';
+  String get reason_of_death => 'Reason of death ';
 
   @override
   String get ph => 'PH';
@@ -5893,10 +5893,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get please_enter_problem => 'Please enter problem *';
 
   @override
-  String get enter_breastfeeding_problem => 'Enter breastfeeding problem';
+  String get enter_breastfeeding_problem => 'Please enter problem';
 
   @override
-  String get write_take_action => 'Please write down the take action';
+  String get write_take_action => 'Please write down the action taken';
 
   @override
   String get breastfeeding_problem_help => 'If there is a problem in breastfeeding, help the mother to overcome it *';

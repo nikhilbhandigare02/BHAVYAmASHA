@@ -5360,13 +5360,13 @@ abstract class AppLocalizations {
   /// No description provided for @dateOfHomeVisitLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of home visit *'**
+  /// **'Home visit date *'**
   String get dateOfHomeVisitLabel;
 
   /// No description provided for @motherStatusLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mother\'s status *'**
+  /// **'Mother status *'**
   String get motherStatusLabel;
 
   /// No description provided for @mcpCardAvailableLabelMother.
@@ -11702,13 +11702,13 @@ abstract class AppLocalizations {
   /// No description provided for @date_of_death.
   ///
   /// In en, this message translates to:
-  /// **'Date of death *'**
+  /// **'Date of death '**
   String get date_of_death;
 
   /// No description provided for @place_of_death.
   ///
   /// In en, this message translates to:
-  /// **'Place of death *'**
+  /// **'Place of death '**
   String get place_of_death;
 
   /// No description provided for @migrated_out.
@@ -11732,7 +11732,7 @@ abstract class AppLocalizations {
   /// No description provided for @reason_of_death.
   ///
   /// In en, this message translates to:
-  /// **'Reason of death *'**
+  /// **'Reason of death '**
   String get reason_of_death;
 
   /// No description provided for @ph.
@@ -11834,13 +11834,13 @@ abstract class AppLocalizations {
   /// No description provided for @enter_breastfeeding_problem.
   ///
   /// In en, this message translates to:
-  /// **'Enter breastfeeding problem'**
+  /// **'Please enter problem'**
   String get enter_breastfeeding_problem;
 
   /// No description provided for @write_take_action.
   ///
   /// In en, this message translates to:
-  /// **'Please write down the take action'**
+  /// **'Please write down the action taken'**
   String get write_take_action;
 
   /// No description provided for @breastfeeding_problem_help.

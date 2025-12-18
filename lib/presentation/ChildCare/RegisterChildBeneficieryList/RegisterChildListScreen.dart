@@ -329,7 +329,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
           _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
           _isLoading = false;
           
-          // Debug log the number of records loaded
+
           debugPrint('✅ Loaded ${_childBeneficiaries.length} child beneficiaries');
           debugPrint('✅ Filtered list contains ${_filtered.length} records');
           
