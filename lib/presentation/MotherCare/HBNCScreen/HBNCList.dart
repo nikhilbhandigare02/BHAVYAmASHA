@@ -65,8 +65,7 @@ class _HBNCListScreenState
       return 0;
     }
   }
-// Add this new method to check sync status from both tables
-// Add this new method to check sync status from both tables
+
   Future<bool> _isSynced(String beneficiaryId) async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -143,7 +142,7 @@ class _HBNCListScreenState
 
       final results = await db.query(
         'followup_form_data',
-        where: 'forms_ref_key = ? AND current_user_key = ?',
+        where: 'forms_ref_key = ? AND current_user_key = ? AND is_deleted = 0',
         whereArgs: [deliveryOutcomeKey, ashaUniqueKey],
       );
 
@@ -154,6 +153,8 @@ class _HBNCListScreenState
       return [];
     }
   }
+
+
 
   Future<void> _loadPregnancyOutcomeeCouples() async {
     setState(() => _isLoading = true);
@@ -192,11 +193,15 @@ class _HBNCListScreenState
           processedBeneficiaries.add(beneficiaryRefKey);
 
           final db = await DatabaseProvider.instance.database;
+          final currentUserData = await SecureStorageService.getCurrentUserData();
+          String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
           final beneficiaryResults = await db.query(
             'beneficiaries_new',
-            where: 'unique_key = ?',
-            whereArgs: [beneficiaryRefKey],
+            where: 'unique_key = ? AND is_deleted = 0 AND current_user_key = ?',
+            whereArgs: [beneficiaryRefKey, ashaUniqueKey],
           );
+
 
           if (beneficiaryResults.isEmpty) {
             print('⚠️ No beneficiary found for key: $beneficiaryRefKey');
@@ -233,7 +238,7 @@ class _HBNCListScreenState
           final householdRefKey = beneficiary['household_ref_key']?.toString() ?? 'N/A';
           final createdDateTime = beneficiary['created_date_time']?.toString() ?? '';
 
-           
+
           final visitCount = await _getVisitCount(beneficiaryRefKey);
           final previousHBNCDate = await _getLastVisitDate(beneficiaryRefKey);
           final nextHBNCDate = await _getNextVisitDate(beneficiaryRefKey, formData['delivery_date']?.toString());

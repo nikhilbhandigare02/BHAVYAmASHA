@@ -179,6 +179,7 @@ class DbMigration {
           "fatherName": "father_name",
           "spouseName": "father_or_spouse_name",
           "dob": "date_of_birth",
+          "gender": "gender",
           "years": "dob_year",
           "months": "dob_month",
           "days": "dob_day",

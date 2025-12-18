@@ -40,106 +40,95 @@ class _EligibleCoupleListState extends State<HighRisk> {
 
       // Get all high risk visits
       final dbForms = await LocalStorageDao.instance.getHighRiskANCVisits();
-
-      // Group visits by beneficiary ID
-      final Map<String, Map<String, dynamic>> latestVisits = {};
-
-      for (final row in dbForms) {
-        try {
-          final formData = Map<String, dynamic>.from(row['form_data'] as Map);
-          final beneficiaryKey = row['beneficiary_ref_key']?.toString() ?? '';
-
-          // Skip if no beneficiary key
-          if (beneficiaryKey.isEmpty) continue;
-
-          // Get the created date of this entry
-          final createdDateStr = row['created_date_time']?.toString();
-          if (createdDateStr == null) continue;
-
-          final createdDate = DateTime.tryParse(createdDateStr);
-          if (createdDate == null) continue;
-
-          // If we already have this beneficiary, check if this is a newer entry
-          if (latestVisits.containsKey(beneficiaryKey)) {
-            final existingDateStr = latestVisits[beneficiaryKey]!['created_date_time']?.toString() ?? '';
-            final existingDate = DateTime.tryParse(existingDateStr) ?? DateTime(1970);
-
-            // Skip if existing entry is newer
-            if (existingDate.isAfter(createdDate)) {
-              continue;
-            }
-          }
-
-          // Store this as the latest entry for this beneficiary
-          latestVisits[beneficiaryKey] = {
-            ...row,
-            'form_data': formData,
-            'created_date_time': createdDateStr,
-          };
-        } catch (e) {
-          print('Error processing high-risk ANC row: $e');
-        }
-      }
-
-      // Now process only the latest entries
       final List<ANCVisitModel> highRiskVisits = [];
 
-      for (final entry in latestVisits.values) {
+      for (final entry in dbForms) {
         try {
           final formData = Map<String, dynamic>.from(entry['form_data'] as Map);
           final beneficiaryKey = entry['beneficiary_ref_key']?.toString() ?? '';
 
-          // Fetch beneficiary to get DOB
-          String? dobStr;
-          if (beneficiaryKey.isNotEmpty) {
+          // Skip if no beneficiary key
+          if (beneficiaryKey.isEmpty) continue;
+
+          // Get the HHID from multiple possible locations
+          final rawHhId = entry['household_ref_key']?.toString() ??
+              entry['beneficiary_data']?['household_ref_key']?.toString() ??
+              formData['household_ref_key']?.toString() ??
+              '';
+
+          final hhId = rawHhId.isNotEmpty
+              ? rawHhId.length > 11
+              ? rawHhId.substring(rawHhId.length - 11)
+              : rawHhId
+              : 'N/A';
+
+          // Get beneficiary info
+          final beneficiaryData = entry['beneficiary_data'] is Map
+              ? Map<String, dynamic>.from(entry['beneficiary_data'])
+              : <String, dynamic>{};
+
+          // Parse beneficiary info if it's a string
+          if (beneficiaryData['beneficiary_info'] is String) {
             try {
-              final ben = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryKey);
-              if (ben != null) {
-                final rawInfo = ben['beneficiary_info'];
-                Map<String, dynamic> info;
-                if (rawInfo is Map) {
-                  info = Map<String, dynamic>.from(rawInfo);
-                } else if (rawInfo is String && rawInfo.isNotEmpty) {
-                  info = jsonDecode(rawInfo) as Map<String, dynamic>;
-                } else {
-                  info = <String, dynamic>{};
-                }
-                dobStr = info['dob']?.toString();
-              }
+              beneficiaryData['beneficiary_info'] = jsonDecode(
+                beneficiaryData['beneficiary_info'],
+              ) as Map<String, dynamic>? ?? {};
             } catch (e) {
-              print('Error fetching beneficiary for high-risk ANC: $e');
+              debugPrint('Error parsing beneficiary_info: $e');
+              beneficiaryData['beneficiary_info'] = {};
             }
           }
 
-          final rawHhId = entry['household_ref_key']?.toString() ?? '';
-          final trimmedHhId = rawHhId.length > 11
-              ? rawHhId.substring(rawHhId.length - 11)
-              : rawHhId;
+          // Get spouse info if available
+          Map<String, dynamic>? spouseData;
+          if (entry['spouse_data'] != null) {
+            spouseData = Map<String, dynamic>.from(entry['spouse_data']);
+            if (spouseData!['beneficiary_info'] is String) {
+              try {
+                spouseData['beneficiary_info'] = jsonDecode(
+                  spouseData['beneficiary_info'],
+                ) as Map<String, dynamic>? ?? {};
+              } catch (e) {
+                debugPrint('Error parsing spouse beneficiary_info: $e');
+                spouseData['beneficiary_info'] = {};
+              }
+            }
+          }
 
           final visitData = {
             'id': beneficiaryKey,
-            'hhId': trimmedHhId,
-            'house_number': formData['house_number'],
-            'woman_name': formData['woman_name'],
-            'husband_name': formData['husband_name'],
-            'rch_number': formData['rch_number'],
-            'visit_type': formData['visit_type'],
+            'hhId': hhId,
+            'house_number': formData['house_number'] ?? '',
+            'woman_name': formData['woman_name'] ??
+                beneficiaryData['beneficiary_info']?['name'] ??
+                '',
+            'husband_name': formData['husband_name'] ??
+                spouseData?['beneficiary_info']?['name'] ??
+                '',
+            'rch_number': formData['rch_number'] ?? '',
+            'visit_type': formData['visit_type'] ?? '',
             'high_risk': true,
-            'date_of_inspection': formData['date_of_inspection'],
-            'edd_date': formData['edd_date'],
-            'weeks_of_pregnancy': formData['weeks_of_pregnancy'],
-            'weight': formData['weight'],
-            'hemoglobin': formData['hemoglobin'],
-            'pre_existing_disease': formData['pre_existing_disease'],
-            'mobileNumber': formData['mobile_number'] ?? formData['contact_number'],
-            'age': '', // age will be derived from DOB
-            'date_of_birth': dobStr,
-            'gender': formData['gender'] ?? 'F',
+            'date_of_inspection': formData['date_of_inspection'] ?? '',
+            'edd_date': formData['edd_date'] ?? '',
+            'weeks_of_pregnancy': formData['weeks_of_pregnancy']?.toString() ?? '',
+            'weight': formData['weight']?.toString() ?? '',
+            'hemoglobin': formData['hemoglobin']?.toString() ?? '',
+            'pre_existing_disease': formData['pre_existing_disease'] ?? '',
+            'mobileNumber': formData['mobile_number'] ??
+                formData['contact_number'] ??
+                beneficiaryData['beneficiary_info']?['mobile_number'] ??
+                beneficiaryData['beneficiary_info']?['contact_number'] ??
+                '',
+            'age': beneficiaryData['beneficiary_info']?['age']?.toString() ?? '',
+            'date_of_birth': beneficiaryData['beneficiary_info']?['dob']?.toString() ?? '',
+            'gender': beneficiaryData['beneficiary_info']?['gender']?.toString().toUpperCase() ?? 'F',
+            'beneficiary_data': beneficiaryData,
+            'spouse_data': spouseData,
           };
 
           highRiskVisits.add(ANCVisitModel.fromJson(visitData));
         } catch (e) {
-          print('Error mapping high-risk ANC entry: $e');
+          debugPrint('Error processing high-risk ANC entry: $e');
         }
       }
 
@@ -148,14 +137,13 @@ class _EligibleCoupleListState extends State<HighRisk> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading high-risk ANC visits: $e');
+      debugPrint('Error loading high-risk ANC visits: $e');
       setState(() {
         _error = 'Failed to load high-risk ANC visits';
         _isLoading = false;
       });
     }
-  }
-  List<ANCVisitModel> _filteredVisits = [];
+  }  List<ANCVisitModel> _filteredVisits = [];
 
   void _onSearchChanged() {
     final query = _searchCtrl.text.toLowerCase().trim();
