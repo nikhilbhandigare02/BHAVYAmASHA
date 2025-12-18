@@ -349,19 +349,32 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
 
               try {
                 final fpVal = state.fpMethod?.toString() ?? '';
-                final low = fpVal.toLowerCase().trim();
-                if (low == 'male sterilization' || low == 'female sterilization') {
-                  final bKey = beneficiaryId.length >= 11
-                      ? beneficiaryId.substring(beneficiaryId.length - 11)
-                      : beneficiaryId;
+                final norm = fpVal.toLowerCase().replaceAll(RegExp(r'\s+'), ' ').trim();
+                if (norm == 'male sterilization' || norm == 'female sterilization') {
+                  final bKey = beneficiaryId;
                   if (bKey.isNotEmpty) {
                     final beneficiary = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(bKey);
                     if (beneficiary != null) {
-                      final info = Map<String, dynamic>.from(
-                          (beneficiary['beneficiary_info'] is Map)
-                              ? beneficiary['beneficiary_info'] as Map
-                              : <String, dynamic>{});
+                      Map<String, dynamic> info = <String, dynamic>{};
+                      try {
+                        final raw = beneficiary['beneficiary_info'];
+                        if (raw is Map) {
+                          info = Map<String, dynamic>.from(raw);
+                        } else if (raw is String && raw.isNotEmpty) {
+                          final first = jsonDecode(raw);
+                          if (first is String) {
+                            final second = jsonDecode(first);
+                            if (second is Map) {
+                              info = Map<String, dynamic>.from(second);
+                            }
+                          } else if (first is Map) {
+                            info = Map<String, dynamic>.from(first);
+                          }
+                        }
+                      } catch (_) {}
+
                       info['fpMethod'] = fpVal;
+
                       await LocalStorageDao.instance.updateBeneficiary({
                         'id': beneficiary['id'],
                         'beneficiary_info': info,

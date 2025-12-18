@@ -1,9 +1,7 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -220,14 +218,12 @@ class _EligibleCoupleIdentifiedScreenState
     final isFemale = genderRaw == 'f' || genderRaw == 'female';
     if (!isFemale) return false;
 
-    // Prefer woman's own marital status, fall back to head's if missing
     final maritalStatusRaw =
         person['maritalStatus']?.toString().toLowerCase() ??
             head?['maritalStatus']?.toString().toLowerCase() ?? '';
     final isMarried = maritalStatusRaw == 'married';
     if (!isMarried) return false;
 
-    // Check age between 15-49
     final dob = person['dob'];
     final age = _calculateAge(dob);
     final fpMethodRaw = person['fpMethod']?.toString().toLowerCase().trim() ?? '';

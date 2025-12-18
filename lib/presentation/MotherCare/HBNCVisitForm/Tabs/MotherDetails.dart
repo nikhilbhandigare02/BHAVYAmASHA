@@ -225,7 +225,7 @@ class MotherDetailsTab extends StatelessWidget {
                     // Full meals count
                     ApiDropdown<int>(
                       labelText: "${t.mealsPerDayLabel} *",
-                      items: const [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                      items: const [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                       getLabel: (e) => e.toString(),
                       value: (m['mealsPerDay'] is int)
                           ? m['mealsPerDay'] as int
