@@ -235,7 +235,6 @@ class _FeatureCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🔹 Image and Count
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

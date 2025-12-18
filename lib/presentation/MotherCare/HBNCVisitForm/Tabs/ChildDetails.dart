@@ -13,6 +13,7 @@ import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 
 import '../../../../core/config/themes/CustomColors.dart';
+import '../../../../core/widgets/DatePicker/timepicker.dart';
 
 class ChildDetailsTab extends StatefulWidget {
   final String beneficiaryId;
@@ -25,11 +26,61 @@ class ChildDetailsTab extends StatefulWidget {
 }
 
 class _ChildDetailsTabState extends State<ChildDetailsTab> {
+  String? _breastfeedingTime;
   @override
   void initState() {
     super.initState();
     _loadLastAncForm();
   }
+  void _validateTemperature({
+    required BuildContext context,
+    required String? tempValue,
+    required String? unit,
+  }) {
+    if (tempValue == null || tempValue.isEmpty || unit == null) return;
+
+    final temp = double.tryParse(tempValue);
+    if (temp == null) return;
+
+    bool isValid = true;
+
+    if (unit == 'Celsius') {
+      isValid = temp >= 36 && temp <= 37;
+    } else if (unit == 'Fahrenheit') {
+      isValid = temp >= 96 && temp <= 99;
+    }
+
+    if (!isValid) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text(
+            'Attention!',
+            style: TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'Please refer the child to nearby hospital.',
+            style: TextStyle(
+              color: Colors.red,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'OKAY',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
 
   Future<void> _loadLastAncForm() async {
     try {
@@ -164,25 +215,85 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     hintText: t.hintTemp,
                     keyboardType: TextInputType.number,
                     initialValue: s(c['temperature']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'temperature', value: val, childIndex: widget.childIndex),
-                    ),
+                    onChanged: (val) {
+                      context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(
+                          field: 'temperature',
+                          value: val,
+                          childIndex: widget.childIndex,
+                        ),
+                      );
+
+                      if (val.length >= 2) {
+                        _validateTemperature(
+                          context: context,
+                          tempValue: val,
+                          unit: s(c['tempUnit']),
+                        );
+                      }
+                    },
                   ),
+
                   const Divider(height: 0,),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.infantTemperatureUnitLabel,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      Row(
+                        children: [
+                          Radio<String>(
+                            value: 'Celsius',
+                            groupValue: s(c['tempUnit']),
+                            onChanged: (val) {
+                              context.read<HbncVisitBloc>().add(
+                                NewbornDetailsChanged(
+                                  field: 'tempUnit',
+                                  value: val,
+                                  childIndex: widget.childIndex,
+                                ),
+                              );
 
+                              _validateTemperature(
+                                context: context,
+                                tempValue: s(c['temperature']),
+                                unit: val,
+                              );
+                            },
+                          ),
+                          Text(t.temperatureUnitCelsius),
 
-                  ApiDropdown<String>(
-                    labelText: t.infantTemperatureUnitLabel,
-                    items: const ['Celsius', 'Fahrenheit'],
-                    getLabel: (e) => e == 'Celsius' ? t.temperatureUnitCelsius : t.temperatureUnitFahrenheit,
-                    value: s(c['tempUnit']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'tempUnit', value: val, childIndex: widget.childIndex),
-                    ),
+                          const SizedBox(width: 24),
+
+                          Radio<String>(
+                            value: 'Fahrenheit',
+                            groupValue: s(c['tempUnit']),
+                            onChanged: (val) {
+                              context.read<HbncVisitBloc>().add(
+                                NewbornDetailsChanged(
+                                  field: 'tempUnit',
+                                  value: val,
+                                  childIndex: widget.childIndex,
+                                ),
+                              );
+
+                              _validateTemperature(
+                                context: context,
+                                tempValue: s(c['temperature']),
+                                unit: val,
+                              );
+                            },
+                          ),
+                          Text(t.temperatureUnitFahrenheit),
+                        ],
+                      ),
+                    ],
                   ),
+
+
                   const Divider(height: 0,),
-
-
                   ApiDropdown<String>(
                     labelText: t.weightColorMatchLabel,
                     items: const ['Yes', 'No'],
@@ -244,10 +355,35 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ],
                     getLabel: (e) => e,
                     value: c['firstBreastfeedTiming'] ?? '',
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'firstBreastfeedTiming', value: val, childIndex: widget.childIndex),
-                    ),
+                    onChanged: (val) {
+                      context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(
+                          field: 'firstBreastfeedTiming',
+                          value: val,
+                          childIndex: widget.childIndex,
+                        ),
+                      );
+                      // If not "Other", clear the custom time
+                      if (val != 'Other') {
+                        context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(
+                            field: 'firstBreastfeedCustomTime',
+                            value: null, // or ''
+                            childIndex: widget.childIndex,
+                          ),
+                        );
+                      }
+                    },
                   ),
+                  if (c['firstBreastfeedTiming'] == 'Other')
+                    const Divider(height: 0,),
+                    CustomTextField(
+                      labelText: 'Please enter breastfeeding time (hh:mm)',
+                      hintText: 'hh:mm',
+                      keyboardType: TextInputType.number,
+                        initialValue: c['firstBreastfeedCustomTime'] ?? '',
+                      onChanged: (val) {}
+                    ),
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(

@@ -2697,7 +2697,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get abnormalSpeechOrSeizureLabel => 'Is the mother speaking abnormally or having fits? *';
 
   @override
-  String get counselingAdviceLabel => 'Counseling / Advice *';
+  String get counselingAdviceLabel => 'Counseling / Advise *';
 
   @override
   String get outcomeFormTitle => 'Delivery Outcome';
@@ -5821,7 +5821,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get referToHospital => 'Refer to hospital?';
 
   @override
-  String get referToLabel => 'Refer to';
+  String get referToLabel => 'Refer to *';
 
   @override
   String get mchLabel => 'MCH';
