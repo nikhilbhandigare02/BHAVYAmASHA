@@ -5,7 +5,10 @@ import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
 import 'package:medixcel_new/data/NetworkAPIServices/APIs_Urls/Endpoints.dart';
 import 'package:medixcel_new/data/NetworkAPIServices/api_services/network_services_API.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
+import 'package:sqflite/sqflite.dart';
 
+import '../../../core/utils/device_info_utils.dart';
+import '../../../core/utils/id_generator_utils.dart';
 import '../../Database/User_Info.dart';
 import '../../Database/local_storage_dao.dart';
 
@@ -27,12 +30,22 @@ class FollowupFormsRepository {
     }
 
     final saved = Map<String, dynamic>.from(rows.first);
+    final List<Map<String, Object?>> countResult = await db.rawQuery(
+        'SELECT COUNT(*) as cnt FROM ${FollowupFormDataTable.table} WHERE is_synced = 0'
+    );
+
+    final int remainingToSync =
+        Sqflite.firstIntValue(countResult) ?? 0;
+
+    print('📌 Remaining followup forms to sync: $remainingToSync');
+
 
     // Do not resend already-synced rows
     final int isSynced = (saved['is_synced'] is int) ? saved['is_synced'] as int : 0;
     if (isSynced == 1) {
       return {'skipped': true, 'reason': 'already_synced'};
     }
+
 
     Map<String, dynamic> deviceJson = {};
     Map<String, dynamic> appJson = {};
@@ -63,7 +76,7 @@ class FollowupFormsRepository {
       final formStr = saved['form_json']?.toString();
       if (formStr != null && formStr.isNotEmpty) {
         final fj = jsonDecode(formStr);
-        formJsonValue = fj; // keep full JSON exactly as stored
+        formJsonValue = fj;
         if (fj is Map) {
           formRoot = Map<String, dynamic>.from(fj);
           if (fj['geolocation_details'] is Map) {
@@ -85,8 +98,14 @@ class FollowupFormsRepository {
     final String householdRefKey = (saved['household_ref_key'] ?? '').toString();
     final String beneficiaryRefKey = (saved['beneficiary_ref_key'] ?? '').toString();
     final String formsRefKey = (saved['forms_ref_key'] ?? '').toString();
+    late DeviceInfo deviceInfo;
+    try {
+      deviceInfo = await DeviceInfo.getDeviceInfo();
+    } catch (e) {
+      print('Error getting package/device info: $e');
+    }
     final String uniqueKeyFromForm =
-        (formRoot['unique_key'] ?? formRoot['form_unique_key'] ?? formsRefKey).toString();
+    await IdGenerator.generateUniqueId(deviceInfo);
 
     if (householdRefKey.isEmpty || beneficiaryRefKey.isEmpty) {
       throw Exception('Missing household_ref_key or beneficiary_ref_key for followup_form_data id=$formId');
@@ -105,50 +124,64 @@ class FollowupFormsRepository {
 
     final String userId = ashaUniqueKey.toString();
     final String facility = facilityId.toString();
+final formType = formJsonValue['form_type'];
+    final Map<String, dynamic> payloadItem = {
+      "unique_key": uniqueKeyFromForm,
+      "household_registration_ref_key": householdRefKey,
+      "beneficiaries_registration_ref_key": beneficiaryRefKey,
+      "forms_ref_key": formsRefKey,
+      "form_type": '',
 
-    final payloadItem = {
-      'unique_key': uniqueKeyFromForm,
-      'household_registration_ref_key': householdRefKey,
-      'beneficiaries_registration_ref_key': beneficiaryRefKey,
-      'forms_ref_key': formsRefKey,
-      'form_json': formJsonValue,
-      'user_id': userId,
-      'facility_id': facilityId,
-      'is_guest': (formRoot is Map && formRoot['is_guest'] != null)
-          ? formRoot['is_guest'].toString()
-          : '0',
-      'created_by': userId,
-      'created_date_time': createdAt,
-      'modified_by': userId,
-      'modified_date_time': modifiedAt,
-      'is_deleted': 0,
-      'parent_added_by': (formRoot is Map && formRoot['parent_added_by'] != null)
-          ? formRoot['parent_added_by'].toString()
-          : userId,
-      'parent_facility_id': (formRoot is Map && formRoot['parent_facility_id'] != null)
-          ? formRoot['parent_facility_id']
-          : int.tryParse(facility) ?? facility,
-      'app_role_id': appRoleId,
-      'is_hsc_updated': (formRoot is Map && formRoot['is_hsc_updated'] != null)
-          ? formRoot['is_hsc_updated'].toString()
-          : '0',
-      'pregnancy_count': (formRoot is Map && formRoot['pregnancy_count'] != null)
-          ? formRoot['pregnancy_count']
-          : 0,
-      'device_details': {
-        'device_id': deviceJson['id'] ?? deviceJson['device_id'],
-        'device_plateform': deviceJson['platform'] ?? deviceJson['device_plateform'],
-        'device_plateform_version': deviceJson['version'] ?? deviceJson['device_plateform_version'],
+      "form_json": formJsonValue,
+
+      "user_id": userId,
+      "facility_id": facilityId.toString(),
+      "is_guest": "0",
+
+      "created_by": userId,
+      "created_date_time": createdAt,
+      "modified_by": userId,
+      "modified_date_time": modifiedAt,
+
+      "is_deleted": 0,
+
+      "parent_added_by": userId,
+      "parent_facility_id": int.parse(facilityId.toString()),
+
+      "app_role_id": appRoleId,
+      "is_hsc_updated": "0",
+      "pregnancy_count": 0,
+
+      "device_details": {
+        "device_id": deviceJson["id"] ?? deviceJson["device_id"],
+        "device_plateform": deviceJson["platform"] ?? deviceJson["device_plateform"],
+        "device_plateform_version":
+        deviceJson["version"] ?? deviceJson["device_plateform_version"],
       },
-      'app_details': {
-        'app_version': appJson['app_version'],
-        'app_name': appJson['app_name'],
+
+      "app_details": {
+        "app_version": appJson["app_version"],
+        "app_name": appJson["app_name"],
       },
-      'geolocation_details': {
-        'latitude': geoJson['lat']?.toString(),
-        'longitude': geoJson['long']?.toString(),
+
+      "geolocation_details": {
+        "latitude": geoJson["lat"],
+        "longitude": geoJson["long"],
       },
+
+      "added_date_time": DateTime.now().toUtc().toIso8601String(),
+      "modified_date_time_added_on_server":
+      DateTime.now().toUtc().toIso8601String(),
+
+      "added_by": userId,
+      "modified_by_added_on_server": userId,
     };
+
+    // AFTER payloadItem is created
+    final String payloadJson = const JsonEncoder.withIndent('  ')
+        .convert(payloadItem);
+
+    print('📦 Followup Payload JSON:\n$payloadJson');
 
     String? token = await SecureStorageService.getToken();
 
@@ -195,7 +228,6 @@ class FollowupFormsRepository {
               updateValues['server_id'] = serverId;
             }
 
-            // Update by beneficiary_ref_key + forms_ref_key so this works per form & beneficiary
             await db.update(
               FollowupFormDataTable.table,
               updateValues,

@@ -320,33 +320,33 @@ class SyncService {
     }
   }
 
-  // Future<void> syncUnsyncedFollowupForms() async {
-  //   try {
-  //     final list = await _dao.getUnsyncedFollowupForms();
-  //     if (list.isEmpty) {
-  //       print('FollowupForms Push: No unsynced forms');
-  //       return;
-  //     }
-  //
-  //     print('FollowupForms Push: Found ${list.length} unsynced form(s)');
-  //
-  //     for (final r in list) {
-  //       final id = r['id'] as int? ?? 0;
-  //       if (id <= 0) continue;
-  //       try {
-  //         final ecHelper = EligibleCoupleApiHelper();
-  //         await ecHelper.syncTrackingDueFromFollowupRow(id);
-  //
-  //         // Then, push the generic followup form via the repository
-  //         await _followupRepo.addFollowupFormsFromDb(id);
-  //       } catch (e) {
-  //         print('FollowupForms Push: error syncing followup_form_data id=$id -> $e');
-  //       }
-  //     }
-  //   } catch (e) {
-  //     print('FollowupForms Push: error -> $e');
-  //   }
-  // }
+  Future<void> syncUnsyncedFollowupForms() async {
+    try {
+      final list = await _dao.getUnsyncedFollowupForms();
+      if (list.isEmpty) {
+        print('FollowupForms Push: No unsynced forms');
+        return;
+      }
+
+      print('FollowupForms Push: Found ${list.length} unsynced form(s)');
+
+      for (final r in list) {
+        final id = r['id'] as int? ?? 0;
+        if (id <= 0) continue;
+        try {
+          // final ecHelper = EligibleCoupleApiHelper();
+          // await ecHelper.syncTrackingDueFromFollowupRow(id);
+
+          // Then, push the generic followup form via the repository
+          await _followupRepo.addFollowupFormsFromDb(id);
+        } catch (e) {
+          print('FollowupForms Push: error syncing followup_form_data id=$id -> $e');
+        }
+      }
+    } catch (e) {
+      print('FollowupForms Push: error -> $e');
+    }
+  }
 
   void stop() {
     _timer?.cancel();
@@ -371,7 +371,7 @@ class SyncService {
       await syncUnsyncedEligibleCoupleActivities();
       await syncUnsyncedChildCareActivities();
       await syncMotherCareActivities();
-      // await syncUnsyncedFollowupForms();
+      await syncUnsyncedFollowupForms();
       await fetchEligibleCoupleActivitiesFromServer();
       await fetchChildCareActivitiesFromServer();
       await fetchMotherCareActivitiesFromServer();
