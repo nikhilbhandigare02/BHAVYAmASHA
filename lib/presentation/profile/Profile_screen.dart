@@ -848,7 +848,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           key: ValueKey(
                             'account_number_field_${state.accountNumber}',
                           ),
-                          labelText: l10n.accountNumberLabel,
+                          labelText: l10n.accountNumberHint,
                           hintText: l10n.accountNumberHint,
                           initialValue: state.accountNumber,
                           keyboardType: TextInputType.number,
@@ -868,6 +868,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           hintText: l10n.ifscHint,
                           initialValue: state.ifsc,
                           onChanged: (v) => bloc.add(IfscChanged(v)),
+                          readOnly: true,
+                        );
+                      },
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5),
+
+                    BlocBuilder<ProfileBloc, ProfileState>(
+                      buildWhen: (previous, current) =>
+                      previous.district != current.district,
+                      builder: (context, state) {
+                        return CustomTextField(
+                          key: ValueKey('district_field_${state.district}'),
+                          labelText: l10n.districtLabel,
+                          hintText: l10n.districtHint,
+                          initialValue: state.district,
                           readOnly: true,
                         );
                       },
@@ -899,21 +914,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           labelText: l10n.divisionLabel,
                           hintText: l10n.divisionHint,
                           initialValue: state.division,
-                          readOnly: true,
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5),
-
-                    BlocBuilder<ProfileBloc, ProfileState>(
-                      buildWhen: (previous, current) =>
-                      previous.district != current.district,
-                      builder: (context, state) {
-                        return CustomTextField(
-                          key: ValueKey('district_field_${state.district}'),
-                          labelText: l10n.districtLabel,
-                          hintText: l10n.districtHint,
-                          initialValue: state.district,
                           readOnly: true,
                         );
                       },
@@ -1104,7 +1104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               "Population covered under ASHA Facilitator")
                               : l10n.populationCoveredLabel,
                           hintText: isFacilitator
-                              ? (l10n?.enterPopulationCoveredAshaFacilitator ??
+                              ? (l10n?.populationCoveredAshaFacilitator ??
                               "Enter population covered under ASHA Facilitator")
                               : l10n.populationCoveredHint,
                           initialValue: state.populationCovered,
@@ -1116,47 +1116,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5),
-                    if (_appRoleId != 4) ...[
-                      BlocBuilder<ProfileBloc, ProfileState>(
-                        buildWhen: (previous, current) =>
-                        previous.ashaFacilitatorName !=
-                            current.ashaFacilitatorName,
-                        builder: (context, state) {
-                          return CustomTextField(
-                            key: ValueKey(
-                              'asha_facilitator_name_field_${state.ashaFacilitatorName}',
-                            ),
-                            labelText: l10n.ashaFacilitatorNameLabel,
-                            hintText: l10n.ashaFacilitatorNameHint,
-                            initialValue: state.ashaFacilitatorName,
-                            onChanged: (v) =>
-                                bloc.add(AshaFacilitatorNameChanged(v)),
-                            readOnly: true,
-                          );
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5),
-                      BlocBuilder<ProfileBloc, ProfileState>(
-                        buildWhen: (previous, current) =>
-                        previous.ashaFacilitatorMobile !=
-                            current.ashaFacilitatorMobile,
-                        builder: (context, state) {
-                          return CustomTextField(
-                            key: ValueKey(
-                              'asha_facilitator_mobile_field_${state.ashaFacilitatorMobile}',
-                            ),
-                            labelText: l10n.ashaFacilitatorMobileLabel,
-                            hintText: l10n.ashaFacilitatorMobileHint,
-                            initialValue: state.ashaFacilitatorMobile,
-                            keyboardType: TextInputType.phone,
-                            onChanged: (v) =>
-                                bloc.add(AshaFacilitatorMobileChanged(v)),
-                            readOnly: true,
-                          );
-                        },
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.5),
-                    ],
+                    // if (_appRoleId != 4) ...[
+                    //   BlocBuilder<ProfileBloc, ProfileState>(
+                    //     buildWhen: (previous, current) =>
+                    //     previous.ashaFacilitatorName !=
+                    //         current.ashaFacilitatorName,
+                    //     builder: (context, state) {
+                    //       return CustomTextField(
+                    //         key: ValueKey(
+                    //           'asha_facilitator_name_field_${state.ashaFacilitatorName}',
+                    //         ),
+                    //         labelText: l10n.ashaFacilitatorNameLabel,
+                    //         hintText: l10n.ashaFacilitatorNameHint,
+                    //         initialValue: state.ashaFacilitatorName,
+                    //         onChanged: (v) =>
+                    //             bloc.add(AshaFacilitatorNameChanged(v)),
+                    //         readOnly: true,
+                    //       );
+                    //     },
+                    //   ),
+                    //   Divider(color: AppColors.divider, thickness: 0.5),
+                    //   BlocBuilder<ProfileBloc, ProfileState>(
+                    //     buildWhen: (previous, current) =>
+                    //     previous.ashaFacilitatorMobile !=
+                    //         current.ashaFacilitatorMobile,
+                    //     builder: (context, state) {
+                    //       return CustomTextField(
+                    //         key: ValueKey(
+                    //           'asha_facilitator_mobile_field_${state.ashaFacilitatorMobile}',
+                    //         ),
+                    //         labelText: l10n.ashaFacilitatorMobileLabel,
+                    //         hintText: l10n.ashaFacilitatorMobileHint,
+                    //         initialValue: state.ashaFacilitatorMobile,
+                    //         keyboardType: TextInputType.phone,
+                    //         onChanged: (v) =>
+                    //             bloc.add(AshaFacilitatorMobileChanged(v)),
+                    //         readOnly: true,
+                    //       );
+                    //     },
+                    //   ),
+                    //   Divider(color: AppColors.divider, thickness: 0.5),
+                    // ],
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
                       previous.choName != current.choName,

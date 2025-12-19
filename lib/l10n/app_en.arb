@@ -471,13 +471,9 @@
   "houseTypeLabel": "Type of house",
   "householdBeneficiarySearch": "Household Beneficiary Search",
   "householdBeneficiaryTitle": "Household Beneficiary",
-  "hscNameHint": "HSC Name",
-  "hscNameLabel": "HSC Name",
   "husbandFatherNameLabel": "Husband / Father Name",
   "husbandLabel": "Husband",
   "husbandNameLabel": "Husband's name",
-  "hwcNameHint": "HWC Name",
-  "hwcNameLabel": "HWC Name",
   "idTypeAadhaar": "Aadhaar card",
   "idTypeRationCard": "Ration Card",
   "uid": "UID",
@@ -2295,6 +2291,11 @@
   "providing": "Providing",
   "newHouseholdRegister": "New Household Registration",
   "sr_No": "Sr.No.",
-  "present": "Present?"
+  "present": "Present?",
 
+
+  "hscNameHint": "HSC",
+  "hscNameLabel": "HSC",
+  "hwcNameHint": "HWC",
+  "hwcNameLabel": "HWC"
 }
