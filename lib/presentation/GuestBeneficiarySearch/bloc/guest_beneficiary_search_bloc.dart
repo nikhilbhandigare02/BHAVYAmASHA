@@ -61,11 +61,21 @@ class GuestBeneficiarySearchBloc extends Bloc<GuestBeneficiarySearchEvent, Guest
     on<GbsSubmitSearch>((event, emit) async {
       log('🔍 Submitting search...');
 
-      // Validate
+      final bool hasAdvancedInput = state.showAdvanced && ([
+        state.district,
+        state.block,
+        state.category,
+        state.gender,
+        state.age,
+        state.mobileNo,
+      ].any((v) => (v ?? '').toString().trim().isNotEmpty));
+
       if (state.beneficiaryNo == null || state.beneficiaryNo!.isEmpty) {
+        emit(state.copyWith(clearError: true, apiMessage: null));
         emit(state.copyWith(
           status: GbsStatus.failure,
-          errorMessage: 'Please enter a beneficiary number',
+          errorMessage: hasAdvancedInput ? 'Enter valid detail' : 'Please enter a beneficiary number',
+          apiMessage: null,
         ));
         return;
       }
@@ -122,11 +132,14 @@ class GuestBeneficiarySearchBloc extends Bloc<GuestBeneficiarySearchEvent, Guest
           emit(state.copyWith(
             status: GbsStatus.success,
             beneficiaries: beneficiaries,
+            apiMessage: response.message ?? 'Search completed successfully',
+            errorMessage: null,
           ));
         }else {
           emit(state.copyWith(
             status: GbsStatus.failure,
             errorMessage: response.message ?? 'Failed to fetch beneficiary data',
+            apiMessage: null,
           ));
         }
       } catch (e, stackTrace) {
@@ -135,6 +148,7 @@ class GuestBeneficiarySearchBloc extends Bloc<GuestBeneficiarySearchEvent, Guest
         emit(state.copyWith(
           status: GbsStatus.failure,
           errorMessage: 'An error occurred while searching for beneficiary',
+          apiMessage: null,
         ));
       }
     });

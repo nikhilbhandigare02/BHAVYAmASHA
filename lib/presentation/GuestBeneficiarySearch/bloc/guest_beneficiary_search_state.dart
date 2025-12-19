@@ -9,6 +9,7 @@ import '../../../data/models/guest_beneficiary/guest_beneficiary_model.dart';
 class GuestBeneficiarySearchState {
   final GbsStatus status;
   final String? errorMessage;
+  final String? apiMessage;
   final bool showAdvanced;
   final String? beneficiaryNo;
   final String? district;
@@ -23,6 +24,7 @@ class GuestBeneficiarySearchState {
   const GuestBeneficiarySearchState({
     this.status = GbsStatus.initial,
     this.errorMessage,
+    this.apiMessage,
     this.showAdvanced = false,
     this.beneficiaryNo,
     this.district,
@@ -38,6 +40,7 @@ class GuestBeneficiarySearchState {
   GuestBeneficiarySearchState copyWith({
     GbsStatus? status,
     String? errorMessage,
+    String? apiMessage,
     bool? showAdvanced,
     String? beneficiaryNo,
     String? district,
@@ -52,6 +55,7 @@ class GuestBeneficiarySearchState {
     return GuestBeneficiarySearchState(
       status: status ?? this.status,
       errorMessage: clearError == true ? null : (errorMessage ?? this.errorMessage),
+      apiMessage: apiMessage ?? this.apiMessage,
       showAdvanced: showAdvanced ?? this.showAdvanced,
       beneficiaryNo: beneficiaryNo ?? this.beneficiaryNo,
       district: district ?? this.district,
@@ -71,6 +75,7 @@ class GuestBeneficiarySearchState {
     return other is GuestBeneficiarySearchState &&
         other.status == status &&
         other.errorMessage == errorMessage &&
+        other.apiMessage == apiMessage &&
         other.showAdvanced == showAdvanced &&
         other.beneficiaryNo == beneficiaryNo &&
         other.district == district &&
@@ -87,6 +92,7 @@ class GuestBeneficiarySearchState {
   int get hashCode {
     return status.hashCode ^
     errorMessage.hashCode ^
+    apiMessage.hashCode ^
     showAdvanced.hashCode ^
     beneficiaryNo.hashCode ^
     district.hashCode ^
@@ -106,6 +112,7 @@ class GuestBeneficiarySearchState {
     return 'GuestBeneficiarySearchState('
         'status: $status, '
         'errorMessage: $errorMessage, '
+        'apiMessage: $apiMessage, '
         'showAdvanced: $showAdvanced, '
         'beneficiaryNo: $beneficiaryNo, '
         'district: $district, '

@@ -130,6 +130,8 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
               // Handle success state
               else if (state.status == GbsStatus.success) {
                 log('✅ Search completed successfully');
+                final msg = state.apiMessage ?? (l10n.searchResults ?? 'Search Results');
+                showAppSnackBar(context, msg);
                 // Navigate to GuestBeneficiaries screen after a short delay to show success state
                 Future.delayed(const Duration(milliseconds: 500), () {
                   Navigator.pushReplacement(
