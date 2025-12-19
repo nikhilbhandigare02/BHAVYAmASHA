@@ -877,15 +877,18 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
           final int childrenTarget = headChildren + memberChildren;
 
-          final int childTypeCount = _members.where((m) {
-            final t = (m['Type'] ?? '').toString().toLowerCase();
-            return t == 'child';
-          }).length;
-
           final Set<String> memberNames = _members
               .map((m) => (m['Name'] ?? '').toString().trim().toLowerCase())
               .where((n) => n.isNotEmpty)
               .toSet();
+
+          final int childFatherMatchesCount = _members.where((m) {
+            final t = (m['Type'] ?? '').toString().toLowerCase();
+            if (t != 'child') return false;
+            final fatherName = (m['Father'] ?? '').toString().trim().toLowerCase();
+            if (fatherName.isEmpty) return false;
+            return memberNames.contains(fatherName);
+          }).length;
 
           final int adultFatherMatchesCount = _members.where((m) {
             final t = (m['Type'] ?? '').toString().toLowerCase();
@@ -899,7 +902,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             return memberNames.contains(fatherName);
           }).length;
 
-          final int childrenAdded = childTypeCount + adultFatherMatchesCount;
+          final int childrenAdded = childFatherMatchesCount + adultFatherMatchesCount;
 
           final int remaining = (childrenTarget - childrenAdded).clamp(0, 9999);
           if (childrenTarget <= 0) return const SizedBox.shrink();

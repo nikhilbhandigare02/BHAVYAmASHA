@@ -9,6 +9,7 @@ import '../../../../data/Database/database_provider.dart';
 
 import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/Database/tables/followup_form_data_table.dart';
+import '../../../../data/Database/tables/mother_care_activities_table.dart';
 import '../../../../data/SecureStorage/SecureStorage.dart';
 
 import 'hbcn_visit_event.dart';
@@ -200,6 +201,25 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         print('  - Forms Ref Key: ${savedData.first['forms_ref_key']}');
         print('  - Beneficiary Ref Key: ${savedData.first['beneficiary_ref_key']}');
         print('  - Created: ${savedData.first['created_date_time']}');
+
+        final visitNumber = state.visitDetails['visitNumber'] as int?;
+        if ((visitNumber ?? 0) == 42 && beneficiaryId.isNotEmpty) {
+          try {
+            final updated = await db.update(
+              MotherCareActivitiesTable.table,
+              {
+                'is_synced': 1,
+                'is_deleted': 1,
+                'modified_date_time': now,
+              },
+              where: 'beneficiary_ref_key = ?',
+              whereArgs: [beneficiaryId],
+            );
+            print('🔄 Updated mother_care_activities flags for beneficiary $beneficiaryId. Rows: $updated');
+          } catch (e) {
+            print('❌ Error updating mother_care_activities flags: $e');
+          }
+        }
 
         // if (beneficiaryId.isNotEmpty) {
         //   try {
