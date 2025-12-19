@@ -278,7 +278,6 @@ class MotherDetailsTab extends StatelessWidget {
         ),
                     const Divider(height: 0),
 
-                    // Paracetamol tablet given when temperature up to 102 F
                     Builder(
                       builder: (context) {
                         final tempStr = _asString(m['temperature']) ?? '';

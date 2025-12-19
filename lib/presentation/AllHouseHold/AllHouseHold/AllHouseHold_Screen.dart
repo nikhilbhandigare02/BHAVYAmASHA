@@ -212,6 +212,87 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               b['is_deleted'] != 1;
         }).toList();
 
+        int totalExpectedChildren = 0;
+        final Set<String> parentNames = <String>{};
+        for (final b in membersForHousehold) {
+          final rawInfo = b['beneficiary_info'];
+          Map<String, dynamic> bi;
+          if (rawInfo is Map) {
+            bi = Map<String, dynamic>.from(rawInfo);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            bi = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            bi = <String, dynamic>{};
+          }
+
+          final hasChildrenRaw = bi['hasChildren'] ?? bi['have_children'];
+          final hasChildren = hasChildrenRaw == true ||
+              hasChildrenRaw?.toString().toLowerCase() == 'yes';
+          if (hasChildren) {
+            final tlRaw = bi['totalLive'] ?? bi['totalLiveChildren'];
+            int tl = 0;
+            if (tlRaw is int) {
+              tl = tlRaw;
+            } else {
+              tl = int.tryParse(tlRaw?.toString() ?? '') ?? 0;
+            }
+            totalExpectedChildren += tl;
+            final pname = (bi['headName'] ?? bi['name'] ?? bi['memberName'] ?? bi['member_name'] ?? '')
+                .toString()
+                .trim()
+                .toLowerCase();
+            if (pname.isNotEmpty) {
+              parentNames.add(pname);
+            }
+          }
+        }
+
+        int recordedChildren = 0;
+        for (final b in membersForHousehold) {
+          final rawInfo = b['beneficiary_info'];
+          Map<String, dynamic> bi;
+          if (rawInfo is Map) {
+            bi = Map<String, dynamic>.from(rawInfo);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            bi = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            bi = <String, dynamic>{};
+          }
+
+          final memberType = bi['memberType']?.toString().toLowerCase() ?? '';
+          final relation = bi['relation']?.toString().toLowerCase() ??
+              bi['relation_to_head']?.toString().toLowerCase() ?? '';
+          final isChildRecord = memberType == 'child' ||
+              relation == 'child' ||
+              relation == 'son' ||
+              relation == 'daughter';
+          if (!isChildRecord) {
+            continue;
+          }
+
+          final fatherName = (bi['fatherName'] ?? bi['father_name'] ?? '')
+              .toString()
+              .trim()
+              .toLowerCase();
+          final motherName = (bi['motherName'] ?? bi['mother_name'] ?? '')
+              .toString()
+              .trim()
+              .toLowerCase();
+
+          if (fatherName.isEmpty && motherName.isEmpty) {
+            continue;
+          }
+
+          final matchesFather = fatherName.isNotEmpty && parentNames.contains(fatherName);
+          final matchesMother = motherName.isNotEmpty && parentNames.contains(motherName);
+          if (matchesFather || matchesMother) {
+            recordedChildren += 1;
+          }
+        }
+
+        final remainingChildren = totalExpectedChildren - recordedChildren;
+        final hasChildrenTarget = totalExpectedChildren > 0;
+
         final uniqueKey = (r['unique_key'] ?? '').toString();
         final headId = uniqueKey.length > 11
             ? uniqueKey.substring(uniqueKey.length - 11)
@@ -230,6 +311,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           'child0to1': child0to1Map[householdRefKey] ?? 0,
           'child1to2': child1to2Map[householdRefKey] ?? 0,
           'child2to5': child2to5Map[householdRefKey] ?? 0,
+          'hasChildrenTarget': hasChildrenTarget,
+          'remainingChildren': remainingChildren < 0 ? 0 : remainingChildren,
           '_raw': r,
         };
       }).toList();

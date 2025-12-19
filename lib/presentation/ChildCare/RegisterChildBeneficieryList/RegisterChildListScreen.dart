@@ -691,14 +691,24 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(child: _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.', data['Mobileno.'] ?? 'N/A')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.fatherNameLabel ?? 'Father\'s Name', data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A')),
-                      const Expanded(child: SizedBox()),
-                    ],
-                  ),
+        Row(
+          children: [
+            Expanded(
+              child: _rowText(
+                l10n?.mobileLabelSimple ?? 'Mobile No.',
+                data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',
+              ),
+            ),
+            const SizedBox(width: 130),
+            Expanded(
+              child: _rowText(
+                l10n?.fatherNameLabel ?? 'Father\'s Name',
+                data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+              ),
+            ),
+          ],
+        ),
+
                 ],
               ),
             ),

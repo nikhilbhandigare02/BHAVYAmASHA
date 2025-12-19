@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/config/themes/CustomColors.dart';
+import '../../core/widgets/AppHeader/AppHeader.dart';
 import '../../data/Database/local_storage_dao.dart';
 import '../../data/repositories/NotificationRepository/Notification_Repository.dart';
 import '../../l10n/app_localizations.dart';
@@ -68,14 +69,11 @@ class _NotificationscreenState extends State<Notificationscreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: AppColors.primary,
-          title:  Text(l10n.notifications ?? "Notifications", style: TextStyle(color: Colors.white)),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+          appBar: AppHeader(
+            screenTitle: l10n.notifications,
+            showBack: false,
+
           ),
-        ),
         body: FutureBuilder<List<Map<String, dynamic>>>(
           future: _notificationFuture,
           builder: (context, snapshot) {
