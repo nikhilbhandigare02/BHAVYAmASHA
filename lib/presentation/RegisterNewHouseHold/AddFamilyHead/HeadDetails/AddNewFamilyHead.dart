@@ -1103,214 +1103,216 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
-          if (state.maritalStatus == 'Married') ...[
-            _Section(
-              child: CustomTextField(
-                labelText: l.ageAtMarriageLabel,
-                hintText: l.ageAtMarriageHint,
-                keyboardType: TextInputType.number,
-                initialValue: state.ageAtMarriage,
-                onChanged: (v) => context
-                    .read<AddFamilyHeadBloc>()
-                    .add(AfhUpdateAgeAtMarriage(v.trim())),
-              ),
-            ),
-            Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-
-            _Section(
-              child: CustomTextField(
-                labelText: '${l.spouseNameLabel} *',
-                hintText: l.spouseNameHint,
-                initialValue: state.spouseName,
-                onChanged: (v) => context
-                    .read<AddFamilyHeadBloc>()
-                    .add(AfhUpdateSpouseName(v.trim())),
-                validator: (value) => _captureError(Validations.validateSpousName(l, value)),
-              ),
-            ),
-            Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-
-            if (state.gender == 'Female') ...[
+          if(widget.isEdit == false) ...[
+            if (state.maritalStatus == 'Married') ...[
               _Section(
-                child: ApiDropdown<String>(
-                  labelText: '${l.isWomanPregnantQuestion} *',
-                  items: const ['Yes', 'No'],
-                  getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                  value: state.isPregnant,
-                  onChanged: (v) {
-                    final bloc = context.read<AddFamilyHeadBloc>();
-                    bloc.add(AfhUpdateIsPregnant(v));
-                    if (v == 'No') {
-                      bloc.add(LMPChange(null));
-                      bloc.add(EDDChange(null));
-                    }
-                  },
-                  validator: (value) {
-                    if (state.gender == 'Female' && state.maritalStatus == 'Married') {
-                      return _captureError(Validations.validateIsPregnant(l, value));
-                    }
-                    return null;
-                  },
+                child: CustomTextField(
+                  labelText: l.ageAtMarriageLabel,
+                  hintText: l.ageAtMarriageHint,
+                  keyboardType: TextInputType.number,
+                  initialValue: state.ageAtMarriage,
+                  onChanged: (v) => context
+                      .read<AddFamilyHeadBloc>()
+                      .add(AfhUpdateAgeAtMarriage(v.trim())),
                 ),
               ),
               Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-              if (state.isPregnant == 'Yes') ...[
+
+              _Section(
+                child: CustomTextField(
+                  labelText: '${l.spouseNameLabel} *',
+                  hintText: l.spouseNameHint,
+                  initialValue: state.spouseName,
+                  onChanged: (v) => context
+                      .read<AddFamilyHeadBloc>()
+                      .add(AfhUpdateSpouseName(v.trim())),
+                  validator: (value) => _captureError(Validations.validateSpousName(l, value)),
+                ),
+              ),
+              Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
+              if (state.gender == 'Female') ...[
                 _Section(
-                  child: CustomDatePicker(
-                    labelText: '${l.lmpDateLabel} *',
-                    hintText: l.dateHint,
-                    initialDate: state.lmp,
-                    onDateChanged: (d) {
+                  child: ApiDropdown<String>(
+                    labelText: '${l.isWomanPregnantQuestion} *',
+                    items: const ['Yes', 'No'],
+                    getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                    value: state.isPregnant,
+                    onChanged: (v) {
                       final bloc = context.read<AddFamilyHeadBloc>();
-                      bloc.add(LMPChange(d));
-                      if (d != null) {
-                        final edd = DateTime(d.year, d.month + 9, d.day + 5);
-                        bloc.add(EDDChange(edd));
-                      } else {
+                      bloc.add(AfhUpdateIsPregnant(v));
+                      if (v == 'No') {
+                        bloc.add(LMPChange(null));
                         bloc.add(EDDChange(null));
                       }
                     },
-                    validator: (date) => _captureError(Validations.validateLMP(l, date)),
-                    firstDate: DateTime.now().subtract( Duration(days: 365)),
-                    lastDate: DateTime.now(),
+                    validator: (value) {
+                      if (state.gender == 'Female' && state.maritalStatus == 'Married') {
+                        return _captureError(Validations.validateIsPregnant(l, value));
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-
-                _Section(
-                  child: CustomDatePicker(
-                    labelText: '${l.eddDateLabel} *',
-                    hintText: l.dateHint,
-                    initialDate: state.edd,
-                    onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(EDDChange(d)),
-                    validator: (date) => _captureError(Validations.validateEDD(l, date)),
-                    readOnly: true,
-                  ),
-                ),
-                Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-              ] else
-                if (state.isPregnant == 'No') ...[
+                if (state.isPregnant == 'Yes') ...[
                   _Section(
-                    child: ApiDropdown<String>(
-                      labelText: 'Are you/your partner adopting family planning? *',
-                      items: const ['Yes', 'No'],
-                      getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                      value: state.hpfamilyPlanningCounseling,
-                      onChanged: (v) {
-                        context.read<AddFamilyHeadBloc>().add(HeadFamilyPlanningCounselingChanged(v!));
+                    child: CustomDatePicker(
+                      labelText: '${l.lmpDateLabel} *',
+                      hintText: l.dateHint,
+                      initialDate: state.lmp,
+                      onDateChanged: (d) {
+                        final bloc = context.read<AddFamilyHeadBloc>();
+                        bloc.add(LMPChange(d));
+                        if (d != null) {
+                          final edd = DateTime(d.year, d.month + 9, d.day + 5);
+                          bloc.add(EDDChange(edd));
+                        } else {
+                          bloc.add(EDDChange(null));
+                        }
                       },
-                      validator: (value) => _captureError(Validations.validateAdoptingPlan(l, value,)),
+                      validator: (date) => _captureError(Validations.validateLMP(l, date)),
+                      firstDate: DateTime.now().subtract( Duration(days: 365)),
+                      lastDate: DateTime.now(),
                     ),
                   ),
                   Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
-                  if (state.hpfamilyPlanningCounseling == 'Yes') ...[
+                  _Section(
+                    child: CustomDatePicker(
+                      labelText: '${l.eddDateLabel} *',
+                      hintText: l.dateHint,
+                      initialDate: state.edd,
+                      onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(EDDChange(d)),
+                      validator: (date) => _captureError(Validations.validateEDD(l, date)),
+                      readOnly: true,
+                    ),
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                ] else
+                  if (state.isPregnant == 'No') ...[
                     _Section(
                       child: ApiDropdown<String>(
-                        labelText: '${l.methodOfContra} *',
-                        items: const [
-                          'Condom',
-                          'Mala -N (Daily Contraceptive pill)',
-                          'Antra injection',
-                          'Copper -T (IUCD)',
-                          'Chhaya (Weekly Contraceptive pill)',
-                          'ECP (Emergency Contraceptive pill)',
-                          'Male Sterilization',
-                          'Female Sterilization',
-                          'Any Other Specify'
-                        ],
-                        getLabel: (s) => s,
-                        value: state.hpMethod,
+                        labelText: 'Are you/your partner adopting family planning? *',
+                        items: const ['Yes', 'No'],
+                        getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                        value: state.hpfamilyPlanningCounseling,
                         onChanged: (v) {
-                          if (v != null) {
-                            context.read<AddFamilyHeadBloc>().add(hpMethodChanged(v));
-                          }
+                          context.read<AddFamilyHeadBloc>().add(HeadFamilyPlanningCounselingChanged(v!));
                         },
-                        validator: (value) => _captureError(Validations.validateAntra(l, value, )),
+                        validator: (value) => _captureError(Validations.validateAdoptingPlan(l, value,)),
                       ),
                     ),
                     Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
-                    if (state.hpMethod == 'Antra injection') ...[
+                    if (state.hpfamilyPlanningCounseling == 'Yes') ...[
                       _Section(
-                        child: CustomDatePicker(
-                          labelText: 'Date of Antra',
-                          initialDate: state.hpantraDate,
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime(2100),
-                          onDateChanged: (date) {
-                            if (date != null) {
-                              context.read<AddFamilyHeadBloc>().add(hpDateofAntraChanged(date));
+                        child: ApiDropdown<String>(
+                          labelText: '${l.methodOfContra} *',
+                          items: const [
+                            'Condom',
+                            'Mala -N (Daily Contraceptive pill)',
+                            'Antra injection',
+                            'Copper -T (IUCD)',
+                            'Chhaya (Weekly Contraceptive pill)',
+                            'ECP (Emergency Contraceptive pill)',
+                            'Male Sterilization',
+                            'Female Sterilization',
+                            'Any Other Specify'
+                          ],
+                          getLabel: (s) => s,
+                          value: state.hpMethod,
+                          onChanged: (v) {
+                            if (v != null) {
+                              context.read<AddFamilyHeadBloc>().add(hpMethodChanged(v));
                             }
                           },
-                        ),
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-                    ],
-
-                    if (state.hpMethod == 'Copper -T (IUCD)') ...[
-                      _Section(
-                        child: CustomDatePicker(
-                          labelText: 'Removal Date',
-                          initialDate: state.hpremovalDate,
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime(2100),
-                          onDateChanged: (date) {
-                            if (date != null) {
-                              context.read<AddFamilyHeadBloc>().add(hpRemovalDateChanged(date));
-                            }
-                          },
+                          validator: (value) => _captureError(Validations.validateAntra(l, value, )),
                         ),
                       ),
                       Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
-                      _Section(
-                        child: CustomTextField(
-                          labelText: 'Reason for Removal',
-                          hintText: 'Enter reason for removal',
-                          initialValue: state.hpremovalReason,
-                          onChanged: (value) {
-                            context.read<AddFamilyHeadBloc>().add(hpRemovalReasonChanged(value ?? ''));
-                          },
+                      if (state.hpMethod == 'Antra injection') ...[
+                        _Section(
+                          child: CustomDatePicker(
+                            labelText: 'Date of Antra',
+                            initialDate: state.hpantraDate,
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime(2100),
+                            onDateChanged: (date) {
+                              if (date != null) {
+                                context.read<AddFamilyHeadBloc>().add(hpDateofAntraChanged(date));
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-                    ],
+                        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                      ],
 
-                    if (state.hpMethod == 'Condom') ...[
-                      _Section(
-                        child: CustomTextField(
-                          labelText: 'Quantity of Condoms',
-                          hintText: 'Enter quantity',
-                          keyboardType: TextInputType.number,
-                          initialValue: state.hpcondomQuantity,
-                          onChanged: (value) {
-                            context.read<AddFamilyHeadBloc>().add(hpCondomQuantityChanged(value ?? ''));
-                          },
+                      if (state.hpMethod == 'Copper -T (IUCD)') ...[
+                        _Section(
+                          child: CustomDatePicker(
+                            labelText: 'Removal Date',
+                            initialDate: state.hpremovalDate,
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime(2100),
+                            onDateChanged: (date) {
+                              if (date != null) {
+                                context.read<AddFamilyHeadBloc>().add(hpRemovalDateChanged(date));
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                      Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
+                        _Section(
+                          child: CustomTextField(
+                            labelText: 'Reason for Removal',
+                            hintText: 'Enter reason for removal',
+                            initialValue: state.hpremovalReason,
+                            onChanged: (value) {
+                              context.read<AddFamilyHeadBloc>().add(hpRemovalReasonChanged(value ?? ''));
+                            },
+                          ),
+                        ),
+                        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                      ],
+
+                      if (state.hpMethod == 'Condom') ...[
+                        _Section(
+                          child: CustomTextField(
+                            labelText: 'Quantity of Condoms',
+                            hintText: 'Enter quantity',
+                            keyboardType: TextInputType.number,
+                            initialValue: state.hpcondomQuantity,
+                            onChanged: (value) {
+                              context.read<AddFamilyHeadBloc>().add(hpCondomQuantityChanged(value ?? ''));
+                            },
+                          ),
+                        ),
+                        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                      ],
                     ],
                   ],
-                ],
+              ],
             ],
-          ],
 
 
-          if (state.maritalStatus != null && state.maritalStatus != 'Unmarried') ...[
-            _Section(
-              child: ApiDropdown<String>(
-                labelText: l.haveChildrenQuestion,
-                items: const ['Yes', 'No'],
-                getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                value: state.hasChildren,
-                onChanged: (v) => context
-                    .read<AddFamilyHeadBloc>()
-                    .add(AfhUpdateHasChildren(v)),
+            if (state.maritalStatus != null && state.maritalStatus != 'Unmarried') ...[
+              _Section(
+                child: ApiDropdown<String>(
+                  labelText: l.haveChildrenQuestion,
+                  items: const ['Yes', 'No'],
+                  getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                  value: state.hasChildren,
+                  onChanged: (v) => context
+                      .read<AddFamilyHeadBloc>()
+                      .add(AfhUpdateHasChildren(v)),
+                ),
               ),
-            ),
-            Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-          ],
+              Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+            ],
+          ]
         ],
 
       ),

@@ -33,6 +33,7 @@ class _AncvisitformState extends State<Ancvisitform> {
   late final AnvvisitformBloc _bloc;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   DateTime? _prevLmpFromEc;
+  DateTime? _lastTd1DateFromDb;
 
   int _childrenCount(String value) {
     switch (value) {
@@ -698,6 +699,7 @@ class _AncvisitformState extends State<Ancvisitform> {
       _bloc.add(HouseNumberChanged(houseNo));
     }
     await _loadPreviousLmpFromEligibleCouple();
+    await _loadLastTd1DateFromDb();
   }
 
   Future<void> _loadPreviousLmpFromEligibleCouple() async {
@@ -778,6 +780,50 @@ class _AncvisitformState extends State<Ancvisitform> {
       }
     } catch (e) {
       print('Error loading previous LMP: $e');
+    }
+  }
+
+  Future<void> _loadLastTd1DateFromDb() async {
+    try {
+      final benId = widget.beneficiaryData?['BeneficiaryID']?.toString() ??
+          widget.beneficiaryData?['unique_key']?.toString() ??
+          (widget.beneficiaryData?['_rawRow'] is Map
+              ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']?.toString()
+              : null);
+
+      if (benId == null || benId.isEmpty) {
+        return;
+      }
+
+      final dao = LocalStorageDao();
+      final forms = await dao.getAncFormsByBeneficiaryId(benId);
+      if (forms.isEmpty) return;
+
+      for (final form in forms) {
+        final formJsonStr = form['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) continue;
+        Map<String, dynamic> root;
+        try {
+          root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+        } catch (_) {
+          continue;
+        }
+        final data = root['form_data'];
+        if (data is Map) {
+          final td1Str = data['td1_date']?.toString();
+          if (td1Str != null && td1Str.isNotEmpty) {
+            try {
+              final td1 = DateTime.parse(td1Str);
+              setState(() {
+                _lastTd1DateFromDb = td1;
+              });
+              break;
+            } catch (_) {}
+          }
+        }
+      }
+    } catch (e) {
+      print('Error loading last TD1 date: $e');
     }
   }
 
@@ -1109,9 +1155,19 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 final curr = state.lmpDate;
                                 if (prev != null && curr != null) {
                                   final years = _fullYearsBetween(prev, curr);
-                                  return years < 3; // disable if gap < 3 years
+                                  if (years < 3) return true;
                                 }
-                                return true;
+                                else {
+                                  return true;
+                                }
+
+                                final inspect = state.dateOfInspection;
+                                final td1 = _lastTd1DateFromDb;
+                                if (inspect == null || td1 == null) {
+                                  return true;
+                                }
+                                final days = inspect.difference(td1).inDays;
+                                return days < 28;
                               })(),
                               onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
                             ),
