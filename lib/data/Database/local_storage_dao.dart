@@ -1733,6 +1733,8 @@ class LocalStorageDao {
 
   }
 
+  // In local_storage_dao.dart, add this method
+
   // In local_storage_dao.dart, update getHeadMobileNumber:
   Future<String?> getHeadMobileNumber(String householdRefKey) async {
     print('🔍 [getHeadMobileNumber] Fetching head mobile for household: $householdRefKey');
@@ -1800,6 +1802,80 @@ class LocalStorageDao {
       return null;
     }
   }
+
+  Future<String?> getSpouseMobileNumber(String householdRefKey) async {
+    print('🔍 [getSpouseMobileNumber] Fetching spouse mobile for household: $householdRefKey');
+    try {
+      final db = await _db;
+
+      final beneficiaries = await db.query(
+        'beneficiaries_new',
+        where: 'household_ref_key = ? AND is_deleted = 0',
+        whereArgs: [householdRefKey],
+      );
+
+      if (beneficiaries.isEmpty) {
+        print('❌ [getSpouseMobileNumber] No beneficiaries found for household: $householdRefKey');
+        return null;
+      }
+
+      // First, try to find a spouse with self-owned mobile
+      for (final beneficiary in beneficiaries) {
+        final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
+        if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;
+
+        try {
+          final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
+          if (infoMap == null) continue;
+
+          final relation = infoMap['relation']?.toString().toLowerCase();
+          final mobileOwner = infoMap['mobileOwner']?.toString().toLowerCase();
+          final mobile = infoMap['mobileNo']?.toString();
+
+          // Check if this is a spouse/mother with self-owned mobile
+          if ((relation == 'mother' || relation == 'spouse' || relation == 'wife') &&
+              mobileOwner == 'self' &&
+              mobile != null &&
+              mobile.isNotEmpty) {
+            print('✅ [getSpouseMobileNumber] Found spouse with self-owned mobile: $mobile');
+            return mobile;
+          }
+        } catch (e) {
+          print('❌ [getSpouseMobileNumber] Error parsing beneficiary info: $e');
+        }
+      }
+
+      // If no self-owned mobile found, look for any spouse with a mobile number
+      for (final beneficiary in beneficiaries) {
+        final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
+        if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;
+
+        try {
+          final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
+          if (infoMap == null) continue;
+
+          final relation = infoMap['relation']?.toString().toLowerCase();
+          final mobile = infoMap['mobileNo']?.toString();
+
+          if ((relation == 'mother' || relation == 'spouse' || relation == 'wife') &&
+              mobile != null &&
+              mobile.isNotEmpty) {
+            print('ℹ️ [getSpouseMobileNumber] Found spouse mobile: $mobile');
+            return mobile;
+          }
+        } catch (e) {
+          print('❌ [getSpouseMobileNumber] Error parsing beneficiary info (fallback): $e');
+        }
+      }
+
+      print('ℹ️ [getSpouseMobileNumber] No mobile number found for spouse');
+      return null;
+    } catch (e) {
+      print('❌ [getSpouseMobileNumber] Error: $e');
+      return null;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getMigratedBeneficiaries() async {
     try {
       print('🔍 [getMIGRecords] Querying  mig records...');

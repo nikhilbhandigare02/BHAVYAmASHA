@@ -79,7 +79,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   bool _tabListenerAttached = false;
   bool _syncingGender = false;
   bool _syncingSpouseName = false;
- 
+
   static String? _anmLastFormError;
 
   static void _clearAnmFormError() {
@@ -102,6 +102,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   List<String> _femaleAdultNames = [];
   List<Map<String, String>> _adultSummaries = [];
   final Map<String, String> _adultRelationByName = {};
+
+
 
   int _ageFromDob(DateTime dob) => DateTime.now().year - dob.year;
 
@@ -342,7 +344,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
           });
         }
       } catch (_) {}
- 
+
       final args = ModalRoute.of(context)?.settings.arguments as Map?;
       if (args != null) {
         print('=== Form Arguments ===');
@@ -403,7 +405,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
       }
     } catch (_) {}
   }
- 
+
   @override
   void dispose() {
     // Close all BLoCs
@@ -430,14 +432,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   @override
   bool get wantKeepAlive => widget.maintainState;
 
-  // Check if we should prefill mobile number based on relation
-  void _checkAndPrefillMobileNumber(String? relation) {
-    if (relation == 'Mother' && widget.headSpouseMobile != null && widget.headSpouseMobile!.isNotEmpty) {
-      // Prefill the mobile number and set owner to 'Self' for mother
-      context.read<AddnewfamilymemberBloc>().add(AnmUpdateMobileNo(widget.headSpouseMobile!));
-      context.read<AddnewfamilymemberBloc>().add(const AnmUpdateMobileOwner('Self'));
-    }
-  }
+
 
   List<String> _getMobileOwnerList(String gender) {
     const common = [
@@ -2609,71 +2604,65 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       value: state.mobileOwner,
                                       onChanged: (v) async {
                                         if (v == null) return;
-                                        final bloc = context
-                                            .read<AddnewfamilymemberBloc>();
+                                        final bloc = context.read<AddnewfamilymemberBloc>();
+
+                                        // Always update the mobile owner first
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        if (v == 'Family Head' ||
-                                            v == "Father") {
-                                          if (widget.isAddMember &&
+                                        // Clear the mobile number first when changing the owner
+                                        bloc.add(AnmUpdateMobileNo(''));
+
+                                        // Check if we should prefill the mobile number
+                                        if (v == 'Family Head' || v == "Father" || v == "Mother") {
+                                          String? mobileNumber;
+                                          bool shouldFetchFromDb = true;
+
+                                          if (v == 'Mother' && widget.headSpouseMobile != null &&
+                                              widget.headSpouseMobile!.isNotEmpty) {
+                                            mobileNumber = widget.headSpouseMobile;
+                                            print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
+                                            shouldFetchFromDb = false;
+                                          }
+                                          else if ((v == 'Family Head' || v == 'Father') &&
+                                              widget.isAddMember &&
                                               widget.headMobileNumber != null &&
-                                              widget
-                                                  .headMobileNumber!
-                                                  .isNotEmpty) {
-                                            print(
-                                              '📱 [AddNewMember] Using head mobile from props: ${widget.headMobileNumber}',
-                                            );
-                                            bloc.add(
-                                              AnmUpdateMobileNo(
-                                                widget.headMobileNumber!,
-                                              ),
-                                            );
-                                          } else if (_isMemberDetails &&
-                                              widget.hhId != null) {
+                                              widget.headMobileNumber!.isNotEmpty) {
+                                            mobileNumber = widget.headMobileNumber;
+                                            print('📱 [AddNewMember] Using head mobile from props: $mobileNumber');
+                                            shouldFetchFromDb = false;
+                                          }
+
+                                          // 3. If not found in props, try to fetch from database
+                                          if (shouldFetchFromDb && _isMemberDetails && widget.hhId != null) {
                                             try {
-                                              final headMobile =
-                                              await LocalStorageDao.instance
-                                                  .getHeadMobileNumber(
-                                                widget.hhId!,
-                                              );
-                                              print(
-                                                '📱 [AddNewMember] Fetched mobile from DB: $headMobile',
-                                              );
-                                              if (headMobile != null &&
-                                                  headMobile.isNotEmpty) {
-                                                bloc.add(
-                                                  AnmUpdateMobileNo(headMobile),
-                                                );
-                                              } else if (mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      l?.no_mobile_found_for_head ?? 'No mobile number found for the head of family',
-                                                    ),
-                                                  ),
-                                                );
+                                              if (v == 'Mother') {
+                                                mobileNumber = await LocalStorageDao.instance.getSpouseMobileNumber(widget.hhId!);
+                                                print('📱 [AddNewMember] Fetched spouse mobile from DB: $mobileNumber');
+                                              } else {
+                                                mobileNumber = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                                print('📱 [AddNewMember] Fetched head mobile from DB: $mobileNumber');
                                               }
                                             } catch (e) {
-                                              print(
-                                                '❌ [AddNewMember] Error fetching from DB: $e',
-                                              );
-                                              if (mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      l?.error_loading_head_mobile ?? 'Error loading head of family mobile number',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
+                                              print('❌ Error fetching mobile number: $e');
                                             }
                                           }
+
+                                          // Update the mobile number if found
+                                          if (mobileNumber != null && mobileNumber.isNotEmpty) {
+                                            print('📱 [AddNewMember] Setting mobile number: $mobileNumber for $v');
+                                            bloc.add(AnmUpdateMobileNo(mobileNumber));
+                                          } else if (mobileNumber == null && mounted) {
+                                            // Show error if no mobile number found
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  l?.no_mobile_found_for_head ?? 'No mobile number found',
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         } else {
-                                          // Clear mobile number if not Family Head
+                                          // For any other selection, clear the mobile number
                                           bloc.add(AnmUpdateMobileNo(''));
                                         }
                                       },

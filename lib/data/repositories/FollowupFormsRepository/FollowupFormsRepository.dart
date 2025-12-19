@@ -124,12 +124,13 @@ class FollowupFormsRepository {
 
     final String userId = ashaUniqueKey.toString();
     final String facility = facilityId.toString();
-
+final formType = formJsonValue['form_type'];
     final Map<String, dynamic> payloadItem = {
       "unique_key": uniqueKeyFromForm,
       "household_registration_ref_key": householdRefKey,
       "beneficiaries_registration_ref_key": beneficiaryRefKey,
       "forms_ref_key": formsRefKey,
+      "form_type": '',
 
       "form_json": formJsonValue,
 
