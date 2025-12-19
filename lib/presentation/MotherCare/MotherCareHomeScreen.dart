@@ -266,13 +266,31 @@ WHERE bn.is_deleted = 0;
       final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
 
       // Get delivery outcome records only for valid beneficiaries
-      final dbOutcomes = await db.rawQuery('''
+      /*final dbOutcomes = await db.rawQuery('''
       SELECT DISTINCT beneficiary_ref_key 
       FROM followup_form_data 
       WHERE forms_ref_key = ? 
       AND current_user_key = ?
       AND beneficiary_ref_key IN ($placeholders)
     ''', [deliveryOutcomeKey, ashaUniqueKey, ...beneficiaryKeys]);
+*/
+
+      final dbOutcomes = await db.rawQuery('''
+  SELECT DISTINCT ffd.beneficiary_ref_key
+  FROM followup_form_data ffd
+  INNER JOIN beneficiaries_new bn
+      ON bn.unique_key = ffd.beneficiary_ref_key
+  WHERE ffd.forms_ref_key = ?
+    AND ffd.current_user_key = ?
+    AND bn.current_user_key = ?
+    AND bn.is_deleted = 0
+    AND ffd.beneficiary_ref_key IN ($placeholders)
+''', [
+        deliveryOutcomeKey,
+        ashaUniqueKey,
+        ashaUniqueKey,
+        ...beneficiaryKeys
+      ]);
 
       final count = dbOutcomes.length;
       print('\n✅ Final HBNC Count: $count');

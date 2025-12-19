@@ -235,13 +235,13 @@ WHERE bn.is_deleted = 0;
     try {
       // First, get all beneficiary_ref_keys that have either pnc_mother or hbnc_visit state
       final validBeneficiaries = await db.rawQuery('''
-      SELECT DISTINCT mca.beneficiary_ref_key,
-             MAX(CASE WHEN mca.is_synced = 1 THEN 1 ELSE 0 END) as has_synced
-      FROM mother_care_activities mca
-      WHERE mca.mother_care_state IN ('pnc_mother', 'hbnc_visit')
-      AND mca.is_deleted = 0
-      GROUP BY mca.beneficiary_ref_key
-    ''');
+    SELECT DISTINCT mca.beneficiary_ref_key,
+           MAX(CASE WHEN mca.is_synced = 1 THEN 1 ELSE 0 END) as has_synced
+    FROM mother_care_activities mca
+    WHERE mca.mother_care_state IN ('pnc_mother', 'hbnc_visit')
+    AND mca.is_deleted = 0
+    GROUP BY mca.beneficiary_ref_key
+  ''');
 
       if (validBeneficiaries.isEmpty) {
         print('ℹ️ No beneficiaries found with pnc_mother or hbnc_visit state');
@@ -253,12 +253,14 @@ WHERE bn.is_deleted = 0;
 
       // Get delivery outcome records only for valid beneficiaries
       final deliveryOutcomeBeneficiaries = await db.rawQuery('''
-      SELECT DISTINCT beneficiary_ref_key 
-      FROM followup_form_data 
-      WHERE forms_ref_key = ? 
-      AND is_deleted = 0
-      AND beneficiary_ref_key IN ($placeholders)
-    ''', [deliveryOutcomeKey, ...beneficiaryKeys]);
+    SELECT DISTINCT beneficiary_ref_key 
+    FROM followup_form_data ffd
+    INNER JOIN beneficiaries_new bn
+      ON bn.unique_key = ffd.beneficiary_ref_key
+    WHERE ffd.forms_ref_key = ? 
+    AND ffd.is_deleted = 0
+    AND ffd.beneficiary_ref_key IN ($placeholders)
+  ''', [deliveryOutcomeKey, ...beneficiaryKeys]);
 
       // Create a set of beneficiaries with delivery outcomes
       final deliveryOutcomeBeneficiarySet = {
@@ -290,6 +292,7 @@ WHERE bn.is_deleted = 0;
       return {'total': 0, 'synced': 0};
     }
   }
+
   static Future<int> getMotherCareSyncedTotalCount() async {
     try {
       final ancResult = await _loadAncVisitCount();

@@ -531,20 +531,9 @@ class _HBNCListScreenState
             ),
           ),
 
+          // Household List
           Expanded(
-            child:  _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _filtered.isEmpty
-                ? Center(
-              child: Text(
-                'No data found',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-              ),
-            )
-                :ListView.builder(
+            child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               itemCount: _filtered.length,
               itemBuilder: (context, index) {

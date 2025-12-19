@@ -2634,7 +2634,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get colorRed => 'Red';
 
   @override
-  String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold to the touch, or that the child\'s temperature is 37.5°C or higher or less than 35.5°C, and that the chest draws inward when breathing. *';
+  String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing. *';
 
   @override
   String get bleedingUmbilicalCordLabel => 'Is Umbilical cord bleeding *';
@@ -2859,10 +2859,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseFillAllFields => 'Please fill all required fields';
 
   @override
-  String get howWasBreastfedLabel => 'How was the baby breastfed? *';
+  String get howWasBreastfedLabel => 'How did the baby breastfed? *';
 
   @override
-  String get firstFeedGivenAfterBirthLabel => 'What was given to the baby as the first feed after birth? *';
+  String get firstFeedGivenAfterBirthLabel => 'What was given as the baby first feed to baby after birth? *';
 
   @override
   String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)? *';

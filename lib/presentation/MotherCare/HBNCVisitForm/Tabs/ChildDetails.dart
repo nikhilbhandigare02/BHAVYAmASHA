@@ -375,8 +375,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       }
                     },
                   ),
+                  const Divider(height: 0,),
                   if (c['firstBreastfeedTiming'] == 'Other')
-                    const Divider(height: 0,),
+
                     CustomTextField(
                       labelText: 'Please enter breastfeeding time (hh:mm)',
                       hintText: 'hh:mm',
@@ -386,21 +387,26 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   const Divider(height: 0,),
 
-                  ApiDropdown<String>(
-                    labelText: t.howWasBreastfedLabel,
-                    items: const [
-                      'Normal',
-                      'Forcefully',
-                      'With weakness',
-                      'Could not breast feed but had to be fed with spoon',
-                      'Could neither breast feed nor take given by spoon'
-                    ],
-                    getLabel: (e) => e,
-                    value: c['howWasBreastfed'] ?? '',
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'howWasBreastfed', value: val, childIndex: widget.childIndex),
+                  if (c['firstBreastfeedTiming'] != 'Not breastfed')
+                    ApiDropdown<String>(
+                      labelText: t.howWasBreastfedLabel,
+                      items: const [
+                        'Normal',
+                        'Forcefully',
+                        'With weakness',
+                        'Could not breast feed but had to be fed with spoon',
+                        'Could neither breast feed nor take given by spoon'
+                      ],
+                      getLabel: (e) => e,
+                      value: c['howWasBreastfed'] ?? '',
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(
+                          field: 'howWasBreastfed',
+                          value: val,
+                          childIndex: widget.childIndex,
+                        ),
+                      ),
                     ),
-                  ),
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(

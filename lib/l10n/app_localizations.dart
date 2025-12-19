@@ -5324,7 +5324,7 @@ abstract class AppLocalizations {
   /// No description provided for @motherReportsTempOrChestIndrawingLabel.
   ///
   /// In en, this message translates to:
-  /// **'The mother reports that the child feels hot or cold to the touch, or that the child\'s temperature is 37.5°C or higher or less than 35.5°C, and that the chest draws inward when breathing. *'**
+  /// **'The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing. *'**
   String get motherReportsTempOrChestIndrawingLabel;
 
   /// No description provided for @bleedingUmbilicalCordLabel.
@@ -5774,13 +5774,13 @@ abstract class AppLocalizations {
   /// No description provided for @howWasBreastfedLabel.
   ///
   /// In en, this message translates to:
-  /// **'How was the baby breastfed? *'**
+  /// **'How did the baby breastfed? *'**
   String get howWasBreastfedLabel;
 
   /// No description provided for @firstFeedGivenAfterBirthLabel.
   ///
   /// In en, this message translates to:
-  /// **'What was given to the baby as the first feed after birth? *'**
+  /// **'What was given as the baby first feed to baby after birth? *'**
   String get firstFeedGivenAfterBirthLabel;
 
   /// No description provided for @adequatelyFedSevenToEightTimesLabel.

@@ -874,7 +874,7 @@
   "colorGreen": "Green",
   "colorYellow": "Yellow",
   "colorRed": "Red",
-  "motherReportsTempOrChestIndrawingLabel": "The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing. *",
+ "motherReportsTempOrChestIndrawingLabel": "The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing. *",
   "bleedingUmbilicalCordLabel": "Is Umbilical cord bleeding *",
   "newbornSeizuresLabel": "Is the child having seizures? *",
   "stoppedCryingLabel": "Has the child stopped crying? *",

@@ -176,9 +176,9 @@ class _EligibleCoupleIdentifiedScreenState
             continue;
           }
 
-         /* if (!allowedRelations.contains(rawRelation)) {
+          if (!allowedRelations.contains(rawRelation)) {
             continue;
-          }*/
+          }
 
 
 
