@@ -21,6 +21,7 @@ class ApiDropdown<T> extends StatelessWidget {
 
   final double? labelFontSize;
   final String? emptyOptionText;
+  final bool readOnly;
 
 
   String _toTitleCase(String text) {
@@ -50,6 +51,7 @@ class ApiDropdown<T> extends StatelessWidget {
     this.labelFontSize,
     this.convertToTitleCase = true,
     this.emptyOptionText,
+    this.readOnly = false
   });
 
   Widget? get _labelWidget {
@@ -102,58 +104,64 @@ class ApiDropdown<T> extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             GestureDetector(
-              onTap: () {
+              onTap: readOnly
+                  ? null // Disable tap when readOnly
+                  : () {
                 FocusManager.instance.primaryFocus?.unfocus();
                 FocusScope.of(context).unfocus();
                 FocusScope.of(context).requestFocus(FocusNode());
                 _showSelectDialog(context, field);
               },
               child: AbsorbPointer(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                absorbing: readOnly,
+                child: Opacity(
+                  opacity: readOnly ? 0.7 : 1.0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
 
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // 🔹 Label and value side by side
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (_labelWidget != null)
-                              DefaultTextStyle(
-                                style: TextStyle(
-                                  fontSize: labelFontSize ?? 14.sp,
-                                  color: AppColors.onSurface,
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.2,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // 🔹 Label and value side by side
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (_labelWidget != null)
+                                DefaultTextStyle(
+                                  style: TextStyle(
+                                    fontSize: labelFontSize ?? 14.sp,
+                                    color: AppColors.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.2,
+                                  ),
+                                  maxLines: labelMaxLines ?? 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  child: _labelWidget!,
                                 ),
-                                maxLines: labelMaxLines ?? 3,
-                                overflow: TextOverflow.ellipsis,
-                                child: _labelWidget!,
-                              ),
-                            const SizedBox(height: 3),
-                            Text(
-                              value != null
-                                  ? getLabel(value!)
-                                   : (hintText ?? l10n.selectOptionLabel),
+                              const SizedBox(height: 3),
+                              Text(
+                                value != null
+                                    ? getLabel(value!)
+                                     : (hintText ?? l10n.selectOptionLabel),
 
-              style: inputStyle.copyWith(
-                                color: value != null
-                                    ? AppColors.onSurface
-                                    : AppColors.onSurfaceVariant,
-                                fontWeight: FontWeight.w400,
+                                style: inputStyle.copyWith(
+                                  color: value != null
+                                      ? AppColors.onSurface
+                                      : AppColors.onSurfaceVariant,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      // 🔹 Dropdown arrow
-                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                    ],
+                        // 🔹 Dropdown arrow
+                        const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                      ],
+                    ),
                   ),
                 ),
               ),
