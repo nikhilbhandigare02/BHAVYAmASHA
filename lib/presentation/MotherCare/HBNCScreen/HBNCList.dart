@@ -145,7 +145,7 @@ class _HBNCListScreenState
       final validBeneficiaries = await db.rawQuery('''
         SELECT DISTINCT mca.beneficiary_ref_key 
         FROM mother_care_activities mca
-        WHERE mca.mother_care_state IN ('pnc_mother', 'hbnc_visit')
+        WHERE mca.mother_care_state ='hbnc_visit'
         AND mca.is_deleted = 0
         AND mca.current_user_key = ?
       ''', [ashaUniqueKey]);

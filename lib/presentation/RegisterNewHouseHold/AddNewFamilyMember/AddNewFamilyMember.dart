@@ -116,7 +116,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   // Form controllers
   bool _isLoading = false;
   bool _isFirstLoad = true;
-  // Ensure inline initial data is applied only once.
   bool _initialApplied = false;
 
   final TextEditingController _memberTypeController = TextEditingController();
