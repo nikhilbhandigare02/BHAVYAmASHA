@@ -1014,18 +1014,29 @@ class LocalStorageDao {
     return rows.map((row) => Map<String, dynamic>.from(row)).toList();
   }
 
-  Future<int> markMotherCareActivitySyncedById(int id) async {
+  // Future<int> markMotherCareActivitySyncedById(int id) async {
+  //   final db = await _db;
+  //   return db.update(
+  //     'mother_care_activities',
+  //     {
+  //       'is_synced': 1,
+  //       'modified_date_time': DateTime.now().toIso8601String(),
+  //     },
+  //     where: 'id = ?',
+  //     whereArgs: [id],
+  //   );
+  // }
+
+  Future<int> markMotherCareActivitySyncedById(int id, {String? serverId}) async {
     final db = await _db;
-    return db.update(
-      'mother_care_activities',
-      {
-        'is_synced': 1,
-        'modified_date_time': DateTime.now().toIso8601String(),
-      },
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    final values = <String, Object?>{
+      'is_synced': 1,
+      'modified_date_time': DateTime.now().toIso8601String(),
+    };
+    if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
+    return db.update('mother_care_activities', values, where: 'id = ?', whereArgs: [id]);
   }
+
 
   Future<List<Map<String, dynamic>>> getUnsyncedMotherCareAncForms() async {
     try {
@@ -2157,15 +2168,15 @@ class LocalStorageDao {
     }).toList();
   }
 
-  Future<int> markChildCareActivitySyncedById(int id, {String? serverId}) async {
-    final db = await _db;
-    final values = <String, Object?>{
-      'is_synced': 1,
-      'modified_date_time': DateTime.now().toIso8601String(),
-    };
-    if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
-    return db.update('child_care_activities', values, where: 'id = ?', whereArgs: [id]);
-  }
+    Future<int> markChildCareActivitySyncedById(int id, {String? serverId}) async {
+      final db = await _db;
+      final values = <String, Object?>{
+        'is_synced': 1,
+        'modified_date_time': DateTime.now().toIso8601String(),
+      };
+      if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
+      return db.update('child_care_activities', values, where: 'id = ?', whereArgs: [id]);
+    }
 
   Future<String> getLatestFollowupFormServerId() async {
     try {
