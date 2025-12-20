@@ -270,11 +270,17 @@ class AshaDashboardSection extends StatelessWidget {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Image.asset(
-                                    item['image'],
-                                    width: 7.w,
-                                    height: 7.w,
-                                    fit: BoxFit.contain,
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: iconSize,
+                                      maxHeight: iconSize,
+                                    ),
+                                    child: Image.asset(
+                                      item['image'],
+                                      width: iconSize,
+                                      height: iconSize,
+                                      fit: BoxFit.contain,
+                                    ),
                                   ),
                                   SizedBox(height: 1.h),
                                   Flexible(
