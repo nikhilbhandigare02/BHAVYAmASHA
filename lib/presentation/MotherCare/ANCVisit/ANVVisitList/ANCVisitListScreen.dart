@@ -62,42 +62,42 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   }
 
 
-  Future<Set<String>> _getDeliveredBeneficiaryIds() async {
-    final db = await DatabaseProvider.instance.database;
-
-    final currentUserData = await SecureStorageService.getCurrentUserData();
-    final String? ashaUniqueKey =
-    currentUserData?['unique_key']?.toString();
-
-    if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
-      return {};
-    }
-
-    final rows = await db.query(
-      'followup_form_data',
-      where: '''
-      forms_ref_key = ?
-      AND current_user_key = ?
-      AND (
-        LOWER(form_json) LIKE '%gives_birth_to_baby%'
-        OR LOWER(form_json) LIKE '%delivery_outcome%'
-      )
-      AND (
-        LOWER(form_json) LIKE '%yes%'
-        OR LOWER(form_json) LIKE '%live_birth%'
-      )
-    ''',
-      whereArgs: ['bt7gs9rl1a5d26mz', ashaUniqueKey],
-      columns: ['beneficiary_ref_key'],
-      distinct: true,
-    );
-
-    return rows
-        .map((e) => e['beneficiary_ref_key']?.toString())
-        .where((id) => id != null && id!.isNotEmpty)
-        .cast<String>()
-        .toSet();
-  }
+  // Future<Set<String>> _getDeliveredBeneficiaryIds() async {
+  //   final db = await DatabaseProvider.instance.database;
+  //
+  //   final currentUserData = await SecureStorageService.getCurrentUserData();
+  //   final String? ashaUniqueKey =
+  //   currentUserData?['unique_key']?.toString();
+  //
+  //   if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+  //     return {};
+  //   }
+  //
+  //   final rows = await db.query(
+  //     'followup_form_data',
+  //     where: '''
+  //     forms_ref_key = ?
+  //     AND current_user_key = ?
+  //     AND (
+  //       LOWER(form_json) LIKE '%gives_birth_to_baby%'
+  //       OR LOWER(form_json) LIKE '%delivery_outcome%'
+  //     )
+  //     AND (
+  //       LOWER(form_json) LIKE '%yes%'
+  //       OR LOWER(form_json) LIKE '%live_birth%'
+  //     )
+  //   ''',
+  //     whereArgs: ['bt7gs9rl1a5d26mz', ashaUniqueKey],
+  //     columns: ['beneficiary_ref_key'],
+  //     distinct: true,
+  //   );
+  //
+  //   return rows
+  //       .map((e) => e['beneficiary_ref_key']?.toString())
+  //       .where((id) => id != null && id!.isNotEmpty)
+  //       .cast<String>()
+  //       .toSet();
+  // }
 
   Future<void> _loadPregnantWomen() async {
     setState(() => _isLoading = true);
@@ -114,8 +114,8 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
           .toSet();
 
-      final deliveredBeneficiaryIds = await _getDeliveredBeneficiaryIds();
-      print('ℹ️ Delivered: ${deliveredBeneficiaryIds.length}');
+    //  final deliveredBeneficiaryIds = await _getDeliveredBeneficiaryIds();
+     // print('ℹ️ Delivered: ${deliveredBeneficiaryIds.length}');
 
       for (final row in rows) {
         try {
@@ -129,9 +129,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           final beneficiaryId = row['unique_key']?.toString() ?? '';
           if (beneficiaryId.isEmpty) continue;
 
-          if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
-            continue;
-          }
+          // if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
+          //   continue;
+          // }
 
           final isPregnant =
               info['isPregnant']?.toString().toLowerCase() == 'yes';
@@ -162,10 +162,10 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           continue;
         }
 
-        // ❌ EXCLUDE DELIVERED (IMPORTANT)
-        if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
-          continue;
-        }
+        // // ❌ EXCLUDE DELIVERED (IMPORTANT)
+        // if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
+        //   continue;
+        // }
 
         pregnantWomen.add({
           'BeneficiaryID': beneficiaryId,
