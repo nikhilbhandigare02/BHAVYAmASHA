@@ -46,7 +46,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         SELECT beneficiary_ref_key,
                MAX(created_date_time) AS max_date
         FROM mother_care_activities
-        WHERE mother_care_state = 'anc_due'
+        WHERE mother_care_state = 'anc_due_state' 
           AND current_user_key = ?
         GROUP BY beneficiary_ref_key
     ) latest
