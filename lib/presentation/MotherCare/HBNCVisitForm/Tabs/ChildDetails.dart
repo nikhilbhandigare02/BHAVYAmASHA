@@ -762,8 +762,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'referredByASHA', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                  const Divider(height: 0,),
                   if (c['referredByASHA'] == 'Yes') ...[
-                    const SizedBox(height: 8),
+
                     ApiDropdown<String>(
                       labelText:t.referredByASHA,
                       items:  [t.hsc,t.aphc,t.phc,t.chc,t.rhLabel,t.sdh,t.dhLabel],

@@ -334,6 +334,43 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
             userDetails['asha_associated_with_facility_id'] ?? 0;
         final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
+        if (state.isPregnant == true) {
+          try {
+            final motherCareActivityData = {
+              'server_id': null,
+              'household_ref_key': householdRefKey,
+              'beneficiary_ref_key': state.beneficiaryRefKey ?? state.beneficiaryId,
+              'mother_care_state': 'anc_due_state',
+              'device_details': jsonEncode({
+                'id': deviceInfo.deviceId,
+                'platform': deviceInfo.platform,
+                'version': deviceInfo.osVersion,
+              }),
+              'app_details': jsonEncode({
+                'app_version': deviceInfo.appVersion.split('+').first,
+                'app_name': deviceInfo.appName,
+                'build_number': deviceInfo.buildNumber,
+                'package_name': deviceInfo.packageName,
+              }),
+              'parent_user': jsonEncode({}),
+              'current_user_key': ashaUniqueKey,
+              'facility_id': facilityId,
+              'created_date_time': nowIso,
+              'modified_date_time': nowIso,
+              'is_synced': 0,
+              'is_deleted': 0,
+            };
+
+            print(
+              'Inserting mother care activity for pregnant beneficiary: ${jsonEncode(motherCareActivityData)}',
+            );
+            await LocalStorageDao.instance.insertMotherCareActivity(
+              motherCareActivityData,
+            );
+          } catch (e) {
+            print('Error inserting mother care activity: $e');
+          }
+        }
 
         final formDataForDb = {
           'server_id': '',

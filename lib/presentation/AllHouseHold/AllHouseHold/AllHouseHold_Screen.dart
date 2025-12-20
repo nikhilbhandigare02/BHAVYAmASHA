@@ -1,17 +1,14 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:sizer/sizer.dart';
-
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
-
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/Loader/Loader.dart';
 import '../../HomeScreen/HomeScreen.dart';
@@ -257,17 +254,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             bi = Map<String, dynamic>.from(jsonDecode(rawInfo));
           } else {
             bi = <String, dynamic>{};
-          }
-
-          final memberType = bi['memberType']?.toString().toLowerCase() ?? '';
-          final relation = bi['relation']?.toString().toLowerCase() ??
-              bi['relation_to_head']?.toString().toLowerCase() ?? '';
-          final isChildRecord = memberType == 'child' ||
-              relation == 'child' ||
-              relation == 'son' ||
-              relation == 'daughter';
-          if (!isChildRecord) {
-            continue;
           }
 
           final fatherName = (bi['fatherName'] ?? bi['father_name'] ?? '')

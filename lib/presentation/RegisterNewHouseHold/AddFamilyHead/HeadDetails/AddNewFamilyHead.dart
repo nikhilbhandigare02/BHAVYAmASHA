@@ -510,26 +510,26 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: IgnorePointer(
               ignoring: widget.isEdit,
               child: ApiDropdown<String>(
-              labelText: '${l.genderLabel} *',
-              items: const ['Male', 'Female', 'Transgender'],
-              getLabel: (s) {
-                switch (s) {
-                  case 'Male':
-                    return l.genderMale;
-                  case 'Female':
-                    return l.genderFemale;
-                  case 'Transgender':
-                    return l.transgender;
-                  default:
-                    return s;
-                }
-              },
-              value: state.gender,
-              onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateGender(v)),
-              validator: (v) => _captureError(v == null ? 'Gender is required ' : null),
+                labelText: '${l.genderLabel} *',
+                items: const ['Male', 'Female', 'Transgender'],
+                getLabel: (s) {
+                  switch (s) {
+                    case 'Male':
+                      return l.genderMale;
+                    case 'Female':
+                      return l.genderFemale;
+                    case 'Transgender':
+                      return l.transgender;
+                    default:
+                      return s;
+                  }
+                },                value: state.gender,
+                onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateGender(v)),
+                validator: (v) => _captureError(v == null ? 'Gender is required' : null),
               ),
             ),
           ),
+
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           _Section(
