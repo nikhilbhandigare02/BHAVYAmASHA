@@ -918,28 +918,29 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
 
               _section(
-                IgnorePointer(
-                  ignoring: widget.isEdit,
-                  child: ApiDropdown<String>(
-                  labelText: '${l.genderLabel} *',
-                  items: const ['Male', 'Female', 'Transgender'],
-                  getLabel: (s) {
-                    switch (s) {
-                      case 'Male':
-                        return l.genderMale;
-                      case 'Female':
-                        return l.genderFemale;
-                      case 'Transgender':
-                        return l.transgender;
-                      default:
-                        return s;
-                    }
-                  },
-                  value: state.gender,
-                  onChanged: null,
-                  validator: (value) => Validations.validateGender(l, value),
-                ),
-              ),
+                ApiDropdown<String>(
+
+                labelText: '${l.genderLabel} *',
+
+                items: const ['Male', 'Female', 'Transgender'],
+                getLabel: (s) {
+                  switch (s) {
+                    case 'Male':
+                      return l.genderMale;
+                    case 'Female':
+                      return l.genderFemale;
+                    case 'Transgender':
+                      return l.transgender;
+                    default:
+                      return s;
+                  }
+                },
+
+                value: state.gender,
+                onChanged: null,
+                validator: (value) => Validations.validateGender(l, value),
+
+                                ),
               ),
 
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),

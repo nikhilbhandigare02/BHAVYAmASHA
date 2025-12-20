@@ -385,7 +385,7 @@ class _AncvisitformState extends State<Ancvisitform> {
         }
       }
 
-      // Extract and ensure full IDs are used - preserve original values without modification
+
       final dataId = data['id']?.toString() ?? '';
       final dataBeneficiaryId = data['BeneficiaryID']?.toString() ?? '';
       final uniqueKey = data['unique_key']?.toString() ?? '';
@@ -424,7 +424,7 @@ class _AncvisitformState extends State<Ancvisitform> {
           }
 
           for (var form in existingForms) {
-            // Try to extract and display name from form_json
+
             if (form['form_json'] != null) {
               try {
                 final formDataJson = jsonDecode(form['form_json'] as String);
@@ -433,7 +433,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                 // If this is the current beneficiary, log more details
                 if (form['beneficiary_ref_key'] == (dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey)) {
-                  print('  👆 Current beneficiary match!');
+                  print('  Current beneficiary match!');
                   final formJsonString = jsonEncode(formDataJson);
                   print('  📝 Full form data: ${formJsonString.length > 200 ? formJsonString.substring(0, 200) + '...' : formJsonString}');
                 }
@@ -962,6 +962,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     return s;
                                 }
                               },
+
                               value: state.visitType.isEmpty ? null : state.visitType,
 
                               onChanged: (v) => bloc.add(VisitTypeChanged(v ?? '')),
@@ -1078,7 +1079,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                             // readOnly: true,
+                              readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                             ),
@@ -1344,6 +1345,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               getLabel: (s) => s,
                               onChanged: (v) => bloc.add(HighRiskChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
+
                             ),
                             if (state.highRisk == 'Yes') ...[
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
