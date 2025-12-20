@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          message,
+          "User does not exists.Please enter valid credentials",
           style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black,
@@ -315,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
                                               content: Text(
-                                                message,
+                                               "User Login Sucessfully",
                                                 style: const TextStyle(color: Colors.white),
                                               ),
                                               backgroundColor: Colors.black,
