@@ -1180,72 +1180,124 @@ class ChildCareCountProvider {
 
       final db = await DatabaseProvider.instance.database;
 
-      // Get current user's unique key
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      /* ------------------------------------------------------------
+     * STEP 1: Fetch deceased beneficiaries from followup forms
+     * ------------------------------------------------------------ */
+      final deceasedChildren = await db.rawQuery('''
+      SELECT DISTINCT beneficiary_ref_key, form_json
+      FROM followup_form_data
+      WHERE form_json LIKE '%"reason_of_death":%'
+    ''');
 
-      // Build where clause exactly like _loadHBYCChildren
-      String whereClause = 'is_deleted = ? AND is_adult = ?';
-      List<dynamic> whereArgs = [0, 0];
+      final Set<String> deceasedIds = {};
+
+      for (final child in deceasedChildren) {
+        try {
+          final jsonData = jsonDecode(child['form_json'] as String);
+          final formData = jsonData['form_data'] as Map<String, dynamic>?;
+          final caseClosure = formData?['case_closure'] as Map<String, dynamic>?;
+
+          if (caseClosure?['is_case_closure'] == true &&
+              caseClosure?['reason_of_death']
+                  ?.toString()
+                  .toLowerCase() ==
+                  'death') {
+            final id = child['beneficiary_ref_key']?.toString();
+            if (id != null && id.isNotEmpty) {
+              deceasedIds.add(id);
+            }
+          }
+        } catch (_) {}
+      }
+
+      developer.log('Deceased HBYC IDs: ${deceasedIds.length}',
+          name: 'ChildCareCountProvider');
+
+      /* ------------------------------------------------------------
+     * STEP 2: Get current ASHA user key
+     * ------------------------------------------------------------ */
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
+
+      /* ------------------------------------------------------------
+     * STEP 3: Build beneficiary query (same as load)
+     * ------------------------------------------------------------ */
+      String whereClause =
+          'is_deleted = ? AND is_adult = ? AND is_death = ?';
+      List<dynamic> whereArgs = [0, 0, 0];
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
       }
 
-      // Get child beneficiaries for current user
       final rows = await db.query(
         'beneficiaries_new',
         where: whereClause,
         whereArgs: whereArgs,
       );
 
-      developer.log('Found ${rows.length} child beneficiaries in database', name: 'ChildCareCountProvider');
+      developer.log('Found ${rows.length} beneficiaries',
+          name: 'ChildCareCountProvider');
 
       int hbycCount = 0;
 
+      /* ------------------------------------------------------------
+     * STEP 4: Process rows (same filters as load)
+     * ------------------------------------------------------------ */
       for (final row in rows) {
         try {
-          // Check household_ref_key like load function does
-          final rowHhId = row['household_ref_key']?.toString();
-          if (rowHhId == null || rowHhId.isEmpty) {
-            continue;
-          }
+          final hhId = row['household_ref_key']?.toString();
+          if (hhId == null || hhId.isEmpty) continue;
 
-          // Parse beneficiary info exactly like load function
+          /* ---------- Parse beneficiary_info ---------- */
           Map<String, dynamic> info = {};
           try {
             if (row['beneficiary_info'] is String) {
               info = jsonDecode(row['beneficiary_info'] as String);
             } else if (row['beneficiary_info'] is Map) {
-              info = Map<String, dynamic>.from(row['beneficiary_info'] as Map);
+              info = Map<String, dynamic>.from(
+                  row['beneficiary_info'] as Map);
             }
-          } catch (e) {
-            developer.log('Error parsing beneficiary_info: $e', name: 'ChildCareCountProvider');
+          } catch (_) {
             continue;
           }
 
-          // Get child details
+          /* ---------- CHILD CONDITION ---------- */
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          final relation =
+              info['relation']?.toString().toLowerCase() ?? '';
+
+          final isChild = memberType == 'child' ||
+              relation == 'child' ||
+              relation == 'son' ||
+              relation == 'daughter';
+
+          if (!isChild) continue;
+
+          /* ---------- DOB & Age Check (3–15 months) ---------- */
           final dob = info['date_of_birth']?.toString() ??
               info['dob']?.toString();
+          if (!_isAgeInRange(dob)) continue;
 
-          // Only count children between 3-15 months
-          if (!_isAgeInRange(dob)) {
-            continue;
-          }
-
-          // Get beneficiary ID
+          /* ---------- Beneficiary ID ---------- */
           final beneficiaryId = row['unique_key']?.toString() ?? '';
-          if (beneficiaryId.isEmpty) {
-            continue;
-          }
+          if (beneficiaryId.isEmpty) continue;
 
-          // Check if case is closed for this beneficiary (inline implementation)
-          final caseClosureWhere = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+          /* ---------- Death Filters ---------- */
+          if (deceasedIds.contains(beneficiaryId)) continue;
+          if ((row['is_death'] ?? 0) == 1) continue;
+
+          /* ---------- Case Closed Check ---------- */
+          final caseClosureWhere =
+          (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
               ? 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0 AND current_user_key = ?'
               : 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
 
-          final caseClosureArgs = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+          final caseClosureArgs =
+          (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
               ? [beneficiaryId, '%case_closure%', ashaUniqueKey]
               : [beneficiaryId, '%case_closure%'];
 
@@ -1258,61 +1310,51 @@ class ChildCareCountProvider {
           bool isCaseClosed = false;
           for (final ccRecord in caseClosureRecords) {
             try {
-              final ccFormJson = ccRecord['form_json'] as String?;
-              if (ccFormJson != null) {
-                final ccFormData = jsonDecode(ccFormJson);
-                final ccFormDataMap = ccFormData['form_data'] as Map<String, dynamic>? ?? {};
-                final caseClosure = ccFormDataMap['case_closure'] as Map<String, dynamic>? ?? {};
+              final ccJson = ccRecord['form_json'] as String?;
+              if (ccJson != null) {
+                final decoded = jsonDecode(ccJson);
+                final formData =
+                    decoded['form_data'] as Map<String, dynamic>? ?? {};
+                final caseClosure =
+                    formData['case_closure'] as Map<String, dynamic>? ?? {};
                 if (caseClosure['is_case_closure'] == true) {
                   isCaseClosed = true;
                   break;
                 }
               }
-            } catch (e) {
-              developer.log('Error checking case closure: $e', name: 'ChildCareCountProvider');
-            }
+            } catch (_) {}
           }
 
-          if (isCaseClosed) {
-            developer.log('Skipping closed case for beneficiary: $beneficiaryId', name: 'ChildCareCountProvider');
-            continue;
-          }
+          if (isCaseClosed) continue;
 
-          // Get name from multiple possible fields (inline implementation)
-          String name = '';
-          final nameFields = ['name', 'child_name', 'memberName', 'member_name', 'memberNameLocal'];
-          for (final field in nameFields) {
-            if (info[field] != null && info[field].toString().trim().isNotEmpty) {
-              name = info[field].toString().trim();
-              break;
-            }
-          }
-
-          // Load function creates card with 'Unnamed Child' as fallback,
-          // so we count children even without names
-
-          // Increment count
+          /* ---------- COUNT ---------- */
           hbycCount++;
 
-          developer.log('HBYC child counted: ${name.isNotEmpty ? name : "Unnamed Child"} (ID: $beneficiaryId)',
-              name: 'ChildCareCountProvider');
-
+          developer.log(
+            'HBYC counted: ${beneficiaryId}',
+            name: 'ChildCareCountProvider',
+          );
         } catch (e) {
-          developer.log('Error processing beneficiary: $e', name: 'ChildCareCountProvider');
+          developer.log('Error processing row: $e',
+              name: 'ChildCareCountProvider');
         }
       }
 
-      developer.log('FINAL HBYC COUNT = $hbycCount', name: 'ChildCareCountProvider');
-      return hbycCount;
+      developer.log('FINAL HBYC COUNT = $hbycCount',
+          name: 'ChildCareCountProvider');
 
+      return hbycCount;
     } catch (e, stackTrace) {
-      developer.log('Error in getHBYCCount: $e',
-          name: 'ChildCareCountProvider',
-          error: e,
-          stackTrace: stackTrace);
+      developer.log(
+        'Error in getHBYCCount: $e',
+        name: 'ChildCareCountProvider',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return 0;
     }
   }
+
 
   bool _isAgeInRange(String? dobStr) {
     if (dobStr == null || dobStr.isEmpty) return false;

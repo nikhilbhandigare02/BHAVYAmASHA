@@ -55,7 +55,6 @@ class _HBYCListState extends State<HBYCList> {
       
       debugPrint('Checking sync status for beneficiary: $beneficiaryId in beneficiaries_new table');
       
-      // Query the beneficiary record
       final rows = await db.query(
         'beneficiaries_new',
         columns: ['is_synced'],
@@ -264,20 +263,55 @@ class _HBYCListState extends State<HBYCList> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // Get current user's unique key
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      /* ------------------------------------------------------------
+     * STEP 1: Fetch deceased beneficiaries from followup forms
+     * ------------------------------------------------------------ */
+      final deceasedChildren = await db.rawQuery('''
+      SELECT DISTINCT beneficiary_ref_key, form_json
+      FROM followup_form_data
+      WHERE form_json LIKE '%"reason_of_death":%'
+    ''');
 
-      // Build where clause based on whether we have a user key
-      String whereClause = 'is_deleted = ? AND is_adult = ?';
-      List<dynamic> whereArgs = [0, 0];
-      
+      final Set<String> deceasedIds = {};
+
+      for (final child in deceasedChildren) {
+        try {
+          final jsonData = jsonDecode(child['form_json'] as String);
+          final formData = jsonData['form_data'] as Map<String, dynamic>?;
+          final caseClosure = formData?['case_closure'] as Map<String, dynamic>?;
+
+          if (caseClosure?['is_case_closure'] == true &&
+              caseClosure?['reason_of_death']
+                  ?.toString()
+                  .toLowerCase() ==
+                  'death') {
+            final id = child['beneficiary_ref_key']?.toString();
+            if (id != null && id.isNotEmpty) {
+              deceasedIds.add(id);
+            }
+          }
+        } catch (_) {}
+      }
+
+      /* ------------------------------------------------------------
+     * STEP 2: Get current ASHA user key
+     * ------------------------------------------------------------ */
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
+
+      /* ------------------------------------------------------------
+     * STEP 3: Build beneficiary query
+     * ------------------------------------------------------------ */
+      String whereClause =
+          'is_deleted = ? AND is_adult = ? AND is_death = ?';
+      List<dynamic> whereArgs = [0, 0, 0];
+
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
       }
 
-      // Get child beneficiaries for current user
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries_new',
         where: whereClause,
@@ -285,42 +319,59 @@ class _HBYCListState extends State<HBYCList> {
         orderBy: 'created_date_time DESC',
       );
 
-      debugPrint('Found ${rows.length} child beneficiaries in database');
-
-      final hbycChildren = <Map<String, dynamic>>[];
+      /* ------------------------------------------------------------
+     * STEP 4: Process rows
+     * ------------------------------------------------------------ */
+      final List<Map<String, dynamic>> hbycChildren = [];
 
       for (final row in rows) {
         try {
-          final rowHhId = row['household_ref_key']?.toString();
-          if (rowHhId == null || rowHhId.isEmpty) continue;
+          final hhId = row['household_ref_key']?.toString();
+          if (hhId == null || hhId.isEmpty) continue;
 
-          // Parse beneficiary info
+          /* ---------- Parse beneficiary_info ---------- */
           Map<String, dynamic> info = {};
           try {
             if (row['beneficiary_info'] is String) {
               info = jsonDecode(row['beneficiary_info'] as String);
             } else if (row['beneficiary_info'] is Map) {
-              info = Map<String, dynamic>.from(row['beneficiary_info'] as Map);
+              info = Map<String, dynamic>.from(
+                  row['beneficiary_info'] as Map);
             }
-          } catch (e) {
-            debugPrint('Error parsing beneficiary_info: $e');
+          } catch (_) {
             continue;
           }
 
-          // Get child details
+          /* ---------- CHILD CONDITION (NEW) ---------- */
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          final relation =
+              info['relation']?.toString().toLowerCase() ?? '';
+
+          final isChild = memberType == 'child' ||
+              relation == 'child' ||
+              relation == 'son' ||
+              relation == 'daughter';
+
+          if (!isChild) continue;
+
+          /* ---------- DOB & Age Check (3–15 months) ---------- */
           final dob = info['date_of_birth']?.toString() ??
               info['dob']?.toString();
-
-          // Only include children between 3-15 months
           if (!_isAgeInRange(dob)) continue;
 
+          /* ---------- Beneficiary ID ---------- */
           final beneficiaryId = row['unique_key']?.toString() ?? '';
           if (beneficiaryId.isEmpty) continue;
 
-          if (await _isCaseClosed(beneficiaryId)) {
-            continue;
-          }
+          /* ---------- Death Filters ---------- */
+          if (deceasedIds.contains(beneficiaryId)) continue;
+          if ((row['is_death'] ?? 0) == 1) continue;
 
+          /* ---------- Case Closed ---------- */
+          if (await _isCaseClosed(beneficiaryId)) continue;
+
+          /* ---------- Extract Fields ---------- */
           final name = _getValueFromMap(info, [
             'name',
             'child_name',
@@ -329,11 +380,7 @@ class _HBYCListState extends State<HBYCList> {
             'memberNameLocal'
           ]);
 
-          // Get gender
-          final gender = _getValueFromMap(info, [
-            'gender',
-            'sex'
-          ]);
+          final gender = _getValueFromMap(info, ['gender', 'sex']);
 
           final rchId = _getValueFromMap(info, [
             'rch_id',
@@ -343,14 +390,14 @@ class _HBYCListState extends State<HBYCList> {
             'richId'
           ]);
 
-          // Get registration date
-          final registrationDate = row['created_date_time']?.toString() ??
-              info['registration_date']?.toString() ??
-              info['createdAt']?.toString();
+          final registrationDate =
+              row['created_date_time']?.toString() ??
+                  info['registration_date']?.toString() ??
+                  info['createdAt']?.toString();
 
-          // Create the card data
+          /* ---------- Build Card ---------- */
           final card = <String, dynamic>{
-            'hhId': rowHhId,
+            'hhId': hhId,
             'RegitrationDate': _formatDate(registrationDate),
             'RegitrationType': 'HBYC',
             'BeneficiaryID': beneficiaryId,
@@ -365,20 +412,24 @@ class _HBYCListState extends State<HBYCList> {
 
           hbycChildren.add(card);
         } catch (e) {
-          debugPrint('Error processing beneficiary: $e');
+          debugPrint('⚠️ Error processing HBYC row: $e');
         }
       }
 
+      /* ------------------------------------------------------------
+     * STEP 5: Update UI
+     * ------------------------------------------------------------ */
       if (mounted) {
         setState(() {
           _hbycChildren = List<Map<String, dynamic>>.from(hbycChildren);
           _filtered = List<Map<String, dynamic>>.from(hbycChildren);
           _isLoading = false;
         });
-        debugPrint('Loaded ${hbycChildren.length} HBYC children');
+
+        debugPrint('✅ Loaded ${hbycChildren.length} HBYC children');
       }
     } catch (e) {
-      debugPrint('Error loading HBYC children: $e');
+      debugPrint('❌ Error loading HBYC children: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -547,7 +598,7 @@ class _HBYCListState extends State<HBYCList> {
                           return Image.asset(
                             'assets/images/sync.png',
                             width: 25,
-                            color: isSynced ? Colors.green : Colors.grey[500],
+                            color: isSynced ? null : Colors.grey[500],
                           );
                         },
                       ),

@@ -244,7 +244,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
         'beneficiaries_new',
         columns: ['*', 'is_death'],
         where: 'is_deleted = ? AND is_adult = ?',
-        whereArgs: [0, 0], // 0 for false, 1 for true
+        whereArgs: [0, 0],
       );
 
       print('📊 Found ${rows.length} total beneficiaries');
@@ -255,14 +255,12 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
           final rowHhId = row['household_ref_key']?.toString();
           if (rowHhId == null) continue;
 
-          // Parse beneficiary info
           final info = row['beneficiary_info'] is String
               ? jsonDecode(row['beneficiary_info'] as String)
               : row['beneficiary_info'];
 
           if (info is! Map) continue;
 
-          // Check if this is a direct child record (new format)
           final memberType = info['memberType']?.toString().toLowerCase() ?? '';
           final relation = info['relation']?.toString().toLowerCase() ?? '';
 
@@ -274,7 +272,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                 info['member_name']?.toString() ??
                 '';
 
-            if (name.isEmpty) continue; // Skip if no name
+            // if (name.isEmpty) continue; // Skip if no name
 
             final fatherName = info['fatherName']?.toString() ??
                 info['father_name']?.toString() ?? '';
