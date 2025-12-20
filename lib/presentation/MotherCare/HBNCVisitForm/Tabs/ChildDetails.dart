@@ -98,8 +98,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
           print('HBNC ChildDetails last ANC record for ${widget.beneficiaryId}: $s');
           try {
             final decoded = jsonDecode(s);
-            if (decoded is Map && decoded['form_data'] is Map) {
-              final fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
+            if (decoded is Map && decoded['anc_form'] is Map) {
+              final fd = Map<String, dynamic>.from(decoded['anc_form'] as Map);
               final outcome = fd['delivery_outcome']?.toString();
               final number_of_children = fd['number_of_children']?.toString();
               final idx = widget.childIndex <= 1 ? 1 : (widget.childIndex >= 3 ? 3 : widget.childIndex);

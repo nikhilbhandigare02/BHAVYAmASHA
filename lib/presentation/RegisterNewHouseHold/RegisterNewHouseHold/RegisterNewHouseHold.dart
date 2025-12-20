@@ -715,6 +715,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             headGender: head['Gender'] ?? '',
             isAddMember: true,
             headMobileNumber: _headForm?['mobileNo']?.toString(), // Add this line
+            headSpouseMobile: spouse['mobileNo']?.toString(), // Add this line
             spouseName: spouse['Name'] ?? '',
             spouseGender: spouse['Gender'] ?? '',
           ),
