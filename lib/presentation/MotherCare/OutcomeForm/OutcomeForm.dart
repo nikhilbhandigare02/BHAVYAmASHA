@@ -144,8 +144,8 @@ class _OutcomeFormView extends StatelessWidget {
                       }
                       if (formJsonRaw.isEmpty) return;
                       final decoded = jsonDecode(formJsonRaw);
-                      if (decoded is Map && decoded['form_data'] is Map) {
-                        final fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
+                      if (decoded is Map && decoded['anc_form'] is Map) {
+                        final fd = Map<String, dynamic>.from(decoded['anc_form'] as Map);
                         final flag = (fd['gives_birth_to_baby']?.toString() ?? '').toLowerCase();
                         if (flag == 'yes') {
                           print('ANC record with gives_birth_to_baby YES: ${results.first}');

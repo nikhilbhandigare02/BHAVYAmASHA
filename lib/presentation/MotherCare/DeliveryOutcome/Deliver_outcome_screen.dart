@@ -376,13 +376,12 @@ ORDER BY created_date_time DESC
               ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
               : <String, dynamic>{});
 
-          womanName = (info['headName'] ?? info['name'] ?? info['woman_name'] ?? 'Unknown').toString();
+          womanName = (info['headName'] ?? info['name'] ??info['memberName'] ?? info['spouseName']?? info['woman_name'] ?? 'Unknown').toString();
         } catch (e) {
           print('⚠️ Error parsing beneficiary_info: $e');
         }
       }
 
-      // Fallback to form data if name not found in beneficiary info
       if (womanName == 'Unknown') {
         womanName = (formData['woman_name'] ?? formData['name'] ?? formData['memberName'] ?? formData['headName'] ?? 'Unknown').toString();
       }
@@ -403,7 +402,6 @@ ORDER BY created_date_time DESC
         }
       }
 
-      // Fallback to form data if not found in beneficiary info
       if (husbandName == 'N/A') {
         husbandName = (formData['husband_name'] ?? formData['spouse_name'] ?? formData['spouseName'] ?? formData['husbandName'] ?? 'N/A').toString();
       }
