@@ -1292,7 +1292,6 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           }
                         }
 
-                        // In regular flow, try to get from widget.headMobileNo or AddFamilyHeadBloc
                         final headNo = (widget.headMobileNo?.trim() ??
                             context.read<AddFamilyHeadBloc>().state.mobileNo?.trim());
                         if (headNo != null && headNo.isNotEmpty) {
@@ -1400,7 +1399,6 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   onChanged: (v) => context.read<SpousBloc>().add(SpUpdateMobileNo(v.trim())),
                   validator: (value) {
                     if (state.mobileOwner == 'Family Head') {
-                      // Skip validation if mobile owner is Family Head
                       return null;
                     }
 
