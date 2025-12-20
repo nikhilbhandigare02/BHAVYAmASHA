@@ -32,8 +32,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     final db = await DatabaseProvider.instance.database;
 
     final currentUserData = await SecureStorageService.getCurrentUserData();
-    final String? ashaUniqueKey =
-    currentUserData?['unique_key']?.toString();
+    final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
     if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
       return [];
@@ -41,27 +40,28 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
     final rows = await db.rawQuery(
       '''
-WITH RankedMCA AS (
-  SELECT
-    mca.*,
-    ROW_NUMBER() OVER (
-      PARTITION BY mca.beneficiary_ref_key
-      ORDER BY mca.created_date_time DESC, mca.id DESC
-    ) AS rn
-  FROM mother_care_activities mca
-  WHERE
-    mca.is_deleted = 0
-    AND mca.current_user_key = ?
-)
-SELECT r.*
-FROM RankedMCA r
-INNER JOIN beneficiaries_new bn
-  ON r.beneficiary_ref_key = bn.unique_key
-WHERE
-  r.rn = 1
-  AND r.mother_care_state = 'anc_due_state'
-  AND bn.is_deleted = 0;
-''',
+    WITH RankedMCA AS (
+      SELECT
+        mca.*,
+        ROW_NUMBER() OVER (
+          PARTITION BY mca.beneficiary_ref_key
+          ORDER BY mca.created_date_time DESC, mca.id DESC
+        ) AS rn
+      FROM mother_care_activities mca
+      WHERE
+        mca.is_deleted = 0
+        AND mca.current_user_key = ?
+    )
+    SELECT r.*
+    FROM RankedMCA r
+    INNER JOIN beneficiaries_new bn
+      ON r.beneficiary_ref_key = bn.unique_key
+    WHERE
+      r.rn = 1
+      AND r.mother_care_state = 'anc_due_state'
+      AND bn.is_deleted = 0
+    ORDER BY r.created_date_time DESC; 
+    ''',
       [ashaUniqueKey],
     );
 

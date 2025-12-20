@@ -56,6 +56,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         where: 'child_care_state = ? AND is_deleted = 0',
         whereArgs: ['tracking_due'],
         columns: ['beneficiary_ref_key'],
+        orderBy: 'created_date_time DESC',
       );
 
       if (childCareActivities.isEmpty) {

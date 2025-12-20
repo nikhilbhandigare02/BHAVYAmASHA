@@ -117,7 +117,7 @@ class _HBNCListScreenState
         [refKey, beneficiaryId],
       );
       if (rows.isEmpty) return 1;
-      final s = rows.first['form_json']?.toString() ?? ''; 
+      final s = rows.first['form_json']?.toString() ?? '';
       if (s.isEmpty) return 1;
       final decoded = jsonDecode(s);
       final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['anc_form'] as Map? ?? {}) : <String, dynamic>{};
@@ -141,13 +141,14 @@ class _HBNCListScreenState
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
+      // 1. Get the list of valid beneficiaries
       final validBeneficiaries = await db.rawQuery('''
-        SELECT DISTINCT mca.beneficiary_ref_key 
-        FROM mother_care_activities mca
-        WHERE mca.mother_care_state ='hbnc_visit'
-        AND mca.is_deleted = 0
-        AND mca.current_user_key = ?
-      ''', [ashaUniqueKey]);
+      SELECT DISTINCT mca.beneficiary_ref_key 
+      FROM mother_care_activities mca
+      WHERE mca.mother_care_state ='hbnc_visit'
+      AND mca.is_deleted = 0
+      AND mca.current_user_key = ?
+    ''', [ashaUniqueKey]);
 
       if (validBeneficiaries.isEmpty) {
         print('No beneficiaries found with pnc_mother or hbnc_visit state');
@@ -157,12 +158,15 @@ class _HBNCListScreenState
       final beneficiaryKeys = validBeneficiaries.map((e) => e['beneficiary_ref_key']).toList();
 
       final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
+
+      // 2. Add ORDER BY DESC here
       final query = '''
-        SELECT * FROM followup_form_data 
-        WHERE forms_ref_key = ? 
-        AND current_user_key = ?
-        AND beneficiary_ref_key IN ($placeholders)
-      ''';
+      SELECT * FROM followup_form_data 
+      WHERE forms_ref_key = ? 
+      AND current_user_key = ?
+      AND beneficiary_ref_key IN ($placeholders)
+      ORDER BY created_date_time DESC
+    ''';
 
       final results = await db.rawQuery(
         query,

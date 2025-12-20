@@ -189,7 +189,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     final bool isTablet = width >= 600;
     print("DRAWER → Current appRoleId: $_appRoleId");
 // Set responsive drawer width
-    final double drawerWidth = isTablet ? width * 0.55 : width * 0.75;
+    final double drawerWidth = isTablet ? width * 0.55 : width * 0.69;
     return SizedBox(
         width: drawerWidth,
         child: Drawer(

@@ -128,7 +128,8 @@ class NetworkServiceApi extends BaseApiServices{
           );
       }
     } on SocketException catch (e) {
-      print('🌐 Network error: $e');
+      print('🌐 Network error: $e'
+      );
       throw NoInternetException('No Internet Connection: $e');
     } on TimeoutException catch (e) {
       print('⏰ Request timeout: $e');

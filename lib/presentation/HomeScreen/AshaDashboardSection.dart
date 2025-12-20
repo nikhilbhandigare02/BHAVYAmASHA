@@ -45,9 +45,24 @@ class AshaDashboardSection extends StatelessWidget {
 
   });
 
+  // Helper method to get responsive icon size
+  double getIconSize(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = screenSize.width > screenSize.height;
+    
+    // Use a combination of screen width and height to get a consistent size
+    final baseSize = isLandscape 
+        ? screenSize.height * 0.05  // Increased size in landscape (from 0.04)
+        : screenSize.width * 0.07;  // Normal size in portrait
+    
+    // Ensure the icon size has reasonable bounds
+    return baseSize.clamp(24.0, 36.0);  // Increased min and max sizes
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final iconSize = getIconSize(context);
 
     final List<Map<String, dynamic>> mainGridItems = [
       {"image": 'assets/images/plus.png', "label": l10n.gridRegisterNewHousehold},
@@ -124,13 +139,18 @@ class AshaDashboardSection extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Image.asset(
-                                    item['image'],
-                                    width: 7.w,
-                                    height: 7.w,
-                                    fit: BoxFit.contain,
-                                    // Make the plus icon for "Register New Household" use primary color
-                                    color: index == 0 ? AppColors.primary : null,
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: iconSize,
+                                      maxHeight: iconSize,
+                                    ),
+                                    child: Image.asset(
+                                      item['image'],
+                                      width: iconSize,
+                                      height: iconSize,
+                                      fit: BoxFit.contain,
+                                      color: index == 0 ? AppColors.primary : null,
+                                    ),
                                   ),
                                   SizedBox(height: 1.h),
                                   Expanded(
@@ -192,10 +212,17 @@ class AshaDashboardSection extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Image.asset(
-                            middleBox['image'],
-                            width: 7.w,
-                            height: 7.w,
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: iconSize,
+                              maxHeight: iconSize,
+                            ),
+                            child: Image.asset(
+                              middleBox['image'],
+                              width: iconSize,
+                              height: iconSize,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                           SizedBox(width: 3.w),
                           Text(
@@ -350,7 +377,6 @@ class AshaDashboardSection extends StatelessWidget {
   void _onBottomGridTap(BuildContext context, int index) {
     int dynamicIndex = index;
 
-    // If appRoleId != 4, cluster meeting is removed, so adjust index
     bool hasCluster = appRoleId == 4;
 
     if (!hasCluster && index >= 1) {
