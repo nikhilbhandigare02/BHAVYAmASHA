@@ -104,9 +104,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   final Map<String, String> _adultRelationByName = {};
 
 
-
-  int _ageFromDob(DateTime dob) => DateTime.now().year - dob.year;
-
   Widget _section(Widget child) =>
       Padding(padding: const EdgeInsets.only(bottom: 4), child: child);
 
@@ -2617,14 +2614,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           String? mobileNumber;
                                           bool shouldFetchFromDb = true;
 
-                                          if (v == 'Mother' && widget.headSpouseMobile != null &&
-                                              widget.headSpouseMobile!.isNotEmpty) {
-                                            mobileNumber = widget.headSpouseMobile;
-                                            print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
-                                            shouldFetchFromDb = false;
+                                          if (v == 'Mother') {
+                                            // First check if we have spouse mobile in props
+                                            if (widget.headSpouseMobile != null && widget.headSpouseMobile!.isNotEmpty) {
+                                              mobileNumber = widget.headSpouseMobile;
+                                              print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
+                                              shouldFetchFromDb = false;
+                                            } 
+                                            // Then check if we have a mobile number in the state (from spouse details)
+                                            else if (state.mobileNo != null && state.mobileNo!.isNotEmpty) {
+                                              mobileNumber = state.mobileNo;
+                                              print('📱 [AddNewMember] Using spouse mobile from state: $mobileNumber');
+                                              shouldFetchFromDb = false;
+                                            }
                                           }
                                           else if ((v == 'Family Head' || v == 'Father') &&
-                                              widget.isAddMember &&
                                               widget.headMobileNumber != null &&
                                               widget.headMobileNumber!.isNotEmpty) {
                                             mobileNumber = widget.headMobileNumber;

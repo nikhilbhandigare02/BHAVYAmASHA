@@ -11,6 +11,7 @@ import '../../../../core/config/themes/CustomColors.dart';
 
 import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
+import '../../../../data/SecureStorage/SecureStorage.dart';
 import '../ANCVisitForm/ANCVisitForm.dart';
 
 class Ancvisitlistscreen extends StatefulWidget {
@@ -30,44 +31,63 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   Future<List<Map<String, dynamic>>> _getAncDueRecords() async {
     final db = await DatabaseProvider.instance.database;
 
+    final currentUserData = await SecureStorageService.getCurrentUserData();
+    final String? ashaUniqueKey =
+    currentUserData?['unique_key']?.toString();
+
+    if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+      return [];
+    }
+
     final rows = await db.rawQuery('''
-  SELECT mca.*
-FROM mother_care_activities mca
-INNER JOIN (
-    SELECT beneficiary_ref_key,
-           MAX(created_date_time) AS max_date
-    FROM mother_care_activities
-    WHERE mother_care_state = 'anc_due'
-    GROUP BY beneficiary_ref_key
-) latest
-  ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
- AND mca.created_date_time = latest.max_date
-INNER JOIN beneficiaries_new bn
-  ON mca.beneficiary_ref_key = bn.unique_key
-WHERE bn.is_deleted = 0;
-
-
-  ''');
+    SELECT mca.*
+    FROM mother_care_activities mca
+    INNER JOIN (
+        SELECT beneficiary_ref_key,
+               MAX(created_date_time) AS max_date
+        FROM mother_care_activities
+        WHERE mother_care_state = 'anc_due'
+          AND current_user_key = ?
+        GROUP BY beneficiary_ref_key
+    ) latest
+      ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
+     AND mca.created_date_time = latest.max_date
+    INNER JOIN beneficiaries_new bn
+      ON mca.beneficiary_ref_key = bn.unique_key
+    WHERE bn.is_deleted = 0
+      AND mca.current_user_key = ?;
+  ''', [ashaUniqueKey, ashaUniqueKey]);
 
     return rows;
   }
 
+
   Future<Set<String>> _getDeliveredBeneficiaryIds() async {
     final db = await DatabaseProvider.instance.database;
+
+    final currentUserData = await SecureStorageService.getCurrentUserData();
+    final String? ashaUniqueKey =
+    currentUserData?['unique_key']?.toString();
+
+    if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+      return {};
+    }
 
     final rows = await db.query(
       'followup_form_data',
       where: '''
       forms_ref_key = ?
+      AND current_user_key = ?
       AND (
         LOWER(form_json) LIKE '%gives_birth_to_baby%'
+        OR LOWER(form_json) LIKE '%delivery_outcome%'
       )
       AND (
         LOWER(form_json) LIKE '%yes%'
         OR LOWER(form_json) LIKE '%live_birth%'
       )
     ''',
-      whereArgs: ['bt7gs9rl1a5d26mz'],
+      whereArgs: ['bt7gs9rl1a5d26mz', ashaUniqueKey],
       columns: ['beneficiary_ref_key'],
       distinct: true,
     );
@@ -495,13 +515,13 @@ WHERE bn.is_deleted = 0;
             if (ancForms.isNotEmpty) {
               final latest = ancForms.first;
               Map<String, dynamic> fd = {};
-              if (latest['form_data'] is Map) {
-                fd = Map<String, dynamic>.from(latest['form_data'] as Map);
+              if (latest['anc_form'] is Map) {
+                fd = Map<String, dynamic>.from(latest['anc_form'] as Map);
               } else if (latest['form_json'] is String && (latest['form_json'] as String).isNotEmpty) {
                 try {
                   final decoded = jsonDecode(latest['form_json'] as String);
-                  if (decoded is Map && decoded['form_data'] is Map) {
-                    fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
+                  if (decoded is Map && decoded['anc_form'] is Map) {
+                    fd = Map<String, dynamic>.from(decoded['anc_form'] as Map);
                   }
                 } catch (_) {}
               }

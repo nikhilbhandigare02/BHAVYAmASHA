@@ -64,55 +64,74 @@ class _DeliveryOutcomeScreenState
     try {
       final db = await DatabaseProvider.instance.database;
 
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
+
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        setState(() => _isLoading = false);
+        return;
+      }
       const ancRefKey = 'bt7gs9rl1a5d26mz';
 
       print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
 
-      final ancForms = await db.rawQuery('''
-        WITH LatestForms AS (
-          SELECT
-            f.beneficiary_ref_key,
-            f.form_json,
-            f.household_ref_key,
-            f.forms_ref_key,
-            f.created_date_time,
-            f.id as form_id,
-            ROW_NUMBER() OVER (
-              PARTITION BY f.beneficiary_ref_key
-              ORDER BY f.created_date_time DESC, f.id DESC
-            ) as rn
-          FROM ${FollowupFormDataTable.table} f
-          WHERE
-            f.forms_ref_key = '$ancRefKey'
-            AND f.is_deleted = 0
-            AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
-        )
-        SELECT * FROM LatestForms WHERE rn = 1
-       
-        UNION
-       
-        -- Also include any records with mother_care_state = 'delivery_outcome' that might not be in the forms
-        SELECT
-          mca.beneficiary_ref_key,
-          '{}' as form_json,
-          mca.household_ref_key,
-          '' as forms_ref_key,
-          mca.created_date_time,
-          mca.id as form_id,
-          1 as rn
-        FROM ${MotherCareActivitiesTable.table} mca
-        WHERE
-          mca.mother_care_state = 'delivery_outcome'
-          AND mca.is_deleted = 0
-          AND mca.beneficiary_ref_key NOT IN (
-            SELECT beneficiary_ref_key
-            FROM ${FollowupFormDataTable.table}
-            WHERE forms_ref_key = '$ancRefKey'
-            AND is_deleted = 0
-            AND form_json LIKE '%"gives_birth_to_baby":"Yes"%'
-          )
-        ORDER BY created_date_time DESC
-      ''');
+      final ancForms = await db.rawQuery(
+        '''
+WITH LatestForms AS (
+  SELECT
+    f.beneficiary_ref_key,
+    f.form_json,
+    f.household_ref_key,
+    f.forms_ref_key,
+    f.created_date_time,
+    f.id as form_id,
+    ROW_NUMBER() OVER (
+      PARTITION BY f.beneficiary_ref_key
+      ORDER BY f.created_date_time DESC, f.id DESC
+    ) as rn
+  FROM ${FollowupFormDataTable.table} f
+  WHERE
+    f.forms_ref_key = ?
+    AND f.is_deleted = 0
+    AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+    AND f.current_user_key = ?
+)
+SELECT * FROM LatestForms WHERE rn = 1
+
+UNION
+
+SELECT
+  mca.beneficiary_ref_key,
+  '{}' as form_json,
+  mca.household_ref_key,
+  '' as forms_ref_key,
+  mca.created_date_time,
+  mca.id as form_id,
+  1 as rn
+FROM ${MotherCareActivitiesTable.table} mca
+WHERE
+  mca.mother_care_state = 'delivery_outcome'
+  AND mca.is_deleted = 0
+  AND mca.beneficiary_ref_key NOT IN (
+    SELECT beneficiary_ref_key
+    FROM ${FollowupFormDataTable.table}
+    WHERE
+      forms_ref_key = ?
+      AND is_deleted = 0
+      AND form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+      AND current_user_key = ?
+  )
+ORDER BY created_date_time DESC
+''',
+        [
+          ancRefKey,
+          ashaUniqueKey,
+          ancRefKey,
+          ashaUniqueKey,
+        ],
+      );
+
 
       print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
 
@@ -130,12 +149,11 @@ class _DeliveryOutcomeScreenState
         print('\n📋 Processing ANC Form for beneficiary: $beneficiaryRefKey');
 
         try {
-          // Fetch the beneficiary record
           final db = await DatabaseProvider.instance.database;
           final beneficiary = await db.query(
             'beneficiaries_new',
-            where: 'unique_key = ?',
-            whereArgs: [beneficiaryRefKey],
+            where: 'unique_key = ? AND current_user_key = ?',
+            whereArgs: [beneficiaryRefKey, ashaUniqueKey],
           );
 
           if (beneficiary.isNotEmpty) {
@@ -200,8 +218,8 @@ class _DeliveryOutcomeScreenState
           final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome];
           final existingOutcome = await db.query(
             FollowupFormDataTable.table,
-            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0',
-            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey],
+            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 AND current_user_key = ?',
+            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey, ashaUniqueKey],
             limit: 1,
           );
           if (existingOutcome.isNotEmpty) {
@@ -219,8 +237,8 @@ class _DeliveryOutcomeScreenState
               final db = await DatabaseProvider.instance.database;
               final results = await db.query(
                 'beneficiaries_new',
-                where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-                whereArgs: [beneficiaryRefKey],
+                where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND current_user_key = ?',
+                whereArgs: [beneficiaryRefKey, ashaUniqueKey],
                 limit: 1,
               );
 

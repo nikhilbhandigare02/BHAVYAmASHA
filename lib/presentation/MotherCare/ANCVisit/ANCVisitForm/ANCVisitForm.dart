@@ -411,8 +411,8 @@ class _AncvisitformState extends State<Ancvisitform> {
           if (formData['form_json'] != null) {
             try {
               final formJson = jsonDecode(formData['form_json'] as String);
-              if (formJson is Map && formJson['form_data'] is Map) {
-                final formDataMap = formJson['form_data'] as Map<String, dynamic>;
+              if (formJson is Map && formJson['anc_form'] is Map) {
+                final formDataMap = formJson['anc_form'] as Map<String, dynamic>;
                 print('📝 Loaded form data: $formDataMap');
 
                 // Update the form with the loaded data
@@ -466,10 +466,10 @@ class _AncvisitformState extends State<Ancvisitform> {
               final latest = byBeneficiary.first;
 
               // Fixed: Proper conditional expression with type casting
-              final fd = latest['form_data'] is Map
-                  ? Map<String, dynamic>.from(latest['form_data'] as Map)
+              final fd = latest['anc_form'] is Map
+                  ? Map<String, dynamic>.from(latest['anc_form'] as Map)
                   : (latest['form_json'] != null
-                  ? ((jsonDecode(latest['form_json'] as String) as Map<String, dynamic>?)?['form_data'] as Map<String, dynamic>?) ?? {}
+                  ? ((jsonDecode(latest['form_json'] as String) as Map<String, dynamic>?)?['anc_form'] as Map<String, dynamic>?) ?? {}
                   : <String, dynamic>{});
 
               print('📝 Loaded fallback ANC form data: $fd');
@@ -740,7 +740,7 @@ class _AncvisitformState extends State<Ancvisitform> {
         } catch (_) {
           continue;
         }
-        final data = root['form_data'];
+        final data = root['anc_form'];
         if (data is Map) {
           final lmpStr = data['lmp_date']?.toString();
           if (lmpStr != null && lmpStr.isNotEmpty) {

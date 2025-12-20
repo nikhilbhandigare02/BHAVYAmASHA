@@ -4,7 +4,7 @@ class FollowupFormDataTable {
   static const String eligibleCoupleRegistration = 'eligible_couple_registration';
   static const String eligibleCoupleTrackingDue = 'eligible_couple_tracking_due';
   static const String eligibleCoupleReregistration = 'eligible_couple_re_registration';
-  static const String ancDueRegistration = 'anc_due_registration';
+  static const String ancDueRegistration = 'mother_care';
   static const String deliveryOutcome = 'delivery_outcome';
   static const String pncMother = 'pnc_mother';
   static const String infantDetails = 'infant_details';
@@ -19,7 +19,7 @@ class FollowupFormDataTable {
     eligibleCoupleRegistration: 'Eligible Couple Registration',
     eligibleCoupleTrackingDue: 'Eligible Couple Tracking Due',
     eligibleCoupleReregistration: 'Eligible Couple Re-registration',
-    ancDueRegistration: 'ANC Due Registration',
+    ancDueRegistration: 'mother_care',
     deliveryOutcome: 'Delivery Outcome',
     pncMother: 'PNC Mother',
     infantDetails: 'Infant Details',
@@ -67,4 +67,15 @@ class FollowupFormDataTable {
     is_deleted INTEGER
   );
   ''';
+
+
+
+  static String getFormTypeFromRefKey(String formsRefKey) {
+    for (final entry in formUniqueKeys.entries) {
+      if (entry.value == formsRefKey) {
+        return entry.key;
+      }
+    }
+    return '';
+  }
 }
