@@ -2603,25 +2603,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         if (v == null) return;
                                         final bloc = context.read<AddnewfamilymemberBloc>();
 
-                                        // Always update the mobile owner first
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        // Clear the mobile number first when changing the owner
                                         bloc.add(AnmUpdateMobileNo(''));
 
-                                        // Check if we should prefill the mobile number
                                         if (v == 'Family Head' || v == "Father" || v == "Mother") {
                                           String? mobileNumber;
                                           bool shouldFetchFromDb = true;
 
                                           if (v == 'Mother') {
-                                            // First check if we have spouse mobile in props
                                             if (widget.headSpouseMobile != null && widget.headSpouseMobile!.isNotEmpty) {
                                               mobileNumber = widget.headSpouseMobile;
                                               print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
                                               shouldFetchFromDb = false;
                                             } 
-                                            // Then check if we have a mobile number in the state (from spouse details)
                                             else if (state.mobileNo != null && state.mobileNo!.isNotEmpty) {
                                               mobileNumber = state.mobileNo;
                                               print('📱 [AddNewMember] Using spouse mobile from state: $mobileNumber');
@@ -2636,7 +2631,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             shouldFetchFromDb = false;
                                           }
 
-                                          // 3. If not found in props, try to fetch from database
                                           if (shouldFetchFromDb && _isMemberDetails && widget.hhId != null) {
                                             try {
                                               if (v == 'Mother') {
@@ -3611,71 +3605,66 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       value: state.mobileOwner,
                                       onChanged: (v) async {
                                         if (v == null) return;
-                                        final bloc = context
-                                            .read<AddnewfamilymemberBloc>();
+                                        final bloc = context.read<AddnewfamilymemberBloc>();
+
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        if (v == 'Family Head' ||
-                                            v == "Father") {
-                                          if (widget.isAddMember &&
-                                              widget.headMobileNumber != null &&
-                                              widget
-                                                  .headMobileNumber!
-                                                  .isNotEmpty) {
-                                            print(
-                                              '📱 [AddNewMember] Using head mobile from props: ${widget.headMobileNumber}',
-                                            );
-                                            bloc.add(
-                                              AnmUpdateMobileNo(
-                                                widget.headMobileNumber!,
-                                              ),
-                                            );
-                                          } else if (_isMemberDetails &&
-                                              widget.hhId != null) {
-                                            try {
-                                              final headMobile =
-                                              await LocalStorageDao.instance
-                                                  .getHeadMobileNumber(
-                                                widget.hhId!,
-                                              );
-                                              print(
-                                                '📱 [AddNewMember] Fetched mobile from DB: $headMobile',
-                                              );
-                                              if (headMobile != null &&
-                                                  headMobile.isNotEmpty) {
-                                                bloc.add(
-                                                  AnmUpdateMobileNo(headMobile),
-                                                );
-                                              } else if (mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      l?.no_mobile_found_for_head ?? 'No mobile number found for the head of family',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            } catch (e) {
-                                              print(
-                                                '❌ [AddNewMember] Error fetching from DB: $e',
-                                              );
-                                              if (mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      l?.error_loading_head_mobile ?? 'Error loading head of family mobile number',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
+                                        bloc.add(AnmUpdateMobileNo(''));
+
+                                        if (v == 'Family Head' || v == "Father" || v == "Mother") {
+                                          String? mobileNumber;
+                                          bool shouldFetchFromDb = true;
+
+                                          if (v == 'Mother') {
+                                            if (widget.headSpouseMobile != null && widget.headSpouseMobile!.isNotEmpty) {
+                                              mobileNumber = widget.headSpouseMobile;
+                                              print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
+                                              shouldFetchFromDb = false;
+                                            }
+                                            else if (state.mobileNo != null && state.mobileNo!.isNotEmpty) {
+                                              mobileNumber = state.mobileNo;
+                                              print('📱 [AddNewMember] Using spouse mobile from state: $mobileNumber');
+                                              shouldFetchFromDb = false;
                                             }
                                           }
+                                          else if ((v == 'Family Head' || v == 'Father') &&
+                                              widget.headMobileNumber != null &&
+                                              widget.headMobileNumber!.isNotEmpty) {
+                                            mobileNumber = widget.headMobileNumber;
+                                            print('📱 [AddNewMember] Using head mobile from props: $mobileNumber');
+                                            shouldFetchFromDb = false;
+                                          }
+
+                                          if (shouldFetchFromDb && _isMemberDetails && widget.hhId != null) {
+                                            try {
+                                              if (v == 'Mother') {
+                                                mobileNumber = await LocalStorageDao.instance.getSpouseMobileNumber(widget.hhId!);
+                                                print('📱 [AddNewMember] Fetched spouse mobile from DB: $mobileNumber');
+                                              } else {
+                                                mobileNumber = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                                print('📱 [AddNewMember] Fetched head mobile from DB: $mobileNumber');
+                                              }
+                                            } catch (e) {
+                                              print('❌ Error fetching mobile number: $e');
+                                            }
+                                          }
+
+                                          // Update the mobile number if found
+                                          if (mobileNumber != null && mobileNumber.isNotEmpty) {
+                                            print('📱 [AddNewMember] Setting mobile number: $mobileNumber for $v');
+                                            bloc.add(AnmUpdateMobileNo(mobileNumber));
+                                          } else if (mobileNumber == null && mounted) {
+                                            // Show error if no mobile number found
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  l?.no_mobile_found_for_head ?? 'No mobile number found',
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         } else {
-                                          // Clear mobile number if not Family Head
+                                          // For any other selection, clear the mobile number
                                           bloc.add(AnmUpdateMobileNo(''));
                                         }
                                       },

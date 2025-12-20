@@ -117,10 +117,10 @@ class _HBNCListScreenState
         [refKey, beneficiaryId],
       );
       if (rows.isEmpty) return 1;
-      final s = rows.first['form_json']?.toString() ?? '';
+      final s = rows.first['form_json']?.toString() ?? ''; 
       if (s.isEmpty) return 1;
       final decoded = jsonDecode(s);
-      final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['form_data'] as Map? ?? {}) : <String, dynamic>{};
+      final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['anc_form'] as Map? ?? {}) : <String, dynamic>{};
       final raw = fd['number_of_children']?.toString().trim().toLowerCase() ?? '';
       if (raw.isEmpty) return 1;
       if (raw == 'one' || raw == 'single' || raw == '1') return 1;
@@ -141,7 +141,6 @@ class _HBNCListScreenState
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      // First, get all beneficiary_ref_keys that have either pnc_mother or hbnc_visit state in mother_care_activities
       final validBeneficiaries = await db.rawQuery('''
         SELECT DISTINCT mca.beneficiary_ref_key 
         FROM mother_care_activities mca
@@ -157,7 +156,6 @@ class _HBNCListScreenState
 
       final beneficiaryKeys = validBeneficiaries.map((e) => e['beneficiary_ref_key']).toList();
 
-      // Then get the delivery outcome data only for those beneficiaries
       final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
       final query = '''
         SELECT * FROM followup_form_data 

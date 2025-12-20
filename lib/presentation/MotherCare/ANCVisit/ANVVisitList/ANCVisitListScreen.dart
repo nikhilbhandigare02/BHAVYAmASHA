@@ -39,65 +39,34 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       return [];
     }
 
-    final rows = await db.rawQuery('''
-    SELECT mca.*
-    FROM mother_care_activities mca
-    INNER JOIN (
-        SELECT beneficiary_ref_key,
-               MAX(created_date_time) AS max_date
-        FROM mother_care_activities
-        WHERE mother_care_state = 'anc_due_state' 
-          AND current_user_key = ?
-        GROUP BY beneficiary_ref_key
-    ) latest
-      ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
-     AND mca.created_date_time = latest.max_date
-    INNER JOIN beneficiaries_new bn
-      ON mca.beneficiary_ref_key = bn.unique_key
-    WHERE bn.is_deleted = 0
-      AND mca.current_user_key = ?;
-  ''', [ashaUniqueKey, ashaUniqueKey]);
+    final rows = await db.rawQuery(
+      '''
+WITH RankedMCA AS (
+  SELECT
+    mca.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY mca.beneficiary_ref_key
+      ORDER BY mca.created_date_time DESC, mca.id DESC
+    ) AS rn
+  FROM mother_care_activities mca
+  WHERE
+    mca.is_deleted = 0
+    AND mca.current_user_key = ?
+)
+SELECT r.*
+FROM RankedMCA r
+INNER JOIN beneficiaries_new bn
+  ON r.beneficiary_ref_key = bn.unique_key
+WHERE
+  r.rn = 1
+  AND r.mother_care_state = 'anc_due_state'
+  AND bn.is_deleted = 0;
+''',
+      [ashaUniqueKey],
+    );
 
     return rows;
   }
-
-
-  // Future<Set<String>> _getDeliveredBeneficiaryIds() async {
-  //   final db = await DatabaseProvider.instance.database;
-  //
-  //   final currentUserData = await SecureStorageService.getCurrentUserData();
-  //   final String? ashaUniqueKey =
-  //   currentUserData?['unique_key']?.toString();
-  //
-  //   if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
-  //     return {};
-  //   }
-  //
-  //   final rows = await db.query(
-  //     'followup_form_data',
-  //     where: '''
-  //     forms_ref_key = ?
-  //     AND current_user_key = ?
-  //     AND (
-  //       LOWER(form_json) LIKE '%gives_birth_to_baby%'
-  //       OR LOWER(form_json) LIKE '%delivery_outcome%'
-  //     )
-  //     AND (
-  //       LOWER(form_json) LIKE '%yes%'
-  //       OR LOWER(form_json) LIKE '%live_birth%'
-  //     )
-  //   ''',
-  //     whereArgs: ['bt7gs9rl1a5d26mz', ashaUniqueKey],
-  //     columns: ['beneficiary_ref_key'],
-  //     distinct: true,
-  //   );
-  //
-  //   return rows
-  //       .map((e) => e['beneficiary_ref_key']?.toString())
-  //       .where((id) => id != null && id!.isNotEmpty)
-  //       .cast<String>()
-  //       .toSet();
-  // }
 
   Future<void> _loadPregnantWomen() async {
     setState(() => _isLoading = true);
@@ -246,6 +215,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
   DateTime _calculateEdd(DateTime lmp) {
     return _dateAfterWeeks(lmp, 40);
+
   }
 
   Map<String, DateTime> _calculateAncDateRanges(DateTime lmp) {

@@ -59,7 +59,9 @@ class _DeliveryOutcomeScreenState
   }
 
   Future<void> _loadPregnancyOutcomeeCouples() async {
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final db = await DatabaseProvider.instance.database;
@@ -72,24 +74,35 @@ class _DeliveryOutcomeScreenState
         setState(() => _isLoading = false);
         return;
       }
+
       const ancRefKey = 'bt7gs9rl1a5d26mz';
 
-      print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
-
-      final ancForms = await db.rawQuery(
+      final results = await db.rawQuery(
         '''
-WITH LatestForms AS (
+WITH LatestMCA AS (
+  SELECT
+    mca.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY mca.beneficiary_ref_key
+      ORDER BY mca.created_date_time DESC, mca.id DESC
+    ) AS rn
+  FROM ${MotherCareActivitiesTable.table} mca
+  WHERE mca.is_deleted = 0
+),
+DeliveryOutcomeOnly AS (
+  SELECT *
+  FROM LatestMCA
+  WHERE rn = 1
+    AND mother_care_state = 'delivery_outcome'
+),
+LatestANC AS (
   SELECT
     f.beneficiary_ref_key,
     f.form_json,
-    f.household_ref_key,
-    f.forms_ref_key,
-    f.created_date_time,
-    f.id as form_id,
     ROW_NUMBER() OVER (
       PARTITION BY f.beneficiary_ref_key
       ORDER BY f.created_date_time DESC, f.id DESC
-    ) as rn
+    ) AS rn
   FROM ${FollowupFormDataTable.table} f
   WHERE
     f.forms_ref_key = ?
@@ -97,222 +110,110 @@ WITH LatestForms AS (
     AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
     AND f.current_user_key = ?
 )
-SELECT * FROM LatestForms WHERE rn = 1
-
-UNION
-
 SELECT
-  mca.beneficiary_ref_key,
-  '{}' as form_json,
-  mca.household_ref_key,
-  '' as forms_ref_key,
-  mca.created_date_time,
-  mca.id as form_id,
-  1 as rn
-FROM ${MotherCareActivitiesTable.table} mca
-WHERE
-  mca.mother_care_state = 'delivery_outcome'
-  AND mca.is_deleted = 0
-  AND mca.beneficiary_ref_key NOT IN (
-    SELECT beneficiary_ref_key
-    FROM ${FollowupFormDataTable.table}
-    WHERE
-      forms_ref_key = ?
-      AND is_deleted = 0
-      AND form_json LIKE '%"gives_birth_to_baby":"Yes"%'
-      AND current_user_key = ?
-  )
-ORDER BY created_date_time DESC
+  d.beneficiary_ref_key,
+  d.household_ref_key,
+  d.created_date_time,
+  d.id AS form_id,
+  COALESCE(a.form_json, '{}') AS form_json
+FROM DeliveryOutcomeOnly d
+LEFT JOIN LatestANC a
+  ON a.beneficiary_ref_key = d.beneficiary_ref_key
+ AND a.rn = 1
+ORDER BY d.created_date_time DESC
 ''',
         [
-          ancRefKey,
-          ashaUniqueKey,
           ancRefKey,
           ashaUniqueKey,
         ],
       );
 
-
-      print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
-
-
-      print('🔍 Found ${ancForms.length} ANC forms with gives_birth_to_baby: Yes');
-
-// For each form, fetch and print the beneficiary details
-      for (var form in ancForms) {
-        final beneficiaryRefKey = form['beneficiary_ref_key'] as String?;
-        if (beneficiaryRefKey == null) {
-          print('⚠️ Form missing beneficiary_ref_key: $form');
-          continue;
-        }
-
-        print('\n📋 Processing ANC Form for beneficiary: $beneficiaryRefKey');
-
-        try {
-          final db = await DatabaseProvider.instance.database;
-          final beneficiary = await db.query(
-            'beneficiaries_new',
-            where: 'unique_key = ? AND current_user_key = ?',
-            whereArgs: [beneficiaryRefKey, ashaUniqueKey],
-          );
-
-          if (beneficiary.isNotEmpty) {
-            final beneficiaryData = beneficiary.first;
-            print('👤 Beneficiary Record:');
-            print('   - Unique Key: ${beneficiaryData['unique_key']}');
-            print('   - Household Ref Key: ${beneficiaryData['household_ref_key']}');
-
-            final beneficiaryInfo = beneficiaryData['beneficiary_info'];
-            if (beneficiaryInfo != null) {
-              try {
-
-                final infoJson = beneficiaryInfo is String ? beneficiaryInfo : jsonEncode(beneficiaryInfo);
-                final info = jsonDecode(infoJson) as Map<String, dynamic>;
-
-                print('   - Beneficiary Info:');
-                info.forEach((key, value) {
-                  print('     - $key: $value');
-                });
-              } catch (e) {
-                print('   - Error parsing beneficiary_info: $e');
-                print('   - Raw beneficiary_info type: ${beneficiaryInfo.runtimeType}');
-                print('   - Raw beneficiary_info value: $beneficiaryInfo');
-              }
-            } else {
-              print('   - No beneficiary_info available');
-            }
-          } else {
-            print('❌ No beneficiary found for ref key: $beneficiaryRefKey');
-          }
-        } catch (e) {
-          print('❌ Error fetching beneficiary: $e');
-        }
-      }
-
-
-
-      if (ancForms.isEmpty) {
-        print('ℹ️ No ANC forms found with gives_birth_to_baby: Yes');
+      if (results.isEmpty) {
         setState(() {
-          _isLoading = false;
           _allData = [];
           _filtered = [];
+          _isLoading = false;
         });
         return;
       }
 
-      // Process each form
       final List<Map<String, dynamic>> processedData = [];
 
+      for (final row in results) {
+        final beneficiaryRefKey =
+        row['beneficiary_ref_key']?.toString();
 
-
-      for (final form in ancForms) {
-        try {
-          // Get beneficiary details
-          final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
-          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            print('⚠️ Form missing beneficiary_ref_key: $form');
-            continue;
-          }
-
-          final deliveryOutcomeKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome];
-          final existingOutcome = await db.query(
-            FollowupFormDataTable.table,
-            where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 AND current_user_key = ?',
-            whereArgs: [deliveryOutcomeKey, beneficiaryRefKey, ashaUniqueKey],
-            limit: 1,
-          );
-          if (existingOutcome.isNotEmpty) {
-            continue;
-          }
-
-          Map<String, dynamic>? beneficiaryRow;
-          try {
-
-            beneficiaryRow = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryRefKey);
-
-
-            if (beneficiaryRow == null) {
-              print('ℹ️ Beneficiary not found in beneficiaries_new, trying beneficiaries table');
-              final db = await DatabaseProvider.instance.database;
-              final results = await db.query(
-                'beneficiaries_new',
-                where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND current_user_key = ?',
-                whereArgs: [beneficiaryRefKey, ashaUniqueKey],
-                limit: 1,
-              );
-
-              if (results.isNotEmpty) {
-                final legacy = Map<String, dynamic>.from(results.first);
-                Map<String, dynamic> info = {};
-                try {
-                  final form = legacy['form_json'];
-                  if (form is String && form.isNotEmpty) {
-                    final decoded = jsonDecode(form);
-                    if (decoded is Map) {
-                      info = Map<String, dynamic>.from(decoded);
-                    }
-                  }
-                } catch (_) {}
-
-                if (!info.containsKey('dob') && info['date_of_birth'] != null) {
-                  info['dob'] = info['date_of_birth'];
-                }
-                if (!info.containsKey('mobileNo') && info['mobile_no'] != null) {
-                  info['mobileNo'] = info['mobile_no'];
-                }
-
-                beneficiaryRow = {
-                  ...legacy,
-                  'beneficiary_info': info,
-                  'geo_location': {},
-                  'death_details': {},
-                };
-              }
-            }
-
-            if (beneficiaryRow != null) {
-              print('✅ Found beneficiary data: ${beneficiaryRow['beneficiary_info']}');
-            } else {
-              print('⚠️ Could not find beneficiary with unique_key=$beneficiaryRefKey in any table');
-            }
-          } catch (e) {
-            print('⚠️ Error fetching beneficiary by unique_key=$beneficiaryRefKey: $e');
-          }
-
-          final formattedData = _formatCoupleData(
-            form,
-            {},
-            {},
-            isHead: true,
-            beneficiaryRow: beneficiaryRow,
-          );
-          processedData.add(formattedData);
-
-        } catch (e) {
-          print('❌ Error processing form: $e');
-          print('Form data: $form');
+        if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
+          continue;
         }
+
+        Map<String, dynamic>? beneficiaryRow;
+
+        try {
+          beneficiaryRow = await LocalStorageDao.instance
+              .getBeneficiaryByUniqueKey(beneficiaryRefKey);
+
+          if (beneficiaryRow == null) {
+            final fallback = await db.query(
+              'beneficiaries_new',
+              where:
+              'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND current_user_key = ?',
+              whereArgs: [beneficiaryRefKey, ashaUniqueKey],
+              limit: 1,
+            );
+
+            if (fallback.isNotEmpty) {
+              final legacy = Map<String, dynamic>.from(fallback.first);
+
+              Map<String, dynamic> info = {};
+              try {
+                final formJson = legacy['form_json'];
+                if (formJson is String && formJson.isNotEmpty) {
+                  final decoded = jsonDecode(formJson);
+                  if (decoded is Map) {
+                    info = Map<String, dynamic>.from(decoded);
+                  }
+                }
+              } catch (_) {}
+
+              beneficiaryRow = {
+                ...legacy,
+                'beneficiary_info': info,
+                'geo_location': {},
+                'death_details': {},
+              };
+            }
+          }
+        } catch (_) {}
+
+        final formatted = _formatCoupleData(
+          row,
+          {},
+          {},
+          isHead: true,
+          beneficiaryRow: beneficiaryRow,
+        );
+
+        processedData.add(formatted);
       }
 
-      print('✅ Processed ${processedData.length} out of ${ancForms.length} forms');
-
-      // Set the data ONCE at the end
       setState(() {
         _allData = processedData;
         _filtered = processedData;
         _isLoading = false;
       });
-
     } catch (e) {
       print('❌ Error loading pregnancy outcome couples: $e');
       setState(() {
-        _isLoading = false;
         _allData = [];
         _filtered = [];
+        _isLoading = false;
       });
     }
   }
+
+
+
 
   // Add this new method to check sync status
   Future<bool> _isSynced(String beneficiaryRefKey) async {
