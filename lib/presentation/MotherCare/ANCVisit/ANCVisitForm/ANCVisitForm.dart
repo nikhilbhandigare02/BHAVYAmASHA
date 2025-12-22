@@ -451,8 +451,8 @@ class _AncvisitformState extends State<Ancvisitform> {
           ? dataBeneficiaryId
           : (dataId.isNotEmpty ? dataId : uniqueKey);
 
-      print('📌 Selected Beneficiary ID: $beneficiaryIdToUse (${beneficiaryIdToUse?.length ?? 0} chars)');
-      print('📌 Household ID: $hhId (${hhId.length} chars)');
+      print('  Selected Beneficiary ID: $beneficiaryIdToUse (${beneficiaryIdToUse?.length ?? 0} chars)');
+      print('  Household ID: $hhId (${hhId.length} chars)');
 
       if (beneficiaryIdToUse != null && beneficiaryIdToUse.isNotEmpty) {
         _bloc.add(BeneficiaryIdSet(beneficiaryIdToUse));
