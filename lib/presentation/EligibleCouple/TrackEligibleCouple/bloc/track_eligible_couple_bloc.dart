@@ -105,6 +105,14 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
       ));
     });
 
+    on<FinancialYearChanged>((event, emit) {
+      emit(state.copyWith(
+        financialYear: event.year,
+        status: state.isValid ? FormStatus.valid : FormStatus.initial,
+        clearError: true,
+      ));
+    });
+
     on<FpAdoptionDateChanged>((event, emit) {
       emit(state.copyWith(fpAdoptionDate: event.date, status: state.isValid ? FormStatus.valid : FormStatus.initial, clearError: true));
     });

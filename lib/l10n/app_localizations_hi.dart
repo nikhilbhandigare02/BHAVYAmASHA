@@ -4585,7 +4585,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get village => 'गाँव';
 
   @override
-  String get mobile => 'Mobile';
+  String get mobile => 'मोबाइल नं.';
 
   @override
   String get gender => 'लिंग';
@@ -6716,6 +6716,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get present => 'उपस्थित है?';
+
+  @override
+  String get moveForward => 'आगे बढ़ें?';
+
+  @override
+  String get lastVisit => 'अंतिम दौरे की तिथि';
 
   @override
   String get hscNameHint => 'एच.एस.सी. का नाम';

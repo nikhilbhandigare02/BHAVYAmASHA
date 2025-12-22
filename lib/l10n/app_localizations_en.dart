@@ -6718,6 +6718,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get present => 'Present?';
 
   @override
+  String get moveForward => 'Move forward?';
+
+  @override
+  String get lastVisit => 'Last Visit';
+
+  @override
   String get hscNameHint => 'HSC';
 
   @override

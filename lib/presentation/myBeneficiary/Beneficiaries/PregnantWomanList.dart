@@ -42,44 +42,11 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
     setState(() { _isLoading = true; });
 
     try {
-      final db = await DatabaseProvider.instance.database;
-
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      final excludedStates = await db.query(
-        'mother_care_activities',
-        where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
-        columns: ['beneficiary_ref_key'],
-        distinct: true,
-      );
-      final excludedBeneficiaryIds = excludedStates
-          .map((e) => e['beneficiary_ref_key']?.toString())
-          .where((id) => id != null && id!.isNotEmpty)
-          .cast<String>()
-          .toSet();
-
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final pregnantWomen = <Map<String, dynamic>>[];
       final processedBeneficiaries = <String>{};
 
-      String ancSql = """
-        SELECT mca.*, bn.*, mca.id as mca_id, bn.id as beneficiary_id
-        FROM mother_care_activities mca
-        INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-        WHERE mca.mother_care_state = 'anc_due' 
-          AND bn.is_deleted = 0
-      """;
-      final ancArgs = <Object?>[];
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        ancSql += ' AND bn.current_user_key = ?';
-        ancArgs.add(ashaUniqueKey);
-      }
-      if (excludedBeneficiaryIds.isNotEmpty) {
-        ancSql += ' AND mca.beneficiary_ref_key NOT IN (${List.filled(excludedBeneficiaryIds.length, '?').join(',')})';
-        ancArgs.addAll(excludedBeneficiaryIds);
-      }
-      final ancDueRecords = await db.rawQuery(ancSql, ancArgs);
+      final ancDueRecords = await _getAncDueRecords();
       final ancDueBeneficiaryIds = ancDueRecords
           .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
           .where((id) => id.isNotEmpty)
@@ -88,20 +55,18 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
       for (final row in rows) {
         try {
           final rawInfo = row['beneficiary_info'];
-          if (rawInfo == null) {
-            continue;
-          }
-          Map<String, dynamic> info = rawInfo is String
+          if (rawInfo == null) continue;
+          final Map<String, dynamic> info = rawInfo is String
               ? jsonDecode(rawInfo) as Map<String, dynamic>
               : Map<String, dynamic>.from(rawInfo as Map);
 
-          final gender = info['gender']?.toString().toLowerCase() ?? '';
           final beneficiaryId = row['unique_key']?.toString() ?? '';
-          final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
-          if (excludedBeneficiaryIds.contains(beneficiaryId)) {
-            continue;
-          }
+          if (beneficiaryId.isEmpty) continue;
+
           final isPregnant = _isPregnant(info);
+          final gender = info['gender']?.toString().toLowerCase() ?? '';
+          final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
+
           if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
             final item = _formatCardData(row, info);
             item['status'] = isAncDue ? 'ANC DUE' : 'Pregnant';
@@ -117,9 +82,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
 
       for (final anc in ancDueRecords) {
         final beneficiaryId = anc['beneficiary_ref_key']?.toString() ?? '';
-        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) {
-          continue;
-        }
+        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) continue;
         final hhId = anc['household_ref_key']?.toString() ?? '';
         final displayId = beneficiaryId.length > 11 ? beneficiaryId.substring(beneficiaryId.length - 11) : beneficiaryId;
         final item = {
@@ -157,9 +120,49 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
       });
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() => _isLoading = false); 
       }
     }
+  }
+
+  Future<List<Map<String, dynamic>>> _getAncDueRecords() async {
+    final db = await DatabaseProvider.instance.database;
+
+    final currentUserData = await SecureStorageService.getCurrentUserData();
+    final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+    if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+      return [];
+    }
+
+    final rows = await db.rawQuery(
+      '''
+    WITH RankedMCA AS (
+      SELECT
+        mca.*,
+        ROW_NUMBER() OVER (
+          PARTITION BY mca.beneficiary_ref_key
+          ORDER BY mca.created_date_time DESC, mca.id DESC
+        ) AS rn
+      FROM mother_care_activities mca
+      WHERE
+        mca.is_deleted = 0
+        AND mca.current_user_key = ?
+    )
+    SELECT r.*
+    FROM RankedMCA r
+    INNER JOIN beneficiaries_new bn
+      ON r.beneficiary_ref_key = bn.unique_key
+    WHERE
+      r.rn = 1
+      AND r.mother_care_state = 'anc_due_state'
+      AND bn.is_deleted = 0
+    ORDER BY r.created_date_time DESC; 
+    ''',
+      [ashaUniqueKey],
+    );
+
+    return rows;
   }
 
   bool _isPregnant(Map<String, dynamic> person) {
@@ -168,6 +171,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
     final statusFlag = person['pregnancyStatus']?.toString().toLowerCase();
     return flag == 'yes' || typoFlag == 'yes' || statusFlag == 'pregnant';
   }
+
   Map<String, dynamic> _formatCardData(Map<String, dynamic> row, Map<String, dynamic> person) {
     try {
       final name = person['memberName']?.toString() ?? person['headName']?.toString() ?? '';

@@ -13481,6 +13481,18 @@ abstract class AppLocalizations {
   /// **'Present?'**
   String get present;
 
+  /// No description provided for @moveForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Move forward?'**
+  String get moveForward;
+
+  /// No description provided for @lastVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Visit'**
+  String get lastVisit;
+
   /// No description provided for @hscNameHint.
   ///
   /// In en, this message translates to:

@@ -77,6 +77,13 @@ class FpAdoptingChanged extends TrackEligibleCoupleEvent {
   @override
   List<Object?> get props => [adopting];
 }
+
+class FinancialYearChanged extends TrackEligibleCoupleEvent {
+  final String year;
+  const FinancialYearChanged(this.year);
+  @override
+  List<Object?> get props => [year];
+}
 class BeneficiaryAbsentCHanged extends TrackEligibleCoupleEvent {
   final bool? value;
   const BeneficiaryAbsentCHanged(this.value);

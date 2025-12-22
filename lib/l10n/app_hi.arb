@@ -2129,7 +2129,10 @@
   "newBornCare": "नवजात शिशु की देखभाल",
   "deaths": "मौतें",
   "otherPublicHealthProgram": "अन्य सार्वजानिक स्वास्थ्य कार्यक्रम",
-  "trainingSupport": "प्रशिक्षण एवं सहायता"
+  "trainingSupport": "प्रशिक्षण एवं सहायता",
+  "moveForward": "आगे बढ़ें?",
+  "mobile": "मोबाइल नं.",
+  "lastVisit": "अंतिम दौरे की तिथि"
 
 
 }

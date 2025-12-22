@@ -2292,10 +2292,12 @@
   "newHouseholdRegister": "New Household Registration",
   "sr_No": "Sr.No.",
   "present": "Present?",
-
+  "moveForward": "Move forward?",
+   "lastVisit": "Last Visit",
 
   "hscNameHint": "HSC",
   "hscNameLabel": "HSC",
   "hwcNameHint": "HWC",
   "hwcNameLabel": "HWC"
+
 }

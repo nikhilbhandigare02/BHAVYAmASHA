@@ -741,7 +741,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                         'assets/images/sync.png',
                         width: 25,
                         color: isSynced 
-                            ? Colors.green
+                            ? null
                             : Colors.grey[500],
                       );
                     },
