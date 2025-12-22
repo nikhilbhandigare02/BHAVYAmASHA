@@ -113,9 +113,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(RchNumberChanged(formData['rch_number'] ?? ''));
 
     // Pregnancy information
-    _bloc.add(LmpDateChanged(_parseDate(formData['lmp_date'])));
-    _bloc.add(EddDateChanged(_parseDate(formData['edd_date'])));
-    _bloc.add(WeeksOfPregnancyChanged(formData['weeks_of_pregnancy']?.toString() ?? ''));
+    // Intentionally not auto-filling LMP/EDD/weeks from previous forms
 
     // Medical information
     _bloc.add(WeightChanged(formData['weight']?.toString() ?? ''));
@@ -165,47 +163,7 @@ class _AncvisitformState extends State<Ancvisitform> {
       }
     }
 
-    if (formData['gives_birth_to_baby'] != null) {
-      _bloc.add(GivesBirthToBaby(formData['gives_birth_to_baby'].toString()));
-    }
-
-    if (formData['delivery_outcome'] != null) {
-      _bloc.add(DeliveryOutcomeChanged(formData['delivery_outcome'].toString()));
-    }
-
-    if (formData['number_of_children'] != null) {
-      _bloc.add(NumberOfChildrenChanged(formData['number_of_children'].toString()));
-    }
-
-    if (formData['baby1_name'] != null) {
-      _bloc.add(Baby1NameChanged(formData['baby1_name'].toString()));
-    }
-    if (formData['baby1_gender'] != null) {
-      _bloc.add(Baby1GenderChanged(formData['baby1_gender'].toString()));
-    }
-    if (formData['baby1_weight'] != null) {
-      _bloc.add(Baby1WeightChanged(formData['baby1_weight'].toString()));
-    }
-
-    if (formData['baby2_name'] != null) {
-      _bloc.add(Baby2NameChanged(formData['baby2_name'].toString()));
-    }
-    if (formData['baby2_gender'] != null) {
-      _bloc.add(Baby2GenderChanged(formData['baby2_gender'].toString()));
-    }
-    if (formData['baby2_weight'] != null) {
-      _bloc.add(Baby2WeightChanged(formData['baby2_weight'].toString()));
-    }
-
-    if (formData['baby3_name'] != null) {
-      _bloc.add(Baby3NameChanged(formData['baby3_name'].toString()));
-    }
-    if (formData['baby3_gender'] != null) {
-      _bloc.add(Baby3GenderChanged(formData['baby3_gender'].toString()));
-    }
-    if (formData['baby3_weight'] != null) {
-      _bloc.add(Baby3WeightChanged(formData['baby3_weight'].toString()));
-    }
+    // Intentionally not auto-filling delivery/baby-related fields from previous forms
   }
 
 
@@ -808,7 +766,7 @@ class _AncvisitformState extends State<Ancvisitform> {
         } catch (_) {
           continue;
         }
-        final data = root['form_data'];
+        final data = root['anc_form'];
         if (data is Map) {
           final td1Str = data['td1_date']?.toString();
           if (td1Str != null && td1Str.isNotEmpty) {

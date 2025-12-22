@@ -588,21 +588,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            '${isAncDue ? 'DUE - ' : ''}${l10n?.visitsLabel ?? 'Visits :'} $count',
-                            style: TextStyle(
-                              color: primary,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.sp,
-                            ),
-                          ),
                           if (isHighRisk) ...[
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: Colors.red[50],
-                                border: Border.all(color: Colors.red[700]!),
+                               // border: Border.all(color: Colors.red[700]!),
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
@@ -623,6 +615,16 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                               ),
                             ),
                           ],
+                          SizedBox(width: 2,),
+                          Text(
+                            '${isAncDue ? ' ' : ''}${l10n?.visitsLabel ?? 'Visits :'} $count',
+                            style: TextStyle(
+                              color: primary,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+
                         ],
                       );
                     },

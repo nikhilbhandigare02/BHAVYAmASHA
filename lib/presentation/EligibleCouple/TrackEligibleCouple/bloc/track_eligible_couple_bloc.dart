@@ -45,18 +45,13 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
 
     on<IsPregnantChanged>((event, emit) {
       if (event.isPregnant == true) {
-        final lmp = state.lmpDate;
-        final edd = lmp != null ? _calculateEddFromLmp(lmp) : null;
         emit(state.copyWith(
           isPregnant: true,
-          lmpDate: lmp,
-          eddDate: edd,
           clearNonPregnantFields: true,
           status: state.isValid ? FormStatus.valid : FormStatus.initial,
           clearError: true,
         ));
       } else {
-        // Not pregnant: clear pregnancy-specific fields
         emit(state.copyWith(
           isPregnant: false,
           clearPregnantFields: true,
@@ -67,14 +62,8 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
     });
 
     on<LmpDateChanged>((event, emit) {
-      final lmp = event.date;
-      if (lmp == null) {
-        return;
-      }
-      final edd = _calculateEddFromLmp(lmp);
       emit(state.copyWith(
-        lmpDate: lmp,
-        eddDate: edd,
+        lmpDate: event.date,
         status: state.isValid ? FormStatus.valid : FormStatus.initial,
         clearError: true,
       ));
@@ -151,9 +140,9 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         }
 
         final financialYear = formData['financial_year']?.toString() ?? state.financialYear;
-        final isPregnant = formData['is_pregnant'] as bool?;
-        final lmpDate = parseDate(formData['lmp_date']);
-        final eddDate = parseDate(formData['edd_date']);
+        final isPregnant = null;
+        final lmpDate = null;
+        final eddDate = null;
         final fpAdopting = formData['fp_adopting'] as bool? ?? state.fpAdopting;
         final fpMethod = formData['fp_method']?.toString();
         final condom = formData['condom_quantity']?.toString();
